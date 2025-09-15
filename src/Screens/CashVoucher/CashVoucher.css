@@ -1,0 +1,401 @@
+.column-selector {
+  margin-bottom: 10px;
+}
+
+.column-selector label {
+  margin-right: 15px;
+}
+
+.HeaderCASH {
+  font-weight: bolder;
+  text-align: center;
+  margin-top: -30px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 5px;
+  font-size: 30px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.tittle {
+  margin-left: 48%;
+  font-size: 25px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+   font-family: 'Times New Roman', Times, serif;
+}
+
+.containers {
+  margin-left: 90%;
+  margin-top: -40px;
+
+}
+
+.Tops {
+  display: flex;
+  flex-direction: column;
+  margin-left: 50px;
+  margin-top: -70px;
+}
+
+.cashdate {
+  width: 150px;
+  height: 40px;
+  font-weight: bold;
+  padding-left: 5px;
+  border-radius: 5px;
+  font-size: 17px;
+  border: 1px solid #969494;;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.2);
+}
+
+.inputfields3 {
+  width: 100%;
+  max-width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.cashvoucher {
+  margin-left: 300px;
+  font-size: 2em;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+}
+
+.form-controltable {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 19px;
+  font-weight: bold;
+  outline: none;
+  width: 300px;
+}
+
+.belowbar {
+  display: flex;
+  flex-direction: row;
+}
+
+.labels {
+  display: flex;
+  flex-direction: column;
+}
+
+.labels2 {
+  display: flex;
+  flex-direction: row;
+}
+
+.labels3 {
+  display: flex;
+  flex-direction: row;
+}
+
+.cashinhand {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.cashinhand:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+.VoucherNo{
+  width: 150px;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  font-weight: bold;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+.VoucherNo:focus{
+  background-color: #30c9c9;
+}
+
+.owner {
+  width: 150px;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  font-weight: bold;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.owner:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.totalpayment {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totalpayment:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.totalreceipt {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totalreceipt:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.totaldiscount {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totaldiscount:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.inputfields {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.inputfields:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.Buttonsgroups {
+  margin-left: 130px;
+}
+
+.TableSectionz {
+  max-height: 462px;
+  overflow-y: auto;
+  margin: 5px;
+}
+.Account{
+  background-color: lightyellow;
+  font-weight: 600;
+}
+.Account:focus{
+  background-color: #78e9e9;
+}
+.Narration{
+  background-color: white;
+  font-weight: 600;
+}
+.Narration:focus{
+  background-color: #78e9e9;
+
+}
+.Payment{
+  background-color: lavender;
+  font-weight: 600;
+}
+.Payment:focus{
+  background-color: #78e9e9;
+}
+.Receipt{
+  background-color: #e3f8e3;
+  font-weight: 600;
+}
+.Receipt:focus{
+  background-color: #78e9e9;
+}
+.Discounts{
+  background-color: white;
+  font-weight: 600;
+  padding-right: 5px;
+}
+.Discounts:focus{
+  background-color: #78e9e9;
+}
+
+
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .belowbar {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+
+  }
+
+
+  .inputfields2 {
+    width: 120px;
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .labels {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cashinhand {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .owner {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100px;
+
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .totalpayment {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 100px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+
+  .totalreceipt {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .totaldiscount {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 100px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .labels3 {
+    margin-left: 45px;
+    margin-top: 15px;
+  }
+
+  .Buttonsgroup {
+    margin-top: 10px;
+  }
+
+  .containers {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 820px) {
+  .HeaderCASH {
+    margin-left: 250px;
+  }
+
+  .tittle {
+    margin-left: 550px;
+  }
+
+  .containers {
+    visibility: hidden;
+  }
+
+  .Buttonsgroups {
+    margin-left: 0px;
+  }
+
+  .TableSectionz {
+    max-height: 850px;
+    overflow-y: auto;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .HeaderCASH {
+    margin-left: 450px;
+  }
+
+  .tittle {
+    margin-left: 550px;
+  }
+
+  .Buttonsgroups {
+    margin-left: 0px;
+  }
+
+  .TableSectionz {
+    max-height: 520px;
+    overflow-y: auto;
+    margin: 5px;
+  }
+}
+
+@media (width: 1366px) {
+  .TableSectionz {
+    max-height: 420px;
+    overflow-y: auto;
+    margin: 5px;
+  }
+
+  .Buttonsgroups {
+    margin-left: 70px;
+  }
+}

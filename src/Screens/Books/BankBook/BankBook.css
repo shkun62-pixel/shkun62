@@ -1,0 +1,239 @@
+/* .datepickerBank{
+    border: 1px solid black;
+    height: 32px;
+    border-radius: 5px;
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 200px;
+    margin-left: 5px;
+}
+.datepickerBank2{
+    border: 1px solid black;
+    height: 32px;
+    border-radius: 5px;
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 200px;
+    margin-left: 22px;
+} */
+/* ===== Base DatePicker ===== */
+.datepickerBank,
+.datepickerBank2 {
+  padding: 10px 14px;
+  border-radius: 5px;
+  border: 1px solid rgb(80, 79, 79);
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  background: #fdfdfd;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.15),
+  inset -2px -2px 6px rgba(255,255,255,0.9),
+  4px 4px 10px rgba(0,0,0,0.15);
+  outline: none;
+  transition: all 0.25s ease-in-out;
+}
+
+/* Hover Effect */
+.datepickerBank:hover,
+.datepickerBank2:hover {
+  background: #f0f9ff;
+  box-shadow: 4px 4px 12px rgba(0, 123, 255, 0.25),
+  -2px -2px 6px rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+  cursor: pointer;
+}
+
+/* Focus Effect */
+.datepickerBank:focus,
+.datepickerBank2:focus {
+  background: #e6f2ff;
+  border: 2px solid #007bff;
+  box-shadow: 0 0 8px rgba(0,123,255,0.5);
+}
+
+/* Placeholder / Text */
+.datepickerBank::placeholder,
+.datepickerBank2::placeholder {
+  color: #888;
+  font-style: italic;
+}
+
+/* ===== React DatePicker Popper (calendar) ===== */
+.react-datepicker {
+  border-radius: 15px !important;
+  border: none !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  font-family: "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+/* Calendar Header */
+.react-datepicker__header {
+  background: linear-gradient(90deg, #007bff, #00bfff);
+  border-bottom: none;
+  color: white;
+  font-weight: bold;
+}
+
+/* Day Cells */
+.react-datepicker__day {
+  border-radius: 50%;
+  padding: 8px;
+  margin: 2px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover Day */
+.react-datepicker__day:hover {
+  background: #007bff;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Selected Day */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: #00bfff !important;
+  color: white !important;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+  transform: scale(1.15);
+}
+
+.Type{
+    border: 1px solid black;
+    height: 32px;
+    border-radius: 5px;
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 200px;
+    margin-left: 25px;  
+}
+
+.Type2{
+    border: 1px solid black;
+    height: 32px;
+    border-radius: 5px;
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 200px;
+    margin-left: 5px;  
+}
+
+.highlight-row {
+  background-color: #c9c7c3 !important;
+  font-weight: bold;
+}
+
+.headers2 {
+  letter-spacing: 2px;
+  color: rgb(3, 3, 114);
+  font-family: 'Times New Roman', Times, serif;
+  text-transform: uppercase;
+}
+.headers {
+  letter-spacing: 2px;
+  color: rgb(3, 3, 114);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* ===== Title ===== */
+.bank-title {
+  text-align: center;
+  font-size: 32px;
+  color: #007bff;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+  margin-top: -35px;
+}
+
+
+/* ===== Date Filter ===== */
+.date-filter {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 15px;
+}
+
+.date-label {
+  font-size: 17px;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+/* ===== 3D Button ===== */
+.btn-3d {
+  border-radius: 5px;
+  padding: 10px 25px;
+  font-weight: bold;
+  box-shadow: 4px 4px 8px rgba(0,0,0,0.2),
+  -4px -4px 8px rgba(255,255,255,0.6);
+  transition: all 0.2s ease-in-out;
+  margin-left: 20px;
+}
+
+.btn-3d:hover {
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 12px rgba(0,0,0,0.3),
+  -6px -6px 12px rgba(255,255,255,0.7);
+}
+
+.bank{
+  padding: 10px 14px;
+  border-radius: 5px;
+  border: 1px solid rgb(80, 79, 79);
+  font-size: 16px;
+  font-weight: 500;
+  width: 70%;
+  margin-left: 7.5%;
+  color: #333;
+  background: #fdfdfd;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.15),
+  inset -2px -2px 6px rgba(255,255,255,0.9),
+  4px 4px 10px rgba(0,0,0,0.15);
+  outline: none;
+  transition: all 0.25s ease-in-out;
+}
+
+.filter{
+  padding: 10px 14px;
+  border-radius: 5px;
+  border: 1px solid rgb(80, 79, 79);
+  font-size: 16px;
+  font-weight: 500;
+  width: 70%;
+  margin-left: 18%;
+  color: #333;
+  background: #fdfdfd;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.15),
+  inset -2px -2px 6px rgba(255,255,255,0.9),
+  4px 4px 10px rgba(0,0,0,0.15);
+  outline: none;
+  transition: all 0.25s ease-in-out;
+}
+
+.annexure{
+  padding: 10px 14px;
+  border-radius: 5px;
+  border: 1px solid rgb(80, 79, 79);
+  font-size: 16px;
+  font-weight: 500;
+  width: 70%;
+  margin-left: 8px;
+  color: #333;
+  background: #fdfdfd;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.15),
+  inset -2px -2px 6px rgba(255,255,255,0.9),
+  4px 4px 10px rgba(0,0,0,0.15);
+  outline: none;
+  transition: all 0.25s ease-in-out;
+}

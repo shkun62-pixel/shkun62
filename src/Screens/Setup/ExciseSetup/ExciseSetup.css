@@ -1,0 +1,127 @@
+.NewModalcb {
+    display: block;
+    position: fixed;
+    z-index: 10000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    /* height: 98%; */
+    overflow: auto;
+    border-radius: 20px;
+}
+  .Modalcontainer{
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 20px;
+    width: 100%;
+    height: 90%;
+    border: 1px solid black;
+    background-color: white;
+    /* background: linear-gradient(to bottom, #edc5a7,#a5d8ed); */
+}
+.Headingz {
+    letter-spacing: 2px;
+    font-weight: bolder;
+    background: linear-gradient(to right,  #07060b,#1279ef);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+.LABEL{
+    font-size: 20px;
+    font-family: 'Times New Roman', Times, serif;
+   
+}
+.ServiceTax{
+    margin-left: 5px;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    border: 1px solid black;
+}
+.PLA{
+    margin-left: 66px;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    border: 1px solid black;
+}
+.RGC{
+    margin-left: 35px;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    border: 1px solid black;
+}
+.RGA{
+    margin-left: 33.8px;
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+}
+.ExciseRate{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    margin-left: 5px;
+}
+.PCessRate{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    margin-left: 5px;
+}
+.HCessRate{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    margin-left: 5px;
+}
+.Modvat{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 180px;
+    padding: 5px;
+    margin-left: 5px;
+}
+.TradingExcise{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 80px;
+    padding: 5px;
+    margin-left: 10px;
+    text-align: center;
+}
+.StockLevel{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 80px;
+    padding: 5px;
+    margin-left: 10px;
+    text-align: center;
+}
+.GroupStock{
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    width: 80px;
+    padding: 5px;
+    margin-left: 10px;
+    text-align: center;
+}

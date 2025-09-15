@@ -1,0 +1,495 @@
+.heading {
+  position: relative;
+  font-size: 2em;
+  font-family: 'Times New Roman', Times, serif;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: table;
+  margin: 20px auto;
+  cursor: pointer;
+  transition: 0.6s;
+}
+.heading:before,
+.heading:after {
+  content: attr(data-text);
+  transition: 0.6s;
+}
+.heading:before {
+  left: 0;
+  position: absolute;
+  z-index: -1;
+  text-shadow: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px,
+    0px 0px, 0px 0px, 0px 0px;
+  -webkit-mask: repeating-linear-gradient(
+    45deg,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.5) 0 20px
+  );
+  mask: repeating-linear-gradient(
+    45deg,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.5) 0 6px
+  );
+}
+
+.form-control {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 19px;
+  font-weight: bold;
+  outline: none;
+}
+/* .heading {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 30px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+} */
+
+.MainDiv{
+display: flex;
+flex-direction: row;
+/* */
+}
+.FirstHalf{
+  display: flex;
+  flex-direction: column;
+  margin-left: 5%;
+  margin-top: -40px;
+}
+
+.SecondHalf{
+ display: flex;
+ flex-direction: column;
+ margin-left: 10%;
+}
+
+.ThirdHalf{
+  height: 60%;
+  width: 25%;
+  margin-left: 10px;
+  margin-top: 20%;
+  padding: 10px;
+  border-radius: 2px; 
+  border: 1px solid black;
+}
+
+.duedatepicker{
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  width: 141px;
+  height: 32px;
+  margin-left: 5px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+.SelectField{
+  border: 1px solid black;
+  height: 35px;
+  font-weight: bold;
+  font-size: 18px;
+}
+.DatePICKERstock{
+  background-color: white;
+  border: 1px solid #b8b8b8;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  width: 105px;
+  height: 40px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+.ACCcoDE{
+  width: 30%;
+  height: 32px;
+  margin-left: 16.5%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.ACCcoDE:focus{
+  background-color: rgb(166, 222, 245);
+}
+.ItemName{
+  width: 70%;
+  height: 32px;
+  margin-left: 18.8%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.ItemName:focus{
+  background-color: rgb(166, 222, 245);
+}
+
+.OpSTOCK{
+  width: 50%;
+  height: 32px;
+  margin-left: 22px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.OpSTOCK:focus{
+  background-color: rgb(166, 222, 245);
+}
+
+.openpcs{
+  width: 96%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.openpcs:focus{
+  background-color: rgb(166, 222, 245);
+}
+.OpStockRS{
+  width: 70%;
+  height: 32px;
+  margin-left: 24px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.OpStockRS:focus{
+  background-color: rgb(166, 222, 245);
+}
+
+.GroupNAME{
+  width: 70%;
+  height: 32px;
+  margin-left: 7.7%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.GroupNAME:focus{
+  background-color: rgb(166, 222, 245);
+}
+.PurchaseRATE{
+  width: 70%;
+  height: 32px;
+  margin-left: 6.5%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.PurchaseRATE:focus{
+  background-color: rgb(166, 222, 245);
+}
+.MRP{
+  width: 30%;
+  height: 32px;
+  margin-left: 18.7%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.MRP:focus{
+  background-color: rgb(166, 222, 245);
+}
+.Cds{
+  width: 23.2%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.Cds:focus{
+  background-color: rgb(166, 222, 245);
+}
+.SaleRATE{
+  width: 35%;
+  height: 32px;
+  margin-left: 14.3%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.SaleRATE:focus{
+  background-color: rgb(166, 222, 245);
+}
+.TotalGST{
+  width: 16.2%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.TotalGST:focus{
+  background-color: rgb(166, 222, 245);
+}
+.ItemCgst{
+  width: 35%;
+  height: 32px;
+  margin-left: 15.5%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+  background-color: white;
+}
+.ItemCgst:focus{
+  background-color: rgb(166, 222, 245);
+}
+.Drate{
+  width: 20.3%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.Drate:focus{
+  background-color: rgb(166, 222, 245);
+}
+.ItemSgst{
+  width: 35%;
+  height: 32px;
+  margin-left: 15.5%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+  background-color: white;
+}
+.ItemSgst:focus{
+  background-color: rgb(166, 222, 245);
+}
+.Cess_rate{
+  width: 20.5%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.Cess_rate:focus{
+  background-color: rgb(166, 222, 245);
+}
+.PurchaseACC{
+  width: 70.3%;
+  height: 32px;
+  margin-left: 37px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.PurchaseACC:focus{
+  background-color: rgb(166, 222, 245);
+}
+.SaleACC{
+  width: 70.3%;
+  height: 32px;
+  margin-left: 15.8%;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.SaleACC:focus{
+  background-color: rgb(166, 222, 245);
+}
+.SIZE{
+  width: 70.3%;
+  height: 32px;
+  margin-left: 101px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.SIZE:focus{
+  background-color: rgb(166, 222, 245);
+}
+.HSNCode{
+  width: 70.3%;
+  height: 32px;
+  margin-left: 58px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.HSNCode:focus{
+  background-color: rgb(166, 222, 245);
+}
+
+.PreviousPur{
+  width: 70.3%;
+  height: 32px;
+  margin-left: 3px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+  background-color: rgb(166, 222, 245);
+}
+.PreviousPur:focus{
+  background-color: rgb(166, 222, 245);
+}
+.PreviousSale{
+  width: 70.3%;
+  height: 32px;
+  margin-left: 35px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+  background-color: rgb(166, 222, 245);
+}
+.PreviousSale:focus{
+  background-color: rgb(166, 222, 245);
+}
+
+.Scheme{
+  width: 100px;
+  height: 32px;
+  margin-left: 45px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.Scheme:focus{
+  background-color: rgb(166, 222, 245);
+}
+.QtyPerCase{
+  width: 30%;
+  height: 32px;
+  margin-left: 5px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.QtyPerCase:focus{
+  background-color: rgb(166, 222, 245);
+}
+.tariff{
+  width: 26%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.tariff:focus{
+  background-color: rgb(166, 222, 245);
+}
+.MinSTK{
+  width: 35%;
+  height: 32px;
+  margin-left: 5px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.MinSTK:focus{
+  background-color: rgb(166, 222, 245);
+}
+.Rg23c{
+  width: 34.5%;
+  height: 32px;
+  margin-left: 2px;
+  border: 1px solid black;
+  font-size: 18px;
+  padding: 2px;
+  font-weight: bold;
+}
+.Rg23c:focus{
+  background-color: rgb(166, 222, 245);
+}
+.Psrno{
+  width: 100px;
+  margin-left: 10px;
+  border: 1px solid black;
+  font-weight: bold;
+  padding-left: 5px;
+}
+.Psrno:focus{
+  background-color: rgb(166, 222, 245);
+}
+.PUnitno{
+  width: 100px;
+  margin-left: 23.4%;
+  border: 1px solid black;
+  font-weight: bold;
+  padding-left: 5px;
+}
+.PUnitno:focus{
+  background-color: rgb(166, 222, 245);
+}
+.percentage{
+  width: 100px;
+  margin-left: 16%;
+  border: 1px solid black;
+  font-weight: bold;
+  padding-left: 5px;
+}
+.percentage:focus{
+  background-color: rgb(166, 222, 245);
+}
+/* Media query for max-width:768px */
+@media (max-width: 768px) {
+  .MainDiv{
+    display: flex;
+    flex-direction: column;
+  }
+  .FirstHalf{
+    background-color: #c2d6d6;
+    padding: 10px;
+    width: 100%;
+    border-radius: 20px;
+    margin-left: 0%;
+    box-shadow: 
+    5px 5px 15px rgba(0, 0, 0, 0.6),   /* Outer Shadow */
+    -5px -5px 15px rgba(255, 255, 255, 0.4), /* Top Light Effect */
+    inset 5px 5px 10px rgba(0, 0, 0, 0.2),   /* Inner Shadow */
+    inset -5px -5px 10px rgba(255, 255, 255, 0.2); /* Inner Light */
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .SecondHalf{
+    margin-left: 0%;
+    margin-top: 20px;
+    background-color:  #d1e0e0;
+    padding: 10px;
+    border-radius: 20px;
+    width: 100%;
+    box-shadow: 
+    5px 5px 15px rgba(0, 0, 0, 0.6),   /* Outer Shadow */
+    -5px -5px 15px rgba(255, 255, 255, 0.4), /* Top Light Effect */
+    inset 5px 5px 10px rgba(0, 0, 0, 0.2),   /* Inner Shadow */
+    inset -5px -5px 10px rgba(255, 255, 255, 0.2); /* Inner Light */
+    transition: transform 0.2s ease-in-out;
+  }
+}

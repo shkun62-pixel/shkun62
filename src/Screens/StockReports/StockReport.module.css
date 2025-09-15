@@ -1,0 +1,70 @@
+.TopPart {
+  display: flex;
+  flex-direction: row;
+  justify-content: center; /* Center columns horizontally */
+  margin-top: 20px;
+}
+.header {
+  text-align: center;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 30px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+  margin-top: -20px;
+}
+
+.TableDIV {
+  max-height: 500px;
+  overflow-y: auto;
+  margin: 5px;
+}
+
+.Column {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.AcName {
+  height: 30px;
+  width: 250px;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgb(141, 140, 140);
+  margin-left: 8px;
+}
+.options {
+  height: 30px;
+  width: 250px;
+  padding: 5px;
+  border-radius: 5px;
+  margin-left: 4%;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgb(141, 140, 140);
+}
+
+.From {
+  height: 30px;
+  width: 250px;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgb(141, 140, 140);
+}
+
+.Upto{
+  height: 30px;
+  width: 250px;
+  padding: 5px;
+  border-radius: 5px;
+  margin-left: 2px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgb(141, 140, 140);  
+}
+.font{
+  font-weight: bold;
+}

@@ -1,0 +1,308 @@
+/* modal.css */
+.newModalz {
+  display: block;
+  position: fixed;
+  z-index: 10000;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95%;
+  height: 98%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 8px 16px rgba(9, 9, 9, 0.3);
+  /* border-radius: 20px; */
+  }
+
+  .check:focus{
+    cursor: pointer;
+  }
+
+.maincontainer{
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  /* border-radius: 20px; */
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+  background-color: white;
+  /* background: linear-gradient(to bottom,#a5d8ed, #edc5a7); */
+}
+.maincontainer2{
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+   
+}
+.rightside{
+    margin-left: 10%;
+}
+.ColorSelect{
+  margin-left: 45px;
+  border: 1px solid black;
+}
+.customername{
+  margin-left: 7px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.termss{
+  margin-left: 45px;
+  font-weight: bold;
+  border: 1px solid black;
+  }
+.vehicleno{
+  margin-left: 5px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.stype{
+  margin-left: 25px;
+    font-weight: bold;
+    border: 1px solid black;
+}
+.BillCash{
+  margin-left: 19px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Supply{
+  margin-left: 41px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Product{
+  margin-left: 23px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Rem1{
+  margin-left: 21px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Rem2{
+  margin-left: 21px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Rem3{
+  margin-left: 21px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Transport{
+  margin-left: 3.5px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Broker{
+  margin-left: 35.5px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.GRno{
+  margin-left: 2.5px;
+  border: 1px solid black;
+  font-weight: bold;
+}
+.sale_ac{
+  margin-left: 28px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Backdate{
+  border: 1px solid black;
+  border: 1px solid black;
+}
+.CessCode{
+  margin-left: 14.2px;
+  color: red;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.TCSrate{
+  margin-left: 5px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.TcsTax{
+  margin-left: 10px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Tcs206H{
+  margin-left: 3px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.TDSAcc{
+  margin-left: 32.5px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.TcsAc{
+  margin-left: 37.5px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.IgstAc{
+  margin-left: 26px;
+  color: red;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.SgstAc{
+  margin-left: 22px;
+  color: red;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.CgstAc{
+  margin-left: 21px;
+  color: red;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.Labour{
+  border: 1px solid black;
+  margin-left: 1px;  
+  font-weight: bold;
+}
+.Postage{
+  border: 1px solid black;
+  margin-left: 1px;  
+  font-weight: bold;
+}
+.Discount{
+  border: 1px solid black;
+  margin-left: 1px;  
+  font-weight: bold;
+}
+.Freight{
+  border: 1px solid black;
+  margin-left: 1px;  
+  font-weight: bold;
+}
+.Expenses{
+  border: 1px solid black;
+  margin-left: 1px;  
+  font-weight: bold;
+}
+.Expenses10{
+  border: 1px solid black;
+  margin-left: 1px;  
+  font-weight: bold;
+}
+.focuscursor{
+  margin-left: 12px;  
+  font-weight: bold;
+  border: 1px solid black;
+}
+.RemPost{
+  margin-left: 60px;  font-weight: bold;  border: 1px solid black;
+}
+.acLed{
+  margin-left: 34px;  font-weight: bold;  border: 1px solid black;
+}
+.revtime{
+  margin-left: 34px;  font-weight: bold;  border: 1px solid black;
+}
+.invtime{
+  margin-left: 38px;  font-weight: bold;  border: 1px solid black;
+}
+.afterTax{
+  margin-left: 11px;  font-weight: bold;  border: 1px solid black;
+}
+.itemLed{
+  margin-left: 90.8px;  font-weight: bold;  border: 1px solid black;
+}
+.extraRem{
+  margin-left: 117px;  font-weight: bold;  border: 1px solid black;
+}
+.cdwindow{
+  margin-left: 120px;  font-weight: bold;  border: 1px solid black;
+}
+.disitems{
+  margin-left: 18px;  font-weight: bold;  border: 1px solid black;
+}
+.taxRoff{
+  margin-left: 8px;  font-weight: bold;  border: 1px solid black;
+}
+.roundoff{
+  margin-left: 34px;  font-weight: bold;  border: 1px solid black;
+}
+.lowsale{
+  margin-left: 46px;  font-weight: bold;  border: 1px solid black;
+}
+.negstklevel{
+  margin-left: 32px;  font-weight: bold;  border: 1px solid black;
+}
+.rateSec{
+  margin-left: 47.5px;  font-weight: bold;  border: 1px solid black;
+}
+.tdsPolicy{
+  margin-left: 15px;  font-weight: bold;  border: 1px solid black;
+}
+.decimalrate{
+  margin-left: 5px;  font-weight: bold;  border: 1px solid black;
+}
+.bag{
+  margin-left: 10px;  font-weight: bold;  border: 1px solid black;
+}
+.qty{
+  margin-left: 10px;  font-weight: bold;  border: 1px solid black;
+}
+.printunReg{
+  border: 1px solid black;
+  font-weight: bold;
+  color: black;
+  background-color: white;
+  width: 150px;
+  margin-left: 4.5px;
+}
+.zerovalue{
+  margin-left: 151.5px;
+  width: 150px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.TDSOptions{
+  margin-left: 174px;
+  width: 150px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.displayHSN{
+  margin-left: 132px;
+  width: 150px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+.S{
+  font-size: 35px;
+  font-weight: bold;
+  background: linear-gradient(to right, #5e2cd4, #0ce93c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.p{
+  font-size: 24px;
+font-weight: bolder;
+  background: linear-gradient(to right, #5e2cd4, #0ce93c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.Exp1{
+  border: 1px solid black;
+  font-weight: bold;
+  width: 100px;
+  height: 30px;
+  padding: 2px;
+}
+.HoverSelect:focus{
+  border-color: blue;
+}

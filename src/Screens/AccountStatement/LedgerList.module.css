@@ -1,0 +1,54 @@
+.headerlist{
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.cardL{
+    padding: 20px;
+    margin-top: -20px;
+}
+.tablecont{
+    max-height: 490px;
+    overflow: auto;
+}
+.Search{
+    border-radius: 5px;
+    width: 400px;
+    margin-top: 10px;
+}
+.tableHeight{
+    max-height: 384px;
+    overflow-y: auto;
+}
+.tType{
+    width: 200px;
+    height: 30px;
+    padding-left: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    margin-left: 20px;
+}
+.nar{
+    width: 200px;
+    height: 30px;
+    padding-left: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    margin-left: 34px;
+}
+.to{
+    width: 200px;
+    height: 30px;
+    padding-left: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    margin-left: 31px;
+}
+.from{
+    width: 200px;
+    height: 30px;
+    padding-left: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+    margin-left: 28px;
+}

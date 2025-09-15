@@ -1,0 +1,41 @@
+.MainContent{
+    /* background-color: rgb(252, 221, 182); */
+    background: linear-gradient(to right, #b19cd9,rgb(217, 217, 249));
+    border-radius: 25px;
+    box-shadow: 
+    10px 10px 15px   rgb(12, 12, 12),   /* Outer Shadow */
+    -5px -5px 15px rgba(255, 255, 255, 0.4), /* Top Light Effect */
+    inset 5px 5px 10px rgba(0, 0, 0, 0.2),   /* Inner Shadow */
+    inset -5px -5px 10px rgba(255, 255, 255, 0.2); /* Inner Light */
+    transition: transform 0.2s ease-in-out;
+    padding: 5px;
+}
+.TableContainer{
+    max-height: 338px;
+}
+.Buttons{
+    background-color: rgb(250, 160, 50);
+    border: transparent;
+    color: rgb(161, 8, 8);
+}
+.SearchField{
+    width: 240px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border: 1px solid black;
+    padding: 5px;
+    margin-left: 10px;
+    border-radius: 5px;
+}
+.HEADER{
+    text-decoration: underline;
+    font-weight: bold;
+}
+Thead{
+    font-weight: bold;
+}
+.SPAN{
+    text-decoration: underline;
+    font-weight: bold;
+}

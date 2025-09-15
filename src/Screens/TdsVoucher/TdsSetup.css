@@ -1,0 +1,238 @@
+.NewModalTDS {
+    display: block;
+    position: fixed;
+    z-index: 10000;
+    top: 50%;
+    left: 70%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 95%;
+    overflow: auto;
+
+    border-radius: 20px;
+}
+  .ModalcontainerTDS{
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 20px;
+    width: 60%;
+    height: 100%;
+    border: 1px solid black;
+    /* background-color: white; */
+    background: linear-gradient(to bottom, #edc5a7,#a5d8ed);
+}
+.headingTDS{
+    background: linear-gradient(to right, #4d4267, #538c8c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
+}
+.leftcontainer{
+    display: flex;
+    flex-direction: column;
+}
+.rightcontainer{
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+.Color1Select{
+    border: 1px solid black;
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 300px;
+    font-weight: bold;
+    margin-left: 83px;
+}
+.creditAc{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.debitAc{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 57.5px;
+    font-weight: bold;
+    padding: 5px;
+}
+.sbCess{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 75px;
+    font-weight: bold;
+    padding: 5px;
+}
+.cessRate{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 56px;
+    font-weight: bold;
+    padding: 5px;
+}
+.hcessRate{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 43.5px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.TdsRate{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 62px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.TdsAcc{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 72px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.GRnumber{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 40px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.KKCess{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 58px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.StaxHcess{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 36.5px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.srvTaxRate{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 34px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.srvTaxAcc{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 44.5px;
+    font-weight: bold;
+    padding: 5px;
+}
+.srvTaxPay{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 17px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.Othercharges{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 6px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.sbCessACC{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 42.5px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.sbCessPay{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 15px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.KKcessAcc{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 41px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.KKcessPay{
+    border: 1px solid black;  
+    height: 30px;
+    width: 300px;
+    margin-left: 13.5px; 
+    font-weight: bold;
+    padding: 5px;
+}
+.Series{
+    border: 1px solid black;
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 300px;
+    font-weight: bold;
+    margin-left: 46.5px;
+}
+.TDSON{
+    border: 1px solid black;
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 300px;
+    font-weight: bold;
+    margin-left: 38px;
+}
+.Roundoff{
+    border: 1px solid black;
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 300px;
+    font-weight: bold;
+    margin-left: 5.5px;
+}
+.Vehicle{
+    border: 1px solid black;
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 300px;
+    font-weight: bold;
+    padding: 5px;
+    margin-left: 4.7px;
+}
+.Ledgershow{
+    border: 1px solid black;
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 183.2px;
+    font-weight: bold;
+    margin-left: 5.5px;
+}

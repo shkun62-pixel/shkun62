@@ -1,0 +1,725 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+@import url("https://fonts.googleapis.com/css?family=Andada|Permanent+Marker|Raleway:300");
+
+* {
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Button {
+  margin: 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.Button:hover {
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-4px);
+}
+
+.Button:active {
+  transform: translateY(-2px);
+}
+
+.header {
+  font-family: sans-serif;
+}
+
+.headerBack {
+  /* background-color: #717171; */
+  color: black;
+  width: 250px;
+  height: 55px;
+  border-radius: 20px;
+  margin-left: 850px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.DialogInput input {
+  border: 1px solid black;
+  border-radius: 8px;
+  font-size: 20px;
+  height: 40px;
+  background: transparent;
+  color: #000;
+}
+
+.sundry {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.8em;
+  font-weight: bolder;
+  text-align: center;
+  /* font-size: 2rem; */
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  /* Light sky-blue gradient */
+  background-clip: text;
+  color: transparent;
+}
+
+.Container {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Common styles */
+.FirstSec {
+  display: flex;
+  flex-direction: column;
+  margin-left: 5%;
+  margin-top: -40px;
+}
+.SecondSection{
+  display: flex;
+  flex-direction: column;
+   margin-left: 10%;
+   margin-top: 30px;
+}
+
+/* Larger screens: show side by side */
+@media screen and (min-width: 768px) {
+  /* .FirstSec, .SecondSection {
+    flex: 1 1 48%; 
+  } */
+}
+
+.veeru {
+  width: 200px;
+  /* Set your desired width */
+}
+.dropdown:focus{
+  background-color: rgb(166, 222, 245);
+}
+/* edited fields */
+.accode {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  height: 30px;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.GstNo {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  height: 30px;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.acName {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  height: 30px;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.address {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  height: 30px;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Cityinp {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  height: 30px;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Pincode {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  height: 30px;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.AccCode {
+  width: 30%;
+  margin-left: 78px;
+  height: 32px;
+  padding: 5px;
+  font-size: 20px;
+  font-weight: bold;
+  border: 1px solid;
+}
+.AccCode:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.GSTNO {
+  margin-top: 2px;
+  width: 49%;
+  height: 32px;
+  padding: 5px;
+  margin-left: 90px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.GSTNO:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.AccountName {
+  border: 1px solid black;
+  width: 80%;
+  margin-left: 76px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.AccountName:focus {
+  background-color: rgb(166, 222, 245);
+}
+.ADD {
+  border: 1px solid black;
+  width: 80%;
+  margin-left: 86px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.ADD:focus {
+  background-color: rgb(166, 222, 245);
+}
+.CITYNAME {
+  border: 1px solid black;
+  width: 80%;
+  margin-left: 117px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.CITYNAME:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.PinCODE {
+  border: 1px solid black;
+  width: 40%;
+  margin-left: 83.5px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.PinCODE:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.DISTT {
+  border: 1px solid black;
+  width: 32.5%;
+  margin-left: 0px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.DISTT:focus {
+  background-color: rgb(166, 222, 245);
+}
+.DISTT {
+  border: 1px solid black;
+  width: 32.5%;
+  margin-left: 0px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.DISTT:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.STATENAME {
+  border: 1px solid black;
+  width: 40%;
+  margin-left: 110px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.STATENAME:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.DISTANCE {
+  border: 1px solid black;
+  width: 29%;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.DISTANCE:focus {
+  background-color: rgb(166, 222, 245);
+}
+.OpeningDR {
+  border: 1px solid black;
+  width: 35%;
+  height: 32px;
+  margin-left: 2px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.OpeningDR:focus {
+  background-color: rgb(166, 222, 245);
+}
+.OpeningCR {
+  border: 1px solid black;
+  width: 34.4%;
+  height: 32px;
+  margin-left: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.OpeningCR:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.ContactNO {
+  border: 1px solid black;
+  font-size: 18px;
+  font-weight: bold;
+}
+.ContactNO:focus {
+  background-color: rgb(166, 222, 245);
+}
+.EMAIL {
+  border: 1px solid black;
+  width: 55%;
+  height: 32px;
+  margin-left: 106px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.EMAIL:focus {
+  background-color: rgb(166, 222, 245);
+}
+.AREA {
+  border: 1px solid black;
+  width: 20%;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.AREA:focus {
+  background-color: rgb(166, 222, 245);
+}
+.AGENT {
+  border: 1px solid black;
+  width: 40%;
+  height: 32px;
+  margin-left: 102px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.AGENT:focus {
+  background-color: rgb(166, 222, 245);
+}
+.GROUP {
+  border: 1px solid black;
+  width: 35%;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.GROUP:focus {
+  background-color: rgb(166, 222, 245);
+}
+.PANNO {
+  border: 1px solid black;
+  width: 80%;
+  height: 32px;
+  margin-left: 120px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.PANNO:focus {
+  background-color: rgb(166, 222, 245);
+}
+.TDSAccNO {
+  border: 1px solid black;
+  width: 78.8%;
+  height: 32px;
+  margin-left: 67px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.TDSAccNO:focus {
+  background-color: rgb(166, 222, 245);
+}
+.WORKS {
+  border: 1px solid black;
+  width: 80%;
+  height: 32px;
+  margin-left: 99px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.WORKS:focus {
+  background-color: rgb(166, 222, 245);
+}
+.NameAndAdd {
+  border: 1px solid black;
+  width: 78.8%;
+  height: 32px;
+  margin-left: 28px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.NameAndAdd:focus {
+  background-color: rgb(166, 222, 245);
+}
+.RTGS {
+  border: 1px solid black;
+  width: 35%;
+  height: 35px;
+  margin-left: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.RTGS:focus {
+  background-color: rgb(166, 222, 245);
+}
+.ECC {
+  border: 1px solid black;
+  width: 35%;
+  height: 35px;
+  margin-left: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.ECC:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.BankNAME {
+  border: 1px solid black;
+  width: 71%;
+  height: 35px;
+  margin-left: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.BankNAME:focus {
+  background-color: rgb(166, 222, 245);
+}
+.AdharNO {
+  border: 1px solid black;
+  width: 71%;
+  height: 35px;
+  margin-left: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.AdharNO:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.SACcode {
+  border: 1px solid black;
+  width: 71%;
+  height: 35px;
+  margin-left: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.SACcode:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.ContactPerson {
+  border: 1px solid black;
+  width: 62%;
+  height: 35px;
+  margin-left: 65px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.ContactPerson:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.DepcRate {
+  border: 1px solid black;
+  width: 62%;
+  height: 35px;
+  margin-left: 68px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.DepcRate:focus {
+  background-color: rgb(166, 222, 245);
+}
+.TDSrate {
+  border: 1px solid black;
+  width: 62%;
+  height: 35px;
+  margin-left: 110px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.TDSrate:focus {
+  background-color: rgb(166, 222, 245);
+}
+.TCSRate {
+  border: 1px solid black;
+  width: 62%;
+  height: 35px;
+  margin-left: 112px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.TCSRate:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.GSTshare {
+  border: 1px solid black;
+  width: 62%;
+  height: 35px;
+  margin-left: 77px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.GSTshare:focus {
+  background-color: rgb(166, 222, 245);
+}
+.QT {
+  border: 1px solid black;
+  width: 62%;
+  height: 35px;
+  margin-left: 108px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px;
+}
+.QT:focus {
+  background-color: rgb(166, 222, 245);
+}
+
+.ModalZZ {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+.headingEZ{
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 30px;
+  background: linear-gradient(to right, #520fec, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-align: center;
+}
+
+.Modal-contentZ {
+  background: linear-gradient(to bottom, #edc5a7,#a5d8ed);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid black;
+  width: 75%;  /* Increased from 300px to 500px */
+  max-width: 100%; /* Responsive for smaller screens */
+  margin: auto;
+}
+
+.close-buttonZ {
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.MiscContainer{
+  display: flex;
+  flex-direction: row;
+}
+
+.ImageDiv{
+  width: 600px;
+  height: 400px;
+  margin-left: 30px;
+}
+
+.PLimit{
+border: 1px solid black;
+margin-left: 7.6%;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+}
+.DueDays{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+margin-left: 2px;
+}
+.Grace{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+margin-left: 6.2%;
+}
+.Sorting{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+margin-left: 3%;
+}
+.QtyBSheet{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+font-weight: bold;
+margin-left: 7.9%;
+}
+.Discountz{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+margin-left: 17%;
+}
+.EXFOR{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+margin-left: 8%;
+}
+.Trading{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+padding: 5px;
+font-weight: bold;
+margin-left: 6.2%;
+}
+.Prefix{
+border: 1px solid black;
+height: 30px;
+font-weight: bold;
+width: 180px;
+margin-left: 2.5%;
+padding: 5px;
+}
+.Status{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+font-weight: bold;
+}
+.Ward{
+border: 1px solid black;
+height: 30px;
+width: 180px;
+font-weight: bold;
+margin-left: 2.5%;
+}
+.AreaCode{
+border: 1px solid black;
+height: 30px;
+width: 100px;
+font-weight: bold;
+padding: 5px;
+margin-left: 6.5%;
+}
+.AOType{
+border: 1px solid black;
+height: 30px;
+width: 100px;
+font-weight: bold;
+padding: 5px;
+margin-left: 14.5%;
+}
+.RangeCode{
+border: 1px solid black;
+height: 30px;
+width: 100px;
+font-weight: bold;
+padding: 5px;
+}
+.AOName{
+border: 1px solid black;
+height: 30px;
+width: 100px;
+font-weight: bold;
+padding: 5px;
+margin-left: 22%;
+}

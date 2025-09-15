@@ -1,0 +1,54 @@
+.textform {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 17px;
+}
+.headerTrail {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.fDate{
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  width: 200px;
+  height: 30px;
+  border-radius: 4px;
+  margin-left: 5px;
+}
+.toDate{
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  width: 200px;
+  height: 30px;
+  border-radius: 4px;
+  margin-left: 26px;
+}
+.value{
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 19px;
+  font-weight: bold;
+  width: 200px;
+  height: 30px;
+  border-radius: 4px;
+}
+.containerT{
+  margin-top: -25px;
+}
+
+.TableSize{
+  max-height: 455px;
+  overflow: auto;
+}
+.tableT{
+  max-height: 454px;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.contMain{
+  margin-top: -10px;
+  padding: 20px;
+}

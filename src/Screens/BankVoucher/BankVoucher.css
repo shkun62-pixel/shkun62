@@ -1,0 +1,356 @@
+.HeaderBANK {
+    font-weight: bolder;
+    text-align: center;
+    margin-top: -30px;
+    background: linear-gradient(to right, #8357eb, #30c9c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 5px;
+    font-size: 30px;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.Belowcontent {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    /* or any other background color */
+    z-index: 1000;
+    /* To make sure it stays on top */
+}
+
+.Tablesections {
+    max-height: 458px;
+    overflow-y: auto;
+    margin: 5px;
+}
+
+.topdetails {
+    display: flex;
+    flex-direction: column;
+    margin-left: 50px;
+    margin-top: -40px;
+}
+
+.bankdiv {
+    display: flex;
+    flex-direction: row;
+}
+
+.totalPayment {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 150px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totalReceipt {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 150px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totalDiscount {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 150px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Totalcharges {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    width: 150px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+.custom-datepickerBank{
+  background-color: white;
+  border: 1px solid #b8b8b8;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  width: 125px;
+  height: 46px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+/* .custom-datepickerBank{
+    border: 1px solid black;
+    height: 35px;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 182px;
+} */ 
+
+.custom-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+.VouchcerNo{
+    border: 1px solid black;
+    height: 35px;
+    width: 182px;
+    margin-top: 5px;
+    margin-left: 22px;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.7);
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+}
+.VouchcerNo:focus{
+    background-color: #8deded;
+}
+
+.USER{
+    border: 1px solid black;
+    height: 35px;  
+    margin-top: 5px;
+    width: 184px;
+    margin-left: 76px;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.7);
+    padding-left: 5px;
+    font-weight: bold;
+    color: black;
+    background-color: white;
+    font-size: 18px;
+}
+
+.BANKname{
+    border: 1px solid black;
+    height: 35px;  
+    width: 300px;
+    background-color: white;
+    margin-left: 22px;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.7);
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+}
+.BANKname:focus{
+background-color: #8deded;
+}
+
+.AcCode{
+    border: 1px solid black;
+    height: 35px;   
+    margin-top: 5px;
+    margin-left: 5px;
+    width: 150px;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.7);
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    color: black;
+}
+
+.Payments{
+    background-color: white;
+    font-weight: 600;
+    text-align: right;
+}
+.Payments:focus{
+  background-color: #8deded;
+}
+
+.Receipts{
+    background-color: lavender;
+    font-weight: 600;
+    text-align: right;
+}
+.Receipts:focus{
+  background-color: #8deded;
+}
+
+.Discounts{
+    font-weight: 600;
+    text-align: right;
+}
+.Discounts:focus{
+  background-color: #8deded;
+}
+
+.Totals{
+    font-weight: 600;
+    text-align: right;
+}
+.Totals:focus{
+  background-color: #e3f8e3;
+}
+
+.Bankcharges{
+    font-weight: 600;
+    text-align: right;
+}
+.Bankcharges:focus{
+    background-color: #8deded;
+}
+
+.TDSrs{
+    font-weight: 600;
+    text-align: right;
+    background-color: lavender;
+}
+.TDSrs:focus{
+    background-color: #8deded;
+}
+
+.chnqBank{
+    font-weight: 600;
+}
+.chnqBank:focus{
+    background-color: #8deded;
+}
+
+.REM{
+    font-weight: 600;
+    background-color: #e3f8e3;
+}
+.REM:focus{
+    background-color: #8deded;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .bankdiv {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .Belowcontent {
+        position: static;
+    }
+
+    .HeaderBANK {
+        font-weight: bolder;
+        margin-left: 75px;
+        background: linear-gradient(to right, #8357eb, #30c9c9);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .acCode {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+        width: 120px;
+        margin-top: 5px;
+        height: 30px;
+        margin-left: 106px;
+    }
+
+    .totalPayment {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        margin-left: 43px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .totalReceipt {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        margin-left: 52px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .totalDiscount {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        margin-left: 43px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .Totalcharges {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        margin-left: 10px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .topdetails {
+        margin-left: 0px;
+        margin-top: 0px;
+    }
+
+    .belowFileds {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tp {
+        margin-left: 10px;
+    }
+
+    .trec {
+        margin-top: 5px;
+        margin-left: 10px;
+    }
+
+    .tdis {
+        margin-top: 5px;
+        margin-left: 10px;
+    }
+
+    .tbc {
+        margin-top: 5px;
+        margin-left: 10px;
+    }
+
+}
+
+@media (width: 820px) and (height: 1180px) {
+    .Tablesections {
+        max-height: 750px;
+        overflow-y: auto;
+        margin: 5px;
+    }
+
+    .belowFileds {
+        margin-left: 60px;
+    }
+}
+
+@media (width: 1180px) and (height: 820px) {
+    .Tablesections {
+        max-height: 460px;
+        overflow-y: auto;
+        margin: 5px;
+    }
+}

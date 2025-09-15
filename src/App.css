@@ -1,0 +1,29 @@
+/* App.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Common helper classes */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;             /* Chrome, Safari, Opera */
+  }
+
+  .no-select {
+    user-select: none;
+  }
+
+  .text-shadow {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .transition-soft {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
+

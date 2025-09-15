@@ -1,0 +1,2098 @@
+.top {
+    display: flex;
+    flex-direction: row;
+    width: 50%;
+    border: 1px solid black;
+    margin: 5px;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5px;
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+}
+
+.tablestyle {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.heads {
+    font-size: 30px;
+    margin-top: -45px;
+    margin-left: 43%;
+}
+
+.custom-datepickerr {
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.text {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: gray;
+}
+
+.Headerz {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 30px;
+    margin-top: -35px;
+    margin-left: 35%;
+    background: linear-gradient(to right, #8357eb, #30c9c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
+}
+
+.inputfields {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.inputfields:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.bottom {
+    /* width: 100%; */
+    background-color: white;
+    padding: 10px;
+}
+
+.Bottomdiv {
+    display: flex;
+    flex-direction: column;
+    background-color: #ceedf0;
+    padding: 5px;
+    margin-left: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5,
+}
+
+.inputfields {
+    height: 30px;
+    font-size: var(--font-size);
+}
+
+.date-picker-container {
+    margin-left: 15px;
+}
+
+.toppart {
+    display: flex;
+    flex-direction: row;
+}
+
+.cus {
+    display: flex;
+    flex-direction: row;
+}
+
+.gst {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.vnozw {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    margin-left: 40px;
+    width: 100px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.vnozw:focus {
+    border: 2px solid #000000;
+}
+
+.supplierz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 10px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.supplierz:focus {
+    border: 2px solid #000000;
+}
+
+.Cityz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 10px;
+}
+
+.Cityz:focus {
+    border: 2px solid #000000;
+}
+
+.Gstnoz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 15.5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Gstnoz:focus {
+    border: 2px solid #000000;
+}
+
+.Panz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 7px;
+}
+
+.Panz:focus {
+    border: 2px solid #000000;
+}
+
+.citydiv {
+    margin-left: 50px;
+}
+
+.pandiv {
+    margin-left: 50px;
+}
+
+.Datez {
+    margin-left: 38px;
+}
+
+.vnodivz {
+    margin-top:10px;
+}
+
+.datediv {
+    margin-top: 5px;
+}
+
+.dbdate {
+    margin-left: 20px;
+}
+
+.DocNo {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 125px;
+    margin-left: 20px;
+    margin-top: 10px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.DocNo:focus {
+    border: 2px solid #000000;
+}
+
+.Termsz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 125px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-top: 10px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.Termsz:focus {
+    border: 2px solid #000000;
+}
+
+.Selfinv {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 125px;
+    font-size: 17px;
+    margin-left: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Selfinv:focus {
+    border: 2px solid #000000;
+}
+
+.service {
+    width: 145px;
+    border: 1px solid black;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.Billcash {
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 40px;
+}
+
+.Bottomcontainer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.btl1 {
+    display: flex;
+    flex-direction: row;
+}
+
+.btl2 {
+    display: flex;
+    flex-direction: row;
+}
+
+.vdate {
+    margin-left: 14px;
+}
+
+.Namez {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 300px;
+    margin-left: 30px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    /* box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3); */
+    font-weight: bold;
+}
+
+.Namez:focus {
+    border: 2px solid black;
+}
+
+.addressz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 300px;
+    margin-left: 14.5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.addressz:focus {
+    border: 2px solid black;
+}
+
+.tpts {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 300px;
+    margin-left: 2px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.tpts:focus {
+    border: 2px solid black;
+}
+
+.place {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 300px;
+    margin-left: 35px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.place:focus {
+    border: 2px solid black;
+}
+
+.tdson {
+    width: 100px;
+    border: 1px solid black;
+    margin-left: 18px;
+    font-weight: bold;
+}
+.declaration{
+    width: 162px;
+    height: 30px;
+    margin-left: 5px;
+    border: 1px solid black;
+    padding: 5px;
+    font-weight: bold;
+}
+.declaration:focus{
+    border: 2px solid black;
+}
+
+.Tcs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 46px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Tcs:focus {
+    border: 2px solid black;
+}
+
+.Tds {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 20px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Tds:focus {
+    border: 2px solid black;
+}
+
+.Tcs206 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.tds206:focus {
+    border: 2px solid black;
+}
+
+.grNo {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 40px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.grNo:focus {
+    border: 2px solid black;
+}
+
+.Trptz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 5px;
+    margin-top: 10px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Trptz:focus {
+    border: 2px solid black;
+}
+
+.Totalgst {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 14px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Expensez {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 280px;
+    margin-left: 27px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Addless {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Cess2 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 33px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.Cess1 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 33px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.SubTotalz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 280px;
+    margin-left: 23.5px;
+    font-size: 17px;
+    outline: none;
+    margin-top: 2px;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.CGSTz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 100px;
+    margin-left: 44.5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.IGSTz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 280px;
+    margin-left: 49.5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.SGSTz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 100px;
+    font-size: 17px;
+    margin-left: 0px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.GrandTotalz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 280px;
+    margin-left: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    font-weight: bold;
+}
+
+.margin {
+    margin-top: 2px;
+}
+
+.plus {
+    margin-left: 90%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+}
+
+.Button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.Billdiv {
+    margin-left: 20px;
+}
+
+.selectors {
+    margin-left: 10%;
+}
+
+.delete {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.Buttonsgroup {
+    margin-left: 20%;
+}
+
+/* Media query */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .heads {
+        font-size: 30px;
+        margin-top: -45px;
+        margin-left: 25%;
+    }
+
+    .toppart {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .Buttonsgroup {
+        margin-left: 20px;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 97%;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: #ceedf0;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+
+    .vnozw {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .supplierz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cityz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 36px;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Gstnoz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Panz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 35.5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cus {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gst {
+        display: flex;
+        flex-direction: column;
+        margin-left: -3.5px;
+    }
+
+    .citydiv {
+        margin-left: 0px;
+    }
+
+    .pandiv {
+        margin-left: 0px;
+    }
+
+    .Datez {
+        margin-left: 28px;
+    }
+
+    .vnodivz {
+        margin-left: 38px;
+    }
+
+    .vnozw {
+        margin-left: 0px;
+    }
+
+    .Selfinv {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 125px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .taxdiv {
+        margin-top: 5px;
+    }
+
+    .service {
+
+        width: 280px;
+        border: 1px solid black;
+    }
+
+    .Billcash {
+        width: 280px;
+        border: 1px solid black;
+        margin-left: 8px;
+    }
+
+    .Termsz {
+        margin-left: 20px;
+    }
+
+    .dbdate {
+        margin-left: 27px;
+    }
+
+    .DocNo {
+        margin-left: 22px;
+    }
+
+    .Billdiv {
+        margin-left: 0px;
+    }
+
+    .selectors {
+        margin-left: 0%;
+    }
+
+    .Bottomcontainer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btl1 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btl2 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .Bottomdiv {
+        display: flex;
+        flex-direction: column;
+        background-color: #ceedf0;
+        padding: 5px;
+        margin-left: 0%;
+        margin-top: 5px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        padding: 5,
+    }
+
+    /* Below Fields */
+    .Namez {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 7px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .addressz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 15px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tpts {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 10px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .place {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tdson {
+        width: 100px;
+        border: 1px solid black;
+        margin-left: 20px;
+    }
+
+    .Tcs {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 47px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Tds {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 22px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Tcs206 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .grNo {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 42px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Trptz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Totalgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 17px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Expensez {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Addless {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cess2 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 28.5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cess1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 28.5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .SubTotalz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 22px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        margin-top: 2px;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .CGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 45px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .IGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 45px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .SGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 45px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .GrandTotalz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 6px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+}
+
+/* Media query for *820 x 1180*/
+@media (width: 820px) and (height: 1180px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tablestyle {
+        max-height: 430px;
+        overflow-y: auto;
+    }
+
+    .toppart {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .Buttonsgroup {
+        margin-left: 20px;
+    }
+
+    .Headerz {
+        margin-top: -40px;
+        margin-left: 20%;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 97%;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: #ceedf0;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+
+    .vnozw {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .supplierz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cityz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 38.5px;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Gstnoz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 14px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Panz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 38px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cus {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gst {
+        display: flex;
+        flex-direction: column;
+        margin-left: -3.5px;
+    }
+
+    .citydiv {
+        margin-left: 0px;
+    }
+
+    .pandiv {
+        margin-left: 0px;
+    }
+
+    .Datez {
+        margin-left: 28px;
+    }
+
+    .vnodivz {
+        margin-left: 38px;
+    }
+
+    .vnozw {
+        margin-left: 0px;
+    }
+
+    .Selfinv {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 125px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .taxdiv {
+        margin-top: 5px;
+    }
+
+    .service {
+
+        width: 280px;
+        border: 1px solid black;
+    }
+
+    .Billcash {
+        width: 280px;
+        border: 1px solid black;
+        margin-left: 10px;
+    }
+
+    .Termsz {
+        margin-left: 23px;
+    }
+
+    .dbdate {
+        margin-left: 33px;
+    }
+
+    .DocNo {
+        margin-left: 22px;
+    }
+
+    .Billdiv {
+        margin-left: 0px;
+    }
+
+    .selectors {
+        margin-left: 0%;
+    }
+
+    .Bottomcontainer {
+        display: flex;
+        flex-direction: column;
+        margin-left: 12px;
+    }
+
+    .btl1 {
+        display: flex;
+        flex-direction: row;
+        margin-left: 60px;
+        margin-top: 20px;
+    }
+
+    .btl2 {
+        display: flex;
+        flex-direction: row;
+        margin-top: 20px;
+    }
+
+    .Bottomdiv {
+        display: flex;
+        flex-direction: column;
+        background-color: #ceedf0;
+        padding: 5px;
+        margin-left: 25px;
+        margin-top: 5px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        padding: 5,
+    }
+
+    /* Below Fields */
+    .Namez {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 7px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .addressz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tpts {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .place {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 35px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tdson {
+        width: 100px;
+        border: 1px solid black;
+        margin-left: 20px;
+    }
+
+    .Tcs {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 47px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Tds {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Tcs206 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .grNo {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 40px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Trptz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Totalgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 17px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Expensez {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Addless {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cess2 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cess1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .SubTotalz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 23px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        margin-top: 2px;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .CGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .IGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .SGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 51px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .GrandTotalz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 6px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+}
+
+@media(width: 1180px) and (height: 820px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .Belowcontents {
+        position: static;
+    }
+
+    .Headerz {
+        margin-top: -40px;
+        margin-left: 20%;
+    }
+
+    .toppart {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 97%;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: #ceedf0;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .vnozw {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .supplierz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cityz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 38.5px;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Gstnoz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 14px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Panz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 38px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cus {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gst {
+        display: flex;
+        flex-direction: column;
+        margin-left: -3.5px;
+    }
+
+    .citydiv {
+        margin-left: 0px;
+    }
+
+    .pandiv {
+        margin-left: 0px;
+    }
+
+    .Datez {
+        margin-left: 28px;
+    }
+
+    .vnodivz {
+        margin-left: 38px;
+    }
+
+    .vnozw {
+        margin-left: 0px;
+    }
+
+    .Selfinv {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 125px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .taxdiv {
+        margin-top: 5px;
+    }
+
+    .service {
+
+        width: 280px;
+        border: 1px solid black;
+    }
+
+    .Billcash {
+        width: 280px;
+        border: 1px solid black;
+        margin-left: 10px;
+    }
+
+    .Termsz {
+        margin-left: 23px;
+    }
+
+    .dbdate {
+        margin-left: 33px;
+    }
+
+    .DocNo {
+        margin-left: 22px;
+    }
+
+    .Billdiv {
+        margin-left: 0px;
+    }
+
+    .selectors {
+        margin-left: 0%;
+    }
+
+    .Bottomcontainer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btl1 {
+        display: flex;
+        flex-direction: row;
+        margin-left: 23%;
+        margin-top: 20px;
+    }
+
+    .btl2 {
+        display: flex;
+        flex-direction: row;
+        margin-top: 20px;
+        margin-left: 17%;
+    }
+
+    .Buttonsgroup {
+        margin-left: 12%;
+    }
+
+    .Bottomdiv {
+        display: flex;
+        flex-direction: column;
+        background-color: #ceedf0;
+        padding: 5px;
+        margin-left: 25px;
+        margin-top: 5px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        padding: 5,
+    }
+
+    .Namez {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 7px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .addressz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tpts {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .place {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 35px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tdson {
+        width: 100px;
+        border: 1px solid black;
+        margin-left: 20px;
+    }
+
+    .Tcs {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 47px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Tds {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Tcs206 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .grNo {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 40px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Trptz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Totalgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 17px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Expensez {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Addless {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cess2 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Cess1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .SubTotalz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 23px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        margin-top: 2px;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .CGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .IGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .SGSTz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 51px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .GrandTotalz {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 6px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+}

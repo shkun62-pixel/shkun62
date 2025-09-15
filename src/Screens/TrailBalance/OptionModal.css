@@ -1,0 +1,63 @@
+.custom-checkbox {
+    width: 25px;
+    height: 25px;
+    appearance: none; /* Remove default checkbox */
+    border: 2px solid #555;
+    border-radius: 50%; /* Make it round */
+    cursor: pointer;
+    position: relative;
+    background-color: white;
+    outline: none;
+  }
+
+  .custom-checkbox:checked {
+    background-color: green; /* Blue when checked */
+    border: 2px solid green;
+  }
+
+  .custom-checkbox:checked::after {
+    content: '✔';
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .Balance{
+    height: 30px;
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 25px;
+    font-weight: bold;
+  }
+  .OrderBY{
+    height: 30px;
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 16px;
+    font-weight: bold;
+  }
+  .Annexure{
+    height: 30px;
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 10px;
+    font-weight: bold;
+  }
+  .custom-datepickerF{
+    width: 150px;
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    margin-left: 10px;
+    padding: 5px;
+  }
+  .custom-datepickerU{
+    width: 150px;
+    border: 1px solid black;
+    height: 30px;
+    font-weight: bold;
+    margin-left: 42%;
+    padding: 5px;
+  }

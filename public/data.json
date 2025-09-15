@@ -1,0 +1,36 @@
+{
+  "stjCd": "PB034",
+  "dty": "Regular",
+  "lgnm": "SHKUNSOFT INNOVATIONS",
+  "stj": "Fatehgarh Sahib - Ward No.4",
+  "adadr": [],
+  "cxdt": "",
+  "gstin": "03AEZFS6485G1ZA",
+  "nba": ["Supplier of Services"],
+  "lstupdt": "22/10/2023",
+  "ctb": "Partnership",
+  "rgdt": "17/10/2023",
+  "pradr": {
+    "addr": {
+      "bnm": "",
+      "loc": "Mandi Gobindgarh",
+      "st": "Motia Khan",
+      "bno": "Near PNB Bank",
+      "dst": "Fatehgarh Sahib",
+      "lt": "30.662334551990806",
+      "locality": "",
+      "pncd": "147301",
+      "landMark": "Shri Brothers",
+      "stcd": "Punjab",
+      "geocodelvl": "Building",
+      "flno": "",
+      "lg": "76.29236698150635"
+    },
+    "ntr": "Supplier of Services"
+  },
+  "tradeNam": "Hitesh Arora",
+  "sts": "Active",
+  "ctjCd": "ZD1302",
+  "ctj": "RANGE-II",
+  "einvoiceStatus": "No"
+}

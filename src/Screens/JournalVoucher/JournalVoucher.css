@@ -1,0 +1,251 @@
+.HeaderJOU {
+  font-weight: bolder;
+  text-align: center;
+  margin-top: -30px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 5px;
+  font-size: 30px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.Top {
+    display: flex;
+    flex-direction: column;
+    margin-top: -70px;
+    margin-left: 40px;
+}
+
+.Tablesection {
+    max-height: 420px;
+    overflow-y: auto;
+    margin: 5px;
+}
+.owner {
+    margin-left: 45px;
+    width: 180px;
+    height: 32px;
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.owner:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.VouchNo{
+    width: 180px;
+    height: 32px;
+    margin-left: 22px;
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3); 
+}
+.totaldebit {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    height: 35px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totaldebit:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.totalcredit {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    height: 35px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totalcredit:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.debitdiv {
+    margin-left: 20px;
+}
+
+.creditdiv {
+    margin-left: 20px;
+}
+
+.inputfields {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.inputfields:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.addbutton {
+    visibility: hidden;
+}
+
+.Debit{
+    background-color: #e3f8e3;
+    text-align: right;
+    font-weight: 600;
+}
+
+.Credits{
+    background-color: #f3bfbf;
+    text-align: right;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .Header {
+        font-weight: bolder;
+        margin-left: 50px;
+        background: linear-gradient(to right, #8357eb, #30c9c9);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .Top {
+        background-color: rgb(155, 218, 243);
+        padding: 10px;
+        margin: 5px;
+        border-radius: 10px;
+        border: 1px solid black;
+    }
+
+    .belowdetails {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .labels {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cashinhand {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 100px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .owner {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        height: 35px;
+        margin-left: 60px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .totaldebit {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        height: 35px;
+        margin-left: 20px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+
+    .totalcredit {
+        border: 1px solid black;
+        padding: 10px;
+        border-radius: 5px;
+        width: 150px;
+        height: 35px;
+        margin-left: 10px;
+        outline: none;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .debitdiv {
+        margin-left: 0px;
+        margin-top: 10px;
+    }
+
+    .creditdiv {
+        margin-left: 0px;
+        margin-top: 10px;
+    }
+
+    .addbutton {
+        margin-left: 10px;
+        visibility: visible;
+    }
+
+}
+
+@media (width: 820px) and (height: 1180px) {
+    .belowdetails {
+        margin-left: 5%;
+    }
+
+    .Tablesection {
+        max-height: 780px;
+        overflow-y: auto;
+        margin: 5px;
+    }
+
+    .addbutton {
+        visibility: visible;
+    }
+}
+
+@media (width: 1180px) and (height: 820px) {
+    .belowdetails {
+        margin-left: 5%;
+    }
+
+    .Tablesection {
+        max-height: 510px;
+        overflow-y: auto;
+        margin: 5px;
+    }
+
+    .addbutton {
+        visibility: visible;
+    }
+}

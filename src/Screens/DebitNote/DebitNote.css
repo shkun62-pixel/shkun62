@@ -1,0 +1,1909 @@
+.top {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border: 1px solid black;
+  margin: 5px;
+  border-radius: 10px;
+  background-color: #ceedf0;
+  box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+  padding: 5px;
+  /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+}
+
+.datediv {
+  display: flex;
+  flex-direction: row;
+}
+
+.Belowcontents {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+
+  background-color: white;
+  /* or any other background color */
+  z-index: 1000;
+  /* To make sure it stays on top */
+}
+
+.custom-datepicker1 {
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  width: 125px;
+  height: 30px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.datepicker {
+  padding: 5px;
+  border-radius: 5px;
+  border-color: #ccc;
+  font-size: 17px;
+  width: 300px;
+  outline: white;
+  height: 30px;
+}
+
+.datepicker2 {
+  padding: 5px;
+  border-radius: 5px;
+  border-color: #ccc;
+  font-size: 17px;
+  width: 200px;
+  outline: white;
+  height: 30px;
+}
+
+.form-control {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 19px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.custom-input {
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  width: 200px;
+  /* Adjust width as needed */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.text {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: gray;
+}
+
+.form-control1 {
+  border: 1px solid #ccc;
+  padding: 5px;
+  height: 9px;
+  width: 350px;
+  border-radius: 5px;
+  font-size: 16px;
+  /* Reduced font size for better fit */
+  outline: none;
+  flex-grow: 1;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.header {
+  font-weight: bolder;
+  text-align: center;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.close-button {
+
+  top: 10px;
+  right: 200px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.custom-datepicker3 {
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  width: 200px;
+  height: 30px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.topinputs {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 250px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.topinputs2 {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 90px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.inputfields {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.inputfields:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.topinputs:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.topinputs2:focus {
+  border: 2px solid black;
+  border-color: #050405;
+  outline: none;
+}
+
+.bottom {
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+}
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.bottomdiv {
+  display: flex;
+  flex-direction: row;
+  background-color: #ceedf0;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+  padding: 5,
+}
+
+.bottomdiv2 {
+  display: flex;
+  flex-direction: row;
+  background-color: #ceedf0;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+  padding: 5px;
+  margin-left: 70px;
+}
+
+.inputfields {
+  height: 30px;
+  font-size: var(--font-size);
+}
+
+.date-picker-container {
+  margin-left: 15px;
+}
+
+.toppart {
+  display: flex;
+  flex-direction: row;
+}
+
+.tablediv {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.cus {
+  display: flex;
+  flex-direction: row;
+}
+
+.gst {
+  display: flex;
+  flex-direction: row;
+  margin-top: 5px;
+}
+
+.billno {
+  margin-left: 110px;
+}
+
+.bill {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 80px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.customer {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 250px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.city {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 250px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  margin-left: 10px;
+}
+
+.gstno {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 250px;
+  margin-left: 65px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.panno {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 250px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  margin-left: 6px;
+}
+
+.grno {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 150px;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-left: 23px;
+  outline: none;
+  flex-grow: 1;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.terms {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 150px;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-left: 18px;
+  outline: none;
+  flex-grow: 1;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.vehicle {
+  border: 1px solid #000000;
+  height: 9px;
+  padding: 10px;
+  width: 150px;
+  border-radius: 5px;
+  margin-left: 10px;
+  outline: none;
+  flex-grow: 1;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.tr {
+  margin-top: 5px;
+}
+
+.vh {
+  margin-top: 5px;
+}
+
+.date {
+  margin-left: 87px;
+}
+
+.taxtype {
+  width: 300px;
+  border: 1px solid black;
+}
+
+.billcash {
+  width: 300px;
+  border: 1px solid black;
+}
+
+.supply {
+  width: 300px;
+  margin-left: 7px;
+  border: 1px solid black;
+}
+
+.bc {
+  margin-top: 5px;
+}
+
+.sup {
+  margin-top: 5px;
+}
+
+.selector {
+  margin-left: 50px;
+}
+
+.bottomcontainer {
+  display: flex;
+  flex-direction: row;
+  margin-left: 8%;
+}
+
+.Plus {
+  margin-left: 90%;
+  margin-top: -35px;
+  display: flex;
+  flex-direction: row;
+}
+
+.head {
+  font-size: 30px;
+  margin-top: -45px;
+  margin-left: 45%;
+}
+
+.Button {
+  margin: 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.delete {
+  margin: 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.Buttonsgroup {
+  margin-left: 20%;
+}
+
+.shippedto {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.rem {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-left: 15px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.vtpt {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-left: 7px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.brokers {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-left: 28px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.tdsq {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 12px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.tcsh {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 2px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.tcs206 {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.advance {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 17px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.totalGst {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 34px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.adless {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 27px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.expensegst {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.value {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 47px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Cgst {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 44px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Sgst {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 45px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Igst {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 48.5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.Grandtotal {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.shipdiv {
+  margin-top: 10px;
+}
+
+.tdsdiv {
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+.adadv {
+  margin-top: 10px;
+}
+
+.valuediv {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+/* Media query for max-width:768px */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .Belowcontents {
+    position: static;
+  }
+
+  .head {
+    font-size: 30px;
+    margin-top: -45px;
+    margin-left: 20%;
+  }
+
+  .toppart {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top {
+    display: flex;
+    flex-direction: column;
+    width: 97.5%;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+  }
+
+  .topinputs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .cus {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gst {
+    display: flex;
+    flex-direction: column;
+    margin-left: -3.5px;
+  }
+
+  .bill {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 80px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .customer {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .city {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 85px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .gstno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 65px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .panno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    margin-left: 85px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .date {
+    margin-left: 10px;
+  }
+
+  .billno {
+    margin-left: 58px;
+  }
+
+  .grno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .terms {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .vehicle {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .grno {
+    margin-left: 26px;
+  }
+
+  .taxtype {
+    margin-left: 7px;
+    border: 1px solid black;
+  }
+
+  .billcash {
+    margin-left: 4px;
+    border: 1px solid black;
+  }
+
+  .supply {
+    margin-left: 14px;
+    border: 1px solid black;
+  }
+
+  .ttype {
+    margin-top: 5px;
+  }
+
+  .selector {
+    margin-left: 0px;
+  }
+
+  .bottomdiv {
+    display: flex;
+    flex-direction: column;
+    background-color: #ceedf0;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+  }
+
+  .bottomdiv2 {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: #ceedf0;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    margin-left: 1px;
+    border: 1px solid gray;
+
+  }
+
+  .bottomcontainer {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1px;
+  }
+
+  .custom-datepicker1 {
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 5px;
+  }
+
+  .Plus {
+    margin-left: 74%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .Buttonsgroup {
+    margin-left: 20px;
+  }
+
+  .delete {
+    margin-left: 50px;
+  }
+
+  .shippedto {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 2px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .rem {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 15px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vtpt {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 8px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .brokers {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 30px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tdsq {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 15px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcsh {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcs206 {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .duedate {
+    margin-left: 18px;
+  }
+
+  .advance {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .totalGst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 32px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .adless {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 24px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .expensegst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .value {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Cgst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 46px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Sgst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 46px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Igst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Grandtotal {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .shipdiv {
+    margin-top: 10px;
+  }
+
+  .tdsdiv {
+    margin-left: 0px;
+    margin-top: 5px;
+    margin-right: 0px;
+  }
+
+  .adadv {
+    margin-top: 10px;
+  }
+
+  .valuediv {
+    margin-top: 2px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
+}
+
+/* media (width: 820px) and (height: 1180px) */
+@media (width: 820px) and (height: 1180px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tablediv {
+    max-height: 450px;
+    overflow-y: auto;
+  }
+
+  .head {
+    font-size: 30px;
+    margin-top: -45px;
+    margin-left: 40%;
+  }
+
+  .toppart {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top {
+    display: flex;
+    flex-direction: column;
+    width: 97.5%;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+  }
+
+  .cusdetails {
+    margin-top: 10px;
+  }
+
+  .topinputs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .cus {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gst {
+    display: flex;
+    flex-direction: column;
+    margin-left: -3.5px;
+  }
+
+  .bill {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 80px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .customer {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .city {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 92.5px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .gstno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 73px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .panno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    margin-left: 93px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .date {
+    margin-left: 10px;
+  }
+
+  .billno {
+    margin-left: 58px;
+  }
+
+  .grno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .terms {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    margin-left: 21px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .vehicle {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .grno {
+    margin-left: 26px;
+  }
+
+  .taxtype {
+    margin-left: 7px;
+    border: 1px solid black;
+  }
+
+  .billcash {
+    margin-left: 7px;
+    border: 1px solid black;
+  }
+
+  .supply {
+    margin-left: 14.5px;
+    border: 1px solid black;
+  }
+
+  .ttype {
+    margin-top: 5px;
+  }
+
+  .selector {
+    margin-left: 0px;
+  }
+
+  .bottomdiv {
+    display: flex;
+    flex-direction: column;
+    background-color: #ceedf0;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+    margin-left: 80px;
+  }
+
+  .bottomdiv2 {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: #ceedf0;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    margin-left: 50px;
+    border: 1px solid gray;
+
+  }
+
+  .bottomcontainer {
+    display: flex;
+    flex-direction: row;
+    margin-left: 1px;
+  }
+
+  .custom-datepicker1 {
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 5px;
+  }
+
+  .Plus {
+    margin-left: 87%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .Buttonsgroup {
+    margin-left: 20px;
+  }
+
+  .delete {
+    margin-left: 50px;
+  }
+
+  .shippedto {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 2px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .rem {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 15px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vtpt {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 8px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .brokers {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 30px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tdsq {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcsh {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcs206 {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .duedate {
+    margin-left: 10px;
+  }
+
+  .advance {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .totalGst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 34px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .adless {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 26px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .expensegst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .value {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 54px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Cgst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 50px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Sgst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Igst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 55px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Grandtotal {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 11px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .shipdiv {
+    margin-top: 10px;
+  }
+
+  .tdsdiv {
+    margin-left: 0px;
+    margin-top: 5px;
+    margin-right: 0px;
+  }
+
+  .adadv {
+    margin-top: 10px;
+  }
+
+  .valuediv {
+    margin-top: 2px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}
+
+/* media (width: 1180px) and (height: 820px) */
+@media (max-width: 1180px) and (height: 820px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cusdetails {
+    margin-top: 10px;
+  }
+
+  .tablediv {
+    max-height: 450px;
+    overflow-y: auto;
+  }
+
+  .head {
+    font-size: 30px;
+    margin-top: -45px;
+    margin-left: 43%;
+  }
+
+  .toppart {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top {
+    display: flex;
+    flex-direction: column;
+    width: 97.5%;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+  }
+
+  .topinputs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .cus {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gst {
+    display: flex;
+    flex-direction: column;
+    margin-left: -3.5px;
+  }
+
+  .bill {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 80px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-left: 13px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .customer {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-left: 10px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .city {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 97px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .gstno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 77px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .panno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    margin-left: 96px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .date {
+    margin-left: 10px;
+  }
+
+  .billno {
+    margin-left: 58px;
+  }
+
+  .grno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .terms {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .vehicle {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .grno {
+    margin-left: 26px;
+  }
+
+  .taxtype {
+    margin-left: 7px;
+    border: 1px solid black;
+  }
+
+  .billcash {
+    margin-left: 4px;
+    border: 1px solid black;
+  }
+
+  .supply {
+    margin-left: 14px;
+    border: 1px solid black;
+  }
+
+  .ttype {
+    margin-top: 5px;
+  }
+
+  .selector {
+    margin-left: 0px;
+  }
+
+  .bottomdiv {
+    display: flex;
+    flex-direction: row;
+    background-color: #ceedf0;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+
+  }
+
+  .bottomdiv2 {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    background-color: #ceedf0;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+    margin-left: 10px;
+
+  }
+
+  .bottomcontainer {
+    display: flex;
+    flex-direction: row;
+    margin-left: 1px;
+  }
+
+  .custom-datepicker1 {
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 5px;
+  }
+
+  .Plus {
+    margin-left: 87%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .Buttonsgroup {
+    margin-left: 20px;
+  }
+
+  .delete {
+    margin-left: 50px;
+  }
+
+  .shippedto {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 2px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .rem {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 15px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vtpt {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 8px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .brokers {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    margin-left: 30px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tdsq {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcsh {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcs206 {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .duedate {
+    margin-left: 10px;
+  }
+
+  .advance {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .totalGst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 34px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .adless {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 26px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .expensegst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .value {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 54px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Cgst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 50px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Sgst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Igst {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 55px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Grandtotal {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 11px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .shipdiv {
+    margin-top: 10px;
+  }
+
+  .tdsdiv {
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-right: 0px;
+  }
+
+  .adadv {
+    margin-top: 10px;
+  }
+
+  .valuediv {
+    margin-top: 2px;
+    margin-left: 20px;
+    margin-right: 0px;
+  }
+}

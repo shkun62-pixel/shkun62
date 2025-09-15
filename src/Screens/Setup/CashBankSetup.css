@@ -1,0 +1,200 @@
+.newModalcb {
+    display: block;
+    position: fixed;
+    z-index: 10000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    /* height: 85%; */
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 8px 16px rgba(16, 16, 16, 0.3);
+    border-radius: 20px;
+}
+  .modalcontainer{
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+    background-color: white;
+    /* background: linear-gradient(to bottom, #edc5a7,#a5d8ed); */
+}
+.contentcontainer{
+    display: flex;
+    flex-direction: row;
+}
+.leftside{
+    display: flex;
+    flex-direction: column;
+    margin-left: 2%;
+}
+.Rightside{
+    display: flex;
+    flex-direction: column;
+    margin-left: 20%;
+}
+.headingBank{
+    background: linear-gradient(to right, #8357eb, #30c9c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.discountdes{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    padding: 5px;
+    margin-left: 47.5px;
+}
+.chgdes{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    padding: 5px;
+    margin-left: 69.5px;
+}
+.discountpaid{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 101px;
+}
+.disRece{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 77.5px;
+}
+.bankchrcode{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 59px;
+}
+.defbankname{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 57px;
+}
+.cashreceiptdes{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    padding: 5px;
+    margin-left: 17px;
+}
+.bankRecDes{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    padding: 5px;
+    margin-left: 14px;
+}
+.BankIssues{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    margin-left: 32px;
+    width: 231.5px;
+    padding: 5px;
+}
+.AcdesBank{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    margin-left: 40px;
+    padding: 5px;
+}
+.narrationMang{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    margin-left: 9.5px;
+}
+.negativeCash{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    margin-left: 5px;
+}
+.tcs1h206{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    margin-left: 110px;
+    padding: 5px;
+}
+.cgstaccount{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 42px;
+}
+.sgstaccount{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 45px;
+}
+.igstaccount{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 200px;
+    padding: 5px;
+    margin-left: 49px;
+}
+.duplicate{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    margin-left: 5px;
+}
+.tdsOPTIONS{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    margin-left: 24.5px;
+}
+.cashvalidate{
+    border: 1px solid black;
+    font-weight: bold;
+    height: 30px;
+    width: 231px;
+    margin-left: 18.5px;
+}
+.Bankdetials{
+    border: 1px solid black;
+    font-weight: bold;
+    margin-top: 5px;
+}
+.selectCB{
+    width: 200px;
+}

@@ -1,0 +1,688 @@
+.label {
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+ 
+}
+.custom-datepicker2 {
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  font-weight: bold;
+  outline: none;
+  width: 300px;
+  height: 30px;
+}
+.Custom-Datepicker {
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  font-weight: bold;
+  outline: none;
+  width: 300px;
+  height: 30px;
+  margin-top: 0.5px;
+}
+
+.button {
+  border-color: transparent;
+  width: 250px;
+}
+
+.MainContainer {
+display: flex;
+flex-direction: row;
+border-radius: 20px;
+background: linear-gradient(to bottom, #a5d8ed, #f5c199);
+margin-top: -20px;
+padding: 5px;
+border: 1px solid rgb(47, 43, 43);
+}
+
+.button1 {
+  border-color: transparent;
+  width: 120px;
+}
+
+.company {
+  letter-spacing: 2px;
+  margin-top: -40px;
+  font-weight: bolder;
+  background: linear-gradient(to right, #1279ef, #07060b);
+  /* Light sky-blue gradient */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.leftSection{
+display: flex;
+flex-direction: column;
+margin-left: 40px;
+}
+.rightSection{
+  display: flex;
+  flex-direction: column;
+  margin-left: 100px;
+}
+.companyname{
+  border: 1px solid black;
+width: 300px;
+margin-left: 28px;
+height: 30px;
+font-weight: bold;
+font-size: 18px;
+}
+.Address{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 77px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px;
+}
+.CITY{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 115px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px;
+}
+.OwnerName{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 45px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Distrcit{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 107px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.stateSelect{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 104px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.PinCode{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 78px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.PhoneNo{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 40.5px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Residence{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 10px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.PanNo{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 117px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.TDSAcno{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 62px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.TDScircle{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 62px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Stylez{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 103px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Commodity{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 56.5px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Afrom{
+  width: 300px;
+  margin-left: 22px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Aupto{
+  width: 300px;
+  margin-left: 27px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.WeightDec{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 11px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.EmailAdd{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 28px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.prncode{
+  border: 1px solid black;
+  width: 50px;
+  margin-left: 26px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+text-align: center;
+}
+.TdsName{
+  width: 152.5px;
+  border: 1px solid black;
+  height: 30px;
+  font-weight: bold;
+}
+.Tcsynsale{
+  border: 1px solid black;
+  width: 50px;
+  margin-left: 24px;
+  height: 30px;
+  font-weight: bold;
+  font-size: 18px; 
+  text-align: center;
+}
+.Tdsname1{
+  width: 152px;
+  border: 1px solid black;
+  height: 30px;
+  font-weight: bold;
+  margin-left: 14px;
+}
+.DispAct{
+    border: 1px solid black;
+    width: 50px;
+    margin-left: 22px;
+    height: 30px;
+    font-weight: bold;
+    font-size: 18px; 
+    text-align: center;
+}
+.Rc{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 19.5px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+
+.Unittype{
+height: 30px;
+background-color: white;
+color: black;
+width: 190px;
+font-weight: bold;
+margin-left: 75.5px;
+border: 1px solid black;
+}
+.Iecno{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 20px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+margin-left: 100px;
+}
+.Collc{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 38px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Range{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 98px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Adhar{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 35px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.CinNo{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 98.5px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.JobWork{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 72px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.GSTno{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 95.5px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.GSTIN{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 66px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.PEID{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 58px;
+  height: 30px;
+  font-weight: bold;
+font-size: 18px; 
+}
+.Cperson{
+  border: 1px solid black;
+  width: 300px;
+  margin-left: 29px;
+  height: 30px;
+  font-weight: bold;
+}
+.QtyApp{
+  display: flex;
+  flex-direction: row;
+}
+.onSale{
+  display: flex;
+  flex-direction: row;
+}
+@media (max-width: 768px) {
+  .MainContainer{
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: 1px solid white;
+  }
+  .leftSection{
+    display: flex;
+    flex-direction: column;
+    margin-left: 0px;
+    }
+    .rightSection{
+      display: flex;
+      flex-direction: column;
+      margin-left: 0px;
+    }
+    .QtyApp{
+      display: flex;
+      flex-direction: column;
+    }
+    .onSale{
+      display: flex;
+      flex-direction: column;
+    }
+    .company {
+      letter-spacing: 2px;
+      margin-top: -40px;
+      font-weight: bolder;
+      font-size: 22px;
+      background: linear-gradient(to right, #1279ef, #07060b);
+      margin-left: 40px;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .companyname{
+      border: 1px solid black;
+    width: 235px;
+    margin-left: 0px;
+    height: 30px;
+    font-weight: bold;
+    }
+    .Address{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 1px;
+      font-weight: bold;
+    font-size: 18px;
+    }
+    .CITY{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 1px;
+      font-weight: bold;
+    font-size: 18px;
+    }
+    .OwnerName{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .Distrcit{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .stateSelect{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 1px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .PinCode{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .PhoneNo{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .Residence{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 1px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .PanNo{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .TDSAcno{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .TDScircle{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 1px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .Stylez{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .Commodity{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .WeightDec{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .EmailAdd{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 1px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    .prncode{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+    font-size: 18px; 
+    text-align: center;
+    }
+    .TdsName{
+      width: 235px;
+      margin-left: 0px;
+      border: 1px solid black;
+      height: 30px;
+      font-weight: bold;
+      font-size: 18px; 
+      margin-top: 0.5px;
+    }
+    .Tcsynsale{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      margin-top: 0.5px;
+      font-weight: bold;
+      font-size: 18px; 
+      text-align: center;
+    }
+    .Tdsname1{
+      width: 235px;
+    margin-left: 0px;
+      border: 1px solid black;
+      height: 30px;
+      font-weight: bold;
+      font-size: 18px; 
+    }
+    .DispAct{
+        border: 1px solid black;
+        width: 235px;
+        margin-left: 0px;
+        height: 30px;
+        margin-top: 1px;
+        font-weight: bold;
+        font-size: 18px; 
+        text-align: center;
+    }
+    .Rc{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    }
+    
+    .Unittype{
+    height: 30px;
+    background-color: white;
+    color: black;
+    width: 235px;
+    margin-left: 0px;
+    font-weight: bold;
+    border: 1px solid black;
+    }
+    .Iecno{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-left: 100px;
+    margin-top: 1px;
+    }
+    .Collc{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top: 1px;
+    }
+    .Range{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:0.5px;
+    }
+    .Adhar{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:0.5px;
+    }
+    .CinNo{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:1px;
+    }
+    .JobWork{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:1px;
+    }
+    .GSTno{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:1px;
+    }
+    .GSTIN{
+      border: 1px solid black;
+      width: 235px;
+    margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:1px;
+    }
+    .PEID{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    font-size: 18px; 
+    margin-top:1px;
+    }
+    .Cperson{
+      border: 1px solid black;
+      width: 235px;
+      margin-left: 0px;
+      height: 30px;
+      font-weight: bold;
+    margin-top:0.5px;
+    }
+    
+}
+ 

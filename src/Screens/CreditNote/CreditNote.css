@@ -1,0 +1,2145 @@
+.top {
+    display: flex;
+    flex-direction: row;
+    width: 50%;
+    border: 1px solid black;
+    margin: 5px;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5px;
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+}
+
+.tablestyle {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.heads {
+    font-size: 30px;
+    margin-top: -45px;
+    margin-left: 43%;
+}
+
+.custom-datepicker1 {
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.datepicker {
+    padding: 5px;
+    border-radius: 5px;
+    border-color: #ccc;
+    font-size: 17px;
+    width: 300px;
+    outline: white;
+    height: 30px;
+}
+
+.datepicker2 {
+    padding: 5px;
+    border-radius: 5px;
+    border-color: #ccc;
+    font-size: 17px;
+    width: 200px;
+    outline: white;
+    height: 30px;
+}
+
+.form-control {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 19px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.custom-input {
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    width: 200px;
+    /* Adjust width as needed */
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.text {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: gray;
+}
+
+.form-control1 {
+    border: 1px solid #ccc;
+    padding: 5px;
+    height: 9px;
+    width: 350px;
+    border-radius: 5px;
+    font-size: 16px;
+    /* Reduced font size for better fit */
+    outline: none;
+    flex-grow: 1;
+    /* Ensures input fields grow to fill available space */
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.header {
+    font-weight: bolder;
+    text-align: center;
+    background: linear-gradient(to right, #8357eb, #30c9c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.close-button {
+
+    top: 10px;
+    right: 200px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.custom-datepicker3 {
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 200px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.topinputs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.topinputs2 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 90px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    /* Ensures input fields grow to fill available space */
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.inputfields {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.inputfields:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.topinputs:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.topinputs2:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+}
+
+.bottom {
+    /* width: 100%; */
+    background-color: white;
+    padding: 10px;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.Bottomdiv {
+    display: flex;
+    flex-direction: column;
+    background-color: #ceedf0;
+    padding: 5px;
+    margin-left: 40px;
+    /* margin-left: 2.5%; */
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5,
+}
+
+.inputfields {
+    height: 30px;
+    font-size: var(--font-size);
+}
+
+.date-picker-container {
+    margin-left: 15px;
+}
+
+.toppart {
+    display: flex;
+    flex-direction: row;
+}
+
+.cus {
+    display: flex;
+    flex-direction: row;
+}
+
+.gst {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.vno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    margin-left: 8px;
+    width: 80px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.supplier {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    margin-left: 10px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.City {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 10px;
+}
+
+.Gstno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 15.5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.Pan {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 7px;
+}
+
+.citydiv {
+    margin-left: 50px;
+}
+
+.pandiv {
+    margin-left: 50px;
+}
+
+.Date {
+    margin-left: 38px;
+}
+
+.vnodiv {
+    margin-left: 172px;
+}
+
+.datediv {
+    margin-top: 5px;
+}
+
+.dbdate {
+    margin-left: 20px;
+}
+
+.vbillno {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 125px;
+    border-radius: 5px;
+    margin-left: 10px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.Terms {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 125px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-top: 10px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 10px;
+}
+
+.selfinv {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 125px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.Taxtype {
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 10px;
+}
+
+.Billcash {
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 10px;
+}
+
+.Bottomcontainer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.btl1 {
+    display: flex;
+    flex-direction: row;
+}
+
+.btl2 {
+    display: flex;
+    flex-direction: row;
+}
+
+.vdate {
+    margin-left: 14px;
+}
+
+.adjustadvance {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    margin-left: 5px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.vacode1 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    margin-left: 17px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.tpt {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    margin-left: 10px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.broker {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    margin-left: 31px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.tdson {
+    width: 100px;
+    border: 1px solid black;
+    margin-left: 18px;
+}
+
+.tcs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 46px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.tds {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 20px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.tcs206 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 5px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.GrNo {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 40px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.trpt {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 5px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.totalgst {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 130px;
+    margin-left: 17px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.expense {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 12px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.addless {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 5px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.cess2 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 33px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.cess1 {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 120px;
+    margin-left: 33px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.subtotal {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    margin-left: 22px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    margin-top: 2px;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.cgst {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    margin-left: 49px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.igst {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    margin-left: 48.5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.sgst {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    margin-left: 50px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.grandtotal {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    margin-left: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.margin {
+    margin-top: 2px;
+}
+
+.plus {
+    margin-left: 90%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+}
+
+.Button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.Billdiv {
+    margin-left: 20px;
+}
+
+.selectors {
+    margin-left: 10%;
+}
+
+.delete {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.Buttonsgroup {
+    margin-left: 20%;
+}
+
+/* Media query */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .heads {
+        font-size: 30px;
+        margin-top: -45px;
+        margin-left: 25%;
+    }
+
+    .toppart {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .Buttonsgroup {
+        margin-left: 20px;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 97%;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: #ceedf0;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+
+    .vno {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .supplier {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .City {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 36px;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Gstno {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Pan {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 35.5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cus {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gst {
+        display: flex;
+        flex-direction: column;
+        margin-left: -3.5px;
+    }
+
+    .citydiv {
+        margin-left: 0px;
+    }
+
+    .pandiv {
+        margin-left: 0px;
+    }
+
+    .Date {
+        margin-left: 28px;
+    }
+
+    .vnodiv {
+        margin-left: 38px;
+    }
+
+    .vno {
+        margin-left: 0px;
+    }
+
+    .selfinv {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 125px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .taxdiv {
+        margin-top: 5px;
+    }
+
+    .Taxtype {
+
+        width: 280px;
+        border: 1px solid black;
+    }
+
+    .Billcash {
+        width: 280px;
+        border: 1px solid black;
+        margin-left: 8px;
+    }
+
+    .Terms {
+        margin-left: 20px;
+    }
+
+    .dbdate {
+        margin-left: 27px;
+    }
+
+    .vbillno {
+        margin-left: 22px;
+    }
+
+    .Billdiv {
+        margin-left: 0px;
+    }
+
+    .selectors {
+        margin-left: 0%;
+    }
+
+    .Bottomcontainer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btl1 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btl2 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .Bottomdiv {
+        display: flex;
+        flex-direction: column;
+        background-color: #ceedf0;
+        padding: 5px;
+        margin-left: 0%;
+        margin-top: 5px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        padding: 5,
+    }
+
+    /* Below Fields */
+    .adjustadvance {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 7px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .vacode1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 15px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tpt {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 10px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .broker {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tdson {
+        width: 100px;
+        border: 1px solid black;
+        margin-left: 20px;
+    }
+
+    .tcs {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 47px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tds {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 22px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tcs206 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .GrNo {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 42px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .trpt {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .totalgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 17px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .expense {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .addless {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cess2 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 28.5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cess1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 28.5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .subtotal {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 22px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        margin-top: 2px;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 45px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .igst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 45px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .sgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 45px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .grandtotal {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 6px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+}
+
+/* Media query for *820 x 1180*/
+@media (width: 820px) and (height: 1180px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .heads {
+        font-size: 30px;
+        margin-top: -45px;
+        margin-left: 35%;
+    }
+
+    .tablestyle {
+        max-height: 430px;
+        overflow-y: auto;
+    }
+
+    .toppart {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .Buttonsgroup {
+        margin-left: 20px;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 97%;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: #ceedf0;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+
+    .vno {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .supplier {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .City {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 38.5px;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Gstno {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 14px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Pan {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 38px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cus {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gst {
+        display: flex;
+        flex-direction: column;
+        margin-left: -3.5px;
+    }
+
+    .citydiv {
+        margin-left: 0px;
+    }
+
+    .pandiv {
+        margin-left: 0px;
+    }
+
+    .Date {
+        margin-left: 28px;
+    }
+
+    .vnodiv {
+        margin-left: 38px;
+    }
+
+    .vno {
+        margin-left: 0px;
+    }
+
+    .selfinv {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 125px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .taxdiv {
+        margin-top: 5px;
+    }
+
+    .Taxtype {
+
+        width: 280px;
+        border: 1px solid black;
+    }
+
+    .Billcash {
+        width: 280px;
+        border: 1px solid black;
+        margin-left: 10px;
+    }
+
+    .Terms {
+        margin-left: 23px;
+    }
+
+    .dbdate {
+        margin-left: 33px;
+    }
+
+    .vbillno {
+        margin-left: 22px;
+    }
+
+    .Billdiv {
+        margin-left: 0px;
+    }
+
+    .selectors {
+        margin-left: 0%;
+    }
+
+    .Bottomcontainer {
+        display: flex;
+        flex-direction: column;
+        margin-left: 12px;
+    }
+
+    .btl1 {
+        display: flex;
+        flex-direction: row;
+        margin-left: 60px;
+        margin-top: 20px;
+    }
+
+    .btl2 {
+        display: flex;
+        flex-direction: row;
+        margin-top: 20px;
+    }
+
+    .Bottomdiv {
+        display: flex;
+        flex-direction: column;
+        background-color: #ceedf0;
+        padding: 5px;
+        margin-left: 25px;
+        margin-top: 5px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        padding: 5,
+    }
+
+    /* Below Fields */
+    .adjustadvance {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 7px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .vacode1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tpt {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .broker {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 35px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tdson {
+        width: 100px;
+        border: 1px solid black;
+        margin-left: 20px;
+    }
+
+    .tcs {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 47px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tds {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tcs206 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .GrNo {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 40px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .trpt {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .totalgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 17px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .expense {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .addless {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cess2 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cess1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .subtotal {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 23px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        margin-top: 2px;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .igst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .sgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 51px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .grandtotal {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 6px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+}
+
+@media(width: 1180px) and (height: 820px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .Belowcontents {
+        position: static;
+    }
+
+    .heads {
+        font-size: 30px;
+        margin-top: -45px;
+        margin-left: 15%;
+    }
+
+    .toppart {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 97%;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: #ceedf0;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .vno {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 80px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .supplier {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .City {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 38.5px;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Gstno {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        margin-left: 14px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .Pan {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 280px;
+        border-radius: 5px;
+        margin-left: 38px;
+        font-size: 17px;
+        margin-top: 5px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cus {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gst {
+        display: flex;
+        flex-direction: column;
+        margin-left: -3.5px;
+    }
+
+    .citydiv {
+        margin-left: 0px;
+    }
+
+    .pandiv {
+        margin-left: 0px;
+    }
+
+    .Date {
+        margin-left: 28px;
+    }
+
+    .vnodiv {
+        margin-left: 38px;
+    }
+
+    .vno {
+        margin-left: 0px;
+    }
+
+    .selfinv {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 125px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .taxdiv {
+        margin-top: 5px;
+    }
+
+    .Taxtype {
+
+        width: 280px;
+        border: 1px solid black;
+    }
+
+    .Billcash {
+        width: 280px;
+        border: 1px solid black;
+        margin-left: 10px;
+    }
+
+    .Terms {
+        margin-left: 23px;
+    }
+
+    .dbdate {
+        margin-left: 33px;
+    }
+
+    .vbillno {
+        margin-left: 22px;
+    }
+
+    .Billdiv {
+        margin-left: 0px;
+    }
+
+    .selectors {
+        margin-left: 0%;
+    }
+
+    .Bottomcontainer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btl1 {
+        display: flex;
+        flex-direction: row;
+        margin-left: 23%;
+        margin-top: 20px;
+    }
+
+    .btl2 {
+        display: flex;
+        flex-direction: row;
+        margin-top: 20px;
+        margin-left: 17%;
+    }
+
+    .Buttonsgroup {
+        margin-left: 12%;
+    }
+
+    .Bottomdiv {
+        display: flex;
+        flex-direction: column;
+        background-color: #ceedf0;
+        padding: 5px;
+        margin-left: 25px;
+        margin-top: 5px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+        padding: 5,
+    }
+
+    .adjustadvance {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 7px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .vacode1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tpt {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .broker {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 200px;
+        margin-left: 35px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tdson {
+        width: 100px;
+        border: 1px solid black;
+        margin-left: 20px;
+    }
+
+    .tcs {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 47px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tds {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 20px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .tcs206 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .GrNo {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 40px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .trpt {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .totalgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 130px;
+        margin-left: 17px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .expense {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 13px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .addless {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cess2 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cess1 {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 120px;
+        margin-left: 32px;
+        border-radius: 5px;
+        margin-top: 2px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .subtotal {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 23px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        margin-top: 2px;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .cgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .igst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 50px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .sgst {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 51px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+
+    .grandtotal {
+        border: 1px solid #000000;
+        height: 9px;
+        padding: 10px;
+        width: 150px;
+        margin-left: 6px;
+        border-radius: 5px;
+        font-size: 17px;
+        outline: none;
+        flex-grow: 1;
+        box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+}

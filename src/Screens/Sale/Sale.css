@@ -1,0 +1,2419 @@
+.TopFields{
+  margin-left: 5px;
+  margin-top: 5px;
+  display: flex;
+  flex-direction: row;
+}
+.datediv {
+  display: flex;
+  flex-direction: row;
+}
+
+.Belowcontents {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+  overflow: auto;
+  background-color: transparent;
+}
+
+.DatePICKER{
+  background-color: white;
+  border: 1px solid #b8b8b8;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  width: 125px;
+  height: 46px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.dueDatePICKER{
+  background-color: white;
+  border: 1px solid #b8b8b8;
+  padding: 5px;
+  outline: none;
+  width: 150px;
+  height: 10px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.headerSale {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 30px;
+  margin-left: 42%;
+  /* background-color: #000000; */
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.Plusminusz {
+  display: flex;
+  flex-direction: row;
+  /* margin-top: -35px; */
+  /* margin-left: 50%; */
+}
+
+.bottom {
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+}
+
+.sale_toppart {
+  display: flex;
+  flex-direction: column;
+  margin-top: -30px;
+  margin-left: 40px;
+}
+.Setup{
+  display: flex;
+  flex-direction: row;
+  margin-left: 70%;
+}
+
+.TableContainer {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 5px;
+}
+
+.CUS {
+  display: flex;
+  flex-direction: row;
+}
+
+.GST {
+  display: flex;
+  flex-direction: row;
+  margin-top: 5px;
+}
+
+ .billdivz {
+  margin-left: 10px;
+} 
+
+.citydivZ {
+  margin-left: 5px;
+}
+
+.pandivZ {
+  margin-left: 5px;
+}
+.shippedTO{
+  margin-left: 5px;
+}
+
+.Billss{
+  width: 180px;
+}
+
+.billzNo {
+  border: 1px solid #000000;
+   background-color: rgb(240, 235, 235);
+  padding: 10px;
+  width: 120px;
+  margin-left: 10px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.billzNo:focus {
+  border: 2px solid black;
+}
+.customerNAME {
+  border: 1px solid #000000;
+  background-color: rgb(240, 235, 235);
+  padding: 10px;
+  width: 310px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.customerNAME:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.cityName {
+  border: 1px solid #000000;
+  background-color: rgb(240, 235, 235);
+  padding: 10px;
+  width: 250px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  margin-left: 2px;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.cityName:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.gstnoZ {
+  border: 1px solid #000000;
+  background-color: rgb(240, 235, 235);
+  padding: 10px;
+  width: 310px;
+  margin-left: 65px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.gstnoZ:focus {
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+  border: 2px solid black;
+}
+
+.PANNoZ {
+  border: 1px solid #000000;
+ background-color: rgb(240, 235, 235);
+  padding: 10px;
+  width: 250px;
+  font-size: 17px;
+  outline: none;
+  flex-grow: 1;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  margin-left: 6px;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.PANNoZ:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.GRNOZ {
+  border: 1px solid #000000;
+   background-color: rgb(240, 235, 235);
+  width: 128px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.GRNOZ:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.TERMS {
+  border: 1px solid #000000;
+  background-color: rgb(240, 235, 235);
+  padding: 10px;
+  width: 128px;
+  font-size: 17px;
+  margin-left: 18px;
+  outline: none;
+  flex-grow: 1;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.TERMS:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.VEHICLE {
+  border: 1px solid #000000;
+  background-color: rgb(240, 235, 235);
+  height: 40px;
+  padding: 10px;
+  width: 180px;
+ margin-left: 10px;
+  outline: none;
+  /* Ensures input fields grow to fill available space */
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.VEHICLE:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.tr {
+  margin-top: 5px;
+}
+
+.vh {
+  margin-top: 5px;
+}
+
+.Dated {
+  display: flex;
+  flex-direction: row;
+  margin-left: 5px;
+  align-items: start;
+}
+
+.TAXtypez {
+  width: 250px;
+}
+  .SupplyTYPE{
+  width: 250px;
+  }
+
+.billcashz {
+  width: 300px;
+  border: 1px solid black;
+  margin-left: 10px;
+  font-weight: bold;
+  color: black;
+  border-radius: 5px;
+  background-color: rgb(221, 216, 216);
+}
+
+.supplyz {
+  width: 300px;
+  margin-left: 17px;
+  border: 1px solid black;
+  font-weight: bold;
+  color: black;  border-radius: 5px;
+  background-color: rgb(221, 216, 216);
+}
+
+.bc {
+  margin-top: 5px;
+}
+
+.sup {
+  margin-top: 5px;
+}
+
+.selector {
+  margin-left: 50px;
+}
+
+.bottomcontainer1 {
+  display: flex;
+  flex-direction: row;
+}
+
+.tittles {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 25px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.plusbutton {
+  margin-left: 30px;
+}
+
+.colorselectz {
+  margin-left: 5%;
+  width: 200px;
+  height: 35px;
+  border: 1px solid black;
+}
+.InvoiceFormat{
+  margin-left: 20%;
+}
+
+.Buttonsgroupz {
+  display: flex;
+  /* justify-content: center; */
+}
+
+.Buttonz {
+  margin: 5px;
+  font-size: 20px;
+  letter-spacing: 2px;
+  width: 130px;
+  padding: 10px 20px;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+/* Hover - Makes it visibly larger and glowing */
+.Buttonz:hover {
+  background-color: #0056b3;
+  color: red;
+  text-decoration: underline;
+  transform: scale(1.12);            /* ✅ Bigger on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 8px #530cf8;  /* ✅ Glow effect */
+}
+
+/* Focus - Also show when focused via keyboard */
+.Buttonz:focus {
+  outline: none;
+  color: red;
+  text-decoration: underline;
+  background-color: #004494;
+  transform: scale(1.12);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 8px #530cf8;  /* ✅ Glow orange when focused */
+}
+
+/* Active (clicked) - Small compression for click feedback */
+.Buttonz:active {
+  transform: scale(1.12);
+  color: red;
+  box-shadow: 0 4px 10px rgba(46, 0, 253, 0.938);
+}
+
+.delete {
+  margin: 5px;
+  width: 130px;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: black;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+
+/* Hover - Makes it visibly larger and glowing */
+.delete:hover {
+  background-color: #0056b3;
+  color: white;
+  text-decoration: underline;
+  transform: scale(1.12);            /* ✅ Bigger on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 8px #530cf8;  /* ✅ Glow effect */
+}
+
+/* Focus - Also show when focused via keyboard */
+.delete:focus {
+  outline: none;
+  background-color: #004494;
+  color: white;
+  text-decoration: underline;
+  transform: scale(1.12);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 8px #530cf8;  /* ✅ Glow orange when focused */
+}
+
+/* Active (clicked) - Small compression for click feedback */
+.delete:active {
+  transform: scale(1.12);
+  color: white;
+  box-shadow: 0 4px 10px rgba(38, 0, 255, 0.959);
+}
+
+.ItemCode{
+  font-weight: bold;
+  font-size: 20px;
+}
+.ItemCode:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.desc{
+  background-color: lightyellow;
+  font-weight: bold;
+}
+.desc:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.PCS{
+  font-weight: bold;
+}
+.PCS:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.QTY{
+  background-color: lavender;
+  font-weight: bold;
+}
+.QTY:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.Price{
+  background-color: white;
+  font-weight: bold;
+}
+.Price:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.Amount{
+  background-color: lightyellow;
+  font-weight: bold;
+}
+.Amount:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.Disc{
+  font-weight: bold;
+}
+.Disc:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.discount{
+  font-weight: bold;
+}
+.discount:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.CTax{
+  background-color: #e3f8e3;
+  font-weight: bold;
+}
+.CTax:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.STax{
+  background-color:white;
+  font-weight: bold;
+}
+.STax:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.ITax{
+  background-color: #e3f8e3;
+  font-weight: bold;
+}
+.ITax:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.Hsn{
+  background-color: white;
+  font-weight: bold;
+}
+.Hsn:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.Others{
+  background-color: white;
+  font-weight: bold;
+}
+.Others:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.TotalTable{
+width: 100%;
+height: 40px;
+box-sizing: border-box;
+border: none;
+padding: 5px;
+background-color: lavender;
+text-align: right;
+font-weight: bold;
+color: red;
+}
+.shippedtoz {
+  border: 1px solid black;
+  width: 300px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.shippedtoz:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.Remz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 300px;
+  margin-left: 15px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.Remz:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.vtptz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 300px;
+  margin-left: 7px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.vtptz:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.brokerz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 300px;
+  margin-left: 29px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.brokerz:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.tdsqz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 9.5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.tdsqz:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+.tdsq2{
+  border: 1px solid black;
+  padding: 10px;
+  font-weight: bold;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.tcshz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 2px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.tcshz:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.tcs206z {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  margin-left: 5px;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.tcs206z:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+  
+}
+
+.duedatez {
+  display: flex;
+  flex-direction: column;
+}
+
+.advancez {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  text-align: right;
+  width: 180px;
+  margin-left: 17px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.advancez:focus {
+  border: 2px solid black;
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.TotalGstz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  width: 180px;
+  text-align: right;
+  margin-left: 34px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.adlessz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 180px;
+  text-align: right;
+  outline: none;
+  margin-left: 27px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.expensegstz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 180px;
+  text-align: right;
+  outline: none;
+  margin-left: 5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+.expensegstz:focus{
+  background-color: rgb(157, 243, 240);
+  color: black  ;
+  font-weight: bold;
+}
+
+.RoundOff{
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 180px;
+  height: 30px;
+  text-align: right;
+  outline: none;
+  margin-left: 21px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.valuez {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 180px;
+  text-align: right;
+  font-weight: bold;
+  outline: none;
+  margin-left: 47px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.Cgstz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  width: 180px;
+  text-align: right;
+  font-weight: bold;
+  outline: none;
+  margin-left: 44px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.Sgstz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  width: 180px;
+  text-align: right;
+  font-weight: bold;
+  margin-left: 45px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.Igstz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  width: 180px;
+  text-align: right;
+  font-weight: bold;
+  margin-left: 48.5px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.Grandtotalz {
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  width: 180px;
+  text-align: right;
+  font-weight: bold;
+  margin-left: 3px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  background-color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.shipdiv {
+  margin-top: 10px;
+}
+
+.tdsdivZ {
+  margin-left: 5px;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+.adadvz {
+  margin-top: 0px;
+}
+
+.valuedivZ {
+  margin-left: 5px;
+  margin-right: 20px;
+}
+
+.Modal {
+  position: fixed;
+  top: 38%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+.headingE{
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 25px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+}
+
+.Modalz {
+  position: fixed;
+  top: 38%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.Modal-content {
+  background: linear-gradient(to bottom, #edc5a7,#a5d8ed);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid black;
+  width: 30%;  /* Increased from 300px to 500px */
+  max-width: 100%; /* Responsive for smaller screens */
+  margin: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+
+.custom-table {
+  border-collapse: collapse;
+ 
+}
+
+.custom-table th,
+.custom-table td {
+  border: 1px solid #000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.custom-table thead th {
+  border-bottom: 1px solid #000;
+}
+
+.MuiInputLabel-root {
+  font-weight: 800 !important;
+  /* color: rgb(73, 73, 73) !important; */
+  /* margin-top: 2px; */
+}
+.custom-bordered-input .MuiFilledInput-root {
+  border: 1px solid #969494;
+  border-radius: 4px;
+  font-weight: bold;
+  background-color: white;
+}
+
+.custom-bordered-input .MuiFilledInput-root.Mui-disabled {
+  border-color: #ccc;
+}
+
+.custom-select .MuiInput-root {
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.custom-select .MuiInput-root.Mui-disabled {
+  border-color: #ccc;
+  background-color: #eee;
+}
+
+.GRNo{
+margin-left: 5px;
+display: flex;
+flex-direction: column;
+}
+
+.ExFor{
+  margin-top: 3px;
+  width: 128px;
+}
+.BillType{
+  margin-top: 11px;
+}
+.VehicleDiv{
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+.TAXDiv{
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+.Totalcontainer{
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+.TotalGSTdiv{
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+.TOTALFIELDS{
+  width: 200px;
+}
+.TCSRATE{
+  width: 80px;
+}
+.TCSPER{
+  width: 120px;
+}
+.CTDS{
+  width: 120px;
+}
+/* Media query for max-width:768px */
+@media (max-width: 768px) {
+
+  .TopFields {
+    margin-left: 0px;
+    margin-top: 1px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .colorselectz{
+    margin-left: 0px;
+  }
+  .InvoiceFormat{
+    margin-left: -200px;
+    visibility: hidden;
+  }
+
+  .Plusminusz {
+    margin-left: 0px;
+    visibility: hidden;
+  }
+
+  .Belowcontents {
+    position: static;
+  }
+
+  .headerSale {
+    font-size: 30px;
+    margin-left: 25%;
+  }
+
+  .sale_toppart {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    margin-left: 10px;
+  }
+  .Setup{
+  display: flex;
+  flex-direction: row;
+  margin-left: 5px;
+}
+
+/* .Setting{
+  visibility: hidden;
+} */
+
+  .billdivz {
+    margin-left: 5px;
+  }
+
+  .citydivZ {
+    margin-left: 0px;
+    margin-top: 26px;
+  }
+
+  .pandivZ {
+    margin-left: 0px;
+    margin-top: 26px;
+  }
+
+  .CUS {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .GST {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0px;
+    margin-top: 26px;
+  }
+  .shippedTO{
+    margin-left: 0px;
+    margin-top: 26px;
+  }
+
+  .GRNo{
+    margin-left: 0px;
+    display: flex;
+    flex-direction: row;
+  }
+  .ExFor{
+    margin-top: 0px;
+    width: 50%;
+  }
+  .VehicleDiv{
+    display: flex;
+    flex-direction: row;
+    margin-left: 0px;
+  }
+  .BillType{
+  margin-top: 0px;
+ }
+ .TAXDiv{
+  margin-left: 0px;
+    margin-top: 1px;
+}
+.Billss{
+  width: 190px;
+}
+
+.TOTALFIELDS{
+  width: 97%;
+}
+
+.TCSRATE{
+  width: 48.5%;
+}
+.TCSPER{
+  width: 48.5%;
+}
+.CTDS{
+  width: 48.5%;
+}
+
+  .billzNo {
+    border: 1px solid #000000;
+    padding: 10px;
+    width: 120px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .customerNAME {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 97%;
+    font-size: 17px;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .cityName {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+ width: 97%;
+    margin-left: 78px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .gstnoZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+   width: 97%;
+    margin-left: 65px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .PANNoZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 97%;
+    margin-left: 85px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .Dated {
+    margin-left: 0px;
+  }
+
+  .billno {
+    margin-left: 58px;
+  }
+
+  .GRNOZ {
+    border: 1px solid #000000;
+    width: 180px;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .TERMS{
+    border: 1px solid #000000;
+    width: 60px;
+    padding: 10px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .VEHICLE {
+    border: 1px solid #000000;
+    width: 180px;
+    margin-left: 0px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .GRNOZ {
+    margin-left: 26px;
+  }
+
+  .TAXtypez {
+    margin-left: 0px;
+    width: 97%;
+    margin-top: 2px;
+  }
+  .SupplyTYPE{
+  width: 98.5%;
+  }
+
+  .billcashz {
+    margin-left: 4px;
+    border: 1px solid black;
+  }
+
+  .supplyz {
+    margin-left: 14px;
+    border: 1px solid black;
+  }
+
+  .ttype {
+    margin-top: 5px;
+  }
+
+  .selector {
+    margin-left: 0px;
+  }
+
+  .bottomdiv11 {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+    margin-left: 0px;
+  }
+
+  .bottomdiv22 {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    margin-left: 1px;
+    border: 1px solid gray;
+
+  }
+
+  .bottomcontainer1 {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1px;
+  }
+
+  .DatePICKER {
+    border: 1px solid #000000;
+  padding: 10px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 46px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    z-index: auto;
+  }
+
+  .Remz{
+    width: 97%;
+  }
+
+  .Plus {
+    margin-left: 74%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+  }
+
+.Buttonsgroupz {
+  margin-left: 5px;
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+  .delete {
+    margin-left: 50px;
+  }
+
+  .shippedtoz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+  width: 97%;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Remz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 15px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vtptz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 8px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .brokerz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 30px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tdsqz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 15px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcshz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcs206z {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .duedatez {
+    margin-left: 0px;
+  }
+
+  .advancez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .TotalGstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 32px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .adlessz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 24px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .expensegstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+.RoundOff{
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 17px;
+  outline: none;
+  margin-left: 23px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+  .valuez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Cgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 46px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Sgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 46px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Igstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Grandtotalz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .shipdiv {
+    margin-top: 10px;
+  }
+
+  .tdsdivZ {
+    margin-left: 0px;
+    margin-top: 5px;
+    margin-right: 0px;
+  }
+
+  .adadvz {
+    margin-top: 10px;
+  }
+
+  .valuedivZ {
+    margin-top: 2px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
+  .Totalcontainer{
+    margin-top: 28px;
+  }
+
+  .dueDatePICKER{
+  background-color: white;
+  border: 1px solid #b8b8b8;
+  padding: 5px;
+  outline: none;
+  width: 97%;
+  height: 10px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.1);
+  font-weight: bold;
+  border-radius: 5px;
+}
+  
+}
+
+/* media (width: 820px) and (height: 1180px) */
+@media (width: 820px) and (height: 1180px) {
+
+  .TopFields {
+  display: flex;
+  flex-direction: column;
+  }
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .colorselectz{
+    margin-left: 0px;
+  }
+  .InvoiceFormat{
+    margin-left: 0px;
+    visibility: hidden;
+  }
+  .TableContainer {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .Plusminusz {
+    display: flex;
+    flex-direction: row;
+    margin-top: -30px;
+    margin-left: 0%;
+    visibility: hidden;
+  }
+
+  .headerSale {
+    font-size: 30px;
+    margin-top: -40px;
+    margin-left: 40%;
+  }
+
+  .sale_toppart {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+  }
+
+  .Belowcontents {
+    position: static;
+
+  }
+
+  .topz {
+    display: flex;
+    flex-direction: column;
+    width: 97.5%;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+  }
+
+  .billdivz {
+    margin-left: 50px;
+  }
+
+  .citydivZ {
+    margin-left: 0px;
+  }
+
+  .pandivZ {
+    margin-left: 0px;
+  }
+
+  .topinputs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .CUS {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .GST {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0px;
+  }
+
+  .billzNo {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 80px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .customerNAME {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 97%;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .cityName {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 97%;
+    margin-left: 92.5px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .gstnoZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+     width: 97%;
+    margin-left: 73px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .PANNoZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 97%;
+    margin-left: 93px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .Dated 
+ {
+    margin-left: 10px;
+  }
+
+  .billno {
+    margin-left: 58px;
+  }
+
+  .GRNOZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .TERMS {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    outline: none;
+    margin-left: 21px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .VEHICLE {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .GRNOZ {
+    margin-left: 26px;
+  }
+
+  .TAXtypez {
+    margin-left: 0px;
+    border: 1px solid black;
+  }
+
+  .billcashz {
+    margin-left: 7px;
+    border: 1px solid black;
+  }
+
+  .supplyz {
+    margin-left: 14.5px;
+    border: 1px solid black;
+  }
+
+  .ttype {
+    margin-top: 5px;
+  }
+
+  .selector {
+    margin-left: 0px;
+  }
+
+  .bottomdiv11 {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    border: 1px solid gray;
+    margin-top: 10px;
+    margin-left: 8px;
+  }
+
+  .bottomdiv22 {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    margin-left: 50px;
+    border: 1px solid gray;
+
+  }
+
+  .bottomcontainer1 {
+    display: flex;
+    flex-direction: row;
+    margin-left: 0px;
+  }
+
+  .DatePICKER {
+    border: 1px solid black;
+      padding: 10px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 5px;
+  }
+
+  .Plus {
+    margin-left: 87%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .Buttonsgroupz {
+    margin-left: 20px;
+  }
+
+  .delete {
+    margin-left: 50px;
+  }
+
+  .shippedtoz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 2px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Remz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 15px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vtptz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 8px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .brokerz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 30px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tdsqz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcshz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcs206z {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .duedatez {
+    margin-left: 0px;
+  }
+
+  .advancez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .TotalGstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 34px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .adlessz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 26px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .expensegstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .valuez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 54px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Cgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 50px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Sgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Igstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 55px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Grandtotalz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 11px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .shipdiv {
+    margin-top: 10px;
+  }
+
+  .tdsdivZ {
+    margin-left: 0px;
+    margin-top: 5px;
+    margin-right: 0px;
+  }
+
+  .adadvz {
+    margin-top: 10px;
+  }
+
+  .valuedivZ {
+    margin-top: 2px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}
+
+/* media (width: 1180px) and (height: 820px) */
+@media (max-width: 1180px) and (height: 820px) {
+  
+    .TopFields {
+  display: flex;
+  flex-direction: column;
+  }
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .colorselectz{
+    margin-left: 0px;
+  }
+  .InvoiceFormat{
+    margin-left: 0px;
+    visibility: hidden;
+  }
+  .Plusminusz {
+    display: flex;
+    flex-direction: row;
+    margin-top: -30px;
+    margin-left: 25%;
+
+  }
+
+
+  .TableContainer {
+    max-height: 450px;
+    overflow-y: auto;
+  }
+
+  .citydivZ {
+    margin-left: 0px;
+  }
+
+  .pandivZ {
+    margin-left: 0px;
+  }
+
+  .head {
+    font-size: 30px;
+    margin-top: -45px;
+    margin-left: 43%;
+  }
+
+  .sale_toppart {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .billdivz {
+    margin-left: 56px;
+  }
+
+  .topz {
+    display: flex;
+    flex-direction: column;
+    width: 97.5%;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: #ceedf0;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+  }
+
+  .topinputs {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .CUS {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .GST {
+    display: flex;
+    flex-direction: column;
+    margin-left: -3.5px;
+  }
+
+  .billzNo {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 80px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-left: 13px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .customerNAME {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    margin-left: 10px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .cityName {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 97px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .gstnoZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 77px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .PANNoZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 96px;
+    font-size: 17px;
+    margin-top: 5px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .Dated {
+    margin-left: 10px;
+  }
+
+  .billno {
+    margin-left: 58px;
+  }
+
+  .GRNOZ {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .TERMS{
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .VEHICLE {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+
+  .GRNOZ {
+    margin-left: 26px;
+  }
+
+  .TAXtypez {
+    margin-left: 7px;
+    border: 1px solid black;
+  }
+
+  .billcashz {
+    margin-left: 4px;
+    border: 1px solid black;
+  }
+
+  .supplyz {
+    margin-left: 14px;
+    border: 1px solid black;
+  }
+
+  .ttype {
+    margin-top: 5px;
+  }
+
+  .selector {
+    margin-left: 0px;
+  }
+
+  .bottomcontainer1 {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0px;
+  }
+
+  .bottomdiv11 {
+    display: flex;
+    flex-direction: row;
+    width: 88%;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+    margin-left: 30px
+  }
+
+  .bottomdiv22 {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    width: 88%;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 10px;
+    border: 1px solid gray;
+    margin-left: 30px
+  }
+  .shipdiv {
+    margin-top: 10px;
+    margin-left: 100px;
+  }
+
+  .tdsdivZ {
+    margin-left: 100px;
+    margin-top: 10px;
+    margin-right: 0px;
+  }
+
+  .adadvz {
+    margin-top: 10px;
+    margin-left: 100px;
+  }
+
+  .valuedivZ {
+    margin-top: 2px;
+    margin-left: 260px;
+    margin-right: 0px;
+  }
+
+  .DatePICKER {
+    border: 1px solid black;
+      padding: 10px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 5px;
+  }
+
+  .Plus {
+    margin-left: 87%;
+    margin-top: -35px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .Buttonsgroupz {
+    margin-left: 20px;
+  }
+
+  .delete {
+    margin-left: 50px;
+  }
+
+  .shippedtoz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 2px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Remz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 15px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .vtptz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 8px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .brokerz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 30px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tdsqz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcshz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .tcs206z {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .duedatez {
+    margin-left: 0px;
+  }
+
+  .advancez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .TotalGstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 34px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .adlessz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 26px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .expensegstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .valuez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 54px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Cgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 50px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Sgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 51px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Igstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 55px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .Grandtotalz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 11px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+}

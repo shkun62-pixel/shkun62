@@ -1,0 +1,421 @@
+/* modal.css */
+.newModal {
+  display: block;
+  /* Make sure modal is displayed */
+  position: fixed;
+  z-index: 1000;
+  /* Increase the z-index value */
+  left: 20;
+  top: 0;
+  width: 95%;
+  height: 90%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent background */
+  border: 1px solid black;
+  box-shadow: 0px 8px 16px rgba(252, 0, 0, 0.3);
+  margin-top: 30px;
+  border-radius: 20px;
+}
+
+.newModal-content {
+  background-color: #fefefe;
+  border: 1px solid #888;
+  width: 100%;
+}
+
+.closeModal {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.closeModal:hover,
+.closeModal:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.custom-datepicker3 {
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 17px;
+  font-weight: bold;
+  outline: none;
+  width: 200px;
+  height: 30px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+}
+
+.form-control {
+  border: 1px solid black;
+  border-radius: 5px;
+  font-size: 19px;
+  font-weight: bold;
+  outline: none;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.cashinventory {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.journal {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.bank {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.saleStock {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.purchase {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.saleOrder {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.cashbook {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.daybook {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.salebook {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.purbook {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.bankbook {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.copyofAc {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.Trail {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.balance {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.Bill {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.stock {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.income {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.ledger {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.cashsummary {
+  border: 1px solid black;
+  box-shadow: 15px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.salepursumm {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.outstanding {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.inttstate {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.excisebook {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.gstreturn {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.tcsreport {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.tdsreport {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.trfacc {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.telephone {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.backup {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #f5c199, #a5d8ed);
+}
+
+.setup {
+  border: 1px solid black;
+  box-shadow: 8px 8px 16px rgba(53, 9, 136, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background: linear-gradient(to right, #a5d8ed, #f5c199);
+}
+
+.pass {
+  border: 1px solid black;
+  box-shadow: 20px 30px 30px rgba(53, 9, 136, 0.3);
+}
+
+.button {
+  border-color: transparent;
+  width: 250px;
+  background-color: green;
+}
+
+label {
+  font-weight: bold;
+}
+
+h3 {
+  letter-spacing: 2px;
+  font-weight: bolder;
+  background: linear-gradient(to right, #1279ef, #07060b);
+  /* Light sky-blue gradient */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* styles.css */
+/* For WebKit browsers */
+::-webkit-scrollbar {
+  width: 12px;
+  /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  /* Background of the track */
+  border-radius: 10px;
+  /* Optional: add border radius */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #636161;
+  /* Color of the scrollbar thumb */
+  border-radius: 10px;
+  /* Optional: add border radius */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #767474;
+  /* Color of the scrollbar thumb when hovered */
+}
+
+.dash {
+  margin-left: 9.08%;
+}
+
+@media (max-width: 1366px) {
+  .dash {
+    margin-left: 10.8%;
+  }
+}

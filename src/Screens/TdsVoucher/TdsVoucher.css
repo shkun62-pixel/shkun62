@@ -1,0 +1,69 @@
+text {
+  font-weight: bold;
+}
+.containerTDSvoucher{
+  display: flex;
+  flex-direction: row;
+}
+
+.left{
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+}
+
+.TdsBlock{
+display: flex;
+flex-direction: column;
+margin-top: 20px;
+}
+
+.datepickerVoucher{
+  border: 1px solid #858282;;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  font-weight: bold;
+  width: 150px;
+  height: 35px;
+  border-radius: 5px;
+}
+
+.custom-datepickerTDS {
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  font-weight: bold;
+  width: 225px;
+  height: 20px;
+  margin-left: 44px;
+  border-radius: 5px;
+}
+
+.custom-datepickerInvo {
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  font-weight: bold;
+  width: 298px;
+  height: 30px;
+  margin-left: 4px;
+  border-radius: 5px;
+}
+.custom-datepickerDepo {
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 17px;
+  outline: none;
+  font-weight: bold;
+  width: 110px;
+  height: 30px;
+  border-radius: 5px;
+}
+.Fields{
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+}

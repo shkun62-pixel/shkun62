@@ -1,0 +1,27 @@
+.Report{
+  border: 1px solid black;
+  width: 300px;
+}
+
+.headerCard {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 30px;
+  background: linear-gradient(to right, #8357eb, #30c9c9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+  text-align: center;
+}
+
+.dayanddate {
+  margin-left: 90%;
+  margin-top: -100px;
+}
+
+.TopCard {
+  display: flex;
+  flex-direction: column;
+  margin-left: 50px;
+  margin-top: -70px;
+}

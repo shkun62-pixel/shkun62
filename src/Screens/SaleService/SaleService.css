@@ -1,0 +1,1887 @@
+.top {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    border: 1px solid black;
+    margin: 5px;
+    border-radius: 10px;
+    /* background-color: #ceedf0; */
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5px;
+    /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+  }
+  
+  .datediv {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .Belowcontents {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: transparent;
+  }
+  
+  .custom-datepickerz{
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 17px;
+    outline: none;
+    width: 125px;
+    height: 30px;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .text {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: gray;
+  }
+  
+  .header {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 30px;
+    margin-top: -35px;
+    margin-left: 40%;
+    background: linear-gradient(to right, #8357eb, #30c9c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .inputfields {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .inputfields:focus {
+    border: 2px solid black;
+    border-color: #050405;
+    outline: none;
+  }
+  
+  .bottom {
+    width: 100%;
+    background-color: white;
+    padding: 10px;
+  }
+  
+  .bottomdiv {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: row;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5,
+  }
+  
+  .bottomdiv2 {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: row;
+    background-color: transparent;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+    padding: 5px;
+    margin-left: 70px;
+  }
+  
+  .inputfields {
+    height: 30px;
+    font-size: var(--font-size);
+  }
+  
+  
+  
+  .toppart {
+    display: flex;
+    flex-direction: row;
+    margin-top: -20px;
+  }
+  
+  .tablediv {
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 5px;
+  }
+  
+  .cus {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .gst {
+    display: flex;
+    flex-direction: row;
+    margin-top: 5px;
+  }
+  
+  .billdiv {
+    margin-left: 300px;
+  }
+  
+  .citydivs {
+    margin-left: 30px;
+  }
+  
+  .pandivs {
+    margin-left: 30px;
+  }
+  
+  .billz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 80px;
+    margin-left: 16px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .billz:focus {
+    border: 2px solid black;
+  }
+  .customerz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .customerz:focus {
+    border: 2px solid black;
+  }
+  
+  .cityz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 10px;
+  }
+  
+  .cityz:focus {
+    border: 2px solid black;
+  }
+  
+  .gstnoz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    margin-left: 65px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .gstnoz:focus {
+    border: 2px solid black;
+  }
+  
+  .pannoz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 250px;
+    font-size: 17px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    margin-left: 6px;
+  }
+  
+  .pannoz:focus {
+    border: 2px solid black;
+  }
+  
+  .grnoz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    font-size: 17px;
+    margin-left: 23px;
+    outline: none;
+    flex-grow: 1;
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .grnoz:focus {
+    border: 2px solid black;
+  }
+  
+  .termz {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    font-size: 17px;
+    margin-left: 18px;
+    outline: none;
+    flex-grow: 1;
+    /* Ensures input fields grow to fill available space */
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .termz:focus {
+    border: 2px solid black;
+  }
+  
+  .vehiclez {
+    border: 1px solid #000000;
+    height: 9px;
+    padding: 10px;
+    width: 150px;
+    margin-left: 10px;
+    outline: none;
+    flex-grow: 1;
+    /* Ensures input fields grow to fill available space */
+    box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+  }
+  
+  .vehiclez:focus {
+    border: 2px solid black;
+  }
+  
+  .tr {
+    margin-top: 5px;
+  }
+  
+  .vh {
+    margin-top: 5px;
+  }
+  
+  .datez {
+    margin-left: 83px;
+  }
+  
+  .taxtypez {
+    width: 300px;
+    margin-left: 10px;
+    border: 1px solid black;
+    
+  }
+  
+  .billcashz {
+    width: 300px;
+    border: 1px solid black;
+    margin-left: 10px;
+  }
+  
+  .supplyz {
+    width: 300px;
+    margin-left: 17px;
+    border: 1px solid black;
+  }
+  
+  .bc {
+    margin-top: 5px;
+  }
+  
+  .sup {
+    margin-top: 5px;
+  }
+  
+  .selector {
+    margin-left: 50px;
+  }
+  
+  .bottomcontainerz {
+    display: flex;
+    flex-direction: row;
+    margin-left: 10%;
+  }
+  
+  .Plusminus {
+    display: flex;
+    flex-direction: row;
+    margin-top: -35px;
+    margin-left: 58%;
+  }
+  
+  .tittles {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 25px;
+    background: linear-gradient(to right, #8357eb, #30c9c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .plusbutton {
+    margin-left: 30px;
+  }
+  
+  .colorselect {
+    margin-left: 35%;
+    width: 200px;
+    height: 35px;
+    border: 1px solid black;
+  }
+  
+  
+  .Button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  
+  .delete {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  
+  .Buttonsgroup {
+    margin-left: 20%;
+  }
+  
+  .shippedtoz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .shippedtoz:focus {
+    border: 2px solid black;
+  }
+  
+  .rem1 {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 15px;
+    width: 450px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .rem1:focus {
+    border: 2px solid black;
+  }
+  .rem2 {
+    border: 1px solid black;
+    padding: 10px;
+    margin-top: 2px;
+    font-size: 17px;
+    margin-left: 84px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .rem2:focus {
+    border: 2px solid black;
+  }
+  
+  
+  .vtptz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 7px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .vtptz:focus {
+    border: 2px solid black;
+  }
+  
+  .brokerss {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 34px;
+    width: 350px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .brokerss:focus {
+    border: 2px solid black;
+  }
+  
+  .tdsqss {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 10px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .tdsqss:focus {
+    border: 2px solid black;
+  }
+  .tdsq22{
+    border: 1px solid black;
+    padding: 10px;
+  }
+  
+  .tcshz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 2px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .tcshz:focus {
+    border: 2px solid black;
+  }
+  
+  .tcs206z {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    margin-left: 5px;
+    outline: none;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .tcs206z:focus {
+    border: 2px solid black;
+  }
+  
+  .duedate {
+    margin-left: 15px;
+  }
+  
+  .advancez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 17px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .advancez:focus {
+    border: 2px solid black;
+  }
+  
+  .totalGstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 29px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .adlessz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 27px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .expensegstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .valuez {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 47px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .Cgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 44px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .Sgstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 45px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .Igstz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 48.5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .Grandtotalz {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 17px;
+    outline: none;
+    margin-left: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .shipdiv {
+    margin-top: 10px;
+  }
+  
+  .tdsdiv {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-right: 20px;
+  }
+  
+  .adadv {
+    margin-top: 10px;
+  }
+  
+  .valuediv {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  
+  .custom-table {
+    border-collapse: collapse;
+  }
+  
+  .custom-table th,
+  .custom-table td {
+    border: 1px solid #000;
+  }
+  
+  .custom-table tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .custom-table thead th {
+    border-bottom: 1px solid #000;
+  }
+  
+  /* Media query for max-width:768px */
+  @media (max-width: 768px) {
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .colorselect{
+      margin-left: 0px;
+    }
+  
+    .Plusminus {
+      margin-left: 0px;
+      visibility: hidden;
+    }
+  
+    .Belowcontents {
+      position: static;
+    }
+  
+    .header {
+      font-size: 30px;
+      margin-top: -40px;
+      margin-left: 35%;
+    }
+  
+    .toppart {
+      display: flex;
+      flex-direction: column;
+      margin-top: -20px;
+    }
+  
+    .top {
+      display: flex;
+      flex-direction: column;
+      width: 97.5%;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: #ceedf0;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+  
+    .topinputs {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .billdiv {
+      margin-left: 45px;
+    }
+  
+    .citydivs {
+      margin-left: 0px;
+    }
+  
+    .pandivs {
+      margin-left: 0px;
+    }
+  
+    .cus {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .gst {
+      display: flex;
+      flex-direction: column;
+      margin-left: -3.5px;
+    }
+  
+    .billz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 80px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .customerz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      font-size: 17px;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .cityz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 85px;
+      font-size: 17px;
+      margin-top: 5px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .gstnoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 65px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .pannoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 85px;
+      font-size: 17px;
+      margin-top: 5px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .datez {
+      margin-left: 10px;
+    }
+  
+    .billno {
+      margin-left: 58px;
+    }
+  
+    .grnoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .termz{
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .vehiclez {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .grnoz {
+      margin-left: 26px;
+    }
+  
+    .taxtypez {
+      margin-left: 7px;
+      border: 1px solid black;
+    }
+  
+    .billcashz {
+      margin-left: 4px;
+      border: 1px solid black;
+    }
+  
+    .supplyz {
+      margin-left: 14px;
+      border: 1px solid black;
+    }
+  
+    .ttype {
+      margin-top: 5px;
+    }
+  
+    .selector {
+      margin-left: 0px;
+    }
+  
+    .bottomdiv {
+      display: flex;
+      flex-direction: column;
+      background-color: transparent;
+      padding: 5px;
+      border-radius: 10px;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      padding: 10px;
+      border: 1px solid gray;
+    }
+  
+    .bottomdiv2 {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      background-color: transparent;
+      padding: 5px;
+      border-radius: 10px;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      padding: 10px;
+      margin-left: 1px;
+      border: 1px solid gray;
+  
+    }
+  
+    .bottomcontainerz {
+      display: flex;
+      flex-direction: column;
+      margin-left: 1px;
+    }
+  
+    .custom-datepickerz {
+      border: 1px solid black;
+      padding: 5px;
+      font-size: 17px;
+      outline: none;
+      width: 125px;
+      height: 30px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+      margin-left: 5px;
+    }
+  
+    .Plus {
+      margin-left: 74%;
+      margin-top: -35px;
+      display: flex;
+      flex-direction: row;
+    }
+  
+    .Buttonsgroup {
+      margin-left: 20px;
+    }
+  
+    .delete {
+      margin-left: 50px;
+    }
+  
+    .shippedtoz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 2px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .rem {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 15px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .vtptz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 8px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .brokerss {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 30px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tdsqss {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 15px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tcshz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 2px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tcs206z {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .duedate {
+      margin-left: 18px;
+    }
+  
+    .advancez {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 17px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .totalGstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 32px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .adlessz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 24px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .expensegstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 5px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .valuez {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 51px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Cgstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 46px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Sgstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 46px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Igstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 51px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Grandtotalz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 12px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .shipdiv {
+      margin-top: 10px;
+    }
+  
+    .tdsdiv {
+      margin-left: 0px;
+      margin-top: 5px;
+      margin-right: 0px;
+    }
+  
+    .adadv {
+      margin-top: 10px;
+    }
+  
+    .valuediv {
+      margin-top: 2px;
+      margin-left: 0px;
+      margin-right: 0px;
+    }
+  
+  }
+  
+  /* media (width: 820px) and (height: 1180px) */
+  @media (width: 820px) and (height: 1180px) {
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .colorselect{
+      margin-left: 0px;
+    }
+    .tablediv {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  
+    .Plusminus {
+      display: flex;
+      flex-direction: row;
+      margin-top: -30px;
+      margin-left: 60%;
+  
+    }
+  
+    .header {
+      font-size: 30px;
+      margin-top: -40px;
+      margin-left: 20%;
+    }
+  
+    .toppart {
+      display: flex;
+      flex-direction: column;
+      margin-top: 5px;
+    }
+  
+    .Belowcontents {
+      position: static;
+  
+    }
+  
+    .top {
+      display: flex;
+      flex-direction: column;
+      width: 97.5%;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: #ceedf0;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+  
+    .billdiv {
+      margin-left: 50px;
+    }
+  
+    .citydivs {
+      margin-left: 0px;
+    }
+  
+    .pandivs {
+      margin-left: 0px;
+    }
+  
+    .cusdetails {
+      margin-top: 10px;
+    }
+  
+    .topinputs {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .cus {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .gst {
+      display: flex;
+      flex-direction: column;
+      margin-left: -3.5px;
+    }
+  
+    .billz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 80px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .customerz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      margin-left: 5px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .cityz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 92.5px;
+      font-size: 17px;
+      margin-top: 5px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .gstnoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 73px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .pannoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 93px;
+      font-size: 17px;
+      margin-top: 5px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .datez {
+      margin-left: 10px;
+    }
+  
+    .billno {
+      margin-left: 58px;
+    }
+  
+    .grnoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .termz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      outline: none;
+      margin-left: 21px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .vehiclez {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      outline: none;
+      margin-left: 12px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .grnoz {
+      margin-left: 26px;
+    }
+  
+    .taxtypez {
+      margin-left: 7px;
+      border: 1px solid black;
+    }
+  
+    .billcashz {
+      margin-left: 7px;
+      border: 1px solid black;
+    }
+  
+    .supplyz {
+      margin-left: 14.5px;
+      border: 1px solid black;
+    }
+  
+    .ttype {
+      margin-top: 5px;
+    }
+  
+    .selector {
+      margin-left: 0px;
+    }
+  
+    .bottomdiv {
+      display: flex;
+      flex-direction: column;
+      background-color: transparent;
+      padding: 5px;
+      border-radius: 10px;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      padding: 10px;
+      border: 1px solid gray;
+      margin-left: 80px;
+      margin-top: 10px;
+    }
+  
+    .bottomdiv2 {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      background-color: transparent;
+      padding: 5px;
+      border-radius: 10px;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      padding: 10px;
+      margin-left: 50px;
+      border: 1px solid gray;
+  
+    }
+  
+    .bottomcontainerz {
+      display: flex;
+      flex-direction: row;
+      margin-left: 0px;
+    }
+  
+    .custom-datepickerz {
+      border: 1px solid black;
+      padding: 5px;
+      font-size: 17px;
+      outline: none;
+      width: 125px;
+      height: 30px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+      margin-left: 5px;
+    }
+  
+    .Plus {
+      margin-left: 87%;
+      margin-top: -35px;
+      display: flex;
+      flex-direction: row;
+    }
+  
+    .Buttonsgroup {
+      margin-left: 20px;
+    }
+  
+    .delete {
+      margin-left: 50px;
+    }
+  
+    .shippedtoz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 2px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .rem {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 15px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .vtptz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 8px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .brokerss {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 30px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tdsqss {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 12px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tcshz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 2px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tcs206z {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .duedate {
+      margin-left: 10px;
+    }
+  
+    .advancez {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 17px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .totalGstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 34px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .adlessz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 26px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .expensegstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 5px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .valuez {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 54px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Cgstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 50px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Sgstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 51px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Igstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 55px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Grandtotalz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 11px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .shipdiv {
+      margin-top: 10px;
+    }
+  
+    .tdsdiv {
+      margin-left: 0px;
+      margin-top: 5px;
+      margin-right: 0px;
+    }
+  
+    .adadv {
+      margin-top: 10px;
+    }
+  
+    .valuediv {
+      margin-top: 2px;
+      margin-left: 0px;
+      margin-right: 0px;
+    }
+  }
+  
+  /* media (width: 1180px) and (height: 820px) */
+  @media (max-width: 1180px) and (height: 820px) {
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .colorselect{
+      margin-left: 0px;
+    }
+  
+    .Plusminus {
+      display: flex;
+      flex-direction: row;
+      margin-top: -30px;
+      margin-left: 70%;
+  
+    }
+  
+    .cusdetails {
+      margin-top: 10px;
+    }
+  
+    .tablediv {
+      max-height: 450px;
+      overflow-y: auto;
+    }
+  
+    .citydivs {
+      margin-left: 0px;
+    }
+  
+    .pandivs {
+      margin-left: 0px;
+    }
+  
+    .head {
+      font-size: 30px;
+      margin-top: -45px;
+      margin-left: 43%;
+    }
+  
+    .toppart {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .billdiv {
+      margin-left: 56px;
+    }
+  
+    .top {
+      display: flex;
+      flex-direction: column;
+      width: 97.5%;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: #ceedf0;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      /* background: linear-gradient(to right, #ceedf0, #84d6f4); */
+    }
+  
+    .topinputs {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .cus {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .gst {
+      display: flex;
+      flex-direction: column;
+      margin-left: -3.5px;
+    }
+  
+    .billz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 80px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      margin-left: 13px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .customerz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      margin-left: 10px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .cityz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 97px;
+      font-size: 17px;
+      margin-top: 5px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .gstnoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 77px;
+      font-size: 17px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .pannoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      width: 250px;
+      margin-left: 96px;
+      font-size: 17px;
+      margin-top: 5px;
+      outline: none;
+      flex-grow: 1;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .datez {
+      margin-left: 10px;
+    }
+  
+    .billno {
+      margin-left: 58px;
+    }
+  
+    .grnoz {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .termz{
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+  
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .vehiclez {
+      border: 1px solid #000000;
+      height: 9px;
+      padding: 10px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+    }
+  
+    .grnoz {
+      margin-left: 26px;
+    }
+  
+    .taxtypez {
+      margin-left: 7px;
+      border: 1px solid black;
+    }
+  
+    .billcashz {
+      margin-left: 4px;
+      border: 1px solid black;
+    }
+  
+    .supplyz {
+      margin-left: 14px;
+      border: 1px solid black;
+    }
+  
+    .ttype {
+      margin-top: 5px;
+    }
+  
+    .selector {
+      margin-left: 0px;
+    }
+  
+    .bottomdiv {
+      display: flex;
+      flex-direction: row;
+      background-color: transparent;
+      padding: 5px;
+      border-radius: 10px;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      padding: 10px;
+      border: 1px solid gray;
+      margin-left: 20px;
+  
+    }
+  
+    .bottomdiv2 {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: row;
+      background-color: transparent;
+      padding: 5px;
+      border-radius: 10px;
+      box-shadow: 8px 8px 16px rgba(1, 1, 1, 0.3);
+      padding: 10px;
+      border: 1px solid gray;
+      margin-left: 10px;
+  
+    }
+  
+    .bottomcontainerz {
+      display: flex;
+      flex-direction: row;
+      margin-left: 1px;
+    }
+  
+    .custom-datepickerz {
+      border: 1px solid black;
+      padding: 5px;
+      font-size: 17px;
+      outline: none;
+      width: 125px;
+      height: 30px;
+      box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.3);
+      margin-left: 5px;
+    }
+  
+    .Plus {
+      margin-left: 87%;
+      margin-top: -35px;
+      display: flex;
+      flex-direction: row;
+    }
+  
+    .Buttonsgroup {
+      margin-left: 20px;
+    }
+  
+    .delete {
+      margin-left: 50px;
+    }
+  
+    .shippedtoz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 2px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .rem {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 15px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .vtptz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 8px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .brokerss {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      margin-left: 30px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tdsqss {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 12px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tcshz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 2px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .tcs206z {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .duedate {
+      margin-left: 10px;
+    }
+  
+    .advancez {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 17px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .totalGstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 34px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .adlessz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 26px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .expensegstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 5px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .valuez {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 54px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Cgstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 50px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Sgstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 51px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Igstz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 55px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .Grandtotalz {
+      border: 1px solid black;
+      padding: 10px;
+      font-size: 17px;
+      outline: none;
+      margin-left: 11px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  
+    .shipdiv {
+      margin-top: 10px;
+    }
+  
+    .tdsdiv {
+      margin-left: 20px;
+      margin-top: 10px;
+      margin-right: 0px;
+    }
+  
+    .adadv {
+      margin-top: 10px;
+    }
+  
+    .valuediv {
+      margin-top: 2px;
+      margin-left: 20px;
+      margin-right: 0px;
+    }
+  }

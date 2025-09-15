@@ -1,0 +1,139 @@
+.NAME{
+    width: 50%;
+    height: 35px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+    margin-left: 12.9%;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+.NAME:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.Code{
+    width: 50%;
+    height: 35px;
+    margin-left: 13.7%;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+}
+.Code:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.Bsheet{
+    width: 50%;
+    height: 35px;
+    margin-left: 10px;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+    color: black;
+}
+.Bsheet:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.DrCr{
+    width: 50%;
+    height: 35px;
+    margin-left: 6.4%;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+    color: black;
+}
+.DrCr:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.Description{
+    width: 50%;
+    height: 35px;
+    margin-left: 7.4%;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+}
+.Description:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.Effect{
+    width: 50%;
+    height: 35px;
+    margin-left: 7%;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+}
+.Effect:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.Annx{
+    width: 50%;
+    height: 35px;
+    margin-left: 7.5%;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+}
+.Annx:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.Group{
+    width: 50%;
+    height: 35px;
+    margin-left: 12.5%;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+    color: black;
+}
+.Group:focus {
+    border: 2px solid black;
+    background-color: rgb(157, 243, 240);
+    color: black  ;
+    font-weight: bold;
+}
+.MultiSelect{
+    width: 70%;
+    margin-left: 5.5%;
+    border: 1px solid black;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 18px;
+}

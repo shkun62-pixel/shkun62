@@ -1,0 +1,18 @@
+Fixations
+
+*******************************************************************
+
+(Done)-> Right Align the values of Payment reciept and Discount. 
+(Done)-> If Values are Empty dont render the next grid index.
+(Done)-> Set User = owner (Default)
+(Done)-> All the values Should be floating point
+(Pending)-> AutoComplete On Narrations.
+(Done Except Date Area)-> Easy Navigation from Starting to ending using enter key
+-> Save on Edit Mode + Backend Remaining
+
+>> Target - 25/08/2024
+
+*******************************************************************
+
+
+-> Basic Styling
