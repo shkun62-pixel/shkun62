@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
 import { Table, Modal, Button, Card, Form } from "react-bootstrap";  // ✅ Form imported
 import styles from "../AccountStatement/LedgerList.module.css";
@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";  // ✅ Add this
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import useCompanySetup from "../Shared/useCompanySetup";
+import OptionModal from "./OptionModal";
 import "./TrailBalance.css"
 import PrintTrail from "./PrintTrail";
 import * as XLSX from 'sheetjs-style';
@@ -38,6 +39,14 @@ const TrailBalance = () => {
   // Filter Ledger Accounts 
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
+  const [isOptionOpen, setIsOptionOpen] = useState(false);
+  
+  const openOptionModal = () => {
+    setIsOptionOpen(true);
+  };
+  const closeOptionModal = () => {
+    setIsOptionOpen(false);
+  };
 
   useEffect(() => {
     if (!ledgerFromDate && dateFrom) {
@@ -271,7 +280,6 @@ const TrailBalance = () => {
     return () => window.removeEventListener("reopenTrailModal", reopenModal);
   }, []);
 
-
   // 🔹 Keyboard navigation inside transactions for Account Statement
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -353,6 +361,25 @@ const TrailBalance = () => {
       [id]: !prev[id],
     }));
   };
+
+  // ✅ Compute selected debit/credit sums
+  const { selectedDebit, selectedCredit } = useMemo(() => {
+    let debitSum = 0;
+    let creditSum = 0;
+
+    filteredLedgers.forEach((ledger) => {
+      if (checkedRows[ledger._id]) {
+        const { balance, drcr } = ledger.totals || {};
+        if (drcr === "DR") debitSum += Math.abs(balance);
+        if (drcr === "CR") creditSum += Math.abs(balance);
+      }
+    });
+
+    return {
+      selectedDebit: debitSum,
+      selectedCredit: creditSum,
+    };
+  }, [checkedRows, filteredLedgers]);
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -537,15 +564,28 @@ const TrailBalance = () => {
            <text style={{ fontSize:20}} className="textform">
               Selected Debit:
             </text>
-            <input style={{ marginLeft: 15}} className="value" />
+            <input
+              style={{ marginLeft: 15,color:"darkblue" }}
+              className="value"
+              value={selectedDebit.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              readOnly
+            />
          </div>
          <div style={{ display: "flex", flexDirection: "row",marginTop:10}}>
           <text style={{fontSize:20}} className="textform">
               Selected Credit:
           </text>
-          <input
-              style={{ marginLeft: 7}}
+           <input
+              style={{ marginLeft: 7,color:"red" }}
               className="value"
+              value={selectedCredit.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              readOnly
             />
           </div>
         </div>
@@ -584,6 +624,7 @@ const TrailBalance = () => {
                   >
                     <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                       <input
+                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
                         type="checkbox"
                         checked={!!checkedRows[ledger._id]}
                         onChange={() => handleCheckboxChange(ledger._id)}
@@ -606,7 +647,7 @@ const TrailBalance = () => {
             </tbody>
 
             {/* ✅ Footer for totals */}
-            <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: -5,}}>
+            <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: -8,}}>
               <tr style={{ fontWeight: "bold",fontSize:20 }}>
                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
                 <td style={{ textAlign: "right", color: "darkblue" }}>
@@ -624,65 +665,6 @@ const TrailBalance = () => {
           </Table>
         </div>
 
-
-        {/* <div className="tableT">
-          <Table size="sm" className="custom-table" hover ref={tableRef}>
-         <thead style={{ position: "sticky", top: 1, background: "skyblue", fontSize: 17, textAlign: "center" }}>
-            <tr>
-              <th></th>
-              <th>NAME</th>
-              <th>CITY</th>
-              <th>DEBIT</th>
-              <th>CREDIT</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredLedgers.map((ledger, index) => {
-              const { balance, drcr } = ledger.totals || {};
-              return (
-                <tr
-                  key={ledger._id}
-                  style={{
-                    backgroundColor: flaggedRows.has(index)
-                      ? "red"
-                      : index === selectedIndex
-                      ? "rgb(187, 186, 186)"
-                      : "transparent",
-                    cursor: "pointer",
-                    fontSize: 16,
-                  }}
-                  onClick={() => openLedgerDetails(ledger)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                >
-                  <td
-                    style={{ textAlign: "center" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!!checkedRows[ledger._id]}
-                      onChange={() => handleCheckboxChange(ledger._id)}
-                    />
-                  </td>
-                  <td>{ledger.formData.ahead}</td>
-                  <td>{ledger.formData.city}</td>
-
-                
-                  <td style={{ textAlign: "right", color: "darkblue",  fontWeight:"bold" }}>
-                    {drcr === "DR" ? Math.abs(balance).toFixed(2) : ""}
-                  </td>
-                  <td style={{ textAlign: "right", color: "red",  fontWeight:"bold" }}>
-                    {drcr === "CR" ? Math.abs(balance).toFixed(2) : ""}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-
-          </Table>
-        </div> */}
-
         {/* ✅ Search Input */}
         <div style={{display:'flex',flexDirection:"row"}}>
           <Form.Control
@@ -694,7 +676,8 @@ const TrailBalance = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <div style={{marginTop:"5px"}}>
-          <Button className="Button" style={{backgroundColor:"#3d85c6",width:"100px"}}>Options</Button>
+          <Button className="Button" style={{backgroundColor:"#3d85c6",width:"100px"}} onClick={openOptionModal} >Options</Button>
+          <OptionModal isOpen={isOptionOpen} onClose={closeOptionModal}/> 
           <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}} onClick={handleOpen} >Print</Button>
           <PrintTrail
             items={filteredLedgers.map((ledger) => {
