@@ -7216,281 +7216,281 @@ const handleViewFAVoucher = () => {
     }
   };
   
-  const handleSaveClick = async () => {
-    document.body.style.backgroundColor = "white";
-    let isDataSaved = false;
-    try {
-      const isValid = customerDetails.every((item) => item.vacode !== "");
-      if (!isValid) {
-        toast.error("Please Fill the Customer Details", {
-          position: "top-center",
-        });
-        return; // Prevent save operation
-      }
-      const nonEmptyItems = items.filter((item) => item.sdisc.trim() !== "");
-      if (nonEmptyItems.length === 0) {
-        toast.error("Please fill in at least one Items name.", {
-          position: "top-center",
-        });
-        return;
-      }
-      let combinedData;
-      if (isAbcmode) {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
-            vtype: formData.vtype,
-            vbillno: formData.vbillno,
-            vno: formData.vno,
-            gr: formData.gr,
-            exfor: formData.exfor,
-            trpt: formData.trpt,
-            stype: formData.stype,
-            btype: formData.btype,
-            conv: formData.conv,
-            rem1: formData.rem1,
-            rem2: formData.rem2,
-            v_tpt: formData.v_tpt,
-            broker: formData.broker,
-            srv_rate: formData.srv_rate,
-            srv_tax: formData.srv_tax,
-            tcs1_rate: formData.tcs1_rate,
-            tcs1: formData.tcs1,
-            tcs206_rate: formData.tcs206_rate,
-            tcs206: formData.tcs206,
-            duedate: expiredDate.toLocaleDateString("en-IN"),
-            pcess: formData.pcess,
-            tax: formData.tax,
-            sub_total: formData.sub_total,
-            exp_before: formData.exp_before,
-            Exp_rate6: formData.Exp_rate6,
-            Exp_rate7: formData.Exp_rate7,
-            Exp_rate8: formData.Exp_rate8,
-            Exp_rate9: formData.Exp_rate9,
-            Exp_rate10: formData.Exp_rate10,
-            Exp6: formData.Exp6,
-            Exp7: formData.Exp7,
-            Exp8: formData.Exp8,
-            Exp9: formData.Exp9,
-            Exp10: formData.Exp10,
-            Tds2: formData.Tds2,
-            Ctds: formData.Ctds,
-            Stds: formData.Stds,
-            iTds: formData.iTds,
-            cgst: formData.cgst,
-            sgst: formData.sgst,
-            igst: formData.igst,
-            expafterGST: formData.expafterGST,
-            ExpRoundoff: formData.ExpRoundoff,
-            grandtotal: formData.grandtotal,
-          },
-          items: nonEmptyItems.map((item) => ({
-            id: item.id,
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            Units: item.Units,
-            pkgs: item.pkgs,
-            weight: item.weight,
-            rate: item.rate,
-            amount: item.amount,
-            disc: item.disc,
-            discount: item.discount,
-            gst: item.gst,
-            Pcodes01: item.Pcodes01,
-            Pcodess: item.Pcodess,
-            Scodes01: item.Scodes01,
-            Scodess: item.Scodess,
-            exp_before: item.exp_before,
-            Exp_rate1: item.Exp_rate1,
-            Exp_rate2: item.Exp_rate2,
-            Exp_rate3: item.Exp_rate3,
-            Exp_rate4: item.Exp_rate4,
-            Exp_rate5: item.Exp_rate5,
-            Exp1: item.Exp1,
-            Exp2: item.Exp2,
-            Exp3: item.Exp3,
-            Exp4: item.Exp4,
-            Exp5: item.Exp5,
-            Exp6: item.Exp6,
-            ctax: item.ctax,
-            stax: item.stax,
-            itax: item.itax,
-            tariff: item.tariff,
-            vamt: item.vamt,
-          })),
-          customerDetails: customerDetails.map((item) => ({
-            Vcode: item.Vcode,
-            vacode: item.vacode,
-            gstno: item.gstno,
-            pan: item.pan,
-            Add1: item.Add1,
-            city: item.city,
-            state: item.state,
-            Tcs206c1H: item.Tcs206c1H,
-            TDS194Q: item.TDS194Q,
-          })),
-          shipped: shipped.map((item) => ({
-            shippedto: item.shippedto,
-            shippingAdd: item.shippingAdd,
-            shippingcity: item.shippingcity,
-            shippingState: item.shippingState,
-            shippingGst: item.shippingGst,
-            shippingPan: item.shippingPan,
-          })),
-        };
-      } else {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
-            vtype: formData.vtype,
-            vbillno: formData.vbillno,
-            vno: formData.vno,
-            gr: formData.gr,
-            exfor: formData.exfor,
-            trpt: formData.trpt,
-            stype: formData.stype,
-            btype: formData.btype,
-            conv: formData.conv,
-            rem1: formData.rem1,
-            rem2: formData.rem2,
-            v_tpt: formData.v_tpt,
-            broker: formData.broker,
-            srv_rate: formData.srv_rate,
-            srv_tax: formData.srv_tax,
-            tcs1_rate: formData.tcs1_rate,
-            tcs1: formData.tcs1,
-            tcs206_rate: formData.tcs206_rate,
-            tcs206: formData.tcs206,
-            duedate: expiredDate.toLocaleDateString("en-IN"),
-            pcess: formData.pcess,
-            tax: formData.tax,
-            sub_total: formData.sub_total,
-            exp_before: formData.exp_before,
-            Exp_rate6: formData.Exp_rate6,
-            Exp_rate7: formData.Exp_rate7,
-            Exp_rate8: formData.Exp_rate8,
-            Exp_rate9: formData.Exp_rate9,
-            Exp_rate10: formData.Exp_rate10,
-            Exp6: formData.Exp6,
-            Exp7: formData.Exp7,
-            Exp8: formData.Exp8,
-            Exp9: formData.Exp9,
-            Exp10: formData.Exp10,
-            Tds2: formData.Tds2,
-            Ctds: formData.Ctds,
-            Stds: formData.Stds,
-            iTds: formData.iTds,
-            cgst: formData.cgst,
-            sgst: formData.sgst,
-            igst: formData.igst,
-            expafterGST: formData.expafterGST,
-            ExpRoundoff: formData.ExpRoundoff,
-            grandtotal: formData.grandtotal,
-          },
-          items: nonEmptyItems.map((item) => ({
-            id: item.id,
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            Units: item.Units,
-            pkgs: item.pkgs,
-            weight: item.weight,
-            rate: item.rate,
-            amount: item.amount,
-            disc: item.disc,
-            discount: item.discount,
-            gst: item.gst,
-            Pcodes01: item.Pcodes01,
-            Pcodess: item.Pcodess,
-            Scodes01: item.Scodes01,
-            Scodess: item.Scodess,
-            exp_before: item.exp_before,
-            Exp_rate1: item.Exp_rate1,
-            Exp_rate2: item.Exp_rate2,
-            Exp_rate3: item.Exp_rate3,
-            Exp_rate4: item.Exp_rate4,
-            Exp_rate5: item.Exp_rate5,
-            Exp1: item.Exp1,
-            Exp2: item.Exp2,
-            Exp3: item.Exp3,
-            Exp4: item.Exp4,
-            Exp5: item.Exp5,
-            Exp6: item.Exp6,
-            ctax: item.ctax,
-            stax: item.stax,
-            itax: item.itax,
-            tariff: item.tariff,
-            vamt: item.vamt,
-          })),
-          customerDetails: customerDetails.map((item) => ({
-            Vcode: item.Vcode,
-            vacode: item.vacode,
-            gstno: item.gstno,
-            pan: item.pan,
-            Add1: item.Add1,
-            city: item.city,
-            state: item.state,
-            Tcs206c1H: item.Tcs206c1H,
-            TDS194Q: item.TDS194Q,
-          })),
-          shipped: shipped.map((item) => ({
-            shippedto: item.shippedto,
-            shippingAdd: item.shippingAdd,
-            shippingcity: item.shippingcity,
-            shippingState: item.shippingState,
-            shippingGst: item.shippingGst,
-            shippingPan: item.shippingPan,
-          })),
-        };
-      }
-      // Debugging
-      // console.log("Combined Data SALE:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst${
-        isAbcmode ? `/${data1._id}` : ""
-      }`;
-      const method = isAbcmode ? "put" : "post";
-      const response = await axios({
-        method,
-        url: apiEndpoint,
-        data: combinedData,
-      });
-      if (response) {
-        fetchData();
-        isDataSaved = true;
-      }
-    } catch (error) {
-      console.error("Error saving data:", error);
-      toast.error("Failed to save data. Please try again.", {
-        position: "top-center",
-      });
-    } finally {
-      setIsSubmitEnabled(false);
-      if (isDataSaved) {
-        setTitle("(View)");
-        setIsAddEnabled(true);
-        setIsDisabled(true);
-        setIsEditMode(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsNextEnabled(true);
-        setIsSearchEnabled(true);
-        setIsDeleteEnabled(true);
-        toast.success("Data Saved Successfully!", { position: "top-center" });
-        if (Defaultbutton === "Print") {
-          setShouldFocusPrint(true); // 👈 Signal that we should focus after enable
-        } else if (Defaultbutton === "Add") {
-          setShouldFocusAdd(true)
-        }
-      } else {
-        setIsAddEnabled(true);
-        setIsDisabled(false);
-      }
-    }
-  };
+  // const handleSaveClick = async () => {
+  //   document.body.style.backgroundColor = "white";
+  //   let isDataSaved = false;
+  //   try {
+  //     const isValid = customerDetails.every((item) => item.vacode !== "");
+  //     if (!isValid) {
+  //       toast.error("Please Fill the Customer Details", {
+  //         position: "top-center",
+  //       });
+  //       return; // Prevent save operation
+  //     }
+  //     const nonEmptyItems = items.filter((item) => item.sdisc.trim() !== "");
+  //     if (nonEmptyItems.length === 0) {
+  //       toast.error("Please fill in at least one Items name.", {
+  //         position: "top-center",
+  //       });
+  //       return;
+  //     }
+  //     let combinedData;
+  //     if (isAbcmode) {
+  //       combinedData = {
+  //         _id: formData._id,
+  //         formData: {
+  //           date: selectedDate.toLocaleDateString("en-IN"),
+  //           vtype: formData.vtype,
+  //           vbillno: formData.vbillno,
+  //           vno: formData.vno,
+  //           gr: formData.gr,
+  //           exfor: formData.exfor,
+  //           trpt: formData.trpt,
+  //           stype: formData.stype,
+  //           btype: formData.btype,
+  //           conv: formData.conv,
+  //           rem1: formData.rem1,
+  //           rem2: formData.rem2,
+  //           v_tpt: formData.v_tpt,
+  //           broker: formData.broker,
+  //           srv_rate: formData.srv_rate,
+  //           srv_tax: formData.srv_tax,
+  //           tcs1_rate: formData.tcs1_rate,
+  //           tcs1: formData.tcs1,
+  //           tcs206_rate: formData.tcs206_rate,
+  //           tcs206: formData.tcs206,
+  //           duedate: expiredDate.toLocaleDateString("en-IN"),
+  //           pcess: formData.pcess,
+  //           tax: formData.tax,
+  //           sub_total: formData.sub_total,
+  //           exp_before: formData.exp_before,
+  //           Exp_rate6: formData.Exp_rate6,
+  //           Exp_rate7: formData.Exp_rate7,
+  //           Exp_rate8: formData.Exp_rate8,
+  //           Exp_rate9: formData.Exp_rate9,
+  //           Exp_rate10: formData.Exp_rate10,
+  //           Exp6: formData.Exp6,
+  //           Exp7: formData.Exp7,
+  //           Exp8: formData.Exp8,
+  //           Exp9: formData.Exp9,
+  //           Exp10: formData.Exp10,
+  //           Tds2: formData.Tds2,
+  //           Ctds: formData.Ctds,
+  //           Stds: formData.Stds,
+  //           iTds: formData.iTds,
+  //           cgst: formData.cgst,
+  //           sgst: formData.sgst,
+  //           igst: formData.igst,
+  //           expafterGST: formData.expafterGST,
+  //           ExpRoundoff: formData.ExpRoundoff,
+  //           grandtotal: formData.grandtotal,
+  //         },
+  //         items: nonEmptyItems.map((item) => ({
+  //           id: item.id,
+  //           vcode: item.vcode,
+  //           sdisc: item.sdisc,
+  //           Units: item.Units,
+  //           pkgs: item.pkgs,
+  //           weight: item.weight,
+  //           rate: item.rate,
+  //           amount: item.amount,
+  //           disc: item.disc,
+  //           discount: item.discount,
+  //           gst: item.gst,
+  //           Pcodes01: item.Pcodes01,
+  //           Pcodess: item.Pcodess,
+  //           Scodes01: item.Scodes01,
+  //           Scodess: item.Scodess,
+  //           exp_before: item.exp_before,
+  //           Exp_rate1: item.Exp_rate1,
+  //           Exp_rate2: item.Exp_rate2,
+  //           Exp_rate3: item.Exp_rate3,
+  //           Exp_rate4: item.Exp_rate4,
+  //           Exp_rate5: item.Exp_rate5,
+  //           Exp1: item.Exp1,
+  //           Exp2: item.Exp2,
+  //           Exp3: item.Exp3,
+  //           Exp4: item.Exp4,
+  //           Exp5: item.Exp5,
+  //           Exp6: item.Exp6,
+  //           ctax: item.ctax,
+  //           stax: item.stax,
+  //           itax: item.itax,
+  //           tariff: item.tariff,
+  //           vamt: item.vamt,
+  //         })),
+  //         customerDetails: customerDetails.map((item) => ({
+  //           Vcode: item.Vcode,
+  //           vacode: item.vacode,
+  //           gstno: item.gstno,
+  //           pan: item.pan,
+  //           Add1: item.Add1,
+  //           city: item.city,
+  //           state: item.state,
+  //           Tcs206c1H: item.Tcs206c1H,
+  //           TDS194Q: item.TDS194Q,
+  //         })),
+  //         shipped: shipped.map((item) => ({
+  //           shippedto: item.shippedto,
+  //           shippingAdd: item.shippingAdd,
+  //           shippingcity: item.shippingcity,
+  //           shippingState: item.shippingState,
+  //           shippingGst: item.shippingGst,
+  //           shippingPan: item.shippingPan,
+  //         })),
+  //       };
+  //     } else {
+  //       combinedData = {
+  //         _id: formData._id,
+  //         formData: {
+  //           date: selectedDate.toLocaleDateString("en-IN"),
+  //           vtype: formData.vtype,
+  //           vbillno: formData.vbillno,
+  //           vno: formData.vno,
+  //           gr: formData.gr,
+  //           exfor: formData.exfor,
+  //           trpt: formData.trpt,
+  //           stype: formData.stype,
+  //           btype: formData.btype,
+  //           conv: formData.conv,
+  //           rem1: formData.rem1,
+  //           rem2: formData.rem2,
+  //           v_tpt: formData.v_tpt,
+  //           broker: formData.broker,
+  //           srv_rate: formData.srv_rate,
+  //           srv_tax: formData.srv_tax,
+  //           tcs1_rate: formData.tcs1_rate,
+  //           tcs1: formData.tcs1,
+  //           tcs206_rate: formData.tcs206_rate,
+  //           tcs206: formData.tcs206,
+  //           duedate: expiredDate.toLocaleDateString("en-IN"),
+  //           pcess: formData.pcess,
+  //           tax: formData.tax,
+  //           sub_total: formData.sub_total,
+  //           exp_before: formData.exp_before,
+  //           Exp_rate6: formData.Exp_rate6,
+  //           Exp_rate7: formData.Exp_rate7,
+  //           Exp_rate8: formData.Exp_rate8,
+  //           Exp_rate9: formData.Exp_rate9,
+  //           Exp_rate10: formData.Exp_rate10,
+  //           Exp6: formData.Exp6,
+  //           Exp7: formData.Exp7,
+  //           Exp8: formData.Exp8,
+  //           Exp9: formData.Exp9,
+  //           Exp10: formData.Exp10,
+  //           Tds2: formData.Tds2,
+  //           Ctds: formData.Ctds,
+  //           Stds: formData.Stds,
+  //           iTds: formData.iTds,
+  //           cgst: formData.cgst,
+  //           sgst: formData.sgst,
+  //           igst: formData.igst,
+  //           expafterGST: formData.expafterGST,
+  //           ExpRoundoff: formData.ExpRoundoff,
+  //           grandtotal: formData.grandtotal,
+  //         },
+  //         items: nonEmptyItems.map((item) => ({
+  //           id: item.id,
+  //           vcode: item.vcode,
+  //           sdisc: item.sdisc,
+  //           Units: item.Units,
+  //           pkgs: item.pkgs,
+  //           weight: item.weight,
+  //           rate: item.rate,
+  //           amount: item.amount,
+  //           disc: item.disc,
+  //           discount: item.discount,
+  //           gst: item.gst,
+  //           Pcodes01: item.Pcodes01,
+  //           Pcodess: item.Pcodess,
+  //           Scodes01: item.Scodes01,
+  //           Scodess: item.Scodess,
+  //           exp_before: item.exp_before,
+  //           Exp_rate1: item.Exp_rate1,
+  //           Exp_rate2: item.Exp_rate2,
+  //           Exp_rate3: item.Exp_rate3,
+  //           Exp_rate4: item.Exp_rate4,
+  //           Exp_rate5: item.Exp_rate5,
+  //           Exp1: item.Exp1,
+  //           Exp2: item.Exp2,
+  //           Exp3: item.Exp3,
+  //           Exp4: item.Exp4,
+  //           Exp5: item.Exp5,
+  //           Exp6: item.Exp6,
+  //           ctax: item.ctax,
+  //           stax: item.stax,
+  //           itax: item.itax,
+  //           tariff: item.tariff,
+  //           vamt: item.vamt,
+  //         })),
+  //         customerDetails: customerDetails.map((item) => ({
+  //           Vcode: item.Vcode,
+  //           vacode: item.vacode,
+  //           gstno: item.gstno,
+  //           pan: item.pan,
+  //           Add1: item.Add1,
+  //           city: item.city,
+  //           state: item.state,
+  //           Tcs206c1H: item.Tcs206c1H,
+  //           TDS194Q: item.TDS194Q,
+  //         })),
+  //         shipped: shipped.map((item) => ({
+  //           shippedto: item.shippedto,
+  //           shippingAdd: item.shippingAdd,
+  //           shippingcity: item.shippingcity,
+  //           shippingState: item.shippingState,
+  //           shippingGst: item.shippingGst,
+  //           shippingPan: item.shippingPan,
+  //         })),
+  //       };
+  //     }
+  //     // Debugging
+  //     // console.log("Combined Data SALE:", combinedData);
+  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst${
+  //       isAbcmode ? `/${data1._id}` : ""
+  //     }`;
+  //     const method = isAbcmode ? "put" : "post";
+  //     const response = await axios({
+  //       method,
+  //       url: apiEndpoint,
+  //       data: combinedData,
+  //     });
+  //     if (response) {
+  //       fetchData();
+  //       isDataSaved = true;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving data:", error);
+  //     toast.error("Failed to save data. Please try again.", {
+  //       position: "top-center",
+  //     });
+  //   } finally {
+  //     setIsSubmitEnabled(false);
+  //     if (isDataSaved) {
+  //       setTitle("(View)");
+  //       setIsAddEnabled(true);
+  //       setIsDisabled(true);
+  //       setIsEditMode(false);
+  //       setIsPreviousEnabled(true);
+  //       setIsNextEnabled(true);
+  //       setIsFirstEnabled(true);
+  //       setIsLastEnabled(true);
+  //       setIsSPrintEnabled(true);
+  //       setIsNextEnabled(true);
+  //       setIsSearchEnabled(true);
+  //       setIsDeleteEnabled(true);
+  //       toast.success("Data Saved Successfully!", { position: "top-center" });
+  //       if (Defaultbutton === "Print") {
+  //         setShouldFocusPrint(true); // 👈 Signal that we should focus after enable
+  //       } else if (Defaultbutton === "Add") {
+  //         setShouldFocusAdd(true)
+  //       }
+  //     } else {
+  //       setIsAddEnabled(true);
+  //       setIsDisabled(false);
+  //     }
+  //   }
+  // };
 
   const handleSaveClickwithSetup = async () => {
       document.body.style.backgroundColor = "white";
@@ -7725,7 +7725,7 @@ const handleViewFAVoucher = () => {
   };
   
   const handleDataSave = async () => {
-    handleSaveClick();
+    // handleSaveClick();
     handleSaveClickwithSetup();
   };
   

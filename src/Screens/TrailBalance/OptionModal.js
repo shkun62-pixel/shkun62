@@ -5,9 +5,6 @@ import { styled } from "@mui/system";
 import "./OptionModal.css";
 import Button from "@mui/material/Button";
 import axios from "axios";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import { Card } from "@mui/material";
@@ -35,32 +32,31 @@ const Header = styled("div")({
   borderRadius: 15,
 });
 
-const OptionModal = ({ isOpen, onClose }) => {
+const OptionModal = ({ isOpen, onClose, onApply }) => {
   const { company } = useContext(CompanyContext);
   const tenant = company?.databaseName;
 
   if (!tenant) {
     // you may want to guard here or show an error state,
     // since without a tenant you can’t hit the right API
-    console.error("No tenant selected!");
+    // console.error("No tenant selected!");
   }
   const [anexureData, setAnexureData] = useState([]);
   const [formData, setFormData] = useState({
-    Balance: "",
+    Balance: "Active Balance",
     OrderBy: "",
-    Annexure: "",
-    From: null, // Changed from empty string to null
-    Upto: null,
+    Annexure: "All",
     T1: false,
     T2: false,
     T3: false,
     T4: false,
     T5: false,
     T6: false,
-    T7: false,
+    T7: true,
     T8: false,
-    T9: false,
+    T9: true,
     T10: false,
+    T11: false,
   });
 
   useEffect(() => {
@@ -105,28 +101,7 @@ const OptionModal = ({ isOpen, onClose }) => {
       [name]: type === "checkbox" ? checked : value, // Update based on type
     }));
   };
-  const handleDateChange = (date) => {
-    setFormData((prev) => ({ ...prev, From: date }));
-  };
 
-  const handleDateChangeUpto = (date) => {
-    setFormData((prev) => ({ ...prev, Upto: date }));
-  };
-
-  useEffect(() => {
-    const formattedFrom = formData.From
-      ? format(formData.From, "dd/MM/yyyy")
-      : "Not Selected";
-    const formattedUpto = formData.Upto
-      ? format(formData.Upto, "dd/MM/yyyy")
-      : "Not Selected";
-
-    console.log("Updated Form Data:", {
-      ...formData,
-      From: formattedFrom,
-      Upto: formattedUpto,
-    });
-  }, [formData]);
 
   return (
     <Modal
@@ -137,177 +112,81 @@ const OptionModal = ({ isOpen, onClose }) => {
       <StyledModal>
         <Header>TRAIL VIEW OPTIONS</Header>
         <div style={{ display: "flex", flexDirection: "row", marginTop: 25 }}>
-          <Card style={{ display: "flex", flexDirection: "column", padding: 10, }}>
-            <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
-            >
-              <text>Period From</text>
-              <DatePicker
-                selected={formData.From}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy" // Format for display
-                className="custom-datepickerF"
-                style={{ border: "1px solid black", marginLeft: 5, height: 30 }}
-              />
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
-            >
-              <text>Upto</text>
-              <DatePicker
-                selected={formData.Upto}
-                onChange={handleDateChangeUpto}
-                dateFormat="dd/MM/yyyy" // Format for display
-                className="custom-datepickerU"
-                style={{ border: "1px solid black", marginLeft: 5, height: 30 }}
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "row", marginTop: 40 }}>
-              <text>Balance</text>
-              <select
-                className="Balance"
-                id="Balance"
-                style={{
-                  height: "30px",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-                value={formData.Balance}
-                onChange={handleBalance}
-              >
-                <option value="All Accounts">All Accounts</option>
-                <option value="Active Balance">Active Balance</option>
-                <option value="Nil Balance">Nil Balance</option>
-                <option value="Debit Balance">Debit Balance</option>
-                <option value="Credit Balance">Credit Balance</option>
-                <option value="Transacted Account">Transacted Account</option>
-                <option value="Non Transacted Account">
-                  Transacted Account
-                </option>
-              </select>
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
-            >
-              <text>Order By</text>
-              <select
-                className="OrderBY"
-                id="OrderBy"
-                style={{
-                  height: "30px",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-                value={formData.OrderBy}
-                onChange={handleOrder}
-              >
-                <option value=""></option>
-                <option value="Annexure Wise">Annexure Wise</option>
-                <option value="Account Name Wise">Account Name Wise</option>
-                <option value="City Wise + Name Wise">
-                  City Wise + Name Wise
-                </option>
-                <option value="Sorting Order No.Wise">
-                  Sorting Order No.Wise
-                </option>
-                <option value="Transacted Account">Prefix Annexure Wise</option>
-              </select>
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
-            >
-              <text>Annexure</text>
-              <select
-                className="Annexure"
-                value={formData.Annexure}
-                onChange={handleSelectChange}
-              >
-                <option value=""></option>
-                {anexureData.map((name, index) => (
-                  <option key={index} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "row", marginTop:"auto",justifyContent:"center" }}>
-              <Button style={{ backgroundColor: "#6c5ce7", color: "white" }}>
-                Chk_Errors
-              </Button>
-              <Button
-                style={{
-                  backgroundColor: "#6c5ce7",
-                  color: "white",
-                  marginLeft: 10,
-                }}
-                onClick={onClose}
-              >
-                EXIT
-              </Button>
-              <Button
-                style={{
-                  backgroundColor: "#6c5ce7",
-                  color: "white",
-                  marginLeft: 10,
-                }}
-              >
-                OK
-              </Button>
-            </div>
-          </Card>
-
-          {/* RIGHT SIDE */}
+            {/* LEFT SIDE */}
           <Card
             style={{
               display: "flex",
               flexDirection: "column",
-              marginLeft: 40,
               padding: 10,
-
+              marginLeft: 20,
             }}
           >
-            <label style={{ display: "flex", alignItems: "center" }}>
-              <input
-                type="checkbox"
-                name="T7"
-                checked={formData.T7}
-                onChange={handleChange}
-                className="custom-checkbox"
-              />
-              <span style={{ marginLeft: "10px" }}>Current Balance</span>
-            </label>
-            <label style={{ display: "flex", alignItems: "center" }}>
-              <input
-                type="checkbox"
-                name="T8"
-                checked={formData.T8}
-                onChange={handleChange}
-                className="custom-checkbox"
-              />
-              <span style={{ marginLeft: "10px" }}>Opening Summary</span>
-            </label>
-            <label style={{ display: "flex", alignItems: "center" }}>
-              <input
-                type="checkbox"
-                name="T9"
-                checked={formData.T9}
-                onChange={handleChange}
-                className="custom-checkbox"
-              />
-              <span style={{ marginLeft: "10px" }}>Detailed</span>
-            </label>
-            <label style={{ display: "flex", alignItems: "center" }}>
-              <input
-                type="checkbox"
-                name="T10"
-                checked={formData.T10}
-                onChange={handleChange}
-                className="custom-checkbox"
-              />
-              <span style={{ marginLeft: "10px" }}>Annx.Summary</span>
-            </label>
-            <div style={{ marginTop: 20 }}>
+            {/* Mutually exclusive using radio buttons */}
+
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <label style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  className="custom-radio"
+                  type="radio"
+                  name="balanceOption"   // same group
+                  value="T7"
+                  checked={formData.T7}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, T7: true, T8: false }))
+                  }
+                />
+                <span style={{ marginLeft: "10px" }}>Current Balance</span>
+              </label>
+
+              <label style={{ display: "flex", alignItems: "center" }}>
+                <input
+                className="custom-radio"
+                  type="radio"
+                  name="balanceOption"   // same group
+                  value="T8"
+                  checked={formData.T8}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, T7: false, T8: true }))
+                  }
+                />
+                <span style={{ marginLeft: "10px" }}>Opening Summary</span>
+              </label>
+            </div>
+
+            {/* Mutually exclusive using radio buttons for Detailed & Annx.Summary */}
+            <div style={{ display: "flex", flexDirection: "column", marginTop: 10 }}>
+              <label style={{ display: "flex", alignItems: "center" }}>
+                <input
+                className="custom-radio"
+                  type="radio"
+                  name="detailOption"   // new group
+                  value="T9"
+                  checked={formData.T9}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, T9: true, T10: false }))
+                  }
+                />
+                <span style={{ marginLeft: "10px" }}>Detailed</span>
+              </label>
+
+              <label style={{ display: "flex", alignItems: "center" }}>
+                <input
+                className="custom-radio"
+                  type="radio"
+                  name="detailOption"   // same group
+                  value="T10"
+                  checked={formData.T10}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, T9: false, T10: true }))
+                  }
+                />
+                <span style={{ marginLeft: "10px" }}>Annx.Summary</span>
+              </label>
+            </div>
+
+            <hr style={{marginTop:5}}/>
+            
+            <div style={{ marginTop: 10 }}>
               <label style={{ display: "flex", alignItems: "center" }}>
                 <input
                   type="checkbox"
@@ -326,7 +205,7 @@ const OptionModal = ({ isOpen, onClose }) => {
                   onChange={handleChange}
                   className="custom-checkbox"
                 />
-                <span style={{ marginLeft: "10px" }}>Print Quality</span>
+                <span style={{ marginLeft: "10px" }}>Print Quantity</span>
               </label>
               <label style={{ display: "flex", alignItems: "center" }}>
                 <input
@@ -373,8 +252,117 @@ const OptionModal = ({ isOpen, onClose }) => {
                   Cash Flow Trail Balance
                 </span>
               </label>
+              <label style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  type="checkbox"
+                  name="T11"
+                  checked={formData.T11}
+                  onChange={handleChange}
+                  className="custom-checkbox"
+                />
+                <span style={{ marginLeft: "10px" }}>Print Balance</span>
+              </label>
             </div>
           </Card>
+
+          {/* RIGHT SIDE */}
+          <div style={{display:"flex",flexDirection:"column"}}>
+          <Card style={{ display: "flex", flexDirection: "column", padding: 10, marginLeft: 40, }}>
+            <div style={{ display: "flex", flexDirection: "row", marginTop: 10 }}>
+              <text>Balance</text>
+              <select
+                className="Balance"
+                id="Balance"
+                style={{
+                  height: "30px",
+                  backgroundColor: "white",
+                  color: "black",
+                }}
+                value={formData.Balance}
+                onChange={handleBalance}
+              >
+                <option value="Active Balance">Active Balance</option>
+                <option value="Nil Balance">Nil Balance</option>
+                <option value="Debit Balance">Debit Balance</option>
+                <option value="Credit Balance">Credit Balance</option>
+                <option value="Transacted Account">Transacted Account</option>
+                <option value="Non Transacted Account">
+                  Non Transacted Account
+                </option>
+                <option value="All Accounts">All Accounts</option>
+              </select>
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
+            >
+              <text>Order By</text>
+              <select
+                className="OrderBY"
+                id="OrderBy"
+                style={{
+                  height: "30px",
+                  backgroundColor: "white",
+                  color: "black",
+                }}
+                value={formData.OrderBy}
+                onChange={handleOrder}
+              >
+                <option value=""></option>
+                <option value="Annexure Wise">Annexure Wise</option>
+                <option value="Account Name Wise">Account Name Wise</option>
+                <option value="City Wise + Name Wise">
+                  City Wise + Name Wise
+                </option>
+                <option value="Sorting Order No.Wise">
+                  Sorting Order No.Wise
+                </option>
+                <option value="Transacted Account">Prefix Annexure Wise</option>
+              </select>
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
+            >
+              <text>Annexure</text>
+              <select
+                className="Annexure"
+                value={formData.Annexure}
+                onChange={handleSelectChange}
+              >
+                <option value="All">All</option>
+                {anexureData.map((name, index) => (
+                  <option key={index} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </Card>
+      
+          <div style={{ display: "flex", flexDirection: "row", marginTop:"auto",justifyContent:"center" }}>
+            <Button style={{ backgroundColor: "#6c5ce7", color: "white" }}>
+              Chk_Errors
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "#6c5ce7",
+                color: "white",
+                marginLeft: 10,
+              }}
+              onClick={onClose}
+            >
+              EXIT
+            </Button>
+            <Button
+            style={{ backgroundColor: "#6c5ce7", color: "white", marginLeft: 10 }}
+            onClick={() => {
+              if (onApply) onApply(formData);
+              onClose();
+            }}
+          >
+            OK
+          </Button>
+          </div>
+          </div>
         </div>
       </StyledModal>
     </Modal>

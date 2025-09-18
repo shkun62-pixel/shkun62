@@ -1,8 +1,9 @@
 // import React, { useEffect, useState, useRef, useMemo } from "react";
 // import axios from "axios";
-// import { Table, Card } from "react-bootstrap";
+// import { Table, Card, Button } from "react-bootstrap";
 // import "react-datepicker/dist/react-datepicker.css";
 // import useCompanySetup from "./Shared/useCompanySetup";
+// import OptionModal from "./TrailBalance/OptionModal";
 
 // const Example = () => {
 //   const { dateFrom } = useCompanySetup();
@@ -10,6 +11,14 @@
 //   const [filteredLedgers, setFilteredLedgers] = useState([]);
 //   const [selectedIndex, setSelectedIndex] = useState(0);
 //   const [checkedRows, setCheckedRows] = useState({});
+
+//   const [isOptionOpen, setIsOptionOpen] = useState(false);
+//   const openOptionModal = () => {
+//     setIsOptionOpen(true);
+//   };
+//   const closeOptionModal = () => {
+//     setIsOptionOpen(false);
+//   };
 
 //   // Filter Ledger Accounts
 //   const [ledgerFromDate, setLedgerFromDate] = useState(null);
@@ -157,201 +166,115 @@
 //         </div>
 
 //         <div className="tableT">
-//         <Table
-//   size="sm"
-//   className="custom-table shadow-sm"
-//   hover
-//   bordered
-//   ref={tableRef}
-//   style={{
-//     borderRadius: "10px",
-//     overflow: "hidden",
-//     backgroundColor: "white",
-//   }}
-// >
-//   <thead
-//     style={{
-//       position: "sticky",
-//       top: 0,
-//       background: "linear-gradient(to right, #4facfe, #00f2fe)",
-//       color: "white",
-//       fontSize: 16,
-//       textAlign: "center",
-//       zIndex: 2,
-//     }}
-//   >
-//     <tr>
-//       <th style={{ width: "60px" }}></th>
-//       <th>NAME</th>
-//       <th>CITY</th>
-//       <th>DEBIT</th>
-//       <th>CREDIT</th>
-//     </tr>
-//   </thead>
+//           <Table size="sm" className="custom-table" hover ref={tableRef}>
+//             <thead style={{ position: "sticky", top: 1, background: "skyblue", fontSize: 17, textAlign: "center" }}>
+//               <tr>
+//                 <th></th>
+//                 <th>NAME</th>
+//                 <th>CITY</th>
+//                 <th>DEBIT</th>
+//                 <th>CREDIT</th>
+//               </tr>
+//             </thead>
 
-//   <tbody>
-//     {filteredLedgers.map((ledger, index) => {
-//       const { balance, drcr } = ledger.totals || {};
-//       return (
-//         <tr
-//           key={ledger._id}
-//           style={{
-//             cursor: "pointer",
-//             fontSize: 15,
-//             backgroundColor: index % 2 === 0 ? "#f9f9f9" : "white", // striped
-//             transition: "all 0.2s ease-in-out",
-//           }}
-//           onMouseEnter={(e) =>
-//             (e.currentTarget.style.backgroundColor = "#e6f7ff")
-//           }
-//           onMouseLeave={(e) =>
-//             (e.currentTarget.style.backgroundColor =
-//               index % 2 === 0 ? "#f9f9f9" : "white")
-//           }
-//           onClick={() => setSelectedIndex(index)}
-//         >
-//           <td
-//             style={{ textAlign: "center" }}
-//             onClick={(e) => e.stopPropagation()}
-//           >
-//             <input
-//               type="checkbox"
-//               checked={!!checkedRows[ledger._id]}
-//               onChange={() => handleCheckboxChange(ledger._id)}
-//             />
-//           </td>
-//           <td style={{ fontWeight: "500" }}>{ledger.formData.ahead}</td>
-//           <td>{ledger.formData.city}</td>
-//           <td
-//             style={{
-//               textAlign: "right",
-//               color: "darkblue",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {drcr === "DR"
-//               ? Math.abs(balance).toLocaleString(undefined, {
-//                   minimumFractionDigits: 2,
-//                   maximumFractionDigits: 2,
-//                 })
-//               : ""}
-//           </td>
-//           <td
-//             style={{
-//               textAlign: "right",
-//               color: "red",
-//               fontWeight: "600",
-//             }}
-//           >
-//             {drcr === "CR"
-//               ? Math.abs(balance).toLocaleString(undefined, {
-//                   minimumFractionDigits: 2,
-//                   maximumFractionDigits: 2,
-//                 })
-//               : ""}
-//           </td>
-//         </tr>
-//       );
-//     })}
-//   </tbody>
+//             <tbody>
+//               {filteredLedgers.map((ledger, index) => {
+//                 const { balance, drcr } = ledger.totals || {};
+//                 return (
+//                   <tr
+//                     key={ledger._id}
+//                     style={{
+//                       cursor: "pointer",
+//                       fontSize: 16,
+//                     }}
+//                     onMouseEnter={() => setSelectedIndex(index)}
+//                   >
+//                     <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+//                       <input
+//                         style={{ width: "18px", height: "18px", cursor: "pointer" }}
+//                         type="checkbox"
+//                         checked={!!checkedRows[ledger._id]}
+//                         onChange={() => handleCheckboxChange(ledger._id)}
+//                       />
+//                     </td>
+//                     <td>{ledger.formData.ahead}</td>
+//                     <td>{ledger.formData.city}</td>
 
-//   {/* ✅ Footer for totals */}
-//   <tfoot
-//     style={{
-//       background: "linear-gradient(to right, #4facfe, #00f2fe)",
-//       color: "white",
-//       position: "sticky",
-//       bottom: -1,
-//       fontSize: 16,
-//     }}
-//   >
-//     <tr style={{ fontWeight: "bold" }}>
-//       <td colSpan={3} style={{ textAlign: "right" }}>
-//         TOTAL:
-//       </td>
-//       <td style={{ textAlign: "right" }}>
-//         {filteredLedgers
-//           .reduce(
-//             (sum, ledger) =>
-//               sum +
-//               (ledger.totals?.drcr === "DR"
-//                 ? Math.abs(ledger.totals.balance)
-//                 : 0),
-//             0
-//           )
-//           .toLocaleString(undefined, {
-//             minimumFractionDigits: 2,
-//             maximumFractionDigits: 2,
-//           })}
-//       </td>
-//       <td style={{ textAlign: "right" }}>
-//         {filteredLedgers
-//           .reduce(
-//             (sum, ledger) =>
-//               sum +
-//               (ledger.totals?.drcr === "CR"
-//                 ? Math.abs(ledger.totals.balance)
-//                 : 0),
-//             0
-//           )
-//           .toLocaleString(undefined, {
-//             minimumFractionDigits: 2,
-//             maximumFractionDigits: 2,
-//           })}
-//       </td>
-//     </tr>
-//   </tfoot>
-// </Table>
+//                     <td style={{ textAlign: "right", color: "darkblue", fontWeight:"bold" }}>
+//                       {drcr === "DR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
 
+//                     </td>
+//                     <td style={{ textAlign: "right", color: "red", fontWeight:"bold" }}>
+//                       {drcr === "CR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
+
+//                     </td>
+//                   </tr>
+//                 );
+//               })}
+//             </tbody>
+
+//             {/* ✅ Footer for totals */}
+//             <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: -8,}}>
+//               <tr style={{ fontWeight: "bold",fontSize:20 }}>
+//                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
+//                 <td style={{ textAlign: "right", color: "darkblue" }}>
+//                 {filteredLedgers
+//                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "DR" ? Math.abs(ledger.totals.balance) : 0), 0)
+//                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+//                 </td>
+//                 <td style={{ textAlign: "right", color: "red" }}>
+//                 {filteredLedgers
+//                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "CR" ? Math.abs(ledger.totals.balance) : 0), 0)
+//                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+//                 </td>
+//               </tr>
+//             </tfoot>
+//           </Table>
 //         </div>
 //       </Card>
+//       <Button variant="primary" sx={{ mt: 2 }} onClick={openOptionModal}> Options</Button>
+//       <OptionModal isOpen={isOptionOpen} onClose={closeOptionModal}/> 
 //     </div>
 //   );
 // };
 
 // export default Example;
 
+// NEW CODE AFTER REFACTORING
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
-import {
-  Grid,
-  Card,
-  Typography,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Checkbox,
-  Paper,
-} from "@mui/material";
+import { Table, Card, Button } from "react-bootstrap";
+import "react-datepicker/dist/react-datepicker.css";
 import useCompanySetup from "./Shared/useCompanySetup";
-import OptionModal from "./TrailBalance/OptionModal"
-import { Button } from "react-bootstrap";
+import OptionModal from "./TrailBalance/OptionModal";
 
 const Example = () => {
   const { dateFrom } = useCompanySetup();
+  const tableRef = useRef(null);
+
+  const [allLedgers, setAllLedgers] = useState([]); // keep full list
   const [filteredLedgers, setFilteredLedgers] = useState([]);
   const [checkedRows, setCheckedRows] = useState({});
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
-  const [isOptionOpen, setIsOptionOpen] = useState(false);
-  const openOptionModal = () => {
-    setIsOptionOpen(true);
-  };
-  const closeOptionModal = () => {
-    setIsOptionOpen(false);
-  };
 
+  const [isOptionOpen, setIsOptionOpen] = useState(false);
+  const [optionValues, setOptionValues] = useState({
+    Balance: "Active Balance", // default
+  });
+
+  const openOptionModal = () => setIsOptionOpen(true);
+  const closeOptionModal = () => setIsOptionOpen(false);
+
+  // fetch ledger + fa data
   useEffect(() => {
     if (!ledgerFromDate && dateFrom) {
       setLedgerFromDate(new Date(dateFrom));
     }
   }, [dateFrom, ledgerFromDate]);
 
-  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -368,11 +291,9 @@ const Example = () => {
         const faData = faRes.data.data || [];
 
         const ledgerTotals = {};
-
         faData.forEach((entry) => {
           entry.transactions.forEach((txn) => {
             const txnDate = new Date(txn.date);
-
             if (ledgerFromDate && txnDate < ledgerFromDate) return;
             if (ledgerToDate && txnDate > ledgerToDate) return;
 
@@ -388,21 +309,19 @@ const Example = () => {
           });
         });
 
-        const filtered = ledgersData
-          .filter((ledger) => ledgerTotals[ledger.formData.ahead.trim()])
-          .map((ledger) => {
-            const acc = ledger.formData.ahead.trim();
-            const debit = ledgerTotals[acc].debit;
-            const credit = ledgerTotals[acc].credit;
-            const balance = debit - credit;
-            const drcr = balance >= 0 ? "DR" : "CR";
-            return {
-              ...ledger,
-              totals: { balance, drcr },
-            };
-          });
+        const enrichedLedgers = ledgersData.map((ledger) => {
+          const acc = ledger.formData.ahead.trim();
+          const totals = ledgerTotals[acc] || { debit: 0, credit: 0 };
+          const balance = totals.debit - totals.credit;
+          const drcr = balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL";
+          return {
+            ...ledger,
+            totals: { balance, drcr },
+            hasTxn: !!ledgerTotals[acc], // flag for transacted accounts
+          };
+        });
 
-        setFilteredLedgers(filtered);
+        setAllLedgers(enrichedLedgers);
       } catch (err) {
         console.error(err);
       }
@@ -411,6 +330,78 @@ const Example = () => {
     fetchData();
   }, [ledgerFromDate, ledgerToDate]);
 
+  // apply OptionModal filter
+  useEffect(() => {
+    let result = [...allLedgers];
+
+    // ✅ Balance filtering
+    switch (optionValues.Balance) {
+      case "Active Balance":
+        result = result.filter((l) => l.totals.balance !== 0);
+        break;
+      case "Nil Balance":
+        result = result.filter((l) => l.totals.balance === 0);
+        break;
+      case "Debit Balance":
+        result = result.filter((l) => l.totals.balance > 0);
+        break;
+      case "Credit Balance":
+        result = result.filter((l) => l.totals.balance < 0);
+        break;
+      case "Transacted Account":
+        result = result.filter((l) => l.hasTxn);
+        break;
+      case "Non Transacted Account":
+        result = result.filter((l) => !l.hasTxn);
+        break;
+      case "All Accounts":
+        // no filter
+        break;
+      default:
+        break;
+    }
+
+    // ✅ Order By sorting
+    switch (optionValues.OrderBy) {
+      case "Annexure Wise":
+        result.sort((a, b) =>
+          (a.formData.Bsgroup || "").localeCompare(b.formData.Bsgroup || "")
+        );
+        break;
+      case "Account Name Wise":
+        result.sort((a, b) =>
+          (a.formData.ahead || "").localeCompare(b.formData.ahead || "")
+        );
+        break;
+      case "City Wise + Name Wise":
+        result.sort((a, b) => {
+          const cityCompare = (a.formData.city || "").localeCompare(
+            b.formData.city || ""
+          );
+          if (cityCompare !== 0) return cityCompare;
+          return (a.formData.ahead || "").localeCompare(b.formData.ahead || "");
+        });
+        break;
+      case "Sorting Order No.Wise":
+        result.sort(
+          (a, b) => (a.formData.sortOrderNo || 0) - (b.formData.sortOrderNo || 0)
+        );
+        break;
+      case "Prefix Annexure Wise":
+        result.sort((a, b) =>
+          (a.formData.prefixAnnexure || "").localeCompare(
+            b.formData.prefixAnnexure || ""
+          )
+        );
+        break;
+      default:
+        break;
+    }
+
+    setFilteredLedgers(result);
+  }, [allLedgers, optionValues]);
+
+
   const handleCheckboxChange = (id) => {
     setCheckedRows((prev) => ({
       ...prev,
@@ -418,11 +409,9 @@ const Example = () => {
     }));
   };
 
-  // Calculate selected debit/credit
   const { selectedDebit, selectedCredit } = useMemo(() => {
     let debitSum = 0;
     let creditSum = 0;
-
     filteredLedgers.forEach((ledger) => {
       if (checkedRows[ledger._id]) {
         const { balance, drcr } = ledger.totals || {};
@@ -430,176 +419,165 @@ const Example = () => {
         if (drcr === "CR") creditSum += Math.abs(balance);
       }
     });
-
     return { selectedDebit: debitSum, selectedCredit: creditSum };
   }, [checkedRows, filteredLedgers]);
 
   return (
-    <Card sx={{ p: 2, boxShadow: 3, borderRadius: 3 }}>
-      {/* Header */}
-      <Grid
-        container
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 2 }}
-      >
-        <Grid item>
-          <Typography variant="h5" fontWeight="bold" color="primary">
-            Trail Balance
-          </Typography>
-        </Grid>
-
-        <Grid item>
-          <Grid container spacing={2}>
-            <Grid item>
-              <TextField
-                label="Selected Debit"
+    <div>
+      <Card className="contMain">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: "10px",
+          }}
+        >
+          <h3 className="headerTrail">TRAIL BALANCE</h3>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              <span style={{ fontSize: 20 }} className="textform">
+                Selected Debit:
+              </span>
+              <input
+                style={{ marginLeft: 15 }}
+                className="value"
                 value={selectedDebit.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
-                InputProps={{ readOnly: true }}
+                readOnly
               />
-            </Grid>
-            <Grid item>
-              <TextField
-                label="Selected Credit"
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
+            >
+              <span style={{ fontSize: 20 }} className="textform">
+                Selected Credit:
+              </span>
+              <input
+                style={{ marginLeft: 7 }}
+                className="value"
                 value={selectedCredit.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
-                InputProps={{ readOnly: true }}
+                readOnly
               />
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+            </div>
+          </div>
+        </div>
 
-      {/* Table */}
-      <TableContainer
-        component={Paper}
-        sx={{ maxHeight: 450, borderRadius: 2 }}
-      >
-        <Table
-          stickyHeader
-          size="small"
-          sx={{
-            "& .MuiTableCell-root": {
-              border: "1px solid #ccc", // 👈 all cells get border
-            },
-            "& .MuiTableHead-root .MuiTableCell-root": {
-              background: "skyblue",
-              color: "white",
-              fontWeight: "bold",
-            },
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>Name</TableCell>
-              <TableCell>City</TableCell>
-              <TableCell align="right">Debit</TableCell>
-              <TableCell align="right">Credit</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {filteredLedgers.map((ledger, index) => {
-              const { balance, drcr } = ledger.totals || {};
-              return (
-                <TableRow
-                  key={ledger._id}
-                  hover
-                  sx={{
-                    backgroundColor: index % 2 === 0 ? "#fafafa" : "white",
-                  }}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={!!checkedRows[ledger._id]}
-                      onChange={() => handleCheckboxChange(ledger._id)}
-                    />
-                  </TableCell>
-                  <TableCell>{ledger.formData.ahead}</TableCell>
-                  <TableCell>{ledger.formData.city}</TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{ color: "darkblue", fontWeight: "bold" }}
-                  >
-                    {drcr === "DR"
-                      ? Math.abs(balance).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })
-                      : ""}
-                  </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{ color: "red", fontWeight: "bold" }}
-                  >
-                    {drcr === "CR"
-                      ? Math.abs(balance).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })
-                      : ""}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-
-          {/* Sticky Total Row */}
-          <tfoot>
-            <TableRow
-              sx={{
+        <div className="tableT">
+          <Table
+            size="sm"
+            className="custom-table"
+            hover
+            ref={tableRef}
+          >
+            <thead
+              style={{
                 position: "sticky",
-                bottom: 0,
-                background: "linear-gradient(to right, #4facfe, #00f2fe)",
-                color: "white",
+                top: 1,
+                background: "skyblue",
+                fontSize: 17,
+                textAlign: "center",
               }}
             >
-              <TableCell colSpan={3} align="right" sx={{ fontWeight: "bold" }}>
-                TOTAL:
-              </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                {filteredLedgers
-                  .reduce(
-                    (sum, ledger) =>
-                      sum +
-                      (ledger.totals?.drcr === "DR"
-                        ? Math.abs(ledger.totals.balance)
-                        : 0),
-                    0
-                  )
-                  .toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-              </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                {filteredLedgers
-                  .reduce(
-                    (sum, ledger) =>
-                      sum +
-                      (ledger.totals?.drcr === "CR"
-                        ? Math.abs(ledger.totals.balance)
-                        : 0),
-                    0
-                  )
-                  .toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-              </TableCell>
-            </TableRow>
-          </tfoot>
-        </Table>
-      </TableContainer>
-      <Button variant="primary" sx={{ mt: 2 }} onClick={openOptionModal}> Options</Button>
-      <OptionModal isOpen={isOptionOpen} onClose={closeOptionModal}/> 
-    </Card>
+              <tr>
+                <th></th>
+                <th>NAME</th>
+                <th>CITY</th>
+                <th>DEBIT</th>
+                <th>CREDIT</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredLedgers.map((ledger, index) => {
+                const { balance, drcr } = ledger.totals || {};
+                return (
+                  <tr
+                    key={ledger._id}
+                    style={{ cursor: "pointer", fontSize: 16 }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                  >
+                    <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                      <input
+                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                        type="checkbox"
+                        checked={!!checkedRows[ledger._id]}
+                        onChange={() => handleCheckboxChange(ledger._id)}
+                      />
+                    </td>
+                    <td>{ledger.formData.ahead}</td>
+                    <td>{ledger.formData.city}</td>
+                    <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
+                      {drcr === "DR"
+                        ? Math.abs(balance).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : ""}
+                    </td>
+                    <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
+                      {drcr === "CR"
+                        ? Math.abs(balance).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : ""}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+
+            <tfoot style={{ backgroundColor: "skyblue", position: "sticky", bottom: -8 }}>
+              <tr style={{ fontWeight: "bold", fontSize: 20 }}>
+                <td colSpan={3} style={{ textAlign: "right" }}>
+                  TOTAL:
+                </td>
+                <td style={{ textAlign: "right", color: "darkblue" }}>
+                  {filteredLedgers
+                    .reduce(
+                      (sum, l) =>
+                        sum + (l.totals?.drcr === "DR" ? Math.abs(l.totals.balance) : 0),
+                      0
+                    )
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </td>
+                <td style={{ textAlign: "right", color: "red" }}>
+                  {filteredLedgers
+                    .reduce(
+                      (sum, l) =>
+                        sum + (l.totals?.drcr === "CR" ? Math.abs(l.totals.balance) : 0),
+                      0
+                    )
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </td>
+              </tr>
+            </tfoot>
+          </Table>
+        </div>
+      </Card>
+
+      <Button variant="primary" sx={{ mt: 2 }} onClick={openOptionModal}>
+        Options
+      </Button>
+
+      <OptionModal
+        isOpen={isOptionOpen}
+        onClose={closeOptionModal}
+        onApply={(values) => setOptionValues(values)} // ✅ capture OptionModal values
+      />
+    </div>
   );
 };
 

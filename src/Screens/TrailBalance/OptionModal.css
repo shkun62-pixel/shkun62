@@ -1,6 +1,6 @@
 .custom-checkbox {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     appearance: none; /* Remove default checkbox */
     border: 2px solid #555;
     border-radius: 50%; /* Make it round */
@@ -17,7 +17,7 @@
 
   .custom-checkbox:checked::after {
     content: '✔';
-    font-size: 20px;
+    font-size: 15px;
     color: white;
     position: absolute;
     left: 50%;
@@ -65,4 +65,11 @@
     font-weight: bold;
     margin-left: 37.8%;
     padding: 5px;
+  }
+
+  .custom-radio {
+    transform: scale(1.5); /* make bigger */
+    margin-right: 8px;     /* spacing */
+    margin-left: 5px;
+    cursor: pointer;
   }
