@@ -1102,8 +1102,14 @@ const TrailBalance = () => {
   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
-    Balance: "Active Balance", // default
+    Balance: "Active Balance",
+    OrderBy: "",
+    Annexure: "All",
+    T1: "", // ✅ include T1 (Selected Accounts)
+    T3: false, // ✅ Print Current Date
   });
+  
+  const [printDateValue, setPrintDateValue] = useState(null); // ✅ actual stored date
   
   const openOptionModal = () => {
     setIsOptionOpen(true);
@@ -1201,7 +1207,7 @@ const TrailBalance = () => {
     }
   }, [activeRowIndex, showModal]);
 
-  // Fetch ledger list
+  // fetch ledger + fa
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -1244,7 +1250,7 @@ const TrailBalance = () => {
           return {
             ...ledger,
             totals: { balance, drcr },
-            hasTxn: !!ledgerTotals[acc], // flag for transacted accounts
+            hasTxn: !!ledgerTotals[acc],
           };
         });
 
@@ -1257,51 +1263,106 @@ const TrailBalance = () => {
     fetchData();
   }, [ledgerFromDate, ledgerToDate]);
 
-  // apply OptionModal filter
+  // apply filters + sorting
   useEffect(() => {
-    let result = [...allLedgers];
+  let result = [...allLedgers];
 
-    switch (optionValues.Balance) {
+  // Balance filter
+  switch (optionValues.Balance) {
       case "Active Balance":
-        result = result.filter((l) => l.totals.balance !== 0);
-        break;
+      result = result.filter((l) => l.totals.balance !== 0);
+      break;
       case "Nil Balance":
-        result = result.filter((l) => l.totals.balance === 0);
-        break;
+      result = result.filter((l) => l.totals.balance === 0);
+      break;
       case "Debit Balance":
-        result = result.filter((l) => l.totals.balance > 0);
-        break;
+      result = result.filter((l) => l.totals.balance > 0);
+      break;
       case "Credit Balance":
-        result = result.filter((l) => l.totals.balance < 0);
-        break;
+      result = result.filter((l) => l.totals.balance < 0);
+      break;
       case "Transacted Account":
-        result = result.filter((l) => l.hasTxn);
-        break;
+      result = result.filter((l) => l.hasTxn);
+      break;
       case "Non Transacted Account":
-        result = result.filter((l) => !l.hasTxn);
-        break;
+      result = result.filter((l) => !l.hasTxn);
+      break;
       case "All Accounts":
-        // no filter, show all
-        break;
       default:
-        break;
-    }
+      break;
+  }
 
-    setFilteredLedgers(result);
-  }, [allLedgers, optionValues]);
+  // Annexure filter
+  if (optionValues.Annexure && optionValues.Annexure !== "All") {
+      result = result.filter(
+      (l) => l.formData.Bsgroup === optionValues.Annexure
+      );
+  }
 
-  // ✅ Handle search filtering
-  useEffect(() => {
+  // Sorting
+  switch (optionValues.OrderBy) {
+    case "Annexure Wise":
+    result.sort((a, b) =>
+        (a.formData.Bsgroup || "").localeCompare(b.formData.Bsgroup || "")
+    );
+    break;
+    case "Account Name Wise":
+    result.sort((a, b) =>
+        (a.formData.ahead || "").localeCompare(b.formData.ahead || "")
+    );
+    break;
+    case "City Wise + Name Wise":
+    result.sort((a, b) => {
+      const cityComp = (a.formData.city || "").localeCompare(
+      b.formData.city || ""
+      );
+      if (cityComp !== 0) return cityComp;
+      return (a.formData.ahead || "").localeCompare(b.formData.ahead || "");
+    });
+    break;
+    case "Sorting Order No.Wise":
+    result.sort(
+        (a, b) =>
+        (a.formData.sortingOrderNo || 0) - (b.formData.sortingOrderNo || 0)
+    );
+    break;
+    case "Prefix Annexure Wise":
+    result.sort((a, b) =>
+        (a.formData.Bsgroup || "")
+        .toString()
+        .charAt(0)
+        .localeCompare((b.formData.Bsgroup || "").toString().charAt(0))
+    );
+    break;
+    default:
+    break;
+  }
+
+  // Selected Accounts filter
+  if (optionValues.T1) {
+    result = result.filter((l) => !!checkedRows[l._id]);
+  }
+
+  // ✅ Search filter
+  if (searchTerm) {
     const lower = searchTerm.toLowerCase();
-    const filtered = allLedgers.filter((ledger) =>
+    result = result.filter(
+    (ledger) =>
       ledger.formData.ahead.toLowerCase().includes(lower) ||
       ledger.formData.city?.toLowerCase().includes(lower) ||
       ledger.formData.gstNo?.toLowerCase().includes(lower) ||
       ledger.formData.phone?.toLowerCase().includes(lower)
     );
-    setFilteredLedgers(filtered);
-    setSelectedIndex(0); // reset highlight
-  }, [searchTerm, allLedgers]);
+  }
+
+  setFilteredLedgers(result);
+  }, [allLedgers, optionValues, checkedRows, searchTerm]);
+
+  // Reset selectedIndex ONLY when filters/search change, not checkbox
+  useEffect(() => {
+  setSelectedIndex(0);
+  }, [allLedgers, optionValues, searchTerm]);
+
 
   // 👉 Function to handle navigation based on vtype
   const handleTransactionSelect = (txn) => {
@@ -1770,8 +1831,21 @@ const TrailBalance = () => {
           <OptionModal
             isOpen={isOptionOpen}
             onClose={closeOptionModal}
-            onApply={(values) => setOptionValues(values)} // ✅ capture OptionModal values
+            onApply={(values) => {
+              setOptionValues(values);
+              // ✅ store date only if Print Current Date checkbox is true
+              if (values.T3) {
+                setPrintDateValue(new Date());
+              } else {
+                setPrintDateValue(null);
+              }
+            }}
           />
+          {/* <OptionModal
+            isOpen={isOptionOpen}
+            onClose={closeOptionModal}
+            onApply={(values) => setOptionValues(values)} // ✅ capture all values (Balance, OrderBy, Annexure, T1...)
+          /> */}
           <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}} onClick={handleOpen} >Print</Button>
           <PrintTrail
             items={filteredLedgers.map((ledger) => {
@@ -1787,13 +1861,8 @@ const TrailBalance = () => {
             handleClose={handleClose}
             ledgerFrom={ledgerFromDate}
             ledgerTo={ledgerToDate}
+            currentDate = {printDateValue}  // ✅ pass actual date
           />
-
-            {/* <PrintTrail
-            items={filteredLedgers}   // ✅ renamed correctly
-            isOpen={open}
-            handleClose={handleClose}
-          /> */}
           <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}}  onClick={exportToExcel}>Export </Button>
           <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}}>Exit</Button>
           </div>

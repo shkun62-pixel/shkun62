@@ -33,6 +33,7 @@ import BankBook from './Screens/Books/BankBook/BankBook';
 import CashReceipt from './Screens/CashVoucher/CashReceipt';
 import LedgerList from './Screens/AccountStatement/LedgerList';
 import Dashboard from './Screens/DashBoard/Dashboard';
+import Demo from './Screens/Demo';
 
 
 function App() {
@@ -83,6 +84,7 @@ function App() {
         <Route path='/CashReceipt' element={<CashReceipt />}></Route>
         <Route path='/LedgerList' element={<LedgerList />}></Route>
         <Route path='/Dashboard' element={<Dashboard />}></Route>
+        <Route path='/Demo' element={<Demo />}></Route>
       </Routes>
 
 

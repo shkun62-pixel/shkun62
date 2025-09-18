@@ -352,6 +352,18 @@ const OptionModal = ({ isOpen, onClose, onApply }) => {
             >
               EXIT
             </Button>
+            {/* <Button
+              style={{ backgroundColor: "#6c5ce7", color: "white", marginLeft: 10 }}
+              onClick={() => {
+                if (onApply) {
+                  onApply(formData);  // just send formData
+                }
+                onClose();
+              }}
+            >
+              OK
+            </Button> */}
+
             <Button
             style={{ backgroundColor: "#6c5ce7", color: "white", marginLeft: 10 }}
             onClick={() => {

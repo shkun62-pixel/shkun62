@@ -19,7 +19,7 @@ const chunkItems = (items = [], firstChunkSize, otherChunkSize) => {
   return chunks;
 };
 
-const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo }, ref) => {
+const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate }, ref) => {
 
   const { companyName, companyAdd, companyCity } = useCompanySetup();
 
@@ -28,7 +28,7 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
     content: () => componentRef.current,
   });
 
-  const chunks = chunkItems(items, 25, 40);
+  const chunks = chunkItems(items, 35, 40);
 
   // ✅ Calculate totals
   const totalDebit = items.reduce((acc, l) => acc + (l.debit || 0), 0);
@@ -105,6 +105,9 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
           </h1>
           <p style={{ textAlign: "center", margin: "0",fontSize:"20px",color:"darkblue" }}>{companyAdd}</p>
           <p style={{ textAlign: "center", margin: "0",fontSize:"20px",color:"darkblue" }}>{companyCity}</p>
+            {currentDate && (
+              <h2 style={{ fontWeight: "bold", fontSize:"18px",marginLeft:"72.3%" }}>Print Date: {formatDate(currentDate)}</h2>
+            )}
           <div style={{display:'flex',flexDirection:"row",justifyContent:'space-between'}}>
             <h2 style={{ fontWeight: "bold", marginTop: "10px",fontSize:"18px" }}>
                 TRIAL BALANCE
