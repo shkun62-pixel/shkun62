@@ -1072,6 +1072,7 @@ import "./TrailBalance.css"
 import PrintTrail from "./PrintTrail";
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
+import CoA from "./CoA";
 
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
@@ -1125,6 +1126,7 @@ const TrailBalance = () => {
   }, [dateFrom, ledgerFromDate]);
 
   // Filters Transactions Account Statement 
+  const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);   // ✅ For Options modal
   const [filterType, setFilterType] = useState("All");     // ✅ Debit / Credit / All
   const [filteredTransactions, setFilteredTransactions] = useState([]); // ✅ For filtered txns
@@ -2140,7 +2142,16 @@ const TrailBalance = () => {
                 <Button size="sm" variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
                 <Button size="sm" variant="secondary">Select</Button>{" "}
                 <Button size="sm" variant="secondary">Export</Button>{" "}
-                <Button size="sm" variant="secondary">Print</Button>{" "}
+                <Button size="sm" variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
+                <CoA
+                  isOpen={isPrintOpen}
+                  handleClose={() => setIsPrintOpen(false)}
+                  filteredTransactions={filteredTransactions}
+                  selectedLedger = {selectedLedger}
+                  ledgerFrom={ledgerFromDate}
+                  ledgerTo={ledgerToDate}
+                  currentDate = {printDateValue}  // ✅ pass actual date
+                />
                 <Button size="sm" variant="secondary">Email</Button>{" "}
               </div>
             </div>
