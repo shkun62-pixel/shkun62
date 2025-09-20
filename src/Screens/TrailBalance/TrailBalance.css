@@ -35,6 +35,15 @@
   height: 30px;
   border-radius: 4px;
 }
+
+.filterselect{
+  border: 1px solid black;
+  padding: 5px;
+  width: 200px;
+  border-radius: 4px;
+  margin-left: 60px;
+}
+
 .containerT{
   margin-top: -25px;
 }
