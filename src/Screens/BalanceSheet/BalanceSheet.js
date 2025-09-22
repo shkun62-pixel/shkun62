@@ -142,6 +142,13 @@ const BalanceSheet = ({ isOpen, onClose, onNavigate}) => {
         <DatePicker
         selected={formData.From}
         onChange={handleDateChange}
+        onChangeRaw={(e) => {
+          let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+          if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+          if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+          e.target.value = val; // Show formatted input
+        }}
         dateFormat="dd/MM/yyyy"  // Format for display
         className="custom-datepickerFrom"
         style={{ border: "1px solid black", marginLeft: 5, height: 30 }}
@@ -152,6 +159,13 @@ const BalanceSheet = ({ isOpen, onClose, onNavigate}) => {
         <DatePicker
         selected={formData.Upto}
         onChange={handleDateChangeUpto}
+        onChangeRaw={(e) => {
+          let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+          if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+          if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+          e.target.value = val; // Show formatted input
+        }}
         dateFormat="dd/MM/yyyy"  // Format for display
         className="custom-datepickerUpto"
         style={{ border: "1px solid black", marginLeft: 5, height: 30 }}

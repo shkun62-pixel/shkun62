@@ -60,47 +60,6 @@
   font-style: italic;
 }
 
-/* ===== React DatePicker Popper (calendar) ===== */
-.react-datepicker {
-  border-radius: 15px !important;
-  border: none !important;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  font-family: "Segoe UI", sans-serif;
-  overflow: hidden;
-}
-
-/* Calendar Header */
-.react-datepicker__header {
-  background: linear-gradient(90deg, #007bff, #00bfff);
-  border-bottom: none;
-  color: white;
-  font-weight: bold;
-}
-
-/* Day Cells */
-.react-datepicker__day {
-  border-radius: 50%;
-  padding: 8px;
-  margin: 2px;
-  transition: all 0.2s ease-in-out;
-}
-
-/* Hover Day */
-.react-datepicker__day:hover {
-  background: #007bff;
-  color: white;
-  transform: scale(1.1);
-}
-
-/* Selected Day */
-.react-datepicker__day--selected,
-.react-datepicker__day--keyboard-selected {
-  background: #00bfff !important;
-  color: white !important;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
-  transform: scale(1.15);
-}
-
 .Type{
     border: 1px solid black;
     height: 32px;

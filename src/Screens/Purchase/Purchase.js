@@ -2674,28 +2674,38 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }
   }, []);
 
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Midnight for today
-
-      const selectedDate = new Date(date);
-      selectedDate.setHours(0, 0, 0, 0); // Midnight for selected date
-
-      if (selectedDate > today) {
-        toast.info("You Have Selected a Future Date.", {
-          position: "top-center",
-        });
-      }
-
-      setSelectedDate(date);
-
-      const formattedDate = date.toISOString().split("T")[0]; // e.g., "2025-03-10"
-      setFormData((prev) => ({ ...prev, date: date, duedate: date }));
-    } else {
-      console.error("Invalid date value");
-    }
-  };
+   const handleDateChange = (date) => {
+     if (date instanceof Date && !isNaN(date)) {
+       setSelectedDate(date);
+       const formattedDate = date.toISOString().split("T")[0];
+       setFormData((prev) => ({
+         ...prev,
+         date: date,
+         duedate: date,
+       }));
+     }
+   };
+ 
+   // ✅ Separate function to validate future or past date
+   const validateDate = (date) => {
+     if (!date) return;
+ 
+     const today = new Date();
+     today.setHours(0, 0, 0, 0); // normalize today
+ 
+     const checkDate = new Date(date);
+     checkDate.setHours(0, 0, 0, 0); // normalize selected date
+ 
+     if (checkDate > today) {
+       toast.info("You Have Selected a Future Date.", {
+         position: "top-center",
+       });
+     } else if (checkDate < today) {
+       toast.info("You Have Selected a Past Date.", {
+         position: "top-center",
+       });
+     }
+   };
 
   const handleCalendarClose = () => {
     // If no date is selected when the calendar closes, default to today's date
@@ -3694,6 +3704,16 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             onCalendarClose={handleCalendarClose}
             dateFormat="dd-MM-yyyy"
             onChange={handleDateChange}
+            onBlur={() => validateDate(selectedDate)} // ✅ call on blur
+            onChangeRaw={(e) => {
+              if (!e.target.value) return; // ✅ avoid undefined error
+
+              let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+              if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
+              if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
+
+              e.target.value = val; // Show formatted input
+            }}
             readOnly={!isEditMode || isDisabled}
           />
           <div className="billdivz">

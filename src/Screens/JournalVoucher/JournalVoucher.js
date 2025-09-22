@@ -104,32 +104,36 @@ const JournalVoucher = () => {
   
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set today's date to midnight
-
-      const selectedDate = new Date(date);
-      selectedDate.setHours(0, 0, 0, 0); // Set selected date to midnight too
-
-      if (selectedDate > today) {
-        toast.info("You Have Selected a Future Date.", {
-          position: "top-center",
-        });
-      }
-
       setSelectedDate(date);
       const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({ ...prev, date: date }));
-    } else {
-      console.error("Invalid date value");
+      setFormData((prev) => ({ ...prev, date: formattedDate }));
     }
   };
-       const handleCalendarClose = () => {
-         // If no date is selected when the calendar closes, default to today's date
-         if (!selectedDate) {
-           const today = new Date();
-           setSelectedDate(today);
-         }
-       };
+
+  // ✅ Separate function for future date check
+  const checkFutureDate = (date) => {
+    if (!date) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+
+    if (checkDate > today) {
+      toast.info("You Have Selected a Future Date.", {
+        position: "top-center",
+      });
+    }
+  };
+
+  const handleCalendarClose = () => {
+    // If no date is selected when the calendar closes, default to today's date
+    if (!selectedDate) {
+      const today = new Date();
+      setSelectedDate(today);
+    }
+  };
   
   const [shopName, setShopName] = useState("NARAYAN FRUIT BAR"); // Set default value here
   const [description, setDescription] = useState(
@@ -1157,7 +1161,29 @@ const handleSearch = async (searchDate) => {
       
       <div className="Top">
         <text>DATE</text>
-          <DatePicker
+         <DatePicker
+            popperClassName="custom-datepicker-popper"
+            ref={datePickerRef}
+            className="DatePICKER"
+            id="date"
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            onBlur={() => checkFutureDate(selectedDate)} // ✅ call function on blur
+            onChangeRaw={(e) => {
+              if (!e.target.value) return; // ✅ avoid undefined error
+
+              let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+              if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
+              if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
+
+              e.target.value = val; // Show formatted input
+            }}
+            readOnly={!isEditMode || isDisabled}
+          />
+          {/* <DatePicker
           popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
           className="cashdate"
@@ -1170,7 +1196,7 @@ const handleSearch = async (searchDate) => {
           onCalendarClose={handleCalendarClose}
           dateFormat="dd-MM-yyyy"
           onChange={handleDateChange}
-        />
+        /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
           id="voucherno"

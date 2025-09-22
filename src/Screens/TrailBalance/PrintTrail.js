@@ -99,12 +99,13 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
               fontWeight: "bold",
               fontSize: "40px",
               color: "darkblue",
+              fontFamily: "Courier New"
             }}
           >
             {companyName?.toUpperCase()}
           </h1>
-          <p style={{ textAlign: "center", margin: "0",fontSize:"20px",color:"darkblue" }}>{companyAdd}</p>
-          <p style={{ textAlign: "center", margin: "0",fontSize:"20px",color:"darkblue" }}>{companyCity}</p>
+          <p style={{ textAlign: "center", margin: "0",fontSize:"20px",color:"darkblue",fontFamily: "Courier New" }}>{companyAdd}</p>
+          <p style={{ textAlign: "center", margin: "0",fontSize:"20px",color:"darkblue",fontFamily: "Courier New" }}>{companyCity}</p>
             {currentDate && (
               <h2 style={{ fontWeight: "bold", fontSize:"18px",marginLeft:"72.3%" }}>Print Date: {formatDate(currentDate)}</h2>
             )}
@@ -138,6 +139,12 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
                 CITY
                 </th>
                 <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
+                PCS
+                </th>
+                <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
+                QTY
+                </th>
+                <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
                 DR.BALANCE
                 </th>
                 <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
@@ -154,6 +161,8 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
                 </td>
                 <td style={{ border: "1px solid black", padding: "6px" }}>{l.name}</td>
                 <td style={{ border: "1px solid black", padding: "6px" }}>{l.city}</td>
+                <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>{l.netPcs}</td>
+                <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>{l.netWeight}</td>
                 <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
                 {l.debit > 0
                     ? l.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -173,7 +182,7 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
             {idx === chunks.length - 1 && (
             <tfoot>
                 <tr style={{ fontWeight: "bold", background: "#f2f2f2", fontSize: 20 }}>
-                <td style={{ border: "1px solid black", padding: "6px" }} colSpan={3}>
+                <td style={{ border: "1px solid black", padding: "6px" }} colSpan={5}>
                     TOTAL
                 </td>
                 <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>

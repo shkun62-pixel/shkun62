@@ -662,6 +662,13 @@ const LedgerList = () => {
             <DatePicker
               selected={fromDate}
               onChange={(date) => setFromDate(date)}   // ✅ FIXED
+              onChangeRaw={(e) => {
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
               dateFormat="dd/MM/yyyy"
               className={styles.from}
             />
@@ -672,6 +679,13 @@ const LedgerList = () => {
             <DatePicker
               selected={toDate}
               onChange={(date) => setToDate(date)}     // ✅ FIXED
+              onChangeRaw={(e) => {
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
               dateFormat="dd/MM/yyyy"
               className={styles.to}
             />

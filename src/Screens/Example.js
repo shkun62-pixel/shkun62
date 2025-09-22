@@ -233,7 +233,7 @@
 //         </div>
 //       </Card>
 //       <Button variant="primary" sx={{ mt: 2 }} onClick={openOptionModal}> Options</Button>
-//       <OptionModal isOpen={isOptionOpen} onClose={closeOptionModal}/> 
+//       <OptionModal isOpen={isOptionOpen} onClose={closeOptionModal}/>
 //     </div>
 //   );
 // };
@@ -592,389 +592,73 @@
 
 // export default Example;
 
-
-
-import React, { useEffect, useState, useRef, useMemo } from "react";
-import axios from "axios";
-import { Table, Card, Button } from "react-bootstrap";
+import React,{useState,useRef} from "react";
+import { ToastContainer, toast } from "react-toastify";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import useCompanySetup from "./Shared/useCompanySetup";
-import OptionModal from "./TrailBalance/OptionModal";
 
 const Example = () => {
-  const { dateFrom } = useCompanySetup();
-  const tableRef = useRef(null);
-
-  const [allLedgers, setAllLedgers] = useState([]); 
-  const [filteredLedgers, setFilteredLedgers] = useState([]);
-  const [checkedRows, setCheckedRows] = useState({});
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const [ledgerFromDate, setLedgerFromDate] = useState(null);
-  const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
-
-  const [isOptionOpen, setIsOptionOpen] = useState(false);
-  const [optionValues, setOptionValues] = useState({
-    Balance: "Active Balance",
-    OrderBy: "",
-    Annexure: "All",
-    T1: "", // ✅ include T1 (Selected Accounts)
+  const [formData, setFormData] = useState({
+    date: "",
   });
+  const datePickerRef = useRef(null);
+  const voucherRef = useRef(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const handleDateChange = (date) => {
+    if (date instanceof Date && !isNaN(date)) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set today's date to midnight
 
-  const openOptionModal = () => setIsOptionOpen(true);
-  const closeOptionModal = () => setIsOptionOpen(false);
+      const selectedDate = new Date(date);
+      selectedDate.setHours(0, 0, 0, 0); // Set selected date to midnight too
 
-  // init date range
-  useEffect(() => {
-    if (!ledgerFromDate && dateFrom) {
-      setLedgerFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, ledgerFromDate]);
-
-  // fetch ledger + fa
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [ledgerRes, faRes] = await Promise.all([
-          axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
-          ),
-          axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
-          ),
-        ]);
-
-        const ledgersData = ledgerRes.data.data || [];
-        const faData = faRes.data.data || [];
-
-        const ledgerTotals = {};
-        faData.forEach((entry) => {
-          entry.transactions.forEach((txn) => {
-            const txnDate = new Date(txn.date);
-            if (ledgerFromDate && txnDate < ledgerFromDate) return;
-            if (ledgerToDate && txnDate > ledgerToDate) return;
-
-            const acc = txn.account.trim();
-            if (!ledgerTotals[acc]) {
-              ledgerTotals[acc] = { debit: 0, credit: 0 };
-            }
-            if (txn.type.toLowerCase() === "debit") {
-              ledgerTotals[acc].debit += txn.amount;
-            } else if (txn.type.toLowerCase() === "credit") {
-              ledgerTotals[acc].credit += txn.amount;
-            }
-          });
+      if (selectedDate > today) {
+        toast.info("You Have Selected a Future Date.", {
+          position: "top-center",
         });
-
-        const enrichedLedgers = ledgersData.map((ledger) => {
-          const acc = ledger.formData.ahead.trim();
-          const totals = ledgerTotals[acc] || { debit: 0, credit: 0 };
-          const balance = totals.debit - totals.credit;
-          const drcr = balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL";
-          return {
-            ...ledger,
-            totals: { balance, drcr },
-            hasTxn: !!ledgerTotals[acc],
-          };
-        });
-
-        setAllLedgers(enrichedLedgers);
-      } catch (err) {
-        console.error(err);
       }
-    };
 
-    fetchData();
-  }, [ledgerFromDate, ledgerToDate]);
-
-  // apply filters + sorting
-  useEffect(() => {
-    let result = [...allLedgers];
-
-    // 🔹 Balance filter
-    switch (optionValues.Balance) {
-      case "Active Balance":
-        result = result.filter((l) => l.totals.balance !== 0);
-        break;
-      case "Nil Balance":
-        result = result.filter((l) => l.totals.balance === 0);
-        break;
-      case "Debit Balance":
-        result = result.filter((l) => l.totals.balance > 0);
-        break;
-      case "Credit Balance":
-        result = result.filter((l) => l.totals.balance < 0);
-        break;
-      case "Transacted Account":
-        result = result.filter((l) => l.hasTxn);
-        break;
-      case "Non Transacted Account":
-        result = result.filter((l) => !l.hasTxn);
-        break;
-      case "All Accounts":
-      default:
-        break;
+      setSelectedDate(date);
+      const formattedDate = date.toISOString().split("T")[0];
+      setFormData((prev) => ({ ...prev, date: formattedDate }));
+    } else {
+      console.error("Invalid date value");
     }
-
-    // 🔹 Annexure filter
-    if (optionValues.Annexure && optionValues.Annexure !== "All") {
-      result = result.filter(
-        (l) => l.formData.Bsgroup === optionValues.Annexure
-      );
-    }
-
-    // 🔹 Sorting (Order By)
-    switch (optionValues.OrderBy) {
-      case "Annexure Wise":
-        result.sort((a, b) =>
-          (a.formData.Bsgroup || "").localeCompare(b.formData.Bsgroup || "")
-        );
-        break;
-      case "Account Name Wise":
-        result.sort((a, b) =>
-          (a.formData.ahead || "").localeCompare(b.formData.ahead || "")
-        );
-        break;
-      case "City Wise + Name Wise":
-        result.sort((a, b) => {
-          const cityComp = (a.formData.city || "").localeCompare(
-            b.formData.city || ""
-          );
-          if (cityComp !== 0) return cityComp;
-          return (a.formData.ahead || "").localeCompare(b.formData.ahead || "");
-        });
-        break;
-      case "Sorting Order No.Wise":
-        result.sort(
-          (a, b) =>
-            (a.formData.sortingOrderNo || 0) - (b.formData.sortingOrderNo || 0)
-        );
-        break;
-      case "Prefix Annexure Wise":
-        result.sort((a, b) =>
-          (a.formData.Bsgroup || "")
-            .toString()
-            .charAt(0)
-            .localeCompare((b.formData.Bsgroup || "").toString().charAt(0))
-        );
-        break;
-      default:
-        break;
-    }
-
-      // 🔹 T1 = Selected Accounts filter
-    if (optionValues.T1) {
-      result = result.filter((l) => !!checkedRows[l._id]);
-    }
-
-
-    setFilteredLedgers(result);
-  }, [allLedgers, optionValues, checkedRows]); // ✅ add checkedRows here
-
-
-  const handleCheckboxChange = (id) => {
-    setCheckedRows((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
   };
 
-  const { selectedDebit, selectedCredit } = useMemo(() => {
-    let debitSum = 0;
-    let creditSum = 0;
-    filteredLedgers.forEach((ledger) => {
-      if (checkedRows[ledger._id]) {
-        const { balance, drcr } = ledger.totals || {};
-        if (drcr === "DR") debitSum += Math.abs(balance);
-        if (drcr === "CR") creditSum += Math.abs(balance);
-      }
-    });
-    return { selectedDebit: debitSum, selectedCredit: creditSum };
-  }, [checkedRows, filteredLedgers]);
+  const handleCalendarClose = () => {
+    // If no date is selected when the calendar closes, default to today's date
+    if (!selectedDate) {
+      const today = new Date();
+      setSelectedDate(today);
+    }
+  };
 
   return (
     <div>
-      <Card className="contMain">
-        {/* HEADER */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginBottom: "10px",
-          }}
-        >
-          <h3 className="headerTrail">TRAIL BALANCE</h3>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", flexDirection: "row" }}>
-              <span style={{ fontSize: 20 }} className="textform">
-                Selected Debit:
-              </span>
-              <input
-                style={{ marginLeft: 15 }}
-                className="value"
-                value={selectedDebit.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                readOnly
-              />
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
-            >
-              <span style={{ fontSize: 20 }} className="textform">
-                Selected Credit:
-              </span>
-              <input
-                style={{ marginLeft: 7 }}
-                className="value"
-                value={selectedCredit.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                readOnly
-              />
-            </div>
-          </div>
-        </div>
+      <ToastContainer />
+      <DatePicker
+        popperClassName="custom-datepicker-popper"
+        ref={datePickerRef}
+        className="DatePICKER"
+        id="date"
+        selected={selectedDate || null}
+        openToDate={new Date()}
+        onCalendarClose={handleCalendarClose}
+        dateFormat="dd-MM-yyyy"
+        onChange={handleDateChange}
+        onChangeRaw={(e) => {
+          if (!e.target.value) return; // ✅ avoid undefined error
 
-        {/* TABLE */}
-        <div className="tableT">
-          <Table size="sm" className="custom-table" hover ref={tableRef}>
-            <thead
-              style={{
-                position: "sticky",
-                top: 1,
-                background: "skyblue",
-                fontSize: 17,
-                textAlign: "center",
-              }}
-            >
-              <tr>
-                <th></th>
-                <th>NAME</th>
-                <th>CITY</th>
-                <th>DEBIT</th>
-                <th>CREDIT</th>
-              </tr>
-            </thead>
+          let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+          if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+          if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
 
-            <tbody>
-              {filteredLedgers.map((ledger, index) => {
-                const { balance, drcr } = ledger.totals || {};
-                return (
-                  <tr
-                    key={ledger._id}
-                    style={{ cursor: "pointer", fontSize: 16 }}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                  >
-                    <td
-                      style={{ textAlign: "center" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <input
-                        style={{
-                          width: "18px",
-                          height: "18px",
-                          cursor: "pointer",
-                        }}
-                        type="checkbox"
-                        checked={!!checkedRows[ledger._id]}
-                        onChange={() => handleCheckboxChange(ledger._id)}
-                      />
-                    </td>
-                    <td>{ledger.formData.ahead}</td>
-                    <td>{ledger.formData.city}</td>
-                    <td
-                      style={{
-                        textAlign: "right",
-                        color: "darkblue",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {drcr === "DR"
-                        ? Math.abs(balance).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : ""}
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "right",
-                        color: "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {drcr === "CR"
-                        ? Math.abs(balance).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : ""}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-
-            <tfoot
-              style={{
-                backgroundColor: "skyblue",
-                position: "sticky",
-                bottom: -8,
-              }}
-            >
-              <tr style={{ fontWeight: "bold", fontSize: 20 }}>
-                <td colSpan={3} style={{ textAlign: "right" }}>
-                  TOTAL:
-                </td>
-                <td style={{ textAlign: "right", color: "darkblue" }}>
-                  {filteredLedgers
-                    .reduce(
-                      (sum, l) =>
-                        sum +
-                        (l.totals?.drcr === "DR"
-                          ? Math.abs(l.totals.balance)
-                          : 0),
-                      0
-                    )
-                    .toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                </td>
-                <td style={{ textAlign: "right", color: "red" }}>
-                  {filteredLedgers
-                    .reduce(
-                      (sum, l) =>
-                        sum +
-                        (l.totals?.drcr === "CR"
-                          ? Math.abs(l.totals.balance)
-                          : 0),
-                      0
-                    )
-                    .toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                </td>
-              </tr>
-            </tfoot>
-          </Table>
-        </div>
-      </Card>
-
-      <Button variant="primary" sx={{ mt: 2 }} onClick={openOptionModal}>
-        Options
-      </Button>
-
-      <OptionModal
-        isOpen={isOptionOpen}
-        onClose={closeOptionModal}
-        onApply={(values) => setOptionValues(values)} // ✅ capture all values (Balance, OrderBy, Annexure, T1...)
+          e.target.value = val; // Show formatted input
+        }}
       />
+      <input 
+      ref={voucherRef}/>
     </div>
   );
 };

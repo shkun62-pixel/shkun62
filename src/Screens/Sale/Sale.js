@@ -7077,8 +7077,8 @@ const handleViewFAVoucher = () => {
       exfor: "",
       trpt: "",
       stype: "",
-      btype: "",
-      conv: "",
+      btype: BillType,
+      conv: SupplyType,
       rem1: "",
       rem2: "",
       v_tpt: "",
@@ -8483,33 +8483,34 @@ if (key === "name") {
 
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set today's date to midnight
-
-      const selectedDate = new Date(date);
-      selectedDate.setHours(0, 0, 0, 0); // Normalize selected date to midnight too
-
-      // ⚠️ Show toast if future date
-      if (selectedDate > today) {
-        toast.info("You have selected a future date.", { position: "top-center" });
-      }
-
-      // ⚠️ Show toast if back date and alertbackdate === "Yes"
-      if (alertbackdate === "Yes" && selectedDate < today) {
-        toast.info("You have selected a back date.", { position: "top-center" });
-      }
-
-      // ✅ Always allow selecting the date
       setSelectedDate(date);
-
       const formattedDate = date.toISOString().split("T")[0];
       setFormData((prev) => ({
         ...prev,
         date: date,
         duedate: date,
       }));
-    } else {
-      console.error("Invalid date value");
+    }
+  };
+
+  // ✅ Separate function to validate future or past date
+  const validateDate = (date) => {
+    if (!date) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // normalize today
+
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0); // normalize selected date
+
+    if (checkDate > today) {
+      toast.info("You Have Selected a Future Date.", {
+        position: "top-center",
+      });
+    } else if (checkDate < today) {
+      toast.info("You Have Selected a Past Date.", {
+        position: "top-center",
+      });
     }
   };
 
@@ -9346,16 +9347,6 @@ const handleKeyDownExp = (e, fieldName, index) => {
       {/* Top Parts */}
       <div className="sale_toppart ">
       <div className="Dated ">
-        {/* <DatePicker
-        ref={datePickerRef}
-        selected={selectedDate}
-        openToDate={new Date()}
-        onChange={handleDateChange}
-        onCalendarClose={handleCalendarClose}
-        dateFormat="dd-MM-yyyy"
-        customInput={<TextField  ref={datePickerRef} className="custom-bordered-input" label="DATE" variant="filled" size="small" sx={{width:130}} />}
-        // placement="bottom-start" // <-- use this, not popperPlacement
-      /> */}
         <DatePicker
         popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
@@ -9369,6 +9360,16 @@ const handleKeyDownExp = (e, fieldName, index) => {
           onCalendarClose={handleCalendarClose}
           dateFormat="dd-MM-yyyy"
           onChange={handleDateChange}
+          onBlur={() => validateDate(selectedDate)} // ✅ call on blur
+          onChangeRaw={(e) => {
+            if (!e.target.value) return; // ✅ avoid undefined error
+
+            let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+            if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
+            if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
+
+            e.target.value = val; // Show formatted input
+          }}
           readOnly={!isEditMode || isDisabled}
         />
       <div  className="billdivz">
@@ -10375,6 +10376,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                       color="error"
                       onClick={() => handleDeleteItem(index)}
                       size="small"
+                      tabIndex={-1} // ✅ prevent focus when tabbing
                     >
                       <DeleteIcon />
                     </IconButton>

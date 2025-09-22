@@ -17,7 +17,6 @@ import CoA from "./CoA";
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
 
-  // const [ledgers, setLedgers] = useState([]);
   const [allLedgers, setAllLedgers] = useState([]); // keep full list
   const [filteredLedgers, setFilteredLedgers] = useState([]); // ✅ for search
   const [searchTerm, setSearchTerm] = useState("");           // ✅ search state
@@ -81,6 +80,7 @@ const TrailBalance = () => {
   const [narrationFilter, setNarrationFilter] = useState(""); // ✅ for narration
   const [selectedRows, setSelectedRows] = useState({});
   const [selectionFilter, setSelectionFilter] = useState("All"); 
+  const [ledgerTotals, setLedgerTotals] = useState({}); // { ledgerId: { netPcs, netWeight } }
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState(() => new Date());
@@ -164,35 +164,6 @@ const TrailBalance = () => {
     selectedRows,      // 👈 added dependency
     transactions,
   ]);
-
-
-  // useEffect(() => {
-  //   let data = transactions;
-
-  //   // ✅ Filter by Debit/Credit
-  //   if (filterType !== "All") {
-  //     data = data.filter(
-  //       (txn) => txn.type.toLowerCase() === filterType.toLowerCase()
-  //     );
-  //   }
-
-  //   // ✅ Filter by narration
-  //   if (narrationFilter.trim() !== "") {
-  //     data = data.filter((txn) =>
-  //       txn.narration?.toLowerCase().includes(narrationFilter.toLowerCase())
-  //     );
-  //   }
-
-  //   // ✅ Filter by Date range
-  //   if (fromDate) {
-  //     data = data.filter((txn) => new Date(txn.date) >= fromDate);
-  //   }
-  //   if (toDate) {
-  //     data = data.filter((txn) => new Date(txn.date) <= toDate);
-  //   }
-
-  //   setFilteredTransactions(data);
-  // }, [filterType, narrationFilter, fromDate, toDate, transactions]);
 
   const [flaggedRows, setFlaggedRows] = useState(() => {
     const saved = localStorage.getItem("flaggedRowsTrail");
@@ -532,6 +503,44 @@ const TrailBalance = () => {
       .catch((err) => console.error(err));
   };
 
+  // For calculating net pcs and weight
+  useEffect(() => {
+    // Fetch all transactions once
+    axios.get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+      .then((res) => {
+        const allTxns = res.data.data || [];
+        
+        // Compute totals for each ledger
+        const totals = {};
+        allLedgers.forEach((ledger) => {
+          const ledgerTxns = allTxns.flatMap((entry) =>
+            entry.transactions.filter(
+              (txn) => txn.account.trim() === ledger.formData.ahead.trim()
+            )
+          );
+
+          let netWeight = 0;
+          let netPcs = 0;
+
+          ledgerTxns.forEach((txn) => {
+            if (txn.vtype === "P") {
+              netWeight += txn.weight || 0;
+              netPcs += txn.pkgs || 0;
+            } else if (txn.vtype === "S") {
+              netWeight -= txn.weight || 0;
+              netPcs -= txn.pkgs || 0;
+            }
+          });
+
+          totals[ledger._id] = { netWeight, netPcs };
+        });
+
+        setLedgerTotals(totals);
+      })
+      .catch((err) => console.error(err));
+  }, [allLedgers]);
+
+
   const handleCheckboxChange = (id) => {
     setCheckedRows((prev) => ({
       ...prev,
@@ -722,6 +731,13 @@ const TrailBalance = () => {
               className="fDate"
               selected={ledgerFromDate}
               onChange={(date) => setLedgerFromDate(date)}
+              onChangeRaw={(e) => {
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
               dateFormat="dd/MM/yyyy"
             />
             </div>
@@ -731,8 +747,22 @@ const TrailBalance = () => {
               className="toDate"
               selected={ledgerToDate}
               onChange={(date) => setLedgerToDate(date)}
+              onChangeRaw={(e) => {
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
               dateFormat="dd/MM/yyyy"
             />
+
+            {/* <DatePicker
+              className="toDate"
+              selected={ledgerToDate}
+              onChange={(date) => setLedgerToDate(date)}
+              dateFormat="dd/MM/yyyy"
+            /> */}
             </div>
           </div>
            <h3 className="headerTrail">TRAIL BALANCE</h3>
@@ -776,6 +806,8 @@ const TrailBalance = () => {
                 <th></th>
                 <th>NAME</th>
                 <th>CITY</th>
+                <th>PCS</th>
+                <th>QTY</th>
                 <th>DEBIT</th>
                 <th>CREDIT</th>
               </tr>
@@ -809,7 +841,12 @@ const TrailBalance = () => {
                     </td>
                     <td>{ledger.formData.ahead}</td>
                     <td>{ledger.formData.city}</td>
-
+                    <td style={{ textAlign: "right" }}>
+                      {ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000"}
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      {ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000"}
+                    </td>
                     <td style={{ textAlign: "right", color: "darkblue", fontWeight:"bold" }}>
                       {drcr === "DR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
 
@@ -823,10 +860,12 @@ const TrailBalance = () => {
               })}
             </tbody>
 
-            {/* ✅ Footer for totals */}
+        
             <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: -8,}}>
               <tr style={{ fontWeight: "bold",fontSize:20 }}>
                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
+                <td></td>
+                <td></td>
                 <td style={{ textAlign: "right", color: "darkblue" }}>
                 {filteredLedgers
                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "DR" ? Math.abs(ledger.totals.balance) : 0), 0)
@@ -867,11 +906,6 @@ const TrailBalance = () => {
               }
             }}
           />
-          {/* <OptionModal
-            isOpen={isOptionOpen}
-            onClose={closeOptionModal}
-            onApply={(values) => setOptionValues(values)} // ✅ capture all values (Balance, OrderBy, Annexure, T1...)
-          /> */}
           <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}} onClick={handleOpen} >Print</Button>
           <PrintTrail
             items={filteredLedgers.map((ledger) => {
@@ -879,6 +913,8 @@ const TrailBalance = () => {
               return {
                 name: ledger.formData.ahead,
                 city: ledger.formData.city,
+                netPcs: ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000",   // ✅ added
+                netWeight: ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000", // ✅ added
                 debit: drcr === "DR" ? Math.abs(balance) : 0,
                 credit: drcr === "CR" ? Math.abs(balance) : 0,
               };
@@ -1056,6 +1092,7 @@ const TrailBalance = () => {
                       <th>Date</th>
                       <th>Type</th>
                       <th>Narration</th>
+                      <th>Pcs</th>
                       <th>Qty</th>
                       <th>Debit</th>
                       <th>Credit</th>
@@ -1108,7 +1145,8 @@ const TrailBalance = () => {
                             <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
                             <td style={{ textAlign: "center" }}>{txn.vtype}</td>
                             <td>{txn.narration}</td>
-                            <td style={{ textAlign: "right" }}>{txn.weight}</td>
+                            <td style={{ textAlign: "right" }}>{txn.pkgs}</td>
+                            <td style={{ textAlign: "right" }}>{txn.weight}</td>                
                             <td style={{ textAlign: "right", color: "darkblue" }}>
                               {txn.type.toLowerCase() === "debit" ? txn.amount.toFixed(2) : ""}
                             </td>
@@ -1128,7 +1166,7 @@ const TrailBalance = () => {
                       })()
                     ) : (
                       <tr>
-                        <td colSpan={8} className="text-center">
+                        <td colSpan={10} className="text-center">
                           No transactions found
                         </td>
                       </tr>
@@ -1137,6 +1175,77 @@ const TrailBalance = () => {
 
                   {/* ✅ Proper footer row */}
                   {transactions.length > 0 && (() => {
+                    let totalDebit = 0;
+                    let totalCredit = 0;
+                    let balance = 0;
+                    let netWeight = 0;
+                    let netPcs = 0;
+
+                    filteredTransactions.forEach((txn) => {
+                      if (txn.type.toLowerCase() === "debit") {
+                        balance += txn.amount;
+                        totalDebit += txn.amount;
+                      } else if (txn.type.toLowerCase() === "credit") {
+                        balance -= txn.amount;
+                        totalCredit += txn.amount;
+                      }
+
+                      // ✅ Weight handling
+                      if (txn.vtype === "P") {
+                        netWeight += txn.weight || 0;   // Purchase positive
+                      } else if (txn.vtype === "S") {
+                        netWeight -= txn.weight || 0;   // Sale negative
+                      }
+                       // ✅ Pcs handling
+                      if (txn.vtype === "P") {
+                        netPcs += txn.pkgs || 0;   // Purchase positive
+                      } else if (txn.vtype === "S") {
+                        netPcs -= txn.pkgs || 0;   // Sale negative
+                      }
+                    });
+
+                    const drcrFinal = balance >= 0 ? "DR" : "CR";
+                    const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
+
+                    return (
+                      <tfoot>
+                        <tr
+                          style={{
+                            position: "sticky",
+                            bottom: -1,
+                            background: "skyblue",
+                            fontWeight: "bold",
+                            fontSize: 16,
+                          }}
+                        >
+                          <td colSpan={4} style={{ textAlign: "center" }}>
+                            Totals
+                          </td>
+                          <td style={{ textAlign: "right"}}>
+                            {netPcs.toFixed(3)}
+                          </td>
+                          {/* ✅ Net weight (sale in minus, purchase in plus) */}
+                          <td style={{ textAlign: "right" }}>
+                            {netWeight.toFixed(3)}
+                          </td>
+                          <td style={{ textAlign: "right", color: "darkblue" }}>
+                            {totalDebit.toFixed(2)}
+                          </td>
+                          <td style={{ textAlign: "right", color: "red" }}>
+                            {totalCredit.toFixed(2)}
+                          </td>
+                          <td style={{ textAlign: "right", color: colorFinal }}>
+                            {Math.abs(balance).toFixed(2)}
+                          </td>
+                          <td style={{ textAlign: "center", color: colorFinal }}>
+                            {drcrFinal}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    );
+                  })()}
+
+                  {/* {transactions.length > 0 && (() => {
                     let totalDebit = 0;
                     let totalCredit = 0;
                     let balance = 0;
@@ -1192,7 +1301,7 @@ const TrailBalance = () => {
                         </tr>
                       </tfoot>
                     );
-                  })()}
+                  })()} */}
                 </Table>
               </div>
               <div className="d-flex justify-content-between mt-2">
@@ -1232,6 +1341,13 @@ const TrailBalance = () => {
             <DatePicker
               selected={fromDate}
               onChange={(date) => setFromDate(date)}   // ✅ FIXED
+              onChangeRaw={(e) => {
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
               dateFormat="dd/MM/yyyy"
               className={styles.from}
             />
@@ -1242,6 +1358,13 @@ const TrailBalance = () => {
             <DatePicker
               selected={toDate}
               onChange={(date) => setToDate(date)}     // ✅ FIXED
+              onChangeRaw={(e) => {
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
               dateFormat="dd/MM/yyyy"
               className={styles.to}
             />
