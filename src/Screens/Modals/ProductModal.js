@@ -383,18 +383,6 @@ const ProductModal = ({
   // Open New Product modal
   const openNewStockModal = () => setShowNewStockModal(true);
 
-  // After closing "New", refresh API if search is active, else use parent
-  // const handleNewStockClose = async () => {
-  //   setShowNewStockModal(false);
-  //   if (searchTerm.trim() === "") {
-  //     setModalProducts(products);
-  //   } else {
-  //     await fetchProductsFromApi(searchTerm);
-  //   }
-  //   setSelectedIndex(0);
-  //   if (inputRef.current) inputRef.current.focus();
-  // };
-  // In ProductModal
 const handleNewStockClose = async () => {
   setShowNewStockModal(false);
   // Always fetch parent products (force update)
@@ -411,6 +399,28 @@ const handleNewStockClose = async () => {
   if (inputRef.current) inputRef.current.focus();
 };
 
+const handleSearchChange = (e) => {
+  const value = e.target.value;
+
+  // Empty always allowed
+  if (value === "") {
+    setSearchTerm("");
+    return;
+  }
+
+  // Check if ANY product field starts with the typed value
+  const hasMatch = products.some((p) =>
+    selectedFields.some((field) => {
+      const fieldVal = String(p[field] || "").toLowerCase();
+      return fieldVal.startsWith(value.toLowerCase()); // ✅ prefix match
+    })
+  );
+
+  if (hasMatch) {
+    setSearchTerm(value);  // ✅ allow typing
+  }
+  // else ignore (user typed wrong letter)
+};
 
   return (
     <>
@@ -476,7 +486,7 @@ const handleNewStockClose = async () => {
             type="text"
             className="search"
             placeholder="Search..."
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}   // ✅ use new function
             value={searchTerm}
             ref={inputRef}
           />

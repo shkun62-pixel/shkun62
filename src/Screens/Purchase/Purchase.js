@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,forwardRef } from "react";
 import "./Purchase.css";
 import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ProductModal from "../Modals/ProductModal";
@@ -31,6 +33,18 @@ import PurFAVoucherModal from "./PurFAVoucherModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 
 const LOCAL_STORAGE_KEY = "TABLEdataVisibility";
+// ✅ Forward ref so DatePicker can focus the input
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar={null}
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
 
 const Purchase = () => {
   const location = useLocation();
@@ -200,7 +214,7 @@ const Purchase = () => {
   ]);
 
   useEffect(() => {
-    if (addButtonRef.current) {
+    if (addButtonRef.current && !purId) {
       addButtonRef.current.focus();
     }
   }, []);
@@ -253,11 +267,11 @@ const Purchase = () => {
   const vBillNoRef = useRef(null);
   const tableRef = useRef(null);
 
-  useEffect(() => {
-    if (customerNameRef.current) {
-      customerNameRef.current.focus();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (customerNameRef.current) {
+  //     customerNameRef.current.focus();
+  //   }
+  // }, []);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
     if (event.key === "Enter") {
@@ -2714,11 +2728,16 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       setSelectedDate(today);
     }
   };
+
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   const HandleInputsChanges = (event) => {
     const { id, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]: capitalizeWords(value),
     }));
   };
 
@@ -3692,14 +3711,21 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       <div className="pur_toppart ">
         <div className="Dated ">
           <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            onBlur={() => validateDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+          {/* <DatePicker
             popperClassName="custom-datepicker-popper"
             ref={datePickerRef}
             className="DatePICKER"
             id="date"
-            // If selectedDate is null, nothing is "selected" in the calendar
             selected={selectedDate || null}
-            // This ensures that if there's no selected date,
-            // the calendar will open focused on today's date:
             openToDate={new Date()}
             onCalendarClose={handleCalendarClose}
             dateFormat="dd-MM-yyyy"
@@ -3715,7 +3741,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               e.target.value = val; // Show formatted input
             }}
             readOnly={!isEditMode || isDisabled}
-          />
+          /> */}
           <div className="billdivz">
             <TextField
               className="billzNo custom-bordered-input"
@@ -4707,6 +4733,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       color="error"
                       onClick={() => handleDeleteItem(index)}
                       size="small"
+                      tabIndex={-1} // ✅ prevent focus when tabbing
                     >
                       <DeleteIcon />
                     </IconButton>

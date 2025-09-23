@@ -152,7 +152,7 @@ const CoA = ({
             padding: "20px",
             borderRadius: "5px",
             boxSizing: "border-box",
-            border: "1px solid #ccc",
+            // border: "1px solid #ccc",
             marginTop: "15px",
           }}
         >
@@ -290,7 +290,7 @@ const CoA = ({
                 }}
               >
                 <thead>
-                  <tr style={{ background: "#ddd", fontSize: 20,textAlign:'center' }}>
+                  <tr style={{ background: "#ddd", fontSize: 20,textAlign:'center',fontFamily: "Courier New" }}>
                     <th style={{ border: "1px solid black", padding: "6px" }}>
                       Date
                     </th>
@@ -467,7 +467,7 @@ const CoA = ({
             style={{
               display: "flex",
               flexDirection: "row",
-              marginTop: "20px",
+              marginTop: "50px",
               fontSize: 20,
               justifyContent: "space-between",
               fontFamily: "Courier New",

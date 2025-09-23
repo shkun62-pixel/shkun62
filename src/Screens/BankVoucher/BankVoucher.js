@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./BankVoucher.css";
 import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { BiTrash } from "react-icons/bi";
@@ -22,6 +24,19 @@ import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import useCompanySetup from "../Shared/useCompanySetup";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 
+// ✅ Forward ref so DatePicker can focus the input
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar={null}
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
+
 const BankVoucher = () => {
 
   const companySetup = useCompanySetup();
@@ -41,6 +56,7 @@ const BankVoucher = () => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const addButtonRef = useRef(null);
   const datePickerRef = useRef(null);
   const VoucherRef = useRef(null);
   const BankRefs = useRef(null);
@@ -110,6 +126,12 @@ const BankVoucher = () => {
       code: "",
     },
   ]);
+
+  useEffect(() => {
+    if (addButtonRef.current && !bankId) {
+      addButtonRef.current.focus();
+    }
+  }, []);
 
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
@@ -1572,6 +1594,16 @@ const BankVoucher = () => {
       <div className="topdetails">
         <div style={{ display: "flex", flexDirection: "row" }}>
           <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            onBlur={() => checkFutureDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+          {/* <DatePicker
             popperClassName="custom-datepicker-popper"
             ref={datePickerRef}
             className="DatePICKER"
@@ -1592,7 +1624,7 @@ const BankVoucher = () => {
               e.target.value = val; // Show formatted input
             }}
             readOnly={!isEditMode || isDisabled}
-          />
+          /> */}
           <div style={{ marginLeft: 5 }}>
             <TextField
               className="custom-bordered-input"
@@ -1938,6 +1970,7 @@ const BankVoucher = () => {
                         color="error"
                         onClick={() => handleDeleteItem(index)}
                         size="small"
+                        tabIndex={-1} // ✅ prevent focus when tabbing
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -2049,6 +2082,7 @@ const BankVoucher = () => {
 
         <div className="Buttonsgroupz">
           <Button
+            ref={addButtonRef}
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[0] }}
             onClick={handleAdd}

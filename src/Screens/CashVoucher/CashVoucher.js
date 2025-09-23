@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./CashVoucher.css";
 import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
@@ -28,23 +30,36 @@ Font.register({
   src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf",
 });
 
+// ✅ Forward ref so DatePicker can focus the input
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar={null}
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
+
 const CashVoucher = () => {
 
-    const companySetup = useCompanySetup();
+  const companySetup = useCompanySetup();
 
-    const location = useLocation();
-    const cashId = location.state?.cashId;
-    const navigate = useNavigate();
+  const location = useLocation();
+  const cashId = location.state?.cashId;
+  const navigate = useNavigate();
 
-   const { company } = useContext(CompanyContext);
-      // const tenant = company?.databaseName;
-       const tenant = "shkun_05062025_05062026"
-   
-      if (!tenant) {
-        // you may want to guard here or show an error state,
-        // since without a tenant you can’t hit the right API
-        console.error("No tenant selected!");
-      }
+  const { company } = useContext(CompanyContext);
+  // const tenant = company?.databaseName;
+    const tenant = "shkun_05062025_05062026"
+
+  if (!tenant) {
+    // you may want to guard here or show an error state,
+    // since without a tenant you can’t hit the right API
+    console.error("No tenant selected!");
+  }
       
   const tableRef = useRef(null);
   const [open, setOpen] = React.useState(false);
@@ -52,6 +67,7 @@ const CashVoucher = () => {
   const handleClose = () => setOpen(false);
   const [currentDate, setCurrentDate] = useState("");
   const [currentDay, setCurrentDay] = useState("");
+  const addButtonRef = useRef(null);
   const datePickerRef = useRef(null);
   const voucherRef = useRef(null);
   const [title, setTitle] = useState("VIEW");
@@ -104,6 +120,12 @@ const CashVoucher = () => {
       disableReceipt: false,
     },
   ]);
+
+  useEffect(() => {
+    if (addButtonRef.current && !cashId) {
+      addButtonRef.current.focus();
+    }
+  }, []);
 
 // DateError
   useEffect(() => {
@@ -1443,7 +1465,17 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
       </div> */}
       <div className="Tops">
         <text>DATE</text>
-          <DatePicker
+         <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            onBlur={() => checkFutureDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+          {/* <DatePicker
             popperClassName="custom-datepicker-popper"
             ref={datePickerRef}
             className="DatePICKER"
@@ -1464,7 +1496,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
               e.target.value = val; // Show formatted input
             }}
             readOnly={!isEditMode || isDisabled}
-          />
+          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
           id="voucherno"
@@ -1664,6 +1696,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
                       color="error"
                       onClick={() => handleDeleteItem(index)}
                       size="small"
+                      tabIndex={-1} // ✅ prevent focus when tabbing
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -1808,6 +1841,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
 
         <div className="Buttonsgroupz">
           <Button
+            ref={addButtonRef}
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[0] }}
             onClick={handleAdd}

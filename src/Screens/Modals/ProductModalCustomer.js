@@ -383,11 +383,38 @@ const ProductModalCustomer = ({
     // Search handler: fetch new list from backend
     const handleSearch = async (e) => {
     const value = e.target.value;
-    setSearchTerm(value);
-    setCurrentPage(1);
-    await fetchCustomers({ search: value, searchField, page: 1 });
-    setSelectedIndex(0);
+
+    // Empty always allowed
+    if (value === "") {
+        setSearchTerm("");
+        setCurrentPage(1);
+        await fetchCustomers({ search: "", searchField, page: 1 });
+        setSelectedIndex(0);
+        return;
+    }
+
+    // Check if ANY product in current list has the searchField starting with value
+    const hasMatch = products.some((p) => {
+        const fieldVal = String(p[searchField] || "").toLowerCase();
+        return fieldVal.startsWith(value.toLowerCase()); // ✅ prefix match
+    });
+
+    if (hasMatch) {
+        setSearchTerm(value);
+        setCurrentPage(1);
+        await fetchCustomers({ search: value, searchField, page: 1 });
+        setSelectedIndex(0);
+    }
+    // else: ignore (block wrong typing)
     };
+
+    // const handleSearch = async (e) => {
+    // const value = e.target.value;
+    // setSearchTerm(value);
+    // setCurrentPage(1);
+    // await fetchCustomers({ search: value, searchField, page: 1 });
+    // setSelectedIndex(0);
+    // };
 
     const handleFieldChange = async (event) => {
     const field = event.target.value;

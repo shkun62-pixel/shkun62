@@ -5923,10 +5923,12 @@
 
 
 //  NEW SALE BELOW
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./Sale.css";
 import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ProductModal from "../Modals/ProductModal";
@@ -5961,6 +5963,19 @@ import FAVoucherModal from "../Shared/FAVoucherModal";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const LOCAL_STORAGE_KEY = "tabledataVisibility";
+
+// ✅ Forward ref so DatePicker can focus the input
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar={null}
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
 
 const Sale = () => {
 
@@ -7867,6 +7882,10 @@ const handleViewFAVoucher = () => {
     setLoading(false);
   };
 
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   // Modal For Items
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -8526,7 +8545,7 @@ if (key === "name") {
     const { id, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]: capitalizeWords(value),
     }));
   };
 
@@ -9348,14 +9367,21 @@ const handleKeyDownExp = (e, fieldName, index) => {
       <div className="sale_toppart ">
       <div className="Dated ">
         <DatePicker
+          ref={datePickerRef}
+          selected={selectedDate || null}
+          openToDate={new Date()}
+          onCalendarClose={handleCalendarClose}
+          dateFormat="dd-MM-yyyy"
+          onChange={handleDateChange}
+          onBlur={() => validateDate(selectedDate)}
+          customInput={<MaskedInput />}
+        />
+        {/* <DatePicker
         popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
           className="DatePICKER"
           id="date"
-          // If selectedDate is null, nothing is "selected" in the calendar
           selected={selectedDate || null}
-          // This ensures that if there's no selected date,
-          // the calendar will open focused on today's date:
           openToDate={new Date()}
           onCalendarClose={handleCalendarClose}
           dateFormat="dd-MM-yyyy"
@@ -9371,7 +9397,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
             e.target.value = val; // Show formatted input
           }}
           readOnly={!isEditMode || isDisabled}
-        />
+        /> */}
       <div  className="billdivz">
         <TextField
           className="billzNo custom-bordered-input"
@@ -9517,7 +9543,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 </div>
                 <div className="citydivZ">
                   <TextField
-                     disabled
+                    //  disabled
                     className="cityName custom-bordered-input"
                     value={item.city}
                     variant="filled"
@@ -9530,7 +9556,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                         fontSize: `${fontSize}px`,
                         // padding: "0 8px",
                       },
-                      // readOnly: !isEditMode || isDisabled,
+                      readOnly: !isEditMode || isDisabled,
                     }}
                     onChange={(e) =>
                       handleItemChangeCus(index, "city", e.target.value)
@@ -9542,7 +9568,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
               <div className="GST">
                 <div>
                   <TextField
-                   disabled
+                  //  disabled
                     className="gstnoZ custom-bordered-input"
                     value={item.gstno}
                     variant="filled"
@@ -9555,7 +9581,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                         fontSize: `${fontSize}px`,
                         // padding: "0 8px",
                       },
-                      // readOnly: !isEditMode || isDisabled,
+                      readOnly: !isEditMode || isDisabled,
                     }}
                     onChange={(e) =>
                       handleItemChangeCus(
@@ -9569,7 +9595,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 </div>
                 <div className="pandivZ">
                   <TextField
-                   disabled
+                  //  disabled
                     className="PANNoZ custom-bordered-input"
                     value={item.pan}
                     variant="filled"
@@ -9582,7 +9608,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                         fontSize: `${fontSize}px`,
                         // padding: "0 8px",
                       },
-                      // readOnly: !isEditMode || isDisabled,
+                      readOnly: !isEditMode || isDisabled,
                     }}
                     onChange={(e) =>
                       handleItemChangeCus(index, "PanNo", e.target.value)
@@ -9732,20 +9758,29 @@ const handleKeyDownExp = (e, fieldName, index) => {
               }}
               size="small"
               variant="filled"
-              disabled={!isEditMode || isDisabled}
+              // disabled={!isEditMode || isDisabled}
             >
               <InputLabel id="billcash-label">BILL TYPE</InputLabel>
-              <Select
-              className="custom-bordered-input"
+                <Select
+                className="custom-bordered-input"
                 labelId="billcash-label"
                 id="billcash"
                 value={formData.btype}
-                onChange={handleBillCash}
+                onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleBillCash(e);
+                }}
+                onOpen={(e) => {
+                  if (!isEditMode || isDisabled) {
+                    e.preventDefault(); // prevent dropdown opening
+                  }
+                }}
                 label="BILL TYPE"
                 displayEmpty
                 inputProps={{
                   sx: {
                     fontSize: `${fontSize}px`, 
+                    pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                   },
                 }}
                 MenuProps={{ disablePortal: true }}
@@ -9763,7 +9798,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 fullWidth
                 size="small"
                 variant="filled"
-                disabled={!isEditMode || isDisabled}
+                // disabled={!isEditMode || isDisabled}
                 className="TAXtypez custom-bordered-input"
                 sx={{
                   fontSize: `${fontSize}px`,
@@ -9774,11 +9809,20 @@ const handleKeyDownExp = (e, fieldName, index) => {
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
-                className="TAXtypez"
+                  className="TAXtypez"
                   labelId="taxtype-label"
                   id="stype"
                   value={formData.stype}
-                  onChange={handleTaxType}
+                  onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleTaxType(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleTaxType}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -9787,6 +9831,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   inputProps={{
                     sx: {
                       fontSize: `${fontSize}px`,
+                      pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
                 >
@@ -9819,21 +9864,31 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 },
               }}
               size="small"
-              disabled={!isEditMode || isDisabled}
+              // disabled={!isEditMode || isDisabled}
               variant="filled"
             >
               <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
               <Select
-              className="SupplyTYPE"
+                className="SupplyTYPE"
                 labelId="supply-label"
                 id="supply"
                 value={formData.conv}
-                onChange={handleSupply}
+                onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleSupply(e);
+                }}
+                onOpen={(e) => {
+                  if (!isEditMode || isDisabled) {
+                    e.preventDefault(); // prevent dropdown opening
+                  }
+                }}
+                // onChange={handleSupply}
                 label="SUPPLY TYPE"
                 displayEmpty
                 inputProps={{
                   sx: {
                     fontSize: `${fontSize}px`,
+                    pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                   },
                 }}
                 MenuProps={{ disablePortal: true }}

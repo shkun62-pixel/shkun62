@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./JournalVoucher.css";
 import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { BiTrash } from "react-icons/bi";
@@ -17,6 +19,19 @@ import TextField from "@mui/material/TextField";
 import {IconButton} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useLocation } from "react-router-dom";
+
+// ✅ Forward ref so DatePicker can focus the input
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar={null}
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
 
 const JournalVoucher = () => {
   const location = useLocation();
@@ -36,6 +51,7 @@ const JournalVoucher = () => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const addButtonRef = useRef(null);
   const accountNameRefs = useRef([]);
   const narrationRefs = useRef([]);
   const debitRefs = useRef([]);
@@ -81,26 +97,32 @@ const JournalVoucher = () => {
     },
   ]);
 
-    // Date
-    useEffect(() => {
-      // If formData.date has a valid date string, parse it and set selectedDate
-      if (formData.date) {
-        try {
-          const date = new Date(formData.date);
-          if (!isNaN(date.getTime())) {
-            setSelectedDate(date);
-          } else {
-            console.error("Invalid date value in formData.date:", formData.date);
-          }
-        } catch (error) {
-          console.error("Error parsing date:", error);
+  useEffect(() => {
+    if (addButtonRef.current && !journalId) {
+      addButtonRef.current.focus();
+    }
+  }, []);
+
+  // Date
+  useEffect(() => {
+    // If formData.date has a valid date string, parse it and set selectedDate
+    if (formData.date) {
+      try {
+        const date = new Date(formData.date);
+        if (!isNaN(date.getTime())) {
+          setSelectedDate(date);
+        } else {
+          console.error("Invalid date value in formData.date:", formData.date);
         }
-      } else {
-        // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-        // but we can still have it open on today's date via openToDate
-        setSelectedDate(null);
+      } catch (error) {
+        console.error("Error parsing date:", error);
       }
-    }, [formData.date]);
+    } else {
+      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
+      // but we can still have it open on today's date via openToDate
+      setSelectedDate(null);
+    }
+  }, [formData.date]);
   
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
@@ -1161,7 +1183,17 @@ const handleSearch = async (searchDate) => {
       
       <div className="Top">
         <text>DATE</text>
-         <DatePicker
+          <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            onBlur={() => checkFutureDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+         {/* <DatePicker
             popperClassName="custom-datepicker-popper"
             ref={datePickerRef}
             className="DatePICKER"
@@ -1182,21 +1214,7 @@ const handleSearch = async (searchDate) => {
               e.target.value = val; // Show formatted input
             }}
             readOnly={!isEditMode || isDisabled}
-          />
-          {/* <DatePicker
-          popperClassName="custom-datepicker-popper"
-          ref={datePickerRef}
-          className="cashdate"
-          id="date"
-          // If selectedDate is null, nothing is "selected" in the calendar
-          selected={selectedDate || null}
-          // This ensures that if there's no selected date, 
-          // the calendar will open focused on today's date:
-          openToDate={new Date()}
-          onCalendarClose={handleCalendarClose}
-          dateFormat="dd-MM-yyyy"
-          onChange={handleDateChange}
-        /> */}
+          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
           id="voucherno"
@@ -1473,6 +1491,7 @@ const handleSearch = async (searchDate) => {
       </div>
         <div className="Buttonsgroupz">
           <Button
+            ref={addButtonRef}
             className="Buttonz"
             style={{
               color: "black",
