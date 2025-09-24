@@ -732,43 +732,6 @@ const LedgerList = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* <Modal style={{zIndex:100000}} show={showOptions} onHide={() => setShowOptions(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Filter Transactions</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-      
-          <Form.Group >
-            <Form.Label>Select Type</Form.Label>
-            <Form.Select
-              className={styles.tType}
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option value="All">All</option>
-              <option value="Debit">Debit</option>
-              <option value="Credit">Credit</option>
-            </Form.Select>
-          </Form.Group>
-
-       
-          <div style={{display:'flex',flexDirection:'row'}}>
-            <Form.Label style={{marginTop:5}}>Narration</Form.Label>
-            <input
-              className={styles.nar}
-              type="text"
-              value={narrationFilter}
-              onChange={(e) => setNarrationFilter(e.target.value)}
-            />
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowOptions(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal> */}
     </div>
   );
 };

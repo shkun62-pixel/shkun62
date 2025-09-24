@@ -29,7 +29,6 @@ const TrailBalance = () => {
   const searchRef = useRef(null);   // ✅ search input ref
   const navigate = useNavigate();
   const [activeRowIndex, setActiveRowIndex] = useState(0);  // ✅ Track highlighted txn row
-  const location = useLocation();
   const [checkedRows, setCheckedRows] = useState({});
 
   // Printing Trail Balance
@@ -81,6 +80,8 @@ const TrailBalance = () => {
   const [selectedRows, setSelectedRows] = useState({});
   const [selectionFilter, setSelectionFilter] = useState("All"); 
   const [ledgerTotals, setLedgerTotals] = useState({}); // { ledgerId: { netPcs, netWeight } }
+  const [progressiveDebit, setProgressiveDebit] = useState(0);
+  const [progressiveCredit, setProgressiveCredit] = useState(0);
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState(() => new Date());
@@ -105,6 +106,29 @@ const TrailBalance = () => {
       [txnId]: !prev[txnId], // toggle selection
     }));
   };
+
+  useEffect(() => {
+    if (!transactions.length || activeRowIndex < 0) {
+      setProgressiveDebit(0);
+      setProgressiveCredit(0);
+      return;
+    }
+
+    let debit = 0;
+    let credit = 0;
+
+    filteredTransactions.slice(0, activeRowIndex + 1).forEach((txn) => {
+      if (txn.type.toLowerCase() === "debit") {
+        debit += txn.amount;
+      } else if (txn.type.toLowerCase() === "credit") {
+        credit += txn.amount;
+      }
+    });
+
+    setProgressiveDebit(debit);
+    setProgressiveCredit(credit);
+  }, [activeRowIndex, filteredTransactions]);
+
 
 
   // ✅ Update filtered transactions whenever filters or transactions change
@@ -989,29 +1013,25 @@ const TrailBalance = () => {
               <div style={{display:'flex',flexDirection:'column',textAlign:'center'}}>
                 <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
                   <b style={{fontSize:16,marginRight:"14px"}}>Progressive DR</b>
-                   <TextField
+                    <TextField
                       className="custom-bordered-input"
                       size="small"
+                      value={progressiveDebit.toFixed(2)}   // ✅ show progressive debit
                       inputProps={{
                         maxLength: 48,
-                        style: {
-                          height: "10px",
-                          width:"206px"
-                        },
+                        style: { height: "10px", width:"206px" },
                       }}
                     />
                 </div>
                 <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
                   <b style={{fontSize:16,marginRight:"14px"}}>Progressive CR</b>
-                   <TextField
+                     <TextField
                       className="custom-bordered-input"
                       size="small"
+                      value={progressiveCredit.toFixed(2)}  // ✅ show progressive credit
                       inputProps={{
                         maxLength: 48,
-                        style: {
-                          height: "10px",
-                          width:"206px"
-                        },
+                        style: { height: "10px", width:"206px" },
                       }}
                     />
                 </div>
@@ -1244,64 +1264,6 @@ const TrailBalance = () => {
                       </tfoot>
                     );
                   })()}
-
-                  {/* {transactions.length > 0 && (() => {
-                    let totalDebit = 0;
-                    let totalCredit = 0;
-                    let balance = 0;
-                    let totalWeightS = 0;
-                    let totalWeightP = 0;
-
-                    filteredTransactions.forEach((txn) => {
-                      if (txn.type.toLowerCase() === "debit") {
-                        balance += txn.amount;
-                        totalDebit += txn.amount;
-                      } else if (txn.type.toLowerCase() === "credit") {
-                        balance -= txn.amount;
-                        totalCredit += txn.amount;
-                      }
-
-                      // Weight totals
-                      if (txn.vtype === "S") totalWeightS += txn.weight || 0;
-                      if (txn.vtype === "P") totalWeightP += txn.weight || 0;
-                    });
-
-                    const drcrFinal = balance >= 0 ? "DR" : "CR";
-                    const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
-
-                    const netWeight = totalWeightS - totalWeightP;
-
-                    return (
-                      <tfoot>
-                        <tr
-                          style={{
-                            position: "sticky",
-                            bottom: -1,
-                            background: "skyblue",
-                            fontWeight: "bold",
-                            fontSize: 16,
-                          }}
-                        >
-                          <td colSpan={4} style={{ textAlign: "center" }}>
-                            Totals
-                          </td>
-                          <td style={{ textAlign: "right" }}>{netWeight.toFixed(3)}</td>
-                          <td style={{ textAlign: "right", color: "darkblue" }}>
-                            {totalDebit.toFixed(2)}
-                          </td>
-                          <td style={{ textAlign: "right", color: "red" }}>
-                            {totalCredit.toFixed(2)}
-                          </td>
-                          <td style={{ textAlign: "right", color: colorFinal }}>
-                            {Math.abs(balance).toFixed(2)}
-                          </td>
-                          <td style={{ textAlign: "center", color: colorFinal }}>
-                            {drcrFinal}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    );
-                  })()} */}
                 </Table>
               </div>
               <div className="d-flex justify-content-between mt-2">

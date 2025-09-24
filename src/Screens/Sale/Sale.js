@@ -11158,11 +11158,11 @@ const handleKeyDownExp = (e, fieldName, index) => {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th>Bill No</th>
+                <th>BillNo</th>
                 <th>Date</th>
                 <th>Customer</th>
                 <th>City</th>
-                <th>Grand Total</th>
+                <th>GrandTotal</th>
                 <th>Action</th>
               </tr>
             </thead>
