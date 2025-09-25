@@ -127,7 +127,7 @@ const JournalVoucher = () => {
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
       setSelectedDate(date);
-      const formattedDate = date.toLocaleDateString("en-US");
+      const formattedDate = date.toISOString().split("T")[0];
       setFormData((prev) => ({ ...prev, date: formattedDate }));
     }
   };
@@ -253,10 +253,6 @@ const JournalVoucher = () => {
     setItems(updatedItems);
   };
 
-  const formattedDate = `${String(selectedDate.getDate()).padStart(2, '0')}/${
-  String(selectedDate.getMonth() + 1).padStart(2, '0')}/${
-  selectedDate.getFullYear()}`;
-
   const handleSaveClick = async () => {
     document.body.style.backgroundColor = 'white';
     setIsSaving(true);
@@ -295,7 +291,7 @@ const JournalVoucher = () => {
                 _id: formData._id,
                 formData: {
                   vtype: formData.vtype,
-                  date: formattedDate, // <-- use the formatted date here
+                  date: selectedDate.toLocaleDateString("en-US"),
                   voucherno: formData.voucherno,
                   owner: formData.owner,
                   totaldebit: formData.totaldebit,
