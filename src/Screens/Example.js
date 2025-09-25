@@ -738,157 +738,158 @@
 
 
 
-// import React, { useState, useEffect, useRef, forwardRef } from "react";
-// import DatePicker from "react-datepicker";
-// import InputMask from "react-input-mask";
-// import "react-datepicker/dist/react-datepicker.css";
-// import "react-toastify/dist/ReactToastify.css";
-// import Button from "react-bootstrap/Button";
-// import { ToastContainer, toast } from "react-toastify";
-
-// // ✅ Forward ref so DatePicker can focus the input
-// const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-//   <InputMask
-//     mask="99-99-9999"
-//     maskChar={null}
-//     value={value}
-//     onChange={onChange}
-//     onBlur={onBlur}
-//   >
-//     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-//   </InputMask>
-// ));
-
-// const Example = () => {
-//    const [formData, setFormData] = useState({
-//       date: "",
-//     });
-//   const datePickerRef = useRef(null);
-//   const [selectedDate, setSelectedDate] = useState(new Date());
-
-//   const handleAdd = () => {
-//     if (datePickerRef.current) {  
-//       datePickerRef.current.setFocus();
-//     }
-//   };
-//    const handleDateChange = (date) => {
-//       if (date instanceof Date && !isNaN(date)) {
-//         setSelectedDate(date);
-//         const formattedDate = date.toISOString().split("T")[0];
-//         setFormData((prev) => ({ ...prev, date: formattedDate }));
-//       }
-//     };
-  
-//     // ✅ Separate function for future date check
-//     const checkFutureDate = (date) => {
-//       if (!date) return;
-  
-//       const today = new Date();
-//       today.setHours(0, 0, 0, 0);
-  
-//       const checkDate = new Date(date);
-//       checkDate.setHours(0, 0, 0, 0);
-  
-//       if (checkDate > today) {
-//         toast.info("You Have Selected a Future Date.", {
-//           position: "top-center",
-//         });
-//       }
-//     };
-  
-//     const handleCalendarClose = () => {
-//       // If no date is selected when the calendar closes, default to today's date
-//       if (!selectedDate) {
-//         const today = new Date();
-//         setSelectedDate(today);
-//       }
-//     };
-//   return (
-//     <div>
-//       <DatePicker
-//         ref={datePickerRef}
-//         selected={selectedDate || null}
-//         openToDate={new Date()}
-//         onCalendarClose={handleCalendarClose}
-//         dateFormat="dd-MM-yyyy"
-//         onChange={handleDateChange}
-//         onBlur={() => checkFutureDate(selectedDate)}
-//         customInput={<MaskedInput />}
-//       />
-//       <Button onClick={handleAdd}>Add</Button>
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
+import DatePicker from "react-datepicker";
 import InputMask from "react-input-mask";
+import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Button from "react-bootstrap/Button";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
+// ✅ Forward ref so DatePicker can focus the input
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar=" "
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
 
 const Example = () => {
-  const [formData, setFormData] = useState({ date: "" });
-  const inputRef = useRef(null); // ✅ ref for focusing
+   const [formData, setFormData] = useState({
+      date: "",
+    });
+  const datePickerRef = useRef(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const handleChange = (e) => {
-    // strip placeholder underscores before saving
-    setFormData({ date: e.target.value.replace(/_/g, "") });
-  };
-
-  const handleBlur = () => {
-    const raw = formData.date;
-    if (!raw || raw.length < 10) return;
-
-    const [day, month, year] = raw.split("-");
-    if (!day || !month || !year || year.length < 4) return;
-
-    const parsed = new Date(Number(year), Number(month) - 1, Number(day));
-    if (isNaN(parsed)) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    parsed.setHours(0, 0, 0, 0);
-
-    if (parsed > today) {
-      toast.info("You Have Selected a Future Date.", { position: "top-center" });
-    }
-  };
-
-  // ✅ Set focus when Add button is clicked
   const handleAdd = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
+    if (datePickerRef.current) {  
+      datePickerRef.current.setFocus();
     }
   };
-
+   const handleDateChange = (date) => {
+      if (date instanceof Date && !isNaN(date)) {
+        setSelectedDate(date);
+        const formattedDate = date.toISOString().split("T")[0];
+        setFormData((prev) => ({ ...prev, date: formattedDate }));
+      }
+    };
+  
+    // ✅ Separate function for future date check
+    const checkFutureDate = (date) => {
+      if (!date) return;
+  
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+  
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+  
+      if (checkDate > today) {
+        toast.info("You Have Selected a Future Date.", {
+          position: "top-center",
+        });
+      }
+    };
+  
+    const handleCalendarClose = () => {
+      // If no date is selected when the calendar closes, default to today's date
+      if (!selectedDate) {
+        const today = new Date();
+        setSelectedDate(today);
+      }
+    };
   return (
     <div>
-      <InputMask
-        mask="99-99-9999"
-        maskChar=" "
-        value={formData.date}
-        onChange={handleChange}
-        onBlur={handleBlur}
-      >
-        {(inputProps) => (
-          <input
-            {...inputProps}
-            ref={inputRef} // ✅ attach ref
-            className="DatePICKER"
-            value={formData.date.replace(/_/g, "")} // optional: show blanks
-          />
-        )}
-      </InputMask>
-
-      <Button onClick={handleAdd} className="m-2">
-        Add
-      </Button>
-
-      <ToastContainer />
+      <DatePicker
+        ref={datePickerRef}
+        selected={selectedDate || null}
+        openToDate={new Date()}
+        onCalendarClose={handleCalendarClose}
+        dateFormat="dd-MM-yyyy"
+        onChange={handleDateChange}
+        onBlur={() => checkFutureDate(selectedDate)}
+        customInput={<MaskedInput />}
+      />
+      <Button onClick={handleAdd}>Add</Button>
     </div>
   );
 };
 
 export default Example;
+
+
+// import React, { useState, useRef } from "react";
+// import InputMask from "react-input-mask";
+// import Button from "react-bootstrap/Button";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// const Example = () => {
+//   const [formData, setFormData] = useState({ date: "" });
+//   const inputRef = useRef(null); // ✅ ref for focusing
+
+//   const handleChange = (e) => {
+//     // strip placeholder underscores before saving
+//     setFormData({ date: e.target.value.replace(/_/g, "") });
+//   };
+
+//   const handleBlur = () => {
+//     const raw = formData.date;
+//     if (!raw || raw.length < 10) return;
+
+//     const [day, month, year] = raw.split("-");
+//     if (!day || !month || !year || year.length < 4) return;
+
+//     const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+//     if (isNaN(parsed)) return;
+
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     parsed.setHours(0, 0, 0, 0);
+
+//     if (parsed > today) {
+//       toast.info("You Have Selected a Future Date.", { position: "top-center" });
+//     }
+//   };
+
+//   // ✅ Set focus when Add button is clicked
+//   const handleAdd = () => {
+//     if (inputRef.current) {
+//       inputRef.current.focus();
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <InputMask
+//         mask="99-99-9999"
+//         maskChar=" "
+//         value={formData.date}
+//         onChange={handleChange}
+//         onBlur={handleBlur}
+//       >
+//         {(inputProps) => (
+//           <input
+//             {...inputProps}
+//             ref={inputRef} // ✅ attach ref
+//             className="DatePICKER"
+//             value={formData.date.replace(/_/g, "")} // optional: show blanks
+//           />
+//         )}
+//       </InputMask>
+
+//       <Button onClick={handleAdd} className="m-2">
+//         Add
+//       </Button>
+
+//       <ToastContainer />
+//     </div>
+//   );
+// };
+
+// export default Example;

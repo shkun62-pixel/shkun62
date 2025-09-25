@@ -5968,7 +5968,7 @@ const LOCAL_STORAGE_KEY = "tabledataVisibility";
 const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
   <InputMask
     mask="99-99-9999"
-    maskChar={null}
+    maskChar=" "
     value={value}
     onChange={onChange}
     onBlur={onBlur}
