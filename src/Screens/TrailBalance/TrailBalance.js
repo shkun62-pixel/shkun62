@@ -46,6 +46,7 @@ const TrailBalance = () => {
     Annexure: "All",
     T1: "", // ✅ include T1 (Selected Accounts)
     T3: false, // ✅ Print Current Date
+    T10: false, // ✅ group by BsGroup toggle
   });
   
   const [printDateValue, setPrintDateValue] = useState(null); // ✅ actual stored date
@@ -290,27 +291,27 @@ const TrailBalance = () => {
 
   // Balance filter
   switch (optionValues.Balance) {
-      case "Active Balance":
-      result = result.filter((l) => l.totals.balance !== 0);
-      break;
-      case "Nil Balance":
-      result = result.filter((l) => l.totals.balance === 0);
-      break;
-      case "Debit Balance":
-      result = result.filter((l) => l.totals.balance > 0);
-      break;
-      case "Credit Balance":
-      result = result.filter((l) => l.totals.balance < 0);
-      break;
-      case "Transacted Account":
-      result = result.filter((l) => l.hasTxn);
-      break;
-      case "Non Transacted Account":
-      result = result.filter((l) => !l.hasTxn);
-      break;
-      case "All Accounts":
-      default:
-      break;
+    case "Active Balance":
+    result = result.filter((l) => l.totals.balance !== 0);
+    break;
+    case "Nil Balance":
+    result = result.filter((l) => l.totals.balance === 0);
+    break;
+    case "Debit Balance":
+    result = result.filter((l) => l.totals.balance > 0);
+    break;
+    case "Credit Balance":
+    result = result.filter((l) => l.totals.balance < 0);
+    break;
+    case "Transacted Account":
+    result = result.filter((l) => l.hasTxn);
+    break;
+    case "Non Transacted Account":
+    result = result.filter((l) => !l.hasTxn);
+    break;
+    case "All Accounts":
+    default:
+    break;
   }
 
   // Annexure filter
@@ -362,6 +363,29 @@ const TrailBalance = () => {
   // Selected Accounts filter
   if (optionValues.T1) {
     result = result.filter((l) => !!checkedRows[l._id]);
+  }
+
+  if (optionValues.T10) {
+    const grouped = {};
+    result.forEach((ledger) => {
+      const group = ledger.formData.Bsgroup || "Others";
+      if (!grouped[group]) {
+        grouped[group] = { balance: 0 };
+      }
+      grouped[group].balance += ledger.totals.balance;
+    });
+
+    result = Object.entries(grouped).map(([group, data]) => {
+      const drcr = data.balance >= 0 ? "DR" : "CR";
+      return {
+        _id: group,
+        formData: { ahead: group, city: "" },
+        totals: {
+          balance: data.balance,
+          drcr,
+        },
+      };
+    });
   }
 
   // ✅ Search filter

@@ -738,158 +738,505 @@
 
 
 
-import React, { useState, useEffect, useRef, forwardRef } from "react";
-import DatePicker from "react-datepicker";
-import InputMask from "react-input-mask";
-import "react-datepicker/dist/react-datepicker.css";
-import "react-toastify/dist/ReactToastify.css";
-import Button from "react-bootstrap/Button";
-import { ToastContainer, toast } from "react-toastify";
-
-// ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar=" "
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
-
-const Example = () => {
-   const [formData, setFormData] = useState({
-      date: "",
-    });
-  const datePickerRef = useRef(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const handleAdd = () => {
-    if (datePickerRef.current) {  
-      datePickerRef.current.setFocus();
-    }
-  };
-   const handleDateChange = (date) => {
-      if (date instanceof Date && !isNaN(date)) {
-        setSelectedDate(date);
-        const formattedDate = date.toISOString().split("T")[0];
-        setFormData((prev) => ({ ...prev, date: formattedDate }));
-      }
-    };
-  
-    // ✅ Separate function for future date check
-    const checkFutureDate = (date) => {
-      if (!date) return;
-  
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-  
-      const checkDate = new Date(date);
-      checkDate.setHours(0, 0, 0, 0);
-  
-      if (checkDate > today) {
-        toast.info("You Have Selected a Future Date.", {
-          position: "top-center",
-        });
-      }
-    };
-  
-    const handleCalendarClose = () => {
-      // If no date is selected when the calendar closes, default to today's date
-      if (!selectedDate) {
-        const today = new Date();
-        setSelectedDate(today);
-      }
-    };
-  return (
-    <div>
-      <DatePicker
-        ref={datePickerRef}
-        selected={selectedDate || null}
-        openToDate={new Date()}
-        onCalendarClose={handleCalendarClose}
-        dateFormat="dd-MM-yyyy"
-        onChange={handleDateChange}
-        onBlur={() => checkFutureDate(selectedDate)}
-        customInput={<MaskedInput />}
-      />
-      <Button onClick={handleAdd}>Add</Button>
-    </div>
-  );
-};
-
-export default Example;
-
-
-// import React, { useState, useRef } from "react";
+// import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import DatePicker from "react-datepicker";
 // import InputMask from "react-input-mask";
+// import "react-datepicker/dist/react-datepicker.css";
+// import "react-toastify/dist/ReactToastify.css";
 // import Button from "react-bootstrap/Button";
 // import { ToastContainer, toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
+
+// // ✅ Forward ref so DatePicker can focus the input
+// const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+//   <InputMask
+//     mask="99-99-9999"
+//     maskChar=" "
+//     value={value}
+//     onChange={onChange}
+//     onBlur={onBlur}
+//   >
+//     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+//   </InputMask>
+// ));
 
 // const Example = () => {
-//   const [formData, setFormData] = useState({ date: "" });
-//   const inputRef = useRef(null); // ✅ ref for focusing
+//    const [formData, setFormData] = useState({
+//       date: "",
+//     });
+//   const datePickerRef = useRef(null);
+//   const [selectedDate, setSelectedDate] = useState(new Date());
 
-//   const handleChange = (e) => {
-//     // strip placeholder underscores before saving
-//     setFormData({ date: e.target.value.replace(/_/g, "") });
-//   };
-
-//   const handleBlur = () => {
-//     const raw = formData.date;
-//     if (!raw || raw.length < 10) return;
-
-//     const [day, month, year] = raw.split("-");
-//     if (!day || !month || !year || year.length < 4) return;
-
-//     const parsed = new Date(Number(year), Number(month) - 1, Number(day));
-//     if (isNaN(parsed)) return;
-
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-//     parsed.setHours(0, 0, 0, 0);
-
-//     if (parsed > today) {
-//       toast.info("You Have Selected a Future Date.", { position: "top-center" });
-//     }
-//   };
-
-//   // ✅ Set focus when Add button is clicked
 //   const handleAdd = () => {
-//     if (inputRef.current) {
-//       inputRef.current.focus();
+//     if (datePickerRef.current) {  
+//       datePickerRef.current.setFocus();
 //     }
 //   };
-
+//    const handleDateChange = (date) => {
+//       if (date instanceof Date && !isNaN(date)) {
+//         setSelectedDate(date);
+//         const formattedDate = date.toISOString().split("T")[0];
+//         setFormData((prev) => ({ ...prev, date: formattedDate }));
+//       }
+//     };
+  
+//     // ✅ Separate function for future date check
+//     const checkFutureDate = (date) => {
+//       if (!date) return;
+  
+//       const today = new Date();
+//       today.setHours(0, 0, 0, 0);
+  
+//       const checkDate = new Date(date);
+//       checkDate.setHours(0, 0, 0, 0);
+  
+//       if (checkDate > today) {
+//         toast.info("You Have Selected a Future Date.", {
+//           position: "top-center",
+//         });
+//       }
+//     };
+  
+//     const handleCalendarClose = () => {
+//       // If no date is selected when the calendar closes, default to today's date
+//       if (!selectedDate) {
+//         const today = new Date();
+//         setSelectedDate(today);
+//       }
+//     };
 //   return (
 //     <div>
-//       <InputMask
-//         mask="99-99-9999"
-//         maskChar=" "
-//         value={formData.date}
-//         onChange={handleChange}
-//         onBlur={handleBlur}
-//       >
-//         {(inputProps) => (
-//           <input
-//             {...inputProps}
-//             ref={inputRef} // ✅ attach ref
-//             className="DatePICKER"
-//             value={formData.date.replace(/_/g, "")} // optional: show blanks
-//           />
-//         )}
-//       </InputMask>
-
-//       <Button onClick={handleAdd} className="m-2">
-//         Add
-//       </Button>
-
-//       <ToastContainer />
+//       <DatePicker
+//         ref={datePickerRef}
+//         selected={selectedDate || null}
+//         openToDate={new Date()}
+//         onCalendarClose={handleCalendarClose}
+//         dateFormat="dd-MM-yyyy"
+//         onChange={handleDateChange}
+//         onBlur={() => checkFutureDate(selectedDate)}
+//         customInput={<MaskedInput />}
+//       />
+//       <Button onClick={handleAdd}>Add</Button>
 //     </div>
 //   );
 // };
 
 // export default Example;
+
+
+// // import React, { useState, useRef } from "react";
+// // import InputMask from "react-input-mask";
+// // import Button from "react-bootstrap/Button";
+// // import { ToastContainer, toast } from "react-toastify";
+// // import "react-toastify/dist/ReactToastify.css";
+
+// // const Example = () => {
+// //   const [formData, setFormData] = useState({ date: "" });
+// //   const inputRef = useRef(null); // ✅ ref for focusing
+
+// //   const handleChange = (e) => {
+// //     // strip placeholder underscores before saving
+// //     setFormData({ date: e.target.value.replace(/_/g, "") });
+// //   };
+
+// //   const handleBlur = () => {
+// //     const raw = formData.date;
+// //     if (!raw || raw.length < 10) return;
+
+// //     const [day, month, year] = raw.split("-");
+// //     if (!day || !month || !year || year.length < 4) return;
+
+// //     const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+// //     if (isNaN(parsed)) return;
+
+// //     const today = new Date();
+// //     today.setHours(0, 0, 0, 0);
+// //     parsed.setHours(0, 0, 0, 0);
+
+// //     if (parsed > today) {
+// //       toast.info("You Have Selected a Future Date.", { position: "top-center" });
+// //     }
+// //   };
+
+// //   // ✅ Set focus when Add button is clicked
+// //   const handleAdd = () => {
+// //     if (inputRef.current) {
+// //       inputRef.current.focus();
+// //     }
+// //   };
+
+// //   return (
+// //     <div>
+// //       <InputMask
+// //         mask="99-99-9999"
+// //         maskChar=" "
+// //         value={formData.date}
+// //         onChange={handleChange}
+// //         onBlur={handleBlur}
+// //       >
+// //         {(inputProps) => (
+// //           <input
+// //             {...inputProps}
+// //             ref={inputRef} // ✅ attach ref
+// //             className="DatePICKER"
+// //             value={formData.date.replace(/_/g, "")} // optional: show blanks
+// //           />
+// //         )}
+// //       </InputMask>
+
+// //       <Button onClick={handleAdd} className="m-2">
+// //         Add
+// //       </Button>
+
+// //       <ToastContainer />
+// //     </div>
+// //   );
+// // };
+
+// // export default Example;
+
+
+import React, { useEffect, useState, useRef, useMemo } from "react";
+import axios from "axios";
+import { Table, Card, Button } from "react-bootstrap";
+import "react-datepicker/dist/react-datepicker.css";
+import useCompanySetup from "./Shared/useCompanySetup";
+import OptionModal from "./TrailBalance/OptionModal";
+
+const Example = () => {
+  const { dateFrom } = useCompanySetup();
+  const tableRef = useRef(null);
+  const [filteredLedgers, setFilteredLedgers] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [checkedRows, setCheckedRows] = useState({});
+
+  const [isOptionOpen, setIsOptionOpen] = useState(false);
+  const [options, setOptions] = useState({
+    balanceOption: "Active Only", // ✅ default (your earlier active balance criteria)
+    T10: false, // ✅ group by BsGroup toggle
+  });
+
+  const openOptionModal = () => setIsOptionOpen(true);
+  const closeOptionModal = () => setIsOptionOpen(false);
+
+  // Filter Ledger Accounts
+  const [ledgerFromDate, setLedgerFromDate] = useState(null);
+  const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
+
+  useEffect(() => {
+    if (!ledgerFromDate && dateFrom) {
+      setLedgerFromDate(new Date(dateFrom));
+    }
+  }, [dateFrom, ledgerFromDate]);
+
+  // Fetch ledger list
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [ledgerRes, faRes] = await Promise.all([
+          axios.get(
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
+          ),
+          axios.get(
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
+          ),
+        ]);
+
+        const ledgersData = ledgerRes.data.data || [];
+        const faData = faRes.data.data || [];
+
+        const ledgerTotals = {};
+
+        faData.forEach((entry) => {
+          entry.transactions.forEach((txn) => {
+            const txnDate = new Date(txn.date);
+
+            if (ledgerFromDate && txnDate < ledgerFromDate) return;
+            if (ledgerToDate && txnDate > ledgerToDate) return;
+
+            const acc = txn.account.trim();
+            if (!ledgerTotals[acc]) {
+              ledgerTotals[acc] = { debit: 0, credit: 0 };
+            }
+            if (txn.type.toLowerCase() === "debit") {
+              ledgerTotals[acc].debit += txn.amount;
+            } else if (txn.type.toLowerCase() === "credit") {
+              ledgerTotals[acc].credit += txn.amount;
+            }
+          });
+        });
+
+        let filtered = ledgersData
+          .filter((ledger) => ledgerTotals[ledger.formData.ahead.trim()])
+          .map((ledger) => {
+            const acc = ledger.formData.ahead.trim();
+            const debit = ledgerTotals[acc].debit;
+            const credit = ledgerTotals[acc].credit;
+            const balance = debit - credit;
+            const drcr = balance >= 0 ? "DR" : "CR";
+            return {
+              ...ledger,
+              totals: {
+                balance,
+                drcr,
+              },
+            };
+          });
+
+        // ✅ Apply Balance criteria
+        if (options.balanceOption === "Active Only") {
+          filtered = filtered.filter((l) => Math.abs(l.totals.balance) > 0);
+        }
+        // if balanceOption === "All Accounts", we keep everything
+
+        // ✅ If T10 toggle is ON → Group by BsGroup
+        if (options.T10) {
+          const grouped = {};
+          filtered.forEach((ledger) => {
+            const group = ledger.formData.Bsgroup || "Others";
+            if (!grouped[group]) {
+              grouped[group] = { balance: 0 };
+            }
+            grouped[group].balance += ledger.totals.balance;
+          });
+
+          filtered = Object.entries(grouped).map(([group, data]) => {
+            const drcr = data.balance >= 0 ? "DR" : "CR";
+            return {
+              _id: group,
+              formData: { ahead: group, city: "" },
+              totals: {
+                balance: data.balance,
+                drcr,
+              },
+            };
+          });
+        }
+
+        setFilteredLedgers(filtered);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, [ledgerFromDate, ledgerToDate, options]);
+
+  const handleCheckboxChange = (id) => {
+    setCheckedRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  // ✅ Compute selected debit/credit sums
+  const { selectedDebit, selectedCredit } = useMemo(() => {
+    let debitSum = 0;
+    let creditSum = 0;
+
+    filteredLedgers.forEach((ledger) => {
+      if (checkedRows[ledger._id]) {
+        const { balance, drcr } = ledger.totals || {};
+        if (drcr === "DR") debitSum += Math.abs(balance);
+        if (drcr === "CR") creditSum += Math.abs(balance);
+      }
+    });
+
+    return {
+      selectedDebit: debitSum,
+      selectedCredit: creditSum,
+    };
+  }, [checkedRows, filteredLedgers]);
+
+  return (
+    <div>
+      <Card className="contMain">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: "10px",
+          }}
+        >
+          <h3 className="headerTrail">TRAIL BALANCE</h3>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              <span style={{ fontSize: 20 }} className="textform">
+                Selected Debit:
+              </span>
+              <input
+                style={{ marginLeft: 15 }}
+                className="value"
+                value={selectedDebit.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                readOnly
+              />
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
+            >
+              <span style={{ fontSize: 20 }} className="textform">
+                Selected Credit:
+              </span>
+              <input
+                style={{ marginLeft: 7 }}
+                className="value"
+                value={selectedCredit.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                readOnly
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="tableT">
+          <Table size="sm" className="custom-table" hover ref={tableRef}>
+            <thead
+              style={{
+                position: "sticky",
+                top: 1,
+                background: "skyblue",
+                fontSize: 17,
+                textAlign: "center",
+              }}
+            >
+              <tr>
+                <th></th>
+                <th>Account Name</th>
+                <th>CITY</th>
+                {/* <th>{options.T10 ? "GROUP NAME" : "NAME"}</th>
+                <th>{options.T10 ? "" : "CITY"}</th> */}
+                <th>DEBIT</th>
+                <th>CREDIT</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredLedgers.map((ledger, index) => {
+                const { balance, drcr } = ledger.totals || {};
+                return (
+                  <tr
+                    key={ledger._id}
+                    style={{
+                      cursor: "pointer",
+                      fontSize: 16,
+                    }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                  >
+                    <td
+                      style={{ textAlign: "center" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          cursor: "pointer",
+                        }}
+                        type="checkbox"
+                        checked={!!checkedRows[ledger._id]}
+                        onChange={() => handleCheckboxChange(ledger._id)}
+                      />
+                    </td>
+                    <td>{ledger.formData.ahead}</td>
+                    <td>{ledger.formData.city}</td>
+                    {/* <td>{!options.T10 && ledger.formData.city}</td> */}
+
+                    <td
+                      style={{
+                        textAlign: "right",
+                        color: "darkblue",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {drcr === "DR"
+                        ? Math.abs(balance).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : ""}
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "right",
+                        color: "red",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {drcr === "CR"
+                        ? Math.abs(balance).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : ""}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+
+            {/* ✅ Footer for totals */}
+            <tfoot
+              style={{
+                backgroundColor: "skyblue",
+                position: "sticky",
+                bottom: -8,
+              }}
+            >
+              <tr style={{ fontWeight: "bold", fontSize: 20 }}>
+                <td colSpan={options.T10 ? 3 : 3} style={{ textAlign: "right" }}>
+                  TOTAL:
+                </td>
+                <td style={{ textAlign: "right", color: "darkblue" }}>
+                  {filteredLedgers
+                    .reduce(
+                      (sum, ledger) =>
+                        sum +
+                        (ledger.totals?.drcr === "DR"
+                          ? Math.abs(ledger.totals.balance)
+                          : 0),
+                      0
+                    )
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </td>
+                <td style={{ textAlign: "right", color: "red" }}>
+                  {filteredLedgers
+                    .reduce(
+                      (sum, ledger) =>
+                        sum +
+                        (ledger.totals?.drcr === "CR"
+                          ? Math.abs(ledger.totals.balance)
+                          : 0),
+                      0
+                    )
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </td>
+              </tr>
+            </tfoot>
+          </Table>
+        </div>
+      </Card>
+      <Button variant="primary" sx={{ mt: 2 }} onClick={openOptionModal}>
+        Options
+      </Button>
+      {/* ✅ Use single onApply */}
+      <OptionModal
+        isOpen={isOptionOpen}
+        onClose={closeOptionModal}
+        onApply={(opts) => setOptions(opts)} // ✅ Keep same Active Balance criteria & T10
+      />
+    </div>
+  );
+};
+
+export default Example;
