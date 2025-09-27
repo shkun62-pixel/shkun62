@@ -322,7 +322,7 @@ useEffect(() => {
             className="Buttonz"
             style={{ backgroundColor: "blueviolet", color: "white",marginTop:5}}
           >
-            Print FA File
+            Print Voucher
           </Button>
         </div>
       </StyledModal>
