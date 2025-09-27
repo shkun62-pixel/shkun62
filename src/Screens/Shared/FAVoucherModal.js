@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import useCompanySetup from "../Shared/useCompanySetup";
+import FAVoucherPrint from "./FAVoucherPrint";
 
 // common modal style
 const modalSx = {
@@ -58,6 +59,9 @@ export default function FAVoucherModal({
   const [loading, setLoading] = useState(false);
   const [fa, setFa] = useState(null);
   const [error, setError] = useState("");
+  const [openPrint, setOpenPrint] = React.useState(false);
+  const handleOpen = () => setOpenPrint(true);
+  const handleClose = () => setOpenPrint(false);
 
   const { companyName, companyAdd, companyCity, cPin } = useCompanySetup();
 
@@ -203,9 +207,17 @@ export default function FAVoucherModal({
             {cfg.header}
           </Box>
           <Box>
-            <Button variant="contained" onClick={handlePrint} sx={{ mr: 1 }}>
+            <Button variant="contained" onClick={handleOpen} sx={{ mr: 1 }}>
               PRINT
             </Button>
+            <FAVoucherPrint
+              open={openPrint}
+              onClose={handleClose}
+              fa={fa}
+              vtype={vtype}
+              cfg={cfg}
+              totals={totals}
+            />
             <Button variant="outlined" onClick={onClose}>
               CLOSE
             </Button>
