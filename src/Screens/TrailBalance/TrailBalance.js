@@ -27,6 +27,7 @@ const TrailBalance = () => {
   const rowRefs = useRef([]);
   const tableRef = useRef(null);
   const searchRef = useRef(null);   // ✅ search input ref
+  const groupRowRefs = useRef([]);
   const navigate = useNavigate();
   const [activeRowIndex, setActiveRowIndex] = useState(0);  // ✅ Track highlighted txn row
   const [checkedRows, setCheckedRows] = useState({});
@@ -37,6 +38,13 @@ const TrailBalance = () => {
   const handleClose = () => setOpen(false);
 
   // Filter Ledger Accounts 
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [groupedLedgersToPick, setGroupedLedgersToPick] = useState([]);
+  const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  const [currentGroupName, setCurrentGroupName] = useState("");
+  const [selectedGroupRows, setSelectedGroupRows] = useState(new Set());
+
+    // odler
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
   const [isOptionOpen, setIsOptionOpen] = useState(false);
@@ -366,27 +374,48 @@ const TrailBalance = () => {
   }
 
   if (optionValues.T10) {
-    const grouped = {};
-    result.forEach((ledger) => {
-      const group = ledger.formData.Bsgroup || "Others";
-      if (!grouped[group]) {
-        grouped[group] = { balance: 0 };
-      }
-      grouped[group].balance += ledger.totals.balance;
-    });
-
-    result = Object.entries(grouped).map(([group, data]) => {
-      const drcr = data.balance >= 0 ? "DR" : "CR";
-      return {
-        _id: group,
-        formData: { ahead: group, city: "" },
-        totals: {
-          balance: data.balance,
-          drcr,
-        },
+  const grouped = {};
+  result.forEach((ledger) => {
+    const group = ledger.formData.Bsgroup || "Others";
+    if (!grouped[group]) {
+      grouped[group] = {
+        balance: 0,
+        qty: 0,
+        pcs: 0,
+        debit: 0,
+        credit: 0,
+        ledgers: [],
       };
-    });
-  }
+    }
+    const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
+    grouped[group].balance += balance;
+    grouped[group].qty += qty;
+    grouped[group].pcs += pcs;
+    if (drcr === "DR") {
+      grouped[group].debit += Math.abs(balance);
+    } else {
+      grouped[group].credit += Math.abs(balance);
+    }
+    grouped[group].ledgers.push(ledger);
+  });
+
+  result = Object.entries(grouped).map(([group, data]) => {
+    const drcr = data.balance >= 0 ? "DR" : "CR";
+    return {
+      _id: group,
+      formData: { ahead: group, city: "" },
+      totals: {
+        balance: data.balance,
+        drcr,
+        qty: data.qty,
+        pcs: data.pcs,
+        debit: data.debit,
+        credit: data.credit,
+      },
+      groupedLedgers: data.ledgers,
+    };
+  });
+}
 
   // ✅ Search filter
   if (searchTerm) {
@@ -500,13 +529,52 @@ const TrailBalance = () => {
   }, [transactions, activeRowIndex, showModal]);
 
   // Handle keyboard navigation for LedgerList
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!filteredLedgers.length) return;
+useEffect(() => {
+  const handleKeyDown = (e) => {
+    // 🔹 Mini modal navigation
+    if (showGroupModal && groupedLedgersToPick.length) {
+      e.preventDefault(); // Prevent default scrolling & background nav
 
       if (e.key === "ArrowDown") {
+        setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
+      } else if (e.key === "ArrowUp") {
+        setActiveGroupIndex((prev) =>
+          prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
+        );
+      } else if (e.key === "Enter") {
+        const selectedLedger = groupedLedgersToPick[activeGroupIndex];
+        setShowGroupModal(false);
+        fetchLedgerTransactions(selectedLedger);
+      } else if (e.key === "Escape") {
+        setShowGroupModal(false);
+      }
+
+      return; // 🔹 stop further handling
+    }
+
+    // 🔹 Account Statement modal navigation
+    if (showModal && transactions.length) {
+      e.preventDefault();
+      if (e.key === "ArrowUp") {
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      } else if (e.key === "ArrowDown") {
+        setActiveRowIndex((prev) =>
+          prev < transactions.length - 1 ? prev + 1 : prev
+        );
+      } else if (e.key === "Escape") {
+        setShowModal(false);
+      }
+
+      return;
+    }
+
+    // 🔹 Main ledger table navigation
+    if (!showModal && filteredLedgers.length) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
         setSelectedIndex((prev) => (prev + 1) % filteredLedgers.length);
       } else if (e.key === "ArrowUp") {
+        e.preventDefault();
         setSelectedIndex((prev) =>
           prev === 0 ? filteredLedgers.length - 1 : prev - 1
         );
@@ -518,39 +586,56 @@ const TrailBalance = () => {
         setFlaggedRows((prev) => {
           const newSet = new Set(prev);
           if (newSet.has(selectedIndex)) {
-            newSet.delete(selectedIndex); // unflag if already red
+            newSet.delete(selectedIndex);
           } else {
-            newSet.add(selectedIndex); // mark as red
+            newSet.add(selectedIndex);
           }
           return newSet;
         });
       }
-    };
-
-    if (!showModal) {
-      window.addEventListener("keydown", handleKeyDown);
     }
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [filteredLedgers, selectedIndex, showModal]);
-
-  // Open modal and fetch transactions
-  const openLedgerDetails = (ledger) => {
-    setSelectedLedger(ledger);
-    axios
-      .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-      .then((res) => {
-        const allTxns = res.data.data || [];
-        const ledgerTxns = allTxns.flatMap((entry) =>
-          entry.transactions.filter(
-            (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-          )
-        );
-        setTransactions(ledgerTxns);
-        setShowModal(true);
-      })
-      .catch((err) => console.error(err));
   };
 
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [
+  showModal,
+  showGroupModal,
+  filteredLedgers,
+  selectedIndex,
+  transactions,
+  activeRowIndex,
+  groupedLedgersToPick,
+  activeGroupIndex,
+]);
+
+  // Open modal and fetch transactions
+ const openLedgerDetails = (ledger) => {
+  if (ledger.groupedLedgers) {
+    setGroupedLedgersToPick(ledger.groupedLedgers);
+    setCurrentGroupName(ledger.formData.ahead); // 🔹 store group name
+    setShowGroupModal(true);
+  } else {
+    fetchLedgerTransactions(ledger);
+  }
+};
+
+const fetchLedgerTransactions = (ledger) => {
+  setSelectedLedger(ledger);
+  axios
+    .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+    .then((res) => {
+      const allTxns = res.data.data || [];
+      const ledgerTxns = allTxns.flatMap((entry) =>
+        entry.transactions.filter(
+          (txn) => txn.account.trim() === ledger.formData.ahead.trim()
+        )
+      );
+      setTransactions(ledgerTxns);
+      setShowModal(true);
+    })
+    .catch((err) => console.error(err));
+};
   // For calculating net pcs and weight
   useEffect(() => {
     // Fetch all transactions once
@@ -765,6 +850,44 @@ const TrailBalance = () => {
     saveAs(blob, "TrialBalance.xlsx");
   };
 
+// logic for BsGroup Annexure Modal
+useEffect(() => {
+  const handleGroupModalKeyDown = (e) => {
+    if (!showGroupModal || !groupedLedgersToPick.length) return;
+
+    e.preventDefault(); // 🔹 prevent background scrolling or default browser behavior
+
+    if (e.key === "ArrowDown") {
+      setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
+    } else if (e.key === "ArrowUp") {
+      setActiveGroupIndex((prev) =>
+        prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
+      );
+    } else if (e.key === "Enter") {
+      const selectedLedger = groupedLedgersToPick[activeGroupIndex];
+      setShowGroupModal(false);
+      fetchLedgerTransactions(selectedLedger);
+    } else if (e.key === "Escape") {
+      setShowGroupModal(false);
+    }
+  };
+
+  window.addEventListener("keydown", handleGroupModalKeyDown);
+  return () => window.removeEventListener("keydown", handleGroupModalKeyDown);
+}, [showGroupModal, groupedLedgersToPick, activeGroupIndex]);
+
+const groupTotals = useMemo(() => {
+  let debit = 0, credit = 0;
+  selectedGroupRows.forEach((index) => {
+    const ledger = groupedLedgersToPick[index];
+    if (ledger?.totals) {
+      const { drcr, balance } = ledger.totals;
+      if (drcr === "DR") debit += Math.abs(balance);
+      else if (drcr === "CR") credit += Math.abs(balance);
+    }
+  });
+  return { debit, credit };
+}, [selectedGroupRows, groupedLedgersToPick]);
 
 
   return (
@@ -1453,18 +1576,111 @@ const TrailBalance = () => {
           <Button variant="secondary" onClick={() => setShowOptions(false)}>
             Close
           </Button>
-          {/* <Button
-            variant="warning"
-            onClick={() => {
-              setFilterType("All");
-              setNarrationFilter("");
-              setFromDate("");
-              setToDate("");
-            }}
-          >
-            Clear Filters
-          </Button> */}
         </Modal.Footer>
+      </Modal>
+
+      {/* BsGroup Listing */}
+       <Modal
+        show={showGroupModal}
+        onHide={() => setShowGroupModal(false)}
+        centered
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title> <span style={{ color: "darkblue" }}>{currentGroupName}</span> </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "2rem", marginBottom: "8px" }}>
+            <div>
+              <label style={{ fontWeight: "bold", color: "darkblue" }}>Selected Debit:</label>
+              <div style={{ textAlign: "right", fontWeight: "bold", color: "darkblue" }}>
+                {groupTotals.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+            </div>
+            <div>
+              <label style={{ fontWeight: "bold", color: "red" }}>Selected Credit:</label>
+              <div style={{ textAlign: "right", fontWeight: "bold", color: "red" }}>
+                {groupTotals.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+            </div>
+          </div>
+        <Table size="sm" hover>
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={selectedGroupRows.size === groupedLedgersToPick.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedGroupRows(new Set(groupedLedgersToPick.map((_, i) => i)));
+                    } else {
+                      setSelectedGroupRows(new Set());
+                    }
+                  }}
+                />
+              </th>
+              <th>Name</th>
+              <th>City</th>
+              <th style={{ textAlign: "right" }}>Qty</th>
+              <th style={{ textAlign: "right" }}>Pcs</th>
+              <th style={{ textAlign: "right" }}>Debit</th>
+              <th style={{ textAlign: "right" }}>Credit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groupedLedgersToPick.map((ledger, index) => {
+              const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
+              return (
+                <tr
+                  key={ledger._id}
+                  ref={(el) => (groupRowRefs.current[index] = el)}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: index === activeGroupIndex ? "rgb(187,186,186)" : "transparent",
+                  }}
+                  onMouseEnter={() => setActiveGroupIndex(index)}
+                  onDoubleClick={() => {
+                    setShowGroupModal(false);
+                    fetchLedgerTransactions(ledger);
+                  }}
+                >
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedGroupRows.has(index)}
+                      onChange={() => {
+                        setSelectedGroupRows((prev) => {
+                          const newSet = new Set(prev);
+                          if (newSet.has(index)) newSet.delete(index);
+                          else newSet.add(index);
+                          return newSet;
+                        });
+                      }}
+                    />
+                  </td>
+                  <td>{ledger.formData.ahead}</td>
+                  <td>{ledger.formData.city}</td>
+                  <td style={{ textAlign: "right" }}>{qty}</td>
+                  <td style={{ textAlign: "right" }}>{pcs}</td>
+                  <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
+                    {drcr === "DR"
+                      ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : ""}
+                  </td>
+                  <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
+                    {drcr === "CR"
+                      ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : ""}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+
+      
+        </Modal.Body>
       </Modal>
 
     </div>
