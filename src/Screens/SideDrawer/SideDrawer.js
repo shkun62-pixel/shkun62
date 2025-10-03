@@ -320,7 +320,7 @@ export default function App() {
                     <CompanyName>SHKUNSOFT INNOVATIONS</CompanyName>
                 </CompanyHeader>
                 <List>
-                <StyledListItem button onClick={() => handleNavigation('/Dashboard')}>
+                <StyledListItem button onClick={() => handleNavigation('/')}>
                         <StyledIcon>
                             <HomeIcon />
                         </StyledIcon>

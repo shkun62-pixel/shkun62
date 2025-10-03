@@ -19,7 +19,7 @@ const chunkItems = (items = [], firstChunkSize, otherChunkSize) => {
   return chunks;
 };
 
-const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate }, ref) => {
+const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate, currentGroupName }, ref) => {
 
   const { companyName, companyAdd, companyCity } = useCompanySetup();
 
@@ -53,7 +53,7 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
 
 
   return (
-    <Modal open={isOpen} onClose={handleClose}>
+    <Modal open={isOpen} onClose={handleClose} style={{ zIndex: 100000}}>
       <Box sx={style}>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
@@ -113,6 +113,9 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
             <h2 style={{ fontWeight: "bold", marginTop: "10px",fontSize:"18px" }}>
                 TRIAL BALANCE
             </h2>
+            {currentGroupName && (
+              <h2 style={{ fontWeight: "bold", fontSize:"18px", marginTop: "10px" }}>{currentGroupName}</h2>
+            )}
             <h2 style={{ fontWeight: "bold", marginTop: "10px",fontSize:"18px",marginRight:"10px" }}>
                 Period: {formatDate(ledgerFrom)} To {formatDate(ledgerTo)}
             </h2>

@@ -470,9 +470,14 @@ const NewStockAcc = ({ onSave }) => {
     fetchData(); // Fetch data when component mounts
     setIsDisabled(true); // Add this line to set isDisabled to true initially
   }, []); // Empty dependency array ensures it only runs once when component mounts
+  
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   const handleChangeAuto = (field) => (event, newValue) => {
-    setFormData((prev) => ({ ...prev, [field]: newValue || "" }));
+    setFormData((prev) =>
+       ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
   };
  
   const handleNext = async () => {

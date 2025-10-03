@@ -10662,8 +10662,27 @@ const handleKeyDownExp = (e, fieldName, index) => {
             />
           </div>
         </div>
-        <div style={{display:'flex',flexDirection:"column",marginLeft:5}}>
-        <div style={{display:'flex',flexDirection:"row",marginTop:'auto'}}>
+        <div style={{display:'flex',flexDirection:"column",marginLeft:5,marginTop:'auto'}}>
+        {formData.Tds2 && Number(formData.Tds2) > 0 && (
+          <TextField
+            className="custom-bordered-input"
+            id="tax"
+            value={"2%"}
+            label="GST. TDS"
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: 20,
+                fontSize: `${fontSize}px`,
+              },
+            }}
+            onFocus={(e) => e.target.select()}
+            size="small"
+            variant="filled"
+            sx={{ width: 120 }}
+          />
+        )}
+        <div style={{display:'flex',flexDirection:"row"}}>
           <TextField
             className="CTDS custom-bordered-input"
             value={formData.Ctds}
@@ -11016,14 +11035,6 @@ const handleKeyDownExp = (e, fieldName, index) => {
               voucherno={formData.vbillno}
               vtype="S"
             />
-            // <SaleFAVoucherModal
-            //   open={isFAModalOpen}
-            //   onClose={() => setIsFAModalOpen(false)}
-            //   tenant={"shkun_05062025_05062026"}
-            //   voucherno={formData?.vbillno}
-            //   vtype="S"
-            //   headerTitle="FA VOUCHER (SALE)"
-            // />
           )}
           <Button
             className="Buttonz"

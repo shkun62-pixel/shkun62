@@ -543,11 +543,12 @@ useEffect(() => {
         );
       } else if (e.key === "Enter") {
         const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-        setShowGroupModal(false);
+        // setShowGroupModal(false);
         fetchLedgerTransactions(selectedLedger);
-      } else if (e.key === "Escape") {
-        setShowGroupModal(false);
-      }
+      } 
+      // else if (e.key === "Escape") {
+      //   setShowGroupModal(false);
+      // }
 
       return; // 🔹 stop further handling
     }
@@ -717,7 +718,8 @@ const fetchLedgerTransactions = (ledger) => {
         City: ledger.formData.city,
         Debit: drcr === "DR" ? Math.abs(balance) : "",
         Credit: drcr === "CR" ? Math.abs(balance) : "",
-        Qty : ledger.formData.qty,
+        Pcs : ledgerTotals[ledger._id]?.netPcs.toFixed(3) || "",
+        Qty : ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "",
         "A/c Code": ledger.formData.acode,
         "Group Name": ledger.formData.Bsgroup,
       };
@@ -743,7 +745,7 @@ const fetchLedgerTransactions = (ledger) => {
     ];
 
     // ✅ Totals Row with Excel formula
-    const numericFields = ["Debit", "Credit"];
+    const numericFields = ["Debit", "Credit", "Pcs", "Qty"];
     const totals = {};
     header.forEach((h, index) => {
       if (index === 0) {
@@ -767,6 +769,7 @@ const fetchLedgerTransactions = (ledger) => {
       { wch: 20 }, // City
       { wch: 15 }, // Debit
       { wch: 15 }, // Credit
+      { wch: 10 }, // Pcs
       { wch: 10 }, // Qty
       { wch: 15 }, // A/c Code
       { wch: 30 }, // BsGroup
@@ -816,7 +819,7 @@ const fetchLedgerTransactions = (ledger) => {
       for (let r = 6; r < data.length + 6; r++) {
         const addr = XLSX.utils.encode_cell({ r, c: acCodeColIdx });
         if (worksheet[addr]) {
-          worksheet[addr].s = { alignment: { horizontal: "left" } };
+          worksheet[addr].s = { alignment: { horizontal: "center" } };
         }
       }
     }
@@ -851,30 +854,31 @@ const fetchLedgerTransactions = (ledger) => {
   };
 
 // logic for BsGroup Annexure Modal
-useEffect(() => {
-  const handleGroupModalKeyDown = (e) => {
-    if (!showGroupModal || !groupedLedgersToPick.length) return;
+// useEffect(() => {
+//   const handleGroupModalKeyDown = (e) => {
+//     if (!showGroupModal || !groupedLedgersToPick.length) return;
 
-    e.preventDefault(); // 🔹 prevent background scrolling or default browser behavior
+//     e.preventDefault(); // 🔹 prevent background scrolling or default browser behavior
 
-    if (e.key === "ArrowDown") {
-      setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
-    } else if (e.key === "ArrowUp") {
-      setActiveGroupIndex((prev) =>
-        prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
-      );
-    } else if (e.key === "Enter") {
-      const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-      setShowGroupModal(false);
-      fetchLedgerTransactions(selectedLedger);
-    } else if (e.key === "Escape") {
-      setShowGroupModal(false);
-    }
-  };
+//     if (e.key === "ArrowDown") {
+//       setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
+//     } else if (e.key === "ArrowUp") {
+//       setActiveGroupIndex((prev) =>
+//         prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
+//       );
+//     } else if (e.key === "Enter") {
+//       const selectedLedger = groupedLedgersToPick[activeGroupIndex];
+//       // setShowGroupModal(false);
+//       fetchLedgerTransactions(selectedLedger);
+//     } 
+//     // else if (e.key === "Escape") {
+//     //   setShowGroupModal(false);
+//     // }
+//   };
 
-  window.addEventListener("keydown", handleGroupModalKeyDown);
-  return () => window.removeEventListener("keydown", handleGroupModalKeyDown);
-}, [showGroupModal, groupedLedgersToPick, activeGroupIndex]);
+//   window.addEventListener("keydown", handleGroupModalKeyDown);
+//   return () => window.removeEventListener("keydown", handleGroupModalKeyDown);
+// }, [showGroupModal, groupedLedgersToPick, activeGroupIndex]);
 
 const groupTotals = useMemo(() => {
   let debit = 0, credit = 0;
@@ -1580,105 +1584,191 @@ const groupTotals = useMemo(() => {
       </Modal>
 
       {/* BsGroup Listing */}
-       <Modal
+      <Modal
         show={showGroupModal}
         onHide={() => setShowGroupModal(false)}
         centered
-        size="lg"
+        className="custom-modal"
+        backdrop="static"   // 👈 prevents closing when clicking outside
+        style={{marginTop:20}}
+ 
       >
         <Modal.Header closeButton>
           <Modal.Title> <span style={{ color: "darkblue" }}>{currentGroupName}</span> </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "2rem", marginBottom: "8px" }}>
-            <div>
-              <label style={{ fontWeight: "bold", color: "darkblue" }}>Selected Debit:</label>
-              <div style={{ textAlign: "right", fontWeight: "bold", color: "darkblue" }}>
-                {groupTotals.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-            </div>
-            <div>
-              <label style={{ fontWeight: "bold", color: "red" }}>Selected Credit:</label>
-              <div style={{ textAlign: "right", fontWeight: "bold", color: "red" }}>
-                {groupTotals.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-            </div>
-          </div>
-        <Table size="sm" hover>
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={selectedGroupRows.size === groupedLedgersToPick.length}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedGroupRows(new Set(groupedLedgersToPick.map((_, i) => i)));
-                    } else {
-                      setSelectedGroupRows(new Set());
-                    }
+          <div style={{display:'flex',flexDirection:"row",justifyContent:'space-between', marginBottom:10}}>
+            <div style={{display:'flex',flexDirection:"column", marginTop:5}}>
+              <div style={{display:"flex",flexDirection:"row"}}>
+                <b style={{fontSize:16,marginRight:"10px"}}>Period From</b>
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={formatDate(fromDate)}   // 👈 formatted here
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "10px",
+                      width:"120px"
+                    },
                   }}
                 />
-              </th>
-              <th>Name</th>
-              <th>City</th>
-              <th style={{ textAlign: "right" }}>Qty</th>
-              <th style={{ textAlign: "right" }}>Pcs</th>
-              <th style={{ textAlign: "right" }}>Debit</th>
-              <th style={{ textAlign: "right" }}>Credit</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groupedLedgersToPick.map((ledger, index) => {
-              const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
-              return (
-                <tr
-                  key={ledger._id}
-                  ref={(el) => (groupRowRefs.current[index] = el)}
-                  style={{
-                    cursor: "pointer",
-                    backgroundColor: index === activeGroupIndex ? "rgb(187,186,186)" : "transparent",
+              </div>
+              <div style={{display:"flex",flexDirection:"row",marginTop:5}}>
+                <b style={{fontSize:16,marginRight:"61px"}}>UpTo</b>
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={formatDate(toDate)}   // 👈 formatted here
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "10px",
+                      width:"120px"
+                    },
                   }}
-                  onMouseEnter={() => setActiveGroupIndex(index)}
-                  onDoubleClick={() => {
-                    setShowGroupModal(false);
-                    fetchLedgerTransactions(ledger);
+                />
+              </div>
+              
+            </div>
+            <div style={{display:'flex',flexDirection:"column", marginTop:5}}>
+              <div style={{display:"flex",flexDirection:"row"}}>
+                <b style={{fontSize:16,marginRight:"16px"}}>Selected Debit</b>
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={groupTotals.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}   // 👈 formatted here
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "10px",
+                      width:"150px"
+                    },
                   }}
-                >
-                  <td>
+                />
+              </div>
+              <div style={{display:"flex",flexDirection:"row",marginTop:5}}>
+                <b style={{fontSize:16,marginRight:"10px"}}>Selected Credit</b>
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={groupTotals.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}  // 👈 formatted here
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "10px",
+                      width:"150px"
+                    },
+                  }}
+                />
+              </div>
+              
+            </div>
+          </div>
+
+           <div className={styles.tableHeight}>
+            <Table size="sm" className="custom-table">
+              <thead style={{ position: "sticky", top: 0, background: "skyblue", fontSize: 17, textAlign: "center", zIndex: 2 }}>
+                <tr>
+                  <th>
                     <input
                       type="checkbox"
-                      checked={selectedGroupRows.has(index)}
-                      onChange={() => {
-                        setSelectedGroupRows((prev) => {
-                          const newSet = new Set(prev);
-                          if (newSet.has(index)) newSet.delete(index);
-                          else newSet.add(index);
-                          return newSet;
-                        });
+                      checked={selectedGroupRows.size === groupedLedgersToPick.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedGroupRows(new Set(groupedLedgersToPick.map((_, i) => i)));
+                        } else {
+                          setSelectedGroupRows(new Set());
+                        }
                       }}
+                      style={{ transform: "scale(1.2)", cursor: "pointer" }}
                     />
-                  </td>
-                  <td>{ledger.formData.ahead}</td>
-                  <td>{ledger.formData.city}</td>
-                  <td style={{ textAlign: "right" }}>{qty}</td>
-                  <td style={{ textAlign: "right" }}>{pcs}</td>
-                  <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
-                    {drcr === "DR"
-                      ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      : ""}
-                  </td>
-                  <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
-                    {drcr === "CR"
-                      ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      : ""}
-                  </td>
+                  </th>
+                  <th>NAME</th>
+                  <th>CITY</th>
+                  <th>QTY</th>
+                  <th>PCS</th>
+                  <th>DEBIT</th>
+                  <th>CREDIT</th>
                 </tr>
-              );
+              </thead>
+              <tbody>
+                {groupedLedgersToPick.map((ledger, index) => {
+                  const { balance, drcr } = ledger.totals || {};
+                  return (
+                    <tr
+                      key={ledger._id}
+                      ref={(el) => (groupRowRefs.current[index] = el)}
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor: index === activeGroupIndex ? "rgb(187,186,186)" : "transparent",
+                      }}
+                      onMouseEnter={() => setActiveGroupIndex(index)}
+                      onClick={() => {
+                        // setShowGroupModal(false);
+                        fetchLedgerTransactions(ledger);
+                      }}
+                    >
+                      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedGroupRows.has(index)}
+                          onChange={() => {
+                            setSelectedGroupRows((prev) => {
+                              const newSet = new Set(prev);
+                              if (newSet.has(index)) newSet.delete(index);
+                              else newSet.add(index);
+                              return newSet;
+                            });
+                          }}
+                          style={{ transform: "scale(1.2)", cursor: "pointer" }}
+                        />
+                      </td>
+                      <td>{ledger.formData.ahead}</td>
+                      <td>{ledger.formData.city}</td>
+                      <td style={{ textAlign: "right" }}> {ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000"}</td>
+                      <td style={{ textAlign: "right" }}> {ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000"}</td>
+                      <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
+                        {drcr === "DR"
+                          ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : ""}
+                      </td>
+                      <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
+                        {drcr === "CR"
+                          ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : ""}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          
+          <div style={{display:'flex', flexDirection:"row"}}> 
+            <Button style={{marginRight:"10px"}} onClick={handleOpen} >Print</Button>
+             <PrintTrail
+              items={groupedLedgersToPick.map((ledger) => {
+              const { balance, drcr } = ledger.totals || {};
+              return {
+                name: ledger.formData.ahead,
+                city: ledger.formData.city,
+                netPcs: ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000",   // ✅ added
+                netWeight: ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000", // ✅ added
+                debit: drcr === "DR" ? Math.abs(balance) : 0,
+                credit: drcr === "CR" ? Math.abs(balance) : 0,
+              };
             })}
-          </tbody>
-        </Table>
-
+            isOpen={open}
+            handleClose={handleClose}
+            ledgerFrom={ledgerFromDate}
+            ledgerTo={ledgerToDate}
+            currentDate = {printDateValue}  // ✅ pass actual date
+            currentGroupName = {currentGroupName}
+          />
+            <Button style={{marginRight:"10px"}}>Export</Button>
+            <Button variant="secondary" onClick={() => setShowGroupModal(false)}>Close</Button>
+          </div>
       
         </Modal.Body>
       </Modal>

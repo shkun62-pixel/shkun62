@@ -676,6 +676,10 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     }
   };
 
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
     const HandleValueChange = (event) => {
     const { id, value } = event.target;
     const isDuplicate = existingpanList.includes(value);
@@ -686,15 +690,16 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     }
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]:  capitalizeWords(value),
     }));
   };
+
    const [initialLoadDone, setInitialLoadDone] = useState(false);
    
   const handleValueChange = (field) => (event, newValue, reason) => {
     // Skip during initial API set
     if (!initialLoadDone) {
-      return setFormData((prev) => ({ ...prev, [field]: newValue || "" }));
+      return setFormData((prev) => ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
     }
 
     // Only check duplicates for ahead field & when user actually sets a value
@@ -711,16 +716,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
       }
     }
 
-    setFormData((prev) => ({ ...prev, [field]: newValue || "" }));
-  };
-
-  const handleAlphabetOnly = (e) => {
-    const { id, value } = e.target;
-    // Allow only alphabets (A-Z, a-z) and spaces
-    const alphabetRegex = /^[A-Za-z\s]*$/;
-    if (alphabetRegex.test(value)) {
-      setFormData({ ...formData, [id]: value });
-    }
+    setFormData((prev) => ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
   };
 
   const initialColors = [
@@ -1250,7 +1246,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
 
     setFormData((prev) => ({
       ...prev,
-      [field]: cleanValue,
+      [field]:  capitalizeWords(cleanValue),
     }));
 
     if (field === "pinCode" && cleanValue.length === 6) {
