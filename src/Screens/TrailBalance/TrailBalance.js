@@ -26,6 +26,10 @@ const TrailBalance = () => {
   const [transactions, setTransactions] = useState([]);
   const rowRefs = useRef([]);
   const tableRef = useRef(null);
+
+  const tableContainerRef = useRef(null);
+  const txnContainerRef = useRef(null);
+
   const searchRef = useRef(null);   // ✅ search input ref
   const groupRowRefs = useRef([]);
   const navigate = useNavigate();
@@ -214,28 +218,28 @@ const TrailBalance = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (showModal && rowRefs.current[activeRowIndex]) {
-      const row = rowRefs.current[activeRowIndex];
-      const container = row.closest(`.${styles.tableHeight}`);
+  // useEffect(() => {
+  //   if (showModal && rowRefs.current[activeRowIndex]) {
+  //     const row = rowRefs.current[activeRowIndex];
+  //     const container = row.closest(`.${styles.tableHeight}`);
 
-      if (container && row) {
-        const rowTop = row.offsetTop;
-        const rowBottom = rowTop + row.offsetHeight;
-        const containerTop = container.scrollTop;
-        const containerBottom = containerTop + container.clientHeight;
+  //     if (container && row) {
+  //       const rowTop = row.offsetTop;
+  //       const rowBottom = rowTop + row.offsetHeight;
+  //       const containerTop = container.scrollTop;
+  //       const containerBottom = containerTop + container.clientHeight;
 
-        // 🔹 Scroll down if row is below view
-        if (rowBottom > containerBottom) {
-          container.scrollTop = rowBottom - container.clientHeight;
-        }
-        // 🔹 Scroll up if row is above view
-        else if (rowTop < containerTop) {
-          container.scrollTop = rowTop;
-        }
-      }
-    }
-  }, [activeRowIndex, showModal]);
+  //       // 🔹 Scroll down if row is below view
+  //       if (rowBottom > containerBottom) {
+  //         container.scrollTop = rowBottom - container.clientHeight;
+  //       }
+  //       // 🔹 Scroll up if row is above view
+  //       else if (rowTop < containerTop) {
+  //         container.scrollTop = rowTop;
+  //       }
+  //     }
+  //   }
+  // }, [activeRowIndex, showModal]);
 
   // fetch ledger + fa
   useEffect(() => {
@@ -853,6 +857,135 @@ const fetchLedgerTransactions = (ledger) => {
     saveAs(blob, "TrialBalance.xlsx");
   };
 
+  const exportGroupToExcel = () => {
+    const data = groupedLedgersToPick.map((ledger) => {
+      const { balance, drcr } = ledger.totals || {};
+      return {
+        Name: ledger.formData.ahead,
+        City: ledger.formData.city,
+        Qty: ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000",
+        Pcs: ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000",
+        Debit: drcr === "DR" ? Math.abs(balance) : 0,
+        Credit: drcr === "CR" ? Math.abs(balance) : 0,
+      };
+    });
+
+    if (data.length === 0) return;
+
+    const header = Object.keys(data[0]);
+
+    // Period
+    const periodFrom = ledgerFromDate ? formatDate(ledgerFromDate) : "--";
+    const periodTo = ledgerToDate ? formatDate(ledgerToDate) : "--";
+
+    // Build sheet data
+    const sheetData = [
+      [companyName || "Company Name"],
+      [companyAdd || "Company Address"],
+      [companyCity || "Company City"],
+      [`Group Ledger - ${currentGroupName}`],
+      [`Period From: ${periodFrom} To: ${periodTo}`],
+      [],
+      header,
+      ...data.map(row => header.map(h => row[h]))
+    ];
+
+    // Totals row for numeric fields
+    const numericFields = ["Debit", "Credit", "Pcs", "Qty"];
+    const totals = {};
+    header.forEach((h, index) => {
+      if (index === 0) totals[h] = "TOTAL";
+      else if (numericFields.includes(h)) {
+        const colLetter = XLSX.utils.encode_col(index);
+        const firstRow = 7; // data starts at row 7 (0-indexed)
+        const lastRow = 7 + data.length - 1;
+        totals[h] = { f: `SUBTOTAL(9,${colLetter}${firstRow}:${colLetter}${lastRow})` };
+      } else {
+        totals[h] = "";
+      }
+    });
+    sheetData.push(header.map(h => totals[h]));
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Column widths
+    worksheet["!cols"] = [
+      { wch: 40 }, // Name
+      { wch: 20 }, // City
+      { wch: 12 }, // Qty
+      { wch: 12 }, // Pcs
+      { wch: 15 }, // Debit
+      { wch: 15 }, // Credit
+    ];
+
+    // Style headers
+    header.forEach((_, colIdx) => {
+      const cellAddr = XLSX.utils.encode_cell({ r: 6, c: colIdx });
+      if (worksheet[cellAddr]) {
+        worksheet[cellAddr].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { patternType: "solid", fgColor: { rgb: "4F81BD" } },
+          alignment: { horizontal: "center", vertical: "center" }
+        };
+      }
+    });
+
+    // Style company rows
+    ["A1", "A2", "A3", "A4", "A5"].forEach((cell, idx) => {
+      if (worksheet[cell]) {
+        worksheet[cell].s = {
+          font: { bold: true, sz: idx === 0 ? 16 : 12, color: { rgb: "000000" } },
+          alignment: { horizontal: "center" }
+        };
+      }
+    });
+
+    // Right-align numeric fields
+    numericFields.forEach(field => {
+      const colIdx = header.indexOf(field);
+      if (colIdx !== -1) {
+        for (let r = 7; r < data.length + 7; r++) {
+          const addr = XLSX.utils.encode_cell({ r, c: colIdx });
+          if (worksheet[addr]) {
+            worksheet[addr].s = {
+              alignment: { horizontal: "right" },
+              numFmt: "0.00"
+            };
+          }
+        }
+      }
+    });
+
+    // Style totals row
+    const totalRowIndex = data.length + 7;
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: totalRowIndex, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true, color: { rgb: "000000" } },
+          fill: { patternType: "solid", fgColor: { rgb: "D9D9D9" } },
+          alignment: { horizontal: colIdx === 0 ? "left" : "right", vertical: "center" }
+        };
+      }
+    });
+
+    // Merge company rows
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: header.length - 1 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: header.length - 1 } },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Group Ledger");
+
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, `${currentGroupName}_Ledger.xlsx`);
+  };
+
 // logic for BsGroup Annexure Modal
 // useEffect(() => {
 //   const handleGroupModalKeyDown = (e) => {
@@ -893,6 +1026,74 @@ const groupTotals = useMemo(() => {
   return { debit, credit };
 }, [selectedGroupRows, groupedLedgersToPick]);
 
+  // ✅ Auto-scroll ledger list to keep selected row fully visible
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // --- adjust for your table header height ---
+    const headerOffset = 40; // px — tweak if your header is taller
+    const buffer = 12;       // space above/below row so it's fully visible
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    const visibleTop = container.scrollTop + headerOffset + buffer;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    if (rowBottom > visibleBottom) {
+      // Scroll down enough to show the whole row
+      const newScrollTop = rowBottom - containerHeight + buffer * 2;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    } else if (rowTop < visibleTop) {
+      // Scroll up enough so header doesn’t hide it
+      const newScrollTop = rowTop - headerOffset - buffer;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [selectedIndex, filteredLedgers]);
+
+  // ✅ Auto-scroll inside ACCOUNT STATEMENT modal
+  useEffect(() => {
+    if (!showModal || !txnContainerRef.current) return;
+
+    const container = txnContainerRef.current;
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(activeRowIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // heights & offsets
+    const headerOffset = 40; // Adjust to match your modal header height
+    const buffer = 12;       // Space above/below so row is clearly visible
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // The currently visible top & bottom inside the scrollable container
+    const visibleTop = container.scrollTop + headerOffset + buffer;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    // scroll adjustments
+    if (rowBottom > visibleBottom) {
+      // Scroll just enough so full row + buffer fits
+      const newScrollTop = rowBottom - containerHeight + buffer * 2;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    } else if (rowTop < visibleTop) {
+      const newScrollTop = rowTop - headerOffset - buffer;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [activeRowIndex, showModal, filteredTransactions]);
 
   return (
     <div style={{ padding: "10px" }}>
@@ -974,7 +1175,7 @@ const groupTotals = useMemo(() => {
 
         </div>
 
-        <div className="tableT">
+        <div className="tableT" ref={tableContainerRef}>
           <Table size="sm" className="custom-table" hover ref={tableRef}>
             <thead style={{ position: "sticky", top: 1, background: "skyblue", fontSize: 17, textAlign: "center" }}>
               <tr>
@@ -1003,8 +1204,12 @@ const groupTotals = useMemo(() => {
                       cursor: "pointer",
                       fontSize: 16,
                     }}
-                    onClick={() => openLedgerDetails(ledger)}
-                    onMouseEnter={() => setSelectedIndex(index)}
+                    // onClick={() => openLedgerDetails(ledger)}
+                    onClick={() => {
+                      setSelectedIndex(index);
+                      openLedgerDetails(ledger);
+                    }}
+                    // onMouseEnter={() => setSelectedIndex(index)}
                   >
                     <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                       <input
@@ -1230,7 +1435,7 @@ const groupTotals = useMemo(() => {
               </div>
               </div>
 
-              <div className={styles.tableHeight}>
+              <div className={styles.tableHeight} ref={txnContainerRef}>
                 <Table size="sm" className="custom-table">
                   <thead
                     style={{
@@ -1302,8 +1507,12 @@ const groupTotals = useMemo(() => {
                                 index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent",
                               cursor: "pointer",
                             }}
-                            onClick={() => handleTransactionSelect(txn)}
-                            onMouseEnter={() => setActiveRowIndex(index)}
+                            onClick={() => {
+                              setActiveRowIndex(index);
+                              handleTransactionSelect(txn);
+                            }}
+                            // onClick={() => handleTransactionSelect(txn)}
+                            // onMouseEnter={() => setActiveRowIndex(index)}
                           >
                             <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                                 <input
@@ -1766,7 +1975,7 @@ const groupTotals = useMemo(() => {
             currentDate = {printDateValue}  // ✅ pass actual date
             currentGroupName = {currentGroupName}
           />
-            <Button style={{marginRight:"10px"}}>Export</Button>
+            <Button style={{marginRight:"10px"}} onClick={exportGroupToExcel}>Export</Button>
             <Button variant="secondary" onClick={() => setShowGroupModal(false)}>Close</Button>
           </div>
       

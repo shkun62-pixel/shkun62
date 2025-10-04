@@ -2156,9 +2156,15 @@ const Purchase = () => {
         value = -Math.abs(numeric); // Force negative
       }
     }
-    
+
     const updatedItems = [...items];
-    updatedItems[index][key] = value;
+    if (["sdisc"].includes(key)) {
+      updatedItems[index][key] = capitalizeWords(value);
+    } else {
+      updatedItems[index][key] = value;
+    }
+    // const updatedItems = [...items];
+    // updatedItems[index][key] = value;
 
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
@@ -3975,7 +3981,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               variant="filled"
               size="small"
               label="BILL NO"
-              onChange={handleNumberChange}
+              onChange={handleCapitalAlpha}
               onKeyDown={handleEnterKeyPress(vBillNoRef, grNoRef)}
               inputProps={{
                 maxLength: 48,

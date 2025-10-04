@@ -883,212 +883,198 @@ const CashVoucher = () => {
     return fields;
   }, []);
 
- const handleSaveClick = async () => {
-    document.body.style.backgroundColor = 'white';
+  const handleSaveClick = async () => {
+    document.body.style.backgroundColor = "white";
 
     // Validate if at least one row is filled
-    const filledRows = items.filter(item => item.accountname !== '');
+    const filledRows = items.filter((item) => item.accountname !== "");
     if (filledRows.length === 0) {
-        toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
-        return;
+      toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
+      return;
     }
 
     // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
-    const isValidTransaction = filledRows.every(item => 
-        parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
+    const isValidTransaction = filledRows.every(
+      (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
     );
-
     if (!isValidTransaction) {
-        toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
-        return;
+      toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
+      return;
+    }
+
+    // ✅ NEW VALIDATION: Prevent both debit and credit in same row
+    const hasBothDebitAndCredit = filledRows.some(
+      (item) => parseFloat(item.payment_debit) > 0 && parseFloat(item.receipt_credit) > 0
+    );
+    if (hasBothDebitAndCredit) {
+      toast.error("A row cannot have both Payment Debit and Receipt Credit values at the same time.", {
+        position: "top-center",
+      });
+      return;
     }
 
     // Only disable the save button AFTER validation passes
     setIsSaving(true);
     try {
-        let combinedData = {
-          _id: formData._id,
-          formData: {
-              date: selectedDate.toLocaleDateString("en-US"),
-              vtype: formData.vtype,
-              voucherno: formData.voucherno,
-              cashinhand: formData.cashinhand || "",
-              owner: formData.owner,
-              user: formData.user || "",
-              totalpayment: formData.totalpayment,
-              totalreceipt: formData.totalreceipt,
-              totaldiscount: formData.totaldiscount,
-          },
-          items: filledRows.map(item => ({
-              id: item.id,
-              acode: item.acode,
-              accountname: item.accountname,
-              narration: item.narration,
-              payment_debit: item.payment_debit,
-              receipt_credit: item.receipt_credit,
-              discount: item.discount,
-              discounted_payment: item.discounted_payment,
-              discounted_receipt: item.discounted_receipt,
-              name: item.name,
-              disableReceipt: item.disableReceipt,
-              disablePayment: item.disablePayment,
-          }))
-        };
+      let combinedData = {
+        _id: formData._id,
+        formData: {
+          date: selectedDate.toLocaleDateString("en-US"),
+          vtype: formData.vtype,
+          voucherno: formData.voucherno,
+          cashinhand: formData.cashinhand || "",
+          owner: formData.owner,
+          user: formData.user || "",
+          totalpayment: formData.totalpayment,
+          totalreceipt: formData.totalreceipt,
+          totaldiscount: formData.totaldiscount,
+        },
+        items: filledRows.map((item) => ({
+          id: item.id,
+          acode: item.acode,
+          accountname: item.accountname,
+          narration: item.narration,
+          payment_debit: item.payment_debit,
+          receipt_credit: item.receipt_credit,
+          discount: item.discount,
+          discounted_payment: item.discounted_payment,
+          discounted_receipt: item.discounted_receipt,
+          name: item.name,
+          disableReceipt: item.disableReceipt,
+          disablePayment: item.disablePayment,
+        })),
+      };
 
-        console.log('Combined Data:', combinedData);
-        const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${isAbcmode ? `/${data1._id}` : ''}`;
-        const method = isAbcmode ? 'put' : 'post';
+      console.log("Combined Data:", combinedData);
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${
+        isAbcmode ? `/${data1._id}` : ""
+      }`;
+      const method = isAbcmode ? "put" : "post";
 
-        const response = await axios({
-            method,
-            url: apiEndpoint,
-            data: combinedData,
-        });
+      const response = await axios({
+        method,
+        url: apiEndpoint,
+        data: combinedData,
+      });
 
-        console.log('API Response:', response);
+      console.log("API Response:", response);
 
-        if (response?.status === 200 || response?.status === 201) {
-            toast.success("Data Saved Successfully!", { position: "top-center" });
-            setIsAddEnabled(true);
-            setIsDisabled(true);
-            setIsEditMode(false);
-            setIsSubmitEnabled(false);
-            setIsPreviousEnabled(true);
-            setIsNextEnabled(true);
-            setIsFirstEnabled(true);
-            setIsLastEnabled(true);
-            setIsSearchEnabled(true);
-            setIsSPrintEnabled(true);
-            setIsDeleteEnabled(true);
-            setTitle('VIEW');
-        } else {
-            throw new Error(`Unexpected response status: ${response?.status}`);
-        }
+      if (response?.status === 200 || response?.status === 201) {
+        toast.success("Data Saved Successfully!", { position: "top-center" });
+        setIsAddEnabled(true);
+        setIsDisabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        setTitle("VIEW");
+      } else {
+        throw new Error(`Unexpected response status: ${response?.status}`);
+      }
     } catch (error) {
-        console.error('Error saving data:', error?.response?.data || error.message);
-        toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, { position: "top-center" });
+      console.error("Error saving data:", error?.response?.data || error.message);
+      toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, {
+        position: "top-center",
+      });
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
-};
+  };
 
 
-//   const handleSaveClick = async () => {
-//     document.body.style.backgroundColor = "white";
-//     setIsSaving(true);
-//     let isDataSaved = false;
-//     try {
-//       const filledRows = items.filter((item) => item.accountname !== "");
-//       if (filledRows.length === 0) {
-//         toast.error("Please fill in at least one account name before saving.", {
-//           position: "top-center",
-//         });
-//         setIsSaving(false);
-//         return;
-//       }
-//       const userConfirmed = window.confirm(
-//         "Are you sure you want to save the data?"
-//       );
-//       if (!userConfirmed) {
-//         setIsSaving(false);
-//         return;
-//       }
+  // const handleSaveClick = async () => {
+  //     document.body.style.backgroundColor = 'white';
 
-//       let combinedData;
-//       if (isAbcmode) {
-//         // console.log(formData);
-//         formData.totalpayment = formData.totalpayment;
-//         formData.totalreceipt = formData.totalreceipt;
-//         formData.totaldiscount = formData.totaldiscount;
+  //     // Validate if at least one row is filled
+  //     const filledRows = items.filter(item => item.accountname !== '');
+  //     if (filledRows.length === 0) {
+  //         toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
+  //         return;
+  //     }
 
-//         combinedData = {
-//           _id: formData._id,
-//           formData: {
-//             date: selectedDate.toLocaleDateString("en-US"),
-//             voucherno: formData.voucherno,
-//             cashinhand: formData.cashinhand || "",
-//             owner: formData.owner,
-//             user: formData.user || "",
-//             totalpayment: formData.totalpayment,
-//             totalreceipt: formData.totalreceipt,
-//             totaldiscount: formData.totaldiscount,
-//           },
-//           items: filledRows.map((item) => ({
-//             id: item.id,
-//             accountname: item.accountname,
-//             narration: item.narration,
-//             payment_debit: item.payment_debit,
-//             receipt_credit: item.receipt_credit,
-//             discount: item.discount,
-//             discounted_payment: item.discounted_payment,
-//             discounted_receipt: item.discounted_receipt,
-//             name: item.name,
-//             disableReceipt: item.disableReceipt,
-//             disablePayment: item.disablePayment,
-//           })),
-//         };
-//       } else {
-//         combinedData = {
-//           _id: formData._id,
-//           formData: {
-//             date: selectedDate.toLocaleDateString("en-US"),
-//             voucherno: formData.voucherno,
-//             cashinhand: formData.cashinhand || "",
-//             owner: formData.owner,
-//             user: formData.user || "",
-//             totalpayment: formData.totalpayment,
-//             totalreceipt: formData.totalreceipt,
-//             totaldiscount: formData.totaldiscount,
-//           },
-//           items: filledRows.map((item) => ({
-//             id: item.id,
-//             accountname: item.accountname,
-//             narration: item.narration,
-//             payment_debit: item.payment_debit,
-//             receipt_credit: item.receipt_credit,
-//             discount: item.discount,
-//             discounted_payment: item.discounted_payment,
-//             discounted_receipt: item.discounted_receipt,
-//             name: item.name,
-//             disableReceipt: item.disableReceipt,
-//           })),
-//         };
-//       }
-//       // Debugging
-//       console.log("Combined Data:", combinedData);
-//       const apiEndpoint = `http://103.154.233.29:3007/auth/cash${
-//         isAbcmode ? `/${data1._id}` : ""
-//       }`;
-//       const method = isAbcmode ? "put" : "post";
-//       const response = await axios({
-//         method,
-//         url: apiEndpoint,
-//         data: combinedData,
-//       });
-//       if (response.status === 200 || response.status === 201) {
-//         // fetchData();
-//         isDataSaved = true;
-//       }
-//     } catch (error) {
-//       console.error("Error saving data:", error);
-//       toast.error("Failed to save data. Please try again.", {
-//         position: "top-center",
-//       });
-//     } finally {
-//       setIsSubmitEnabled(false);
-//       setIsSaving(false);
-//       if (isDataSaved) {
-//         setTitle("View");
-//         setIsAddEnabled(true);
-//         setIsDisabled(true);
-//         setIsEditMode(false);
-//         toast.success("Data Saved Successfully!", { position: "top-center" });
-//       } else {
-//         setIsAddEnabled(false);
-//         setIsDisabled(false);
-//       }
-//     }
-//   };
+  //     // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+  //     const isValidTransaction = filledRows.every(item => 
+  //         parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
+  //     );
+
+  //     if (!isValidTransaction) {
+  //         toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
+  //         return;
+  //     }
+
+  //     // Only disable the save button AFTER validation passes
+  //     setIsSaving(true);
+  //     try {
+  //         let combinedData = {
+  //           _id: formData._id,
+  //           formData: {
+  //               date: selectedDate.toLocaleDateString("en-US"),
+  //               vtype: formData.vtype,
+  //               voucherno: formData.voucherno,
+  //               cashinhand: formData.cashinhand || "",
+  //               owner: formData.owner,
+  //               user: formData.user || "",
+  //               totalpayment: formData.totalpayment,
+  //               totalreceipt: formData.totalreceipt,
+  //               totaldiscount: formData.totaldiscount,
+  //           },
+  //           items: filledRows.map(item => ({
+  //               id: item.id,
+  //               acode: item.acode,
+  //               accountname: item.accountname,
+  //               narration: item.narration,
+  //               payment_debit: item.payment_debit,
+  //               receipt_credit: item.receipt_credit,
+  //               discount: item.discount,
+  //               discounted_payment: item.discounted_payment,
+  //               discounted_receipt: item.discounted_receipt,
+  //               name: item.name,
+  //               disableReceipt: item.disableReceipt,
+  //               disablePayment: item.disablePayment,
+  //           }))
+  //         };
+
+  //         console.log('Combined Data:', combinedData);
+  //         const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${isAbcmode ? `/${data1._id}` : ''}`;
+  //         const method = isAbcmode ? 'put' : 'post';
+
+  //         const response = await axios({
+  //             method,
+  //             url: apiEndpoint,
+  //             data: combinedData,
+  //         });
+
+  //         console.log('API Response:', response);
+
+  //         if (response?.status === 200 || response?.status === 201) {
+  //             toast.success("Data Saved Successfully!", { position: "top-center" });
+  //             setIsAddEnabled(true);
+  //             setIsDisabled(true);
+  //             setIsEditMode(false);
+  //             setIsSubmitEnabled(false);
+  //             setIsPreviousEnabled(true);
+  //             setIsNextEnabled(true);
+  //             setIsFirstEnabled(true);
+  //             setIsLastEnabled(true);
+  //             setIsSearchEnabled(true);
+  //             setIsSPrintEnabled(true);
+  //             setIsDeleteEnabled(true);
+  //             setTitle('VIEW');
+  //         } else {
+  //             throw new Error(`Unexpected response status: ${response?.status}`);
+  //         }
+  //     } catch (error) {
+  //         console.error('Error saving data:', error?.response?.data || error.message);
+  //         toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, { position: "top-center" });
+  //     } finally {
+  //         setIsSaving(false);
+  //     }
+  // };
 
   const handleDeleteClick = async (id) => {
     if (!id) {

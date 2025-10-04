@@ -7907,9 +7907,16 @@ const handleViewFAVoucher = () => {
         value = -Math.abs(numeric); // Force negative
       }
     }
-
+    
     const updatedItems = [...items];
-    updatedItems[index][key] = value;
+    if (["sdisc"].includes(key)) {
+      updatedItems[index][key] = capitalizeWords(value);  
+    } else {
+      updatedItems[index][key] = value;
+    }
+
+    // const updatedItems = [...items];
+    // updatedItems[index][key] = value;
 
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {

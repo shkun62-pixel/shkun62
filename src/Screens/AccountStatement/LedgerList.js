@@ -20,6 +20,10 @@ const LedgerList = () => {
   const [transactions, setTransactions] = useState([]);
   const rowRefs = useRef([]);
   const tableRef = useRef(null);
+
+  const tableContainerRef = useRef(null);
+  const txnContainerRef = useRef(null);
+
   const searchRef = useRef(null);   // ✅ search input ref
   const navigate = useNavigate();
   const [activeRowIndex, setActiveRowIndex] = useState(0);  // ✅ Track highlighted txn row
@@ -87,28 +91,28 @@ const LedgerList = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (showModal && rowRefs.current[activeRowIndex]) {
-      const row = rowRefs.current[activeRowIndex];
-      const container = row.closest(`.${styles.tableHeight}`);
+  // useEffect(() => {
+  //   if (showModal && rowRefs.current[activeRowIndex]) {
+  //     const row = rowRefs.current[activeRowIndex];
+  //     const container = row.closest(`.${styles.tableHeight}`);
 
-      if (container && row) {
-        const rowTop = row.offsetTop;
-        const rowBottom = rowTop + row.offsetHeight;
-        const containerTop = container.scrollTop;
-        const containerBottom = containerTop + container.clientHeight;
+  //     if (container && row) {
+  //       const rowTop = row.offsetTop;
+  //       const rowBottom = rowTop + row.offsetHeight;
+  //       const containerTop = container.scrollTop;
+  //       const containerBottom = containerTop + container.clientHeight;
 
-        // 🔹 Scroll down if row is below view
-        if (rowBottom > containerBottom) {
-          container.scrollTop = rowBottom - container.clientHeight;
-        }
-        // 🔹 Scroll up if row is above view
-        else if (rowTop < containerTop) {
-          container.scrollTop = rowTop;
-        }
-      }
-    }
-  }, [activeRowIndex, showModal]);
+  //       // 🔹 Scroll down if row is below view
+  //       if (rowBottom > containerBottom) {
+  //         container.scrollTop = rowBottom - container.clientHeight;
+  //       }
+  //       // 🔹 Scroll up if row is above view
+  //       else if (rowTop < containerTop) {
+  //         container.scrollTop = rowTop;
+  //       }
+  //     }
+  //   }
+  // }, [activeRowIndex, showModal]);
 
   // Fetch ledger list
   useEffect(() => {
@@ -299,6 +303,75 @@ const LedgerList = () => {
     }
   };
 
+// ✅ Auto-scroll ledger list to keep selected row fully visible
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // --- adjust for your table header height ---
+    const headerOffset = 40; // px — tweak if your header is taller
+    const buffer = 12;       // space above/below row so it's fully visible
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    const visibleTop = container.scrollTop + headerOffset + buffer;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    if (rowBottom > visibleBottom) {
+      // Scroll down enough to show the whole row
+      const newScrollTop = rowBottom - containerHeight + buffer * 2;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    } else if (rowTop < visibleTop) {
+      // Scroll up enough so header doesn’t hide it
+      const newScrollTop = rowTop - headerOffset - buffer;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [selectedIndex, filteredLedgers]);
+
+
+  // ✅ Auto-scroll inside ACCOUNT STATEMENT modal
+  useEffect(() => {
+    if (!showModal || !txnContainerRef.current) return;
+
+    const container = txnContainerRef.current;
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(activeRowIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // heights & offsets
+    const headerOffset = 40; // Adjust to match your modal header height
+    const buffer = 12;       // Space above/below so row is clearly visible
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // The currently visible top & bottom inside the scrollable container
+    const visibleTop = container.scrollTop + headerOffset + buffer;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    // scroll adjustments
+    if (rowBottom > visibleBottom) {
+      // Scroll just enough so full row + buffer fits
+      const newScrollTop = rowBottom - containerHeight + buffer * 2;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    } else if (rowTop < visibleTop) {
+      const newScrollTop = rowTop - headerOffset - buffer;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [activeRowIndex, showModal, filteredTransactions]);
 
 
   return (
@@ -306,7 +379,7 @@ const LedgerList = () => {
       <Card className={styles.cardL}>
         <h3 className={styles.headerlist}>LEDGER ACCOUNTS</h3>
 
-        <div className={styles.tablecont}>
+        <div className={styles.tablecont} ref={tableContainerRef}>
           <Table size="sm" className="custom-table" hover ref={tableRef}>
             <thead style={{ position: "sticky", top: 0, background: "skyblue", fontSize: 17, textAlign: "center" }}>
               <tr>
@@ -331,8 +404,11 @@ const LedgerList = () => {
                     cursor: "pointer",
                     fontSize: 16,
                   }}
-                  onClick={() => openLedgerDetails(ledger)}
-                  onMouseEnter={() => setSelectedIndex(index)}   // ✅ highlight on hover
+                  onClick={() => {
+                    setSelectedIndex(index);
+                    openLedgerDetails(ledger);
+                  }}
+                  // onMouseEnter={() => setSelectedIndex(index)}   // ✅ highlight on hover
                 >
                   <td style={{ textAlign: "center" }}
                     onClick={(e) => e.stopPropagation()}
@@ -388,7 +464,6 @@ const LedgerList = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             ACCOUNT STATEMENT
-            {/* Ledger Details - {selectedLedger?.formData?.ahead} */}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -501,7 +576,7 @@ const LedgerList = () => {
               </div>
               </div>
 
-              <div className={styles.tableHeight}>
+              <div className={styles.tableHeight} ref={txnContainerRef}>
                 <Table size="sm" className="custom-table">
                   <thead
                     style={{
@@ -552,8 +627,12 @@ const LedgerList = () => {
                                   backgroundColor: index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent", // ✅ highlight
                                   cursor: "pointer",
                                 }}
-                                onClick={() => handleTransactionSelect(txn)}
-                                onMouseEnter={() => setActiveRowIndex(index)}   // ✅ highlight on hover
+                                onClick={() => {
+                                  setActiveRowIndex(index);
+                                  handleTransactionSelect(txn);
+                                }}
+                                // onClick={() => handleTransactionSelect(txn)}
+                                // onMouseEnter={() => setActiveRowIndex(index)}   // ✅ highlight on hover
                               >
                               <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
                               <td style={{ textAlign: "center" }}>{txn.vtype}</td>

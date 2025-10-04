@@ -41,6 +41,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     // since without a tenant you can’t hit the right API
     console.error("No tenant selected!");
   }
+  const [title, setTitle] = useState("VIEW");
   const [imageSrc, setImageSrc] = useState(null);
   const fileInputRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
@@ -513,7 +514,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
 
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
-    console.log(data1._id);
+    // console.log(data1._id);
     try {
       if (data1) {
         const response = await axios.get(
@@ -525,6 +526,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
           setIndex(index + 1);
           setFormData(nextData.formData);
           setIsDisabled(true);
+          setTitle("VIEW");
         }
       }
     } catch (error) {
@@ -544,6 +546,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
           setIndex(index - 1);
           setFormData(prevData.formData);
           setIsDisabled(true);
+          setTitle("VIEW");
         }
       }
     } catch (error) {
@@ -563,6 +566,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
         setFormData(firstData.formData);
         setData1(response.data.data);
         setIsDisabled(true);
+        setTitle("(VIEW)");
       }
     } catch (error) {
       console.error("Error fetching first record:", error);
@@ -580,6 +584,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
         setFormData(lastData.formData);
         setData1(response.data.data);
         setIsDisabled(true);
+        setTitle("VIEW");
       }
     } catch (error) {
       console.error("Error fetching last record:", error);
@@ -588,6 +593,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
   
   const handleAdd = async () => {
     setShowModal(true);
+    setTitle("NEW");
     try {
         await fetchData();
         let lastvoucherno = 0;
@@ -1060,6 +1066,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
   // };
   
   const handleEditClick = () => {
+    setTitle("EDIT");
     setIsDisabled(false); // Enable fields when editing
     setIsEditMode(true); // Enter edit mode when editing
     setIsSubmitEnabled(true); // Enable the Save button when in edit mode
@@ -1101,7 +1108,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     }
   };
   const handleExit = async () => {
-    document.body.style.backgroundColor = 'white'; // Reset background color
+    setTitle("VIEW");
     setIsAddEnabled(true); // Enable "Add" button
     setIsSubmitEnabled(false);
     try {
@@ -1473,9 +1480,9 @@ const handleAttachClick = () => {
         <div class="Container">
           {/* First Half Screen */}
           <div className="FirstSec">
-            <div>
+            <div style={{display:'flex',flexDirection:'row',alignItems:'center'}}>
             <TextField
-            className="billzNo custom-bordered-input"
+            className="custom-bordered-input"
             id="acode"
             value={formData.acode}
             variant="filled"
@@ -1487,11 +1494,17 @@ const handleAttachClick = () => {
               style: {
                 height: "15px",
                 fontSize: 16,
+                width: "120px",
                 // padding: "0 8px"
               },
               readOnly: !isEditMode || isDisabled
             }}
           />
+          <div style={{marginLeft:20}}>
+             <span className="text-black-500 font-semibold text-base sm:text-lg">
+                {title}
+             </span>
+          </div>
           </div>
           <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
             <TextField
@@ -1514,15 +1527,15 @@ const handleAttachClick = () => {
                 fontSize: 16,
               },
             }}
-            sx={{ width: 350 }}
+            sx={{ width: 370 }}
           />
           <div>
           <Button
             className="back"
             style={{
               width:100,
-              height:35,
               marginLeft:2,
+              marginTop:2
               }}
               disabled={!isFetchEnabled}
             onClick={handleFetchData}
@@ -1533,7 +1546,7 @@ const handleAttachClick = () => {
             className="back"
             style={{
             width:98,
-            height:35,
+            marginTop:2,
             marginLeft:8,
             }}
             disabled={!isSubMasterEnabled}
