@@ -82,6 +82,7 @@ const Purchase = () => {
   const priceRefs = useRef([]);
   const amountRefs = useRef([]);
   const discountRef = useRef([]);
+  const discount2Ref = useRef([]);
   const othersRefs = useRef([]);
   const cgstRefs = useRef([]);
   const sgstRefs = useRef([]);
@@ -2849,6 +2850,9 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           discountRef.current[index]?.focus();
           break;
         case "disc":
+          discount2Ref.current[index]?.focus();
+          break;
+        case "discount":
           othersRefs.current[index]?.focus();
           break;
         case "exp_before":
@@ -2884,6 +2888,10 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
         discountRef.current[index]?.focus();
         setTimeout(() => discountRef.current[index]?.select(), 0);
       } else if (field === "disc") {
+        discount2Ref.current[index]?.focus();
+        setTimeout(() => discount2Ref.current[index]?.select(), 0);
+      }
+      else if (field === "discount") {
         othersRefs.current[index]?.focus();
         setTimeout(() => othersRefs.current[index]?.select(), 0);
       }
@@ -2891,9 +2899,12 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     // Move Left (←)
     else if (event.key === "ArrowLeft") {
       if (field === "exp_before") {
+        discount2Ref.current[index]?.focus();
+        setTimeout(() => discount2Ref.current[index]?.select(), 0);
+      } else if (field === "discount") {
         discountRef.current[index]?.focus();
         setTimeout(() => discountRef.current[index]?.select(), 0);
-      } else if (field === "disc") {
+      }else if (field === "disc") {
         priceRefs.current[index]?.focus();
         setTimeout(() => priceRefs.current[index]?.select(), 0);
       } else if (field === "rate") {
@@ -4460,6 +4471,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onBlur={() => handleBlur(index, "disc")}
                     ref={(el) => (discountRef.current[index] = el)}
                     onFocus={(e) => e.target.select()} // Select text on focus
+                    readOnly={!isEditMode || isDisabled}
                   />
                 </td>
                   )}
@@ -4480,7 +4492,13 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onChange={(e) =>
                       handleItemChange(index, "discount", e.target.value)
                     }
+                    onKeyDown={(e) => {
+                      handleKeyDown(e, index, "discount");
+                    }}
+                    onFocus={(e) => e.target.select()} // Select text on focus
+                    ref={(el) => (discount2Ref.current[index] = el)}
                     onBlur={() => handleBlur(index, "discount")}
+                    readOnly={!isEditMode || isDisabled}
                   />
                 </td>
                 )}

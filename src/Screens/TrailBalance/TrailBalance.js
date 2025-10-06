@@ -460,6 +460,7 @@ const TrailBalance = () => {
           saleId: txn._id,
         },
       });
+      alert(txn._id)
         break;
       case "P": // Purchase
         navigate("/purchase", {
@@ -467,6 +468,7 @@ const TrailBalance = () => {
           purId: txn._id,
         },
       });
+       alert(txn._id)
         // navigate("/purchase", { state: { purId: txn._id, rowIndex: activeRowIndex } });
         break;
       case "B": // Bank
@@ -475,6 +477,7 @@ const TrailBalance = () => {
           bankId: txn._id,
         },
       });
+       alert(txn._id)
         // navigate("/bankvoucher", { state: { bankId: txn._id, rowIndex: activeRowIndex } });
         break;
       case "C": // Cash
@@ -483,6 +486,7 @@ const TrailBalance = () => {
           cashId: txn._id,
         },
       });
+       alert(txn._id)
         // navigate("/cashvoucher", { state: { cashId: txn._id, rowIndex: activeRowIndex } });
         break;
       case "J": // Journal
@@ -491,6 +495,7 @@ const TrailBalance = () => {
           journalId: txn._id,
         },
       });
+       alert(txn._id)
         // navigate("/journalvoucher", { state: { journalId: txn._id, rowIndex: activeRowIndex } });
         break;
       default:
@@ -511,26 +516,50 @@ const TrailBalance = () => {
 
   // 🔹 Keyboard navigation inside transactions for Account Statement
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!transactions.length || !showModal) return; // ✅ Only when modal is open
+  const handleKeyDown = (e) => {
+    if (!transactions.length || !showModal) return;
 
-      if (e.key === "ArrowUp") {
-        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
-      } else if (e.key === "ArrowDown") {
-        setActiveRowIndex((prev) =>
-          prev < transactions.length - 1 ? prev + 1 : prev
-        );
-      } else if (e.key === "Enter") {
-        const entry = transactions[activeRowIndex];
-        handleTransactionSelect(entry); // ✅ Navigate
-      } else if (e.key === "Escape") {
-        setShowModal(false); // ✅ Close modal
-      }
-    };
+    if (e.key === "ArrowUp") {
+      setActiveRowIndex((prev) =>
+        prev > 0 ? prev - 1 : transactions.length - 1 // 🔁 jump to last
+      );
+    } else if (e.key === "ArrowDown") {
+      setActiveRowIndex((prev) =>
+        prev < transactions.length - 1 ? prev + 1 : 0 // 🔁 jump to first
+      );
+    } else if (e.key === "Enter") {
+      const entry = transactions[activeRowIndex];
+      handleTransactionSelect(entry);
+    } else if (e.key === "Escape") {
+      setShowModal(false);
+    }
+  };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [transactions, activeRowIndex, showModal]);
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [transactions, activeRowIndex, showModal]);
+
+  // useEffect(() => {
+  //   const handleKeyDown = (e) => {
+  //     if (!transactions.length || !showModal) return; // ✅ Only when modal is open
+
+  //     if (e.key === "ArrowUp") {
+  //       setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  //     } else if (e.key === "ArrowDown") {
+  //       setActiveRowIndex((prev) =>
+  //         prev < transactions.length - 1 ? prev + 1 : prev
+  //       );
+  //     } else if (e.key === "Enter") {
+  //       const entry = transactions[activeRowIndex];
+  //       handleTransactionSelect(entry); // ✅ Navigate
+  //     } else if (e.key === "Escape") {
+  //       setShowModal(false); // ✅ Close modal
+  //     }
+  //   };
+
+  //   window.addEventListener("keydown", handleKeyDown);
+  //   return () => window.removeEventListener("keydown", handleKeyDown);
+  // }, [transactions, activeRowIndex, showModal]);
 
   // Handle keyboard navigation for LedgerList
 useEffect(() => {
@@ -714,6 +743,7 @@ const fetchLedgerTransactions = (ledger) => {
     return `${day}/${month}/${year}`;
   };
 
+ // Export Trail Balance 
   const exportToExcel = () => {
     const data = filteredLedgers.map((ledger) => {
       const { balance, drcr } = ledger.totals || {};
@@ -857,6 +887,7 @@ const fetchLedgerTransactions = (ledger) => {
     saveAs(blob, "TrialBalance.xlsx");
   };
 
+  // Export BsGroup Wise
   const exportGroupToExcel = () => {
     const data = groupedLedgersToPick.map((ledger) => {
       const { balance, drcr } = ledger.totals || {};
@@ -985,6 +1016,148 @@ const fetchLedgerTransactions = (ledger) => {
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, `${currentGroupName}_Ledger.xlsx`);
   };
+
+  // Export Account Statement 
+  const exportAccountStatementToExcel = () => {
+    if (!filteredTransactions || filteredTransactions.length === 0) return;
+
+    // Build transaction data for Excel
+    let balance = 0;
+    const data = filteredTransactions.map((txn) => {
+      if (txn.type.toLowerCase() === "debit") balance += txn.amount;
+      else if (txn.type.toLowerCase() === "credit") balance -= txn.amount;
+
+      const drcr = balance >= 0 ? "DR" : "CR";
+
+      return {
+        Date: new Date(txn.date).toLocaleDateString("en-GB"),
+        Type: txn.vtype,
+        Narration: txn.narration,
+        Pcs: txn.pkgs?.toFixed(3) || "0.000",
+        Qty: txn.weight?.toFixed(3) || "0.000",
+        Debit: txn.type.toLowerCase() === "debit" ? txn.amount.toFixed(2) : "",
+        Credit: txn.type.toLowerCase() === "credit" ? txn.amount.toFixed(2) : "",
+        Balance: Math.abs(balance).toFixed(2),
+        "DR/CR": drcr,
+      };
+    });
+
+    const header = Object.keys(data[0]);
+
+    // Period
+    const periodFrom = ledgerFromDate ? formatDate(ledgerFromDate) : "--";
+    const periodTo = ledgerToDate ? formatDate(ledgerToDate) : "--";
+
+    // Build sheet data
+    const sheetData = [
+      [companyName || "Company Name"],
+      [companyAdd || "Company Address"],
+      [companyCity || "Company City"],
+      [`Account Statement - ${selectedLedger?.formData?.ahead || ""}`],
+      [`Period From: ${periodFrom} To: ${periodTo}`],
+      [],
+      header,
+      ...data.map(row => header.map(h => row[h]))
+    ];
+
+    // Add totals row
+    const numericFields = ["Pcs", "Qty", "Debit", "Credit", "Balance"];
+    const totals = {};
+    header.forEach((h, index) => {
+      if (index === 0) totals[h] = "TOTAL";
+      else if (numericFields.includes(h)) {
+        const colLetter = XLSX.utils.encode_col(index);
+        const firstRow = 8;
+        const lastRow = 8 + data.length - 1;
+        totals[h] = { f: `SUBTOTAL(9,${colLetter}${firstRow}:${colLetter}${lastRow})` };
+      } else totals[h] = "";
+    });
+    sheetData.push(header.map(h => totals[h]));
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Column widths
+    worksheet["!cols"] = [
+      { wch: 12 },  // Date
+      { wch: 10 },  // Type
+      { wch: 35 },  // Narration
+      { wch: 10 },  // Pcs
+      { wch: 10 },  // Qty
+      { wch: 15 },  // Debit
+      { wch: 15 },  // Credit
+      { wch: 15 },  // Balance
+      { wch: 8 },   // DR/CR
+    ];
+
+    // Style header row
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: 6, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { patternType: "solid", fgColor: { rgb: "4F81BD" } },
+          alignment: { horizontal: "center", vertical: "center" },
+        };
+      }
+    });
+
+    // Style top rows (company info)
+    ["A1", "A2", "A3", "A4", "A5"].forEach((cell, idx) => {
+      if (worksheet[cell]) {
+        worksheet[cell].s = {
+          font: { bold: true, sz: idx === 0 ? 16 : 12 },
+          alignment: { horizontal: "center" },
+        };
+      }
+    });
+
+    // Numeric alignment
+    numericFields.concat(["Balance"]).forEach(field => {
+      const colIdx = header.indexOf(field);
+      if (colIdx !== -1) {
+        for (let r = 7; r < data.length + 7; r++) {
+          const addr = XLSX.utils.encode_cell({ r, c: colIdx });
+          if (worksheet[addr]) {
+            worksheet[addr].s = {
+              alignment: { horizontal: "right" },
+              numFmt: "0.00",
+            };
+          }
+        }
+      }
+    });
+
+    // Style totals row
+    const totalRowIndex = data.length + 7;
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: totalRowIndex, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true },
+          fill: { patternType: "solid", fgColor: { rgb: "D9D9D9" } },
+          alignment: { horizontal: colIdx === 0 ? "left" : "right" },
+        };
+      }
+    });
+
+    // Merge title and header cells
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: header.length - 1 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: header.length - 1 } },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Account Statement");
+
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, `${selectedLedger?.formData?.ahead || "Account"}_COA.xlsx`);
+  };
+
+
 
 // logic for BsGroup Annexure Modal
 // useEffect(() => {
@@ -1262,17 +1435,19 @@ const groupTotals = useMemo(() => {
         </div>
 
         {/* ✅ Search Input */}
-        <div style={{display:'flex',flexDirection:"row"}}>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
+          <span style={{fontSize:18,marginRight:"10px"}}>SEARCH : </span>
           <Form.Control
             ref={searchRef}
             className={styles.Search}
+            style={{marginTop:0}}
             type="text"
-            placeholder="Search..."
+            // placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div style={{marginTop:"5px"}}>
-          <Button className="Button" style={{backgroundColor:"#3d85c6",width:"100px"}} onClick={openOptionModal} >Options</Button>
+          <div style={{marginTop:"5px",marginLeft:'auto'}}>
+          <Button className="Buttonz" style={{backgroundColor:"#3d85c6"}} onClick={openOptionModal} >Options</Button>
           <OptionModal
             isOpen={isOptionOpen}
             onClose={closeOptionModal}
@@ -1286,7 +1461,7 @@ const groupTotals = useMemo(() => {
               }
             }}
           />
-          <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}} onClick={handleOpen} >Print</Button>
+          <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}} onClick={handleOpen} >Print</Button>
           <PrintTrail
             items={filteredLedgers.map((ledger) => {
               const { balance, drcr } = ledger.totals || {};
@@ -1305,8 +1480,8 @@ const groupTotals = useMemo(() => {
             ledgerTo={ledgerToDate}
             currentDate = {printDateValue}  // ✅ pass actual date
           />
-          <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}}  onClick={exportToExcel}>Export </Button>
-          <Button className="Button" style={{backgroundColor:'#3d85c6',width:"100px"}}>Exit</Button>
+          <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}  onClick={exportToExcel}>Export </Button>
+          <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}>Exit</Button>
           </div>
         </div>
 
@@ -1628,9 +1803,9 @@ const groupTotals = useMemo(() => {
               </div>
               <div className="d-flex justify-content-between mt-2">
               <div>
-                <Button  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                <Button  variant="secondary">Export</Button>{" "}
-                <Button  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
                 <CoA
                   isOpen={isPrintOpen}
                   handleClose={() => setIsPrintOpen(false)}
@@ -1640,8 +1815,7 @@ const groupTotals = useMemo(() => {
                   ledgerTo={ledgerToDate}
                   currentDate = {printDateValue}  // ✅ pass actual date
                 />
-                <Button  variant="secondary">Email</Button>{" "}
-                <Button  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
               </div>
             </div>
             </div>
@@ -1786,7 +1960,7 @@ const groupTotals = useMemo(() => {
         </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowOptions(false)}>
+          <Button className="Buttonz" variant="secondary" onClick={() => setShowOptions(false)}>
             Close
           </Button>
         </Modal.Footer>
@@ -1955,7 +2129,7 @@ const groupTotals = useMemo(() => {
           </div>
           
           <div style={{display:'flex', flexDirection:"row"}}> 
-            <Button style={{marginRight:"10px"}} onClick={handleOpen} >Print</Button>
+            <Button className="Buttonz" style={{marginRight:"10px"}} onClick={handleOpen} >Print</Button>
              <PrintTrail
               items={groupedLedgersToPick.map((ledger) => {
               const { balance, drcr } = ledger.totals || {};
@@ -1975,8 +2149,8 @@ const groupTotals = useMemo(() => {
             currentDate = {printDateValue}  // ✅ pass actual date
             currentGroupName = {currentGroupName}
           />
-            <Button style={{marginRight:"10px"}} onClick={exportGroupToExcel}>Export</Button>
-            <Button variant="secondary" onClick={() => setShowGroupModal(false)}>Close</Button>
+            <Button className="Buttonz" style={{marginRight:"10px"}} onClick={exportGroupToExcel}>Export</Button>
+            <Button className="Buttonz" variant="secondary" onClick={() => setShowGroupModal(false)}>Close</Button>
           </div>
       
         </Modal.Body>

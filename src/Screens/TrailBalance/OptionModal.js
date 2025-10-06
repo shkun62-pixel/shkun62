@@ -338,11 +338,12 @@ const OptionModal = ({ isOpen, onClose, onApply }) => {
             </div>
           </Card>
       
-          <div style={{ display: "flex", flexDirection: "row", marginTop:"auto",justifyContent:"center" }}>
-            <Button style={{ backgroundColor: "#6c5ce7", color: "white" }}>
+          <div style={{ display: "flex", flexDirection: "row", marginTop:"auto",marginLeft:30 }}>
+            <Button className="Buttonz" style={{ backgroundColor: "#6c5ce7", color: "white" }}>
               Chk_Errors
             </Button>
             <Button
+            className="Buttonz"
               style={{
                 backgroundColor: "#6c5ce7",
                 color: "white",
@@ -365,6 +366,7 @@ const OptionModal = ({ isOpen, onClose, onApply }) => {
             </Button> */}
 
             <Button
+            className="Buttonz"
             style={{ backgroundColor: "#6c5ce7", color: "white", marginLeft: 10 }}
             onClick={() => {
               if (onApply) onApply(formData);

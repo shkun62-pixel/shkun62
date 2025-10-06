@@ -6006,6 +6006,7 @@ const Sale = () => {
   const priceRefs = useRef([]);
   const amountRefs = useRef([]);
   const discountRef = useRef([]);
+  const discount2Ref = useRef([]);
   const othersRefs = useRef([]);
   const cgstRefs = useRef([]);
   const sgstRefs = useRef([]);
@@ -8837,6 +8838,9 @@ if (key === "name") {
           discountRef.current[index]?.focus();
           break;
         case "disc":
+          discount2Ref.current[index]?.focus();
+          break;
+        case "discount":
           othersRefs.current[index]?.focus();
           break;
         case "exp_before":
@@ -8872,6 +8876,10 @@ if (key === "name") {
         discountRef.current[index]?.focus();
         setTimeout(() => discountRef.current[index]?.select(), 0);
       } else if (field === "disc") {
+        discount2Ref.current[index]?.focus();
+        setTimeout(() => discount2Ref.current[index]?.select(), 0);
+      }
+      else if (field === "discount") {
         othersRefs.current[index]?.focus();
         setTimeout(() => othersRefs.current[index]?.select(), 0);
       }
@@ -8879,6 +8887,9 @@ if (key === "name") {
     // Move Left (←)
     else if (event.key === "ArrowLeft") {
       if (field === "exp_before") {
+        discount2Ref.current[index]?.focus();
+        setTimeout(() => discount2Ref.current[index]?.select(), 0);
+      } else if (field === "discount") {
         discountRef.current[index]?.focus();
         setTimeout(() => discountRef.current[index]?.select(), 0);
       } else if (field === "disc") {
@@ -10158,12 +10169,14 @@ const handleKeyDownExp = (e, fieldName, index) => {
                     onBlur={() => handleBlur(index, "disc")}
                     ref={(el) => (discountRef.current[index] = el)}
                     onFocus={(e) => e.target.select()} // Select text on focus
+                    readOnly={!isEditMode || isDisabled}
                   />
                 </td>
                   )}
                 {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  id="discount"
                     className="discount"
                     style={{
                       height: 40,
@@ -10178,7 +10191,13 @@ const handleKeyDownExp = (e, fieldName, index) => {
                     onChange={(e) =>  
                       handleItemChange(index, "discount", e.target.value)
                     }
-                   onBlur={() => handleBlur(index, "discount")}
+                    onKeyDown={(e) => {
+                      handleKeyDown(e, index, "discount");
+                    }}
+                    onFocus={(e) => e.target.select()} // Select text on focus
+                    ref={(el) => (discount2Ref.current[index] = el)}
+                    onBlur={() => handleBlur(index, "discount")}
+                    readOnly={!isEditMode || isDisabled}
                   />
                 </td>
                 )}
