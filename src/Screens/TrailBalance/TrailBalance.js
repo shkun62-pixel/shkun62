@@ -18,6 +18,8 @@ const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
 
   const [allLedgers, setAllLedgers] = useState([]); // keep full list
+  // const [allLedgers, setAllLedgers] = useState([]);
+  const [faDataState, setFaDataState] = useState([]); // ✅ store faData here
   const [filteredLedgers, setFilteredLedgers] = useState([]); // ✅ for search
   const [searchTerm, setSearchTerm] = useState("");           // ✅ search state
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -256,6 +258,8 @@ const TrailBalance = () => {
 
         const ledgersData = ledgerRes.data.data || [];
         const faData = faRes.data.data || [];
+
+         setFaDataState(faData); // ✅ store faData in state
 
         const ledgerTotals = {};
         faData.forEach((entry) => {
@@ -743,7 +747,7 @@ const fetchLedgerTransactions = (ledger) => {
     return `${day}/${month}/${year}`;
   };
 
- // Export Trail Balance 
+  // Export Trail Balance 
   const exportToExcel = () => {
     const data = filteredLedgers.map((ledger) => {
       const { balance, drcr } = ledger.totals || {};
@@ -885,6 +889,163 @@ const fetchLedgerTransactions = (ledger) => {
     const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, "TrialBalance.xlsx");
+  };
+
+  // Export Month-Wise
+  const exportLedgerMonthwiseFY  = () => {
+    if (!allLedgers || allLedgers.length === 0 || !faDataState) return;
+
+    // Financial Year months: April → March
+    const monthNames = [
+      "Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"
+    ];
+
+    // Helper: map transaction date to FY month index 0–11
+    const getFYMonthIndex = (date) => (date.getUTCMonth() + 9) % 12;
+
+    // Step 1: Build ledger → month → amount map from faDataState
+    const ledgerMonthwiseTotals = {}; // { ledgerName: { monthName: amount } }
+
+    faDataState.forEach(entry => {
+      entry.transactions.forEach(txn => {
+        const txnDate = new Date(txn.date);
+        if (ledgerFromDate && txnDate < ledgerFromDate) return;
+        if (ledgerToDate && txnDate > ledgerToDate) return;
+
+        const acc = txn.account.trim();
+        const monthIndex = getFYMonthIndex(txnDate); // 0–11 FY order
+        const monthKey = monthNames[monthIndex];
+
+        if (!ledgerMonthwiseTotals[acc]) ledgerMonthwiseTotals[acc] = {};
+        if (!ledgerMonthwiseTotals[acc][monthKey]) ledgerMonthwiseTotals[acc][monthKey] = 0;
+
+        const amount = Number(txn.amount) || 0;
+        ledgerMonthwiseTotals[acc][monthKey] += txn.type.toLowerCase() === "debit" ? amount : -amount;
+      });
+    });
+
+    // Step 2: Prepare data rows for Excel
+    const data = allLedgers.map(ledger => {
+      const acc = ledger.formData.ahead.trim();
+      const row = {
+        "Account Name": ledger.formData.ahead,
+        Destination: ledger.formData.city
+      };
+
+      // Fill all FY months
+      monthNames.forEach(month => {
+        row[month] = ledgerMonthwiseTotals[acc]?.[month] || 0;
+      });
+
+      // ✅ Add total of all months for this row
+      row["Total"] = monthNames.reduce((sum, month) => sum + (Number(row[month]) || 0), 0);
+
+      return row;
+    });
+
+    // Step 3: TOTAL row
+    const totalRow = { "Account Name": "TOTAL", Destination: "" };
+    monthNames.forEach(month => {
+      totalRow[month] = data.reduce((sum, r) => sum + (Number(r[month]) || 0), 0);
+    });
+    totalRow["Total"] = data.reduce((sum, r) => sum + (Number(r["Total"]) || 0), 0);
+    data.push(totalRow);
+
+    // Step 4: Build Excel sheet
+    const header = [
+      "Account Name",
+      "Destination",
+      ...monthNames,
+      "Total",   // <-- new Total column
+    ];
+
+    const sheetData = [
+      [companyName || "Company Name"],
+      [companyAdd || "Company Address"],
+      [companyCity || "Company City"],
+      [`TRIAL BALANCE - Financial Year (Apr → Mar)`],
+      [],
+      header,
+      ...data.map(row => header.map(h => row[h]))
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Style company rows (bold & center)
+    ["A1", "A2", "A3", "A4"].forEach((cellAddr, idx) => {
+      if (worksheet[cellAddr]) {
+        worksheet[cellAddr].s = {
+          font: { bold: true, sz: idx === 0 ? 16 : 12, color: { rgb: "000000" } },
+          alignment: { horizontal: "center", indent: 25 } // <-- gives "margin left"
+        };
+      }
+    });
+
+    // Column widths
+    worksheet["!cols"] = header.map((h) => {
+      if (h === "Account Name") return { wch: 40 };  // wider
+      if (h === "Destination") return { wch: 25 };   // wider
+      return { wch: Math.max(h.length + 5, 12) };    // default
+    });
+
+    // Merge top header rows
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: header.length - 1 } }
+    ];
+
+    // Style headers
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: 5, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { patternType: "solid", fgColor: { rgb: "4F81BD" } },
+          alignment: { horizontal: "center", vertical: "center" },
+        };
+      }
+    });
+
+    // Style month cells and Total (Debit = blue, Credit = red)
+    const firstDataRow = 6;
+    const lastDataRow = data.length + 5;
+    [...monthNames, "Total"].forEach(month => {
+      const colIdx = header.indexOf(month);
+      for (let r = firstDataRow; r <= lastDataRow; r++) {
+        const addr = XLSX.utils.encode_cell({ r, c: colIdx });
+        const cell = worksheet[addr];
+        if (cell && typeof cell.v === "number") {
+          worksheet[addr].s = {
+            font: { color: { rgb: cell.v >= 0 ? "0000FF" : "FF0000" } },
+            alignment: { horizontal: "right" },
+            numFmt: "0.00"
+          };
+        }
+      }
+    });
+
+    // Style totals row
+    const totalRowIndex = lastDataRow;
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: totalRowIndex, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true },
+          fill: { patternType: "solid", fgColor: { rgb: "D9D9D9" } },
+          alignment: { horizontal: colIdx < 2 ? "left" : "right" },
+        };
+      }
+    });
+
+    // Step 5: Save Excel
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger_FY_Apr_Mar");
+
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, "Ledger_FY_Apr_Mar.xlsx");
   };
 
   // Export BsGroup Wise
@@ -1156,8 +1317,6 @@ const fetchLedgerTransactions = (ledger) => {
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, `${selectedLedger?.formData?.ahead || "Account"}_COA.xlsx`);
   };
-
-
 
 // logic for BsGroup Annexure Modal
 // useEffect(() => {
@@ -1435,7 +1594,7 @@ const groupTotals = useMemo(() => {
         </div>
 
         {/* ✅ Search Input */}
-        <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"auto"}}>
           <span style={{fontSize:18,marginRight:"10px"}}>SEARCH : </span>
           <Form.Control
             ref={searchRef}
@@ -1451,6 +1610,7 @@ const groupTotals = useMemo(() => {
           <OptionModal
             isOpen={isOptionOpen}
             onClose={closeOptionModal}
+            exportMonthWise = {exportLedgerMonthwiseFY}
             onApply={(values) => {
               setOptionValues(values);
               // ✅ store date only if Print Current Date checkbox is true

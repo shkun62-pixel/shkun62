@@ -32,7 +32,7 @@ const Header = styled("div")({
   borderRadius: 15,
 });
 
-const OptionModal = ({ isOpen, onClose, onApply }) => {
+const OptionModal = ({ isOpen, onClose, onApply, exportMonthWise }) => {
   const { company } = useContext(CompanyContext);
   const tenant = company?.databaseName;
 
@@ -369,6 +369,9 @@ const OptionModal = ({ isOpen, onClose, onApply }) => {
             className="Buttonz"
             style={{ backgroundColor: "#6c5ce7", color: "white", marginLeft: 10 }}
             onClick={() => {
+              if (formData.T4){
+                exportMonthWise();
+              }
               if (onApply) onApply(formData);
               onClose();
             }}

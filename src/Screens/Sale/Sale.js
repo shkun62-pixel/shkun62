@@ -8530,11 +8530,11 @@ if (key === "name") {
     const checkDate = new Date(date);
     checkDate.setHours(0, 0, 0, 0); // normalize selected date
 
-    if (checkDate > today) {
+    if (isEditMode && checkDate > today) {
       toast.info("You Have Selected a Future Date.", {
         position: "top-center",
       });
-    } else if (checkDate < today) {
+    } else if (isEditMode && checkDate < today) {
       toast.info("You Have Selected a Past Date.", {
         position: "top-center",
       });

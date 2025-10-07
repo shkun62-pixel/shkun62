@@ -58,6 +58,8 @@
   margin-bottom: 10px;
 }
 .contMain{
-  margin-top: -10px;
+  height: 92vh;
+  margin-top: -12px;
   padding: 20px;
+  box-shadow: 0px 8px 16px rgba(1, 1, 1, 0.5);
 }
