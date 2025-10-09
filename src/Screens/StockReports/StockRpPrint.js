@@ -41,7 +41,7 @@ const StockRpPrint = React.forwardRef(
       ? new Date(uptoDate).toLocaleDateString("en-GB")
       : "";
     // Split items into chunks of 10
-    const chunks = chunkItems(items, 10, 20);
+    const chunks = chunkItems(items, 30, 30);
     const style = {
       bgcolor: "white",
       boxShadow: 24,
@@ -54,7 +54,7 @@ const StockRpPrint = React.forwardRef(
       content: () => componentRef.current,
     });
 
-  const {companyName,companyAdd} = useCompanySetup();
+  const {companyName,companyAdd,companyCity} = useCompanySetup();
 
   const handleExportExcel = () => {
     const exportData = items.map(entry => {
@@ -245,12 +245,13 @@ exportData.forEach((row, rowIdx) => {
                     textAlign: "center",
                   }}
                 >
-                  <text style={{ fontSize: 40 }}>{companyName}</text>
-                  <text style={{ fontSize: 20 }}>{companyAdd}</text>
+                  <text style={{ fontSize: 40, fontFamily: "Courier New" }}>{companyName}</text>
+                  <text style={{ fontSize: 20, fontFamily: "Courier New" }}>{companyAdd}</text>
+                  <text style={{ fontSize: 20, fontFamily: "Courier New" }}>{companyCity}</text>
                   {/* <text style={{ fontSize: 20 }}>{"MANDI GOBINDGARH"}</text> */}
                 </div>
-                <text style={{fontSize:18}}>Stock Statement of : {selectedAhead}</text>
-                <text style={{fontSize:18,marginLeft:'45%'}}>From: {formattedFrom} &nbsp;&nbsp; Upto: {formattedUpto}</text>
+                <text style={{fontSize:18, fontFamily: "Courier New"}}>Stock Statement of : {selectedAhead}</text>
+                <text style={{fontSize:18,marginLeft:'35%', fontFamily: "Courier New"}}>From: {formattedFrom} &nbsp;&nbsp; Upto: {formattedUpto}</text>
                 <table
                   style={{
                     width: "100%",

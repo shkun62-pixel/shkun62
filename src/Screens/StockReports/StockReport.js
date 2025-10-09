@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./StockReport.module.css";
-import { Button } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 import axios from "axios";
 import DatePicker from "react-datepicker";
@@ -188,7 +188,8 @@ const StockReport = () => {
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: "10px" }}>
+      <Card className={styles.cardL}>
       <h1 className={styles.header}>STOCK REPORT</h1>
       <div className={styles.TopPart}>
         <div className={styles.Column}>
@@ -274,8 +275,8 @@ const StockReport = () => {
             />
           </div>
         </div>
-        <div style={{ padding: 10 }}>
-          <Button onClick={handleOpen}>Print</Button>
+        <div style={{marginLeft:"20px",marginTop:"auto"}}>
+          <Button className="Buttonz" onClick={handleOpen}>Print</Button>
         </div>
         <div style={{ visibility: "hidden", width: 0, height: 0 }}>
           <StockRpPrint
@@ -286,11 +287,6 @@ const StockReport = () => {
             fromDate={fromDate}
             uptoDate={uptoDate}
           />
-        </div>
-        <div style={{ padding: 10 }}>
-          <Button onClick={() => setRefreshTrigger((prev) => prev + 1)}>
-            Refresh
-          </Button>
         </div>
       </div>
       {loading ? (
@@ -445,6 +441,7 @@ const StockReport = () => {
           </Table>
         </div>
       )}
+      </Card>
     </div>
   );
 };

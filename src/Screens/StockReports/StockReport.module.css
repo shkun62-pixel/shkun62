@@ -1,8 +1,8 @@
 .TopPart {
   display: flex;
   flex-direction: row;
-  justify-content: center; /* Center columns horizontally */
   margin-top: 20px;
+  margin-bottom: 10px;
 }
 .header {
   text-align: center;
@@ -13,11 +13,11 @@
   background-clip: text;
   color: transparent;
   font-weight: bold;
-  margin-top: -20px;
+  /* margin-top: -20px; */
 }
 
 .TableDIV {
-  max-height: 500px;
+  max-height: 458px;
   overflow-y: auto;
   margin: 5px;
 }
@@ -67,4 +67,9 @@
 }
 .font{
   font-weight: bold;
+}
+
+.cardL{
+  padding: 20px;
+  margin-top: -10px;
 }
