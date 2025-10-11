@@ -1761,227 +1761,492 @@ const Purchase = () => {
   // };
   
 
-  const handleSaveClick = async () => {
-    document.body.style.backgroundColor = "white";
-    setIsSubmitEnabled(true);
-    let isDataSaved = false;
+  // const handleSaveClick = async () => {
+  //   document.body.style.backgroundColor = "white";
+  //   setIsSubmitEnabled(true);
+  //   let isDataSaved = false;
   
-    try {
-      // Validation: Check supplierdetails
-      const isValid = supplierdetails.every((item) => item.vacode !== "");
-      if (!isValid) {
-        toast.error("Please Fill the Customer Details", { position: "top-center" });
-        return;
-      }
+  //   try {
+  //     // Validation: Check supplierdetails
+  //     const isValid = supplierdetails.every((item) => item.vacode !== "");
+  //     if (!isValid) {
+  //       toast.error("Please Fill the Customer Details", { position: "top-center" });
+  //       return;
+  //     }
   
-      // Validation: At least one item filled
-      const nonEmptyItems = items.filter((item) => item.sdisc.trim() !== "");
-      if (nonEmptyItems.length === 0) {
-        toast.error("Please fill in at least one Items name.", { position: "top-center" });
-        return;
-      }
+  //     // Validation: At least one item filled
+  //     const nonEmptyItems = items.filter((item) => item.sdisc.trim() !== "");
+  //     if (nonEmptyItems.length === 0) {
+  //       toast.error("Please fill in at least one Items name.", { position: "top-center" });
+  //       return;
+  //     }
   
       
 
-      if (!isAbcmode && formData.p_entry && formData.p_entry !== "0") {
-        try {
-          const { data } = await axios.get(
-            `https://www.shkunweb.com/${tenant}/tenant/api/purchase/check`,
-            { params: { p_entry: String(formData.p_entry).trim() } }
-          );
+  //     if (!isAbcmode && formData.p_entry && formData.p_entry !== "0") {
+  //       try {
+  //         const { data } = await axios.get(
+  //           `https://www.shkunweb.com/${tenant}/tenant/api/purchase/check`,
+  //           { params: { p_entry: String(formData.p_entry).trim() } }
+  //         );
       
-          if (data.exists) {
-            toast.error("Self Invoice No Already Exists.", { position: "top-center" });
-            return;
-          }
-        } catch (fetchError) {
-          console.error("Error checking duplicates:", fetchError);
-          toast.error("Error checking duplicate p_entry. Please try again.", { position: "top-center" });
-          return;
-        }
-      }
+  //         if (data.exists) {
+  //           toast.error("Self Invoice No Already Exists.", { position: "top-center" });
+  //           return;
+  //         }
+  //       } catch (fetchError) {
+  //         console.error("Error checking duplicates:", fetchError);
+  //         toast.error("Error checking duplicate p_entry. Please try again.", { position: "top-center" });
+  //         return;
+  //       }
+  //     }
       
-      // Prepare combinedData
-      const combinedData = {
-        _id: formData._id,
-        formData: {
-          date: selectedDate.toLocaleDateString("en-IN"),
-          vtype: formData.vtype,
-          vno: formData.vno,
-          vbillno: formData.vbillno,
-          exfor: formData.exfor,
-          trpt: formData.trpt,
-          p_entry: formData.p_entry,
-          stype: formData.stype,
-          btype: formData.btype,
-          conv: formData.conv,
-          vacode1: formData.vacode1,
-          rem2: formData.rem2,
-          v_tpt: formData.v_tpt,
-          broker: formData.broker,
-          srv_rate: formData.srv_rate,
-          srv_tax: formData.srv_tax,
-          tcs1_rate: formData.tcs1_rate,
-          tcs1: formData.tcs1,
-          tcs206_rate: formData.tcs206_rate,
-          tcs206: formData.tcs206,
-          duedate: expiredDate.toLocaleDateString("en-IN"),
-          gr: formData.gr,
-          tdson: formData.tdson,
-          pcess: formData.pcess,
-          tax: formData.tax,
-          cess1: formData.cess1,
-          cess2: formData.cess2,
-          sub_total: formData.sub_total,
-          exp_before: formData.exp_before,
-          Exp_rate6: formData.Exp_rate6,
-          Exp_rate7: formData.Exp_rate7,
-          Exp_rate8: formData.Exp_rate8,
-          Exp_rate9: formData.Exp_rate9,
-          Exp_rate10: formData.Exp_rate10,
-          Exp6: formData.Exp6,
-          Exp7: formData.Exp7,
-          Exp8: formData.Exp8,
-          Exp9: formData.Exp9,
-          Exp10: formData.Exp10,
-          Tds2: formData.Tds2,
-          Ctds: formData.Ctds,
-          Stds: formData.Stds,
-          iTds: formData.iTds,
-          cgst: formData.cgst,
-          sgst: formData.sgst,
-          igst: formData.igst,
-          expafterGST: formData.expafterGST,
-          ExpRoundoff: formData.ExpRoundoff,
-          grandtotal: formData.grandtotal,
+  //     // Prepare combinedData
+  //     const combinedData = {
+  //       _id: formData._id,
+  //       formData: {
+  //         date: selectedDate.toLocaleDateString("en-IN"),
+  //         vtype: formData.vtype,
+  //         vno: formData.vno,
+  //         vbillno: formData.vbillno,
+  //         exfor: formData.exfor,
+  //         trpt: formData.trpt,
+  //         p_entry: formData.p_entry,
+  //         stype: formData.stype,
+  //         btype: formData.btype,
+  //         conv: formData.conv,
+  //         vacode1: formData.vacode1,
+  //         rem2: formData.rem2,
+  //         v_tpt: formData.v_tpt,
+  //         broker: formData.broker,
+  //         srv_rate: formData.srv_rate,
+  //         srv_tax: formData.srv_tax,
+  //         tcs1_rate: formData.tcs1_rate,
+  //         tcs1: formData.tcs1,
+  //         tcs206_rate: formData.tcs206_rate,
+  //         tcs206: formData.tcs206,
+  //         duedate: expiredDate.toLocaleDateString("en-IN"),
+  //         gr: formData.gr,
+  //         tdson: formData.tdson,
+  //         pcess: formData.pcess,
+  //         tax: formData.tax,
+  //         cess1: formData.cess1,
+  //         cess2: formData.cess2,
+  //         sub_total: formData.sub_total,
+  //         exp_before: formData.exp_before,
+  //         Exp_rate6: formData.Exp_rate6,
+  //         Exp_rate7: formData.Exp_rate7,
+  //         Exp_rate8: formData.Exp_rate8,
+  //         Exp_rate9: formData.Exp_rate9,
+  //         Exp_rate10: formData.Exp_rate10,
+  //         Exp6: formData.Exp6,
+  //         Exp7: formData.Exp7,
+  //         Exp8: formData.Exp8,
+  //         Exp9: formData.Exp9,
+  //         Exp10: formData.Exp10,
+  //         Tds2: formData.Tds2,
+  //         Ctds: formData.Ctds,
+  //         Stds: formData.Stds,
+  //         iTds: formData.iTds,
+  //         cgst: formData.cgst,
+  //         sgst: formData.sgst,
+  //         igst: formData.igst,
+  //         expafterGST: formData.expafterGST,
+  //         ExpRoundoff: formData.ExpRoundoff,
+  //         grandtotal: formData.grandtotal,
 
-          // Setting Purchase Setup Accounts 
-          cgst_ac: setupFormData.cgst_ac,
-          cgst_code: setupFormData.cgst_code,
-          cgst_ac1: setupFormData.cgst_ac1,
-          cgst_code1: setupFormData.cgst_code1,
-          cgst_ac2: setupFormData.cgst_ac2,
-          cgst_code2: setupFormData.cgst_code2,
+  //         // Setting Purchase Setup Accounts 
+  //         cgst_ac: setupFormData.cgst_ac,
+  //         cgst_code: setupFormData.cgst_code,
+  //         cgst_ac1: setupFormData.cgst_ac1,
+  //         cgst_code1: setupFormData.cgst_code1,
+  //         cgst_ac2: setupFormData.cgst_ac2,
+  //         cgst_code2: setupFormData.cgst_code2,
 
-          sgst_ac: setupFormData.sgst_ac,
-          sgst_code: setupFormData.sgst_code,
-          sgst_ac1: setupFormData.sgst_ac1,
-          sgst_code1: setupFormData.sgst_code1,
-          sgst_ac2: setupFormData.sgst_ac2,
-          sgst_code2: setupFormData.sgst_code2,
+  //         sgst_ac: setupFormData.sgst_ac,
+  //         sgst_code: setupFormData.sgst_code,
+  //         sgst_ac1: setupFormData.sgst_ac1,
+  //         sgst_code1: setupFormData.sgst_code1,
+  //         sgst_ac2: setupFormData.sgst_ac2,
+  //         sgst_code2: setupFormData.sgst_code2,
 
-          igst_ac: setupFormData.igst_ac,
-          igst_code: setupFormData.igst_code,
-          igst_ac1: setupFormData.igst_ac1,
-          igst_code1: setupFormData.igst_code1,
-          igst_ac2: setupFormData.igst_ac1,
-          igst_code2: setupFormData.igst_code1,
+  //         igst_ac: setupFormData.igst_ac,
+  //         igst_code: setupFormData.igst_code,
+  //         igst_ac1: setupFormData.igst_ac1,
+  //         igst_code1: setupFormData.igst_code1,
+  //         igst_ac2: setupFormData.igst_ac1,
+  //         igst_code2: setupFormData.igst_code1,
 
-          Adcode : setupFormData.Adcode,
-          Ad_ac : setupFormData.Ad_ac,
+  //         Adcode : setupFormData.Adcode,
+  //         Ad_ac : setupFormData.Ad_ac,
 
-          cesscode : setupFormData.cesscode,
-          cessAc : setupFormData.cessAc,
+  //         cesscode : setupFormData.cesscode,
+  //         cessAc : setupFormData.cessAc,
 
-          tds_code: setupFormData.tds_code,
-          tds_ac: setupFormData.tds_ac,
+  //         tds_code: setupFormData.tds_code,
+  //         tds_ac: setupFormData.tds_ac,
 
-          tcs_code: setupFormData.tcs_code,
-          tcs_ac: setupFormData.tcs_ac,
-          tcs206code:  setupFormData.tcs206code,
-          tcs206ac: setupFormData.tcs206ac,
-          discount_code:  setupFormData.discount_code,
-          discount_ac: setupFormData.discount_code,
+  //         tcs_code: setupFormData.tcs_code,
+  //         tcs_ac: setupFormData.tcs_ac,
+  //         tcs206code:  setupFormData.tcs206code,
+  //         tcs206ac: setupFormData.tcs206ac,
+  //         discount_code:  setupFormData.discount_code,
+  //         discount_ac: setupFormData.discount_code,
 
-          expense1_code: setupFormData.E1Code,
-          expense1_ac: setupFormData.E1name,
+  //         expense1_code: setupFormData.E1Code,
+  //         expense1_ac: setupFormData.E1name,
 
-          expense2_code: setupFormData.E2Code,
-          expense2_ac: setupFormData.E2name,
+  //         expense2_code: setupFormData.E2Code,
+  //         expense2_ac: setupFormData.E2name,
 
-          expense3_code: setupFormData.E3Code,
-          expense3_ac: setupFormData.E3name,
+  //         expense3_code: setupFormData.E3Code,
+  //         expense3_ac: setupFormData.E3name,
 
-          expense4_code: setupFormData.E4Code,
-          expense4_ac: setupFormData.E4name,
+  //         expense4_code: setupFormData.E4Code,
+  //         expense4_ac: setupFormData.E4name,
 
-          expense5_code: setupFormData.E5Code,
-          expense5_ac: setupFormData.E5name,
+  //         expense5_code: setupFormData.E5Code,
+  //         expense5_ac: setupFormData.E5name,
 
-          expense6_code: setupFormData.E6Code,
-          expense6_ac: setupFormData.E6name,
+  //         expense6_code: setupFormData.E6Code,
+  //         expense6_ac: setupFormData.E6name,
 
-          expense7_code: setupFormData.E7Code,
-          expense7_ac: setupFormData.E7name,
+  //         expense7_code: setupFormData.E7Code,
+  //         expense7_ac: setupFormData.E7name,
 
-          expense8_code: setupFormData.E8Code,
-          expense8_ac: setupFormData.E8name,
+  //         expense8_code: setupFormData.E8Code,
+  //         expense8_ac: setupFormData.E8name,
 
-          expense9_code: setupFormData.E9Code,
-          expense9_ac: setupFormData.E9name,
+  //         expense9_code: setupFormData.E9Code,
+  //         expense9_ac: setupFormData.E9name,
           
-          expense10_code: setupFormData.E10Code,
-          expense10_ac: setupFormData.E10name,
-        },
-        items: nonEmptyItems.map((item) => ({
-          id: item.id,
-          vcode: item.vcode,
-          sdisc: item.sdisc,
-          Units: item.Units,
-          pkgs: item.pkgs,
-          weight: item.weight,
-          rate: item.rate,
-          amount: item.amount,
-          disc: item.disc,
-          discount: item.discount,
-          gst: item.gst,
-          Pcodess: item.Pcodess,
-          Pcodes01: item.Pcodes01,
-          Scodess: item.Scodess,
-          Scodes01: item.Scodes01,
-          exp_before: item.exp_before,
-          Exp_rate1: item.Exp_rate1,
-          Exp_rate2: item.Exp_rate2,
-          Exp_rate3: item.Exp_rate3,
-          Exp_rate4: item.Exp_rate4,
-          Exp_rate5: item.Exp_rate5,
-          Exp1: item.Exp1,
-          Exp2: item.Exp2,
-          Exp3: item.Exp3,
-          Exp4: item.Exp4,
-          Exp5: item.Exp5,
-          ctax: item.ctax,
-          stax: item.stax,
-          itax: item.itax,
-          tariff: item.tariff,
-          vamt: item.vamt,
-        })),
-        supplierdetails: supplierdetails.map((item) => ({
-          Vcode: item.Vcode,
-          vacode: item.vacode,
-          gstno: item.gstno,
-          pan: item.pan,
-          Add1: item.Add1,
-          city: item.city,
-          state: item.state,
-          Tcs206c1H: item.Tcs206c1H,
-          TDS194Q: item.TDS194Q,
-        })),
-      };
+  //         expense10_code: setupFormData.E10Code,
+  //         expense10_ac: setupFormData.E10name,
+  //       },
+  //       items: nonEmptyItems.map((item) => ({
+  //         id: item.id,
+  //         vcode: item.vcode,
+  //         sdisc: item.sdisc,
+  //         Units: item.Units,
+  //         pkgs: item.pkgs,
+  //         weight: item.weight,
+  //         rate: item.rate,
+  //         amount: item.amount,
+  //         disc: item.disc,
+  //         discount: item.discount,
+  //         gst: item.gst,
+  //         Pcodess: item.Pcodess,
+  //         Pcodes01: item.Pcodes01,
+  //         Scodess: item.Scodess,
+  //         Scodes01: item.Scodes01,
+  //         exp_before: item.exp_before,
+  //         Exp_rate1: item.Exp_rate1,
+  //         Exp_rate2: item.Exp_rate2,
+  //         Exp_rate3: item.Exp_rate3,
+  //         Exp_rate4: item.Exp_rate4,
+  //         Exp_rate5: item.Exp_rate5,
+  //         Exp1: item.Exp1,
+  //         Exp2: item.Exp2,
+  //         Exp3: item.Exp3,
+  //         Exp4: item.Exp4,
+  //         Exp5: item.Exp5,
+  //         ctax: item.ctax,
+  //         stax: item.stax,
+  //         itax: item.itax,
+  //         tariff: item.tariff,
+  //         vamt: item.vamt,
+  //       })),
+  //       supplierdetails: supplierdetails.map((item) => ({
+  //         Vcode: item.Vcode,
+  //         vacode: item.vacode,
+  //         gstno: item.gstno,
+  //         pan: item.pan,
+  //         Add1: item.Add1,
+  //         city: item.city,
+  //         state: item.state,
+  //         Tcs206c1H: item.Tcs206c1H,
+  //         TDS194Q: item.TDS194Q,
+  //       })),
+  //     };
   
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstsave${isAbcmode ? `/${data1._id}` : ""}`;
-      const method = isAbcmode ? "put" : "post";
+  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstsave${isAbcmode ? `/${data1._id}` : ""}`;
+  //     const method = isAbcmode ? "put" : "post";
   
-      const response = await axios({
-        method,
-        url: apiEndpoint,
-        data: combinedData,
-      });
-      console.log(response);
+  //     const response = await axios({
+  //       method,
+  //       url: apiEndpoint,
+  //       data: combinedData,
+  //     });
+  //     console.log(response);
   
     
-      if (response.status === 200 || response.status === 201) {
-        // 1️⃣ Purchase saved: now update stock (use your purchase endpoint)
+  //     if (response.status === 200 || response.status === 201) {
+  //       // 1️⃣ Purchase saved: now update stock (use your purchase endpoint)
+  //       await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
+  //         items: nonEmptyItems.map(item => ({
+  //           vcode: item.vcode,
+  //           sdisc: item.sdisc,
+  //           weight: Number(item.weight) || 0,
+  //           pkgs: Number(item.pkgs) || 0,
+  //         }))
+  //       });
+      
+  //       // 2️⃣ Post FA entries ONLY AFTER PurchaseGst success
+  //       try {
+  //         await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasefaFile`, {
+  //           formData: combinedData.formData,
+  //           items: combinedData.items,
+  //           supplierdetails: combinedData.supplierdetails,
+  //         });
+  //       } catch (faErr) {
+  //         console.error("purchasefaFile error:", faErr);
+  //         // Don't fail the whole save; just inform
+  //         toast.warn(
+  //           "Purchase saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
+  //           { position: "top-center" }
+  //         );
+  //       }
+      
+  //       fetchData();
+  //       isDataSaved = true;
+  //     }
+      
+  //   } catch (error) {
+  //     console.error("Error saving data:", error);
+  //     toast.error("Failed to save data. Please try again.", { position: "top-center" });
+  //   } finally {
+  //     setIsSubmitEnabled(!isDataSaved);
+  //     if (isDataSaved) {
+  //       setTitle("View");
+  //       setIsAddEnabled(true);
+  //       setIsDisabled(true);
+  //       setIsEditMode(false);
+  //       setIsPreviousEnabled(true);
+  //       setIsNextEnabled(true);
+  //       setIsFirstEnabled(true);
+  //       setIsLastEnabled(true);
+  //       setIsSPrintEnabled(true);
+  //       setIsSearchEnabled(true);
+  //       setIsDeleteEnabled(true);
+  //       toast.success("Data Saved Successfully!", { position: "top-center" });
+  //       if (Defaultbutton === "Print") {
+  //         setShouldFocusPrint(true);
+  //       } else if (Defaultbutton === "Add") {
+  //         setShouldFocusAdd(true);
+  //       }
+  //     } else {
+  //       setIsAddEnabled(false);
+  //       setIsDisabled(false);
+  //     }
+  //   }
+  // };
+  
+  const handleSaveClick = async () => {
+  document.body.style.backgroundColor = "white";
+  setIsSubmitEnabled(true);
+  let isDataSaved = false;
+
+  try {
+    // --- 1) VALIDATIONS ---------------------------------------------------
+    const isValid = supplierdetails.every((item) => (item.vacode || "") !== "");
+    if (!isValid) {
+      toast.error("Please Fill the Customer Details", { position: "top-center" });
+      return;
+    }
+
+    const nonEmptyItems = items.filter((item) => (item.sdisc || "").trim() !== "");
+    if (nonEmptyItems.length === 0) {
+      toast.error("Please fill in at least one Items name.", { position: "top-center" });
+      return;
+    }
+
+    if (!isAbcmode && formData.p_entry && formData.p_entry !== "0") {
+      try {
+        const { data } = await axios.get(
+          `https://www.shkunweb.com/${tenant}/tenant/api/purchase/check`,
+          { params: { p_entry: String(formData.p_entry).trim() } }
+        );
+        if (data.exists) {
+          toast.error("Self Invoice No Already Exists.", { position: "top-center" });
+          return;
+        }
+      } catch (fetchError) {
+        console.error("Error checking duplicates:", fetchError);
+        toast.error("Error checking duplicate p_entry. Please try again.", { position: "top-center" });
+        return;
+      }
+    }
+
+    // --- 2) BUILD PAYLOAD -------------------------------------------------
+    const combinedData = {
+      _id: formData._id,
+      formData: {
+        date: selectedDate.toLocaleDateString("en-IN"),
+        vtype: formData.vtype,
+        vno: formData.vno,
+        vbillno: formData.vbillno,
+        exfor: formData.exfor,
+        trpt: formData.trpt,
+        p_entry: formData.p_entry,
+        stype: formData.stype,
+        btype: formData.btype,
+        conv: formData.conv,
+        vacode1: formData.vacode1,
+        rem2: formData.rem2,
+        v_tpt: formData.v_tpt,
+        broker: formData.broker,
+        srv_rate: formData.srv_rate,
+        srv_tax: formData.srv_tax,
+        tcs1_rate: formData.tcs1_rate,
+        tcs1: formData.tcs1,
+        tcs206_rate: formData.tcs206_rate,
+        tcs206: formData.tcs206,
+        duedate: expiredDate.toLocaleDateString("en-IN"),
+        gr: formData.gr,
+        tdson: formData.tdson,
+        pcess: formData.pcess,
+        tax: formData.tax,
+        cess1: formData.cess1,
+        cess2: formData.cess2,
+        sub_total: formData.sub_total,
+        exp_before: formData.exp_before,
+        Exp_rate6: formData.Exp_rate6,
+        Exp_rate7: formData.Exp_rate7,
+        Exp_rate8: formData.Exp_rate8,
+        Exp_rate9: formData.Exp_rate9,
+        Exp_rate10: formData.Exp_rate10,
+        Exp6: formData.Exp6,
+        Exp7: formData.Exp7,
+        Exp8: formData.Exp8,
+        Exp9: formData.Exp9,
+        Exp10: formData.Exp10,
+        Tds2: formData.Tds2,
+        Ctds: formData.Ctds,
+        Stds: formData.Stds,
+        iTds: formData.iTds,
+        cgst: formData.cgst,
+        sgst: formData.sgst,
+        igst: formData.igst,
+        expafterGST: formData.expafterGST,
+        ExpRoundoff: formData.ExpRoundoff,
+        grandtotal: formData.grandtotal,
+
+        // ---- Setup (Purchase) accounts
+        cgst_ac:  setupFormData.cgst_ac,
+        cgst_code: setupFormData.cgst_code,
+        cgst_ac1: setupFormData.cgst_ac1,
+        cgst_code1: setupFormData.cgst_code1,
+        cgst_ac2: setupFormData.cgst_ac2,
+        cgst_code2: setupFormData.cgst_code2,
+
+        sgst_ac:  setupFormData.sgst_ac,
+        sgst_code: setupFormData.sgst_code,
+        sgst_ac1: setupFormData.sgst_ac1,
+        sgst_code1: setupFormData.sgst_code1,
+        sgst_ac2: setupFormData.sgst_ac2,
+        sgst_code2: setupFormData.sgst_code2,
+
+        igst_ac:  setupFormData.igst_ac,
+        igst_code: setupFormData.igst_code,
+        igst_ac1: setupFormData.igst_ac1,
+        igst_code1: setupFormData.igst_code1,
+        igst_ac2: setupFormData.igst_ac1,   // (kept as you had)
+        igst_code2: setupFormData.igst_code1,
+
+        Adcode: setupFormData.Adcode,
+        Ad_ac:  setupFormData.Ad_ac,
+
+        cesscode: setupFormData.cesscode,
+        cessAc:   setupFormData.cessAc,
+
+        tds_code: setupFormData.tds_code,
+        tds_ac:   setupFormData.tds_ac,
+
+        tcs_code:   setupFormData.tcs_code,
+        tcs_ac:     setupFormData.tcs_ac,
+        tcs206code: setupFormData.tcs206code,
+        tcs206ac:   setupFormData.tcs206ac,
+
+        discount_code: setupFormData.discount_code,
+        discount_ac:   setupFormData.discount_code, // (kept as you had)
+
+        expense1_code: setupFormData.E1Code,  expense1_ac: setupFormData.E1name,
+        expense2_code: setupFormData.E2Code,  expense2_ac: setupFormData.E2name,
+        expense3_code: setupFormData.E3Code,  expense3_ac: setupFormData.E3name,
+        expense4_code: setupFormData.E4Code,  expense4_ac: setupFormData.E4name,
+        expense5_code: setupFormData.E5Code,  expense5_ac: setupFormData.E5name,
+        expense6_code: setupFormData.E6Code,  expense6_ac: setupFormData.E6name,
+        expense7_code: setupFormData.E7Code,  expense7_ac: setupFormData.E7name,
+        expense8_code: setupFormData.E8Code,  expense8_ac: setupFormData.E8name,
+        expense9_code: setupFormData.E9Code,  expense9_ac: setupFormData.E9name,
+        expense10_code: setupFormData.E10Code, expense10_ac: setupFormData.E10name,
+      },
+      items: nonEmptyItems.map((item) => ({
+        id: item.id,
+        vcode: item.vcode,
+        sdisc: item.sdisc,
+        Units: item.Units,
+        pkgs: item.pkgs,
+        weight: item.weight,
+        rate: item.rate,
+        amount: item.amount,
+        disc: item.disc,
+        discount: item.discount,
+        gst: item.gst,
+        Pcodess: item.Pcodess,
+        Pcodes01: item.Pcodes01,
+        Scodess: item.Scodess,
+        Scodes01: item.Scodes01,
+        exp_before: item.exp_before,
+        Exp_rate1: item.Exp_rate1,
+        Exp_rate2: item.Exp_rate2,
+        Exp_rate3: item.Exp_rate3,
+        Exp_rate4: item.Exp_rate4,
+        Exp_rate5: item.Exp_rate5,
+        Exp1: item.Exp1,
+        Exp2: item.Exp2,
+        Exp3: item.Exp3,
+        Exp4: item.Exp4,
+        Exp5: item.Exp5,
+        ctax: item.ctax,
+        stax: item.stax,
+        itax: item.itax,
+        tariff: item.tariff,
+        vamt: item.vamt,
+      })),
+      supplierdetails: supplierdetails.map((item) => ({
+        Vcode: item.Vcode,
+        vacode: item.vacode,
+        gstno: item.gstno,
+        pan: item.pan,
+        Add1: item.Add1,
+        city: item.city,
+        state: item.state,
+        Tcs206c1H: item.Tcs206c1H,
+        TDS194Q: item.TDS194Q,
+      })),
+    };
+
+    // --- 3) SAVE PURCHASE GST --------------------------------------------
+    const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstsave${isAbcmode ? `/${data1._id}` : ""}`
+    const method = isAbcmode ? "put" : "post";
+
+    const response = await axios({ method, url: apiEndpoint, data: combinedData });
+    console.log(response);
+
+    // Extract the new/updated PurchaseGst id
+    const purchaseId =
+      response?.data?.purchaseId ||   // preferred (from backend create)
+      response?.data?._id ||          // legacy (if PUT returns doc)
+      (isAbcmode ? data1?._id : null);
+
+    if (!purchaseId) {
+      console.warn("purchaseId not found in /purchasegstsave response. Ensure backend returns { ok: true, purchaseId }.");
+    }
+
+    if (response.status === 200 || response.status === 201) {
+      // --- 4) UPDATE STOCK (purchase -> add) ------------------------------
+      try {
         await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
           items: nonEmptyItems.map(item => ({
             vcode: item.vcode,
@@ -1990,56 +2255,57 @@ const Purchase = () => {
             pkgs: Number(item.pkgs) || 0,
           }))
         });
-      
-        // 2️⃣ Post FA entries ONLY AFTER PurchaseGst success
-        try {
-          await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasefaFile`, {
-            formData: combinedData.formData,
-            items: combinedData.items,
-            supplierdetails: combinedData.supplierdetails,
-          });
-        } catch (faErr) {
-          console.error("purchasefaFile error:", faErr);
-          // Don't fail the whole save; just inform
-          toast.warn(
-            "Purchase saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
-            { position: "top-center" }
-          );
-        }
-      
-        fetchData();
-        isDataSaved = true;
+      } catch (stkErr) {
+        console.error("Stock update error:", stkErr);
+        // continue; don't fail whole flow
       }
-      
-    } catch (error) {
-      console.error("Error saving data:", error);
-      toast.error("Failed to save data. Please try again.", { position: "top-center" });
-    } finally {
-      setIsSubmitEnabled(!isDataSaved);
-      if (isDataSaved) {
-        setTitle("View");
-        setIsAddEnabled(true);
-        setIsDisabled(true);
-        setIsEditMode(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsSearchEnabled(true);
-        setIsDeleteEnabled(true);
-        toast.success("Data Saved Successfully!", { position: "top-center" });
-        if (Defaultbutton === "Print") {
-          setShouldFocusPrint(true);
-        } else if (Defaultbutton === "Add") {
-          setShouldFocusAdd(true);
-        }
-      } else {
-        setIsAddEnabled(false);
-        setIsDisabled(false);
+
+      // --- 5) POST FA ENTRIES with purchaseId ----------------------------
+      try {
+        await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasefaFile`, {
+          formData: combinedData.formData,
+          items: combinedData.items,
+          supplierdetails: combinedData.supplierdetails,
+          purchaseId, // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        });
+      } catch (faErr) {
+        console.error("purchasefaFile error:", faErr);
+        toast.warn(
+          "Purchase saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
+          { position: "top-center" }
+        );
       }
+
+      // --- 6) REFRESH + UI STATE -----------------------------------------
+      fetchData();
+      isDataSaved = true;
     }
-  };
+  } catch (error) {
+    console.error("Error saving data:", error);
+    toast.error("Failed to save data. Please try again.", { position: "top-center" });
+  } finally {
+    setIsSubmitEnabled(!isDataSaved);
+    if (isDataSaved) {
+      setTitle("View");
+      setIsAddEnabled(true);
+      setIsDisabled(true);
+      setIsEditMode(false);
+      setIsPreviousEnabled(true);
+      setIsNextEnabled(true);
+      setIsFirstEnabled(true);
+      setIsLastEnabled(true);
+      setIsSPrintEnabled(true);
+      setIsSearchEnabled(true);
+      setIsDeleteEnabled(true);
+      toast.success("Data Saved Successfully!", { position: "top-center" });
+      if (Defaultbutton === "Print") setShouldFocusPrint(true);
+      else if (Defaultbutton === "Add") setShouldFocusAdd(true);
+    } else {
+      setIsAddEnabled(false);
+      setIsDisabled(false);
+    }
+  }
+};
 
   const handleDataSave = async () => {
     handleSaveClick();

@@ -267,14 +267,15 @@ const LedgerList = () => {
       case "S": // Sale
         navigate("/Sale", {
         state: {
-          saleId: txn._id,
+           saleId: txn.saleId
+          // saleId: txn._id,
         },
       });
         break;
       case "P": // Purchase
         navigate("/purchase", {
         state: {
-          purId: txn._id,
+          purId: txn.purId,
         },
       });
         // navigate("/purchase", { state: { purId: txn._id, rowIndex: activeRowIndex } });
@@ -378,21 +379,45 @@ const LedgerList = () => {
 
   // Open modal and fetch transactions
   const openLedgerDetails = (ledger) => {
-    setSelectedLedger(ledger);
-    axios
-      .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-      .then((res) => {
-        const allTxns = res.data.data || [];
-        const ledgerTxns = allTxns.flatMap((entry) =>
-          entry.transactions.filter(
-            (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-          )
-        );
-        setTransactions(ledgerTxns);
-        setShowModal(true);
-      })
-      .catch((err) => console.error(err));
-  };
+  setSelectedLedger(ledger);
+  axios
+    .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+    .then((res) => {
+      const allTxns = res.data.data || [];
+
+      // Flatten transactions and attach saleId from parent voucher
+      const ledgerTxns = allTxns.flatMap((entry) =>
+        entry.transactions
+          .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
+          .map((txn) => ({
+            ...txn,
+            saleId: entry.saleId || null, // ✅ attach saleId for Sales
+            purId: entry.purchaseId || null,   // attach saleId for Sales
+          }))
+      );
+
+      setTransactions(ledgerTxns);
+      setShowModal(true);
+    })
+    .catch((err) => console.error(err));
+};
+
+  // const openLedgerDetails = (ledger) => {
+  //   setSelectedLedger(ledger);
+  //   axios
+  //     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+  //     .then((res) => {
+  //       const allTxns = res.data.data || [];
+  //       const ledgerTxns = allTxns.flatMap((entry) =>
+  //         entry.transactions.filter(
+  //           (txn) => txn.account.trim() === ledger.formData.ahead.trim()
+  //         )
+  //       );
+  //       setTransactions(ledgerTxns);
+  //       setShowModal(true);
+  //     })
+  //     .catch((err) => console.error(err));
+  // };
 
   const handleCheckboxChange = (id) => {
     setCheckedRows((prev) => ({

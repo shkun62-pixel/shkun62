@@ -6,12 +6,12 @@ import TextField from "@mui/material/TextField";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import useCompanySetup from "./Shared/useCompanySetup";
-import OptionModal from "./TrailBalance/OptionModal";
 import "./TrailBalance/TrailBalance.css"
+import { useNavigate, useLocation } from "react-router-dom";  // ✅ Add this
 
 const Example = () => {
   const { dateFrom } = useCompanySetup();
-
+const navigate = useNavigate();
   const [allLedgers, setAllLedgers] = useState([]); // keep full list
   const [filteredLedgers, setFilteredLedgers] = useState([]); // ✅ for search
   const [searchTerm, setSearchTerm] = useState("");           // ✅ search state
@@ -21,8 +21,6 @@ const Example = () => {
   const [transactions, setTransactions] = useState([]);
   const rowRefs = useRef([]);
   const tableRef = useRef(null);
-  const searchRef = useRef(null);   // ✅ search input ref
-  const groupRowRefs = useRef([]);
 
   const [activeRowIndex, setActiveRowIndex] = useState(0);  // ✅ Track highlighted txn row
   const [checkedRows, setCheckedRows] = useState({});
@@ -32,14 +30,8 @@ const Example = () => {
   const [groupedLedgersToPick, setGroupedLedgersToPick] = useState([]);
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
   const [currentGroupName, setCurrentGroupName] = useState("");
-  const [selectedGroupRows, setSelectedGroupRows] = useState(new Set());
-
-
-
-
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
-  const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
     Balance: "Active Balance",
     OrderBy: "",
@@ -49,13 +41,6 @@ const Example = () => {
     T10: false, // ✅ group by BsGroup toggle
   });
   
-  const openOptionModal = () => {
-    setIsOptionOpen(true);
-  };
-  const closeOptionModal = () => {
-    setIsOptionOpen(false);
-  };
-
 useEffect(() => {
   const handleGroupModalKeyDown = (e) => {
     if (!showGroupModal || !groupedLedgersToPick.length) return;
@@ -80,22 +65,6 @@ useEffect(() => {
   window.addEventListener("keydown", handleGroupModalKeyDown);
   return () => window.removeEventListener("keydown", handleGroupModalKeyDown);
 }, [showGroupModal, groupedLedgersToPick, activeGroupIndex]);
-
-const groupTotals = useMemo(() => {
-  let debit = 0, credit = 0;
-  selectedGroupRows.forEach((index) => {
-    const ledger = groupedLedgersToPick[index];
-    if (ledger?.totals) {
-      const { drcr, balance } = ledger.totals;
-      if (drcr === "DR") debit += Math.abs(balance);
-      else if (drcr === "CR") credit += Math.abs(balance);
-    }
-  });
-  return { debit, credit };
-}, [selectedGroupRows, groupedLedgersToPick]);
-
-
-
 
   useEffect(() => {
     if (!ledgerFromDate && dateFrom) {
@@ -127,30 +96,6 @@ const groupTotals = useMemo(() => {
     }));
   };
 
-  useEffect(() => {
-    if (!transactions.length || activeRowIndex < 0) {
-      setProgressiveDebit(0);
-      setProgressiveCredit(0);
-      return;
-    }
-
-    let debit = 0;
-    let credit = 0;
-
-    filteredTransactions.slice(0, activeRowIndex + 1).forEach((txn) => {
-      if (txn.type.toLowerCase() === "debit") {
-        debit += txn.amount;
-      } else if (txn.type.toLowerCase() === "credit") {
-        credit += txn.amount;
-      }
-    });
-
-    setProgressiveDebit(debit);
-    setProgressiveCredit(credit);
-  }, [activeRowIndex, filteredTransactions]);
-
-
-
   // ✅ Update filtered transactions whenever filters or transactions change
   useEffect(() => {
     let data = transactions;
@@ -178,36 +123,6 @@ const groupTotals = useMemo(() => {
   useEffect(() => {
     localStorage.setItem("flaggedRowsTrail", JSON.stringify([...flaggedRows]));
   }, [flaggedRows]);
-
-  // Auto focus search field on mount
-  useEffect(() => {
-    if (searchRef.current) {
-      searchRef.current.focus();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (showModal && rowRefs.current[activeRowIndex]) {
-      const row = rowRefs.current[activeRowIndex];
-      const container = row.closest(`.${styles.tableHeight}`);
-
-      if (container && row) {
-        const rowTop = row.offsetTop;
-        const rowBottom = rowTop + row.offsetHeight;
-        const containerTop = container.scrollTop;
-        const containerBottom = containerTop + container.clientHeight;
-
-        // 🔹 Scroll down if row is below view
-        if (rowBottom > containerBottom) {
-          container.scrollTop = rowBottom - container.clientHeight;
-        }
-        // 🔹 Scroll up if row is above view
-        else if (rowTop < containerTop) {
-          container.scrollTop = rowTop;
-        }
-      }
-    }
-  }, [activeRowIndex, showModal]);
 
   // fetch ledger + fa
   useEffect(() => {
@@ -340,68 +255,6 @@ const groupTotals = useMemo(() => {
     break;
   }
 
-  // Selected Accounts filter
-  if (optionValues.T1) {
-    result = result.filter((l) => !!checkedRows[l._id]);
-  }
-
- if (optionValues.T10) {
-  const grouped = {};
-  result.forEach((ledger) => {
-    const group = ledger.formData.Bsgroup || "Others";
-    if (!grouped[group]) {
-      grouped[group] = {
-        balance: 0,
-        qty: 0,
-        pcs: 0,
-        debit: 0,
-        credit: 0,
-        ledgers: [],
-      };
-    }
-    const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
-    grouped[group].balance += balance;
-    grouped[group].qty += qty;
-    grouped[group].pcs += pcs;
-    if (drcr === "DR") {
-      grouped[group].debit += Math.abs(balance);
-    } else {
-      grouped[group].credit += Math.abs(balance);
-    }
-    grouped[group].ledgers.push(ledger);
-  });
-
-  result = Object.entries(grouped).map(([group, data]) => {
-    const drcr = data.balance >= 0 ? "DR" : "CR";
-    return {
-      _id: group,
-      formData: { ahead: group, city: "" },
-      totals: {
-        balance: data.balance,
-        drcr,
-        qty: data.qty,
-        pcs: data.pcs,
-        debit: data.debit,
-        credit: data.credit,
-      },
-      groupedLedgers: data.ledgers,
-    };
-  });
-}
-
-
-  // ✅ Search filter
-  if (searchTerm) {
-    const lower = searchTerm.toLowerCase();
-    result = result.filter(
-    (ledger) =>
-      ledger.formData.ahead.toLowerCase().includes(lower) ||
-      ledger.formData.city?.toLowerCase().includes(lower) ||
-      ledger.formData.gstNo?.toLowerCase().includes(lower) ||
-      ledger.formData.phone?.toLowerCase().includes(lower)
-    );
-  }
-
   setFilteredLedgers(result);
   }, [allLedgers, optionValues, checkedRows, searchTerm]);
 
@@ -524,7 +377,6 @@ useEffect(() => {
   activeGroupIndex,
 ]);
 
-
   // Open modal and fetch transactions
 const openLedgerDetails = (ledger) => {
   if (ledger.groupedLedgers) {
@@ -535,41 +387,47 @@ const openLedgerDetails = (ledger) => {
     fetchLedgerTransactions(ledger);
   }
 };
-
 const fetchLedgerTransactions = (ledger) => {
   setSelectedLedger(ledger);
   axios
     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
     .then((res) => {
       const allTxns = res.data.data || [];
+
+      // Flatten transactions and attach saleId from parent voucher
       const ledgerTxns = allTxns.flatMap((entry) =>
-        entry.transactions.filter(
-          (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-        )
+        entry.transactions
+          .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
+          .map((txn) => ({
+            ...txn,
+            saleId: entry.saleId || null,   // attach saleId for Sales
+            purId: entry.purchaseId || null,   // attach saleId for Sales
+          }))
       );
+
       setTransactions(ledgerTxns);
       setShowModal(true);
     })
     .catch((err) => console.error(err));
 };
 
-  // const openLedgerDetails = (ledger) => {
-  //   setSelectedLedger(ledger);
-  //   axios
-  //     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-  //     .then((res) => {
-  //       const allTxns = res.data.data || [];
-  //       const ledgerTxns = allTxns.flatMap((entry) =>
-  //         entry.transactions.filter(
-  //           (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-  //         )
-  //       );
-  //       setTransactions(ledgerTxns);
-  //       setShowModal(true);
-  //     })
-  //     .catch((err) => console.error(err));
-  // };
 
+// const fetchLedgerTransactions = (ledger) => {
+//   setSelectedLedger(ledger);
+//   axios
+//     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+//     .then((res) => {
+//       const allTxns = res.data.data || [];
+//       const ledgerTxns = allTxns.flatMap((entry) =>
+//         entry.transactions.filter(
+//           (txn) => txn.account.trim() === ledger.formData.ahead.trim()
+//         )
+//       );
+//       setTransactions(ledgerTxns);
+//       setShowModal(true);
+//     })
+//     .catch((err) => console.error(err));
+// };
   // For calculating net pcs and weight
   useEffect(() => {
     // Fetch all transactions once
@@ -621,6 +479,61 @@ const fetchLedgerTransactions = (ledger) => {
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
+  };
+  const handleTransactionSelect = (txn) => {
+    if (!txn) return;
+    const modalState = {
+      rowIndex: activeRowIndex,
+      selectedLedger,
+      keepModalOpen: true,
+    };
+
+    sessionStorage.setItem("trailModalState", JSON.stringify(modalState));
+
+    switch (txn.vtype) {   // ✅ use vtype from your transaction object
+      case "S": // Sale
+        navigate("/Sale", {
+          state: {
+            saleId: txn.saleId
+          }
+        // state: {
+        //    saleId: txn.saleId, // ✅ changed here
+        // },
+      });
+      alert(txn.saleId)
+        break;
+      case "P": // Purchase
+        navigate("/purchase", {
+        state: {
+          purId: txn.purId,
+        },
+      });
+      alert(txn.purId)
+        break;
+      case "B": // Bank
+       navigate("/bankvoucher", {
+        state: {
+          bankId: txn._id,
+        },
+      });
+        break;
+      case "C": // Cash
+        navigate("/cashvoucher", {
+        state: {
+          cashId: txn._id,
+        },
+      });
+        break;
+      case "J": // Journal
+       navigate("/journalvoucher", {
+        state: {
+          journalId: txn._id,
+        },
+      });
+        break;
+      default:
+        console.log("Unknown vtype:", txn.vtype);
+    }
   };
 
   return (
@@ -746,29 +659,6 @@ const fetchLedgerTransactions = (ledger) => {
             </tfoot>
           </Table>
         </div>
-
-        {/* ✅ Search Input */}
-        <div style={{display:'flex',flexDirection:"row"}}>
-          <Form.Control
-            ref={searchRef}
-            className={styles.Search}
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <div style={{marginTop:"5px"}}>
-          <Button className="Button" style={{backgroundColor:"#3d85c6",width:"100px"}} onClick={openOptionModal} >Options</Button>
-          <OptionModal
-            isOpen={isOptionOpen}
-            onClose={closeOptionModal}
-            onApply={(values) => {
-              setOptionValues(values);
-            }}
-          />
-          </div>
-        </div>
-
       </Card>
       {/* ... Modal Account Statement ... */}
       <Modal
@@ -921,7 +811,10 @@ const fetchLedgerTransactions = (ledger) => {
                                 index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent",
                               cursor: "pointer",
                             }}
-                            onMouseEnter={() => setActiveRowIndex(index)}
+                                onClick={() => {
+                                    setActiveRowIndex(index);
+                                    handleTransactionSelect(txn);
+                                  }}
                           >
                             <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                                 <input
@@ -1044,110 +937,6 @@ const fetchLedgerTransactions = (ledger) => {
           )}
         </Modal.Body>
       </Modal>
-      {/* modal for listing */}
- <Modal
-  show={showGroupModal}
-  onHide={() => setShowGroupModal(false)}
-  centered
-  size="lg"
->
-  <Modal.Header closeButton>
-    <Modal.Title> <span style={{ color: "darkblue" }}>{currentGroupName}</span> </Modal.Title>
-  </Modal.Header>
-  <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
-    <div style={{ display: "flex", justifyContent: "flex-end", gap: "2rem", marginBottom: "8px" }}>
-  <div>
-    <label style={{ fontWeight: "bold", color: "darkblue" }}>Selected Debit:</label>
-    <div style={{ textAlign: "right", fontWeight: "bold", color: "darkblue" }}>
-      {groupTotals.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-    </div>
-  </div>
-  <div>
-    <label style={{ fontWeight: "bold", color: "red" }}>Selected Credit:</label>
-    <div style={{ textAlign: "right", fontWeight: "bold", color: "red" }}>
-      {groupTotals.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-    </div>
-  </div>
-</div>
-<Table size="sm" hover>
-  <thead>
-    <tr>
-      <th>
-        <input
-          type="checkbox"
-          checked={selectedGroupRows.size === groupedLedgersToPick.length}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedGroupRows(new Set(groupedLedgersToPick.map((_, i) => i)));
-            } else {
-              setSelectedGroupRows(new Set());
-            }
-          }}
-        />
-      </th>
-      <th>Name</th>
-      <th>City</th>
-      <th style={{ textAlign: "right" }}>Qty</th>
-      <th style={{ textAlign: "right" }}>Pcs</th>
-      <th style={{ textAlign: "right" }}>Debit</th>
-      <th style={{ textAlign: "right" }}>Credit</th>
-    </tr>
-  </thead>
-  <tbody>
-    {groupedLedgersToPick.map((ledger, index) => {
-      const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
-      return (
-        <tr
-          key={ledger._id}
-          ref={(el) => (groupRowRefs.current[index] = el)}
-          style={{
-            cursor: "pointer",
-            backgroundColor: index === activeGroupIndex ? "rgb(187,186,186)" : "transparent",
-          }}
-          onMouseEnter={() => setActiveGroupIndex(index)}
-          onDoubleClick={() => {
-            setShowGroupModal(false);
-            fetchLedgerTransactions(ledger);
-          }}
-        >
-          <td>
-            <input
-              type="checkbox"
-              checked={selectedGroupRows.has(index)}
-              onChange={() => {
-                setSelectedGroupRows((prev) => {
-                  const newSet = new Set(prev);
-                  if (newSet.has(index)) newSet.delete(index);
-                  else newSet.add(index);
-                  return newSet;
-                });
-              }}
-            />
-          </td>
-          <td>{ledger.formData.ahead}</td>
-          <td>{ledger.formData.city}</td>
-          <td style={{ textAlign: "right" }}>{qty}</td>
-          <td style={{ textAlign: "right" }}>{pcs}</td>
-          <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
-            {drcr === "DR"
-              ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-              : ""}
-          </td>
-          <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
-            {drcr === "CR"
-              ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-              : ""}
-          </td>
-        </tr>
-      );
-    })}
-  </tbody>
-</Table>
-
-
-  </Modal.Body>
-</Modal>
-
     </div>
   );
 };
