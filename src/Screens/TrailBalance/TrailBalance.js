@@ -1799,7 +1799,7 @@ const groupTotals = useMemo(() => {
                   <thead
                     style={{
                       position: "sticky",
-                      top: 0,
+                      top: -1,
                       background: "skyblue",
                       fontSize: 17,
                       textAlign: "center",
