@@ -1396,7 +1396,7 @@ const groupTotals = useMemo(() => {
 
     // --- adjust for your table header height ---
     const headerOffset = 40; // px — tweak if your header is taller
-    const buffer = 12;       // space above/below row so it's fully visible
+    const buffer = 25;       // space above/below row so it's fully visible
 
     const rowTop = selectedRow.offsetTop;
     const rowBottom = rowTop + selectedRow.offsetHeight;
@@ -1430,7 +1430,7 @@ const groupTotals = useMemo(() => {
 
     // heights & offsets
     const headerOffset = 40; // Adjust to match your modal header height
-    const buffer = 12;       // Space above/below so row is clearly visible
+    const buffer = 25;       // Space above/below so row is clearly visible
 
     const rowTop = selectedRow.offsetTop;
     const rowBottom = rowTop + selectedRow.offsetHeight;
@@ -1531,7 +1531,7 @@ const groupTotals = useMemo(() => {
 
         </div>
 
-        <div className="tableT" ref={tableContainerRef}>
+        <div className="TableT" ref={tableContainerRef}>
           <Table size="sm" className="custom-table" hover ref={tableRef}>
             <thead style={{ position: "sticky", top: 1, background: "skyblue", fontSize: 17, textAlign: "center" }}>
               <tr>
@@ -1597,7 +1597,7 @@ const groupTotals = useMemo(() => {
             </tbody>
 
         
-            <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: -8,}}>
+            <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: 0,}}>
               <tr style={{ fontWeight: "bold",fontSize:20 }}>
                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
                 <td></td>
