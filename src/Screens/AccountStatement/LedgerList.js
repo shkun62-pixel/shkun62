@@ -283,7 +283,7 @@ const LedgerList = () => {
       case "B": // Bank
        navigate("/bankvoucher", {
         state: {
-          bankId: txn._id,
+          bankId: txn.bankId,
         },
       });
         // navigate("/bankvoucher", { state: { bankId: txn._id, rowIndex: activeRowIndex } });
@@ -291,7 +291,7 @@ const LedgerList = () => {
       case "C": // Cash
         navigate("/cashvoucher", {
         state: {
-          cashId: txn._id,
+          cashId: txn.cashId,
         },
       });
         // navigate("/cashvoucher", { state: { cashId: txn._id, rowIndex: activeRowIndex } });
@@ -299,7 +299,7 @@ const LedgerList = () => {
       case "J": // Journal
        navigate("/journalvoucher", {
         state: {
-          journalId: txn._id,
+          journalId: txn.journalId,
         },
       });
         // navigate("/journalvoucher", { state: { journalId: txn._id, rowIndex: activeRowIndex } });
@@ -392,7 +392,10 @@ const LedgerList = () => {
           .map((txn) => ({
             ...txn,
             saleId: entry.saleId || null, // ✅ attach saleId for Sales
-            purId: entry.purchaseId || null,   // attach saleId for Sales
+            purId: entry.purchaseId || null,
+            bankId: entry.bankId || null,  
+            cashId: entry.cashId || null,  
+            journalId: entry.journalId || null, 
           }))
       );
 

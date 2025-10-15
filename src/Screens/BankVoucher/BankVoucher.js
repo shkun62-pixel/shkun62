@@ -257,7 +257,7 @@ const BankVoucher = () => {
       if (Array.isArray(data) && data.length > 0 && data[0].formData) {
         const formDataFromAPI = data[0].formData;
         setdecimalValue(formDataFromAPI.decimals);
-        console.log(decimalValue);
+        // console.log(decimalValue);
       } else {
         throw new Error("Invalid response structure");
       }
@@ -543,14 +543,14 @@ const BankVoucher = () => {
       // const response = await axios.get(
       //   `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last`
       // );
-      console.log("Response: ", response.data);
+      // console.log("Response: ", response.data);
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
         // Set flags and update form data
         setFirstTimeCheckData("DataAvailable");
         setFormData(lastEntry.formData);
-        console.log(lastEntry.formData, "Formdata");
+        // console.log(lastEntry.formData, "Formdata");
 
         // Update items with the last entry's items
         const updatedItems = lastEntry.items.map((item) => ({
@@ -798,7 +798,7 @@ const BankVoucher = () => {
           `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
-          console.log(response);
+          // console.log(response);
           setData1(response.data.data);
           const prevData = response.data.data;
           setIndex(index - 1);
@@ -1055,7 +1055,7 @@ const BankVoucher = () => {
 
       let combinedData;
       if (isAbcmode) {
-        console.log(formData);
+        // console.log(formData);
         // formData.totalpayment = formData.totalpayment;
         // formData.totalreceipt = formData.totalreceipt;
         // formData.totaldiscount = formData.totaldiscount;
@@ -1139,7 +1139,7 @@ const BankVoucher = () => {
         };
       }
       // Debugging
-      console.log("Combined Data:", combinedData);
+      // console.log("Combined Data:", combinedData);
       const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank${
         isAbcmode ? `/${data1._id}` : ""
       }`;

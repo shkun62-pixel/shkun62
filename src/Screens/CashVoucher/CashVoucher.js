@@ -143,24 +143,44 @@ const CashVoucher = () => {
 
   // Date
   useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
+  if (formData.date) {
+    try {
+      // Expecting date in format "DD/MM/YYYY"
+      const [day, month, year] = formData.date.split("/").map(Number);
+      const date = new Date(year, month - 1, day); // month is 0-based
+
+      if (!isNaN(date.getTime())) {
+        setSelectedDate(date);
+      } else {
+        console.error("Invalid date value in formData.date:", formData.date);
       }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
+    } catch (error) {
+      console.error("Error parsing date:", error);
     }
-  }, [formData.date]);
+  } else {
+    setSelectedDate(null);
+  }
+}, [formData.date]);
+
+  // useEffect(() => {
+  //   // If formData.date has a valid date string, parse it and set selectedDate
+  //   if (formData.date) {
+  //     try {
+  //       const date = new Date(formData.date);
+  //       if (!isNaN(date.getTime())) {
+  //         setSelectedDate(date);
+  //       } else {
+  //         console.error("Invalid date value in formData.date:", formData.date);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error parsing date:", error);
+  //     }
+  //   } else {
+  //     // If there's no date, we keep selectedDate as null so the DatePicker is blank,
+  //     // but we can still have it open on today's date via openToDate
+  //     setSelectedDate(null);
+  //   }
+  // }, [formData.date]);
 
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
@@ -919,7 +939,7 @@ const CashVoucher = () => {
       let combinedData = {
         _id: formData._id,
         formData: {
-          date: selectedDate.toLocaleDateString("en-US"),
+          date: selectedDate.toLocaleDateString("en-IN"),
           vtype: formData.vtype,
           voucherno: formData.voucherno,
           cashinhand: formData.cashinhand || "",
@@ -945,11 +965,13 @@ const CashVoucher = () => {
         })),
       };
 
-      console.log("Combined Data:", combinedData);
+      // console.log("Combined Data:", combinedData);
       const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
+      console.log("Method",method);
+      
 
       const response = await axios({
         method,
@@ -1373,7 +1395,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
         if (Array.isArray(data) && data.length > 0 && data[0].formData) {
           const formDataFromAPI = data[0].formData;
           setdecimalValue(formDataFromAPI.decimals);
-          console.log(decimalValue);
+          // console.log(decimalValue);
           
         } else {
           throw new Error("Invalid response structure");

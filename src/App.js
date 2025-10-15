@@ -32,7 +32,7 @@ import StockSummary from './Screens/StockReports/StockSummary';
 import BankBook from './Screens/Books/BankBook/BankBook';
 import CashReceipt from './Screens/CashVoucher/CashReceipt';
 import LedgerList from './Screens/AccountStatement/LedgerList';
-import Dashboard from './Screens/DashBoard/Dashboard';
+// import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
 
@@ -83,7 +83,7 @@ function App() {
         <Route path='/BankBook' element={<BankBook />}></Route>
         <Route path='/CashReceipt' element={<CashReceipt />}></Route>
         <Route path='/LedgerList' element={<LedgerList />}></Route>
-        <Route path='/Dashboard' element={<Dashboard />}></Route>
+        {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>
 

@@ -322,8 +322,8 @@ const ProductModalCustomer = ({
     try {
         const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount?search=${encodeURIComponent(search)}&searchField=${encodeURIComponent(searchField)}&page=${page}&limit=30`;
         const res = await fetch(url);
-        console.log(res);
-        console.log("Tenant:",tenant);
+        // console.log(res);
+        // console.log("Tenant:",tenant);
         
         if (!res.ok) throw new Error('Failed to fetch');
         const result = await res.json();

@@ -944,92 +944,161 @@
 // export default Example;
 
 
-import React, { useState, useEffect, useRef, forwardRef } from "react";
-import DatePicker from "react-datepicker";
-import InputMask from "react-input-mask";
-import "react-datepicker/dist/react-datepicker.css";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import DatePicker from "react-datepicker";
+// import InputMask from "react-input-mask";
+// import "react-datepicker/dist/react-datepicker.css";
+// import "react-toastify/dist/ReactToastify.css";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
-// ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar=" "
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
+// // ✅ Forward ref so DatePicker can focus the input
+// const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+//   <InputMask
+//     mask="99-99-9999"
+//     maskChar=" "
+//     value={value}
+//     onChange={onChange}
+//     onBlur={onBlur}
+//   >
+//     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+//   </InputMask>
+// ));
+
+// const Example = () => {
+//   const datePickerRef = useRef(null);
+//   const customerNameRef = useRef(null);
+//   const [selectedDate, setSelectedDate] = useState(new Date());
+//   const [formData, setFormData] = useState({
+//     date: "",
+//   });
+
+//   const handleDateChange = (date) => {
+//     if (date instanceof Date && !isNaN(date)) {
+//       setSelectedDate(date);
+//       const formattedDate = date.toISOString().split("T")[0];
+//       setFormData((prev) => ({
+//         ...prev,
+//         date: date,
+//         duedate: date,
+//       }));
+//     }
+//   };
+
+//   // ✅ Separate function to validate future or past date
+//   const validateDate = (date) => {
+//     if (!date) return;
+
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0); // normalize today
+
+//     const checkDate = new Date(date);
+//     checkDate.setHours(0, 0, 0, 0); // normalize selected date
+
+//     if (checkDate > today) {
+//       toast.info("You Have Selected a Future Date.", {
+//         position: "top-center",
+//       });
+//     } else if (checkDate < today) {
+//       toast.info("You Have Selected a Past Date.", {
+//         position: "top-center",
+//       });
+//     }
+//   };
+
+//   const handleCalendarClose = () => {
+//     // If no date is selected when the calendar closes, default to today's date
+//     if (!selectedDate) {
+//       const today = new Date();
+//       setSelectedDate(today);
+//     }
+//   };
+//   return (
+//     <div>
+//       <DatePicker
+//         ref={datePickerRef}
+//         selected={selectedDate || null}
+//         openToDate={new Date()}
+//         onCalendarClose={handleCalendarClose}
+//         dateFormat="dd-MM-yyyy"
+//         onChange={handleDateChange}
+//         onBlur={() => validateDate(selectedDate)}
+//         customInput={<MaskedInput />}
+//       />
+//       <input
+//       ref={customerNameRef}
+//       />
+//     </div>
+//   )
+// }
+
+// export default Example
+
+
+// import React,{useState} from 'react'
+// import DatePicker from "react-datepicker";
+
+// const Example = () => {
+//   const [ledgerFromDate, setLedgerFromDate] = useState(() => new Date());
+//   return (
+//     <div>
+//       <DatePicker
+//         className="fDate"
+//         selected={ledgerFromDate}
+//         onChange={(date) => setLedgerFromDate(date)}
+//         onChangeRaw={(e) => {
+//           if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
+
+//           let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+//           if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+//           if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+//           e.target.value = val; // Show formatted input
+//         }}
+//         dateFormat="dd/MM/yyyy"
+//       />
+//     </div>
+//   )
+// }
+
+// export default Example
+
+
+
+import React, { useState, useEffect } from "react";
+import InputMask from "react-input-mask";
 
 const Example = () => {
-  const datePickerRef = useRef(null);
-  const customerNameRef = useRef(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [formData, setFormData] = useState({
-    date: "",
-  });
+  const [ledgerFromDate, setLedgerFromDate] = useState("");
 
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      setSelectedDate(date);
-      const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({
-        ...prev,
-        date: date,
-        duedate: date,
-      }));
-    }
+  // ✅ Simulate fetching date from API
+  useEffect(() => {
+    const apiDate = "2025-06-05T10:31:13.346Z"; // example API date
+    const formatted = formatApiDate(apiDate);
+    setLedgerFromDate(formatted);
+  }, []);
+
+  // ✅ Convert API format → dd/mm/yyyy
+  const formatApiDate = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
-  // ✅ Separate function to validate future or past date
-  const validateDate = (date) => {
-    if (!date) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // normalize today
-
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0); // normalize selected date
-
-    if (checkDate > today) {
-      toast.info("You Have Selected a Future Date.", {
-        position: "top-center",
-      });
-    } else if (checkDate < today) {
-      toast.info("You Have Selected a Past Date.", {
-        position: "top-center",
-      });
-    }
-  };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
   return (
     <div>
-      <DatePicker
-        ref={datePickerRef}
-        selected={selectedDate || null}
-        openToDate={new Date()}
-        onCalendarClose={handleCalendarClose}
-        dateFormat="dd-MM-yyyy"
-        onChange={handleDateChange}
-        onBlur={() => validateDate(selectedDate)}
-        customInput={<MaskedInput />}
-      />
-      <input
-      ref={customerNameRef}
+      <InputMask
+        mask="99/99/9999"
+        placeholder="dd/mm/yyyy"
+        value={ledgerFromDate}
+        onChange={(e) => setLedgerFromDate(e.target.value)}
+        className="fDate"
       />
     </div>
-  )
-}
+  );
+};
 
-export default Example
+export default Example;

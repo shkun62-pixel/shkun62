@@ -13,6 +13,7 @@ import PrintTrail from "./PrintTrail";
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 import CoA from "./CoA";
+import InputMask from "react-input-mask";
 
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
@@ -51,8 +52,18 @@ const TrailBalance = () => {
   const [selectedGroupRows, setSelectedGroupRows] = useState(new Set());
 
     // odler
+  // ✅ Convert API format → dd/mm/yyyy
+  const formatApiDate = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
-  const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
+  const [ledgerToDate, setLedgerToDate] = useState(() => formatApiDate(new Date()));
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
     Balance: "Active Balance",
@@ -74,7 +85,9 @@ const TrailBalance = () => {
 
   useEffect(() => {
     if (!ledgerFromDate && dateFrom) {
-      setLedgerFromDate(new Date(dateFrom));
+      const formatted = formatApiDate(dateFrom);
+      setLedgerFromDate(formatted);
+      console.log("Setting ledgerFromDate to dateFrom:", dateFrom);
     }
   }, [dateFrom, ledgerFromDate]);
 
@@ -465,7 +478,6 @@ const TrailBalance = () => {
           // saleId: txn._id,
         },
       });
-      alert(txn._id)
         break;
       case "P": // Purchase
         navigate("/purchase", {
@@ -473,34 +485,30 @@ const TrailBalance = () => {
           purId: txn.purId,
         },
       });
-       alert(txn._id)
         // navigate("/purchase", { state: { purId: txn._id, rowIndex: activeRowIndex } });
         break;
       case "B": // Bank
        navigate("/bankvoucher", {
         state: {
-          bankId: txn._id,
+          bankId: txn.bankId,
         },
       });
-       alert(txn._id)
         // navigate("/bankvoucher", { state: { bankId: txn._id, rowIndex: activeRowIndex } });
         break;
       case "C": // Cash
         navigate("/cashvoucher", {
         state: {
-          cashId: txn._id,
+          cashId: txn.cashId,
         },
       });
-       alert(txn._id)
         // navigate("/cashvoucher", { state: { cashId: txn._id, rowIndex: activeRowIndex } });
         break;
       case "J": // Journal
        navigate("/journalvoucher", {
         state: {
-          journalId: txn._id,
+          journalId: txn.journalId,
         },
       });
-       alert(txn._id)
         // navigate("/journalvoucher", { state: { journalId: txn._id, rowIndex: activeRowIndex } });
         break;
       default:
@@ -689,7 +697,10 @@ const fetchLedgerTransactions = (ledger) => {
           .map((txn) => ({
             ...txn,
             saleId: entry.saleId || null,   // attach saleId for Sales
-            purId: entry.purchaseId || null,   // attach saleId for Sales
+            purId: entry.purchaseId || null,  
+            bankId: entry.bankId || null,  
+            cashId: entry.cashId || null,  
+            journalId: entry.journalId || null,  
           }))
       );
 
@@ -1459,11 +1470,20 @@ const groupTotals = useMemo(() => {
           <div style={{ display: "flex", flexDirection:"column", alignItems: "center",gap:"10px" }}>
             <div style={{display:'flex',flexDirection:'row'}}>
             <span className="textform"><b>From:</b></span>
-            <DatePicker
+            <InputMask
+              mask="99/99/9999"
+              placeholder="dd/mm/yyyy"
+              value={ledgerFromDate}
+              onChange={(e) => setLedgerFromDate(e.target.value)}
+              className="fDate"
+            />
+            {/* <DatePicker
               className="fDate"
               selected={ledgerFromDate}
               onChange={(date) => setLedgerFromDate(date)}
               onChangeRaw={(e) => {
+                if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
+
                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
@@ -1471,11 +1491,34 @@ const groupTotals = useMemo(() => {
                 e.target.value = val; // Show formatted input
               }}
               dateFormat="dd/MM/yyyy"
-            />
+            /> */}
+
             </div>
             <div style={{display:'flex',flexDirection:'row'}}>
             <span className="textform"><b>To:</b></span>
-            <DatePicker
+            <InputMask
+              mask="99/99/9999"
+              placeholder="dd/mm/yyyy"
+              value={ledgerToDate}
+              onChange={(e) => setLedgerToDate(e.target.value)}
+              className="toDate"
+            />
+             {/* <DatePicker
+              className="toDate"
+              selected={ledgerToDate}
+              onChange={(date) => setLedgerToDate(date)}
+              onChangeRaw={(e) => {
+                if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
+
+                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+
+                e.target.value = val; // Show formatted input
+              }}
+              dateFormat="dd/MM/yyyy"
+            /> */}
+            {/* <DatePicker
               className="toDate"
               selected={ledgerToDate}
               onChange={(date) => setLedgerToDate(date)}
@@ -1487,7 +1530,7 @@ const groupTotals = useMemo(() => {
                 e.target.value = val; // Show formatted input
               }}
               dateFormat="dd/MM/yyyy"
-            />
+            /> */}
 
             {/* <DatePicker
               className="toDate"
@@ -2022,6 +2065,8 @@ const groupTotals = useMemo(() => {
               selected={fromDate}
               onChange={(date) => setFromDate(date)}   // ✅ FIXED
               onChangeRaw={(e) => {
+                if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
+
                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
@@ -2039,6 +2084,8 @@ const groupTotals = useMemo(() => {
               selected={toDate}
               onChange={(date) => setToDate(date)}     // ✅ FIXED
               onChangeRaw={(e) => {
+                if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
+                
                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
