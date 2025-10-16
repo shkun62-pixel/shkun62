@@ -117,7 +117,7 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
               <h2 style={{ fontWeight: "bold", fontSize:"18px", marginTop: "10px" }}>{currentGroupName}</h2>
             )}
             <h2 style={{ fontWeight: "bold", marginTop: "10px",fontSize:"18px",marginRight:"10px" }}>
-                Period: {formatDate(ledgerFrom)} To {formatDate(ledgerTo)}
+                Period: {formatDate(ledgerFrom)} To {ledgerTo}
             </h2>
           </div>
         

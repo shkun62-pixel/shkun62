@@ -217,6 +217,27 @@ const PurchaseSetup = ({ onClose }) => {
     discount_ac: "",
   },
   ]);
+
+  // TDS SCRAP
+  const [cTds, setcTds] = useState([
+  {
+    cTds_code: "",
+    cTds_ac: "",
+  },
+  ]);
+  const [sTds, setsTds] = useState([
+  {
+    sTds_code: "",
+    sTds_ac: "",
+  },
+  ]);
+  const [iTds, setiTds] = useState([
+  {
+    iTds_code: "",
+    iTds_ac: "",
+  },
+  ]);
+
   const [E1name, setE1name] = useState([{ E1Code: "", E1name: "" }]);
   const [E2name, setE2name] = useState([{ E2Code: "", E2name: "" }]);
   const [E3name, setE3name] = useState([{ E3Code: "", E3name: "" }]);
@@ -355,6 +376,25 @@ const PurchaseSetup = ({ onClose }) => {
           discount_code: lastEntry.formData.discount_code,
           discount_ac: lastEntry.formData.discount_ac,
         },
+        ]);
+        // TDS SCRAP
+        setcTds([
+          {
+            cTds_code: lastEntry.formData.cTds_code,
+            cTds_ac: lastEntry.formData.cTds_ac,
+          },
+        ]);
+        setsTds([
+          {
+            sTds_code: lastEntry.formData.sTds_code,
+            sTds_ac: lastEntry.formData.sTds_ac,
+          },
+        ]);
+        setiTds([
+          {
+            iTds_code: lastEntry.formData.iTds_code,
+            iTds_ac: lastEntry.formData.iTds_ac,
+          },
         ]);
         setE1name([
           {
@@ -590,6 +630,17 @@ const PurchaseSetup = ({ onClose }) => {
         tcs206ac: tcs206code.length > 0 ? tcs206code[0].tcs206ac : "",
         discount_code: discountcode.length > 0 ? discountcode[0].discount_code : "",
         discount_ac: discountcode.length > 0 ? discountcode[0].discount_ac : "",
+
+        // TDS SCRAP
+        cTds_code: cTds.length > 0 ? cTds[0].cTds_code : "",
+        cTds_ac: cTds.length > 0 ? cTds[0].cTds_ac : "",
+        
+        sTds_code: sTds.length > 0 ? sTds[0].sTds_code : "",
+        sTds_ac: sTds.length > 0 ? sTds[0].sTds_ac : "",
+
+        iTds_code: iTds.length > 0 ? iTds[0].iTds_code : "",
+        iTds_ac: iTds.length > 0 ? iTds[0].iTds_ac : "",
+        
         E1name: E1name.length > 0 ? E1name[0].E1name : "",
         E1Code: E1name.length > 0 ? E1name[0].E1Code : "",
         E2name: E2name.length > 0 ? E2name[0].E2name : "",
@@ -698,6 +749,15 @@ const PurchaseSetup = ({ onClose }) => {
       setProductE8name(formattedData);
       setProductE9name(formattedData);
       setProductE10name(formattedData);
+
+      setProductscTds(formattedData);
+      setProductssTds(formattedData);
+      setProductsiTds(formattedData);
+      // Set loading states to false after data is fetched
+      setLoadingcTds(false);
+      setLoadingsTds(false);
+      setLoadingiTds(false);
+
       setLoadingCus(false);
       setLoadingAdcode(false);
       setLoadingAcc(false);
@@ -722,6 +782,13 @@ const PurchaseSetup = ({ onClose }) => {
       setLoadingE9name(false);
       setLoadingE10name(false);
     } catch (error) {
+      setErrorcTds(error.message);
+      setLoadingcTds(false);
+      setErrorsTds(error.message);
+      setLoadingsTds(false);
+      setErroriTds(error.message);
+      setLoadingiTds(false);
+
       setErrorCus(error.message);
       setLoadingCus(false);
       setErrorcgst1(error.message);
@@ -762,6 +829,213 @@ const PurchaseSetup = ({ onClose }) => {
       setLoadingE10name(false);
     }
   };
+  // modal for CTDS
+    const [productscTds, setProductscTds] = useState([]);
+    const [showModalcTds, setShowModalcTds] = useState(false);
+    const [selectedItemIndexcTds, setSelectedItemIndexcTds] = useState(null);
+    const [loadingcTds, setLoadingcTds] = useState(true);
+    const [errorcTds, setErrorcTds] = useState(null);
+
+    const handleItemChangecTds = (index, key, value) => {
+      const updatedItems = [...cTds];
+      updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+
+      // If the key is 'name', find the corresponding product and set the price
+      if (key === "name") {
+        const selectedProduct = productscTds.find(
+          (product) => product.ahead === value
+        );
+        if (selectedProduct) {
+          updatedItems[index]["cTds_ac"] = selectedProduct.ahead;
+          updatedItems[index]["cTds_code"] = selectedProduct.acode;
+        }
+      } else if (key === "discount") {
+        // No operation
+      }
+      setcTds(updatedItems);
+    };
+
+    const handleProductSelectcTds = (product) => {
+      if (!product) {
+        alert("No account selected!");
+        setShowModalcTds(false);
+        return;
+      }
+
+      // Deep copy cesscode array
+      const updatedShipped = [...cTds];
+
+      // Update the correct object in the array
+      updatedShipped[selectedItemIndexcTds] = {
+        ...updatedShipped[selectedItemIndexcTds],
+        cTds_ac: product.ahead || "",
+        cTds_code: product.acode || "",
+        // Add any other mappings needed
+      };
+
+      const nameValue = product.ahead || product.name || "";
+      if (selectedItemIndexcTds !== null) {
+        handleItemChangecTds(selectedItemIndexcTds, "name", nameValue);
+      }
+      setcTds(updatedShipped);
+      setIsEditMode(true);
+      setShowModalcTds(false);
+    };
+
+    const openModalForItemcTds = (index) => {
+      if (isEditMode) {
+        setSelectedItemIndexcTds(index);
+        setShowModalcTds(true);
+      }
+    };
+
+    const allFieldscTds = productscTds.reduce((fields, product) => {
+      Object.keys(product).forEach((key) => {
+        if (!fields.includes(key)) {
+          fields.push(key);
+        }
+      });
+      return fields;
+    }, []);
+
+    // ITDS
+    const [productssTds, setProductssTds] = useState([]);
+    const [showModalsTds, setShowModalsTds] = useState(false);
+    const [selectedItemIndexsTds, setSelectedItemIndexsTds] = useState(null);
+    const [loadingsTds, setLoadingsTds] = useState(true);
+    const [errorsTds, setErrorsTds] = useState(null);
+
+    const handleItemChangesTds = (index, key, value) => {
+      const updatedItems = [...sTds];
+      updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+
+      // If the key is 'name', find the corresponding product and set the price
+      if (key === "name") {
+        const selectedProduct = productssTds.find(
+          (product) => product.ahead === value
+        );
+        if (selectedProduct) {
+          updatedItems[index]["sTds_ac"] = selectedProduct.ahead;
+          updatedItems[index]["sTds_code"] = selectedProduct.acode;
+        }
+      } else if (key === "discount") {
+        // No operation
+      }
+      setsTds(updatedItems);
+    };
+
+    const handleProductSelectsTds = (product) => {
+      if (!product) {
+        alert("No account selected!");
+        setShowModalsTds(false);
+        return;
+      }
+
+      // Deep copy cesscode array
+      const updatedShipped = [...sTds];
+
+      // Update the correct object in the array
+      updatedShipped[selectedItemIndexsTds] = {
+        ...updatedShipped[selectedItemIndexsTds],
+        sTds_ac: product.ahead || "",
+        sTds_code: product.acode || "",
+        // Add any other mappings needed
+      };
+
+      const nameValue = product.ahead || product.name || "";
+      if (selectedItemIndexsTds !== null) {
+        handleItemChangesTds(selectedItemIndexsTds, "name", nameValue);
+      }
+      setsTds(updatedShipped);
+      setIsEditMode(true);
+      setShowModalsTds(false);
+    };
+
+    const openModalForItemsTds = (index) => {
+      if (isEditMode) {
+        setSelectedItemIndexsTds(index);
+        setShowModalsTds(true);
+      }
+    };
+
+    const allFieldssTds = productssTds.reduce((fields, product) => {
+      Object.keys(product).forEach((key) => {
+        if (!fields.includes(key)) {
+          fields.push(key);
+        }
+      });
+      return fields;
+    }, []);
+
+    // ITDS
+    const [productsiTds, setProductsiTds] = useState([]);
+    const [showModaliTds, setShowModaliTds] = useState(false);
+    const [selectedItemIndexiTds, setSelectedItemIndexiTds] = useState(null);
+    const [loadingiTds, setLoadingiTds] = useState(true);
+    const [erroriTds, setErroriTds] = useState(null);
+
+    const handleItemChangeiTds = (index, key, value) => {
+      const updatedItems = [...iTds];
+      updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+
+      // If the key is 'name', find the corresponding product and set the price
+      if (key === "name") {
+        const selectedProduct = productsiTds.find(
+          (product) => product.ahead === value
+        );
+        if (selectedProduct) {
+          updatedItems[index]["iTds_ac"] = selectedProduct.ahead;
+          updatedItems[index]["iTds_code"] = selectedProduct.acode;
+        }
+      } else if (key === "discount") {
+        // No operation
+      }
+      setiTds(updatedItems);
+    };
+
+    const handleProductSelectiTds = (product) => {
+      if (!product) {
+        alert("No account selected!");
+        setShowModaliTds(false);
+        return;
+      }
+
+      // Deep copy cesscode array
+      const updatedShipped = [...iTds];
+
+      // Update the correct object in the array
+      updatedShipped[selectedItemIndexiTds] = {
+        ...updatedShipped[selectedItemIndexiTds],
+        iTds_ac: product.ahead || "",
+        iTds_code: product.acode || "",
+        // Add any other mappings needed
+      };
+
+      const nameValue = product.ahead || product.name || "";
+      if (selectedItemIndexiTds !== null) {
+        handleItemChangeiTds(selectedItemIndexiTds, "name", nameValue);
+      }
+      setiTds(updatedShipped);
+      setIsEditMode(true);
+      setShowModaliTds(false);
+    };
+
+    const openModalForItemiTds = (index) => {
+      if (isEditMode) {
+        setSelectedItemIndexiTds(index);
+        setShowModaliTds(true);
+      }
+    };
+
+    const allFieldsiTds = productsiTds.reduce((fields, product) => {
+      Object.keys(product).forEach((key) => {
+        if (!fields.includes(key)) {
+          fields.push(key);
+        }
+      });
+      return fields;
+    }, []);
+
     // Modal For Discount 
     const [productsDis, setProductsDis] = useState([]);
     const [showModalDis, setShowModalDis] = useState(false);
@@ -2561,7 +2835,23 @@ const PurchaseSetup = ({ onClose }) => {
         setPressedKey(event.key);
         openModalForItemDis(index);
         event.preventDefault();
-      } else if (field === "E1name" && isEditMode) {
+      }else if (field === "cTds_code" && isEditMode) {
+        setPressedKey(event.key);
+        openModalForItemcTds(index);
+        event.preventDefault();
+      }  
+      else if (field === "sTds_code" && isEditMode) {
+        setPressedKey(event.key);
+        openModalForItemsTds(index);
+        event.preventDefault();
+      }  
+      else if (field === "iTds_code" && isEditMode) {
+        setPressedKey(event.key);
+        openModalForItemiTds(index);
+        event.preventDefault();
+      }  
+      
+      else if (field === "E1name" && isEditMode) {
         setPressedKey(event.key);
         openModalForItemE1name(index);
         event.preventDefault();
@@ -3860,10 +4150,97 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
               </Grid>
+              {/* TDS */}
+              <Grid container spacing={2} mt={1}>
+                {cTds.map((item, index) => (
+                  <Grid item xs={4} key={`cTds-${index}`}>
+                    <TextField
+                      label="TDS CGST"
+                      fullWidth
+                      size="small"
+                      sx={textFieldStyle}
+                      value={item.cTds_code || ""}
+                      onChange={(e) => {
+                        const newCode = [...cTds];
+                        newCode[index].cTds_code = e.target.value;
+                        setcTds(newCode);
+                      }}
+                      onKeyDown={(e) => handleOpenModal(e, index, "cTds_code")}
+                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                    />
+                    {showModalcTds && (
+                      <ProductModalAccount
+                        allFields={allFieldscTds}
+                        onSelect={handleProductSelectcTds}
+                        onClose={() => setShowModalcTds(false)} 
+                        initialKey={pressedKey}
+                        tenant={tenant}
+                        onRefresh={fetchCustomers}
+                      />
+                    )}
+                  </Grid>
+                ))}
+                {sTds.map((item, index) => (
+                  <Grid item xs={4} key={`sTds-${index}`}>
+                    <TextField
+                      label="TDS SGST"
+                      fullWidth
+                      size="small"
+                      sx={textFieldStyle}
+                      value={item.sTds_code || ""}
+                      onChange={(e) => {
+                        const newCode = [...sTds];
+                        newCode[index].sTds_code = e.target.value;
+                        setsTds(newCode);
+                      }}
+                      onKeyDown={(e) => handleOpenModal(e, index, "sTds_code")}
+                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                    />
+                    {showModalsTds && (
+                      <ProductModalAccount
+                        allFields={allFieldssTds}
+                        onSelect={handleProductSelectsTds}
+                        onClose={() => setShowModalsTds(false)} 
+                        initialKey={pressedKey}
+                        tenant={tenant}
+                        onRefresh={fetchCustomers}
+                      />
+                    )}
+                  </Grid>
+                ))}
+                {iTds.map((item, index) => (
+                  <Grid item xs={4} key={`iTds-${index}`}>
+                    <TextField
+                      label="TDS IGST"
+                      fullWidth
+                      size="small"
+                      sx={textFieldStyle}
+                      value={item.iTds_code || ""}
+                      onChange={(e) => {
+                        const newCode = [...iTds];
+                        newCode[index].iTds_code = e.target.value;
+                        setiTds(newCode);
+                      }}
+                      onKeyDown={(e) => handleOpenModal(e, index, "iTds_code")}
+                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                    />
+                    {showModaliTds && (
+                      <ProductModalAccount
+                        allFields={allFieldsiTds}
+                        onSelect={handleProductSelectiTds}
+                        onClose={() => setShowModaliTds(false)} 
+                        initialKey={pressedKey}
+                        tenant={tenant}
+                        onRefresh={fetchCustomers}
+                      />
+                    )}
+                  </Grid>
+                ))}
+              </Grid>
               {/* Row 4: ADcode & CessCode */}
               <Grid container spacing={2} mt={1}>
                 {Adcode.map((item, index) => (
-                  <Grid item xs={6} key={`Adcode-${index}`}>
+                  <Grid item xs={4} key={`Adcode-${index}`}>
                     <TextField
                       label="PUR.IMP GST"
                       fullWidth
@@ -3891,7 +4268,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </Grid>
                 ))}
                 {cesscode.map((item, index) => (
-                  <Grid item xs={6} key={`cesscode-${index}`}>
+                  <Grid item xs={4} key={`cesscode-${index}`}>
                     <TextField
                       label="CESS CODE"
                       fullWidth
@@ -3918,11 +4295,8 @@ const PurchaseSetup = ({ onClose }) => {
                     )}
                   </Grid>
                 ))}
-              </Grid>
-              {/* Row 4: TCS 206 */}
-                <Grid container spacing={2} mt={1}>
                 {tcs206code.map((item, index) => (
-                  <Grid item xs={6} key={`tcs206-${index}`}>
+                  <Grid item xs={4} key={`tcs206code-${index}`}>
                     <TextField
                       label="TCS 206 C(1H)"
                       fullWidth
@@ -3949,8 +4323,11 @@ const PurchaseSetup = ({ onClose }) => {
                     )}
                   </Grid>
                 ))}
+              </Grid>
+              {/* Row 4: TCS 206 */}
+              <Grid container spacing={2} mt={1}>
                 {tcscode.map((item, index) => (
-                  <Grid item xs={6} key={`tcs-${index}`}>
+                  <Grid item xs={4} key={`tcscode-${index}`}>
                     <TextField
                       label="TCS A/C"
                       fullWidth
@@ -3977,24 +4354,8 @@ const PurchaseSetup = ({ onClose }) => {
                     )}
                   </Grid>
                 ))}
-              </Grid>
-              {/*  */}
-              <Grid container spacing={2} mt={1}>
-                <Grid item xs={6}>
-                {/* <FormLabel sx={{ mt: 1 }}>TCS RATE ALL</FormLabel> */}
-                <TextField
-                  label="TCS RATE ALL"
-                  id="TcsRate"
-                  fullWidth
-                  size="small"
-                  sx={textFieldStyle}
-                  value={formData.TcsRate || ""}
-                  onChange={handleInputChange}
-                  InputProps={{ readOnly: !isEditMode || isDisabled }}
-                />
-              </Grid>
-              {discountcode.map((item, index) => (
-              <Grid item xs={6} key={`discountcode-${index}`}>
+                {discountcode.map((item, index) => (
+                <Grid item xs={4} key={`discountcode-${index}`}>
                   <TextField
                     label="DISCOUNT"
                     fullWidth
@@ -4020,8 +4381,22 @@ const PurchaseSetup = ({ onClose }) => {
                     />
                   )}
               </Grid>
-              ))}
+                ))}
+                 <Grid item xs={4}>
+                {/* <FormLabel sx={{ mt: 1 }}>TCS RATE ALL</FormLabel> */}
+                <TextField
+                  label="TCS RATE ALL"
+                  id="TcsRate"
+                  fullWidth
+                  size="small"
+                  sx={textFieldStyle}
+                  value={formData.TcsRate || ""}
+                  onChange={handleInputChange}
+                  InputProps={{ readOnly: !isEditMode || isDisabled }}
+                />
               </Grid>
+              </Grid>
+              {/*  */}
               <Grid item xs={6}>
                 <FormLabel sx={{ mt: 1 }}>TCS ON TAX</FormLabel>
                 <Select

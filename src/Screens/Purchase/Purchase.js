@@ -598,7 +598,7 @@ const Purchase = () => {
         item.tariff &&
         applicableTariffs.some((tariff) => item.tariff.startsWith(tariff))
       ) {
-        if (gstNumber === same) {
+        if (CompanyState == supplierdetails[0].state) {
           cTds = totalValue * 0.01;
           sTds = totalValue * 0.01;
           tcspercentage = "2%";
