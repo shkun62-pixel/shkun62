@@ -54,7 +54,7 @@ export default function FAVoucherModal({
   onClose,
   tenant,
   voucherno,
-  vtype = "P", // default Purchase
+  vtype = "S", // default 
 }) {
   const [loading, setLoading] = useState(false);
   const [fa, setFa] = useState(null);

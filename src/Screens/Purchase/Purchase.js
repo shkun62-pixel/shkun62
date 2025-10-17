@@ -2170,6 +2170,14 @@ const Purchase = () => {
         discount_code: setupFormData.discount_code,
         discount_ac:   setupFormData.discount_code, // (kept as you had)
 
+        // TDS ACCOUNTS
+        cTds_code: setupFormData.cTds_code,
+        cTds_ac: setupFormData.cTds_ac,
+        sTds_code: setupFormData.sTds_code,
+        sTds_ac: setupFormData.sTds_ac,
+        iTds_code: setupFormData.iTds_code,
+        iTds_ac: setupFormData.iTds_ac,
+
         expense1_code: setupFormData.E1Code,  expense1_ac: setupFormData.E1name,
         expense2_code: setupFormData.E2Code,  expense2_ac: setupFormData.E2name,
         expense3_code: setupFormData.E3Code,  expense3_ac: setupFormData.E3name,
