@@ -725,7 +725,7 @@ const CashVoucher = () => {
     calculateTotalPayment();
     calculateTotalReceipt();
     calculateTotalDiscount();
-    calculateCashInHand();
+    // calculateCashInHand();
   };
 
   const capitalizeWords = (str) => {
@@ -1373,13 +1373,6 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
     } catch (error) {
       console.error("Error fetching data", error);
     }
-  };
-
-  const updateTotals = () => {
-    calculateTotalPayment();
-    calculateTotalReceipt();
-    calculateTotalDiscount();
-    calculateCashInHand();
   };
 
   const [decimalValue, setdecimalValue] = useState(0);

@@ -2937,6 +2937,26 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // useEffect(() => {
+  //   if (formData.date) {
+  //     try {
+  //       // Expecting date in format "DD/MM/YYYY"
+  //       const [day, month, year] = formData.date.split("/").map(Number);
+  //       const date = new Date(year, month - 1, day); // month is 0-based
+  
+  //       if (!isNaN(date.getTime())) {
+  //         setSelectedDate(date);
+  //       } else {
+  //         console.error("Invalid date value in formData.date:", formData.date);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error parsing date:", error);
+  //     }
+  //   } else {
+  //     setSelectedDate(null);
+  //   }
+  // }, [formData.date]);
+
   useEffect(() => {
     // If formData.date has a valid date string, parse it and set selectedDate
     if (formData.date) {
