@@ -1455,7 +1455,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
         />
       </div>
       <h1 className="HeaderCASH">CASH VOUCHER</h1>
-      <text className="tittle">{title}</text>
+      <span className="tittle">{title}</span>
       <div className="containers">
         <span style={styles2.dates}>{currentDate}</span>
         <span style={styles2.days}>{currentDay}</span>
@@ -1465,7 +1465,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
           <Button style={{ marginLeft: 10 }} onClick={increaseFontSize}><FaPlus /></Button>
       </div> */}
       <div className="Tops">
-        <text>DATE</text>
+        <span>DATE</span>
          <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
@@ -1564,7 +1564,6 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
           <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
             {items.map((item, index) => (
               <tr key={`${item.accountname}-${index}`}>
-                {" "}
                 <td style={{ padding: 0 }}>
                   <input
                   className="Account"
