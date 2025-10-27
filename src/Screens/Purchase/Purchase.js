@@ -548,7 +548,8 @@ const Purchase = () => {
     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
 
     let gstTotal = cgstTotal + sgstTotal + igstTotal;
-    let grandTotal = totalValue + gstTotal + totalOthers + totalExpenses - totalDis;
+    let grandTotal = totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
+    // let grandTotal = totalValue + gstTotal + totalOthers + totalExpenses - totalDis;
     let taxable = parseFloat(formDataOverride.sub_total);
     // ✅ Skip TCS Calculation if skipTCS is true
     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
