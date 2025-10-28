@@ -19,6 +19,8 @@ import TextField from "@mui/material/TextField";
 import {IconButton} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useLocation } from "react-router-dom";
+import PrintChoiceModal from "../Shared/PrintChoiceModal";
+import FAVoucherModal from "../Shared/FAVoucherModal";
 
 // ✅ Forward ref so DatePicker can focus the input
 const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
@@ -583,6 +585,23 @@ const JournalVoucher = () => {
   const [isEditMode2, setIsEditMode2] = useState(false); // State to track edit mode
   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
+  const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+  const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
+  
+  // replace your Print button onClick:
+  const handlePrintClick = () => setPrintChoiceOpen(true);
+  
+  // 1) Normal print (your existing PDF)
+  const handleNormalPrint = () => {
+    setPrintChoiceOpen(false);
+    handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+  };
+
+  // 2) FA voucher preview
+  const handleFAPreview = async () => {
+    setIsFAModalOpen(true);
+  };
+
   // Fetch Data
   const fetchData = async () => {
     try {
@@ -1615,7 +1634,8 @@ const handleSearch = async (searchDate) => {
                 </Modal.Footer>
             </Modal>
           <Button
-           onClick={handleOpen}
+          //  onClick={handleOpen}
+           onClick={handlePrintClick}
             className="Buttonz"
             style={{
               color: "black",
@@ -1625,6 +1645,20 @@ const handleSearch = async (searchDate) => {
           >
             Print
           </Button>
+          <PrintChoiceModal
+            open={printChoiceOpen}
+            onClose={() => setPrintChoiceOpen(false)}
+            onNormal={handleNormalPrint}
+            onFA={handleFAPreview}
+          />
+    
+          <FAVoucherModal
+            open={isFAModalOpen}
+            onClose={() => setIsFAModalOpen(false)}
+            tenant="shkun_05062025_05062026"
+            voucherno={formData?.voucherno}
+            vtype="J"
+          />
           <Button
             className="Buttonz"
             style={{

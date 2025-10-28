@@ -47,6 +47,7 @@ const CONFIG = {
   S: { apipath: "salefafile",     header: "FA VOUCHER (SALE)",     posting: "Sale FA Entries" },
   B: { apipath: "bankfafile",     header: "FA VOUCHER (BANK)",     posting: "Bank FA Entries" },
   C: { apipath: "cashfafile",     header: "FA VOUCHER (CASH)",     posting: "Cash FA Entries" },
+  J: { apipath: "journalfafile",  header: "FA VOUCHER (JOURNAL)",  posting: "Journal FA Entries" },
 };
 
 export default function FAVoucherModal({
