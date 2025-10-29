@@ -1,0 +1,25 @@
+.method{
+    height: 30px;
+    width: 300px;
+    border: 1px solid black;
+    border-radius: 2px;
+    margin-left: 23px;
+    font-weight: bold;
+}
+.Filters{
+    height: 30px;
+    width: 300px;
+    border: 1px solid black;
+    border-radius: 2px;
+    margin-left: 38px;
+    font-weight: bold;
+}
+
+.Msme{
+    height: 30px;
+    width: 300px;
+    border: 1px solid black;
+    border-radius: 2px;
+    margin-left: 32px;
+    font-weight: bold;
+}

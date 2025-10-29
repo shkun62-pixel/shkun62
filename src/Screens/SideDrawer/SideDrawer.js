@@ -32,6 +32,7 @@ import SwapVertIcon from '@mui/icons-material/SwapVert';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import WidgetsIcon from '@mui/icons-material/Widgets';
@@ -157,7 +158,7 @@ export default function App() {
     const [isBSheetOpen, setIsBsheetOpen] = useState(false);
     const [isModalOpenCBook, setModalOpenCBook] = useState(false);
     const [isJBookOpen, setJBookOpen] = useState(false);
-    const [isBankBookOpen, setBankBookOpen] = useState(false);
+    const [isOutStandingOpen, setIsOutStandingOpen] = useState(false); 
     const [open, setOpen] = useState(false);
 
     const handleNavigation = (path) => {
@@ -167,6 +168,7 @@ export default function App() {
             setIsSaleOpen(false);
             setIsReportOpen(false);
             setIsBooksOpen(false);
+            setIsOutStandingOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -177,6 +179,7 @@ export default function App() {
             setIsSaleOpen(false);
             setIsReportOpen(false);
             setIsBooksOpen(false);
+            setIsOutStandingOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -264,6 +267,7 @@ export default function App() {
         setIsSaleOpen(false);
         setIsReportOpen(false);
         setIsBooksOpen(false);
+        setIsOutStandingOpen(false);
         setIsStockOpen(false);
         setIsExtraFeatureOpen(false);
         setIsDataSecurityOpen(false);
@@ -286,6 +290,10 @@ export default function App() {
 
     const handleBooksClick = () => {
         setIsBooksOpen(!isBooksOpen); // Toggle BOOKS section
+    };
+
+    const handleOutStandingClick = () => {
+        setIsOutStandingOpen(!isOutStandingOpen); // Toggle OutStanding section
     };
 
     const handleGoodsReturn = () => {
@@ -340,73 +348,73 @@ export default function App() {
                                     <StyledIcon>
                                         <LocalOfferIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="SALE" />
+                                    <StyledListItemText primary="Sale" />
                                 </StyledListItem>
                                <SaleModal isOpen={isSaleModalOpen} onClose={closeSaleModal} onNavigate={handleModalNavigate}  />
                                <StyledListItem button onClick={openPurModal}>
                                     <StyledIcon>
                                         <ShoppingCartIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="PURCHASE" />
+                                    <StyledListItemText primary="Purchase" />
                                 </StyledListItem>
                                 <PurchaseModal isOpen={isPurModalOpen} onClose={closePurModal} onNavigate={handleModalNavigate}  />
                                 <StyledListItem button onClick={openCashModal}>
                                     <StyledIcon>
                                         <AttachMoneyIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="CASH VOUCHER" />
+                                    <StyledListItemText primary="Cash Voucher" />
                                 </StyledListItem>
                                 <CashModal isOpen={isCashModalOpen} onClose={closeCashModal} onNavigate={handleModalNavigate}  />
                                 <StyledListItem button onClick={() => handleNavigation('/JournalVoucher')}>
                                     <StyledIcon>
                                         <ReceiptIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="JOURNAL VOUCHER" />
+                                    <StyledListItemText primary="Journal Voucher" />
                                 </StyledListItem>
                                 <StyledListItem button onClick={openBankModal}>
                                     <StyledIcon>
                                         <AccountBalanceIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="BANK VOUCHER" />
+                                    <StyledListItemText primary="Bank Voucher" />
                                 </StyledListItem>
                                 <BankModal isOpen={isBankModalOpen} onClose={closeBankModal} onNavigate={handleModalNavigate}  />
                                 <StyledListItem button onClick={openTdsModal}>
                                     <StyledIcon>
                                         <ReceiptLongIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="TDS VOUCHER" />
+                                    <StyledListItemText primary="TDS Voucher" />
                                 </StyledListItem>
                                 <TdsModal isOpen={isTdsModalOpen} onClose={closeTdsModal} onNavigate={handleModalNavigate}  />
                                 <StyledListItem button onClick={() => handleNavigation('/LedgerAcc')}>
                                     <StyledIcon>
                                         <AccountTreeIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="LEDGER ACCOUNT" />
+                                    <StyledListItemText primary="Ledger Account" />
                                 </StyledListItem>
                                 <StyledListItem button onClick={() => handleNavigation('/NewStockAcc')}>
                                     <StyledIcon>
                                         <InventoryIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="STOCK ACCOUNTS" />
+                                    <StyledListItemText primary="Stock Account" />
                                 </StyledListItem>
                                 <StyledListItem button onClick={openAnnexureParent}>
                                     <StyledIcon>
                                         <LocalOfferIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="ANNEXURE" />
+                                    <StyledListItemText primary="Annexure" />
                                 </StyledListItem>
                                <AnnexureModalParent isOpen={isAnnexureOpen} onClose={closeAnnexureParent} onNavigate={handleModalNavigate}/>
                                <StyledListItem button onClick={() => handleNavigation('/StockTransfer')}>
                                     <StyledIcon>
                                         <SwapVertIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="STOCK TRANSFER" />
+                                    <StyledListItemText primary="Stock Transfer" />
                                 </StyledListItem>
                                <StyledListItem button onClick={() => handleNavigation('/Productioncard')}>
                                     <StyledIcon>
                                     <BarChartIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="PRODUCTION CHART" />
+                                    <StyledListItemText primary="Production Chart" />
                                 </StyledListItem>
                                 <StyledListItem button onClick={handleGoodsReturn}>
                                     <StyledIcon>
@@ -422,13 +430,13 @@ export default function App() {
                                                 <StyledIcon>
                                                     <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="SALES RETURN" />
+                                                <StyledListItemText primary="Sales Return" />
                                             </StyledListItem>
                                             <StyledListItem button onClick={() => handleNavigation('/PurchasesReturn')}>
                                                 <StyledIcon>
                                                 <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="PURCHASE RETURN" />
+                                                <StyledListItemText primary="Purchase Return" />
                                             </StyledListItem>
                                         </List>
                                     </Collapse>
@@ -451,20 +459,20 @@ export default function App() {
                                     <StyledIcon style={{}}>
                                         <DescriptionIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="ACCOUNT STATEMENT" />
+                                    <StyledListItemText primary="Account Statement" />
                                 </StyledListItem>
                                 <StyledListItem button onClick={() => handleNavigation('/TrailBalance')}>
                                     <StyledIcon style={{}}>
                                         <BalanceIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="TRAIL BALANCE" />
+                                    <StyledListItemText primary="Trail Balance" />
                                 </StyledListItem>
                                 <BalanceSheet isOpen={isBSheetOpen} onClose={closeBalanceSheet} onNavigate={handleModalNavigate}/>
                                 <StyledListItem button onClick={OpenBalanceSheet}>
                                     <StyledIcon style={{}}>
                                         <TableChartIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="BALANCE SHEET" />
+                                    <StyledListItemText primary="Balance Sheet" />
                                 </StyledListItem>
                                 <StyledListItem button onClick={handleBooksClick}>
                                     <StyledIcon>
@@ -480,37 +488,65 @@ export default function App() {
                                                 <StyledIcon>
                                                     <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="SALES BOOK" />
+                                                <StyledListItemText primary="Sales Book" />
                                             </StyledListItem>
                                             <StyledListItem button onClick={() => handleNavigation('/PurchaseBook')}>
                                                 <StyledIcon>
                                                 <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="PURCHASE BOOK" />
+                                                <StyledListItemText primary="Purchase Book" />
                                             </StyledListItem>
                                             <StyledListItem button onClick={openCashBOOk}>
                                                 <StyledIcon>
                                                 <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="CASH BOOK" />
+                                                <StyledListItemText primary="Cash Book" />
                                             </StyledListItem>
                                             <CBookModal isOpen={isModalOpenCBook} handleClose={closeCashbook} onNavigate={handleModalNavigate} />
                                             <StyledListItem button onClick={openJournalBOOk}>
                                                 <StyledIcon>
                                                 <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="JOURNAL BOOK" />
+                                                <StyledListItemText primary="Journal Book" />
                                             </StyledListItem>
                                             <JournalBook isOpen={isJBookOpen} handleClose={closeJournalbook} onNavigate={handleModalNavigate} />
                                             <StyledListItem button onClick={() => handleNavigation('/BankBook')}>
                                                 <StyledIcon>
                                                 <MenuBookIcon />
                                                 </StyledIcon>
-                                                <StyledListItemText primary="BANK BOOK" />
+                                                <StyledListItemText primary="Bank Book" />
                                             </StyledListItem>
                                             </List>
                                     </Collapse>
                                 </div>
+
+                                {/* OutStandiing Reports */}
+                                 <StyledListItem button onClick={handleOutStandingClick}>
+                                    <StyledIcon>
+                                        <SummarizeIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="OutStanding Reports" />
+                                    {isOutStandingOpen ? <ExpandLess /> : <ExpandMore />}
+                                </StyledListItem>
+                                <div style={{ marginLeft: 20 }}>
+                                <Collapse in={isOutStandingOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                    <StyledListItem button onClick={() => handleNavigation('/DebtorsList')}>
+                                        <StyledIcon>
+                                            <MenuBookIcon />
+                                        </StyledIcon>
+                                        <StyledListItemText primary="Debtors" />
+                                    </StyledListItem>
+                                    <StyledListItem button onClick={() => handleNavigation('/CreditorsList')}>
+                                        <StyledIcon>
+                                            <MenuBookIcon />
+                                        </StyledIcon>
+                                        <StyledListItemText primary="Creditors" />
+                                    </StyledListItem>
+                                    </List>
+                                </Collapse>
+                                </div>
+
                                 {/* Stock Section */}
                                 <StyledListItem button onClick={handleStockClick}>
                                     <StyledIcon>
@@ -575,7 +611,7 @@ export default function App() {
                                     <StyledIcon>
                                         <SettingsIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="SETUP" />
+                                    <StyledListItemText primary="Setup" />
                                 </StyledListItem>
                                 {/* <StyledListItem button onClick={openSale_WinModal}>
                                     <StyledIcon>1

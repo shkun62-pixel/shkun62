@@ -32,6 +32,8 @@ import StockSummary from './Screens/StockReports/StockSummary';
 import BankBook from './Screens/Books/BankBook/BankBook';
 import CashReceipt from './Screens/CashVoucher/CashReceipt';
 import LedgerList from './Screens/AccountStatement/LedgerList';
+import DebtorsList from './Screens/OutStandingReports/DebtorsList';
+import CreditorsList from './Screens/OutStandingReports/CreditorsList';
 // import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
@@ -83,6 +85,8 @@ function App() {
         <Route path='/BankBook' element={<BankBook />}></Route>
         <Route path='/CashReceipt' element={<CashReceipt />}></Route>
         <Route path='/LedgerList' element={<LedgerList />}></Route>
+        <Route path='/DebtorsList' element={<DebtorsList />}></Route>
+        <Route path='/CreditorsList' element={<CreditorsList />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>
