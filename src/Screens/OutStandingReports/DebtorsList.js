@@ -415,6 +415,12 @@ const DebtorsList = () => {
     };
   });
 }
+  // ✅ Only show ledgers that have either GST number or Pin Code
+  result = result.filter((ledger) => {
+    const gst = ledger.formData.gstNo?.trim();
+    const pin = ledger.formData.pinCode?.toString().trim();
+    return gst || pin;
+  });
 
   // ✅ Search filter
   if (searchTerm) {
