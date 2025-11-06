@@ -60,22 +60,26 @@ const CashBankSetup = ({ onClose }) => {
   ]);
   const [DiscountPaid, setDiscountPaid] = useState([
     {
-      Bank_text2: "",
+      disPaid_code: "",
+      disPaid_Ac: "",
     },
   ]);
   const [DiscountReceipt, setDiscountReceipt] = useState([
     {
-      Bank_text6: "",
+      disRec_code: "",
+      disRec_Ac: "",
     },
   ]);
   const [BankChargesCode, setBankChargesCode] = useState([
     {
-      Bank_text3: "",
+      bankchr_code: "",
+      bankchr_Ac: "",
     },
   ]);
   const [DefBankName, setDefBankName] = useState([
     {
-      Bank_text4: "",
+      defBank_code: "",
+      defBank_Ac: "",
     },
   ]);
   const [tcs206code, settcs206code] = useState([
@@ -134,10 +138,10 @@ const CashBankSetup = ({ onClose }) => {
         setIndex(lastEntry._id);
         // Convert cesscode into an array containing one object
         setcashCode([{ cash_code: lastEntry.formData.cash_code, cash_Ac: lastEntry.formData.cash_Ac,  }]);
-        setDiscountPaid([{ Bank_text2: lastEntry.formData.Bank_text2 }]);
-        setDiscountReceipt([{ Bank_text6: lastEntry.formData.Bank_text6 }]);
-        setBankChargesCode([{ Bank_text3: lastEntry.formData.Bank_text3 }]);
-        setDefBankName([{ Bank_text4: lastEntry.formData.Bank_text4 }]);
+        setDiscountPaid([{ disPaid_code: lastEntry.formData.disPaid_code, disPaid_Ac: lastEntry.formData.disPaid_Ac }]);
+        setDiscountReceipt([{ disRec_code: lastEntry.formData.disRec_code, disRec_Ac: lastEntry.formData.disRec_Ac }]);
+        setBankChargesCode([{ bankchr_code: lastEntry.formData.bankchr_code, bankchr_Ac: lastEntry.formData.bankchr_Ac }]);
+        setDefBankName([{ defBank_code: lastEntry.formData.defBank_code, defBank_Ac: lastEntry.formData.defBank_Ac }]);
         settcs206code([
           {
             Tcs206_code: lastEntry.formData.Tcs206_code,
@@ -191,10 +195,10 @@ const CashBankSetup = ({ onClose }) => {
       B5: "",
       decimals: 2,
     };
-    const emptyDisPaid = [{ Bank_text2: "" }];
-    const emptyDisReceipt = [{ Bank_text6: "" }];
-    const emptyBankChr = [{ Bank_text3: "" }];
-    const emptyDefBank = [{ Bank_text4: "" }];
+    const emptyDisPaid = [{ disPaid_code: "", disPaid_Ac: "" }];
+    const emptyDisReceipt = [{ disRec_code: "", disRec_Ac: "" }];
+    const emptyBankChr = [{ bankchr_code: "", bankchr_Ac:"" }];
+    const emptyDefBank = [{ defBank_code: "", defBank_Ac:"" }];
     const emptyTcs206code = [{ Tcs206_code: "", Tcs206_ac: "" }];
     const emptycgstcode = [{ cgst_code: "", cgst_ac: "" }];
     const emptysgstcode = [{ sgst_code: "", sgst_ac: "" }];
@@ -421,7 +425,8 @@ const CashBankSetup = ({ onClose }) => {
         (product) => product.ahead === value
       );
       if (selectedProduct) {
-        updatedItems[index]["Bank_text2"] = selectedProduct.acode;
+        updatedItems[index]["disPaid_code"] = selectedProduct.acode;
+        updatedItems[index]["disPaid_Ac"] = selectedProduct.ahead;
       }
     } else if (key === "discount") {
     }
@@ -441,7 +446,8 @@ const CashBankSetup = ({ onClose }) => {
     // Update the correct object in the array
     updatedShipped[selectedItemIndexCus] = {
       ...updatedShipped[selectedItemIndexCus],
-      Bank_text2: product.acode || "",
+      disPaid_code: product.acode || "",
+      disPaid_Ac: product.ahead || "",
       // Add any other mappings needed
     };
 
@@ -485,7 +491,8 @@ const CashBankSetup = ({ onClose }) => {
         (product) => product.ahead === value
       );
       if (selectedProduct) {
-        updatedItems[index]["Bank_text6"] = selectedProduct.acode;
+        updatedItems[index]["disRec_code"] = selectedProduct.acode;
+        updatedItems[index]["disRec_Ac"] = selectedProduct.ahead;
       }
     } else if (key === "discount") {
     }
@@ -505,7 +512,8 @@ const CashBankSetup = ({ onClose }) => {
     // Update the correct object in the array
     updatedShipped[selectedItemIndexAcc] = {
       ...updatedShipped[selectedItemIndexAcc],
-      Bank_text6: product.acode || "",
+      disRec_code: product.acode || "",
+      disRec_Ac: product.ahead || ""
       // Add any other mappings needed
     };
 
@@ -548,7 +556,8 @@ const CashBankSetup = ({ onClose }) => {
         (product) => product.ahead === value
       );
       if (selectedProduct) {
-        updatedItems[index]["Bank_text3"] = selectedProduct.acode;
+        updatedItems[index]["bankchr_code"] = selectedProduct.acode;
+        updatedItems[index]["bankchr_Ac"] = selectedProduct.ahead;
       }
     } else if (key === "discount") {
     }
@@ -575,7 +584,8 @@ const CashBankSetup = ({ onClose }) => {
     // Update the correct object in the array
     updatedShipped[selectedItemIndexbankchrg] = {
       ...updatedShipped[selectedItemIndexbankchrg],
-      Bank_text3: product.acode || "",
+      bankchr_code: product.acode || "",
+      bankchr_Ac: product.ahead || "",
       // Add any other mappings needed
     };
 
@@ -618,7 +628,8 @@ const CashBankSetup = ({ onClose }) => {
         (product) => product.ahead === value
       );
       if (selectedProduct) {
-        updatedItems[index]["Bank_text4"] = selectedProduct.acode;
+        updatedItems[index]["defBank_code"] = selectedProduct.acode;
+        updatedItems[index]["defBank_Ac"] = selectedProduct.ahead;
       }
     } else if (key === "discount") {
     }
@@ -649,7 +660,8 @@ const CashBankSetup = ({ onClose }) => {
     // Update the correct object in the array
     updatedShipped[selectedItemIndexdefaultname] = {
       ...updatedShipped[selectedItemIndexdefaultname],
-      Bank_text4: product.acode || "",
+      defBank_code: product.acode || "",
+      defBank_Ac: product.ahead || "",
       // Add any other mappings needed
     };
 
@@ -960,7 +972,7 @@ const CashBankSetup = ({ onClose }) => {
 
   const handleOpenModal = (event, index, field) => {
     if (/^[a-zA-Z]$/.test(event.key)) {
-      if (field === "Bank_text2" && isEditMode) {
+      if (field === "disPaid_code" && isEditMode) {
         setPressedKey(event.key);
         openModalForItemCus(index);
         event.preventDefault();
@@ -968,15 +980,15 @@ const CashBankSetup = ({ onClose }) => {
         setPressedKey(event.key);
         openModalForItemCashAc(index);
         event.preventDefault();
-      }else if (field === "Bank_text6" && isEditMode) {
+      }else if (field === "disRec_code" && isEditMode) {
         setPressedKey(event.key);
         openModalForItemAcc(index);
         event.preventDefault();
-      } else if (field === "Bank_text3" && isEditMode) {
+      } else if (field === "bankchr_code" && isEditMode) {
         setPressedKey(event.key);
         openModalForItembankchrg(index);
         event.preventDefault();
-      } else if (field === "Bank_text4" && isEditMode) {
+      } else if (field === "defBank_code" && isEditMode) {
         setPressedKey(event.key);
         openModalForItemdefaultname(index);
         event.preventDefault();
@@ -1015,12 +1027,18 @@ const CashBankSetup = ({ onClose }) => {
       _id: formData._id,
       formData: {
         ...formData,
-        Bank_text2: DiscountPaid.length > 0 ? DiscountPaid[0].Bank_text2 : "",
-        Bank_text6:
-          DiscountReceipt.length > 0 ? DiscountReceipt[0].Bank_text6 : "",
-        Bank_text3:
-          BankChargesCode.length > 0 ? BankChargesCode[0].Bank_text3 : "",
-        Bank_text4: DefBankName.length > 0 ? DefBankName[0].Bank_text4 : "",
+        disPaid_code: DiscountPaid.length > 0 ? DiscountPaid[0].disPaid_code : "",
+        disPaid_Ac: DiscountPaid.length > 0 ? DiscountPaid[0].disPaid_Ac : "",
+
+        disRec_code: DiscountReceipt.length > 0 ? DiscountReceipt[0].disRec_code : "",
+        disRec_Ac: DiscountReceipt.length > 0 ? DiscountReceipt[0].disRec_Ac : "",
+
+        bankchr_code: BankChargesCode.length > 0 ? BankChargesCode[0].bankchr_code : "",
+        bankchr_Ac: BankChargesCode.length > 0 ? BankChargesCode[0].bankchr_Ac : "",
+
+        defBank_code: DefBankName.length > 0 ? DefBankName[0].defBank_code : "",
+        defBank_Ac: DefBankName.length > 0 ? DefBankName[0].defBank_Ac : "",
+        
         Tcs206_code: tcs206code.length > 0 ? tcs206code[0].Tcs206_code : "",
         Tcs206_ac: tcs206code.length > 0 ? tcs206code[0].Tcs206_ac : "",
         cgst_code: cgstcode.length > 0 ? cgstcode[0].cgst_code : "",
@@ -1137,17 +1155,17 @@ const CashBankSetup = ({ onClose }) => {
                 <TextField
                   key={index}
                   label="DISCOUNT PAID"
-                  id="Bank_text2"
+                  id="disPaid_code"
                   fullWidth
                   size="small"
                   sx={textFieldStyle}
-                  value={item.Bank_text2 || ""}
+                  value={item.disPaid_code || ""}
                   onChange={(e) => {
                     const newTdsname = [...DiscountPaid];
-                    newTdsname[index].Bank_text2 = e.target.value;
+                    newTdsname[index].disPaid_code = e.target.value;
                     setDiscountPaid(newTdsname);
                   }}
-                  onKeyDown={(e) => handleOpenModal(e, index, "Bank_text2")}
+                  onKeyDown={(e) => handleOpenModal(e, index, "disPaid_code")}
                   InputProps={{ readOnly: !isEditMode || isDisabled }}
                 />
               ))}
@@ -1167,17 +1185,17 @@ const CashBankSetup = ({ onClose }) => {
                 <TextField
                   key={index}
                   label="DISCOUNT RECEIPT"
-                  id="Bank_text6"
+                  id="disRec_code"
                   fullWidth
                   size="small"
                   sx={textFieldStyle}
-                  value={item.Bank_text6 || ""}
+                  value={item.disRec_code || ""}
                   onChange={(e) => {
                     const newReceipt = [...DiscountReceipt];
-                    newReceipt[index].Bank_text6 = e.target.value;
+                    newReceipt[index].disRec_code = e.target.value;
                     setDiscountReceipt(newReceipt);
                   }}
-                  onKeyDown={(e) => handleOpenModal(e, index, "Bank_text6")}
+                  onKeyDown={(e) => handleOpenModal(e, index, "disRec_code")}
                   InputProps={{ readOnly: !isEditMode || isDisabled }}
                 />
               ))}
@@ -1197,17 +1215,17 @@ const CashBankSetup = ({ onClose }) => {
                 <TextField
                   key={index}
                   label="BANK CHARGES CODE"
-                  id="Bank_text3"
+                  id="bankchr_code"
                   fullWidth
                   size="small"
                   sx={textFieldStyle}
-                  value={item.Bank_text3 || ""}
+                  value={item.bankchr_code || ""}
                   onChange={(e) => {
                     const newReceipt = [...BankChargesCode];
-                    newReceipt[index].Bank_text3 = e.target.value;
+                    newReceipt[index].bankchr_code = e.target.value;
                     setBankChargesCode(newReceipt);
                   }}
-                  onKeyDown={(e) => handleOpenModal(e, index, "Bank_text3")}
+                  onKeyDown={(e) => handleOpenModal(e, index, "bankchr_code")}
                   InputProps={{ readOnly: !isEditMode || isDisabled }}
                 />
               ))}
@@ -1227,17 +1245,17 @@ const CashBankSetup = ({ onClose }) => {
                 <TextField
                   key={index}
                   label="DEFAULT BANK NAME"
-                  id="Bank_text4"
+                  id="defBank_code"
                   fullWidth
                   size="small"
                   sx={textFieldStyle}
-                  value={item.Bank_text4 || ""}
+                  value={item.defBank_code || ""}
                   onChange={(e) => {
                     const newReceipt = [...DefBankName];
-                    newReceipt[index].Bank_text4 = e.target.value;
+                    newReceipt[index].defBank_code = e.target.value;
                     setDefBankName(newReceipt);
                   }}
-                  onKeyDown={(e) => handleOpenModal(e, index, "Bank_text4")}
+                  onKeyDown={(e) => handleOpenModal(e, index, "defBank_code")}
                   InputProps={{ readOnly: !isEditMode || isDisabled }}
                 />
               ))}
