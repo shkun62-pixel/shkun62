@@ -142,17 +142,20 @@ const PrintOutStanding = React.forwardRef(({ items = [], isOpen, handleClose,led
                 CITY
                 </th>
                 <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
+                PHONE
+                </th>
+                <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
                 PCS
                 </th>
                 <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
                 QTY
                 </th>
-                <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
-                DR.BALANCE
-                </th>
-                <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
-                CR.BALANCE
-                </th>
+                {/* ✅ Show debit OR credit column conditionally */}
+                {items.some((l) => l.debit > 0) ? (
+                  <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>DR.BALANCE</th>
+                ) : (
+                  <th style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>CR.BALANCE</th>
+                )}
               </tr>
              </thead>
              <tbody>
@@ -164,18 +167,23 @@ const PrintOutStanding = React.forwardRef(({ items = [], isOpen, handleClose,led
                 </td>
                 <td style={{ border: "1px solid black", padding: "6px" }}>{l.name}</td>
                 <td style={{ border: "1px solid black", padding: "6px" }}>{l.city}</td>
+                <td style={{ border: "1px solid black", padding: "6px" }}>{l.phone}</td>
                 <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>{l.netPcs}</td>
                 <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>{l.netWeight}</td>
-                <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
-                {l.debit > 0
-                    ? l.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                    : ""}
-                </td>
-                <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
-                {l.credit > 0
-                    ? l.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                    : ""}
-                </td>
+                {/* ✅ Only show relevant balance column */}
+                {items.some((l) => l.debit > 0) ? (
+                  <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
+                    {l.debit > 0
+                      ? l.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : ""}
+                  </td>
+                ) : (
+                  <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
+                    {l.credit > 0
+                      ? l.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : ""}
+                  </td>
+                )}
                 </tr>
               ))}
              </tbody>
@@ -185,15 +193,19 @@ const PrintOutStanding = React.forwardRef(({ items = [], isOpen, handleClose,led
             {idx === chunks.length - 1 && (
             <tfoot>
                 <tr style={{ fontWeight: "bold", background: "#f2f2f2", fontSize: 20 }}>
-                <td style={{ border: "1px solid black", padding: "6px" }} colSpan={5}>
+                <td style={{ border: "1px solid black", padding: "6px" }} colSpan={6}>
                     TOTAL
                 </td>
-                <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
+                {/* ✅ Show total for whichever column is visible */}
+                {items.some((l) => l.debit > 0) ? (
+                  <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
                     {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
-                <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
+                  </td>
+                ) : (
+                  <td style={{ border: "1px solid black", padding: "6px", textAlign: "right" }}>
                     {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
+                  </td>
+                )}
                 </tr>
             </tfoot>
             )}

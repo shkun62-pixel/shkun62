@@ -32,7 +32,7 @@ const Header = styled("div")({
   borderRadius: 15,
 });
 
-const OutStandingOptions = ({ isOpen, onClose, onApply, exportMonthWise }) => {
+const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
   const { company } = useContext(CompanyContext);
   const tenant = company?.databaseName;
 
@@ -43,7 +43,7 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, exportMonthWise }) => {
   }
   const [anexureData, setAnexureData] = useState([]);
   const [formData, setFormData] = useState({
-    Balance: "Debit Balance",
+    Balance: balance === "cr" ? "Credit Balance" : "Debit Balance", // 👈 dynamic
     OrderBy: "",
     Annexure: "All",
     method:"",

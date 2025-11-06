@@ -298,23 +298,8 @@ const CreditorsList = () => {
 
   // Balance filter
   switch (optionValues.Balance) {
-    case "Active Balance":
-    result = result.filter((l) => l.totals.balance !== 0);
-    break;
-    case "Nil Balance":
-    result = result.filter((l) => l.totals.balance === 0);
-    break;
-    case "Debit Balance":
-    result = result.filter((l) => l.totals.balance > 0);
-    break;
     case "Credit Balance":
     result = result.filter((l) => l.totals.balance < 0);
-    break;
-    case "Transacted Account":
-    result = result.filter((l) => l.hasTxn);
-    break;
-    case "Non Transacted Account":
-    result = result.filter((l) => !l.hasTxn);
     break;
     case "All Accounts":
     default:
@@ -372,49 +357,49 @@ const CreditorsList = () => {
     result = result.filter((l) => !!checkedRows[l._id]);
   }
 
-  if (optionValues.T10) {
-  const grouped = {};
-  result.forEach((ledger) => {
-    const group = ledger.formData.Bsgroup || "Others";
-    if (!grouped[group]) {
-      grouped[group] = {
-        balance: 0,
-        qty: 0,
-        pcs: 0,
-        debit: 0,
-        credit: 0,
-        ledgers: [],
-      };
-    }
-    const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
-    grouped[group].balance += balance;
-    grouped[group].qty += qty;
-    grouped[group].pcs += pcs;
-    if (drcr === "DR") {
-      grouped[group].debit += Math.abs(balance);
-    } else {
-      grouped[group].credit += Math.abs(balance);
-    }
-    grouped[group].ledgers.push(ledger);
-  });
+//   if (optionValues.T10) {
+//   const grouped = {};
+//   result.forEach((ledger) => {
+//     const group = ledger.formData.Bsgroup || "Others";
+//     if (!grouped[group]) {
+//       grouped[group] = {
+//         balance: 0,
+//         qty: 0,
+//         pcs: 0,
+//         debit: 0,
+//         credit: 0,
+//         ledgers: [],
+//       };
+//     }
+//     const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
+//     grouped[group].balance += balance;
+//     grouped[group].qty += qty;
+//     grouped[group].pcs += pcs;
+//     if (drcr === "DR") {
+//       grouped[group].debit += Math.abs(balance);
+//     } else {
+//       grouped[group].credit += Math.abs(balance);
+//     }
+//     grouped[group].ledgers.push(ledger);
+//   });
 
-  result = Object.entries(grouped).map(([group, data]) => {
-    const drcr = data.balance >= 0 ? "DR" : "CR";
-    return {
-      _id: group,
-      formData: { ahead: group, city: "" },
-      totals: {
-        balance: data.balance,
-        drcr,
-        qty: data.qty,
-        pcs: data.pcs,
-        debit: data.debit,
-        credit: data.credit,
-      },
-      groupedLedgers: data.ledgers,
-    };
-  });
-}
+//   result = Object.entries(grouped).map(([group, data]) => {
+//     const drcr = data.balance >= 0 ? "DR" : "CR";
+//     return {
+//       _id: group,
+//       formData: { ahead: group, city: "" },
+//       totals: {
+//         balance: data.balance,
+//         drcr,
+//         qty: data.qty,
+//         pcs: data.pcs,
+//         debit: data.debit,
+//         credit: data.credit,
+//       },
+//       groupedLedgers: data.ledgers,
+//     };
+//   });
+// }
   // ✅ Only show ledgers that have either GST number or Pin Code
   result = result.filter((ledger) => {
     const gst = ledger.formData.gstNo?.trim();
@@ -1160,9 +1145,9 @@ const fetchLedgerTransactions = (ledger) => {
                 <th></th>
                 <th>NAME</th>
                 <th>CITY</th>
+                <th>PHONE</th>
                 <th>PCS</th>
                 <th>QTY</th>
-                <th>DEBIT</th>
                 <th>CREDIT</th>
               </tr>
             </thead>
@@ -1199,16 +1184,17 @@ const fetchLedgerTransactions = (ledger) => {
                     </td>
                     <td>{ledger.formData.ahead}</td>
                     <td>{ledger.formData.city}</td>
+                    <td>{ledger.formData.phone}</td>
                     <td style={{ textAlign: "right" }}>
                       {ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000"}
                     </td>
                     <td style={{ textAlign: "right" }}>
                       {ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000"}
                     </td>
-                    <td style={{ textAlign: "right", color: "darkblue", fontWeight:"bold" }}>
+                    {/* <td style={{ textAlign: "right", color: "darkblue", fontWeight:"bold" }}>
                       {drcr === "DR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
 
-                    </td>
+                    </td> */}
                     <td style={{ textAlign: "right", color: "red", fontWeight:"bold" }}>
                       {drcr === "CR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
 
@@ -1224,11 +1210,12 @@ const fetchLedgerTransactions = (ledger) => {
                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
                 <td></td>
                 <td></td>
-                <td style={{ textAlign: "right", color: "darkblue" }}>
+                <td></td>
+                {/* <td style={{ textAlign: "right", color: "darkblue" }}>
                 {filteredLedgers
                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "DR" ? Math.abs(ledger.totals.balance) : 0), 0)
                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
+                </td> */}
                 <td style={{ textAlign: "right", color: "red" }}>
                 {filteredLedgers
                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "CR" ? Math.abs(ledger.totals.balance) : 0), 0)
@@ -1256,6 +1243,7 @@ const fetchLedgerTransactions = (ledger) => {
           <OutStandingOptions
             isOpen={isOptionOpen}
             onClose={closeOptionModal}
+            balance="cr"
             onApply={(values) => {
               setOptionValues(values);
               // ✅ store date only if Print Current Date checkbox is true
@@ -1273,9 +1261,10 @@ const fetchLedgerTransactions = (ledger) => {
               return {
                 name: ledger.formData.ahead,
                 city: ledger.formData.city,
+                phone: ledger.formData.phone,
                 netPcs: ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000",   // ✅ added
                 netWeight: ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000", // ✅ added
-                debit: drcr === "DR" ? Math.abs(balance) : 0,
+                // debit: drcr === "DR" ? Math.abs(balance) : 0,
                 credit: drcr === "CR" ? Math.abs(balance) : 0,
               };
             })}

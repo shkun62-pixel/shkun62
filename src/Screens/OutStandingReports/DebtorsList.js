@@ -1159,10 +1159,11 @@ const fetchLedgerTransactions = (ledger) => {
                 <th></th>
                 <th>NAME</th>
                 <th>CITY</th>
+                <th>PHONE</th>
                 <th>PCS</th>
                 <th>QTY</th>
                 <th>DEBIT</th>
-                <th>CREDIT</th>
+                {/* <th>CREDIT</th> */}
               </tr>
             </thead>
 
@@ -1198,6 +1199,7 @@ const fetchLedgerTransactions = (ledger) => {
                     </td>
                     <td>{ledger.formData.ahead}</td>
                     <td>{ledger.formData.city}</td>
+                    <td>{ledger.formData.phone}</td>
                     <td style={{ textAlign: "right" }}>
                       {ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000"}
                     </td>
@@ -1208,10 +1210,10 @@ const fetchLedgerTransactions = (ledger) => {
                       {drcr === "DR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
 
                     </td>
-                    <td style={{ textAlign: "right", color: "red", fontWeight:"bold" }}>
+                    {/* <td style={{ textAlign: "right", color: "red", fontWeight:"bold" }}>
                       {drcr === "CR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
 
-                    </td>
+                    </td> */}
                   </tr>
                 );
               })}
@@ -1223,16 +1225,17 @@ const fetchLedgerTransactions = (ledger) => {
                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
                 <td></td>
                 <td></td>
+                <td></td>
                 <td style={{ textAlign: "right", color: "darkblue" }}>
                 {filteredLedgers
                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "DR" ? Math.abs(ledger.totals.balance) : 0), 0)
                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
-                <td style={{ textAlign: "right", color: "red" }}>
+                {/* <td style={{ textAlign: "right", color: "red" }}>
                 {filteredLedgers
                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "CR" ? Math.abs(ledger.totals.balance) : 0), 0)
                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
+                </td> */}
               </tr>
             </tfoot>
           </Table>
@@ -1255,6 +1258,7 @@ const fetchLedgerTransactions = (ledger) => {
           <OutStandingOptions
             isOpen={isOptionOpen}
             onClose={closeOptionModal}
+            balance="dr"
             onApply={(values) => {
               setOptionValues(values);
               // ✅ store date only if Print Current Date checkbox is true
@@ -1272,10 +1276,11 @@ const fetchLedgerTransactions = (ledger) => {
               return {
                 name: ledger.formData.ahead,
                 city: ledger.formData.city,
+                phone: ledger.formData.phone,
                 netPcs: ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000",   // ✅ added
                 netWeight: ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000", // ✅ added
                 debit: drcr === "DR" ? Math.abs(balance) : 0,
-                credit: drcr === "CR" ? Math.abs(balance) : 0,
+                // credit: drcr === "CR" ? Math.abs(balance) : 0,
               };
             })}
             isOpen={open}

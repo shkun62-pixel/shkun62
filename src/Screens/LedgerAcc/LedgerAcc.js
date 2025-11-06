@@ -190,7 +190,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
 //   }, []);
 
     // Modal For CustomerDetails
-    const [pressedKey, setPressedKey] = useState("a"); // State to hold the pressed key
+    const [pressedKey, setPressedKey] = useState(" "); // State to hold the pressed key
     const [productsCus, setProductsCus] = useState([]);
     const [showModalCus, setShowModalCus] = useState(false);
     const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
@@ -999,6 +999,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
         setIsAddEnabled(true);
         setIsDisabled(true);
         setIsEditMode(false);
+        setTitle("VIEW");
         toast.success("Data Saved Successfully!", { position: "top-center" });
       } 
       // Remove else block to avoid changing button states when user cancels
