@@ -2,20 +2,21 @@ import React, { useEffect, useState,useRef } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import PurBookPrint from "./PurBookPrint";
-import styles from '../SaleBook/SaleBook.module.css'
-import { CompanyContext } from "../../Context/CompanyContext";
+import SaleBookPrint from "../Books/SaleBook/SaleBookPrint";
+import ReceiptListPrint from "./ReceiptListPrint";
+import styles from '../Books/SaleBook/SaleBook.module.css'
+import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
-import useCompanySetup from "../../Shared/useCompanySetup";
+import useCompanySetup from "../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const LOCAL_STORAGE_KEY = "FieldsPurVisibility";
+const LOCAL_STORAGE_KEY = "ReceiptTableData";
 
-const PurchaseBook = () => {
-  
+const ReceiptList = () => {
+
   const navigate = useNavigate();
-  const {dateFrom} = useCompanySetup();
+  const { dateFrom } = useCompanySetup();
   const { company } = useContext(CompanyContext);
   const tenant = company?.databaseName;
 
@@ -24,27 +25,27 @@ const PurchaseBook = () => {
       // since without a tenant you can’t hit the right API
       // console.error("No tenant selected!");
     }
+    // const [grossOrDetail, setGrossOrDetail] = useState('detailed');
     const [formData, setFormData] = useState({
-          city: "",
-          vehicle:"",
-          btype:"All",
-          stype:"All",
-          v_tpt:"",
-          broker:"",
-          rem1:"",
-          exfor:"",
-          lDesc:"",
-          lPost:"",
-          terms:"",
-          pnc:"All",
-          mfg:"",
-          iFrom:"",
-          iUpto:"",
-          vRange1:"",
-          vRange2:"",
+      city: "",
+      vehicle:"",
+      btype:"All",
+      stype:"All",
+      v_tpt:"",
+      broker:"",
+      rem1:"",
+      exfor:"",
+      lDesc:"",
+      lPost:"",
+      terms:"",
+      pnc:"All",
+      mfg:"",
+      iFrom:"",
+      iUpto:"",
+      vRange1:"",
+      vRange2:"",
     });
-
-     const handleChangevalues = (event) => {
+    const handleChangevalues = (event) => {
       const { id, value } = event.target;
       setFormData((prevState) => ({
         ...prevState,
@@ -70,12 +71,11 @@ const PurchaseBook = () => {
         }));
       }
     };
-
     const defaultTableFields = {
       date: true,
       billno: true,
       weight: true, 
-      pcs: true, 
+      pcs: false, 
       accountname: true,
       city: true,
       gstin: true,
@@ -147,7 +147,7 @@ const PurchaseBook = () => {
     };
 
     const [columnOrder, setColumnOrder] = useState(() => {
-      const saved = localStorage.getItem("ColumnOrderPur");
+      const saved = localStorage.getItem("ColumnOrder");
       console.log("saved:",saved);
       
       const parsed = saved ? JSON.parse(saved) : {};
@@ -167,34 +167,34 @@ const PurchaseBook = () => {
       const sanitizedValue = Math.max(1, parseInt(value) || 1); // ⛔ No zero or negative values
       setColumnOrder((prev) => {
         const newOrder = { ...prev, [field]: sanitizedValue };
-        localStorage.setItem("ColumnOrderPur", JSON.stringify(newOrder));
+        localStorage.setItem("ColumnOrder", JSON.stringify(newOrder));
         return newOrder;
       });
     };
 
     useEffect(() => {
-      localStorage.setItem("ColumnOrderPur", JSON.stringify(columnOrder));
-      console.log("ColumnOrderPur:",columnOrder);
+      localStorage.setItem("ColumnOrder", JSON.stringify(columnOrder));
+      console.log("columnOrder:",columnOrder);
       
     }, [columnOrder]);
 
     // Select Font weight 
     const [fontWeight, setFontWeight] = useState(() => {
-      return localStorage.getItem("FontWeightPur") || "normal";
+      return localStorage.getItem("FontWeight") || "normal";
     });
 
     useEffect(() => {
-      localStorage.setItem("FontWeightPur", fontWeight);
+      localStorage.setItem("FontWeight", fontWeight);
     }, [fontWeight]);
 
     // Increase Decrease fontSize
     const [fontSize, setFontSize] = useState(() => {
-      const saved = localStorage.getItem("FontSizePur");
+      const saved = localStorage.getItem("FontSize");
       return saved ? parseInt(saved, 10) : 15;
     });
 
     useEffect(() => {
-      localStorage.setItem("FontSizePur", fontSize.toString());
+      localStorage.setItem("FontSize", fontSize.toString());
     }, [fontSize]);
 
 
@@ -219,7 +219,6 @@ const PurchaseBook = () => {
     }
   }, [dateFrom, fromDate]);
 
-  
   useEffect(() => {
     const timer = setTimeout(() => {
       if (tableRef.current) {
@@ -236,7 +235,9 @@ const PurchaseBook = () => {
     const fetchEntries = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
+        const response = await fetch(
+          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
+        );
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const data = await response.json();
@@ -258,14 +259,15 @@ const PurchaseBook = () => {
     fetchEntries();
   }, [fromDate, toDate]);
 
+
   useEffect(() => {
     const filtered = entries.filter((entry) => {
       const supplierMatch = selectedSupplier
-        ? entry.supplierdetails?.[0]?.vacode === selectedSupplier
+        ? entry.customerDetails?.[0]?.vacode === selectedSupplier
         : true;
 
       const cityMatch = formData.city
-        ? entry.supplierdetails?.[0]?.city?.toLowerCase().includes(formData.city.toLowerCase())
+        ? entry.customerDetails?.[0]?.city?.toLowerCase().includes(formData.city.toLowerCase())
         : true;
 
       const vehicleMatch = formData.vehicle
@@ -326,10 +328,10 @@ const PurchaseBook = () => {
     setFilteredEntries(filtered);
   }, [selectedSupplier, formData.city, formData.vehicle, formData.btype, formData.stype, selectedItems, formData.v_tpt, formData.broker, formData.rem1, formData.terms, formData.pnc, formData.iFrom, formData.iUpto, formData.taxRate, entries]);
 
+  const uniqueSuppliers = [...new Set(entries.map(entry => entry.customerDetails?.[0]?.vacode))].filter(Boolean);
   const uniqueItem = [...new Set(entries.map(entry => entry.items?.[0]?.sdisc))].filter(Boolean);
-  const uniqueSuppliers = [...new Set(entries.map(entry => entry.supplierdetails?.[0]?.vacode))].filter(Boolean);
 
-  // Calculate totals based on filtered data
+    // Calculate totals based on filtered data
   const totalGrandTotal = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.grandtotal || 0), 0);
   const totalCGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.cgst || 0), 0);
   const totalSGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sgst || 0), 0);
@@ -402,8 +404,8 @@ const PurchaseBook = () => {
     } else if (e.key === "Enter") {
       const entry = filteredEntries[activeRowIndex];
       if (entry) {
-        navigate("/purchase", { state: { purId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
-        localStorage.setItem("selectedRowIndexPur", activeRowIndex); 
+        navigate("/sale", { state: { saleId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
+        localStorage.setItem("selectedRowIndex", activeRowIndex); 
       }
     }
     };
@@ -414,7 +416,7 @@ const PurchaseBook = () => {
 
   // ✅ Restore selected row index if coming back from Sale
   useEffect(() => {
-    const savedIndex = localStorage.getItem("selectedRowIndexPur");
+    const savedIndex = localStorage.getItem("selectedRowIndex");
     if (savedIndex !== null) {
       setActiveRowIndex(parseInt(savedIndex, 10));
       setTimeout(() => {
@@ -444,16 +446,16 @@ const PurchaseBook = () => {
 
   return (
     <div>
-      <h3 className="bank-title">📒 PURCHASE BOOK</h3>
+      <h3 className="bank-title">📒 RECEIPT LIST</h3>
 
       <div style={{ display: "flex",flexDirection:"row", marginBottom: 10,marginLeft:10, marginTop:"20px" }}>
       <div>
         <span className="text-lg mr-2">Period From:</span>
-          <DatePicker
+         <DatePicker
             selected={fromDate}
             onChange={(date) => setFromDate(date)}
             dateFormat="dd/MM/yyyy"
-            className="datepickerBank"
+           className="datepickerBank"
             placeholderText="From Date"
           />
         </div>
@@ -467,7 +469,7 @@ const PurchaseBook = () => {
           placeholderText="To Date"
         />
         </div>
-          <div style={{display:'flex',flexDirection:'row'}}>
+         <div style={{display:'flex',flexDirection:'row'}}>
         <Button  onClick={() => setModalOpen(true)} variant="info" style={{ marginLeft: 10,background:"blue",width:"100px" }}>Print</Button>
         <Button onClick={() => setMoreModalOpen(true)} variant="info" style={{ marginLeft: 10,background:"blue",width:"100px" }}>More</Button>
         <button
@@ -481,7 +483,7 @@ const PurchaseBook = () => {
       </div>
 
       <div style={{ display: "none" }}>
-        <PurBookPrint 
+        <ReceiptListPrint 
         isOpen={modalOpen} 
         handleClose={() => 
         setModalOpen(false)} 
@@ -493,268 +495,214 @@ const PurchaseBook = () => {
         sortedVisibleFields = {sortedVisibleFields}
         />
       </div>
-        {/* More Modal */}
-        <Modal show={moreModalOpen} onHide={() => setMoreModalOpen(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Filters</Modal.Title>
-          </Modal.Header>
-          <Modal.Body style={{display:'flex',flexDirection:'column'}}>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>A/c Name</span>
-            <Form.Select className={styles.filterz} value={selectedSupplier} onChange={(e) => setSelectedSupplier(e.target.value)}>
-              <option value="">All</option>
-              {uniqueSuppliers.map((vacode, index) => (
-                <option key={index} value={vacode}>{vacode}</option>
-              ))}
-            </Form.Select>
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>City</span>
-              <input className={styles.citY}
-              id="city"
-              value={formData.city}
-              onChange={handleAlphabetOnly}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Vehicle No</span>
-              <input className={styles.vehicle}
-              id="vehicle"
-              value={formData.vehicle}
-              onChange={handleChangevalues}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold',marginLeft:2}}>TaxType</span>
-            <Form.Select
-              id="stype"
-              className={styles.stype}
-              style={{ marginTop: '0px' }}
-              value={formData.stype}
-              onChange={handleChangevalues}
-            >
-            <option value="All">All</option>
-            <option value="GST Sale (RD)">GST Sale (RD)</option>
-            <option value="IGST Sale (RD)">IGST Sale (RD)</option>
-            <option value="GST (URD)">GST (URD)</option>
-            <option value="IGST (URD)">IGST (URD)</option>
-            <option value="Tax Free Within State">Tax Free Within State</option>
-            <option value="Tax Free Interstate">Tax Free Interstate</option>
-            <option value="Export Sale">Export Sale</option>
-            <option value="Export Sale(IGST)">Export Sale(IGST)</option>
-            <option value="Including GST">Including GST</option>
-            <option value="Including IGST">Including IGST</option>
-            <option value="Not Applicable">Not Applicable</option>
-            <option value="Exempted Sale">Exempted Sale</option>
-            </Form.Select>
-            <span style={{fontWeight:'bold',marginLeft:5}}>Led.Post</span>
-            <Form.Select
-              id="lPost"
-              className={styles.lPost}
-              style={{ marginTop: '0px' }}
-              value={formData.lPost}
-              onChange={handleChangevalues}
-            >
-            <option value=""></option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            </Form.Select>
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Product Name</span>
-            <Form.Select className={styles.pName} value={selectedItems} onChange={(e) => setSelectedItems(e.target.value)}>
-              <option value="">All</option>
-              {uniqueItem.map((sdisc, index) => (
-                <option key={index} value={sdisc}>{sdisc}</option>
-              ))}
-            </Form.Select>
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Transport</span>
-              <input className={styles.tpt}
-              id="v_tpt"
-              value={formData.v_tpt}
-              onChange={handleChangevalues}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Broker</span>
-              <input className={styles.broker}
-              id="broker"
-              value={formData.broker}
-              onChange={handleChangevalues}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Remarks</span>
-              <input className={styles.rem}
-              id="rem1"
-              value={formData.rem1}
-              onChange={handleChangevalues}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-            <span style={{fontWeight:'bold',marginLeft:2}}>Ledger Desc.</span>
-            <Form.Select
-              id="lDesc"
-              className={styles.lDesc}
-              style={{ marginTop: '0px' }}
-              value={formData.lDesc}
-              onChange={handleChangevalues}
-            >
-            <option value="Yes">Yes</option>
-            <option value="NO">NO</option>
-            </Form.Select>
-              <span style={{fontWeight:'bold',marginLeft:5}}>Terms</span>
-              <input className={styles.terms}
-              id="terms"
-              value={formData.terms}
-              onChange={handleChangevalues}
-              />
-          </div>
-            <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-            <span style={{fontWeight:'bold',marginLeft:2}}>Pos/Neg/Cancel</span>
-            <Form.Select
-              id="pnc"
-              className={styles.pnc}
-              style={{ marginTop: '0px' }}
-              value={formData.pnc}
-              onChange={handleChangevalues}
-            >
-            <option value="All">All</option>
-            <option value="Positive">Positive</option>
-            <option value="Negative">Negative</option>
-            <option value="Cancel">Cancel</option>
-            </Form.Select>
-              <span style={{fontWeight:'bold',marginLeft:5}}>Mfg/Trd</span>
-              <Form.Select
-              id="mfg"
-              className={styles.mfg}
-              style={{ marginTop: '0px' }}
-              value={formData.mfg}
-              onChange={handleChangevalues}
-            >
-            <option value=""></option>
-            <option value="Manu">Manufacturing</option>
-            <option value="TED">Trading Extra Duty</option>
-            <option value="TS">Trading Sale</option>
-            </Form.Select>
-          </div>
-          <hr style={{marginTop:"10px",backgroundColor:'black'}}/>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"10px"}}>
-            <span style={{fontWeight:'bold'}}>Invoice From</span>
-              <input className={styles.iFrom}
-              id="iFrom"
-              value={formData.iFrom}
-              onChange={handleNumericValue}
-              />
-            <span style={{fontWeight:'bold',marginLeft:10}}>Upto</span>
-              <input className={styles.iUpto}
-              id="iUpto"
-              value={formData.iUpto}
-              onChange={handleNumericValue}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Value Range</span>
-              <input className={styles.vRange1}
-              id="vRange1"
-              value={formData.vRange1}
-              onChange={handleChangevalues}
-              />
-              <input className={styles.vRange2}
-              id="vRange2"
-              value={formData.vRange2}
-              onChange={handleChangevalues}
-              />
-          </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setMoreModalOpen(false)}>Close</Button>
-          </Modal.Footer>
-        </Modal>
-        {/* Table fields */}
-        <Modal show={tableModalOpen} onHide={() => settableModalOpen(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Filters</Modal.Title>
-          </Modal.Header>
-          <Modal.Body style={{display:'flex',flexDirection:'column'}}>
-            <span style={{ fontWeight: 'bold', marginTop: '10px' }}>Select Font Weight <span style={{marginLeft:"38%"}}>Font Size</span></span>
-            <div style={{display:'flex',flexDirection:'row'}}>
-            <Form.Select
-              className={styles.filterzFont}
-              style={{ marginTop: '0px' }}
-              value={fontWeight}
-              onChange={(e) => setFontWeight(e.target.value)}
-            >
-              <option value="normal">Normal</option>
-              <option value="bold">Bold</option>
-            </Form.Select>
+      {/* More Modal */}
+      <Modal show={moreModalOpen} onHide={() => setMoreModalOpen(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Filters</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{display:'flex',flexDirection:'column'}}>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>A/c Name</span>
+          <Form.Select className={styles.filterz} value={selectedSupplier} onChange={(e) => setSelectedSupplier(e.target.value)}>
+            <option value="">All</option>
+            {uniqueSuppliers.map((vacode, index) => (
+              <option key={index} value={vacode}>{vacode}</option>
+            ))}
+          </Form.Select>
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>City</span>
+           <input className={styles.citY}
+           id="city"
+           value={formData.city}
+           onChange={handleAlphabetOnly}
+           />
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>Vehicle No</span>
+           <input className={styles.vehicle}
+           id="vehicle"
+           value={formData.vehicle}
+           onChange={handleChangevalues}
+           />
+           <span style={{fontWeight:'bold',marginLeft:2}}>Cash/Bill</span>
+          <Form.Select
+            id="btype"
+            className={styles.cbill}
+            style={{ marginTop: '0px' }}
+            value={formData.btype}
+            onChange={handleChangevalues}
+          >
+          <option value="All">All</option>
+          <option value="Bill">Bill</option>
+          <option value="Cash">Cash</option>
+          </Form.Select>
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold',marginLeft:2}}>TaxType</span>
+          <Form.Select
+            id="stype"
+            className={styles.stype}
+            style={{ marginTop: '0px' }}
+            value={formData.stype}
+            onChange={handleChangevalues}
+          >
+          <option value="All">All</option>
+          <option value="GST Sale (RD)">GST Sale (RD)</option>
+          <option value="IGST Sale (RD)">IGST Sale (RD)</option>
+          <option value="GST (URD)">GST (URD)</option>
+          <option value="IGST (URD)">IGST (URD)</option>
+          <option value="Tax Free Within State">Tax Free Within State</option>
+          <option value="Tax Free Interstate">Tax Free Interstate</option>
+          <option value="Export Sale">Export Sale</option>
+          <option value="Export Sale(IGST)">Export Sale(IGST)</option>
+          <option value="Including GST">Including GST</option>
+          <option value="Including IGST">Including IGST</option>
+          <option value="Not Applicable">Not Applicable</option>
+          <option value="Exempted Sale">Exempted Sale</option>
+          </Form.Select>
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>Product Name</span>
+          <Form.Select className={styles.pName} value={selectedItems} onChange={(e) => setSelectedItems(e.target.value)}>
+            <option value="">All</option>
+            {uniqueItem.map((sdisc, index) => (
+              <option key={index} value={sdisc}>{sdisc}</option>
+            ))}
+          </Form.Select>
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>Transport</span>
+           <input className={styles.tpt}
+           id="v_tpt"
+           value={formData.v_tpt}
+           onChange={handleChangevalues}
+           />
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>Broker</span>
+           <input className={styles.broker}
+           id="broker"
+           value={formData.broker}
+           onChange={handleChangevalues}
+           />
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+           <span style={{fontWeight:'bold'}}>Remarks</span>
+           <input className={styles.rem}
+           id="rem1"
+           value={formData.rem1}
+           onChange={handleChangevalues}
+           />
+        </div>
+        <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
+          <span style={{fontWeight:'bold',marginLeft:2}}>Pos/Neg/Cancel</span>
+          <Form.Select
+            id="pnc"
+            className={styles.pnc}
+            style={{ marginTop: '0px' }}
+            value={formData.pnc}
+            onChange={handleChangevalues}
+          >
+          <option value="All">All</option>
+          <option value="Positive">Positive</option>
+          <option value="Negative">Negative</option>
+          <option value="Cancel">Cancel</option>
+          </Form.Select>
+           <span style={{fontWeight:'bold',marginLeft:5}}>Terms</span>
+           <input className={styles.terms}
+           id="terms"
+           value={formData.terms}
+           onChange={handleChangevalues}
+           />
+        </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setMoreModalOpen(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Table fields */}
+      <Modal show={tableModalOpen} onHide={() => settableModalOpen(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Filters</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{display:'flex',flexDirection:'column'}}>
+          <span style={{ fontWeight: 'bold', marginTop: '10px' }}>Select Font Weight <span style={{marginLeft:"38%"}}>Font Size</span></span>
+          <div style={{display:'flex',flexDirection:'row'}}>
+          <Form.Select
+            className={styles.filterzFont}
+            style={{ marginTop: '0px' }}
+            value={fontWeight}
+            onChange={(e) => setFontWeight(e.target.value)}
+          >
+            <option value="normal">Normal</option>
+            <option value="bold">Bold</option>
+          </Form.Select>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px",marginLeft:"15%"}}>
-              <Button
-                variant="outline-secondary"
-                onClick={() => setFontSize((prev) => Math.max(prev - 1, 10))} // limit minimum size
-                style={{ fontSize: "18px", padding: "0px 10px",backgroundColor:"darkblue",border:'transparent',color:"white" }}
-              >
-                −
-              </Button>
-              <span style={{ fontSize: "16px", minWidth: "30px", textAlign: "center" }}>{fontSize}px</span>
-              <Button
-                variant="outline-secondary"
-                onClick={() => setFontSize((prev) => Math.min(prev + 1, 25))} // limit max size
-                style={{ fontSize: "18px", padding: "0px 10px",backgroundColor:"darkblue",border:'transparent',color:"white" }}
-              >
-                +
-              </Button>
-            </div>
-            </div>
-            <span style={{fontSize:17,fontWeight:'bold',marginTop:"10px"}}>SELECT TABLE FIELDS</span>
-            <div style={{ display: "flex", flexDirection:'column',padding:"5px",border:"1px solid black",height:"340px",overflow:"auto"}}>
-              <div style={{marginTop:"10px",display:'flex',flexDirection:"column"}}>
-              {Object.keys(tableData).map((field) => (
-              <div
-                key={field}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
-                  <input
-                    type="checkbox"
-                    checked={tableData[field]}
-                    onChange={() => handleCheckboxChange(field)}
-                    style={{ width: "16px", height: "16px", marginRight: "8px" }}
-                  />
-                  <span style={{ marginRight: "8px", minWidth: "80px" }}>
-                    {field.toUpperCase()}
-                  </span>
-                </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px",marginLeft:"15%"}}>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setFontSize((prev) => Math.max(prev - 1, 10))} // limit minimum size
+              style={{ fontSize: "18px", padding: "0px 10px",backgroundColor:"darkblue",border:'transparent',color:"white" }}
+            >
+              −
+            </Button>
+            <span style={{ fontSize: "16px", minWidth: "30px", textAlign: "center" }}>{fontSize}px</span>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setFontSize((prev) => Math.min(prev + 1, 25))} // limit max size
+              style={{ fontSize: "18px", padding: "0px 10px",backgroundColor:"darkblue",border:'transparent',color:"white" }}
+            >
+              +
+            </Button>
+          </div>
+          </div>
+          <span style={{fontSize:17,fontWeight:'bold',marginTop:"10px"}}>SELECT TABLE FIELDS</span>
+          <div style={{ display: "flex", flexDirection:'column',padding:"5px",border:"1px solid black",height:"340px",overflow:"auto"}}>
+            <div style={{marginTop:"10px",display:'flex',flexDirection:"column"}}>
+            {Object.keys(tableData).map((field) => (
+            <div
+              key={field}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "8px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
                 <input
-                  type="number"
-                  min="1"
-                  value={columnOrder[field] || ""}
-                  onChange={(e) => handleSerialChange(field, e.target.value)}
-                  placeholder="Order"
-                  style={{
-                    width: "80px",
-                    padding: "2px 5px",
-                    border: "1px solid black",
-                    marginRight:"40%"
-                  }}
+                  type="checkbox"
+                  checked={tableData[field]}
+                  onChange={() => handleCheckboxChange(field)}
+                  style={{ width: "16px", height: "16px", marginRight: "8px" }}
                 />
+                <span style={{ marginRight: "8px", minWidth: "80px" }}>
+                  {field.toUpperCase()}
+                </span>
               </div>
-              ))}
-              </div>
+              <input
+                type="number"
+                min="1"
+                value={columnOrder[field] || ""}
+                onChange={(e) => handleSerialChange(field, e.target.value)}
+                placeholder="Order"
+                style={{
+                  width: "80px",
+                  padding: "2px 5px",
+                  border: "1px solid black",
+                  marginRight:"40%"
+                }}
+              />
             </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => settableModalOpen(false)}>Close</Button>
-          </Modal.Footer>
-        </Modal>
+            ))}
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => settableModalOpen(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
         <div
           ref={tableRef}
           tabIndex={0}
@@ -796,25 +744,27 @@ const PurchaseBook = () => {
                 field.toUpperCase()}
               </th>
             ))}
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {filteredEntries.map((entry, index) => {
             const formData = entry.formData || {};
-            const supplierdetails = entry.supplierdetails?.[0] || {};
+            const customerDetails = entry.customerDetails?.[0] || {};
             const item = entry.items?.[0] || {};
             const totalItemWeight = entry.items?.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(3);
             const totalItemPkgs = entry.items?.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(3);
             const isActive = index === activeRowIndex;
 
             return (
-             <tr key={index}
+             <tr
+                key={index}
                 ref={(el) => (rowRefs.current[index] = el)}
                 tabIndex={0} // ✅ focusable row
                 onMouseEnter={() => setActiveRowIndex(index)}
                 onClick={() => {
-                  navigate("/purchase", { state: { purId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
-                  localStorage.setItem("selectedRowIndexPur", activeRowIndex); 
+                  navigate("/sale", { state: { saleId: entry._id, rowIndex: index } }); // ✅ pass via state
+                   localStorage.setItem("selectedRowIndex", activeRowIndex); 
                 }}
                 style={{
                   backgroundColor: isActive ? "rgb(197, 190, 190)" : "",
@@ -822,16 +772,16 @@ const PurchaseBook = () => {
                   fontWeight: fontWeight,
                   fontSize: `${fontSize}px`,
                 }}
-              >
+                >
                 {sortedVisibleFields.map((field) => {
                   let value = "";
                   if (field === "date") value = formatDate(formData.date);
                   else if (field === "billno") value = formData.vno || "";
-                  else if (field === "accountname") value = supplierdetails.vacode || "";
+                  else if (field === "accountname") value = customerDetails.vacode || "";
                   else if (field === "weight") value = totalItemWeight;
                   else if (field === "pcs") value = totalItemPkgs;
-                  else if (field === "city") value = supplierdetails.city || "";
-                  else if (field === "gstin") value = supplierdetails.gstno || "";
+                  else if (field === "city") value = customerDetails.city || "";
+                  else if (field === "gstin") value = customerDetails.gstno || "";
                   else if (field === "value") value = formData.grandtotal || "";
                   else if (field === "cgst") value = formData.cgst || "";
                   else if (field === "sgst") value = formData.sgst || "";
@@ -855,6 +805,23 @@ const PurchaseBook = () => {
                   else if (field === "taxtype") value = formData.stype || "" ;
                   return <td key={field}>{value}</td>;
                 })}
+                <td style={{ textAlign: "center" }}>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    style={{
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      padding: "4px 10px",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents row click event
+                      alert(`Make payment for Bill No: ${formData.vno}`);
+                    }}
+                  >
+                    Make Payment
+                  </Button>
+                </td>
               </tr>
             );
           })}
@@ -883,6 +850,7 @@ const PurchaseBook = () => {
               else if (field === "exp10") value = totalexp10.toFixed(2);
               return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
             })}
+             <td></td>
           </tr>
         </tfoot>
         </Table>
@@ -891,4 +859,4 @@ const PurchaseBook = () => {
   );
 };
 
-export default PurchaseBook;
+export default ReceiptList;

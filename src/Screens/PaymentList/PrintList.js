@@ -4,9 +4,9 @@ import { Modal, Box, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
-import useCompanySetup from '../../Shared/useCompanySetup';
+import useCompanySetup from '../Shared/useCompanySetup';
 
-const SaleBookPrint = React.forwardRef(({
+const PrintList = React.forwardRef(({
     items,
     isOpen, // Changed from 'open' to 'isOpen'
     handleClose,
@@ -50,13 +50,13 @@ const SaleBookPrint = React.forwardRef(({
     const handleExportExcel = () => {
       const exportData = items.map(entry => {
         const formData = entry.formData || {};
-        const customer = entry.customerDetails?.[0] || {};
+        const customer = entry.supplierdetails?.[0] || {};
         const item = entry.items?.[0] || {};
         const row = {};
 
         sortedVisibleFields.forEach(field => {
           if (field === "date") row["Date"] = formatDate(formData.date);
-          else if (field === "billno") row["Bill No."] = formData.vbillno || "";
+          else if (field === "billno") row["Bill No."] = formData.vno || "";
           else if (field === "weight") {
             row["Qty"] = Number(entry.items?.reduce((sum, i) => sum + parseFloat(i.weight || 0), 0).toFixed(3));
           } else if (field === "pcs") {
@@ -227,7 +227,7 @@ const SaleBookPrint = React.forwardRef(({
       ];
 
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sale Book');
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Payment List');
 
       const buffer = XLSX.write(workbook, {
         bookType: 'xlsx',
@@ -236,7 +236,7 @@ const SaleBookPrint = React.forwardRef(({
       });
 
       const blob = new Blob([buffer], { type: 'application/octet-stream' });
-      saveAs(blob, 'SaleBook.xlsx');
+      saveAs(blob, 'Payment_List.xlsx');
     };
 
     const formatDate = (dateValue) => {
@@ -307,7 +307,7 @@ const SaleBookPrint = React.forwardRef(({
         >
           <h2 style={{ textAlign: "center",marginTop:-5,fontSize:35,color:'darkblue'}}>{companyName}</h2>
           <h2 style={{ textAlign: "center",fontSize:35,color:'darkblue'}}>{companyAdd}</h2>
-          <h4 style={{ textAlign:"center",textDecoration:'underline',fontSize:20,color:'darkblue'}}>Sale Book</h4>
+          <h4 style={{ textAlign:"center",textDecoration:'underline',fontSize:20,color:'darkblue'}}>Payment List</h4>
 
           <div style={{ display:'flex',flexDirection:'row', textAlign: "center", fontWeight: "bold" }}>
             <span style={{fontSize:18}}>Period From: {fromDate ? new Date(fromDate).toLocaleDateString("en-GB") : "--"}</span>
@@ -362,7 +362,7 @@ const SaleBookPrint = React.forwardRef(({
           <tbody>
             {items.map((entry, index) => {
               const formData = entry.formData || {};
-              const customerDetails = entry.customerDetails?.[0] || {};
+              const supplierdetails = entry.supplierdetails?.[0] || {};
               const item = entry.items?.[0] || {};
               const totalItemWeight = entry.items?.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(3);
               const totalItemPkgs = entry.items?.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(3);
@@ -372,11 +372,11 @@ const SaleBookPrint = React.forwardRef(({
                   let value = "";
                   if (field === "date") value = formatDate(formData.date);
                   else if (field === "billno") value = formData.vno || "";
-                  else if (field === "accountname") value = customerDetails.vacode || "";
+                  else if (field === "accountname") value = supplierdetails.vacode || "";
                   else if (field === "weight") value = totalItemWeight;
                   else if (field === "pcs") value = totalItemPkgs;
-                  else if (field === "city") value = customerDetails.city || "";
-                  else if (field === "gstin") value = customerDetails.gstno || "";
+                  else if (field === "city") value = supplierdetails.city || "";
+                  else if (field === "gstin") value = supplierdetails.gstno || "";
                   else if (field === "value") value = formData.grandtotal || "";
                   else if (field === "cgst") value = formData.cgst || "";
                   else if (field === "sgst") value = formData.sgst || "";
@@ -436,4 +436,4 @@ const SaleBookPrint = React.forwardRef(({
       </Modal>
     );
   });
-  export default SaleBookPrint;
+  export default PrintList;

@@ -34,6 +34,8 @@ import CashReceipt from './Screens/CashVoucher/CashReceipt';
 import LedgerList from './Screens/AccountStatement/LedgerList';
 import DebtorsList from './Screens/OutStandingReports/DebtorsList';
 import CreditorsList from './Screens/OutStandingReports/CreditorsList';
+import PaymentList from './Screens/PaymentList/PaymentList';
+import ReceiptList from './Screens/ReceiptList/ReceiptList';
 // import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
@@ -87,6 +89,8 @@ function App() {
         <Route path='/LedgerList' element={<LedgerList />}></Route>
         <Route path='/DebtorsList' element={<DebtorsList />}></Route>
         <Route path='/CreditorsList' element={<CreditorsList />}></Route>
+        <Route path='/PaymentList' element={<PaymentList />}></Route>
+        <Route path='/ReceiptList' element={<ReceiptList />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>

@@ -4,9 +4,9 @@ import { Modal, Box, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
-import useCompanySetup from '../../Shared/useCompanySetup';
+import useCompanySetup from '../Shared/useCompanySetup';
 
-const SaleBookPrint = React.forwardRef(({
+const ReceiptListPrint = React.forwardRef(({
     items,
     isOpen, // Changed from 'open' to 'isOpen'
     handleClose,
@@ -227,7 +227,7 @@ const SaleBookPrint = React.forwardRef(({
       ];
 
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sale Book');
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Receipt List');
 
       const buffer = XLSX.write(workbook, {
         bookType: 'xlsx',
@@ -236,7 +236,7 @@ const SaleBookPrint = React.forwardRef(({
       });
 
       const blob = new Blob([buffer], { type: 'application/octet-stream' });
-      saveAs(blob, 'SaleBook.xlsx');
+      saveAs(blob, 'Receipt_List.xlsx');
     };
 
     const formatDate = (dateValue) => {
@@ -307,7 +307,7 @@ const SaleBookPrint = React.forwardRef(({
         >
           <h2 style={{ textAlign: "center",marginTop:-5,fontSize:35,color:'darkblue'}}>{companyName}</h2>
           <h2 style={{ textAlign: "center",fontSize:35,color:'darkblue'}}>{companyAdd}</h2>
-          <h4 style={{ textAlign:"center",textDecoration:'underline',fontSize:20,color:'darkblue'}}>Sale Book</h4>
+          <h4 style={{ textAlign:"center",textDecoration:'underline',fontSize:20,color:'darkblue'}}>Receipt List</h4>
 
           <div style={{ display:'flex',flexDirection:'row', textAlign: "center", fontWeight: "bold" }}>
             <span style={{fontSize:18}}>Period From: {fromDate ? new Date(fromDate).toLocaleDateString("en-GB") : "--"}</span>
@@ -436,4 +436,4 @@ const SaleBookPrint = React.forwardRef(({
       </Modal>
     );
   });
-  export default SaleBookPrint;
+  export default ReceiptListPrint;

@@ -2,17 +2,17 @@ import React, { useEffect, useState,useRef } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import PurBookPrint from "./PurBookPrint";
-import styles from '../SaleBook/SaleBook.module.css'
-import { CompanyContext } from "../../Context/CompanyContext";
+import PrintList from "./PrintList";
+import styles from '../Books/SaleBook/SaleBook.module.css'
+import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
-import useCompanySetup from "../../Shared/useCompanySetup";
+import useCompanySetup from "../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const LOCAL_STORAGE_KEY = "FieldsPurVisibility";
+const LOCAL_STORAGE_KEY = "PayementListTableData";
 
-const PurchaseBook = () => {
+const PaymentList = () => {
   
   const navigate = useNavigate();
   const {dateFrom} = useCompanySetup();
@@ -25,23 +25,23 @@ const PurchaseBook = () => {
       // console.error("No tenant selected!");
     }
     const [formData, setFormData] = useState({
-          city: "",
-          vehicle:"",
-          btype:"All",
-          stype:"All",
-          v_tpt:"",
-          broker:"",
-          rem1:"",
-          exfor:"",
-          lDesc:"",
-          lPost:"",
-          terms:"",
-          pnc:"All",
-          mfg:"",
-          iFrom:"",
-          iUpto:"",
-          vRange1:"",
-          vRange2:"",
+        city: "",
+        vehicle:"",
+        btype:"All",
+        stype:"All",
+        v_tpt:"",
+        broker:"",
+        rem1:"",
+        exfor:"",
+        lDesc:"",
+        lPost:"",
+        terms:"",
+        pnc:"All",
+        mfg:"",
+        iFrom:"",
+        iUpto:"",
+        vRange1:"",
+        vRange2:"",
     });
 
      const handleChangevalues = (event) => {
@@ -60,22 +60,11 @@ const PurchaseBook = () => {
       }
     };
 
-    const handleNumericValue = (event) => {
-      const { id, value } = event.target;
-      // Allow only numeric values, including optional decimal points
-      if (/^\d*\.?\d*$/.test(value) || value === "") {
-        setFormData((prevData) => ({
-          ...prevData,
-          [id]: value,
-        }));
-      }
-    };
-
     const defaultTableFields = {
       date: true,
       billno: true,
       weight: true, 
-      pcs: true, 
+      pcs: false, 
       accountname: true,
       city: true,
       gstin: true,
@@ -147,7 +136,7 @@ const PurchaseBook = () => {
     };
 
     const [columnOrder, setColumnOrder] = useState(() => {
-      const saved = localStorage.getItem("ColumnOrderPur");
+      const saved = localStorage.getItem("ColumnOrderPList");
       console.log("saved:",saved);
       
       const parsed = saved ? JSON.parse(saved) : {};
@@ -167,34 +156,34 @@ const PurchaseBook = () => {
       const sanitizedValue = Math.max(1, parseInt(value) || 1); // ⛔ No zero or negative values
       setColumnOrder((prev) => {
         const newOrder = { ...prev, [field]: sanitizedValue };
-        localStorage.setItem("ColumnOrderPur", JSON.stringify(newOrder));
+        localStorage.setItem("ColumnOrderPList", JSON.stringify(newOrder));
         return newOrder;
       });
     };
 
     useEffect(() => {
-      localStorage.setItem("ColumnOrderPur", JSON.stringify(columnOrder));
-      console.log("ColumnOrderPur:",columnOrder);
+      localStorage.setItem("ColumnOrderPList", JSON.stringify(columnOrder));
+      console.log("ColumnOrderPList:",columnOrder);
       
     }, [columnOrder]);
 
     // Select Font weight 
     const [fontWeight, setFontWeight] = useState(() => {
-      return localStorage.getItem("FontWeightPur") || "normal";
+      return localStorage.getItem("FontWeightPList") || "normal";
     });
 
     useEffect(() => {
-      localStorage.setItem("FontWeightPur", fontWeight);
+      localStorage.setItem("FontWeightPList", fontWeight);
     }, [fontWeight]);
 
     // Increase Decrease fontSize
     const [fontSize, setFontSize] = useState(() => {
-      const saved = localStorage.getItem("FontSizePur");
+      const saved = localStorage.getItem("FontSizePList");
       return saved ? parseInt(saved, 10) : 15;
     });
 
     useEffect(() => {
-      localStorage.setItem("FontSizePur", fontSize.toString());
+      localStorage.setItem("FontSizePList", fontSize.toString());
     }, [fontSize]);
 
 
@@ -403,7 +392,7 @@ const PurchaseBook = () => {
       const entry = filteredEntries[activeRowIndex];
       if (entry) {
         navigate("/purchase", { state: { purId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
-        localStorage.setItem("selectedRowIndexPur", activeRowIndex); 
+        localStorage.setItem("selectedRowIndexPList", activeRowIndex); 
       }
     }
     };
@@ -414,7 +403,7 @@ const PurchaseBook = () => {
 
   // ✅ Restore selected row index if coming back from Sale
   useEffect(() => {
-    const savedIndex = localStorage.getItem("selectedRowIndexPur");
+    const savedIndex = localStorage.getItem("selectedRowIndexPList");
     if (savedIndex !== null) {
       setActiveRowIndex(parseInt(savedIndex, 10));
       setTimeout(() => {
@@ -444,7 +433,7 @@ const PurchaseBook = () => {
 
   return (
     <div>
-      <h3 className="bank-title">📒 PURCHASE BOOK</h3>
+      <h3 className="bank-title">📒 PAYMENT LIST</h3>
 
       <div style={{ display: "flex",flexDirection:"row", marginBottom: 10,marginLeft:10, marginTop:"20px" }}>
       <div>
@@ -481,7 +470,7 @@ const PurchaseBook = () => {
       </div>
 
       <div style={{ display: "none" }}>
-        <PurBookPrint 
+        <PrintList 
         isOpen={modalOpen} 
         handleClose={() => 
         setModalOpen(false)} 
@@ -547,18 +536,6 @@ const PurchaseBook = () => {
             <option value="Not Applicable">Not Applicable</option>
             <option value="Exempted Sale">Exempted Sale</option>
             </Form.Select>
-            <span style={{fontWeight:'bold',marginLeft:5}}>Led.Post</span>
-            <Form.Select
-              id="lPost"
-              className={styles.lPost}
-              style={{ marginTop: '0px' }}
-              value={formData.lPost}
-              onChange={handleChangevalues}
-            >
-            <option value=""></option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            </Form.Select>
           </div>
           <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
               <span style={{fontWeight:'bold'}}>Product Name</span>
@@ -594,25 +571,6 @@ const PurchaseBook = () => {
               />
           </div>
           <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-            <span style={{fontWeight:'bold',marginLeft:2}}>Ledger Desc.</span>
-            <Form.Select
-              id="lDesc"
-              className={styles.lDesc}
-              style={{ marginTop: '0px' }}
-              value={formData.lDesc}
-              onChange={handleChangevalues}
-            >
-            <option value="Yes">Yes</option>
-            <option value="NO">NO</option>
-            </Form.Select>
-              <span style={{fontWeight:'bold',marginLeft:5}}>Terms</span>
-              <input className={styles.terms}
-              id="terms"
-              value={formData.terms}
-              onChange={handleChangevalues}
-              />
-          </div>
-            <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
             <span style={{fontWeight:'bold',marginLeft:2}}>Pos/Neg/Cancel</span>
             <Form.Select
               id="pnc"
@@ -626,7 +584,13 @@ const PurchaseBook = () => {
             <option value="Negative">Negative</option>
             <option value="Cancel">Cancel</option>
             </Form.Select>
-              <span style={{fontWeight:'bold',marginLeft:5}}>Mfg/Trd</span>
+            <span style={{fontWeight:'bold',marginLeft:5}}>Terms</span>
+              <input className={styles.terms}
+              id="terms"
+              value={formData.terms}
+              onChange={handleChangevalues}
+              />
+              {/* <span style={{fontWeight:'bold',marginLeft:5}}>Mfg/Trd</span>
               <Form.Select
               id="mfg"
               className={styles.mfg}
@@ -638,35 +602,7 @@ const PurchaseBook = () => {
             <option value="Manu">Manufacturing</option>
             <option value="TED">Trading Extra Duty</option>
             <option value="TS">Trading Sale</option>
-            </Form.Select>
-          </div>
-          <hr style={{marginTop:"10px",backgroundColor:'black'}}/>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"10px"}}>
-            <span style={{fontWeight:'bold'}}>Invoice From</span>
-              <input className={styles.iFrom}
-              id="iFrom"
-              value={formData.iFrom}
-              onChange={handleNumericValue}
-              />
-            <span style={{fontWeight:'bold',marginLeft:10}}>Upto</span>
-              <input className={styles.iUpto}
-              id="iUpto"
-              value={formData.iUpto}
-              onChange={handleNumericValue}
-              />
-          </div>
-          <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"3px"}}>
-              <span style={{fontWeight:'bold'}}>Value Range</span>
-              <input className={styles.vRange1}
-              id="vRange1"
-              value={formData.vRange1}
-              onChange={handleChangevalues}
-              />
-              <input className={styles.vRange2}
-              id="vRange2"
-              value={formData.vRange2}
-              onChange={handleChangevalues}
-              />
+            </Form.Select> */}
           </div>
           </Modal.Body>
           <Modal.Footer>
@@ -796,6 +732,7 @@ const PurchaseBook = () => {
                 field.toUpperCase()}
               </th>
             ))}
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -814,7 +751,7 @@ const PurchaseBook = () => {
                 onMouseEnter={() => setActiveRowIndex(index)}
                 onClick={() => {
                   navigate("/purchase", { state: { purId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
-                  localStorage.setItem("selectedRowIndexPur", activeRowIndex); 
+                  localStorage.setItem("selectedRowIndexPList", activeRowIndex); 
                 }}
                 style={{
                   backgroundColor: isActive ? "rgb(197, 190, 190)" : "",
@@ -855,6 +792,24 @@ const PurchaseBook = () => {
                   else if (field === "taxtype") value = formData.stype || "" ;
                   return <td key={field}>{value}</td>;
                 })}
+               <td style={{ textAlign: "center" }}>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    style={{
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      padding: "4px 10px",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents row click event
+                      alert(`Make payment for Bill No: ${formData.vno}`);
+                    }}
+                  >
+                    Make Payment
+                  </Button>
+               </td>
+
               </tr>
             );
           })}
@@ -883,6 +838,7 @@ const PurchaseBook = () => {
               else if (field === "exp10") value = totalexp10.toFixed(2);
               return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
             })}
+            <td></td>
           </tr>
         </tfoot>
         </Table>
@@ -891,4 +847,4 @@ const PurchaseBook = () => {
   );
 };
 
-export default PurchaseBook;
+export default PaymentList;

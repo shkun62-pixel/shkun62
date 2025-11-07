@@ -245,7 +245,8 @@ const SaleBook = () => {
           return entryDate >= fromDate && entryDate <= toDate;
         });
 
-        setEntries(data);
+        // setEntries(data);
+        setEntries(filteredData);
         setFilteredEntries(filteredData);
       } catch (err) {
         setError(err.message);

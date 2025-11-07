@@ -1,1119 +1,547 @@
-// // import React, { useEffect, useState, useRef, useMemo } from "react";
-// // import axios from "axios";
-// // import { Table, Modal, Button, Card, Form } from "react-bootstrap";  // ✅ Form imported
-// // import styles from "./AccountStatement/LedgerList.module.css";
-// // import TextField from "@mui/material/TextField";
-// // import DatePicker from "react-datepicker";
-// // import "react-datepicker/dist/react-datepicker.css";
-// // import useCompanySetup from "./Shared/useCompanySetup";
-// // import "./TrailBalance/TrailBalance.css"
-// // import { useNavigate, useLocation } from "react-router-dom";  // ✅ Add this
-
-// // const Example = () => {
-// //   const { dateFrom } = useCompanySetup();
-// // const navigate = useNavigate();
-// //   const [allLedgers, setAllLedgers] = useState([]); // keep full list
-// //   const [filteredLedgers, setFilteredLedgers] = useState([]); // ✅ for search
-// //   const [searchTerm, setSearchTerm] = useState("");           // ✅ search state
-// //   const [selectedIndex, setSelectedIndex] = useState(0);
-// //   const [showModal, setShowModal] = useState(false);
-// //   const [selectedLedger, setSelectedLedger] = useState(null);
-// //   const [transactions, setTransactions] = useState([]);
-// //   const rowRefs = useRef([]);
-// //   const tableRef = useRef(null);
-
-// //   const [activeRowIndex, setActiveRowIndex] = useState(0);  // ✅ Track highlighted txn row
-// //   const [checkedRows, setCheckedRows] = useState({});
-
-// //   // Filter Ledger Accounts 
-// //   const [showGroupModal, setShowGroupModal] = useState(false);
-// //   const [groupedLedgersToPick, setGroupedLedgersToPick] = useState([]);
-// //   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
-// //   const [currentGroupName, setCurrentGroupName] = useState("");
-// //   const [ledgerFromDate, setLedgerFromDate] = useState(null);
-// //   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
-// //   const [optionValues, setOptionValues] = useState({
-// //     Balance: "Active Balance",
-// //     OrderBy: "",
-// //     Annexure: "All",
-// //     T1: "", // ✅ include T1 (Selected Accounts)
-// //     T3: false, // ✅ Print Current Date
-// //     T10: false, // ✅ group by BsGroup toggle
-// //   });
-  
-// // useEffect(() => {
-// //   const handleGroupModalKeyDown = (e) => {
-// //     if (!showGroupModal || !groupedLedgersToPick.length) return;
-
-// //     e.preventDefault(); // 🔹 prevent background scrolling or default browser behavior
-
-// //     if (e.key === "ArrowDown") {
-// //       setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
-// //     } else if (e.key === "ArrowUp") {
-// //       setActiveGroupIndex((prev) =>
-// //         prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
-// //       );
-// //     } else if (e.key === "Enter") {
-// //       const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-// //       setShowGroupModal(false);
-// //       fetchLedgerTransactions(selectedLedger);
-// //     } else if (e.key === "Escape") {
-// //       setShowGroupModal(false);
-// //     }
-// //   };
-
-// //   window.addEventListener("keydown", handleGroupModalKeyDown);
-// //   return () => window.removeEventListener("keydown", handleGroupModalKeyDown);
-// // }, [showGroupModal, groupedLedgersToPick, activeGroupIndex]);
-
-// //   useEffect(() => {
-// //     if (!ledgerFromDate && dateFrom) {
-// //       setLedgerFromDate(new Date(dateFrom));
-// //     }
-// //   }, [dateFrom, ledgerFromDate]);
-
-// //   // Filters Transactions Account Statement 
-// //   const [showOptions, setShowOptions] = useState(false);   // ✅ For Options modal
-// //   const [filteredTransactions, setFilteredTransactions] = useState([]); // ✅ For filtered txns
-// //   const [selectedRows, setSelectedRows] = useState({});
-// //   const [ledgerTotals, setLedgerTotals] = useState({}); // { ledgerId: { netPcs, netWeight } }
-// //   const [progressiveDebit, setProgressiveDebit] = useState(0);
-// //   const [progressiveCredit, setProgressiveCredit] = useState(0);
-
-// //   const [fromDate, setFromDate] = useState("");
-// //   const [toDate, setToDate] = useState(() => new Date());
-
-// //   useEffect(() => {
-// //     if (!fromDate && dateFrom) {
-// //       setFromDate(new Date(dateFrom));
-// //     }
-// //   }, [dateFrom, fromDate]);
-
-// //   const handleRowCheckboxChange = (txnId) => {
-// //     setSelectedRows((prev) => ({
-// //       ...prev,
-// //       [txnId]: !prev[txnId], // toggle selection
-// //     }));
-// //   };
-
-// //   // ✅ Update filtered transactions whenever filters or transactions change
-// //   useEffect(() => {
-// //     let data = transactions;
-
-// //     // ✅ Filter by Date range
-// //     if (fromDate) {
-// //       data = data.filter((txn) => new Date(txn.date) >= fromDate);
-// //     }
-// //     if (toDate) {
-// //       data = data.filter((txn) => new Date(txn.date) <= toDate);
-// //     }
-
-// //     setFilteredTransactions(data);
-// //   }, [
-// //     fromDate,
-// //     toDate,
-// //     transactions,
-// //   ]);
-
-// //   const [flaggedRows, setFlaggedRows] = useState(() => {
-// //     const saved = localStorage.getItem("flaggedRowsTrail");
-// //     return saved ? new Set(JSON.parse(saved)) : new Set();
-// //   });
-
-// //   useEffect(() => {
-// //     localStorage.setItem("flaggedRowsTrail", JSON.stringify([...flaggedRows]));
-// //   }, [flaggedRows]);
-
-// //   // fetch ledger + fa
-// //   useEffect(() => {
-// //     const fetchData = async () => {
-// //       try {
-// //         const [ledgerRes, faRes] = await Promise.all([
-// //           axios.get(
-// //             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
-// //           ),
-// //           axios.get(
-// //             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
-// //           ),
-// //         ]);
-
-// //         const ledgersData = ledgerRes.data.data || [];
-// //         const faData = faRes.data.data || [];
-
-// //         const ledgerTotals = {};
-// //         faData.forEach((entry) => {
-// //           entry.transactions.forEach((txn) => {
-// //             const txnDate = new Date(txn.date);
-// //             if (ledgerFromDate && txnDate < ledgerFromDate) return;
-// //             if (ledgerToDate && txnDate > ledgerToDate) return;
-
-// //             const acc = txn.account.trim();
-// //             if (!ledgerTotals[acc]) {
-// //               ledgerTotals[acc] = { debit: 0, credit: 0 };
-// //             }
-// //             if (txn.type.toLowerCase() === "debit") {
-// //               ledgerTotals[acc].debit += txn.amount;
-// //             } else if (txn.type.toLowerCase() === "credit") {
-// //               ledgerTotals[acc].credit += txn.amount;
-// //             }
-// //           });
-// //         });
-
-// //         const enrichedLedgers = ledgersData.map((ledger) => {
-// //           const acc = ledger.formData.ahead.trim();
-// //           const totals = ledgerTotals[acc] || { debit: 0, credit: 0 };
-// //           const balance = totals.debit - totals.credit;
-// //           const drcr = balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL";
-// //           return {
-// //             ...ledger,
-// //             totals: { balance, drcr },
-// //             hasTxn: !!ledgerTotals[acc],
-// //           };
-// //         });
-
-// //         setAllLedgers(enrichedLedgers);
-// //       } catch (err) {
-// //         console.error(err);
-// //       }
-// //     };
-
-// //     fetchData();
-// //   }, [ledgerFromDate, ledgerToDate]);
-
-// //   // apply filters + sorting
-// //   useEffect(() => {
-// //   let result = [...allLedgers];
-
-// //   // Balance filter
-// //   switch (optionValues.Balance) {
-// //     case "Active Balance":
-// //     result = result.filter((l) => l.totals.balance !== 0);
-// //     break;
-// //     case "Nil Balance":
-// //     result = result.filter((l) => l.totals.balance === 0);
-// //     break;
-// //     case "Debit Balance":
-// //     result = result.filter((l) => l.totals.balance > 0);
-// //     break;
-// //     case "Credit Balance":
-// //     result = result.filter((l) => l.totals.balance < 0);
-// //     break;
-// //     case "Transacted Account":
-// //     result = result.filter((l) => l.hasTxn);
-// //     break;
-// //     case "Non Transacted Account":
-// //     result = result.filter((l) => !l.hasTxn);
-// //     break;
-// //     case "All Accounts":
-// //     default:
-// //     break;
-// //   }
-
-// //   // Annexure filter
-// //   if (optionValues.Annexure && optionValues.Annexure !== "All") {
-// //       result = result.filter(
-// //       (l) => l.formData.Bsgroup === optionValues.Annexure
-// //       );
-// //   }
-
-// //   // Sorting
-// //   switch (optionValues.OrderBy) {
-// //     case "Annexure Wise":
-// //     result.sort((a, b) =>
-// //         (a.formData.Bsgroup || "").localeCompare(b.formData.Bsgroup || "")
-// //     );
-// //     break;
-// //     case "Account Name Wise":
-// //     result.sort((a, b) =>
-// //         (a.formData.ahead || "").localeCompare(b.formData.ahead || "")
-// //     );
-// //     break;
-// //     case "City Wise + Name Wise":
-// //     result.sort((a, b) => {
-// //       const cityComp = (a.formData.city || "").localeCompare(
-// //       b.formData.city || ""
-// //       );
-// //       if (cityComp !== 0) return cityComp;
-// //       return (a.formData.ahead || "").localeCompare(b.formData.ahead || "");
-// //     });
-// //     break;
-// //     case "Sorting Order No.Wise":
-// //     result.sort(
-// //         (a, b) =>
-// //         (a.formData.sortingOrderNo || 0) - (b.formData.sortingOrderNo || 0)
-// //     );
-// //     break;
-// //     case "Prefix Annexure Wise":
-// //     result.sort((a, b) =>
-// //         (a.formData.Bsgroup || "")
-// //         .toString()
-// //         .charAt(0)
-// //         .localeCompare((b.formData.Bsgroup || "").toString().charAt(0))
-// //     );
-// //     break;
-// //     default:
-// //     break;
-// //   }
-
-// //   setFilteredLedgers(result);
-// //   }, [allLedgers, optionValues, checkedRows, searchTerm]);
-
-// //   // Reset selectedIndex ONLY when filters/search change, not checkbox
-// //   useEffect(() => {
-// //   setSelectedIndex(0);
-// //   }, [allLedgers, optionValues, searchTerm]);
-
-  
-// //   useEffect(() => {
-// //     const reopenModal = (e) => {
-// //       const { rowIndex, selectedLedger } = e.detail;
-// //       setActiveRowIndex(rowIndex || 0);
-// //       if (selectedLedger) openLedgerDetails(selectedLedger);
-// //     };
-
-// //     window.addEventListener("reopenTrailModal", reopenModal);
-// //     return () => window.removeEventListener("reopenTrailModal", reopenModal);
-// //   }, []);
-
-// //   // 🔹 Keyboard navigation inside transactions for Account Statement
-// //   useEffect(() => {
-// //     const handleKeyDown = (e) => {
-// //       if (!transactions.length || !showModal) return; // ✅ Only when modal is open
-
-// //       if (e.key === "ArrowUp") {
-// //         setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
-// //       } else if (e.key === "ArrowDown") {
-// //         setActiveRowIndex((prev) =>
-// //           prev < transactions.length - 1 ? prev + 1 : prev
-// //         );
-// //       }
-// //        else if (e.key === "Escape") {
-// //         setShowModal(false); // ✅ Close modal
-// //       }
-// //     };
-
-// //     window.addEventListener("keydown", handleKeyDown);
-// //     return () => window.removeEventListener("keydown", handleKeyDown);
-// //   }, [transactions, activeRowIndex, showModal]);
-
-// //   // Handle keyboard navigation for LedgerList
-// // useEffect(() => {
-// //   const handleKeyDown = (e) => {
-// //     // 🔹 Mini modal navigation
-// //     if (showGroupModal && groupedLedgersToPick.length) {
-// //       e.preventDefault(); // Prevent default scrolling & background nav
-
-// //       if (e.key === "ArrowDown") {
-// //         setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
-// //       } else if (e.key === "ArrowUp") {
-// //         setActiveGroupIndex((prev) =>
-// //           prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
-// //         );
-// //       } else if (e.key === "Enter") {
-// //         const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-// //         setShowGroupModal(false);
-// //         fetchLedgerTransactions(selectedLedger);
-// //       } else if (e.key === "Escape") {
-// //         setShowGroupModal(false);
-// //       }
-
-// //       return; // 🔹 stop further handling
-// //     }
-
-// //     // 🔹 Account Statement modal navigation
-// //     if (showModal && transactions.length) {
-// //       e.preventDefault();
-// //       if (e.key === "ArrowUp") {
-// //         setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
-// //       } else if (e.key === "ArrowDown") {
-// //         setActiveRowIndex((prev) =>
-// //           prev < transactions.length - 1 ? prev + 1 : prev
-// //         );
-// //       } else if (e.key === "Escape") {
-// //         setShowModal(false);
-// //       }
-
-// //       return;
-// //     }
-
-// //     // 🔹 Main ledger table navigation
-// //     if (!showModal && filteredLedgers.length) {
-// //       if (e.key === "ArrowDown") {
-// //         e.preventDefault();
-// //         setSelectedIndex((prev) => (prev + 1) % filteredLedgers.length);
-// //       } else if (e.key === "ArrowUp") {
-// //         e.preventDefault();
-// //         setSelectedIndex((prev) =>
-// //           prev === 0 ? filteredLedgers.length - 1 : prev - 1
-// //         );
-// //       } else if (e.key === "Enter") {
-// //         const ledger = filteredLedgers[selectedIndex];
-// //         openLedgerDetails(ledger);
-// //       } else if (e.key === "F3") {
-// //         e.preventDefault();
-// //         setFlaggedRows((prev) => {
-// //           const newSet = new Set(prev);
-// //           if (newSet.has(selectedIndex)) {
-// //             newSet.delete(selectedIndex);
-// //           } else {
-// //             newSet.add(selectedIndex);
-// //           }
-// //           return newSet;
-// //         });
-// //       }
-// //     }
-// //   };
-
-// //   window.addEventListener("keydown", handleKeyDown);
-// //   return () => window.removeEventListener("keydown", handleKeyDown);
-// // }, [
-// //   showModal,
-// //   showGroupModal,
-// //   filteredLedgers,
-// //   selectedIndex,
-// //   transactions,
-// //   activeRowIndex,
-// //   groupedLedgersToPick,
-// //   activeGroupIndex,
-// // ]);
-
-// //   // Open modal and fetch transactions
-// // const openLedgerDetails = (ledger) => {
-// //   if (ledger.groupedLedgers) {
-// //     setGroupedLedgersToPick(ledger.groupedLedgers);
-// //     setCurrentGroupName(ledger.formData.ahead); // 🔹 store group name
-// //     setShowGroupModal(true);
-// //   } else {
-// //     fetchLedgerTransactions(ledger);
-// //   }
-// // };
-// // const fetchLedgerTransactions = (ledger) => {
-// //   setSelectedLedger(ledger);
-// //   axios
-// //     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-// //     .then((res) => {
-// //       const allTxns = res.data.data || [];
-
-// //       // Flatten transactions and attach saleId from parent voucher
-// //       const ledgerTxns = allTxns.flatMap((entry) =>
-// //         entry.transactions
-// //           .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
-// //           .map((txn) => ({
-// //             ...txn,
-// //             saleId: entry.saleId || null,   // attach saleId for Sales
-// //             purId: entry.purchaseId || null,   // attach saleId for Sales
-// //           }))
-// //       );
-
-// //       setTransactions(ledgerTxns);
-// //       setShowModal(true);
-// //     })
-// //     .catch((err) => console.error(err));
-// // };
-
-
-// // // const fetchLedgerTransactions = (ledger) => {
-// // //   setSelectedLedger(ledger);
-// // //   axios
-// // //     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-// // //     .then((res) => {
-// // //       const allTxns = res.data.data || [];
-// // //       const ledgerTxns = allTxns.flatMap((entry) =>
-// // //         entry.transactions.filter(
-// // //           (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-// // //         )
-// // //       );
-// // //       setTransactions(ledgerTxns);
-// // //       setShowModal(true);
-// // //     })
-// // //     .catch((err) => console.error(err));
-// // // };
-// //   // For calculating net pcs and weight
-// //   useEffect(() => {
-// //     // Fetch all transactions once
-// //     axios.get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-// //       .then((res) => {
-// //         const allTxns = res.data.data || [];
-        
-// //         // Compute totals for each ledger
-// //         const totals = {};
-// //         allLedgers.forEach((ledger) => {
-// //           const ledgerTxns = allTxns.flatMap((entry) =>
-// //             entry.transactions.filter(
-// //               (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-// //             )
-// //           );
-
-// //           let netWeight = 0;
-// //           let netPcs = 0;
-
-// //           ledgerTxns.forEach((txn) => {
-// //             if (txn.vtype === "P") {
-// //               netWeight += txn.weight || 0;
-// //               netPcs += txn.pkgs || 0;
-// //             } else if (txn.vtype === "S") {
-// //               netWeight -= txn.weight || 0;
-// //               netPcs -= txn.pkgs || 0;
-// //             }
-// //           });
-
-// //           totals[ledger._id] = { netWeight, netPcs };
-// //         });
-
-// //         setLedgerTotals(totals);
-// //       })
-// //       .catch((err) => console.error(err));
-// //   }, [allLedgers]);
-
-// //   const handleCheckboxChange = (id) => {
-// //     setCheckedRows((prev) => ({
-// //       ...prev,
-// //       [id]: !prev[id],
-// //     }));
-// //   };
-
-// //   const formatDate = (date) => {
-// //     if (!date) return "";
-// //     const d = new Date(date);
-// //     const day = String(d.getDate()).padStart(2, "0");
-// //     const month = String(d.getMonth() + 1).padStart(2, "0");
-// //     const year = d.getFullYear();
-// //     return `${day}/${month}/${year}`;
-// //   };
-// //   const handleTransactionSelect = (txn) => {
-// //     if (!txn) return;
-// //     const modalState = {
-// //       rowIndex: activeRowIndex,
-// //       selectedLedger,
-// //       keepModalOpen: true,
-// //     };
-
-// //     sessionStorage.setItem("trailModalState", JSON.stringify(modalState));
-
-// //     switch (txn.vtype) {   // ✅ use vtype from your transaction object
-// //       case "S": // Sale
-// //         navigate("/Sale", {
-// //           state: {
-// //             saleId: txn.saleId
-// //           }
-// //         // state: {
-// //         //    saleId: txn.saleId, // ✅ changed here
-// //         // },
-// //       });
-// //       alert(txn.saleId)
-// //         break;
-// //       case "P": // Purchase
-// //         navigate("/purchase", {
-// //         state: {
-// //           purId: txn.purId,
-// //         },
-// //       });
-// //       alert(txn.purId)
-// //         break;
-// //       case "B": // Bank
-// //        navigate("/bankvoucher", {
-// //         state: {
-// //           bankId: txn._id,
-// //         },
-// //       });
-// //         break;
-// //       case "C": // Cash
-// //         navigate("/cashvoucher", {
-// //         state: {
-// //           cashId: txn._id,
-// //         },
-// //       });
-// //         break;
-// //       case "J": // Journal
-// //        navigate("/journalvoucher", {
-// //         state: {
-// //           journalId: txn._id,
-// //         },
-// //       });
-// //         break;
-// //       default:
-// //         console.log("Unknown vtype:", txn.vtype);
-// //     }
-// //   };
-
-// //   return (
-// //     <div style={{ padding: "10px" }}>
-// //       <Card className="contMain">
-// //         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "10px" }}>
-// //           {/* Date Filters */}
-// //           <div style={{ display: "flex", flexDirection:"column", alignItems: "center",gap:"10px" }}>
-// //             <div style={{display:'flex',flexDirection:'row'}}>
-// //             <span className="textform"><b>From:</b></span>
-// //             <DatePicker
-// //               className="fDate"
-// //               selected={ledgerFromDate}
-// //               onChange={(date) => setLedgerFromDate(date)}
-// //               onChangeRaw={(e) => {
-// //                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-// //                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-// //                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-// //                 e.target.value = val; // Show formatted input
-// //               }}
-// //               dateFormat="dd/MM/yyyy"
-// //             />
-// //             </div>
-// //             <div style={{display:'flex',flexDirection:'row'}}>
-// //             <span className="textform"><b>To:</b></span>
-// //             <DatePicker
-// //               className="toDate"
-// //               selected={ledgerToDate}
-// //               onChange={(date) => setLedgerToDate(date)}
-// //               onChangeRaw={(e) => {
-// //                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-// //                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-// //                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-// //                 e.target.value = val; // Show formatted input
-// //               }}
-// //               dateFormat="dd/MM/yyyy"
-// //             />
-// //             </div>
-// //           </div>
-// //            <h3 className="headerTrail">TRAIL BALANCE</h3>
-// //         </div>
-
-// //         <div className="tableT">
-// //           <Table size="sm" className="custom-table" hover ref={tableRef}>
-// //             <thead style={{ position: "sticky", top: 1, background: "skyblue", fontSize: 17, textAlign: "center" }}>
-// //               <tr>
-// //                 <th></th>
-// //                 <th>NAME</th>
-// //                 <th>CITY</th>
-// //                 <th>PCS</th>
-// //                 <th>QTY</th>
-// //                 <th>DEBIT</th>
-// //                 <th>CREDIT</th>
-// //               </tr>
-// //             </thead>
-
-// //             <tbody>
-// //               {filteredLedgers.map((ledger, index) => {
-// //                 const { balance, drcr } = ledger.totals || {};
-// //                 return (
-// //                   <tr
-// //                     key={ledger._id}
-// //                     style={{
-// //                       backgroundColor: flaggedRows.has(index)
-// //                         ? "red"
-// //                         : index === selectedIndex
-// //                         ? "rgb(187, 186, 186)"
-// //                         : "transparent",
-// //                       cursor: "pointer",
-// //                       fontSize: 16,
-// //                     }}
-// //                     onClick={() => openLedgerDetails(ledger)}
-// //                     onMouseEnter={() => setSelectedIndex(index)}
-// //                   >
-// //                     <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-// //                       <input
-// //                         style={{ width: "18px", height: "18px", cursor: "pointer" }}
-// //                         type="checkbox"
-// //                         checked={!!checkedRows[ledger._id]}
-// //                         onChange={() => handleCheckboxChange(ledger._id)}
-// //                       />
-// //                     </td>
-// //                     <td>{ledger.formData.ahead}</td>
-// //                     <td>{ledger.formData.city}</td>
-// //                     <td style={{ textAlign: "right" }}>
-// //                       {ledgerTotals[ledger._id]?.netPcs?.toFixed(3) || "0.000"}
-// //                     </td>
-// //                     <td style={{ textAlign: "right" }}>
-// //                       {ledgerTotals[ledger._id]?.netWeight?.toFixed(3) || "0.000"}
-// //                     </td>
-// //                     <td style={{ textAlign: "right", color: "darkblue", fontWeight:"bold" }}>
-// //                       {drcr === "DR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
-
-// //                     </td>
-// //                     <td style={{ textAlign: "right", color: "red", fontWeight:"bold" }}>
-// //                       {drcr === "CR" ? Math.abs(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
-
-// //                     </td>
-// //                   </tr>
-// //                 );
-// //               })}
-// //             </tbody>
-
-        
-// //             <tfoot style={{backgroundColor: "skyblue", position: "sticky", bottom: -8,}}>
-// //               <tr style={{ fontWeight: "bold",fontSize:20 }}>
-// //                 <td colSpan={3} style={{ textAlign: "right" }}>TOTAL:</td>
-// //                 <td></td>
-// //                 <td></td>
-// //                 <td style={{ textAlign: "right", color: "darkblue" }}>
-// //                 {filteredLedgers
-// //                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "DR" ? Math.abs(ledger.totals.balance) : 0), 0)
-// //                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-// //                 </td>
-// //                 <td style={{ textAlign: "right", color: "red" }}>
-// //                 {filteredLedgers
-// //                   .reduce((sum, ledger) => sum + (ledger.totals?.drcr === "CR" ? Math.abs(ledger.totals.balance) : 0), 0)
-// //                   .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-// //                 </td>
-// //               </tr>
-// //             </tfoot>
-// //           </Table>
-// //         </div>
-// //       </Card>
-// //       {/* ... Modal Account Statement ... */}
-// //       <Modal
-// //         show={showModal}
-// //         onHide={() => {
-// //           setShowModal(false);
-// //           setActiveRowIndex(0); // ✅ reset highlight when closing modal manually
-// //         }}
-// //        className="custom-modal"
-// //        style={{marginTop:20}}
-// //         centered
-// //       >
-// //         <Modal.Header closeButton>
-// //           <Modal.Title>
-// //             ACCOUNT STATEMENT
-// //             {/* Ledger Details - {selectedLedger?.formData?.ahead} */}
-// //           </Modal.Title>
-// //         </Modal.Header>
-// //         <Modal.Body>
-// //           {selectedLedger && (
-// //             <div>
-// //               <div style={{display:'flex',flexDirection:"row",justifyContent:'space-between'}}>             
-// //                 <div style={{display:'flex',flexDirection:'column',textAlign:'center'}}>
-// //                   <b style={{fontSize:20}}>{selectedLedger.formData.ahead}{" "}</b> 
-// //                   <b style={{fontSize:20}}>{selectedLedger.formData.add1}{" "}</b> 
-// //                   <b style={{fontSize:20}}>{selectedLedger.formData.city}{" "}</b> 
-// //                   {/* ✅ Closing Balance Display */}
-// //                   {transactions.length > 0 && (
-// //                     <div style={{ fontSize: "20px" }}>
-// //                       {(() => {
-// //                         let balance = 0;
-// //                         transactions.forEach((txn) => {
-// //                           if (txn.type.toLowerCase() === "debit") {
-// //                             balance += txn.amount;
-// //                           } else if (txn.type.toLowerCase() === "credit") {
-// //                             balance -= txn.amount;
-// //                           }
-// //                         });
-// //                         const drcr = balance >= 0 ? "DR" : "CR";
-// //                         const color = drcr === "DR" ? "darkblue" : "red";
-// //                         return (
-// //                           <b style={{ color }}>
-// //                             Balance Rs: {Math.abs(balance).toFixed(2)} {drcr}
-// //                           </b>
-// //                         );
-// //                       })()}
-// //                     </div>
-// //                   )}
-// //               </div>
-// //               <div style={{display:'flex',flexDirection:'column',textAlign:'center'}}>
-// //                 <div style={{display:'flex',flexDirection:"row",alignItems:'center', marginTop:5}}>
-// //                   <b style={{fontSize:16,marginRight:"77px"}}>Period</b>
-// //                    <TextField
-// //                       className="custom-bordered-input"
-// //                       size="small"
-// //                       value={formatDate(fromDate)}   // 👈 formatted here
-// //                       inputProps={{
-// //                         maxLength: 48,
-// //                         style: {
-// //                           height: "10px",
-// //                           width:"90px"
-// //                         },
-// //                       }}
-// //                     />
-// //                      <TextField
-// //                       className="custom-bordered-input"
-// //                       size="small"
-// //                       value={formatDate(toDate)}   // 👈 formatted here
-// //                       inputProps={{
-// //                         maxLength: 48,
-// //                         style: {
-// //                           height: "10px",
-// //                           width:"90px"
-// //                         },
-// //                       }}
-// //                     />
-// //                 </div>
-// //               </div>
-// //               </div>
-
-// //               <div className={styles.tableHeight}>
-// //                 <Table size="sm" className="custom-table">
-// //                   <thead
-// //                     style={{
-// //                       position: "sticky",
-// //                       top: 0,
-// //                       background: "skyblue",
-// //                       fontSize: 17,
-// //                       textAlign: "center",
-// //                       zIndex: 2,
-// //                     }}
-// //                   >
-// //                     <tr>
-// //                       <th>
-// //                         <input
-// //                           type="checkbox"
-// //                           onChange={(e) => {
-// //                             const checked = e.target.checked;
-// //                             const newSelections = {};
-// //                             filteredTransactions.forEach((txn) => {
-// //                               newSelections[txn._id] = checked;
-// //                             });
-// //                             setSelectedRows(newSelections);
-// //                           }}
-// //                           checked={
-// //                             filteredTransactions.length > 0 &&
-// //                             filteredTransactions.every((txn) => selectedRows[txn._id])
-// //                           }
-// //                         />
-// //                       </th>
-// //                       <th>Date</th>
-// //                       <th>Type</th>
-// //                       <th>Narration</th>
-// //                       <th>Pcs</th>
-// //                       <th>Qty</th>
-// //                       <th>Debit</th>
-// //                       <th>Credit</th>
-// //                       <th>Balance</th>
-// //                       <th>DR/CR</th>
-// //                     </tr>
-// //                   </thead>
-
-// //                   <tbody>
-// //                     {transactions.length > 0 ? (
-// //                       (() => {
-// //                         let balance = 0;
-// //                         let totalDebit = 0;
-// //                         let totalCredit = 0;
-
-// //                         return filteredTransactions.map((txn,index) => {
-// //                           if (txn.type.toLowerCase() === "debit") {
-// //                             balance += txn.amount;
-// //                             totalDebit += txn.amount;
-// //                           } else if (txn.type.toLowerCase() === "credit") {
-// //                             balance -= txn.amount;
-// //                             totalCredit += txn.amount;
-// //                           }
-
-// //                           const drcr = balance >= 0 ? "DR" : "CR";
-// //                           const color = drcr === "DR" ? "darkblue" : "red";
-
-// //                           return (
-// //                            <tr
-// //                             key={txn._id}
-// //                             ref={(el) => (rowRefs.current[index] = el)}
-// //                             style={{
-// //                               fontWeight: "bold",
-// //                               fontSize: 16,
-// //                               backgroundColor:
-// //                                 index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent",
-// //                               cursor: "pointer",
-// //                             }}
-// //                                 onClick={() => {
-// //                                     setActiveRowIndex(index);
-// //                                     handleTransactionSelect(txn);
-// //                                   }}
-// //                           >
-// //                             <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-// //                                 <input
-// //                                 type="checkbox"
-// //                                 checked={!!selectedRows[txn._id]}
-// //                                 onChange={() => handleRowCheckboxChange(txn._id)}
-// //                                 style={{ transform: "scale(1.3)", cursor: "pointer" }}
-// //                               />
-// //                             </td>
-// //                             <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
-// //                             <td style={{ textAlign: "center" }}>{txn.vtype}</td>
-// //                             <td>{txn.narration}</td>
-// //                             <td style={{ textAlign: "right" }}>{txn.pkgs}</td>
-// //                             <td style={{ textAlign: "right" }}>{txn.weight}</td>                
-// //                             <td style={{ textAlign: "right", color: "darkblue" }}>
-// //                               {txn.type.toLowerCase() === "debit" ? txn.amount.toFixed(2) : ""}
-// //                             </td>
-// //                             <td style={{ textAlign: "right", color: "red" }}>
-// //                               {txn.type.toLowerCase() === "credit" ? txn.amount.toFixed(2) : ""}
-// //                             </td>
-// //                             <td style={{ textAlign: "right", color }}>
-// //                               {Math.abs(balance).toFixed(2)}
-// //                             </td>
-// //                             <td style={{ textAlign: "center", fontWeight: "bold", color }}>
-// //                               {drcr}
-// //                             </td>
-// //                            </tr>
-
-// //                           );
-// //                         });
-// //                       })()
-// //                     ) : (
-// //                       <tr>
-// //                         <td colSpan={10} className="text-center">
-// //                           No transactions found
-// //                         </td>
-// //                       </tr>
-// //                     )}
-// //                   </tbody>
-
-// //                   {/* ✅ Proper footer row */}
-// //                   {transactions.length > 0 && (() => {
-// //                     let totalDebit = 0;
-// //                     let totalCredit = 0;
-// //                     let balance = 0;
-// //                     let netWeight = 0;
-// //                     let netPcs = 0;
-
-// //                     filteredTransactions.forEach((txn) => {
-// //                       if (txn.type.toLowerCase() === "debit") {
-// //                         balance += txn.amount;
-// //                         totalDebit += txn.amount;
-// //                       } else if (txn.type.toLowerCase() === "credit") {
-// //                         balance -= txn.amount;
-// //                         totalCredit += txn.amount;
-// //                       }
-
-// //                       // ✅ Weight handling
-// //                       if (txn.vtype === "P") {
-// //                         netWeight += txn.weight || 0;   // Purchase positive
-// //                       } else if (txn.vtype === "S") {
-// //                         netWeight -= txn.weight || 0;   // Sale negative
-// //                       }
-// //                        // ✅ Pcs handling
-// //                       if (txn.vtype === "P") {
-// //                         netPcs += txn.pkgs || 0;   // Purchase positive
-// //                       } else if (txn.vtype === "S") {
-// //                         netPcs -= txn.pkgs || 0;   // Sale negative
-// //                       }
-// //                     });
-
-// //                     const drcrFinal = balance >= 0 ? "DR" : "CR";
-// //                     const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
-
-// //                     return (
-// //                       <tfoot>
-// //                         <tr
-// //                           style={{
-// //                             position: "sticky",
-// //                             bottom: -1,
-// //                             background: "skyblue",
-// //                             fontWeight: "bold",
-// //                             fontSize: 16,
-// //                           }}
-// //                         >
-// //                           <td colSpan={4} style={{ textAlign: "center" }}>
-// //                             Totals
-// //                           </td>
-// //                           <td style={{ textAlign: "right"}}>
-// //                             {netPcs.toFixed(3)}
-// //                           </td>
-// //                           {/* ✅ Net weight (sale in minus, purchase in plus) */}
-// //                           <td style={{ textAlign: "right" }}>
-// //                             {netWeight.toFixed(3)}
-// //                           </td>
-// //                           <td style={{ textAlign: "right", color: "darkblue" }}>
-// //                             {totalDebit.toFixed(2)}
-// //                           </td>
-// //                           <td style={{ textAlign: "right", color: "red" }}>
-// //                             {totalCredit.toFixed(2)}
-// //                           </td>
-// //                           <td style={{ textAlign: "right", color: colorFinal }}>
-// //                             {Math.abs(balance).toFixed(2)}
-// //                           </td>
-// //                           <td style={{ textAlign: "center", color: colorFinal }}>
-// //                             {drcrFinal}
-// //                           </td>
-// //                         </tr>
-// //                       </tfoot>
-// //                     );
-// //                   })()}
-// //                 </Table>
-// //               </div>
-// //               <div className="d-flex justify-content-between mt-2">
-// //               <div>
-// //                 <Button  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-// //               </div>
-// //             </div>
-// //             </div>
-// //           )}
-// //         </Modal.Body>
-// //       </Modal>
-// //     </div>
-// //   );
-// // };
-
-// // export default Example;
-
-
-// // import React, { useState, useEffect, useRef, forwardRef } from "react";
-// // import DatePicker from "react-datepicker";
-// // import InputMask from "react-input-mask";
-// // import "react-datepicker/dist/react-datepicker.css";
-// // import "react-toastify/dist/ReactToastify.css";
-// // import { ToastContainer, toast } from "react-toastify";
-// // import "react-toastify/dist/ReactToastify.css";
-
-// // // ✅ Forward ref so DatePicker can focus the input
-// // const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-// //   <InputMask
-// //     mask="99-99-9999"
-// //     maskChar=" "
-// //     value={value}
-// //     onChange={onChange}
-// //     onBlur={onBlur}
-// //   >
-// //     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-// //   </InputMask>
-// // ));
-
-// // const Example = () => {
-// //   const datePickerRef = useRef(null);
-// //   const customerNameRef = useRef(null);
-// //   const [selectedDate, setSelectedDate] = useState(new Date());
-// //   const [formData, setFormData] = useState({
-// //     date: "",
-// //   });
-
-// //   const handleDateChange = (date) => {
-// //     if (date instanceof Date && !isNaN(date)) {
-// //       setSelectedDate(date);
-// //       const formattedDate = date.toISOString().split("T")[0];
-// //       setFormData((prev) => ({
-// //         ...prev,
-// //         date: date,
-// //         duedate: date,
-// //       }));
-// //     }
-// //   };
-
-// //   // ✅ Separate function to validate future or past date
-// //   const validateDate = (date) => {
-// //     if (!date) return;
-
-// //     const today = new Date();
-// //     today.setHours(0, 0, 0, 0); // normalize today
-
-// //     const checkDate = new Date(date);
-// //     checkDate.setHours(0, 0, 0, 0); // normalize selected date
-
-// //     if (checkDate > today) {
-// //       toast.info("You Have Selected a Future Date.", {
-// //         position: "top-center",
-// //       });
-// //     } else if (checkDate < today) {
-// //       toast.info("You Have Selected a Past Date.", {
-// //         position: "top-center",
-// //       });
-// //     }
-// //   };
-
-// //   const handleCalendarClose = () => {
-// //     // If no date is selected when the calendar closes, default to today's date
-// //     if (!selectedDate) {
-// //       const today = new Date();
-// //       setSelectedDate(today);
-// //     }
-// //   };
-// //   return (
-// //     <div>
-// //       <DatePicker
-// //         ref={datePickerRef}
-// //         selected={selectedDate || null}
-// //         openToDate={new Date()}
-// //         onCalendarClose={handleCalendarClose}
-// //         dateFormat="dd-MM-yyyy"
-// //         onChange={handleDateChange}
-// //         onBlur={() => validateDate(selectedDate)}
-// //         customInput={<MaskedInput />}
-// //       />
-// //       <input
-// //       ref={customerNameRef}
-// //       />
-// //     </div>
-// //   )
-// // }
-
-// // export default Example
-
-
-// // import React,{useState} from 'react'
-// // import DatePicker from "react-datepicker";
-
-// // const Example = () => {
-// //   const [ledgerFromDate, setLedgerFromDate] = useState(() => new Date());
-// //   return (
-// //     <div>
-// //       <DatePicker
-// //         className="fDate"
-// //         selected={ledgerFromDate}
-// //         onChange={(date) => setLedgerFromDate(date)}
-// //         onChangeRaw={(e) => {
-// //           if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
-
-// //           let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-// //           if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-// //           if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-// //           e.target.value = val; // Show formatted input
-// //         }}
-// //         dateFormat="dd/MM/yyyy"
-// //       />
-// //     </div>
-// //   )
-// // }
-
-// // export default Example
-
-
-
-// import React, { useState, useEffect } from "react";
-// import InputMask from "react-input-mask";
-
-// const Example = () => {
-//   const [ledgerFromDate, setLedgerFromDate] = useState("");
-
-//   // ✅ Simulate fetching date from API
-//   useEffect(() => {
-//     const apiDate = "2025-06-05T10:31:13.346Z"; // example API date
-//     const formatted = formatApiDate(apiDate);
-//     setLedgerFromDate(formatted);
-//   }, []);
-
-//   // ✅ Convert API format → dd/mm/yyyy
-//   const formatApiDate = (isoString) => {
-//     if (!isoString) return "";
-//     const date = new Date(isoString);
-//     const day = String(date.getDate()).padStart(2, "0");
-//     const month = String(date.getMonth() + 1).padStart(2, "0");
-//     const year = date.getFullYear();
-//     return `${day}/${month}/${year}`;
-//   };
-
-//   return (
-//     <div>
-//       <InputMask
-//         mask="99/99/9999"
-//         placeholder="dd/mm/yyyy"
-//         value={ledgerFromDate}
-//         onChange={(e) => setLedgerFromDate(e.target.value)}
-//         className="fDate"
-//       />
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-
-import React from 'react'
-import useCompanySetup from './Shared/useCompanySetup'
+import React, { useEffect, useState,useRef } from "react";
+import { Table, Button, Form, Modal } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useContext } from "react";
+import useCompanySetup from "./Shared/useCompanySetup";
+import { FaCog } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
+const LOCAL_STORAGE_KEY = "PayementListTableData";
 
 const Example = () => {
-  const { CompanyState, unitType } = useCompanySetup();
+  
+  const navigate = useNavigate();
+  const {dateFrom} = useCompanySetup();
+
+  const [formData, setFormData] = useState({
+      city: "",
+      vehicle:"",
+      btype:"All",
+      stype:"All",
+      v_tpt:"",
+      broker:"",
+      rem1:"",
+      exfor:"",
+      lDesc:"",
+      lPost:"",
+      terms:"",
+      pnc:"All",
+      mfg:"",
+      iFrom:"",
+      iUpto:"",
+      vRange1:"",
+      vRange2:"",
+  });
+
+  const defaultTableFields = {
+    date: true,
+    billno: true,
+    weight: true, 
+    pcs: false, 
+    accountname: true,
+    city: true,
+    gstin: true,
+    value: true,
+    cgst: true,
+    sgst: true,
+    igst: true,
+    netvalue: true,
+    exp1: false,
+    exp2: false,
+    exp3: false,
+    exp4: false,
+    exp5: false,
+    exp6: false,
+    exp7: false,
+    exp8: false,
+    exp9: false,
+    exp10: false,          
+    description: false,  
+    vehicleno: false,    
+    remarks: false,     
+    transport: false, 
+    broker: false,    
+    taxtype: false,                               
+  };
+  
+  const [tableData, settableData] = useState(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+    // Only keep keys that exist in defaultFormData
+    const sanitized = Object.fromEntries(
+      Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+        Object.hasOwn(defaultTableFields, key)
+      )
+    );
+    
+    return sanitized;
+  });
+
+  const defaultColumnOrder = {
+    date: 1,
+    billno: 2,
+    weight: 3,
+    pcs: 4,
+    accountname: 5,
+    city: 6,
+    gstin:7,
+    value: 8,
+    cgst: 9,
+    sgst: 10,
+    igst: 11,
+    netvalue: 12,
+    exp1: 13,
+    exp2: 14,
+    exp3: 15,
+    exp4: 16,
+    exp5: 17,
+    exp6: 18,
+    exp7: 19,
+    exp8: 20,
+    exp9: 21,
+    exp10: 22,
+    description: 23,
+    vehicleno: 24,
+    remarks: 25,
+    transport: 26,
+    broker:27,
+    taxtype: 28,
+  };
+
+    const [columnOrder, setColumnOrder] = useState(() => {
+      const saved = localStorage.getItem("ColumnOrderPList");
+      console.log("saved:",saved);
+      
+      const parsed = saved ? JSON.parse(saved) : {};
+      return { ...defaultColumnOrder, ...parsed }; // ✅ merge saved over defaults
+    });
+
+    // Increase Decrease fontSize
+    const [fontSize, setFontSize] = useState(() => {
+      const saved = localStorage.getItem("FontSizePList");
+      return saved ? parseInt(saved, 10) : 15;
+    });
+
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
+  const tableRef = useRef(null);
+  const [entries, setEntries] = useState([]);
+  const [filteredEntries, setFilteredEntries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(() => new Date());
+  const [selectedSupplier, setSelectedSupplier] = useState(""); 
+  const [selectedItems, setSelectedItems] = useState(""); 
+  const rowRefs = useRef([]);
+
+  useEffect(() => {
+    if (!fromDate && dateFrom) {
+      setFromDate(new Date(dateFrom));
+    }
+  }, [dateFrom, fromDate]);
+
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (tableRef.current) {
+        tableRef.current.focus();
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!fromDate || !toDate) return;
+
+    const fetchEntries = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const data = await response.json();
+        const filteredData = data.filter((entry) => {
+          const entryDate = new Date(entry.formData?.date);
+          return entryDate >= fromDate && entryDate <= toDate;
+        });
+
+        setEntries(data);
+        setFilteredEntries(filteredData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEntries();
+  }, [fromDate, toDate]);
+
+  // useEffect(() => {
+  //   const filtered = entries.filter((entry) => {
+  //     const supplierMatch = selectedSupplier
+  //       ? entry.supplierdetails?.[0]?.vacode === selectedSupplier
+  //       : true;
+
+  //     const cityMatch = formData.city
+  //       ? entry.supplierdetails?.[0]?.city?.toLowerCase().includes(formData.city.toLowerCase())
+  //       : true;
+
+  //     const vehicleMatch = formData.vehicle
+  //       ? entry.formData?.trpt?.toLowerCase().includes(formData.vehicle.toLowerCase())
+  //       : true;
+
+  //     const btypeMatch = formData.btype && formData.btype !== "All"
+  //       ? (entry.formData?.btype || "").toLowerCase() === formData.btype.toLowerCase()
+  //       : true;
+
+  //     const stypeMatch = formData.stype && formData.stype !== "All"
+  //       ? (entry.formData?.stype || "").toLowerCase() === formData.stype.toLowerCase()
+  //       : true;
+
+  //     const productMatch = selectedItems
+  //       ? entry.items?.some(item => item.sdisc === selectedItems)
+  //       : true;
+
+  //     const transportMatch = formData.v_tpt
+  //       ? entry.formData?.v_tpt?.toLowerCase().includes(formData.v_tpt.toLowerCase())
+  //       : true;
+
+  //     const brokerMatch = formData.broker
+  //       ? entry.formData?.broker?.toLowerCase().includes(formData.broker.toLowerCase())
+  //       : true;
+
+  //     const remarkMatch = formData.rem1
+  //       ? entry.formData?.rem2?.toLowerCase().includes(formData.rem1.toLowerCase())
+  //       : true;
+
+  //     const termsMatch = formData.terms
+  //       ? entry.formData?.exfor?.toLowerCase().includes(formData.terms.toLowerCase())
+  //       : true;
+      
+  //     const pncMatch = formData.pnc && formData.pnc !== "All"
+  //       ? formData.pnc === "Positive" ? Number(entry.formData?.grandtotal) > 0
+  //       : formData.pnc === "Negative" ? Number(entry.formData?.grandtotal) < 0
+  //       : formData.pnc === "Cancel" ? Number(entry.formData?.grandtotal) === 0
+  //       : true
+  //       : true;
+
+  //     const invoiceRangeMatch =
+  //     formData.iFrom && formData.iUpto
+  //       ? Number(entry.formData?.vno) >= Number(formData.iFrom) && Number(entry.formData?.vno) <= Number(formData.iUpto)
+  //       : formData.iFrom
+  //       ? Number(entry.formData?.vno) >= Number(formData.iFrom) : formData.iUpto
+  //       ? Number(entry.formData?.vno) <= Number(formData.iUpto)
+  //       : true;
+
+  //     const taxRateMatch = formData.taxRate
+  //     ? entry.items?.some(item => String(item.gst).includes(formData.taxRate))
+  //     : true;
+
+
+  //     return supplierMatch && cityMatch && vehicleMatch && btypeMatch && stypeMatch && productMatch && transportMatch && brokerMatch && remarkMatch && termsMatch && pncMatch && invoiceRangeMatch && taxRateMatch;
+  //   });
+
+  //   setFilteredEntries(filtered);
+  // }, [selectedSupplier, formData.city, formData.vehicle, formData.btype, formData.stype, selectedItems, formData.v_tpt, formData.broker, formData.rem1, formData.terms, formData.pnc, formData.iFrom, formData.iUpto, formData.taxRate, entries]);
+
+  const uniqueItem = [...new Set(entries.map(entry => entry.items?.[0]?.sdisc))].filter(Boolean);
+  const uniqueSuppliers = [...new Set(entries.map(entry => entry.supplierdetails?.[0]?.vacode))].filter(Boolean);
+
+  // Calculate totals based on filtered data
+  const totalGrandTotal = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.grandtotal || 0), 0);
+  const totalCGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.cgst || 0), 0);
+  const totalSGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sgst || 0), 0);
+  const totalIGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.igst || 0), 0);
+  const totalTAX = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sub_total || 0), 0);
+  const totalWeight = filteredEntries.reduce((entryAcc, entry) => {
+    const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.weight || 0), 0);
+    return entryAcc + itemTotal;
+  }, 0);
+  const totalPcs = filteredEntries.reduce((entryAcc, entry) => {
+  const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.pkgs || 0), 0);
+  return entryAcc + itemTotal;
+  }, 0);
+
+  const totalexp1 = filteredEntries.reduce((entryAcc, entry) => {
+  const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp1 || 0), 0);
+  return entryAcc + itemTotal;
+  }, 0);
+    const totalexp2 = filteredEntries.reduce((entryAcc, entry) => {
+  const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp2 || 0), 0);
+  return entryAcc + itemTotal;
+  }, 0);
+    const totalexp3 = filteredEntries.reduce((entryAcc, entry) => {
+  const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp3 || 0), 0);
+  return entryAcc + itemTotal;
+  }, 0);
+    const totalexp4 = filteredEntries.reduce((entryAcc, entry) => {
+  const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp4 || 0), 0);
+  return entryAcc + itemTotal;
+  }, 0);
+    const totalexp5 = filteredEntries.reduce((entryAcc, entry) => {
+  const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp5 || 0), 0);
+  return entryAcc + itemTotal;
+  }, 0);
+
+  const totalexp6 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp6 || 0), 0);
+  const totalexp7 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp7 || 0), 0);
+  const totalexp8 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp8 || 0), 0);
+  const totalexp9 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp9 || 0), 0);
+  const totalexp10 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp10 || 0), 0);
+
+
+  const formatDate = (dateValue) => {
+    // Check if date is already in dd/mm/yyyy or d/m/yyyy format
+    const ddmmyyyyPattern = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+
+    if (ddmmyyyyPattern.test(dateValue)) {
+      return dateValue;  // already correctly formatted
+    }
+
+    // otherwise assume ISO or another format, parse it
+    const dateObj = new Date(dateValue);
+    if (isNaN(dateObj)) {
+      return "";  // invalid date fallback
+    }
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const year = dateObj.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowUp") {
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      } else if (e.key === "ArrowDown") {
+        setActiveRowIndex((prev) =>
+          prev < filteredEntries.length - 1 ? prev + 1 : prev
+        );
+    } else if (e.key === "Enter") {
+      const entry = filteredEntries[activeRowIndex];
+      if (entry) {
+        navigate("/purchase", { state: { purId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
+        localStorage.setItem("selectedRowIndexPList", activeRowIndex); 
+      }
+    }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredEntries, activeRowIndex, navigate]);
+
+  // ✅ Restore selected row index if coming back from Sale
+  useEffect(() => {
+    const savedIndex = localStorage.getItem("selectedRowIndexPList");
+    if (savedIndex !== null) {
+      setActiveRowIndex(parseInt(savedIndex, 10));
+      setTimeout(() => {
+        if (rowRefs.current[savedIndex]) {
+          rowRefs.current[savedIndex].focus();
+          rowRefs.current[savedIndex].scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        }
+      }, 0);
+    }
+  }, []);
+
+  // Show loading only after user selects the dates
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  // Sorting Column Order
+  const sortedVisibleFields = Object.keys(tableData)
+  .filter(field => tableData[field]) // only visible ones
+  .sort((a, b) => {
+    const orderA = parseInt(columnOrder[a]) || 999;
+    const orderB = parseInt(columnOrder[b]) || 999;
+    return orderA - orderB;
+  });
+
   return (
     <div>
-      <h1>{CompanyState}</h1>
-    </div>
-  )
-}
+      <h3 className="bank-title">📒 PAYMENT LIST</h3>
 
-export default Example
+      <div style={{ display: "flex",flexDirection:"row", marginBottom: 10,marginLeft:10, marginTop:"20px" }}>
+      <div>
+        <span className="text-lg mr-2">Period From:</span>
+          <DatePicker
+            selected={fromDate}
+            onChange={(date) => setFromDate(date)}
+            dateFormat="dd/MM/yyyy"
+            className="datepickerBank"
+            placeholderText="From Date"
+          />
+        </div>
+        <div>
+        <span className="text-lg ml-3 mr-2">UpTo:</span>
+        <DatePicker
+          selected={toDate}
+          onChange={(date) => setToDate(date)}
+          dateFormat="dd/MM/yyyy"
+          className="datepickerBank2"
+          placeholderText="To Date"
+        />
+        </div>
+      </div>
+      <div
+          ref={tableRef}
+          tabIndex={0}
+          style={{ maxHeight: 530, overflowY: "auto", padding: 5, outline: "none" }}
+        >
+        <Table className="custom-table" bordered>
+        <thead style={{ backgroundColor: "skyblue", position: "sticky", top: -6, textAlign: 'center',    fontSize: `${fontSize}px` }}>
+          <tr>
+            {sortedVisibleFields.map((field) => (
+              <th key={field}>
+                {field === "date" ? "Date" :
+                field === "billno" ? "BillNo." :
+                field === "accountname" ? "A/C Name" :
+                field === "weight" ? "Qty" :
+                field === "pcs" ? "Pcs" :
+                field === "city" ? "City" :
+                field === "gstin" ? "Gstin" :
+                field === "value" ? "Bill Value" :
+                field === "cgst" ? "C.Tax" :
+                field === "sgst" ? "S.Tax" :
+                field === "igst" ? "I.Tax" :
+                field === "netvalue" ? "Net value" :
+                field === "exp1" ? "Exp1" :
+                field === "exp2" ? "Exp2" :
+                field === "exp3" ? "Exp3" :
+                field === "exp4" ? "Exp4" :
+                field === "exp5" ? "Exp5" :
+                field === "exp6" ? "Exp6" :
+                field === "exp7" ? "Exp7" :
+                field === "exp8" ? "Exp8" :
+                field === "exp9" ? "Exp9" :
+                field === "exp10" ? "Exp10" : 
+                field === "description" ? "Description" : 
+                field === "vehicleno" ? "Vehicleno" :    
+                field === "remarks" ? "Remarks" :      
+                field === "transport" ? "Transport" :     
+                field === "broker" ? "Broker" :
+                field === "taxtype" ? "TaxType" :
+                field.toUpperCase()}
+              </th>
+            ))}
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredEntries.map((entry, index) => {
+            const formData = entry.formData || {};
+            const supplierdetails = entry.supplierdetails?.[0] || {};
+            const item = entry.items?.[0] || {};
+            const totalItemWeight = entry.items?.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(3);
+            const totalItemPkgs = entry.items?.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(3);
+            const isActive = index === activeRowIndex;
+
+            return (
+             <tr key={index}
+                ref={(el) => (rowRefs.current[index] = el)}
+                tabIndex={0} // ✅ focusable row
+                onMouseEnter={() => setActiveRowIndex(index)}
+                onClick={() => {
+                  navigate("/purchase", { state: { purId: entry._id, rowIndex: activeRowIndex } }); // ✅ pass via state
+                  localStorage.setItem("selectedRowIndexPList", activeRowIndex); 
+                }}
+                style={{
+                  backgroundColor: isActive ? "rgb(197, 190, 190)" : "",
+                  cursor: "pointer",
+                  fontSize: `${fontSize}px`,
+                }}
+              >
+                {sortedVisibleFields.map((field) => {
+                  let value = "";
+                  if (field === "date") value = formatDate(formData.date);
+                  else if (field === "billno") value = formData.vno || "";
+                  else if (field === "accountname") value = supplierdetails.vacode || "";
+                  else if (field === "weight") value = totalItemWeight;
+                  else if (field === "pcs") value = totalItemPkgs;
+                  else if (field === "city") value = supplierdetails.city || "";
+                  else if (field === "gstin") value = supplierdetails.gstno || "";
+                  else if (field === "value") value = formData.grandtotal || "";
+                  else if (field === "cgst") value = formData.cgst || "";
+                  else if (field === "sgst") value = formData.sgst || "";
+                  else if (field === "igst") value = formData.igst || "";
+                  else if (field === "netvalue") value = formData.sub_total || "";
+                  else if (field === "exp1") value = item.Exp1 || "0.00";
+                  else if (field === "exp2") value = item.Exp2 || "0.00";
+                  else if (field === "exp3") value = item.Exp3 || "0.00";
+                  else if (field === "exp4") value = item.Exp4 || "0.00";
+                  else if (field === "exp5") value = item.Exp5 || "0.00";
+                  else if (field === "exp6") value = formData.Exp6 || "";
+                  else if (field === "exp7") value = formData.Exp7 || "";
+                  else if (field === "exp8") value = formData.Exp8 || "";
+                  else if (field === "exp9") value = formData.Exp9 || "";
+                  else if (field === "exp10") value = formData.Exp10 || ""; 
+                  else if (field === "description") value = item.sdisc || "";
+                  else if (field === "vehicleno") value = formData.trpt || "";
+                  else if (field === "remarks") value = formData.rem2 || "";
+                  else if (field === "transport") value = formData.v_tpt || "";
+                  else if (field === "broker") value = formData.broker || "" ;
+                  else if (field === "taxtype") value = formData.stype || "" ;
+                  return <td key={field}>{value}</td>;
+                })}
+               <td style={{ textAlign: "center" }}>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    style={{
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      padding: "4px 10px",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents row click event
+                      alert(`Make payment for Bill No: ${formData.vno}`);
+                    }}
+                  >
+                    Make Payment
+                  </Button>
+               </td>
+
+              </tr>
+            );
+          })}
+        </tbody>
+      <tfoot style={{ backgroundColor: "skyblue", position: "sticky", bottom: -6, fontSize: `${fontSize}px` }}>
+          <tr>
+            {sortedVisibleFields.map((field, idx) => {
+              let value = "";
+              if (field === "date") value = "TOTAL";
+              else if (field === "value") value = totalGrandTotal.toFixed(2);
+              else if (field === "cgst") value = totalCGST.toFixed(2);
+              else if (field === "sgst") value = totalSGST.toFixed(2);
+              else if (field === "igst") value = totalIGST.toFixed(2);
+              else if (field === "netvalue") value = totalTAX.toFixed(2);
+              else if (field === "weight") value = totalWeight.toFixed(3);
+              else if (field === "pcs") value = totalPcs.toFixed(3);
+              else if (field === "exp1") value = totalexp1.toFixed(2);
+              else if (field === "exp2") value = totalexp2.toFixed(2);
+              else if (field === "exp3") value = totalexp3.toFixed(2);
+              else if (field === "exp4") value = totalexp4.toFixed(2);
+              else if (field === "exp5") value = totalexp5.toFixed(2);
+              else if (field === "exp6") value = totalexp6.toFixed(2);
+              else if (field === "exp7") value = totalexp7.toFixed(2);
+              else if (field === "exp8") value = totalexp8.toFixed(2);
+              else if (field === "exp9") value = totalexp9.toFixed(2);
+              else if (field === "exp10") value = totalexp10.toFixed(2);
+              return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
+            })}
+            <td></td>
+          </tr>
+        </tfoot>
+        </Table>
+      </div>
+    </div>
+  );
+};
+
+export default Example;

@@ -474,11 +474,23 @@ export default function App() {
                                     </StyledIcon>
                                     <StyledListItemText primary="Balance Sheet" />
                                 </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/PaymentList')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Payment List" />
+                                </StyledListItem>
+                                 <StyledListItem button onClick={() => handleNavigation('/ReceiptList')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Receipt List" />
+                                </StyledListItem>
                                 <StyledListItem button onClick={handleBooksClick}>
                                     <StyledIcon>
                                         <BookIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="BOOKS" />
+                                    <StyledListItemText primary="Books" />
                                     {isBooksOpen ? <ExpandLess /> : <ExpandMore />}
                                 </StyledListItem>
                                 <div style={{ marginLeft: 20 }}>
@@ -489,7 +501,7 @@ export default function App() {
                                                     <MenuBookIcon />
                                                 </StyledIcon>
                                                 <StyledListItemText primary="Sales Book" />
-                                            </StyledListItem>
+                                        </StyledListItem>
                                             <StyledListItem button onClick={() => handleNavigation('/PurchaseBook')}>
                                                 <StyledIcon>
                                                 <MenuBookIcon />
@@ -552,7 +564,7 @@ export default function App() {
                                     <StyledIcon>
                                         <ShowChartIcon  />
                                     </StyledIcon>
-                                    <StyledListItemText primary="STOCKS..." />
+                                    <StyledListItemText primary="Stocks..." />
                                     {isStockOpen ? <ExpandLess /> : <ExpandMore />}
                                 </StyledListItem>
                                 <div style={{ marginLeft: 20 }}>
