@@ -70,9 +70,13 @@ const CreditorsList = () => {
     Balance: "Credit Balance",
     OrderBy: "",
     Annexure: "All",
-    T1: "", // ✅ include T1 (Selected Accounts)
-    T3: false, // ✅ Print Current Date
-    T10: false, // ✅ group by BsGroup toggle
+    method:"",
+    filter:"",
+    Msme:"",
+    agent:"",
+    city:"",
+    area:"",
+    state:"",
   });
   
   const [printDateValue, setPrintDateValue] = useState(null); // ✅ actual stored date
@@ -357,49 +361,6 @@ const CreditorsList = () => {
     result = result.filter((l) => !!checkedRows[l._id]);
   }
 
-//   if (optionValues.T10) {
-//   const grouped = {};
-//   result.forEach((ledger) => {
-//     const group = ledger.formData.Bsgroup || "Others";
-//     if (!grouped[group]) {
-//       grouped[group] = {
-//         balance: 0,
-//         qty: 0,
-//         pcs: 0,
-//         debit: 0,
-//         credit: 0,
-//         ledgers: [],
-//       };
-//     }
-//     const { balance, drcr, qty = 0, pcs = 0 } = ledger.totals || {};
-//     grouped[group].balance += balance;
-//     grouped[group].qty += qty;
-//     grouped[group].pcs += pcs;
-//     if (drcr === "DR") {
-//       grouped[group].debit += Math.abs(balance);
-//     } else {
-//       grouped[group].credit += Math.abs(balance);
-//     }
-//     grouped[group].ledgers.push(ledger);
-//   });
-
-//   result = Object.entries(grouped).map(([group, data]) => {
-//     const drcr = data.balance >= 0 ? "DR" : "CR";
-//     return {
-//       _id: group,
-//       formData: { ahead: group, city: "" },
-//       totals: {
-//         balance: data.balance,
-//         drcr,
-//         qty: data.qty,
-//         pcs: data.pcs,
-//         debit: data.debit,
-//         credit: data.credit,
-//       },
-//       groupedLedgers: data.ledgers,
-//     };
-//   });
-// }
   // ✅ Only show ledgers that have either GST number or Pin Code
   result = result.filter((ledger) => {
     const gst = ledger.formData.gstNo?.trim();
@@ -407,7 +368,38 @@ const CreditorsList = () => {
     return gst || pin;
   });
 
-  
+ // ✅ Agent filter (case-insensitive + partial match)
+if (optionValues.agent && optionValues.agent.trim() !== "") {
+  const selectedAgent = optionValues.agent.toLowerCase().trim();
+  result = result.filter(
+    (l) => l.formData.agent?.toLowerCase().includes(selectedAgent)
+  );
+}
+
+// ✅ City filter (case-insensitive + partial match)
+if (optionValues.city && optionValues.city.trim() !== "") {
+  const selectedCity = optionValues.city.toLowerCase().trim();
+  result = result.filter(
+    (l) => l.formData.city?.toLowerCase().includes(selectedCity)
+  );
+}
+
+// ✅ Area filter (case-insensitive + partial match)
+if (optionValues.area && optionValues.area.trim() !== "") {
+  const selectedArea = optionValues.area.toLowerCase().trim();
+  result = result.filter(
+    (l) => l.formData.area?.toLowerCase().includes(selectedArea)
+  );
+}
+
+// ✅ State filter (case-insensitive + partial match)
+if (optionValues.state && optionValues.state.trim() !== "") {
+  const selectedState = optionValues.state.toLowerCase().trim();
+  result = result.filter(
+    (l) => l.formData.state?.toLowerCase().includes(selectedState)
+  );
+}
+
   // ✅ Search filter
   if (searchTerm) {
     const lower = searchTerm.toLowerCase();

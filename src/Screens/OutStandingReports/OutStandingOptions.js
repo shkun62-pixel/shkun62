@@ -49,6 +49,10 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
     method:"",
     filter:"",
     Msme:"",
+    agent:"",
+    city:"",
+    area:"",
+    state:"",
   });
 
   useEffect(() => {
@@ -102,11 +106,20 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
     };
 
     const handleMsMe = (event) => {
-        const { value } = event.target; // Get the selected value from the event
-        setFormData((prevState) => ({
-        ...prevState,
-        Msme: value, // Update the ratecalculate field in FormData
-        }));
+      const { value } = event.target; // Get the selected value from the event
+      setFormData((prevState) => ({
+      ...prevState,
+      Msme: value, // Update the ratecalculate field in FormData
+      }));
+    };
+
+    const handleAlphabetOnly = (e) => {
+      const { id, value } = e.target;
+      // Allow only alphabets (A-Z, a-z) and spaces
+      const alphabetRegex = /^[A-Za-z\s]*$/;
+      if (alphabetRegex.test(value)) {
+        setFormData({ ...formData, [id]: value });
+      }
     };
 
   return (
@@ -121,7 +134,7 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
           <div style={{display:"flex",flexDirection:"column"}}>
           <Card style={{ display: "flex", flexDirection: "column", padding: 10, marginLeft: 10, }}>
             <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10,alignItems:"center" }}
+              style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}
             >
               <text>Method</text>
               <select
@@ -146,7 +159,7 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
               </select>
             </div>
             <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10,alignItems:"center" }}
+              style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}
             >
               <text>Order By</text>
               <select
@@ -173,7 +186,7 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
               </select>
             </div>
             <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10,alignItems:"center" }}
+              style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}
             >
               <text>Annexure</text>
               <select
@@ -191,7 +204,7 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
             </div>
 
             <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10,alignItems:"center" }}
+              style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}
             >
               <text>Filter</text>
               <select
@@ -215,7 +228,7 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
             </div>
 
                <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10,alignItems:"center" }}
+              style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}
             >
               <text>Msme</text>
               <select
@@ -234,6 +247,42 @@ const OutStandingOptions = ({ isOpen, onClose, onApply, balance }) => {
                 <option value="Mediun/Large">Mediun/Large</option>
                 <option value="Not Covered in MSMED">Not Covered in MSMED</option>
               </select>
+            </div>
+            <div  style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}>
+              <text>Agent</text>
+              <input
+              className="agent"
+              id="agent"
+              value={formData.agent}
+              onChange={handleAlphabetOnly}
+              />
+            </div>
+                <div  style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}>
+              <text>City</text>
+              <input
+              className="city"
+              id="city"
+              value={formData.city}
+              onChange={handleAlphabetOnly}
+              />
+            </div>
+                <div  style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}>
+              <text>State</text>
+              <input
+              className="state"
+              id="state"
+              value={formData.state}
+              onChange={handleAlphabetOnly}
+              />
+            </div>
+                <div  style={{ display: "flex", flexDirection: "row", marginTop: 5,alignItems:"center" }}>
+              <text>Area</text>
+              <input
+              className="area"
+              id="area"
+              value={formData.area}
+              onChange={handleAlphabetOnly}
+              />
             </div>
 
           </Card>
