@@ -9492,8 +9492,8 @@ if (key === "name") {
   const [isModalOpenExp, setIsModalOpenExp] = useState(false);
 
 const handleKeyDownExp = (e, fieldName, index) => {
-  if (e.key === "F7" && fieldName === "exp_before") {
-    e.preventDefault(); // Optional: stop default F7 behavior
+  if (e.key === "F2" && fieldName === "exp_before") {
+    e.preventDefault(); // Optional: stop default F2 behavior
     setCurrentIndex(index);
     setIsModalOpenExp(true);
   }

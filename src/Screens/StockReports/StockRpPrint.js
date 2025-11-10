@@ -251,7 +251,7 @@ exportData.forEach((row, rowIdx) => {
                   {/* <text style={{ fontSize: 20 }}>{"MANDI GOBINDGARH"}</text> */}
                 </div>
                 <text style={{fontSize:18, fontFamily: "Courier New"}}>Stock Statement of : {selectedAhead}</text>
-                <text style={{fontSize:18,marginLeft:'35%', fontFamily: "Courier New"}}>From: {formattedFrom} &nbsp;&nbsp; Upto: {formattedUpto}</text>
+                <text style={{fontSize:18,marginLeft:'30%', fontFamily: "Courier New"}}>From: {formattedFrom} &nbsp;&nbsp; Upto: {formattedUpto}</text>
                 <table
                   style={{
                     width: "100%",
