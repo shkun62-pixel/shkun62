@@ -2,7 +2,6 @@ import React, { useEffect, useState,useRef } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import SaleBookPrint from "../Books/SaleBook/SaleBookPrint";
 import ReceiptListPrint from "./ReceiptListPrint";
 import styles from '../Books/SaleBook/SaleBook.module.css'
 import { CompanyContext } from "../Context/CompanyContext";
@@ -10,6 +9,7 @@ import { useContext } from "react";
 import useCompanySetup from "../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import ReceiptModal from "../Modals/ReceiptModal";
 
 const LOCAL_STORAGE_KEY = "ReceiptTableData";
 
@@ -45,6 +45,12 @@ const ReceiptList = () => {
       vRange1:"",
       vRange2:"",
     });
+
+    // Payement Modal State
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedEntry, setSelectedEntry] = useState(null);
+
+
     const handleChangevalues = (event) => {
       const { id, value } = event.target;
       setFormData((prevState) => ({
@@ -229,36 +235,94 @@ const ReceiptList = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (!fromDate || !toDate) return;
+  // useEffect(() => {
+  //   if (!fromDate || !toDate) return;
 
-    const fetchEntries = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
-        );
-        if (!response.ok) throw new Error("Failed to fetch data");
+  //   const fetchEntries = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch(
+  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
+  //       );
+  //       if (!response.ok) throw new Error("Failed to fetch data");
 
-        const data = await response.json();
-        const filteredData = data.filter((entry) => {
-          const entryDate = new Date(entry.formData?.date);
-          return entryDate >= fromDate && entryDate <= toDate;
+  //       const data = await response.json();
+  //       const filteredData = data.filter((entry) => {
+  //         const entryDate = new Date(entry.formData?.date);
+  //         return entryDate >= fromDate && entryDate <= toDate;
+  //       });
+
+  //       // setEntries(data);
+  //       setEntries(filteredData);
+  //       setFilteredEntries(filteredData);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchEntries();
+  // }, [fromDate, toDate]);
+
+useEffect(() => {
+  if (!fromDate || !toDate) return;
+
+  const fetchEntries = async () => {
+    setLoading(true);
+    try {
+      // 1️⃣ Fetch Sale Entries
+      const saleRes = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
+      );
+      if (!saleRes.ok) throw new Error("Failed to fetch sale data");
+      const saleData = await saleRes.json();
+
+      // Filter sales by date
+      const filteredByDate = saleData.filter((entry) => {
+        const entryDate = new Date(entry.formData?.date);
+        return entryDate >= fromDate && entryDate <= toDate;
+      });
+
+      // 2️⃣ Fetch Bank Voucher Entries
+      const bankRes = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
+      );
+      if (!bankRes.ok) throw new Error("Failed to fetch bank data");
+      const bankData = await bankRes.json();
+
+      // Flatten bank voucher items
+      const bankItems = bankData.flatMap((voucher) => voucher.items || []);
+
+      // 3️⃣ Filter out sales already received in bank
+      const unpaidSales = filteredByDate.filter((sale) => {
+        const accountName =
+          sale.customerDetails?.[0]?.vacode?.trim().toLowerCase() || "";
+        const saleAmount = parseFloat(sale.formData?.grandtotal || 0);
+
+        const isReceived = bankItems.some((item) => {
+          const bankName = item.accountname?.trim().toLowerCase() || "";
+          const bankAmount = parseFloat(item.receipt_credit || 0);
+          const amountMatch = Math.abs(bankAmount - saleAmount) < 1; // ₹1 tolerance
+
+          return bankName === accountName && amountMatch;
         });
 
-        // setEntries(data);
-        setEntries(filteredData);
-        setFilteredEntries(filteredData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+        return !isReceived; // keep only unpaid
+      });
 
-    fetchEntries();
-  }, [fromDate, toDate]);
+      // 4️⃣ Update state
+      setEntries(unpaidSales);
+      setFilteredEntries(unpaidSales);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  fetchEntries();
+}, [fromDate, toDate]);
 
   useEffect(() => {
     const filtered = entries.filter((entry) => {
@@ -806,21 +870,18 @@ const ReceiptList = () => {
                   return <td key={field}>{value}</td>;
                 })}
                 <td style={{ textAlign: "center" }}>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: "bold",
-                      padding: "4px 10px",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevents row click event
-                      alert(`Make payment for Bill No: ${formData.vno}`);
-                    }}
-                  >
-                    Make Payment
-                  </Button>
+                 <Button
+                  variant="success"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedEntry(entry);
+                    console.log("Selected entry:", entry);
+                    setShowPaymentModal(true);
+                  }}
+                >
+                  Make Payment
+                </Button>
                 </td>
               </tr>
             );
@@ -855,7 +916,15 @@ const ReceiptList = () => {
         </tfoot>
         </Table>
       </div>
+     <ReceiptModal
+      show={showPaymentModal}
+      onHide={() => setShowPaymentModal(false)}
+      entry={selectedEntry}
+      // onPaymentSaved={fetchBankVouchers} // your refresh function
+    />
+
     </div>
+    
   );
 };
 
