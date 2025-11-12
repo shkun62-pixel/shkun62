@@ -97,6 +97,7 @@ const BankVoucher = () => {
     totalreceipt: "",
     totaldiscount: "",
     totalbankcharges: "",
+    againstbillno: "",
   });
   const [items, setItems] = useState([
     {
@@ -603,6 +604,7 @@ const BankVoucher = () => {
           totalreceipt: "",
           totaldiscount: "",
           totalbankcharges: "",
+          againstbillno: "",
         };
         const emptyItems = [
           {
@@ -656,6 +658,7 @@ const BankVoucher = () => {
         totalreceipt: "",
         totaldiscount: "",
         totalbankcharges: "",
+        againstbillno: "",
       };
       const emptyItems = [
         {
@@ -894,6 +897,7 @@ const BankVoucher = () => {
         totalreceipt: "",
         totaldiscount: "",
         totalbankcharges: "",
+        againstbillno: "",
       };
       setData([...data, newData]);
       setFormData(newData);
@@ -1071,6 +1075,7 @@ const BankVoucher = () => {
             totalreceipt: formData.totalreceipt || "",
             totaldiscount: formData.totaldiscount,
             totalbankcharges: formData.totalbankcharges,
+            againstbillno: formData.againstbillno || "",
           },
           items: filledRows.map((item) => ({
             id: item.id,
@@ -1110,6 +1115,7 @@ const BankVoucher = () => {
             totalreceipt: formData.totalreceipt || "",
             totaldiscount: formData.totaldiscount,
             totalbankcharges: formData.totalbankcharges,
+            againstbillno: formData.againstbillno || "",
           },
           items: filledRows.map((item) => ({
             id: item.id,
@@ -1466,6 +1472,7 @@ const BankVoucher = () => {
           totalreceipt: "",
           totaldiscount: "",
           totalbankcharges: "",
+          againstbillno: "",
         };
         setFormData(newData);
         setItems([

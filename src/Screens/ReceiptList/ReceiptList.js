@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState,useRef, useCallback } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -235,6 +235,11 @@ const ReceiptList = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const formatAmount = (val) => {
+    const num = parseFloat(val);
+    return isNaN(num) ? "0.00" : num.toFixed(2);
+  };
+
   // useEffect(() => {
   //   if (!fromDate || !toDate) return;
 
@@ -265,64 +270,91 @@ const ReceiptList = () => {
   //   fetchEntries();
   // }, [fromDate, toDate]);
 
-useEffect(() => {
-  if (!fromDate || !toDate) return;
+ const fetchEntries = useCallback(async () => {
+    if (!fromDate || !toDate) return;
 
-  const fetchEntries = async () => {
     setLoading(true);
     try {
-      // 1️⃣ Fetch Sale Entries
+      // --- 1️⃣ Fetch sales ---
       const saleRes = await fetch(
         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
       );
       if (!saleRes.ok) throw new Error("Failed to fetch sale data");
       const saleData = await saleRes.json();
 
-      // Filter sales by date
-      const filteredByDate = saleData.filter((entry) => {
-        const entryDate = new Date(entry.formData?.date);
-        return entryDate >= fromDate && entryDate <= toDate;
-      });
+      const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
+        (entry) => {
+          const entryDate = new Date(entry?.formData?.date || "");
+          return entryDate >= fromDate && entryDate <= toDate;
+        }
+      );
 
-      // 2️⃣ Fetch Bank Voucher Entries
+      // --- 2️⃣ Fetch bank vouchers ---
       const bankRes = await fetch(
         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
       );
       if (!bankRes.ok) throw new Error("Failed to fetch bank data");
-      const bankData = await bankRes.json();
+      const bankRaw = await bankRes.json();
 
-      // Flatten bank voucher items
-      const bankItems = bankData.flatMap((voucher) => voucher.items || []);
+      const bankData = Array.isArray(bankRaw)
+        ? bankRaw.map((b) => b?.data || b)
+        : [];
 
-      // 3️⃣ Filter out sales already received in bank
-      const unpaidSales = filteredByDate.filter((sale) => {
-        const accountName =
-          sale.customerDetails?.[0]?.vacode?.trim().toLowerCase() || "";
-        const saleAmount = parseFloat(sale.formData?.grandtotal || 0);
+      // --- 3️⃣ Create payment map ---
+      const paymentMap = new Map();
+      bankData.forEach((voucher) => {
+        const vForm = voucher?.formData || {};
+        const items = Array.isArray(voucher?.items)
+          ? voucher.items
+          : Array.isArray(voucher?.data?.items)
+          ? voucher.data.items
+          : [];
 
-        const isReceived = bankItems.some((item) => {
-          const bankName = item.accountname?.trim().toLowerCase() || "";
-          const bankAmount = parseFloat(item.receipt_credit || 0);
-          const amountMatch = Math.abs(bankAmount - saleAmount) < 1; // ₹1 tolerance
+        const billNo = parseInt(vForm.againstbillno || 0);
+        if (!billNo) return;
 
-          return bankName === accountName && amountMatch;
-        });
-
-        return !isReceived; // keep only unpaid
+        const totalPaid = items.reduce(
+          (sum, item) => sum + parseFloat(item?.receipt_credit || 0),
+          0
+        );
+        paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
       });
 
-      // 4️⃣ Update state
-      setEntries(unpaidSales);
-      setFilteredEntries(unpaidSales);
+      // --- 4️⃣ Merge payment info ---
+      const updatedSales = filteredSales
+        .map((sale) => {
+          const formData = sale?.formData || {};
+          const saleBillNo = parseInt(formData?.vno || 0);
+          const saleAmount = parseFloat(formData?.grandtotal || 0);
+          const paidAmount = paymentMap.get(saleBillNo) || 0;
+          const balance = saleAmount - paidAmount;
+
+          return {
+            ...sale,
+            formData: {
+              ...formData,
+              paidAmount,
+              balance,
+            },
+          };
+        })
+        // ✅ Hide fully paid bills
+        .filter((sale) => sale?.formData?.balance > 0.5);
+
+      setEntries(updatedSales);
+      setFilteredEntries(updatedSales);
     } catch (err) {
+      console.error("❌ Fetch Error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fromDate, toDate]);
 
-  fetchEntries();
-}, [fromDate, toDate]);
+  // Fetch initially and when dates change
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
 
   useEffect(() => {
     const filtered = entries.filter((entry) => {
@@ -767,7 +799,8 @@ useEffect(() => {
           <Button variant="secondary" onClick={() => settableModalOpen(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
-        <div
+      {/* Main Table Component  */}
+      <div
           ref={tableRef}
           tabIndex={0}
           style={{ maxHeight: 530, overflowY: "auto", padding: 5, outline: "none" }}
@@ -808,6 +841,8 @@ useEffect(() => {
                 field.toUpperCase()}
               </th>
             ))}
+            <th>Paid</th>
+            <th>Balance</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -869,6 +904,8 @@ useEffect(() => {
                   else if (field === "taxtype") value = formData.stype || "" ;
                   return <td key={field}>{value}</td>;
                 })}
+                <td>{formatAmount(formData?.paidAmount)}</td>
+                <td>{formatAmount(formData?.balance)}</td>
                 <td style={{ textAlign: "center" }}>
                  <Button
                   variant="success"
@@ -911,7 +948,9 @@ useEffect(() => {
               else if (field === "exp10") value = totalexp10.toFixed(2);
               return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
             })}
-             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
           </tr>
         </tfoot>
         </Table>
@@ -920,7 +959,7 @@ useEffect(() => {
       show={showPaymentModal}
       onHide={() => setShowPaymentModal(false)}
       entry={selectedEntry}
-      // onPaymentSaved={fetchBankVouchers} // your refresh function
+      onPaymentSaved={fetchEntries}
     />
 
     </div>

@@ -299,7 +299,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
   // ✅ Auto-fill amount from entry
   useEffect(() => {
     if (entry?.formData?.grandtotal) {
-      setAmount(entry.formData.grandtotal);
+      setAmount(parseFloat(entry.formData.balance).toFixed(2));
     }
   }, [entry]);
 
@@ -344,6 +344,11 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
     setLoading(true);
 
     try {
+      // 🧮 Always format numeric fields to two decimals
+      const formattedAmount = parseFloat(amount || 0).toFixed(2);
+      const formattedDiscount = parseFloat(discount || 0).toFixed(2);
+      const formattedTds = parseFloat(tdsRs || 0).toFixed(2);
+
       const payload = {
         formData: {
           date: new Date().toLocaleDateString("en-GB"),
@@ -351,9 +356,10 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
           voucherno: voucherno,
           user: "Owner",
           totalpayment: "0.00",
-          totalreceipt: amount,
-          totaldiscount: discount,
+          totalreceipt: formattedAmount,
+          totaldiscount: formattedDiscount,
           totalbankcharges: "0.00",
+          againstbillno: formData.vno || "",
         },
         items: [
           {
@@ -363,11 +369,11 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
             Add1: supplier.Add1 || "",
             bsGroup: supplier.bsGroup || "",
             payment_debit: "0.00",
-            receipt_credit: amount,
-            discount,
-            Total: (parseFloat(amount) + parseFloat(discount)).toFixed(2),
+            receipt_credit: formattedAmount,
+            discount: formattedDiscount,
+            Total: (parseFloat(formattedAmount) + parseFloat(formattedDiscount)).toFixed(2),
             bankchargers: "0.00",
-            tdsRs,
+            tdsRs: formattedTds,
             chqnoBank: chqnoBank.startsWith("CH No.")
               ? chqnoBank
               : chqnoBank
@@ -375,7 +381,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
               : "",
             remarks,
             discounted_receipt: (
-              parseFloat(amount) - parseFloat(discount)
+              parseFloat(formattedAmount) - parseFloat(formattedDiscount)
             ).toFixed(2),
             discounted_payment: "0.00",
             destination: supplier.city || "",
@@ -411,6 +417,88 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
     }
   };
 
+  // const handleSavePayment = async () => {
+  //   if (!amount || parseFloat(amount) <= 0) {
+  //     toast.error("Please enter a valid payment amount");
+  //     return;
+  //   }
+
+  //   if (!bankName) {
+  //     toast.error("Bank name is required");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     const payload = {
+  //       formData: {
+  //         date: new Date().toLocaleDateString("en-GB"),
+  //         vtype: "B",
+  //         voucherno: voucherno,
+  //         user: "Owner",
+  //         totalpayment: "0.00",
+  //         totalreceipt: amount,
+  //         totaldiscount: discount,
+  //         totalbankcharges: "0.00",
+  //         againstbillno: formData.vno || "",
+  //       },
+  //       items: [
+  //         {
+  //           id: 1,
+  //           accountname: supplier.vacode || "Unknown",
+  //           pan: supplier.pan || "",
+  //           Add1: supplier.Add1 || "",
+  //           bsGroup: supplier.bsGroup || "",
+  //           payment_debit: "0.00",
+  //           receipt_credit: amount,
+  //           discount,
+  //           Total: (parseFloat(amount) + parseFloat(discount)).toFixed(2),
+  //           bankchargers: "0.00",
+  //           tdsRs,
+  //           chqnoBank: chqnoBank.startsWith("CH No.")
+  //             ? chqnoBank
+  //             : chqnoBank
+  //             ? `CH No. ${chqnoBank}`
+  //             : "",
+  //           remarks,
+  //           discounted_receipt: (
+  //             parseFloat(amount) - parseFloat(discount)
+  //           ).toFixed(2),
+  //           discounted_payment: "0.00",
+  //           destination: supplier.city || "",
+  //           disablePayment: false,
+  //           disableReceipt: true,
+  //         },
+  //       ],
+  //       bankdetails: [
+  //         {
+  //           Bankname: bankName,
+  //           code: 100032,
+  //         },
+  //       ],
+  //     };
+
+  //     const res = await axios.post(
+  //       "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank",
+  //       payload
+  //     );
+
+  //     if (res.status === 200 || res.status === 201) {
+  //       toast.success(`Payment saved! Voucher No: ${voucherno}`);
+  //       onHide();
+  //       if (onPaymentSaved) onPaymentSaved();
+  //     } else {
+  //       toast.error("Failed to save payment");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving payment:", error);
+  //     toast.error("Error saving payment");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   return (
     <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton style={{ backgroundColor: "#e3f2fd" }}>
@@ -425,16 +513,18 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
         ) : entry ? (
           <>
             {/* <p><strong>Voucher No:</strong> {voucherno || "--"}</p> */}
-            <p><strong>Bill No:</strong> {formData.vno}</p>
-            <p><strong>Account Name:</strong> {supplier.vacode}</p>
-            <p><strong>Bill Value:</strong> ₹{formData.grandtotal}</p>
+            <p style={{fontSize:18}}><strong>Bill No:</strong> {formData.vno}</p>
+            <p style={{fontSize:18}}><strong>Account Name:</strong> {supplier.vacode}</p>
+            <p style={{fontSize:18}}><strong>Bill Value:</strong> ₹{formData.grandtotal}</p>
+            <p style={{fontSize:18}}><strong>Balance Value:</strong> ₹{(entry.formData.balance).toFixed(2)}</p>
+           
 
             <hr/>
 
             <Form>
               {/* Row 1 - Payment Amount + Discount (%) */}
               <div className="row" style={{marginTop:"10px"}}>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-2">
                   <Form.Label>Discount (%)</Form.Label>
                   <Form.Control
                     type="number"
@@ -443,7 +533,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
                     placeholder="Enter discount percentage"
                   />
                 </div>
-                 <div className="col-md-6 mb-3">
+                 <div className="col-md-6 mb-2">
                   <Form.Label>Discount (₹)</Form.Label>
                   <Form.Control
                     type="number"
@@ -456,7 +546,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
 
               {/* Row 2 - Discount (₹) + TDS */}
               <div className="row">
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-2">
                   <Form.Label>Receipt Amount</Form.Label>
                   <Form.Control
                     type="number"
@@ -467,7 +557,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
                 </div>
                
 
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-2">
                   <Form.Label>TDS Amount</Form.Label>
                   <Form.Control
                     type="number"
@@ -480,7 +570,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
 
               {/* Row 3 - Cheque No. + Bank Name */}
               <div className="row">
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-2">
                   <Form.Label>Cheque No.</Form.Label>
                   <Form.Control
                     type="text"
@@ -502,7 +592,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
                   />
                 </div>
 
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-2">
                   <Form.Label>Bank Name</Form.Label>
                   <Form.Control
                     type="text"
@@ -513,7 +603,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
               </div>
 
               {/* Remarks */}
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-2">
                 <Form.Label>Remarks</Form.Label>
                 <Form.Control
                   as="textarea"
