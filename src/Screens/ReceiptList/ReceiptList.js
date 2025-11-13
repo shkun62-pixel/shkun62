@@ -429,6 +429,14 @@ const ReceiptList = () => {
 
     // Calculate totals based on filtered data
   const totalGrandTotal = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.grandtotal || 0), 0);
+  const totalPaid = filteredEntries.reduce(
+  (acc, e) => acc + parseFloat(e?.formData?.paidAmount || 0),
+    0
+  );
+  const totalBalance = filteredEntries.reduce(
+    (acc, e) => acc + parseFloat(e?.formData?.balance || 0),
+    0
+  );
   const totalCGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.cgst || 0), 0);
   const totalSGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sgst || 0), 0);
   const totalIGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.igst || 0), 0);
@@ -948,8 +956,12 @@ const ReceiptList = () => {
               else if (field === "exp10") value = totalexp10.toFixed(2);
               return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
             })}
-            <td></td>
-            <td></td>
+            <td style={{ fontWeight: "bold", color: "red" }}>
+                {formatAmount(totalPaid)}
+            </td>
+            <td style={{ fontWeight: "bold", color: "red" }}>
+              {formatAmount(totalBalance)}
+            </td>
             <td></td>
           </tr>
         </tfoot>

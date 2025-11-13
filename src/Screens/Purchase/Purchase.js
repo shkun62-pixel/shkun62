@@ -6455,6 +6455,7 @@ const Purchase = () => {
       Add1: "",
       city: "",
       state: "",
+      bsGroup:"",
       Tcs206c1H: "",
       TDS194Q: "",
     },
@@ -7159,6 +7160,7 @@ const Purchase = () => {
         Add1: "",
         city: "",
         state: "",
+        bsGroup:"",
         Tcs206c1H: "",
         TDS194Q: "",
       },
@@ -7541,6 +7543,7 @@ const Purchase = () => {
           Add1: "",
           city: "",
           state: "",
+          bsGroup:"",
           Tcs206c1H: "",
           TDS194Q: "",
         },
@@ -9085,6 +9088,7 @@ const handleSaveClick = async () => {
         Add1: item.Add1,
         city: item.city,
         state: item.state,
+        bsGroup: item.bsGroup,
         Tcs206c1H: item.Tcs206c1H,
         TDS194Q: item.TDS194Q,
       })),
@@ -9614,6 +9618,7 @@ const handleSaveClick = async () => {
           Add1: selectedProduct.add1,
           city: selectedProduct.city,
           state: selectedProduct.state,
+          bsGroup: selectedProduct.Bsgroup,
           Tcs206c1H: selectedProduct.tcs206,
           TDS194Q: selectedProduct.tds194q,
         };
@@ -9694,6 +9699,7 @@ const handleSaveClick = async () => {
       pan:    product.pan    || '',
       Add1: product.Add1 || '',
       state: product.state    || '',
+      bsGroup: product.Bsgroup || '',
       Tcs206c1H: product.Tcs206c1H    || '',
       TDS194Q: product.TDS194Q    || '',
       
@@ -9819,31 +9825,13 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // useEffect(() => {
-  //   if (formData.date) {
-  //     try {
-  //       // Expecting date in format "DD/MM/YYYY"
-  //       const [day, month, year] = formData.date.split("/").map(Number);
-  //       const date = new Date(year, month - 1, day); // month is 0-based
-  
-  //       if (!isNaN(date.getTime())) {
-  //         setSelectedDate(date);
-  //       } else {
-  //         console.error("Invalid date value in formData.date:", formData.date);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing date:", error);
-  //     }
-  //   } else {
-  //     setSelectedDate(null);
-  //   }
-  // }, [formData.date]);
-
   useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
     if (formData.date) {
       try {
-        const date = new Date(formData.date);
+        // Expecting date in format "DD/MM/YYYY"
+        const [day, month, year] = formData.date.split("/").map(Number);
+        const date = new Date(year, month - 1, day); // month is 0-based
+  
         if (!isNaN(date.getTime())) {
           setSelectedDate(date);
         } else {
@@ -9853,11 +9841,29 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
         console.error("Error parsing date:", error);
       }
     } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
       setSelectedDate(null);
     }
   }, [formData.date]);
+
+  // useEffect(() => {
+  //   // If formData.date has a valid date string, parse it and set selectedDate
+  //   if (formData.date) {
+  //     try {
+  //       const date = new Date(formData.date);
+  //       if (!isNaN(date.getTime())) {
+  //         setSelectedDate(date);
+  //       } else {
+  //         console.error("Invalid date value in formData.date:", formData.date);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error parsing date:", error);
+  //     }
+  //   } else {
+  //     // If there's no date, we keep selectedDate as null so the DatePicker is blank,
+  //     // but we can still have it open on today's date via openToDate
+  //     setSelectedDate(null);
+  //   }
+  // }, [formData.date]);
 
   const [expiredDate, setexpiredDate] = useState(null);
 
@@ -9947,50 +9953,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
     });
   };
-  // INVOICE
-  const [shopName, setShopName] = useState("NARAYAN FRUIT BAR"); // Set default value here
-  const [description, setDescription] = useState(
-    "STOCKISTS IN : FRESH FRUITS ARE AVAIABLE HERE"
-  );
-  const [address, setAddress] = useState(
-    "AMLOH ROAD, OPP. FRIENDS INDS., MANDI GOBINDGARH (PB)"
-  );
-  const [GSTIN, setGSTIN] = useState("07AAAHT5580L1ZX");
-  const [PAN, setPAN] = useState("BNV5855MN6");
-
-  // Function to save data to local storage
-  const saveToLocalStorage = () => {
-    localStorage.setItem("shopName", shopName);
-    localStorage.setItem("description", description);
-    localStorage.setItem("address", address);
-    localStorage.setItem("GSTIN", GSTIN);
-    localStorage.setItem("PAN", PAN);
-  };
-
-  // Function to retrieve data from local storage
-  const getFromLocalStorage = () => {
-    const savedShopName = localStorage.getItem("shopName");
-    const savedDescription = localStorage.getItem("description");
-    const savedAddress = localStorage.getItem("address");
-    const savedGSTIN = localStorage.getItem("GSTIN");
-    const savedPAN = localStorage.getItem("PAN");
-
-    if (savedShopName) setShopName(savedShopName);
-    if (savedDescription) setDescription(savedDescription);
-    if (savedAddress) setAddress(savedAddress);
-    if (savedGSTIN) setGSTIN(savedGSTIN);
-    if (savedPAN) setPAN(savedPAN);
-  };
-
-  useEffect(() => {
-    // Retrieve data from local storage when component mounts
-    getFromLocalStorage();
-  }, []);
-
-  useEffect(() => {
-    // Save data to local storage whenever shopName, description, or address change
-    saveToLocalStorage();
-  }, [shopName, description, address, GSTIN, PAN]);
 
   const [fontSize, setFontSize] = useState(16.5); // Initial font size in pixels
   const increaseFontSize = () => {
@@ -10273,6 +10235,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             Add1: "",
             city: "",
             state: "",
+            bsGroup: "",
             Tcs206c1H: "",
             TDS194Q: "",
           },
@@ -10283,136 +10246,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       console.error("Error fetching data", error);
     }
   };
-
-  // const handleExit = async () => {
-  //   try {
-  //       const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`); // Fetch the latest data
-  //       if (response.status === 200 && response.data.data) {
-  //           // If data is available
-  //           const lastEntry = response.data.data;
-  //           setFormData(lastEntry.formData); // Set form data
-  //           setData1(response.data.data);
-  //           const updateditems = lastEntry.items.map(item => ({
-  //             ...item,
-  //         }));
-  //         const updateditems2 = lastEntry.supplierdetails.map(item => ({
-  //           ...item,
-  //       }));
-  //       setItems(updateditems)
-  //       setsupplierdetails(updateditems2);
-  //       setIsDisabled(true); // Disable fields after loading the data
-  //       setIndex(lastEntry.formData)
-  //       setIsAddEnabled(true);
-  //       setIsSubmitEnabled(false);
-  //       setIsPreviousEnabled(true);
-  //       setIsNextEnabled(true);
-  //       setIsFirstEnabled(true);
-  //       setIsLastEnabled(true);
-  //       setIsSearchEnabled(true);
-  //       setIsSPrintEnabled(true)
-  //       setIsDeleteEnabled(true)
-  //       setTitle("VIEW")
-  //       } else {
-  //           // If no data is available, initialize with default values
-  //           //console.log("No data available");
-  //           const newData = {
-  //             date: "",
-  //             vtype: "P",
-  //             vno: 0,
-  //             vbillno: 0,
-  //             exfor: "",
-  //             trpt: "",
-  //             p_entry: 0,
-  //             stype: "",
-  //             btype: "",
-  //             conv: "",
-  //             vacode1: "",
-  //             rem2: "",
-  //             v_tpt: "",
-  //             broker: "",
-  //             srv_rate: "",
-  //             srv_tax: "",
-  //             tcs1_rate: "",
-  //             tcs1: "",
-  //             tcs206_rate: "",
-  //             tcs206: "",
-  //             duedate: "",
-  //             gr: "",
-  //             tdson: "",
-  //             pcess: "",
-  //             tax: "",
-  //             cess1: "",
-  //             cess2: "",
-  //             sub_total: "",
-  //             exp_before: "",
-  //             Exp_rate6: "",
-  //             Exp_rate7: "",
-  //             Exp_rate8: "",
-  //             Exp_rate9:"",
-  //             Exp_rate10: "",
-  //             Exp6: "",
-  //             Exp7: "'",
-  //             Exp8: "",
-  //             Exp9: "",
-  //             Exp10: "",
-  //             cgst: "",
-  //             sgst: "",
-  //             igst: "",
-  //             expafterGST: "",
-  //             grandtotal: "",
-  //           };
-  //           setFormData(newData); // Set default form data
-  //           setItems([{
-  //             id: 1,
-  //             vcode: "",
-  //             sdisc: "",
-  //             Units:"",
-  //             pkgs: "",
-  //             weight: "",
-  //             rate: 0,
-  //             amount: 0,
-  //             disc:"",
-  //             discount:"",
-  //             gst: 0,
-  //             Pcodes01:"",
-  //             Pcodess:"",
-  //             Scodes01:"",
-  //             Scodess:"",
-  //             Exp_rate1:0,
-  //             Exp_rate2:0,
-  //             Exp_rate3:0,
-  //             Exp_rate4:0,
-  //             Exp_rate5:0,
-  //             Exp1:0,
-  //             Exp2:0,
-  //             Exp3:0,
-  //             Exp4:0,
-  //             Exp5:0,
-  //             exp_before: 0,
-  //             ctax: 0,
-  //             stax: 0,
-  //             itax: 0,
-  //             tariff: "",
-  //             vamt: 0,
-  //           }]);
-  //           setsupplierdetails([{
-  //             Vcode:"",
-  //             vacode: "",
-  //             gstno: "",
-  //             pan: "",
-  //             Add1:"",
-  //             city: "",
-  //             state: "",
-  //             Tcs206c1H:"",
-  //             TDS194Q:"",
-  //           }]);
-
-  //           setIsDisabled(true); // Disable fields after loading the default data
-  //       }
-  //   } catch (error) {
-  //       console.error("Errorss fetching data", error);
-  //   }
-  // };
 
   const advanceRef = useRef(null);
   const twoBRef = useRef(null);

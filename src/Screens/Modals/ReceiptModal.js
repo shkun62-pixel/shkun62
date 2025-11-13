@@ -351,7 +351,7 @@ const ReceiptModal = ({ show, onHide, entry, onPaymentSaved }) => {
 
       const payload = {
         formData: {
-          date: new Date().toLocaleDateString("en-GB"),
+          date: new Date().toLocaleDateString("en-US"),
           vtype: "B",
           voucherno: voucherno,
           user: "Owner",

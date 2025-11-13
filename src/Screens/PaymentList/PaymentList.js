@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState,useRef, useCallback } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,6 +9,7 @@ import { useContext } from "react";
 import useCompanySetup from "../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import PaymentModal from "../Modals/PaymentModal";
 
 const LOCAL_STORAGE_KEY = "PayementListTableData";
 
@@ -186,7 +187,10 @@ const PaymentList = () => {
       localStorage.setItem("FontSizePList", fontSize.toString());
     }, [fontSize]);
 
-
+  // Payement Modal State
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  
   const [activeRowIndex, setActiveRowIndex] = useState(0);
   const tableRef = useRef(null);
   const [entries, setEntries] = useState([]);
@@ -219,33 +223,228 @@ const PaymentList = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
+  const formatAmount = (val) => {
+    const num = parseFloat(val);
+    return isNaN(num) ? "0.00" : num.toFixed(2);
+  };
+
+  const fetchEntries = useCallback(async () => {
     if (!fromDate || !toDate) return;
 
-    const fetchEntries = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
-        if (!response.ok) throw new Error("Failed to fetch data");
+    setLoading(true);
+    try {
+      // --- 1️⃣ Fetch sales ---
+      const saleRes = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`
+      );
+      if (!saleRes.ok) throw new Error("Failed to fetch sale data");
+      const saleData = await saleRes.json();
 
-        const data = await response.json();
-        const filteredData = data.filter((entry) => {
-          const entryDate = new Date(entry.formData?.date);
-          return entryDate >= fromDate && entryDate <= toDate;
-        });
+      // ✅ Helper to parse both ISO and DD/MM/YYYY formats
+      const parseDate = (dateStr) => {
+        if (!dateStr) return null;
 
-        // setEntries(data);
-        setEntries(filteredData);
-        setFilteredEntries(filteredData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+        // ISO or already valid
+        const isoDate = new Date(dateStr);
+        if (!isNaN(isoDate)) return isoDate;
 
-    fetchEntries();
+        // Handle DD/MM/YYYY
+        const parts = dateStr.split("/");
+        if (parts.length === 3) {
+          const [day, month, year] = parts.map((p) => parseInt(p, 10));
+          return new Date(year, month - 1, day);
+        }
+
+        return null;
+      };
+
+      const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
+        (entry) => {
+          const entryDate = parseDate(entry?.formData?.date);
+          return (
+            entryDate &&
+            entryDate >= new Date(fromDate.setHours(0, 0, 0, 0)) &&
+            entryDate <= new Date(toDate.setHours(23, 59, 59, 999))
+          );
+        }
+      );
+
+      // --- 2️⃣ Fetch bank vouchers ---
+      const bankRes = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
+      );
+      if (!bankRes.ok) throw new Error("Failed to fetch bank data");
+      const bankRaw = await bankRes.json();
+
+      const bankData = Array.isArray(bankRaw)
+        ? bankRaw.map((b) => b?.data || b)
+        : [];
+
+      // --- 3️⃣ Create payment map ---
+      const paymentMap = new Map();
+      bankData.forEach((voucher) => {
+        const vForm = voucher?.formData || {};
+        const items = Array.isArray(voucher?.items)
+          ? voucher.items
+          : Array.isArray(voucher?.data?.items)
+          ? voucher.data.items
+          : [];
+
+        const billNo = parseInt(vForm.againstbillno || 0);
+        if (!billNo) return;
+
+        const totalPaid = items.reduce(
+          (sum, item) => sum + parseFloat(item?.payment_debit || 0),
+          0
+        );
+        paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
+      });
+
+      // --- 4️⃣ Merge payment info ---
+      const updatedSales = filteredSales
+        .map((sale) => {
+          const formData = sale?.formData || {};
+          const saleBillNo = parseInt(formData?.vno || 0);
+          const saleAmount = parseFloat(formData?.grandtotal || 0);
+          const paidAmount = paymentMap.get(saleBillNo) || 0;
+          const balance = saleAmount - paidAmount;
+
+          return {
+            ...sale,
+            formData: {
+              ...formData,
+              paidAmount,
+              balance,
+            },
+          };
+        })
+        // ✅ Hide fully paid bills
+        .filter((sale) => sale?.formData?.balance > 0.5);
+
+      setEntries(updatedSales);
+      setFilteredEntries(updatedSales);
+    } catch (err) {
+      console.error("❌ Fetch Error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [fromDate, toDate]);
+
+
+  //  const fetchEntries = useCallback(async () => {
+  //     if (!fromDate || !toDate) return;
+  
+  //     setLoading(true);
+  //     try {
+  //       // --- 1️⃣ Fetch sales ---
+  //       const saleRes = await fetch(
+  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`
+  //       );
+  //       if (!saleRes.ok) throw new Error("Failed to fetch sale data");
+  //       const saleData = await saleRes.json();
+  
+  //       const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
+  //         (entry) => {
+  //           const entryDate = new Date(entry?.formData?.date || "");
+  //           return entryDate >= fromDate && entryDate <= toDate;
+  //         }
+  //       );
+  
+  //       // --- 2️⃣ Fetch bank vouchers ---
+  //       const bankRes = await fetch(
+  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
+  //       );
+  //       if (!bankRes.ok) throw new Error("Failed to fetch bank data");
+  //       const bankRaw = await bankRes.json();
+  
+  //       const bankData = Array.isArray(bankRaw)
+  //         ? bankRaw.map((b) => b?.data || b)
+  //         : [];
+  
+  //       // --- 3️⃣ Create payment map ---
+  //       const paymentMap = new Map();
+  //       bankData.forEach((voucher) => {
+  //         const vForm = voucher?.formData || {};
+  //         const items = Array.isArray(voucher?.items)
+  //           ? voucher.items
+  //           : Array.isArray(voucher?.data?.items)
+  //           ? voucher.data.items
+  //           : [];
+  
+  //         const billNo = parseInt(vForm.againstbillno || 0);
+  //         if (!billNo) return;
+  
+  //         const totalPaid = items.reduce(
+  //           (sum, item) => sum + parseFloat(item?.payment_debit || 0),
+  //           0
+  //         );
+  //         paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
+  //       });
+  
+  //       // --- 4️⃣ Merge payment info ---
+  //       const updatedSales = filteredSales
+  //         .map((sale) => {
+  //           const formData = sale?.formData || {};
+  //           const saleBillNo = parseInt(formData?.vno || 0);
+  //           const saleAmount = parseFloat(formData?.grandtotal || 0);
+  //           const paidAmount = paymentMap.get(saleBillNo) || 0;
+  //           const balance = saleAmount - paidAmount;
+  
+  //           return {
+  //             ...sale,
+  //             formData: {
+  //               ...formData,
+  //               paidAmount,
+  //               balance,
+  //             },
+  //           };
+  //         })
+  //         // ✅ Hide fully paid bills
+  //         .filter((sale) => sale?.formData?.balance > 0.5);
+  
+  //       setEntries(updatedSales);
+  //       setFilteredEntries(updatedSales);
+  //     } catch (err) {
+  //       console.error("❌ Fetch Error:", err);
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }, [fromDate, toDate]);
+  
+    // Fetch initially and when dates change
+    useEffect(() => {
+      fetchEntries();
+    }, [fetchEntries]);
+
+  // useEffect(() => {
+  //   if (!fromDate || !toDate) return;
+
+  //   const fetchEntries = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
+  //       if (!response.ok) throw new Error("Failed to fetch data");
+
+  //       const data = await response.json();
+  //       const filteredData = data.filter((entry) => {
+  //         const entryDate = new Date(entry.formData?.date);
+  //         return entryDate >= fromDate && entryDate <= toDate;
+  //       });
+
+  //       // setEntries(data);
+  //       setEntries(filteredData);
+  //       setFilteredEntries(filteredData);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchEntries();
+  // }, [fromDate, toDate]);
 
   useEffect(() => {
     const filtered = entries.filter((entry) => {
@@ -320,6 +519,15 @@ const PaymentList = () => {
 
   // Calculate totals based on filtered data
   const totalGrandTotal = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.grandtotal || 0), 0);
+  const totalPaid = filteredEntries.reduce(
+  (acc, e) => acc + parseFloat(e?.formData?.paidAmount || 0),
+    0
+  );
+  const totalBalance = filteredEntries.reduce(
+    (acc, e) => acc + parseFloat(e?.formData?.balance || 0),
+    0
+  );
+
   const totalCGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.cgst || 0), 0);
   const totalSGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sgst || 0), 0);
   const totalIGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.igst || 0), 0);
@@ -732,6 +940,8 @@ const PaymentList = () => {
                 field.toUpperCase()}
               </th>
             ))}
+            <th>Paid</th>
+            <th>Balance</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -792,24 +1002,22 @@ const PaymentList = () => {
                   else if (field === "taxtype") value = formData.stype || "" ;
                   return <td key={field}>{value}</td>;
                 })}
-               <td style={{ textAlign: "center" }}>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: "bold",
-                      padding: "4px 10px",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevents row click event
-                      alert(`Make payment for Bill No: ${formData.vno}`);
-                    }}
-                  >
-                    Make Payment
-                  </Button>
-               </td>
-
+                <td>{formatAmount(formData?.paidAmount)}</td>
+                <td>{formatAmount(formData?.balance)}</td>
+                <td style={{ textAlign: "center" }}>
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedEntry(entry);
+                    console.log("Selected entry:", entry);
+                    setShowPaymentModal(true);
+                  }}
+                >
+                  Make Payment
+                </Button>
+                </td>
               </tr>
             );
           })}
@@ -838,11 +1046,23 @@ const PaymentList = () => {
               else if (field === "exp10") value = totalexp10.toFixed(2);
               return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
             })}
+             <td style={{ fontWeight: "bold", color: "red" }}>
+                {formatAmount(totalPaid)}
+              </td>
+              <td style={{ fontWeight: "bold", color: "red" }}>
+                {formatAmount(totalBalance)}
+              </td>
             <td></td>
           </tr>
         </tfoot>
         </Table>
       </div>
+        <PaymentModal
+        show={showPaymentModal}
+        onHide={() => setShowPaymentModal(false)}
+        entry={selectedEntry}
+        onPaymentSaved={fetchEntries}
+      />
     </div>
   );
 };

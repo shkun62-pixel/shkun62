@@ -78,39 +78,68 @@ const PrintList = React.forwardRef(({
           else if (field === "broker") row["Broker"] = formData.broker || "";
           else if (field === "taxtype") row["TaxType"] = formData.stype || "";
         });
-
+          row["Paid"] = parseFloat(formData.paidAmount) || 0;
+          row["Balance"] = parseFloat(formData.balance) || 0;
         return row;
       });
 
       if (exportData.length === 0) return;
 
-      const header = sortedVisibleFields.map(field => {
-        if (field === "date") return "Date";
-        if (field === "billno") return "Bill No.";
-        if (field === "accountname") return "A/C Name";
-        if (field === "weight") return "Qty";
-        if (field === "pcs") return "Pcs";
-        if (field === "city") return "City";
-        if (field === "gstin") return "Gstin";
-        if (field === "netvalue") return "Net Sale";
-        if (field === "cgst") return "C.Tax";
-        if (field === "sgst") return "S.Tax";
-        if (field === "igst") return "I.Tax";
-        if (field === "value") return "Bill Amount";
-        if (field.startsWith("exp")) return `Exp ${field.replace("exp", "")}`;
-        if (field === "description") return "Description";
-        if (field === "vehicleno") return "VehicleNo";
-        if (field === "remarks") return "Remarks";
-        if (field === "transport") return "Transport";
-        if (field === "broker") return "Broker";
-        if (field === "taxtype") return "TaxType";
-        return field.toUpperCase();
-      });
+      const header = [
+        ...sortedVisibleFields.map(field => {
+          if (field === "date") return "Date";
+          if (field === "billno") return "Bill No.";
+          if (field === "accountname") return "A/C Name";
+          if (field === "weight") return "Qty";
+          if (field === "pcs") return "Pcs";
+          if (field === "city") return "City";
+          if (field === "gstin") return "Gstin";
+          if (field === "netvalue") return "Net Sale";
+          if (field === "cgst") return "C.Tax";
+          if (field === "sgst") return "S.Tax";
+          if (field === "igst") return "I.Tax";
+          if (field === "value") return "Bill Amount";
+          if (field.startsWith("exp")) return `Exp ${field.replace("exp", "")}`;
+          if (field === "description") return "Description";
+          if (field === "vehicleno") return "VehicleNo";
+          if (field === "remarks") return "Remarks";
+          if (field === "transport") return "Transport";
+          if (field === "broker") return "Broker";
+          if (field === "taxtype") return "TaxType";
+          return field.toUpperCase();
+        }),
+        // ✅ Add headers for new columns
+        "Paid",
+        "Balance"
+      ];
+
+      // const header = sortedVisibleFields.map(field => {
+      //   if (field === "date") return "Date";
+      //   if (field === "billno") return "Bill No.";
+      //   if (field === "accountname") return "A/C Name";
+      //   if (field === "weight") return "Qty";
+      //   if (field === "pcs") return "Pcs";
+      //   if (field === "city") return "City";
+      //   if (field === "gstin") return "Gstin";
+      //   if (field === "netvalue") return "Net Sale";
+      //   if (field === "cgst") return "C.Tax";
+      //   if (field === "sgst") return "S.Tax";
+      //   if (field === "igst") return "I.Tax";
+      //   if (field === "value") return "Bill Amount";
+      //   if (field.startsWith("exp")) return `Exp ${field.replace("exp", "")}`;
+      //   if (field === "description") return "Description";
+      //   if (field === "vehicleno") return "VehicleNo";
+      //   if (field === "remarks") return "Remarks";
+      //   if (field === "transport") return "Transport";
+      //   if (field === "broker") return "Broker";
+      //   if (field === "taxtype") return "TaxType";
+      //   return field.toUpperCase();
+      // });
 
       const numericFields = [
         "Qty", "Pcs", "Net Sale", "C.Tax", "S.Tax", "I.Tax", "Bill Amount",
         "Exp 1", "Exp 2", "Exp 3", "Exp 4", "Exp 5",
-        "Exp 6", "Exp 7", "Exp 8", "Exp 9", "Exp 10"
+        "Exp 6", "Exp 7", "Exp 8", "Exp 9", "Exp 10","Paid", "Balance"
       ];
 
       const totals = {};
@@ -148,7 +177,7 @@ const PrintList = React.forwardRef(({
         if (h === "A/C Name") return { wch: 45 };
         if (h === "City") return { wch: 20 };
         if (h === "Gstin") return { wch: 20 };
-        if (h === "Net Sale" || h === "Bill Amount") return { wch: 15 };
+        if (h === "Net Sale" || h === "Bill Amount" || h === "Paid" || h === "Balance") return { wch: 15 }; // ✅ adjusted
         if (h.startsWith("Exp")) return { wch: 10 };
         return { wch: 15 };
       });
@@ -357,6 +386,8 @@ const PrintList = React.forwardRef(({
                 field.toUpperCase()}
               </th>
             ))}
+            <th style={thStyle}>Paid</th>
+            <th style={thStyle}>Balance</th>
             </tr>
           </thead>
           <tbody>
@@ -366,6 +397,10 @@ const PrintList = React.forwardRef(({
               const item = entry.items?.[0] || {};
               const totalItemWeight = entry.items?.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(3);
               const totalItemPkgs = entry.items?.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(3);
+              const formatAmount = (amt) => {
+                const num = parseFloat(amt || 0);
+                return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              };
               return (
                 <tr key={index} style={{fontWeight:fontWeight}}>
                    {sortedVisibleFields.map((field) => {
@@ -400,6 +435,8 @@ const PrintList = React.forwardRef(({
                   else if (field === "taxtype") value = formData.stype || "" ;
                   return <td style={tdStyle} key={field}>{value}</td>;
                 })}
+                <td style={tdRight}>{formatAmount(formData?.paidAmount)}</td>
+                <td style={tdRight}>{formatAmount(formData?.balance)}</td>
                 </tr>
               );
             })}
@@ -428,6 +465,12 @@ const PrintList = React.forwardRef(({
               else if (field === "exp10") value = items.reduce((a, b) => a + (parseFloat(b.formData?.Exp10 || 0)), 0).toFixed(2);
               return <td key={field} style={tdStyle}>{value}</td>;
             })}
+            <td style={tdRight}>
+              {items.reduce((a, b) => a + (parseFloat(b.formData?.paidAmount) || 0), 0).toFixed(2)}
+            </td>
+            <td style={tdRight}>
+              {items.reduce((a, b) => a + (parseFloat(b.formData?.balance) || 0), 0).toFixed(2)}
+            </td>
             </tr>
           </tfoot>
           </table>
