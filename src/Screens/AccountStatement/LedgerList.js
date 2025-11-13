@@ -493,7 +493,7 @@ const LedgerList = () => {
 
     // heights & offsets
     const headerOffset = 40; // Adjust to match your modal header height
-    const buffer = 12;       // Space above/below so row is clearly visible
+    const buffer = 18;       // Space above/below so row is clearly visible
 
     const rowTop = selectedRow.offsetTop;
     const rowBottom = rowTop + selectedRow.offsetHeight;

@@ -533,14 +533,19 @@ const TrailBalance = () => {
     if (!transactions.length || !showModal) return;
 
     if (e.key === "ArrowUp") {
-      setActiveRowIndex((prev) =>
-        prev > 0 ? prev - 1 : transactions.length - 1 // 🔁 jump to last
-      );
+      setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
     } else if (e.key === "ArrowDown") {
       setActiveRowIndex((prev) =>
-        prev < transactions.length - 1 ? prev + 1 : 0 // 🔁 jump to first
+        prev < transactions.length - 1 ? prev + 1 : prev
       );
-    } else if (e.key === "Enter") {
+    } else if (e.key === "PageUp") {
+      // Jump to first entry
+      setActiveRowIndex(0);
+    } else if (e.key === "PageDown") {
+      // Jump to last entry
+      setActiveRowIndex(transactions.length - 1);
+    }
+    else if (e.key === "Enter") {
       const entry = transactions[activeRowIndex];
       handleTransactionSelect(entry);
     } else if (e.key === "Escape") {
@@ -551,28 +556,6 @@ const TrailBalance = () => {
   window.addEventListener("keydown", handleKeyDown);
   return () => window.removeEventListener("keydown", handleKeyDown);
 }, [transactions, activeRowIndex, showModal]);
-
-  // useEffect(() => {
-  //   const handleKeyDown = (e) => {
-  //     if (!transactions.length || !showModal) return; // ✅ Only when modal is open
-
-  //     if (e.key === "ArrowUp") {
-  //       setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  //     } else if (e.key === "ArrowDown") {
-  //       setActiveRowIndex((prev) =>
-  //         prev < transactions.length - 1 ? prev + 1 : prev
-  //       );
-  //     } else if (e.key === "Enter") {
-  //       const entry = transactions[activeRowIndex];
-  //       handleTransactionSelect(entry); // ✅ Navigate
-  //     } else if (e.key === "Escape") {
-  //       setShowModal(false); // ✅ Close modal
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleKeyDown);
-  //   return () => window.removeEventListener("keydown", handleKeyDown);
-  // }, [transactions, activeRowIndex, showModal]);
 
   // Handle keyboard navigation for LedgerList
 useEffect(() => {
@@ -589,43 +572,53 @@ useEffect(() => {
         );
       } else if (e.key === "Enter") {
         const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-        // setShowGroupModal(false);
         fetchLedgerTransactions(selectedLedger);
       } 
-      // else if (e.key === "Escape") {
-      //   setShowGroupModal(false);
-      // }
-
       return; // 🔹 stop further handling
     }
 
     // 🔹 Account Statement modal navigation
-    if (showModal && transactions.length) {
-      e.preventDefault();
-      if (e.key === "ArrowUp") {
-        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
-      } else if (e.key === "ArrowDown") {
-        setActiveRowIndex((prev) =>
-          prev < transactions.length - 1 ? prev + 1 : prev
-        );
-      } else if (e.key === "Escape") {
-        setShowModal(false);
-      }
+    // if (showModal && transactions.length) {
+    //   e.preventDefault();
 
-      return;
-    }
+    //   if (e.key === "ArrowUp") {
+    //     setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    //   } else if (e.key === "ArrowDown") {
+    //     setActiveRowIndex((prev) =>
+    //       prev < transactions.length - 1 ? prev + 1 : prev
+    //     );
+    //   } else if (e.key === "PageUp") {
+    //     // Jump to first entry
+    //     setActiveRowIndex(0);
+    //   } else if (e.key === "PageDown") {
+    //     // Jump to last entry
+    //     setActiveRowIndex(transactions.length - 1);
+    //   } else if (e.key === "Escape") {
+    //     setShowModal(false);
+    //   }
+
+    //   return;
+    // }
+
 
     // 🔹 Main ledger table navigation
     if (!showModal && filteredLedgers.length) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % filteredLedgers.length);
+         setSelectedIndex((prev) =>
+          prev < filteredLedgers.length - 1 ? prev + 1 : prev
+        );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev === 0 ? filteredLedgers.length - 1 : prev - 1
-        );
-      } else if (e.key === "Enter") {
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      }else if (e.key === "PageUp") {
+        // Jump to first entry
+        setSelectedIndex(0);
+      } else if (e.key === "PageDown") {
+        // Jump to last entry
+        setSelectedIndex(filteredLedgers.length - 1);
+      }
+      else if (e.key === "Enter") {
         const ledger = filteredLedgers[selectedIndex];
         openLedgerDetails(ledger);
       } else if (e.key === "F3") {
@@ -656,59 +649,112 @@ useEffect(() => {
   activeGroupIndex,
 ]);
 
+  // ✅ Auto-scroll ledger list to keep selected row fully visible
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // --- adjust for your table header height ---
+    const headerOffset = 40; // px — tweak if your header is taller
+    const buffer = 25;       // space above/below row so it's fully visible
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    const visibleTop = container.scrollTop + headerOffset + buffer;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    if (rowBottom > visibleBottom) {
+      // Scroll down enough to show the whole row
+      const newScrollTop = rowBottom - containerHeight + buffer * 2;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    } else if (rowTop < visibleTop) {
+      // Scroll up enough so header doesn’t hide it
+      const newScrollTop = rowTop - headerOffset - buffer;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [selectedIndex, filteredLedgers]);
+
+  // ✅ Auto-scroll inside ACCOUNT STATEMENT modal
+  useEffect(() => {
+    if (!showModal || !txnContainerRef.current) return;
+
+    const container = txnContainerRef.current;
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(activeRowIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // heights & offsets
+    const headerOffset = 40; // Adjust to match your modal header height
+    const buffer = 18;       // Space above/below so row is clearly visible
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // The currently visible top & bottom inside the scrollable container
+    const visibleTop = container.scrollTop + headerOffset + buffer;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    // scroll adjustments
+    if (rowBottom > visibleBottom) {
+      // Scroll just enough so full row + buffer fits
+      const newScrollTop = rowBottom - containerHeight + buffer * 2;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    } else if (rowTop < visibleTop) {
+      const newScrollTop = rowTop - headerOffset - buffer;
+      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [activeRowIndex, showModal, filteredTransactions]);
+
   // Open modal and fetch transactions
- const openLedgerDetails = (ledger) => {
-  if (ledger.groupedLedgers) {
-    setGroupedLedgersToPick(ledger.groupedLedgers);
-    setCurrentGroupName(ledger.formData.ahead); // 🔹 store group name
-    setShowGroupModal(true);
-  } else {
-    fetchLedgerTransactions(ledger);
-  }
-};
+  const openLedgerDetails = (ledger) => {
+    if (ledger.groupedLedgers) {
+      setGroupedLedgersToPick(ledger.groupedLedgers);
+      setCurrentGroupName(ledger.formData.ahead); // 🔹 store group name
+      setShowGroupModal(true);
+    } else {
+      fetchLedgerTransactions(ledger);
+    }
+  };
 
-// const fetchLedgerTransactions = (ledger) => {
-//   setSelectedLedger(ledger);
-//   axios
-//     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-//     .then((res) => {
-//       const allTxns = res.data.data || [];
-//       const ledgerTxns = allTxns.flatMap((entry) =>
-//         entry.transactions.filter(
-//           (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-//         )
-//       );
-//       setTransactions(ledgerTxns);
-//       setShowModal(true);
-//     })
-//     .catch((err) => console.error(err));
-// };
-const fetchLedgerTransactions = (ledger) => {
-  setSelectedLedger(ledger);
-  axios
-    .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-    .then((res) => {
-      const allTxns = res.data.data || [];
+  const fetchLedgerTransactions = (ledger) => {
+    setSelectedLedger(ledger);
+    axios
+      .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+      .then((res) => {
+        const allTxns = res.data.data || [];
 
-      // Flatten transactions and attach saleId from parent voucher
-      const ledgerTxns = allTxns.flatMap((entry) =>
-        entry.transactions
-          .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
-          .map((txn) => ({
-            ...txn,
-            saleId: entry.saleId || null,   // attach saleId for Sales
-            purId: entry.purchaseId || null,  
-            bankId: entry.bankId || null,  
-            cashId: entry.cashId || null,  
-            journalId: entry.journalId || null,  
-          }))
-      );
+        // Flatten transactions and attach saleId from parent voucher
+        const ledgerTxns = allTxns.flatMap((entry) =>
+          entry.transactions
+            .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
+            .map((txn) => ({
+              ...txn,
+              saleId: entry.saleId || null,   // attach saleId for Sales
+              purId: entry.purchaseId || null,  
+              bankId: entry.bankId || null,  
+              cashId: entry.cashId || null,  
+              journalId: entry.journalId || null,  
+            }))
+        );
 
-      setTransactions(ledgerTxns);
-      setShowModal(true);
-    })
-    .catch((err) => console.error(err));
-};
+        setTransactions(ledgerTxns);
+        setShowModal(true);
+      })
+      .catch((err) => console.error(err));
+  };
   // For calculating net pcs and weight
   useEffect(() => {
     // Fetch all transactions once
@@ -1353,33 +1399,6 @@ const fetchLedgerTransactions = (ledger) => {
     saveAs(blob, `${selectedLedger?.formData?.ahead || "Account"}_COA.xlsx`);
   };
 
-// logic for BsGroup Annexure Modal
-// useEffect(() => {
-//   const handleGroupModalKeyDown = (e) => {
-//     if (!showGroupModal || !groupedLedgersToPick.length) return;
-
-//     e.preventDefault(); // 🔹 prevent background scrolling or default browser behavior
-
-//     if (e.key === "ArrowDown") {
-//       setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
-//     } else if (e.key === "ArrowUp") {
-//       setActiveGroupIndex((prev) =>
-//         prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
-//       );
-//     } else if (e.key === "Enter") {
-//       const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-//       // setShowGroupModal(false);
-//       fetchLedgerTransactions(selectedLedger);
-//     } 
-//     // else if (e.key === "Escape") {
-//     //   setShowGroupModal(false);
-//     // }
-//   };
-
-//   window.addEventListener("keydown", handleGroupModalKeyDown);
-//   return () => window.removeEventListener("keydown", handleGroupModalKeyDown);
-// }, [showGroupModal, groupedLedgersToPick, activeGroupIndex]);
-
 const groupTotals = useMemo(() => {
   let debit = 0, credit = 0;
   selectedGroupRows.forEach((index) => {
@@ -1392,75 +1411,6 @@ const groupTotals = useMemo(() => {
   });
   return { debit, credit };
 }, [selectedGroupRows, groupedLedgersToPick]);
-
-  // ✅ Auto-scroll ledger list to keep selected row fully visible
-  useEffect(() => {
-    const container = tableContainerRef.current;
-    if (!container) return;
-
-    const rows = container.querySelectorAll("tbody tr");
-    if (!rows.length) return;
-
-    const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
-    const selectedRow = rows[idx];
-    if (!selectedRow) return;
-
-    // --- adjust for your table header height ---
-    const headerOffset = 40; // px — tweak if your header is taller
-    const buffer = 25;       // space above/below row so it's fully visible
-
-    const rowTop = selectedRow.offsetTop;
-    const rowBottom = rowTop + selectedRow.offsetHeight;
-    const containerHeight = container.clientHeight;
-
-    const visibleTop = container.scrollTop + headerOffset + buffer;
-    const visibleBottom = container.scrollTop + containerHeight - buffer;
-
-    if (rowBottom > visibleBottom) {
-      // Scroll down enough to show the whole row
-      const newScrollTop = rowBottom - containerHeight + buffer * 2;
-      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
-    } else if (rowTop < visibleTop) {
-      // Scroll up enough so header doesn’t hide it
-      const newScrollTop = rowTop - headerOffset - buffer;
-      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
-    }
-  }, [selectedIndex, filteredLedgers]);
-
-  // ✅ Auto-scroll inside ACCOUNT STATEMENT modal
-  useEffect(() => {
-    if (!showModal || !txnContainerRef.current) return;
-
-    const container = txnContainerRef.current;
-    const rows = container.querySelectorAll("tbody tr");
-    if (!rows.length) return;
-
-    const idx = Math.max(0, Math.min(activeRowIndex, rows.length - 1));
-    const selectedRow = rows[idx];
-    if (!selectedRow) return;
-
-    // heights & offsets
-    const headerOffset = 40; // Adjust to match your modal header height
-    const buffer = 25;       // Space above/below so row is clearly visible
-
-    const rowTop = selectedRow.offsetTop;
-    const rowBottom = rowTop + selectedRow.offsetHeight;
-    const containerHeight = container.clientHeight;
-
-    // The currently visible top & bottom inside the scrollable container
-    const visibleTop = container.scrollTop + headerOffset + buffer;
-    const visibleBottom = container.scrollTop + containerHeight - buffer;
-
-    // scroll adjustments
-    if (rowBottom > visibleBottom) {
-      // Scroll just enough so full row + buffer fits
-      const newScrollTop = rowBottom - containerHeight + buffer * 2;
-      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
-    } else if (rowTop < visibleTop) {
-      const newScrollTop = rowTop - headerOffset - buffer;
-      container.scrollTo({ top: newScrollTop, behavior: "smooth" });
-    }
-  }, [activeRowIndex, showModal, filteredTransactions]);
 
   return (
     <div style={{ padding: "10px" }}>
