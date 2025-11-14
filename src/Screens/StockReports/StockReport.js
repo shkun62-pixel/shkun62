@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./StockReport.module.css";
 import { Button, Card } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
@@ -6,6 +6,7 @@ import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import StockRpPrint from "./StockRpPrint";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -38,6 +39,12 @@ const StockReport = () => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  // Active Row 
+  const tableContainerRef = useRef(null);
+  const [activeRow, setActiveRow] = useState(0);
+  const navigate = useNavigate();
+
 
   // Fetch unique Aheads list
   useEffect(() => {
@@ -101,7 +108,8 @@ const StockReport = () => {
                 isWithinDateRange(purchase.formData.date)
             )
             .map((item) => ({
-              id: `purchase-${purchase.id}-${item.id}`,
+              id: item.id,            // item number
+              docId: purchase._id,    // Mongo document ID
               type: "purchase",
               date: new Date(purchase.formData.date),
               sdisc: purchase.supplierdetails?.[0]?.vacode || "",
@@ -118,7 +126,8 @@ const StockReport = () => {
                 isWithinDateRange(sale.formData.date)
             )
             .map((item) => ({
-              id: `sale-${sale.id}-${item.id}`,
+              id: item.id,          // item number
+              docId: sale._id,      // Mongo document ID
               type: "sale",
               date: new Date(sale.formData.date),
               sdisc: sale.customerDetails?.[0]?.vacode || "",
@@ -126,6 +135,41 @@ const StockReport = () => {
               sale: parseFloat(item.weight),
             }))
         );
+
+
+        // const purchases = purchaseRes.data.flatMap((purchase) =>
+        //   purchase.items
+        //     .filter(
+        //       (item) =>
+        //         item.sdisc?.trim().toLowerCase() === normalizedAhead &&
+        //         isWithinDateRange(purchase.formData.date)
+        //     )
+        //     .map((item) => ({
+        //       id: `purchase-${purchase.id}-${item.id}`,
+        //       type: "purchase",
+        //       date: new Date(purchase.formData.date),
+        //       sdisc: purchase.supplierdetails?.[0]?.vacode || "",
+        //       purRec: parseFloat(item.weight),
+        //       sale: 0,
+        //     }))
+        // );
+
+        // const sales = saleRes.data.flatMap((sale) =>
+        //   sale.items
+        //     .filter(
+        //       (item) =>
+        //         item.sdisc?.trim().toLowerCase() === normalizedAhead &&
+        //         isWithinDateRange(sale.formData.date)
+        //     )
+        //     .map((item) => ({
+        //       id: `sale-${sale.id}-${item.id}`,
+        //       type: "sale",
+        //       date: new Date(sale.formData.date),
+        //       sdisc: sale.customerDetails?.[0]?.vacode || "",
+        //       purRec: 0,
+        //       sale: parseFloat(item.weight),
+        //     }))
+        // );
 
         setPurchaseItems(purchases);
         setSaleItems(sales);
@@ -186,6 +230,111 @@ const StockReport = () => {
 
   fetchInitialAfromDate(); // Run once when component mounts
   }, []);
+
+//   useEffect(() => {
+//   const handleKeyDown = (e) => {
+//     if (items.length === 0) return;
+
+//     if (e.key === "ArrowDown") {
+//       setActiveRow((prev) => Math.min(prev + 1, items.length - 1));
+//     } 
+//     else if (e.key === "ArrowUp") {
+//       setActiveRow((prev) => Math.max(prev - 1, 0));
+//     }
+//     else if (e.key === "Enter") {
+//       const row = items[activeRow];
+//       if (!row) return;
+
+//       alert("Document _id: " + row.docId);
+//     }
+//   };
+
+//   window.addEventListener("keydown", handleKeyDown);
+//   return () => window.removeEventListener("keydown", handleKeyDown);
+// }, [items, activeRow]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (items.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        setActiveRow((prev) => Math.min(prev + 1, items.length - 1));
+      } 
+      else if (e.key === "ArrowUp") {
+        setActiveRow((prev) => Math.max(prev - 1, 0));
+      }
+      else if (e.key === "Enter") {
+        const row = items[activeRow];
+        if (!row) return;
+
+        // 🔥 Navigation Logic
+        if (row.type === "sale") {
+          navigate("/sale", {
+            state: {
+              saleId: row.docId
+            }
+          });
+        }
+        else if (row.type === "purchase") {
+          navigate("/purchase", {
+            state: {
+              purId: row.docId
+            }
+          });
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [items, activeRow]);
+
+  // Auto -scroll effect
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(activeRow, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // Adjust for header height (if your thead is sticky)
+    const headerOffset = 40;  // Adjust if your header height is different
+    const buffer = 25;        // Extra space above/below row
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+
+    const containerHeight = container.clientHeight;
+    const visibleTop = container.scrollTop + buffer + headerOffset;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    // If row is below visible area → scroll down
+    if (rowBottom > visibleBottom) {
+      const newScroll =
+        rowBottom - containerHeight + buffer * 2;
+
+      container.scrollTo({
+        top: newScroll,
+        behavior: "smooth",
+      });
+    }
+
+    // If row is above visible area → scroll up
+    else if (rowTop < visibleTop) {
+      const newScroll =
+        rowTop - headerOffset - buffer;
+
+      container.scrollTo({
+        top: newScroll,
+        behavior: "smooth",
+      });
+    }
+  }, [activeRow, items]);
+
 
   return (
     <div style={{ padding: "10px" }}>
@@ -295,7 +444,7 @@ const StockReport = () => {
           <span style={{ marginLeft: 10 }}>Loading...</span>
         </div>
       ) : (
-        <div className={styles.TableDIV}>
+        <div ref={tableContainerRef} className={styles.TableDIV}>
           <Table className="custom-table">
             <thead
               style={{
@@ -316,128 +465,30 @@ const StockReport = () => {
                 <th>CLOSING</th>
               </tr>
             </thead>
-            <tbody
-              style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}
-            >
+           <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
               {items.map((item, index) => (
-                <tr key={item.id}>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                      }}
-                      type="text"
-                      value={item.date}
-                      readOnly
-                    />
-                  </td>
-                  <td style={{ padding: 0, width: 400 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                      }}
-                      maxLength={48}
-                      value={item.sdisc}
-                    />
-                  </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.opening}
-                    />
-                  </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.purRec} // Show raw value during input
-                    />
-                  </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.production} // Show raw value during input
-                    />
-                  </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.issue} // Show raw value during input
-                    />
-                  </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      maxLength={48}
-                      value={item.sale}
-                    />
-                  </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.closing}
-                    />
-                  </td>
+                <tr
+                  key={item.id}
+                  style={{
+                    backgroundColor: activeRow === index ? "#ffe08a" : "white",
+                    fontWeight: activeRow === index ? "bold" : "normal",
+                    cursor: "pointer",
+                    transition: "0.2s",
+                  }}
+                  onClick={() => setActiveRow(index)}
+                >
+                  <td className={styles.font} style={{ padding: "8px" }}>{item.date}</td>
+                  <td className={styles.font} style={{ padding: "8px" }}>{item.sdisc}</td>
+                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.opening}</td>
+                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.purRec}</td>
+                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.production}</td>
+                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.issue}</td>
+                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.sale}</td>
+                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.closing}</td>
                 </tr>
               ))}
-            </tbody>
+           </tbody>
+
           </Table>
         </div>
       )}

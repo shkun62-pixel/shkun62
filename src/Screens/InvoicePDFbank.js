@@ -109,6 +109,7 @@ const InvoicePDFbank = React.forwardRef(({
               borderRadius: "5px",
               boxSizing: "border-box",
               marginTop: 5,
+              fontFamily: "Courier New"
             }}
           >
             {chunks.map((chunk, pageIndex) => (
@@ -172,7 +173,7 @@ const InvoicePDFbank = React.forwardRef(({
                             flexDirection:"column"
                           }}
                         >
-                          {item.accountname}
+                          <span style={{fontWeight:'bold'}}>{item.accountname}</span>
                           <div style={{display:'flex',flexDirection:'row'}}>
                                 <span>{item.chqnoBank}</span>
                                 <span style={{marginLeft:10}}>{item.remarks}</span>
@@ -241,10 +242,10 @@ const InvoicePDFbank = React.forwardRef(({
                     </tr>
                   </tfoot>
                 </table>
-                <div style={{display:"flex",flexDirection:"row",marginTop:60}}>
-                    <text style={{fontSize:25,fontFamily:'serif',marginLeft:20}}>Cashier</text>
-                    <text style={{fontSize:25,marginLeft:"32%",fontFamily:'serif'}}>Accountant</text>
-                    <text style={{fontSize:25,marginLeft:"32%",fontFamily:'serif'}}>Manager</text>
+                <div style={{display:"flex",flexDirection:"row",marginTop:60,fontFamily: "Courier New",justifyContent:'space-between'}}>
+                    <text style={{fontSize:25,marginLeft:10}}>Cashier</text>
+                    <text style={{fontSize:25}}>Accountant</text>
+                    <text style={{fontSize:25, marginRight:10}}>Manager</text>
                 </div>
                 {/* <div style={{ fontSize: "12px" }}>
                   <text>Footer content specific to page {pageIndex + 1}</text>

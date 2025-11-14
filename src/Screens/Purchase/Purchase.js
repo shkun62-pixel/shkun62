@@ -9828,14 +9828,21 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
   useEffect(() => {
     if (formData.date) {
       try {
-        // Expecting date in format "DD/MM/YYYY"
-        const [day, month, year] = formData.date.split("/").map(Number);
-        const date = new Date(year, month - 1, day); // month is 0-based
-  
+        let date;
+
+        // Check for dd/mm/yyyy
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(formData.date)) {
+          const [day, month, year] = formData.date.split("/").map(Number);
+          date = new Date(year, month - 1, day); // JS months are 0-based
+        } else {
+          // Otherwise try normal parsing (ISO etc.)
+          date = new Date(formData.date);
+        }
+
         if (!isNaN(date.getTime())) {
           setSelectedDate(date);
         } else {
-          console.error("Invalid date value in formData.date:", formData.date);
+          console.error("Invalid date value:", formData.date);
         }
       } catch (error) {
         console.error("Error parsing date:", error);
@@ -9845,25 +9852,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }
   }, [formData.date]);
 
-  // useEffect(() => {
-  //   // If formData.date has a valid date string, parse it and set selectedDate
-  //   if (formData.date) {
-  //     try {
-  //       const date = new Date(formData.date);
-  //       if (!isNaN(date.getTime())) {
-  //         setSelectedDate(date);
-  //       } else {
-  //         console.error("Invalid date value in formData.date:", formData.date);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing date:", error);
-  //     }
-  //   } else {
-  //     // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-  //     // but we can still have it open on today's date via openToDate
-  //     setSelectedDate(null);
-  //   }
-  // }, [formData.date]);
 
   const [expiredDate, setexpiredDate] = useState(null);
 

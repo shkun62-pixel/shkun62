@@ -60,7 +60,8 @@ const CashVoucher = () => {
     // since without a tenant you can’t hit the right API
     console.error("No tenant selected!");
   }
-      
+
+  const [narrationSuggestions, setNarrationSuggestions] = useState([]);
   const tableRef = useRef(null);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -706,6 +707,28 @@ const CashVoucher = () => {
     }));
   };
 
+  const fetchNarrations = async () => {
+    try {
+      const res = await fetch(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash"
+      );
+      const data = await res.json();
+
+      // extract narrations from all items
+      const narrs = data
+        .flatMap(entry => entry.items || [])
+        .map(item => item.narration)
+        .filter(n => n && n.trim() !== "");  // remove empty narrations
+
+      // unique values
+      const uniqueNarrs = [...new Set(narrs)];
+
+      setNarrationSuggestions(uniqueNarrs);
+    } catch (err) {
+      console.error("Narration fetch failed:", err);
+    }
+  };
+
   const handleNumberChange = (event, index, field) => {
     const value = event.target.value;
     if (!/^\d*\.?\d*$/.test(value)) {
@@ -742,6 +765,7 @@ const CashVoucher = () => {
   React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchCustomers();
+    fetchNarrations();  // new
   }, []);
 
   const fetchCustomers = async () => {
@@ -994,6 +1018,7 @@ const CashVoucher = () => {
         setIsSearchEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
+        fetchData(); // Refresh data to get updated _id and other info
         setTitle("VIEW");
       } else {
         throw new Error(`Unexpected response status: ${response?.status}`);
@@ -1592,6 +1617,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
                 <td style={{ padding: 0 }}>
                   <input
                   className="Narration"
+                    list="narrationList"
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1611,6 +1637,11 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
                     }}
                     onFocus={(e) => e.target.select()}  // Select text on focus
                   />
+                  <datalist id="narrationList">
+                    {narrationSuggestions.map((n, i) => (
+                      <option key={i} value={n} />
+                    ))}
+                  </datalist>
                 </td>
                 <td style={{ padding: 0, width: 160 }}>
                   <input

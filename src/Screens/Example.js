@@ -772,318 +772,656 @@
 // export default Example;
 
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Table, Button } from "react-bootstrap";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import useCompanySetup from "./Shared/useCompanySetup";
-import { useNavigate } from "react-router-dom";
-import ReceiptModal from "./Modals/ReceiptModal";
+// import React, { useEffect, useState, useRef, useCallback } from "react";
+// import { Table, Button } from "react-bootstrap";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+// import useCompanySetup from "./Shared/useCompanySetup";
+// import { useNavigate } from "react-router-dom";
+// import ReceiptModal from "./Modals/ReceiptModal";
 
-const LOCAL_STORAGE_KEY = "PayementListTableData";
+// const LOCAL_STORAGE_KEY = "PayementListTableData";
+
+// const Example = () => {
+//   const navigate = useNavigate();
+//   const { dateFrom } = useCompanySetup();
+
+//   const defaultTableFields = {
+//     date: true,
+//     billno: true,
+//     accountname: true,
+//     city: true,
+//     gstin: true,
+//     value: true,
+//     paidamount: true,
+//     balance: true,
+//   };
+
+//   const [tableData, settableData] = useState(defaultTableFields);
+//   const [entries, setEntries] = useState([]);
+//   const [filteredEntries, setFilteredEntries] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [fromDate, setFromDate] = useState(null);
+//   const [toDate, setToDate] = useState(() => new Date());
+//   const [showPaymentModal, setShowPaymentModal] = useState(false);
+//   const [selectedEntry, setSelectedEntry] = useState(null);
+
+//   const tableRef = useRef(null);
+//   const [activeRowIndex, setActiveRowIndex] = useState(0);
+//   const rowRefs = useRef([]);
+
+//   const formatAmount = (val) => {
+//     const num = parseFloat(val);
+//     return isNaN(num) ? "0.00" : num.toFixed(2);
+//   };
+
+//   const formatDate = (dateValue) => {
+//     if (!dateValue) return "";
+//     const d = new Date(dateValue);
+//     if (isNaN(d)) return "";
+//     return `${String(d.getDate()).padStart(2, "0")}/${String(
+//       d.getMonth() + 1
+//     ).padStart(2, "0")}/${d.getFullYear()}`;
+//   };
+
+//   useEffect(() => {
+//     if (!fromDate && dateFrom) setFromDate(new Date(dateFrom));
+//   }, [dateFrom, fromDate]);
+
+//   // ✅ Fetch entries (reusable function)
+//   const fetchEntries = useCallback(async () => {
+//     if (!fromDate || !toDate) return;
+
+//     setLoading(true);
+//     try {
+//       // --- 1️⃣ Fetch sales ---
+//       const saleRes = await fetch(
+//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
+//       );
+//       if (!saleRes.ok) throw new Error("Failed to fetch sale data");
+//       const saleData = await saleRes.json();
+
+//       const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
+//         (entry) => {
+//           const entryDate = new Date(entry?.formData?.date || "");
+//           return entryDate >= fromDate && entryDate <= toDate;
+//         }
+//       );
+
+//       // --- 2️⃣ Fetch bank vouchers ---
+//       const bankRes = await fetch(
+//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
+//       );
+//       if (!bankRes.ok) throw new Error("Failed to fetch bank data");
+//       const bankRaw = await bankRes.json();
+
+//       const bankData = Array.isArray(bankRaw)
+//         ? bankRaw.map((b) => b?.data || b)
+//         : [];
+
+//       // --- 3️⃣ Create payment map ---
+//       const paymentMap = new Map();
+//       bankData.forEach((voucher) => {
+//         const vForm = voucher?.formData || {};
+//         const items = Array.isArray(voucher?.items)
+//           ? voucher.items
+//           : Array.isArray(voucher?.data?.items)
+//           ? voucher.data.items
+//           : [];
+
+//         const billNo = parseInt(vForm.againstbillno || 0);
+//         if (!billNo) return;
+
+//         const totalPaid = items.reduce(
+//           (sum, item) => sum + parseFloat(item?.receipt_credit || 0),
+//           0
+//         );
+//         paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
+//       });
+
+//       // --- 4️⃣ Merge payment info ---
+//       const updatedSales = filteredSales
+//         .map((sale) => {
+//           const formData = sale?.formData || {};
+//           const saleBillNo = parseInt(formData?.vno || 0);
+//           const saleAmount = parseFloat(formData?.grandtotal || 0);
+//           const paidAmount = paymentMap.get(saleBillNo) || 0;
+//           const balance = saleAmount - paidAmount;
+
+//           return {
+//             ...sale,
+//             formData: {
+//               ...formData,
+//               paidAmount,
+//               balance,
+//             },
+//           };
+//         })
+//         // ✅ Hide fully paid bills
+//         .filter((sale) => sale?.formData?.balance > 0.5);
+
+//       setEntries(updatedSales);
+//       setFilteredEntries(updatedSales);
+//     } catch (err) {
+//       console.error("❌ Fetch Error:", err);
+//       setError(err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   }, [fromDate, toDate]);
+
+//   // Fetch initially and when dates change
+//   useEffect(() => {
+//     fetchEntries();
+//   }, [fetchEntries]);
+
+//   // Totals
+//   const totalGrandTotal = filteredEntries.reduce(
+//     (acc, e) => acc + parseFloat(e?.formData?.grandtotal || 0),
+//     0
+//   );
+//   const totalPaid = filteredEntries.reduce(
+//     (acc, e) => acc + parseFloat(e?.formData?.paidAmount || 0),
+//     0
+//   );
+//   const totalBalance = filteredEntries.reduce(
+//     (acc, e) => acc + parseFloat(e?.formData?.balance || 0),
+//     0
+//   );
+
+//   if (loading) return <p>Loading...</p>;
+//   if (error) return <p>Error: {error}</p>;
+
+//   const sortedFields = Object.keys(tableData);
+
+//   return (
+//     <div>
+//       <h3 className="bank-title">📒 Receipt LIST</h3>
+
+//       {/* Date Filters */}
+//       <div
+//         style={{
+//           display: "flex",
+//           flexDirection: "row",
+//           marginBottom: 10,
+//           marginLeft: 10,
+//           marginTop: "20px",
+//         }}
+//       >
+//         <div>
+//           <span className="text-lg mr-2">Period From:</span>
+//           <DatePicker
+//             selected={fromDate}
+//             onChange={(date) => setFromDate(date)}
+//             dateFormat="dd/MM/yyyy"
+//             className="datepickerBank"
+//           />
+//         </div>
+//         <div>
+//           <span className="text-lg ml-3 mr-2">UpTo:</span>
+//           <DatePicker
+//             selected={toDate}
+//             onChange={(date) => setToDate(date)}
+//             dateFormat="dd/MM/yyyy"
+//             className="datepickerBank2"
+//           />
+//         </div>
+//       </div>
+
+//       {/* Table */}
+//       <div
+//         ref={tableRef}
+//         tabIndex={0}
+//         style={{
+//           maxHeight: 530,
+//           overflowY: "auto",
+//           padding: 5,
+//           outline: "none",
+//         }}
+//       >
+//         <Table className="custom-table" bordered>
+//           <thead
+//             style={{
+//               backgroundColor: "skyblue",
+//               position: "sticky",
+//               top: -6,
+//               textAlign: "center",
+//               fontSize: "15px",
+//             }}
+//           >
+//             <tr>
+//               {sortedFields.map((field) => (
+//                 <th key={field}>
+//                   {field === "paidamount"
+//                     ? "Paid"
+//                     : field === "balance"
+//                     ? "Balance"
+//                     : field === "value"
+//                     ? "Bill Value"
+//                     : field.toUpperCase()}
+//                 </th>
+//               ))}
+//               <th>Action</th>
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {filteredEntries.map((entry, index) => {
+//               const formData = entry?.formData || {};
+//               const customer = entry?.customerDetails?.[0] || {};
+
+//               return (
+//                 <tr
+//                   key={index}
+//                   ref={(el) => (rowRefs.current[index] = el)}
+//                   onMouseEnter={() => setActiveRowIndex(index)}
+//                   style={{
+//                     backgroundColor:
+//                       index === activeRowIndex ? "rgb(197,190,190)" : "",
+//                     cursor: "pointer",
+//                   }}
+//                 >
+//                   <td>{formatDate(formData?.date)}</td>
+//                   <td>{formData?.vno || ""}</td>
+//                   <td>{customer?.vacode || ""}</td>
+//                   <td>{customer?.city || ""}</td>
+//                   <td>{customer?.gstno || ""}</td>
+//                   <td>{formatAmount(formData?.grandtotal)}</td>
+//                   <td>{formatAmount(formData?.paidAmount)}</td>
+//                   <td>{formatAmount(formData?.balance)}</td>
+//                   <td style={{ textAlign: "center" }}>
+//                     <Button
+//                       variant="success"
+//                       size="sm"
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         setSelectedEntry(entry);
+//                         setShowPaymentModal(true);
+//                       }}
+//                     >
+//                       Make Payment
+//                     </Button>
+//                   </td>
+//                 </tr>
+//               );
+//             })}
+//           </tbody>
+
+//           <tfoot
+//             style={{
+//               backgroundColor: "skyblue",
+//               position: "sticky",
+//               bottom: -6,
+//               fontSize: "15px",
+//             }}
+//           >
+//             <tr>
+//               <td colSpan={5} style={{ fontWeight: "bold" }}>
+//                 TOTAL
+//               </td>
+//               <td style={{ fontWeight: "bold", color: "red" }}>
+//                 {formatAmount(totalGrandTotal)}
+//               </td>
+//               <td style={{ fontWeight: "bold", color: "red" }}>
+//                 {formatAmount(totalPaid)}
+//               </td>
+//               <td style={{ fontWeight: "bold", color: "red" }}>
+//                 {formatAmount(totalBalance)}
+//               </td>
+//               <td></td>
+//             </tr>
+//           </tfoot>
+//         </Table>
+//       </div>
+
+//       {/* ✅ Pass refresh callback to modal */}
+//       <ReceiptModal
+//         show={showPaymentModal}
+//         onHide={() => setShowPaymentModal(false)}
+//         entry={selectedEntry}
+//         onPaymentSaved={fetchEntries}
+//       />
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+
+import React,{useState} from 'react'
+import Table from "react-bootstrap/Table";
+import ProductModalCustomer from './Modals/ProductModalCustomer';
 
 const Example = () => {
-  const navigate = useNavigate();
-  const { dateFrom } = useCompanySetup();
 
-  const defaultTableFields = {
-    date: true,
-    billno: true,
-    accountname: true,
-    city: true,
-    gstin: true,
-    value: true,
-    paidamount: true,
-    balance: true,
+  const tenant = "shkun_05062025_05062026"
+  const [formData, setFormData] = useState({
+  narr:""
+  });
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      acode:"",
+      accountname: "",
+      narration: "",
+      payment_debit: "",
+      receipt_credit: "",
+      discount: "",
+      discounted_payment: "",
+      discounted_receipt: "",
+      disablePayment: false,
+      disableReceipt: false,
+    },
+  ]);
+
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
+  const [narrationSuggestions, setNarrationSuggestions] = useState([]);
 
-  const [tableData, settableData] = useState(defaultTableFields);
-  const [entries, setEntries] = useState([]);
-  const [filteredEntries, setFilteredEntries] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(() => new Date());
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState(null);
+const fetchNarrations = async () => {
+  try {
+    const res = await fetch(
+      "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash"
+    );
+    const data = await res.json();
 
-  const tableRef = useRef(null);
-  const [activeRowIndex, setActiveRowIndex] = useState(0);
-  const rowRefs = useRef([]);
+    // extract narrations from all items
+    const narrs = data
+      .flatMap(entry => entry.items || [])
+      .map(item => item.narration)
+      .filter(n => n && n.trim() !== "");  // remove empty narrations
 
-  const formatAmount = (val) => {
-    const num = parseFloat(val);
-    return isNaN(num) ? "0.00" : num.toFixed(2);
-  };
+    // unique values
+    const uniqueNarrs = [...new Set(narrs)];
 
-  const formatDate = (dateValue) => {
-    if (!dateValue) return "";
-    const d = new Date(dateValue);
-    if (isNaN(d)) return "";
-    return `${String(d.getDate()).padStart(2, "0")}/${String(
-      d.getMonth() + 1
-    ).padStart(2, "0")}/${d.getFullYear()}`;
-  };
+    setNarrationSuggestions(uniqueNarrs);
+  } catch (err) {
+    console.error("Narration fetch failed:", err);
+  }
+};
 
-  useEffect(() => {
-    if (!fromDate && dateFrom) setFromDate(new Date(dateFrom));
-  }, [dateFrom, fromDate]);
+  // Modal For Customer
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const [productsCus, setProductsCus] = useState([]);
+  const [showModalCus, setShowModalCus] = useState(false);
+  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+  const [loadingCus, setLoadingCus] = useState(true);
+  const [errorCus, setErrorCus] = useState(null);
+  
+  React.useEffect(() => {
+    // Fetch products from the API when the component mounts
+    fetchCustomers();
+    fetchNarrations();  // new
+  }, []);
 
-  // ✅ Fetch entries (reusable function)
-  const fetchEntries = useCallback(async () => {
-    if (!fromDate || !toDate) return;
-
-    setLoading(true);
+  const fetchCustomers = async () => {
     try {
-      // --- 1️⃣ Fetch sales ---
-      const saleRes = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
+      const response = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
       );
-      if (!saleRes.ok) throw new Error("Failed to fetch sale data");
-      const saleData = await saleRes.json();
-
-      const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
-        (entry) => {
-          const entryDate = new Date(entry?.formData?.date || "");
-          return entryDate >= fromDate && entryDate <= toDate;
-        }
-      );
-
-      // --- 2️⃣ Fetch bank vouchers ---
-      const bankRes = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
-      );
-      if (!bankRes.ok) throw new Error("Failed to fetch bank data");
-      const bankRaw = await bankRes.json();
-
-      const bankData = Array.isArray(bankRaw)
-        ? bankRaw.map((b) => b?.data || b)
-        : [];
-
-      // --- 3️⃣ Create payment map ---
-      const paymentMap = new Map();
-      bankData.forEach((voucher) => {
-        const vForm = voucher?.formData || {};
-        const items = Array.isArray(voucher?.items)
-          ? voucher.items
-          : Array.isArray(voucher?.data?.items)
-          ? voucher.data.items
-          : [];
-
-        const billNo = parseInt(vForm.againstbillno || 0);
-        if (!billNo) return;
-
-        const totalPaid = items.reduce(
-          (sum, item) => sum + parseFloat(item?.receipt_credit || 0),
-          0
-        );
-        paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
-      });
-
-      // --- 4️⃣ Merge payment info ---
-      const updatedSales = filteredSales
-        .map((sale) => {
-          const formData = sale?.formData || {};
-          const saleBillNo = parseInt(formData?.vno || 0);
-          const saleAmount = parseFloat(formData?.grandtotal || 0);
-          const paidAmount = paymentMap.get(saleBillNo) || 0;
-          const balance = saleAmount - paidAmount;
-
-          return {
-            ...sale,
-            formData: {
-              ...formData,
-              paidAmount,
-              balance,
-            },
-          };
-        })
-        // ✅ Hide fully paid bills
-        .filter((sale) => sale?.formData?.balance > 0.5);
-
-      setEntries(updatedSales);
-      setFilteredEntries(updatedSales);
-    } catch (err) {
-      console.error("❌ Fetch Error:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+      const data = await response.json();
+      // Ensure to extract the formData for easier access in the rest of your app
+      const formattedData = data.map((item) => ({
+        ...item.formData,
+        _id: item._id,
+      }));
+      setProductsCus(formattedData);
+      setLoadingCus(false);
+    } catch (error) {
+      setErrorCus(error.message);
+      setLoadingCus(false);
     }
-  }, [fromDate, toDate]);
+  };
 
-  // Fetch initially and when dates change
-  useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
+  const handleItemChangeCus = (index, key, value) => {
+    if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
+      return; // reject invalid input
+    }
+    const updatedItems = [...items];
+    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+    // If the key is 'name', find the corresponding product and set the price
+    if (key === "name") {
+      const selectedProduct = productsCus.find(
+        (product) => product.ahead === value
+      );
+      if (selectedProduct) {
+        updatedItems[index]["accountname"] = selectedProduct.ahead;
+      }
+    } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
+      const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
+      const discount = parseFloat(updatedItems[index]["discount"]) || 0;
+      const discountedPayment = payment - discount;
+      const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
 
-  // Totals
-  const totalGrandTotal = filteredEntries.reduce(
-    (acc, e) => acc + parseFloat(e?.formData?.grandtotal || 0),
-    0
-  );
-  const totalPaid = filteredEntries.reduce(
-    (acc, e) => acc + parseFloat(e?.formData?.paidAmount || 0),
-    0
-  );
-  const totalBalance = filteredEntries.reduce(
-    (acc, e) => acc + parseFloat(e?.formData?.balance || 0),
-    0
-  );
+      let discountedReceipt = receipt - discount;
+      if (updatedItems[index].disableReceipt) {
+        discountedReceipt = 0; // Set to zero if receipt field is disabled
+      }
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+      let discounted_payment = discountedPayment;
+      if (updatedItems[index].disablePayment) {
+        discounted_payment = 0; // Set to zero if payment field is disabled
+      }
 
-  const sortedFields = Object.keys(tableData);
+      updatedItems[index]["payment_debit"] = payment.toFixed(2);
+      updatedItems[index]["discounted_payment"] = discounted_payment.toFixed(2);
+      updatedItems[index]["receipt_credit"] = receipt.toFixed(2);
+      updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
+      updatedItems[index]["discount"] = discount;
+    }
+    setItems(updatedItems);
+  };
+
+  const handleProductSelectCus = (product) => {
+    if (!product) {
+      alert("No product received!");
+      setShowModalCus(false);
+      return;
+    }
+  
+    // clone the array
+    const newCustomers = [...items];
+  
+    // overwrite the one at the selected index
+    newCustomers[selectedItemIndexCus] = {
+      ...newCustomers[selectedItemIndexCus],
+      accountname: product.ahead || '', 
+      acode: product.acode || '', 
+    };
+    const nameValue = product.ahead || product.name || "";
+    if (selectedItemIndexCus !== null) {
+      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+      setShowModalCus(false);
+    }
+    setItems(newCustomers);
+    setShowModalCus(false);
+  
+  };
+
+  const handleCloseModalCus = () => {
+    setShowModalCus(false);
+    setPressedKey(""); // resets for next modal open
+  };
+
+  const openModalForItemCus = (index) => {
+      setSelectedItemIndexCus(index);
+      setShowModalCus(true);
+  };
+
+  const allFieldsCus = productsCus.reduce((fields, product) => {
+    Object.keys(product).forEach((key) => {
+      if (!fields.includes(key)) {
+        fields.push(key);
+      }
+    });
+
+    return fields;
+  }, []);
+
+    const handleNumberChange = (event, index, field) => {
+    const value = event.target.value;
+    if (!/^\d*\.?\d*$/.test(value)) {
+      return;
+    }
+    const updatedItems = [...items];
+    updatedItems[index][field] = value;
+    const isValueGreaterThanZero = parseFloat(value) > 0;
+
+    if (field === "payment_debit") {
+      updatedItems[index].disableReceipt = isValueGreaterThanZero;
+    } else if (field === "receipt_credit") {
+      updatedItems[index].disablePayment = isValueGreaterThanZero;
+    }
+    setItems(updatedItems);
+  };
+  
 
   return (
     <div>
-      <h3 className="bank-title">📒 Receipt LIST</h3>
-
-      {/* Date Filters */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          marginBottom: 10,
-          marginLeft: 10,
-          marginTop: "20px",
-        }}
-      >
-        <div>
-          <span className="text-lg mr-2">Period From:</span>
-          <DatePicker
-            selected={fromDate}
-            onChange={(date) => setFromDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="datepickerBank"
-          />
-        </div>
-        <div>
-          <span className="text-lg ml-3 mr-2">UpTo:</span>
-          <DatePicker
-            selected={toDate}
-            onChange={(date) => setToDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="datepickerBank2"
-          />
-        </div>
-      </div>
-
-      {/* Table */}
-      <div
-        ref={tableRef}
-        tabIndex={0}
-        style={{
-          maxHeight: 530,
-          overflowY: "auto",
-          padding: 5,
-          outline: "none",
-        }}
-      >
-        <Table className="custom-table" bordered>
+       {showModalCus && (
+        <ProductModalCustomer
+          allFields={allFieldsCus}
+          onSelect={handleProductSelectCus}
+          onClose={handleCloseModalCus}
+          initialKey={pressedKey}
+          tenant={tenant}
+        />
+        )}
+      <div className="TableSectionz">
+        <Table className="custom-table">
           <thead
             style={{
               backgroundColor: "skyblue",
-              position: "sticky",
-              top: -6,
               textAlign: "center",
-              fontSize: "15px",
+              position: "sticky",
+              top: 0,
             }}
           >
-            <tr>
-              {sortedFields.map((field) => (
-                <th key={field}>
-                  {field === "paidamount"
-                    ? "Paid"
-                    : field === "balance"
-                    ? "Balance"
-                    : field === "value"
-                    ? "Bill Value"
-                    : field.toUpperCase()}
-                </th>
-              ))}
-              <th>Action</th>
+            <tr style={{ color: "white" }}>
+              <th>ACCOUNTNAME</th>
+              <th>NARRATION</th>
+              <th>PAYMENT</th>
+              <th>RECEIPT</th>
+              <th>DISCOUNT</th>
+              <th className="text-center">DELETE</th>
             </tr>
           </thead>
+          <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
+            {items.map((item, index) => (
+              <tr key={`${item.accountname}-${index}`}>
+                <td style={{ padding: 0 }}>
+                  <input
+                  className="Account"
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    type="text"
+                    value={item.accountname}
+                  />
+                </td>
+                <td style={{ padding: 0 }}>
+                 <input
+  className="Narration"
+  list="narrationList"
+  style={{
+    height: 40,
+    width: "100%",
+    boxSizing: "border-box",
+    border: "none",
+    padding: 5,
+  }}
+  value={item.narration}
+  onChange={(e) =>
+    handleItemChangeCus(index, "narration", e.target.value)
+  }
+/>
 
-          <tbody>
-            {filteredEntries.map((entry, index) => {
-              const formData = entry?.formData || {};
-              const customer = entry?.customerDetails?.[0] || {};
+<datalist id="narrationList">
+  {narrationSuggestions.map((n, i) => (
+    <option key={i} value={n} />
+  ))}
+</datalist>
 
-              return (
-                <tr
-                  key={index}
-                  ref={(el) => (rowRefs.current[index] = el)}
-                  onMouseEnter={() => setActiveRowIndex(index)}
-                  style={{
-                    backgroundColor:
-                      index === activeRowIndex ? "rgb(197,190,190)" : "",
-                    cursor: "pointer",
-                  }}
-                >
-                  <td>{formatDate(formData?.date)}</td>
-                  <td>{formData?.vno || ""}</td>
-                  <td>{customer?.vacode || ""}</td>
-                  <td>{customer?.city || ""}</td>
-                  <td>{customer?.gstno || ""}</td>
-                  <td>{formatAmount(formData?.grandtotal)}</td>
-                  <td>{formatAmount(formData?.paidAmount)}</td>
-                  <td>{formatAmount(formData?.balance)}</td>
-                  <td style={{ textAlign: "center" }}>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEntry(entry);
-                        setShowPaymentModal(true);
-                      }}
-                    >
-                      Make Payment
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
+                </td>
+                <td style={{ padding: 0, width: 160 }}>
+                  <input
+                  className="Payment"
+                    style={{
+                      height: 40,
+                      textAlign: "right",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    value={item.payment_debit}
+                    onChange={(e) =>
+                      handleNumberChange(e, index, "payment_debit")
+                    }
+                  />
+                </td>
+                <td style={{ padding: 0, width: 160 }}>
+                  <input
+                  className="Receipt"
+                    style={{
+                      height: 40,
+                      textAlign: "right",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    value={item.receipt_credit}
+                    onChange={(e) =>
+                      handleNumberChange(e, index, "receipt_credit")
+                    }
+                  />
+                </td>
+                <td style={{ padding: 0, width: 160 }}>
+                  <input
+                  className="Discounts"
+                    style={{
+                      height: 40,
+                      textAlign: "right",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                    }}
+                    value={item.discount}
+                    onChange={(e) =>
+                      handleItemChangeCus(index, "discount", e.target.value)
+                    }
+                  />
+                </td>
+                <td style={{ padding: 0}}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center", // horizontally center
+                      alignItems: "center",      // vertically center
+                      height: "100%",            // takes full cell height
+                    }}
+                  >
+                    delete
+                  </div>
+                </td>
+           
+              </tr>
+            ))}
           </tbody>
-
-          <tfoot
-            style={{
-              backgroundColor: "skyblue",
-              position: "sticky",
-              bottom: -6,
-              fontSize: "15px",
-            }}
-          >
-            <tr>
-              <td colSpan={5} style={{ fontWeight: "bold" }}>
-                TOTAL
-              </td>
-              <td style={{ fontWeight: "bold", color: "red" }}>
-                {formatAmount(totalGrandTotal)}
-              </td>
-              <td style={{ fontWeight: "bold", color: "red" }}>
-                {formatAmount(totalPaid)}
-              </td>
-              <td style={{ fontWeight: "bold", color: "red" }}>
-                {formatAmount(totalBalance)}
-              </td>
-              <td></td>
-            </tr>
-          </tfoot>
         </Table>
       </div>
-
-      {/* ✅ Pass refresh callback to modal */}
-      <ReceiptModal
-        show={showPaymentModal}
-        onHide={() => setShowPaymentModal(false)}
-        entry={selectedEntry}
-        onPaymentSaved={fetchEntries}
-      />
     </div>
-  );
-};
+  )
+}
 
-export default Example;
+export default Example
