@@ -15,6 +15,7 @@ import { Modal } from "react-bootstrap"; // Import Bootstrap components
 import { useEditMode } from "../../EditModeContext";
 import InvoicePDFcash from "../InvoicePDFcash";
 import { CompanyContext } from '../Context/CompanyContext';
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { useContext } from "react";
 import TextField from "@mui/material/TextField";
 import {IconButton} from '@mui/material';
@@ -62,6 +63,15 @@ const CashVoucher = () => {
   }
 
   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+  // Save & load Narration Type
+  const [narrationType, setNarrationType] = useState(() => {
+    return localStorage.getItem("narrationType") || "General";
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("narrationType", narrationType);
+  }, [narrationType]);
+
   const tableRef = useRef(null);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -714,19 +724,29 @@ const CashVoucher = () => {
       );
       const data = await res.json();
 
-      // extract narrations from all items
-      const narrs = data
-        .flatMap(entry => entry.items || [])
-        .map(item => item.narration)
-        .filter(n => n && n.trim() !== "");  // remove empty narrations
+      // Extract objects with narration + accountname
+      const narrs = data.flatMap(entry =>
+        (entry.items || [])
+          .filter(it => it.narration && it.narration.trim() !== "")
+          .map(it => ({
+            narration: it.narration,
+            accountname: it.accountname || ""
+          }))
+      );
 
-      // unique values
-      const uniqueNarrs = [...new Set(narrs)];
-
-      setNarrationSuggestions(uniqueNarrs);
+      setNarrationSuggestions(narrs); // STORE OBJECTS instead of TEXT
     } catch (err) {
       console.error("Narration fetch failed:", err);
     }
+  };
+
+  const getFilteredNarrations = (item) => {
+    if (narrationType === "General") return narrationSuggestions;
+
+    // Individual ⇒ only show narrations for same accountname
+    return narrationSuggestions.filter(
+      n => n.accountname?.trim() === item.accountname?.trim()
+    );
   };
 
   const handleNumberChange = (event, index, field) => {
@@ -1563,8 +1583,44 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
           size="small"
           variant="filled"
           className="custom-bordered-input"
-          sx={{ width: 150,marginLeft:1 }}
+          sx={{ width: 150,marginLeft:1,marginRight:1 }}
           />
+          <FormControl variant="filled" fullWidth size="small"
+          className="custom-bordered-input"
+            sx={{
+              fontSize: `${fontSize}px`,
+              '& .MuiFilledInput-root': {
+                height: 47, // adjust as needed (default ~56px for filled)
+                width: 200,
+              },
+            }}
+          >
+            <InputLabel>NARRATION TYPE</InputLabel>
+
+            <Select
+              value={narrationType}
+              label="Narration Type"
+              onChange={(e) => {
+                if (!isEditMode || isDisabled) return; // prevent changing
+                  setNarrationType(e.target.value)
+              }}
+              onOpen={(e) => {
+                if (!isEditMode || isDisabled) {
+                  e.preventDefault(); // prevent dropdown opening
+                }
+              }}
+              inputProps={{
+                sx: {
+                  pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+                },
+              }}
+            >
+              <MenuItem value="General">General</MenuItem>
+              <MenuItem value="Individual">Individual</MenuItem>
+            </Select>
+          </FormControl>
+    
+
         </div>  
       </div>
       <div className="TableSectionz">
@@ -1616,8 +1672,8 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
-                  className="Narration"
-                    list="narrationList"
+                    className="Narration"
+                    list={`narrList-${index}`}
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1637,9 +1693,9 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
                     }}
                     onFocus={(e) => e.target.select()}  // Select text on focus
                   />
-                  <datalist id="narrationList">
-                    {narrationSuggestions.map((n, i) => (
-                      <option key={i} value={n} />
+                  <datalist id={`narrList-${index}`}>
+                    {getFilteredNarrations(item).map((n, i) => (
+                      <option key={i} value={n.narration} />
                     ))}
                   </datalist>
                 </td>
