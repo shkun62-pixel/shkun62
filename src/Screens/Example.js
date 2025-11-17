@@ -1089,612 +1089,534 @@
 // export default Example;
 
 
-// import React,{useState} from 'react'
-// import Table from "react-bootstrap/Table";
-// import ProductModalCustomer from './Modals/ProductModalCustomer';
-// import { Autocomplete, TextField } from "@mui/material";
+import React,{useState} from 'react'
+import Table from "react-bootstrap/Table";
+import ProductModalCustomer from './Modals/ProductModalCustomer';
+import { TextField } from '@mui/material';
 
+const Example = () => {
+
+  const tenant = "shkun_05062025_05062026"
+  const [formData, setFormData] = useState({
+  narr:""
+  });
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      acode:"",
+      accountname: "",
+      narration: "",
+      payment_debit: "",
+      receipt_credit: "",
+      discount: "",
+      discounted_payment: "",
+      discounted_receipt: "",
+      disablePayment: false,
+      disableReceipt: false,
+    },
+  ]);
+
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+
+const fetchNarrations = async () => {
+  try {
+    const res = await fetch(
+      "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash"
+    );
+    const data = await res.json();
+
+    // extract narrations from all items
+    const narrs = data
+      .flatMap(entry => entry.items || [])
+      .map(item => item.narration)
+      .filter(n => n && n.trim() !== "");  // remove empty narrations
+
+    // unique values
+    const uniqueNarrs = [...new Set(narrs)];
+
+    setNarrationSuggestions(uniqueNarrs);
+  } catch (err) {
+    console.error("Narration fetch failed:", err);
+  }
+};
+
+
+  // Modal For Customer
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const [productsCus, setProductsCus] = useState([]);
+  const [showModalCus, setShowModalCus] = useState(false);
+  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+  const [loadingCus, setLoadingCus] = useState(true);
+  const [errorCus, setErrorCus] = useState(null);
+  
+  React.useEffect(() => {
+    // Fetch products from the API when the component mounts
+    fetchCustomers();
+    fetchNarrations();  // new
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+      const data = await response.json();
+      // Ensure to extract the formData for easier access in the rest of your app
+      const formattedData = data.map((item) => ({
+        ...item.formData,
+        _id: item._id,
+      }));
+      setProductsCus(formattedData);
+      setLoadingCus(false);
+    } catch (error) {
+      setErrorCus(error.message);
+      setLoadingCus(false);
+    }
+  };
+
+  const handleItemChangeCus = (index, key, value) => {
+    if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
+      return; // reject invalid input
+    }
+    const updatedItems = [...items];
+    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+    // If the key is 'name', find the corresponding product and set the price
+    if (key === "name") {
+      const selectedProduct = productsCus.find(
+        (product) => product.ahead === value
+      );
+      if (selectedProduct) {
+        updatedItems[index]["accountname"] = selectedProduct.ahead;
+      }
+    } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
+      const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
+      const discount = parseFloat(updatedItems[index]["discount"]) || 0;
+      const discountedPayment = payment - discount;
+      const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
+
+      let discountedReceipt = receipt - discount;
+      if (updatedItems[index].disableReceipt) {
+        discountedReceipt = 0; // Set to zero if receipt field is disabled
+      }
+
+      let discounted_payment = discountedPayment;
+      if (updatedItems[index].disablePayment) {
+        discounted_payment = 0; // Set to zero if payment field is disabled
+      }
+
+      updatedItems[index]["payment_debit"] = payment.toFixed(2);
+      updatedItems[index]["discounted_payment"] = discounted_payment.toFixed(2);
+      updatedItems[index]["receipt_credit"] = receipt.toFixed(2);
+      updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
+      updatedItems[index]["discount"] = discount;
+    }
+    setItems(updatedItems);
+  };
+
+  const handleProductSelectCus = (product) => {
+    if (!product) {
+      alert("No product received!");
+      setShowModalCus(false);
+      return;
+    }
+  
+    // clone the array
+    const newCustomers = [...items];
+  
+    // overwrite the one at the selected index
+    newCustomers[selectedItemIndexCus] = {
+      ...newCustomers[selectedItemIndexCus],
+      accountname: product.ahead || '', 
+      acode: product.acode || '', 
+    };
+    const nameValue = product.ahead || product.name || "";
+    if (selectedItemIndexCus !== null) {
+      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+      setShowModalCus(false);
+    }
+    setItems(newCustomers);
+    setShowModalCus(false);
+  
+  };
+
+  const handleCloseModalCus = () => {
+    setShowModalCus(false);
+    setPressedKey(""); // resets for next modal open
+  };
+
+  const openModalForItemCus = (index) => {
+      setSelectedItemIndexCus(index);
+      setShowModalCus(true);
+  };
+
+  const allFieldsCus = productsCus.reduce((fields, product) => {
+    Object.keys(product).forEach((key) => {
+      if (!fields.includes(key)) {
+        fields.push(key);
+      }
+    });
+
+    return fields;
+  }, []);
+
+    const handleNumberChange = (event, index, field) => {
+    const value = event.target.value;
+    if (!/^\d*\.?\d*$/.test(value)) {
+      return;
+    }
+    const updatedItems = [...items];
+    updatedItems[index][field] = value;
+    const isValueGreaterThanZero = parseFloat(value) > 0;
+
+    if (field === "payment_debit") {
+      updatedItems[index].disableReceipt = isValueGreaterThanZero;
+    } else if (field === "receipt_credit") {
+      updatedItems[index].disablePayment = isValueGreaterThanZero;
+    }
+    setItems(updatedItems);
+  };
+  
+  return (
+    <div>
+       {showModalCus && (
+        <ProductModalCustomer
+          allFields={allFieldsCus}
+          onSelect={handleProductSelectCus}
+          onClose={handleCloseModalCus}
+          initialKey={pressedKey}
+          tenant={tenant}
+        />
+        )}
+         <TextField
+          id="voucherno"
+          value={formData.voucherno}
+          label="VOUCHER NO."
+          inputProps={{
+            maxLength: 48,
+            style: {
+              height: 20,
+              fontWeight: "bold",
+            },
+          }}
+          size="small"
+          variant="filled"
+          className="custom-bordered-input"
+          sx={{ width: 150 }}
+          />
+      <div className="TableSectionz">
+        <Table className="custom-table">
+          <thead
+            style={{
+              backgroundColor: "skyblue",
+              textAlign: "center",
+              position: "sticky",
+              top: 0,
+            }}
+          >
+            <tr style={{ color: "white" }}>
+              <th>ACCOUNTNAME</th>
+              <th>
+                NARRATION
+                <input 
+                  type="checkbox"
+                  style={{ marginLeft: 5 }}
+                  tabIndex={-1}       // ⬅⬅ prevents tab focus
+                  checked={showNarrationSuggestions}
+                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                />
+              </th>
+              <th>PAYMENT</th>
+              <th>RECEIPT</th>
+              <th>DISCOUNT</th>
+              <th className="text-center">DELETE</th>
+            </tr>
+          </thead>
+          <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
+            {items.map((item, index) => (
+              <tr key={`${item.accountname}-${index}`}>
+                <td style={{ padding: 0 }}>
+                  <input
+                  className="Account"
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    type="text"
+                    value={item.accountname}
+                    onChange={(e) => handleItemChangeCus(index, "accountname", e.target.value)}
+                  />
+                </td>
+                <td style={{ padding: 0 }}>
+                <input
+                  className="Narration"
+                  list={showNarrationSuggestions ? "narrationList" : undefined}
+                  style={{
+                    height: 40,
+                    width: "100%",
+                    boxSizing: "border-box",
+                    border: "none",
+                    padding: 5,
+                  }}
+                  value={item.narration}
+                  onChange={(e) =>
+                    handleItemChangeCus(index, "narration", e.target.value)
+                  }
+                />
+
+                {showNarrationSuggestions && (
+                  <datalist id="narrationList">
+                    {narrationSuggestions.map((n, i) => (
+                      <option key={i} value={n} />
+                    ))}
+                  </datalist>
+                )}
+
+                </td>
+                <td style={{ padding: 0, width: 160 }}>
+                  <input
+                  className="Payment"
+                    style={{
+                      height: 40,
+                      textAlign: "right",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    value={item.payment_debit}
+                    onChange={(e) =>
+                      handleNumberChange(e, index, "payment_debit")
+                    }
+                  />
+                </td>
+                <td style={{ padding: 0, width: 160 }}>
+                  <input
+                  className="Receipt"
+                    style={{
+                      height: 40,
+                      textAlign: "right",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    value={item.receipt_credit}
+                    onChange={(e) =>
+                      handleNumberChange(e, index, "receipt_credit")
+                    }
+                  />
+                </td>
+                <td style={{ padding: 0, width: 160 }}>
+                  <input
+                  className="Discounts"
+                    style={{
+                      height: 40,
+                      textAlign: "right",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                    }}
+                    value={item.discount}
+                    onChange={(e) =>
+                      handleItemChangeCus(index, "discount", e.target.value)
+                    }
+                  />
+                </td>
+                <td style={{ padding: 0}}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center", // horizontally center
+                      alignItems: "center",      // vertically center
+                      height: "100%",            // takes full cell height
+                    }}
+                  >
+                    delete
+                  </div>
+                </td>
+           
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+export default Example
+
+
+
+// import React, { useState, useEffect } from "react";
+// import TextField from "@mui/material/TextField";
 
 // const Example = () => {
-
-//   const tenant = "shkun_05062025_05062026"
 //   const [formData, setFormData] = useState({
-//   narr:""
+//     vbillno: "",
+//     p_entry: "",
 //   });
-//   const [items, setItems] = useState([
-//     {
-//       id: 1,
-//       acode:"",
-//       accountname: "",
-//       narration: "",
-//       payment_debit: "",
-//       receipt_credit: "",
-//       discount: "",
-//       discounted_payment: "",
-//       discounted_receipt: "",
-//       disablePayment: false,
-//       disableReceipt: false,
-//     },
+
+//   const [supplierdetails, setSupplierdetails] = useState([
+//     { vacode: "" },
 //   ]);
+
+//   const [purchaseData, setPurchaseData] = useState([]);
+
+//   // 1️⃣ Fetch purchase API once
+//   useEffect(() => {
+//     const fetchPurchase = async () => {
+//       try {
+//         const res = await fetch(
+//           "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+//         );
+//         const data = await res.json();
+//         setPurchaseData(data);
+//       } catch (err) {
+//         console.error("API Fetch Error", err);
+//       }
+//     };
+
+//     fetchPurchase();
+//   }, []);
+
+//   // 2️⃣ Function to check duplicate bill for same customer
+//   const checkDuplicateBill = (customerName, billNo) => {
+//     if (!customerName || !billNo) return false;
+
+//     return purchaseData.some((entry) => {
+//       const apiCustomer = entry.supplierdetails?.[0]?.vacode?.trim().toUpperCase();
+//       const apiBill = entry.formData?.vbillno?.trim().toUpperCase();
+
+//       return (
+//         apiCustomer === customerName.trim().toUpperCase() &&
+//         apiBill === billNo.trim().toUpperCase()
+//       );
+//     });
+//   };
+
+//   // ⭐ 3️⃣ Function to check duplicate SELF INVOICE p_entry (GLOBAL CHECK)
+// const checkDuplicatePEntry = (pEntry) => {
+//   if (!pEntry) return false;
+
+//   return purchaseData.some((entry) => {
+//     const apiPentry = entry.formData?.p_entry?.trim().toUpperCase();
+//     return apiPentry === pEntry.trim().toUpperCase();
+//   });
+// };
+
+//   // 3️⃣ Handle BILL NO change + Duplicate check
+//   const handleCapitalAlpha = (event) => {
+//     const { id, value } = event.target;
+//     const upper = value.toUpperCase();
+
+//     setFormData((prev) => ({
+//       ...prev,
+//       [id]: upper,
+//     }));
+
+//     const customerName = supplierdetails[0].vacode;
+
+//     if (customerName && checkDuplicateBill(customerName, upper)) {
+//       alert(`Bill No ${upper} already exists for this customer: ${customerName}`);
+//     }
+//   };
 
 //   const capitalizeWords = (str) => {
 //     return str.replace(/\b\w/g, (char) => char.toUpperCase());
 //   };
-//   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
-//   // Save & load Narration Type
-//   const [narrationType, setNarrationType] = useState(() => {
-//     return localStorage.getItem("narrationType") || "General";
-//   });
 
-//   React.useEffect(() => {
-//     localStorage.setItem("narrationType", narrationType);
-//   }, [narrationType]);
+// const HandleInputsChanges = (event) => {
+//   const { id, value } = event.target;
+//   const cap = capitalizeWords(value);
 
+//   setFormData((prevData) => ({
+//     ...prevData,
+//     [id]: cap,
+//   }));
 
-//   const fetchNarrations = async () => {
-//     try {
-//       const res = await fetch(
-//         "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash"
-//       );
-//       const data = await res.json();
+//   // ⭐ If SELF INV field changed
+//   if (id === "p_entry") {
+//     const upper = value.toUpperCase();
 
-//       // Extract objects with narration + accountname
-//       const narrs = data.flatMap(entry =>
-//         (entry.items || [])
-//           .filter(it => it.narration && it.narration.trim() !== "")
-//           .map(it => ({
-//             narration: it.narration,
-//             accountname: it.accountname || ""
-//           }))
-//       );
-
-//       setNarrationSuggestions(narrs); // STORE OBJECTS instead of TEXT
-//     } catch (err) {
-//       console.error("Narration fetch failed:", err);
+//     if (checkDuplicatePEntry(upper)) {
+//       alert(`Self Invoice No ${upper} already exists!`);
 //     }
-//   };
-
-//   const getFilteredNarrations = (item) => {
-//     if (narrationType === "General") return narrationSuggestions;
-
-//     // Individual ⇒ only show narrations for same accountname
-//     return narrationSuggestions.filter(
-//       n => n.accountname?.trim() === item.accountname?.trim()
-//     );
-//   };
-
-//   // Modal For Customer
-//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-//   const [productsCus, setProductsCus] = useState([]);
-//   const [showModalCus, setShowModalCus] = useState(false);
-//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-//   const [loadingCus, setLoadingCus] = useState(true);
-//   const [errorCus, setErrorCus] = useState(null);
-  
-//   React.useEffect(() => {
-//     // Fetch products from the API when the component mounts
-//     fetchCustomers();
-//     fetchNarrations();  // new
-//   }, []);
-
-//   const fetchCustomers = async () => {
-//     try {
-//       const response = await fetch(
-//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
-//       );
-//       if (!response.ok) {
-//         throw new Error("Failed to fetch products");
-//       }
-//       const data = await response.json();
-//       // Ensure to extract the formData for easier access in the rest of your app
-//       const formattedData = data.map((item) => ({
-//         ...item.formData,
-//         _id: item._id,
-//       }));
-//       setProductsCus(formattedData);
-//       setLoadingCus(false);
-//     } catch (error) {
-//       setErrorCus(error.message);
-//       setLoadingCus(false);
-//     }
-//   };
-
-//   const handleItemChangeCus = (index, key, value) => {
-//     if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
-//       return; // reject invalid input
-//     }
-//     const updatedItems = [...items];
-//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-//     // If the key is 'name', find the corresponding product and set the price
-//     if (key === "name") {
-//       const selectedProduct = productsCus.find(
-//         (product) => product.ahead === value
-//       );
-//       if (selectedProduct) {
-//         updatedItems[index]["accountname"] = selectedProduct.ahead;
-//       }
-//     } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
-//       const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
-//       const discount = parseFloat(updatedItems[index]["discount"]) || 0;
-//       const discountedPayment = payment - discount;
-//       const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
-
-//       let discountedReceipt = receipt - discount;
-//       if (updatedItems[index].disableReceipt) {
-//         discountedReceipt = 0; // Set to zero if receipt field is disabled
-//       }
-
-//       let discounted_payment = discountedPayment;
-//       if (updatedItems[index].disablePayment) {
-//         discounted_payment = 0; // Set to zero if payment field is disabled
-//       }
-
-//       updatedItems[index]["payment_debit"] = payment.toFixed(2);
-//       updatedItems[index]["discounted_payment"] = discounted_payment.toFixed(2);
-//       updatedItems[index]["receipt_credit"] = receipt.toFixed(2);
-//       updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
-//       updatedItems[index]["discount"] = discount;
-//     }
-//     setItems(updatedItems);
-//   };
-
-//   const handleProductSelectCus = (product) => {
-//     if (!product) {
-//       alert("No product received!");
-//       setShowModalCus(false);
-//       return;
-//     }
-  
-//     // clone the array
-//     const newCustomers = [...items];
-  
-//     // overwrite the one at the selected index
-//     newCustomers[selectedItemIndexCus] = {
-//       ...newCustomers[selectedItemIndexCus],
-//       accountname: product.ahead || '', 
-//       acode: product.acode || '', 
-//     };
-//     const nameValue = product.ahead || product.name || "";
-//     if (selectedItemIndexCus !== null) {
-//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-//       setShowModalCus(false);
-//     }
-//     setItems(newCustomers);
-//     setShowModalCus(false);
-  
-//   };
-
-//   const handleCloseModalCus = () => {
-//     setShowModalCus(false);
-//     setPressedKey(""); // resets for next modal open
-//   };
-
-//   const openModalForItemCus = (index) => {
-//       setSelectedItemIndexCus(index);
-//       setShowModalCus(true);
-//   };
-
-//   const allFieldsCus = productsCus.reduce((fields, product) => {
-//     Object.keys(product).forEach((key) => {
-//       if (!fields.includes(key)) {
-//         fields.push(key);
-//       }
-//     });
-
-//     return fields;
-//   }, []);
-
-//     const handleNumberChange = (event, index, field) => {
-//     const value = event.target.value;
-//     if (!/^\d*\.?\d*$/.test(value)) {
-//       return;
-//     }
-//     const updatedItems = [...items];
-//     updatedItems[index][field] = value;
-//     const isValueGreaterThanZero = parseFloat(value) > 0;
-
-//     if (field === "payment_debit") {
-//       updatedItems[index].disableReceipt = isValueGreaterThanZero;
-//     } else if (field === "receipt_credit") {
-//       updatedItems[index].disablePayment = isValueGreaterThanZero;
-//     }
-//     setItems(updatedItems);
-//   };
-  
-//   const InlineSuggestInput = ({ value, onChange, suggestions }) => {
-//   // Find first matching suggestion
-//   const match =
-//     value && value.trim() !== ""
-//       ? suggestions.find((s) =>
-//           s.narration.toLowerCase().startsWith(value.toLowerCase())
-//         )
-//       : null;
-
-//   // What to show as ghost suggestion
-//   const suggestionText =
-//     match && value.length < match.narration.length
-//       ? match.narration
-//       : "";
-
-//   return (
-//     <div style={{ position: "relative", width: "100%" }}>
-//       {/* Ghost Suggestion */}
-//       <input
-//         style={{
-//           position: "absolute",
-//           inset: 0,
-//           height: 40,
-//           width: "100%",
-//           padding: 5,
-//           border: "none",
-//           boxSizing: "border-box",
-//           color: "#bfbfbf",
-//           background: "transparent",
-//           pointerEvents: "none",
-//         }}
-//         value={suggestionText}
-//         readOnly
-//       />
-
-//       {/* Actual input */}
-//       <input
-//         style={{
-//           height: 40,
-//           width: "100%",
-//           padding: 5,
-//           border: "none",
-//           background: "transparent",
-//           position: "relative",
-//           boxSizing: "border-box",
-//         }}
-//         value={value}
-//         onChange={(e) => onChange(e.target.value)}
-//       />
-//     </div>
-//   );
+//   }
 // };
 
 
 //   return (
 //     <div>
-//        {showModalCus && (
-//         <ProductModalCustomer
-//           allFields={allFieldsCus}
-//           onSelect={handleProductSelectCus}
-//           onClose={handleCloseModalCus}
-//           initialKey={pressedKey}
-//           tenant={tenant}
+//     {supplierdetails.map((item, index) => (
+//     <div key={index}>
+//       <div className="customerdiv">
+//         <TextField
+//           label="CUSTOMER NAME"
+//           variant="filled"
+//           size="small"
+//           value={item.vacode}
+//           className="customerNAME custom-bordered-input"
+//           onChange={(e) => {
+//             const val = e.target.value.toUpperCase(); // optional uppercase
+
+//             setSupplierdetails((prev) => {
+//               const updated = [...prev];
+//               updated[index].vacode = val;
+//               return updated;
+//             });
+//           }}
+//           inputProps={{
+//             maxLength: 48,
+//             style: { height: "20px" }
+//           }}
 //         />
-//         )}
-//         <div style={{ marginBottom: "10px" }}>
-//           <label style={{ fontWeight: "bold" }}>Narration Type: </label>
-//           <select
-//             value={narrationType}
-//             onChange={(e) => setNarrationType(e.target.value)}
-//             style={{ marginLeft: 10, padding: 5 }}
-//           >
-//             <option value="General">General</option>
-//             <option value="Individual">Individual</option>
-//           </select>
-//         </div>
-//       <div className="TableSectionz">
-//         <Table className="custom-table">
-//           <thead
-//             style={{
-//               backgroundColor: "skyblue",
-//               textAlign: "center",
-//               position: "sticky",
-//               top: 0,
-//             }}
-//           >
-//             <tr style={{ color: "white" }}>
-//               <th>ACCOUNTNAME</th>
-//               <th>NARRATION</th>
-//               <th>PAYMENT</th>
-//               <th>RECEIPT</th>
-//               <th>DISCOUNT</th>
-//               <th className="text-center">DELETE</th>
-//             </tr>
-//           </thead>
-//           <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
-//             {items.map((item, index) => (
-//               <tr key={`${item.accountname}-${index}`}>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                   className="Account"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     type="text"
-//                     value={item.accountname}
-//                     onChange={(e) => handleItemChangeCus(index, "accountname", e.target.value)}
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                 <Autocomplete
-//                   freeSolo
-//                   options={getFilteredNarrations(item)}    // IMPORTANT: filtered narrations
-//                   getOptionLabel={(option) => 
-//                     typeof option === "string" ? option : option.narration
-//                   }
-//                   value={item.narration || ""}
-//                   onInputChange={(event, newValue) => {
-//                     handleItemChangeCus(index, "narration", newValue);
-//                   }}
-//                   renderOption={(props, option) => (
-//                     <li {...props}>
-//                       {option.narration} 
-//                       {option.accountname ? ` (${option.accountname})` : ""}
-//                     </li>
-//                   )}
-//                   renderInput={(params) => (
-//                     <TextField
-//                       {...params}
-//                       variant="standard"
-//                       placeholder="Narration"
-//                       InputProps={{
-//                         ...params.InputProps,
-//                         disableUnderline: true,
-//                         style: { padding: 5, height: 40 },
-//                       }}
-//                       sx={{ width: "100%" }}
-//                     />
-//                   )}
-//                 />
-//                 </td>
-//                 <td style={{ padding: 0, width: 160 }}>
-//                   <input
-//                   className="Payment"
-//                     style={{
-//                       height: 40,
-//                       textAlign: "right",
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     value={item.payment_debit}
-//                     onChange={(e) =>
-//                       handleNumberChange(e, index, "payment_debit")
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, width: 160 }}>
-//                   <input
-//                   className="Receipt"
-//                     style={{
-//                       height: 40,
-//                       textAlign: "right",
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     value={item.receipt_credit}
-//                     onChange={(e) =>
-//                       handleNumberChange(e, index, "receipt_credit")
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, width: 160 }}>
-//                   <input
-//                   className="Discounts"
-//                     style={{
-//                       height: 40,
-//                       textAlign: "right",
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                     }}
-//                     value={item.discount}
-//                     onChange={(e) =>
-//                       handleItemChangeCus(index, "discount", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0}}>
-//                   <div
-//                     style={{
-//                       display: "flex",
-//                       justifyContent: "center", // horizontally center
-//                       alignItems: "center",      // vertically center
-//                       height: "100%",            // takes full cell height
-//                     }}
-//                   >
-//                     delete
-//                   </div>
-//                 </td>
-           
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
 //       </div>
 //     </div>
-//   )
-// }
-
-// export default Example
-
-
-
-// import React,{useState} from 'react'
-// import TextField from "@mui/material/TextField";
-
-// const Example = () => {
-//   const [formData, setFormData] = useState({
-//     vbillno: 0,
-//   });
-//   const [supplierdetails, setsupplierdetails] = useState([
-//     {
-//       vacode: "",
-//     },
-//   ]);
-//   const handleCapitalAlpha = (event) => {
-//     const { id, value } = event.target;
-//     // force all letters to uppercase
-//     const uppercasedValue = value.toUpperCase();
-//     setFormData((prevData) => ({
-//       ...prevData,
-//       [id]: uppercasedValue,
-//     }));
-//   };
-//   return (
-//     <div>
-//      {supplierdetails.map((item, index) => (
-//         <div key={item.vacode}>
-//             <div className="customerdiv">
-//               <TextField
-//                 label="CUSTOMER NAME"
-//                 variant="filled"
-//                 size="small"
-//                 value={item.vacode}
-//                 className="customerNAME custom-bordered-input"
-//                 inputProps={{
-//                   maxLength: 48,
-//                   style: {
-//                     height: "20px",
-//                   },
-//                 }}
-//               />
-//             </div>
-        
-//         </div>
 //       ))}
+
+
 //       <TextField
-//       className="VbillzNo custom-bordered-input"
-//       id="vbillno"
-//       value={formData.vbillno}
-//       variant="filled"
-//       size="small"
-//       label="BILL NO"
-//       onChange={handleCapitalAlpha}
-//       inputProps={{
-//         maxLength: 48,
-//         style: {
-//           height: "20px",
-//         },
-//       }}
-//     />
+//         className="VbillzNo custom-bordered-input"
+//         id="vbillno"
+//         value={formData.vbillno}
+//         variant="filled"
+//         size="small"
+//         label="BILL NO"
+//         onChange={handleCapitalAlpha}
+//         inputProps={{
+//           maxLength: 48,
+//           style: { height: "20px" },
+//         }}
+//       />
+//       <TextField
+//         className="custom-bordered-input"
+//         id="p_entry"
+//         value={formData.p_entry}
+//         variant="filled"
+//         label="SELF INV#"
+//         size="small"
+//         onChange={HandleInputsChanges}
+//         inputProps={{
+//           maxLength: 48,
+//           style: {
+//             height: "20px",
+//           },
+//         }}
+//       />
 //     </div>
-//   )
-// }
+//   );
+// };
 
-// export default Example
-
-
-import React, { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
-
-const Example = () => {
-  const [formData, setFormData] = useState({
-    vbillno: "",
-  });
-
-  const [supplierdetails, setSupplierdetails] = useState([
-    { vacode: "" },
-  ]);
-
-  const [purchaseData, setPurchaseData] = useState([]);
-
-  // 1️⃣ Fetch purchase API once
-  useEffect(() => {
-    const fetchPurchase = async () => {
-      try {
-        const res = await fetch(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
-        );
-        const data = await res.json();
-        setPurchaseData(data);
-      } catch (err) {
-        console.error("API Fetch Error", err);
-      }
-    };
-
-    fetchPurchase();
-  }, []);
-
-  // 2️⃣ Function to check duplicate bill for same customer
-  const checkDuplicateBill = (customerName, billNo) => {
-    if (!customerName || !billNo) return false;
-
-    return purchaseData.some((entry) => {
-      const apiCustomer = entry.supplierdetails?.[0]?.vacode?.trim().toUpperCase();
-      const apiBill = entry.formData?.vbillno?.trim().toUpperCase();
-
-      return (
-        apiCustomer === customerName.trim().toUpperCase() &&
-        apiBill === billNo.trim().toUpperCase()
-      );
-    });
-  };
-
-  // 3️⃣ Handle BILL NO change + Duplicate check
-  const handleCapitalAlpha = (event) => {
-    const { id, value } = event.target;
-    const upper = value.toUpperCase();
-
-    setFormData((prev) => ({
-      ...prev,
-      [id]: upper,
-    }));
-
-    const customerName = supplierdetails[0].vacode;
-
-    if (customerName && checkDuplicateBill(customerName, upper)) {
-      alert(`Bill No ${upper} already exists for this customer: ${customerName}`);
-    }
-  };
-
-  return (
-    <div>
-    {supplierdetails.map((item, index) => (
-    <div key={index}>
-      <div className="customerdiv">
-        <TextField
-          label="CUSTOMER NAME"
-          variant="filled"
-          size="small"
-          value={item.vacode}
-          className="customerNAME custom-bordered-input"
-          onChange={(e) => {
-            const val = e.target.value.toUpperCase(); // optional uppercase
-
-            setSupplierdetails((prev) => {
-              const updated = [...prev];
-              updated[index].vacode = val;
-              return updated;
-            });
-          }}
-          inputProps={{
-            maxLength: 48,
-            style: { height: "20px" }
-          }}
-        />
-      </div>
-    </div>
-      ))}
-
-
-      <TextField
-        className="VbillzNo custom-bordered-input"
-        id="vbillno"
-        value={formData.vbillno}
-        variant="filled"
-        size="small"
-        label="BILL NO"
-        onChange={handleCapitalAlpha}
-        inputProps={{
-          maxLength: 48,
-          style: { height: "20px" },
-        }}
-      />
-    </div>
-  );
-};
-
-export default Example;
+// export default Example;

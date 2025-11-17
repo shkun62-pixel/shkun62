@@ -7612,28 +7612,18 @@ const Purchase = () => {
         });
         return; // 🚫 STOP SAVE
       }
+      const p_entry = formData.p_entry;
+      if (checkDuplicatePEntry(p_entry)) {
+        toast.error(`Self Inv No Already exists: "${p_entry}".`, { 
+          position: "top-center" 
+        });
+        return; // 🚫 STOP SAVE
+      }
 
       const nonEmptyItems = items.filter((item) => (item.sdisc || "").trim() !== "");
       if (nonEmptyItems.length === 0) {
         toast.error("Please fill in at least one Items name.", { position: "top-center" });
         return;
-      }
-
-      if (!isAbcmode && formData.p_entry && formData.p_entry !== "0") {
-        try {
-          const { data } = await axios.get(
-            `https://www.shkunweb.com/${tenant}/tenant/api/purchase/check`,
-            { params: { p_entry: String(formData.p_entry).trim() } }
-          );
-          if (data?.exists) {
-            toast.error("Self Invoice No Already Exists.", { position: "top-center" });
-            return;
-          }
-        } catch (fetchError) {
-          console.error("Error checking duplicates:", fetchError);
-          toast.error("Error checking duplicate p_entry. Please try again.", { position: "top-center" });
-          return;
-        }
       }
 
       // --- 2) BUILD PAYLOAD -------------------------------------------------
@@ -8618,11 +8608,23 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
   const HandleInputsChanges = (event) => {
     const { id, value } = event.target;
+    const cap = capitalizeWords(value);
+
     setFormData((prevData) => ({
       ...prevData,
-      [id]: capitalizeWords(value),
+      [id]: cap,
     }));
+
+    // ⭐ If SELF INV field changed
+    if (id === "p_entry") {
+      const upper = value.toUpperCase();
+
+      if (checkDuplicatePEntry(upper)) {
+        alert(`Self Invoice No ${upper} already exists!`);
+      }
+    }
   };
+
 
   // const handleCapitalAlpha = (event) => {
   // const { id, value } = event.target;
@@ -8663,6 +8665,16 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           apiCustomer === customerName.trim().toUpperCase() &&
           apiBill === billNo.trim().toUpperCase()
         );
+      });
+    };
+
+    // ⭐ 3️⃣ Function to check duplicate SELF INVOICE p_entry (GLOBAL CHECK)
+    const checkDuplicatePEntry = (pEntry) => {
+      if (!pEntry) return false;
+
+      return purchaseData.some((entry) => {
+        const apiPentry = entry.formData?.p_entry?.trim().toUpperCase();
+        return apiPentry === pEntry.trim().toUpperCase();
       });
     };
 

@@ -134,6 +134,31 @@ const BankVoucher = () => {
     }
   }, []);
 
+  // Naration Suggestions
+  const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+  const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+  const fetchNarrations = async () => {
+    try {
+      const res = await fetch(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank"
+      );
+      const data = await res.json();
+
+      // extract narrations from all items
+      const narrs = data
+        .flatMap(entry => entry.items || [])
+        .map(item => item.remarks)
+        .filter(n => n && n.trim() !== "");  // remove empty narrations
+
+      // unique values
+      const uniqueNarrs = [...new Set(narrs)];
+
+      setNarrationSuggestions(uniqueNarrs);
+    } catch (err) {
+      console.error("Narration fetch failed:", err);
+    }
+  };
+
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
 
@@ -274,6 +299,7 @@ const BankVoucher = () => {
   React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchCustomers();
+    fetchNarrations();
   }, []);
 
   const fetchCustomers = async () => {
@@ -1183,6 +1209,8 @@ const BankVoucher = () => {
         setIsPreviousEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
+        fetchData(); // Refresh data after saving
+        fetchNarrations(); // Refresh narrations after saving
         toast.success("Data Saved Successfully!", { position: "top-center" });
       } else {
         setIsAddEnabled(false);
@@ -1757,7 +1785,16 @@ const BankVoucher = () => {
               <th>BNK.CHG.</th>
               <th>TDS Rs.</th>
               <th>CHQNO+BANK</th>
-              <th>REMARKS</th>
+              <th>
+                REMARKS
+                <input 
+                  type="checkbox"
+                  style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
+                  tabIndex={-1}       // ⬅⬅ prevents tab focus
+                  checked={showNarrationSuggestions}
+                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                />
+              </th>
               {isEditMode && <th className="text-center">DELETE</th>}
             </tr>
           </thead>
@@ -1944,6 +1981,7 @@ const BankVoucher = () => {
                 <td style={{ padding: 0 }}>
                   <input
                     className="REM"
+                    list={showNarrationSuggestions ? "narrationList" : undefined}
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
@@ -1962,6 +2000,13 @@ const BankVoucher = () => {
                     onKeyDown={(e) => handleKeyDown(e, index, "remarks")}
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
+                  {showNarrationSuggestions && (
+                    <datalist id="narrationList">
+                      {narrationSuggestions.map((n, i) => (
+                        <option key={i} value={n} />
+                      ))}
+                    </datalist>
+                  )}
                 </td>
                 {isEditMode && (
                   <td style={{ padding: 0 }}>

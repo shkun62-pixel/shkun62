@@ -357,6 +357,7 @@ const LedgerList = () => {
       } else if (e.key === "Enter") {
         const ledger = filteredLedgers[selectedIndex];
         openLedgerDetails(ledger);
+        setSearchTerm(""); // Clear search on open
       } else if (e.key === "F3") {
         e.preventDefault();
         setFlaggedRows((prev) => {

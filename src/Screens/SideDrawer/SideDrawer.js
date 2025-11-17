@@ -79,14 +79,14 @@ const StyledListItem = styled(ListItem)({
     '&:hover': {
         backgroundColor: '#2196F3',
         borderRadius: '10px',
-        padding: '10px 10px',
+        // padding: '10px 10px',
         fontFamily: 'Arial, sans-serif',
         color: 'white',
         '& .MuiListItemIcon-root': {
             color: '#000000', // Dark icon color on hover
         },
     },
-    padding: '15px 20px',
+    // padding: '15px 20px',
     transition: 'background-color 0.3s ease-in-out, padding 0.3s ease-in-out, color 0.3s ease-in-out',
 });
 
@@ -143,6 +143,9 @@ export default function App() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isSaleOpen, setIsSaleOpen] = useState(false);
     const [isReportOpen, setIsReportOpen] = useState(false);
+    const [isGstReportOpen, setIsGstReportOpen] = useState(false);
+    const [isTdsTcsOpen, setIsTdsTcsOpen] = useState(false);
+    const [isIncomeTaxOpen, setIsIncomeTaxOpen] = useState(false);
     const [isBooksOpen, setIsBooksOpen] = useState(false); 
     const [isGoodReturn, setIsGoodReturn] = useState(false); 
     const [isStockOpen, setIsStockOpen] = useState(false); 
@@ -167,6 +170,9 @@ export default function App() {
             setIsDrawerOpen(false); // Close the drawer after navigation
             setIsSaleOpen(false);
             setIsReportOpen(false);
+            setIsGstReportOpen(false);
+            setIsTdsTcsOpen(false);
+            setIsIncomeTaxOpen(false);
             setIsBooksOpen(false);
             setIsOutStandingOpen(false);
             setIsStockOpen(false);
@@ -178,6 +184,9 @@ export default function App() {
             setIsDrawerOpen(false); // Close the drawer after navigation
             setIsSaleOpen(false);
             setIsReportOpen(false);
+            setIsGstReportOpen(false);
+            setIsTdsTcsOpen(false);
+            setIsIncomeTaxOpen(false);
             setIsBooksOpen(false);
             setIsOutStandingOpen(false);
             setIsStockOpen(false);
@@ -266,6 +275,9 @@ export default function App() {
         setIsSaleModalOpen(false); // Close the modal
         setIsSaleOpen(false);
         setIsReportOpen(false);
+        setIsGstReportOpen(false);
+        setIsTdsTcsOpen(false);
+        setIsIncomeTaxOpen(false);
         setIsBooksOpen(false);
         setIsOutStandingOpen(false);
         setIsStockOpen(false);
@@ -279,6 +291,15 @@ export default function App() {
     };
     const handleReportClick = () => {
         setIsReportOpen(!isReportOpen);
+    };
+    const handleGstReport = () => {
+        setIsGstReportOpen(!isGstReportOpen);
+    };
+    const handleTdsTcs = () => {
+        setIsTdsTcsOpen(!isTdsTcsOpen);
+    };
+    const handleIncomeTax = () => {
+        setIsIncomeTaxOpen(!isIncomeTaxOpen);
     };
     const handleExtraFeature = () => {
         setIsExtraFeatureOpen(!isExtraFeatureOpen);
@@ -341,7 +362,7 @@ export default function App() {
                         <StyledListItemText primary="TRANSACTION" />
                         {isSaleOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 20 }}>
+                    <div style={{ marginLeft: 10 }}>
                         <Collapse in={isSaleOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
                             <StyledListItem button onClick={openSaleModal}>
@@ -423,7 +444,7 @@ export default function App() {
                                     <StyledListItemText primary="Goods Return" />
                                     {isGoodReturn ? <ExpandLess /> : <ExpandMore />}
                                 </StyledListItem>
-                                <div style={{ marginLeft: 20 }}>
+                                <div style={{ marginLeft: 10 }}>
                                     <Collapse in={isGoodReturn} timeout="auto" unmountOnExit>
                                         <List component="div" disablePadding>
                                         <StyledListItem button onClick={() => handleNavigation('/SalesReturn')}>
@@ -444,15 +465,15 @@ export default function App() {
                             </List>
                         </Collapse>
                     </div>
-                    {/*Reports Section  */}
+                    {/*Financial Reports Section  */}
                     <StyledListItem button onClick={handleReportClick}>
                         <StyledIcon>
                             <AssessmentIcon />
                         </StyledIcon>
-                        <StyledListItemText primary="REPORTS" />
+                        <StyledListItemText primary="FINANCIAL REPORTS" />
                         {isReportOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 20 }}>
+                    <div style={{ marginLeft: 10 }}>
                         <Collapse in={isReportOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
                             <StyledListItem button onClick={() => handleNavigation('/LedgerList')}>
@@ -493,7 +514,7 @@ export default function App() {
                                     <StyledListItemText primary="Books" />
                                     {isBooksOpen ? <ExpandLess /> : <ExpandMore />}
                                 </StyledListItem>
-                                <div style={{ marginLeft: 20 }}>
+                                <div style={{ marginLeft: 10 }}>
                                     <Collapse in={isBooksOpen} timeout="auto" unmountOnExit>
                                         <List component="div" disablePadding>
                                         <StyledListItem button onClick={() => handleNavigation('/SaleBook')}>
@@ -540,7 +561,7 @@ export default function App() {
                                     <StyledListItemText primary="OutStanding Reports" />
                                     {isOutStandingOpen ? <ExpandLess /> : <ExpandMore />}
                                 </StyledListItem>
-                                <div style={{ marginLeft: 20 }}>
+                                <div style={{ marginLeft: 10 }}>
                                 <Collapse in={isOutStandingOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
                                     <StyledListItem button onClick={() => handleNavigation('/DebtorsList')}>
@@ -567,7 +588,7 @@ export default function App() {
                                     <StyledListItemText primary="Stocks..." />
                                     {isStockOpen ? <ExpandLess /> : <ExpandMore />}
                                 </StyledListItem>
-                                <div style={{ marginLeft: 20 }}>
+                                <div style={{ marginLeft: 10 }}>
                                     <Collapse in={isStockOpen} timeout="auto" unmountOnExit>
                                         <List component="div" disablePadding>
                                         <StyledListItem button onClick={() => handleNavigation('/StockReport')}>
@@ -595,6 +616,193 @@ export default function App() {
                             </List>
                         </Collapse>
                     </div>
+                    {/* GST  Reports */}
+                    <StyledListItem button onClick={handleGstReport}>
+                        <StyledIcon>
+                            <DescriptionIcon />
+                        </StyledIcon>
+                        <StyledListItemText primary="GST REPORTS" />
+                        {isGstReportOpen ? <ExpandLess /> : <ExpandMore />}
+                    </StyledListItem>
+                    <div style={{ marginLeft: 10 }}>
+                        <Collapse in={isGstReportOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Monthly Forms" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="GST Ledger" />
+                            </StyledListItem>
+                            {/*  */}
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="WorkSheet" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="GSTR-2 Filed Status" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="GSTR-3B Yearly Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="GSTR-3B Reconciliation" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Party Wise GST Details" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Party Wise GST Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Account Wise GST Details" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Other Details" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Yearly GSTR-9" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Tax Wise Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="GSTIN Wise Expenditure" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="HSN Wise Inward / Outward" />
+                            </StyledListItem>
+                            </List>
+                        </Collapse>
+                    </div>
+                    {/* TDS/TCS  Reports */}
+                    <StyledListItem button onClick={handleTdsTcs}>
+                        <StyledIcon>
+                            <ReceiptIcon />
+                        </StyledIcon>
+                        <StyledListItemText primary="TDS/TCS REPORTS" />
+                        {isTdsTcsOpen ? <ExpandLess /> : <ExpandMore />}
+                    </StyledListItem>
+                    <div style={{ marginLeft: 10 }}>
+                        <Collapse in={isTdsTcsOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Form 16-A" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Form 26-Q" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="194-Q Detail" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="194-Q Check List" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="TCS & TDS Combine List" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Commission List" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="TCS Reports" />
+                            </StyledListItem>
+                            </List>
+                        </Collapse>
+                    </div>
+                    {/* IncomeTax  Reports */}
+                    <StyledListItem button onClick={handleIncomeTax}>
+                        <StyledIcon>
+                            <ReceiptLongIcon />
+                        </StyledIcon>
+                        <StyledListItemText primary="INCOME TAX REPORTS" />
+                        {isIncomeTaxOpen ? <ExpandLess /> : <ExpandMore />}
+                    </StyledListItem>
+                    <div style={{ marginLeft: 10 }}>
+                        <Collapse in={isIncomeTaxOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptLongIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Purchase Report" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptLongIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Sale Reports" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon style={{}}>
+                                    <ReceiptLongIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Section 40A(3) Detail" />
+                            </StyledListItem>
+                            </List>
+                        </Collapse>
+                    </div>
                     {/* Extra Features */}
                     <StyledListItem button onClick={handleExtraFeature}>
                         <StyledIcon>
@@ -603,7 +811,7 @@ export default function App() {
                         <StyledListItemText primary="EXTRA FEATURES" />
                         {isExtraFeatureOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 20 }}>
+                    <div style={{ marginLeft: 10 }}>
                         <Collapse in={isExtraFeatureOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
                             <StyledListItem button onClick={() => handleNavigation('/companies')}>
@@ -643,7 +851,7 @@ export default function App() {
                         <StyledListItemText primary="DATA SECURITY" />
                         {isDataSecurityOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 20 }}>
+                    <div style={{ marginLeft: 10 }}>
                         <Collapse in={isDataSecurityOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
                             <StyledListItem button onClick={() => handleNavigation('/')}>

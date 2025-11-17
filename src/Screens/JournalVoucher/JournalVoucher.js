@@ -105,6 +105,31 @@ const JournalVoucher = () => {
     }
   }, []);
 
+  // Naration Suggestions
+  const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+  const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+  const fetchNarrations = async () => {
+    try {
+      const res = await fetch(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal"
+      );
+      const data = await res.json();
+
+      // extract narrations from all items
+      const narrs = data
+        .flatMap(entry => entry.items || [])
+        .map(item => item.narration)
+        .filter(n => n && n.trim() !== "");  // remove empty narrations
+
+      // unique values
+      const uniqueNarrs = [...new Set(narrs)];
+
+      setNarrationSuggestions(uniqueNarrs);
+    } catch (err) {
+      console.error("Narration fetch failed:", err);
+    }
+  };
+
   // Date
   useEffect(() => {
     // If formData.date has a valid date string, parse it and set selectedDate
@@ -366,6 +391,8 @@ const JournalVoucher = () => {
             setIsPreviousEnabled(true);
             setIsSPrintEnabled(true);
             setIsDeleteEnabled(true);
+            fetchData(); // Refresh data to get updated _id and other info
+            fetchNarrations(); // Refresh narrations
             toast.success("Data Saved Successfully!", { position: "top-center" });
         } else {
             setIsAddEnabled(false);
@@ -415,6 +442,7 @@ const JournalVoucher = () => {
     React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchCustomers();
+    fetchNarrations();
   }, []);
 
  
@@ -1289,7 +1317,16 @@ const handleSearch = async (searchDate) => {
           >
             <tr style={{ color: "white" }}>
               <th>ACCOUNT NAME</th>
-              <th>NARRATION</th>
+              <th>
+                NARRATION
+                <input 
+                  type="checkbox"
+                  style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
+                  tabIndex={-1}       // ⬅⬅ prevents tab focus
+                  checked={showNarrationSuggestions}
+                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                />
+              </th>
               <th>DEBIT</th>
               <th>CREDIT</th>
               {isEditMode && <th className="text-center">DELETE</th>}
@@ -1330,6 +1367,7 @@ const handleSearch = async (searchDate) => {
                 <td style={{ padding: 0 }}>
                   <input
                   className="Narration"
+                  list={showNarrationSuggestions ? "narrationList" : undefined}
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1349,6 +1387,13 @@ const handleSearch = async (searchDate) => {
                     }}
                     onFocus={(e) => e.target.select()}  // Select text on focus
                   />
+                  {showNarrationSuggestions && (
+                    <datalist id="narrationList">
+                      {narrationSuggestions.map((n, i) => (
+                        <option key={i} value={n} />
+                      ))}
+                    </datalist>
+                  )}
                 </td>
                 <td style={{ padding: 0 ,width:250}}>
                   <input
