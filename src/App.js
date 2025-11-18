@@ -36,6 +36,7 @@ import DebtorsList from './Screens/OutStandingReports/DebtorsList';
 import CreditorsList from './Screens/OutStandingReports/CreditorsList';
 import PaymentList from './Screens/PaymentList/PaymentList';
 import ReceiptList from './Screens/ReceiptList/ReceiptList';
+import GstWorksheet from './Screens/GSTworkSheet/GstWorksheet';
 // import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
@@ -91,6 +92,7 @@ function App() {
         <Route path='/CreditorsList' element={<CreditorsList />}></Route>
         <Route path='/PaymentList' element={<PaymentList />}></Route>
         <Route path='/ReceiptList' element={<ReceiptList />}></Route>
+        <Route path='/GstWorksheet' element={<GstWorksheet />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>
