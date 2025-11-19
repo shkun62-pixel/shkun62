@@ -46,6 +46,14 @@ function parseISODate(dateString) {
   return d;
 }
 
+function parseDMY(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return null;
+  const [day, month, year] = parts;
+  return new Date(`${year}-${month}-${day}`);
+}
+
 function sumSafe(arr, key) {
   return arr.reduce((s, x) => s + (Number(x?.[key] ?? 0) || 0), 0);
 }
@@ -105,7 +113,17 @@ export default function GstWorksheet() {
   // Utility: returns whether a record (sale/purchase) passes filters:
   const recordPassesFilters = (record, isSale = true) => {
     // Date filter
-    const recDate = parseISODate(record?.formData?.date || record?.formData?.duedate);
+    let rawDate = record?.formData?.date || record?.formData?.duedate;
+
+    let recDate = null;
+
+    // If date contains "/" → DD/MM/YYYY
+    if (rawDate && rawDate.includes("/")) {
+      recDate = parseDMY(rawDate);
+    } else {
+      // Normal ISO
+      recDate = parseISODate(rawDate);
+    }
     const from = parseISODate(fromDate);
     const to = parseISODate(toDate);
     if (!recDate) return false;
@@ -494,8 +512,13 @@ export default function GstWorksheet() {
             <TableBody>
               {detailDialog.entries.map((en, idx) => (
                 <TableRow key={idx}>
-                  <TableCell>{formatDateISO(en.date)}</TableCell>
-                  <TableCell>{en.vbillno}</TableCell>
+                  <TableCell>
+                    {en.date?.includes("/") 
+                      ? parseDMY(en.date).toLocaleDateString("en-GB") 
+                      : formatDateISO(en.date)
+                    }
+                  </TableCell>
+                  <TableCell>{en.vbillno || en.vno}</TableCell>
                   <TableCell>{en.party}</TableCell>
                   <TableCell align="right">{Number(en.value).toFixed(2)}</TableCell>
                   <TableCell align="right">{Number(en.ctax).toFixed(2)}</TableCell>

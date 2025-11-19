@@ -640,7 +640,7 @@ export default function App() {
                                 <StyledListItemText primary="GST Ledger" />
                             </StyledListItem>
                             {/*  */}
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledListItem button onClick={() => handleNavigation('/GstWorksheet')}>
                                 <StyledIcon style={{}}>
                                     <DescriptionIcon />
                                 </StyledIcon>
