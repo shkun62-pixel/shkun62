@@ -198,7 +198,8 @@ export default function GstWorksheet() {
         groups[rateKey].entries.push({
           id: rec._id,
           date,
-          vbillno: rec?.formData?.vbillno ?? rec?.formData?.vno,
+          vbillno: rec?.formData?.vbillno || "",
+          vno: rec?.formData?.vno || "",
           party: partyName,
           item: it,
           ctax,
@@ -489,6 +490,62 @@ export default function GstWorksheet() {
           </Grid>
         </Grid>
       )}
+
+      {/* GRAND TOTAL SUMMARY */}
+<Box mt={3}>
+  <Paper sx={{ p: 2 }}>
+    <Typography variant="h6" align="center" gutterBottom>
+      TOTAL SUMMARY
+    </Typography>
+
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={6}>
+        <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+          <Typography variant="subtitle1"><strong>Sale Totals</strong></Typography>
+          <Typography>Total Value: {totals.sale.value.toFixed(2)}</Typography>
+          <Typography>CGST: {totals.sale.ctax.toFixed(2)}</Typography>
+          <Typography>SGST: {totals.sale.stax.toFixed(2)}</Typography>
+          <Typography>IGST: {totals.sale.itax.toFixed(2)}</Typography>
+          <Typography>Cess: {totals.sale.cess.toFixed(2)}</Typography>
+        </Paper>
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+          <Typography variant="subtitle1"><strong>Purchase Totals</strong></Typography>
+          <Typography>Total Value: {totals.purchase.value.toFixed(2)}</Typography>
+          <Typography>CGST: {totals.purchase.ctax.toFixed(2)}</Typography>
+          <Typography>SGST: {totals.purchase.stax.toFixed(2)}</Typography>
+          <Typography>IGST: {totals.purchase.itax.toFixed(2)}</Typography>
+          <Typography>Cess: {totals.purchase.cess.toFixed(2)}</Typography>
+        </Paper>
+      </Grid>
+
+      {/* DIFFERENCE */}
+      <Grid item xs={12}>
+        <Paper sx={{ p: 2, bgcolor: "#e3f7e3" }}>
+          <Typography variant="subtitle1"><strong>DIFFERENCE (Sale – Purchase)</strong></Typography>
+          <Typography>
+            Value Diff: {(totals.sale.value - totals.purchase.value).toFixed(2)}
+          </Typography>
+          <Typography>
+            CGST Diff: {(totals.sale.ctax - totals.purchase.ctax).toFixed(2)}
+          </Typography>
+          <Typography>
+            SGST Diff: {(totals.sale.stax - totals.purchase.stax).toFixed(2)}
+          </Typography>
+          <Typography>
+            IGST Diff: {(totals.sale.itax - totals.purchase.itax).toFixed(2)}
+          </Typography>
+          <Typography>
+            Cess Diff: {(totals.sale.cess - totals.purchase.cess).toFixed(2)}
+          </Typography>
+        </Paper>
+      </Grid>
+    </Grid>
+  </Paper>
+</Box>
+
 
       {/* Detail Dialog */}
       <Dialog open={detailDialog.open} maxWidth="md" fullWidth onClose={() => setDetailDialog({ open: false, entries: [] })}>
