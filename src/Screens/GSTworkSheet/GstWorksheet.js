@@ -23,6 +23,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import * as XLSX from 'sheetjs-style';
+import { saveAs } from 'file-saver';
+import useCompanySetup from "../Shared/useCompanySetup";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import InputMask from "react-input-mask";
+
 
 // --------- CONFIG ----------
 const SALE_API = "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
@@ -54,19 +61,55 @@ function parseDMY(dateStr) {
   return new Date(`${year}-${month}-${day}`);
 }
 
+// Helper function to format date to dd/mm/yyyy
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-GB"); // 'en-GB' formats to dd/mm/yyyy
+};
+
 function sumSafe(arr, key) {
   return arr.reduce((s, x) => s + (Number(x?.[key] ?? 0) || 0), 0);
 }
 
 export default function GstWorksheet() {
-  const [fromDate, setFromDate] = useState(() => {
-    const now = new Date();
-    // default one year back
-    const y = new Date(now);
-    y.setFullYear(now.getFullYear() - 1);
-    return formatDateISO(y);
-  });
+
+  const {dateFrom, companyName,companyAdd, companyCity} = useCompanySetup();
+
+  const [fromDate, setFromDate] = useState("");
+  useEffect(() => {
+    if (!fromDate && dateFrom) {
+      setFromDate(new Date(dateFrom));
+    }
+  }, [dateFrom, fromDate]);
+
+  const [rawValue, setRawValue] = useState("");
+  useEffect(() => {
+    if (!rawValue && dateFrom) {
+      const d = new Date(dateFrom);
+
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const year = d.getFullYear();
+
+      setRawValue(`${day}/${month}/${year}`);
+      console.log(dateFrom, "dateFrom formatted");
+    }
+  }, [dateFrom, rawValue]);
+
   const [toDate, setToDate] = useState(() => formatDateISO(new Date()));
+  const [toRaw, setToRaw] = useState("");
+
+  // Initialize to today's date
+  useEffect(() => {
+    if (!toRaw) {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Months 0-indexed
+      const year = today.getFullYear();
+      setToRaw(`${day}/${month}/${year}`);
+      setToDate(today);
+    }
+  }, [toRaw]);
 
   const [stateCondition, setStateCondition] = useState("All"); // All | Within | Out
   const [regdFilter, setRegdFilter] = useState("All"); // All | Registered | Un-Registered
@@ -252,61 +295,227 @@ export default function GstWorksheet() {
     });
   };
 
-  // Export CSV of totals (Sale & Purchase rows per GST)
   const handleExport = () => {
-    // Build rows by unique GST rates (union)
-    const allRates = Array.from(new Set([...saleGrouped.map((g) => g.gst), ...purchaseGrouped.map((g) => g.gst)])).sort((a,b)=>a-b);
-    const rows = [];
-    rows.push(["GST%", "Sale Value", "Sale C.Tax", "Sale S.Tax", "Sale I.Tax", "Sale Cess", "Purchase Value", "Purchase C.Tax", "Purchase S.Tax", "Purchase I.Tax", "Purchase Cess"]);
-    allRates.forEach((r) => {
-      const s = saleGrouped.find((g) => g.gst === r) || { value:0, ctax:0, stax:0, itax:0, cess:0 };
-      const p = purchaseGrouped.find((g) => g.gst === r) || { value:0, ctax:0, stax:0, itax:0, cess:0 };
-      rows.push([
-        String(r),
-        s.value.toFixed(2),
-        s.ctax.toFixed(2),
-        s.stax.toFixed(2),
-        s.itax.toFixed(2),
-        s.cess.toFixed(2),
-        p.value.toFixed(2),
-        p.ctax.toFixed(2),
-        p.stax.toFixed(2),
-        p.itax.toFixed(2),
-        p.cess.toFixed(2),
-      ]);
-    });
-    // Add totals row
-    rows.push([
-      "TOTAL",
-      totals.sale.value.toFixed(2),
-      totals.sale.ctax.toFixed(2),
-      totals.sale.stax.toFixed(2),
-      totals.sale.itax.toFixed(2),
-      totals.sale.cess.toFixed(2),
-      totals.purchase.value.toFixed(2),
-      totals.purchase.ctax.toFixed(2),
-      totals.purchase.stax.toFixed(2),
-      totals.purchase.itax.toFixed(2),
-      totals.purchase.cess.toFixed(2),
-    ]);
+    // ---------- BUILD allRates ----------
+    const allRates = Array.from(
+      new Set([
+        ...saleGrouped.map(g => g.gst),
+        ...purchaseGrouped.map(g => g.gst)
+      ])
+    ).sort((a, b) => a - b);
 
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `gst-summary-${formatDateISO(new Date())}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    // ---------- TABLE HEADER ----------
+    const header = [
+      "Sale Value", "Gst @", "C.Tax", "S.Tax", "I.Tax", "Cess",
+      "Pur. Value", "Gst @", "C.Tax", "S.Tax", "I.Tax", "Cess"
+    ];
+
+    // ---------- BUILD SHEET DATA ----------
+    const sheetData = [
+      [companyName || "COMPANY NAME"],
+      [companyAdd || ""],
+      [companyCity || ""],
+      [],
+      [`PERIOD FROM ${formatDate(fromDate)} To ${formatDate(toDate)}`],
+      [],
+      header,
+
+      ...allRates.map(r => {
+        const s = saleGrouped.find(g => g.gst === r) || { value: 0, ctax: 0, stax: 0, itax: 0, cess: 0 };
+        const p = purchaseGrouped.find(g => g.gst === r) || { value: 0, ctax: 0, stax: 0, itax: 0, cess: 0 };
+
+        return [
+          s.value, r, s.ctax, s.stax, s.itax, s.cess,
+          p.value, r, p.ctax, p.stax, p.itax, p.cess
+        ];
+      })
+    ];
+
+    // ---------- TOTAL ROW ----------
+    const totalStart = 7; 
+    const totalEnd = totalStart + allRates.length - 1;
+
+    const totalsRow = header.map((col, colIndex) => {
+      // GST @ columns (1 & 7) should stay blank
+      if (colIndex === 1 || colIndex === 7) return "";
+
+      // First column label
+      // if (colIndex === 0) return "";
+
+      // Add SUBTOTAL formula
+      const colLetter = XLSX.utils.encode_col(colIndex);
+      return {
+        f: `SUBTOTAL(9,${colLetter}${totalStart + 1}:${colLetter}${totalEnd + 1})`
+      };
+    });
+
+    sheetData.push(totalsRow);
+
+    // ---------- WORKSHEET ----------
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // ---------- COLUMN WIDTHS ----------
+    ws['!cols'] = [
+      { wch: 15 }, { wch: 8 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 10 },
+      { wch: 15 }, { wch: 8 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 10 }
+    ];
+
+    // ---------- MERGE CELLS ----------
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: header.length - 1 } }
+    ];
+
+    // ---------- STYLING ----------
+    ["A1", "A2", "A3"].forEach((addr, i) => {
+      if (ws[addr]) {
+        ws[addr].s = {
+          font: { bold: true, sz: i === 0 ? 16 : 12 },
+          alignment: { horizontal: "center" }
+        };
+      }
+    });
+
+    if (ws["A5"]) {
+      ws["A5"].s = {
+        font: { bold: true, sz: 12 },
+        alignment: { horizontal: "center" }
+      };
+    }
+
+    // Header row styling
+    header.forEach((_, colIndex) => {
+      const cell = XLSX.utils.encode_cell({ r: 6, c: colIndex });
+      if (ws[cell]) {
+        ws[cell].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { patternType: "solid", fgColor: { rgb: "4F81BD" } },
+          alignment: { horizontal: "center" }
+        };
+      }
+    });
+
+    // Data rows right-align & force 2 decimals
+    allRates.forEach((_, rowIndex) => {
+      for (let c = 0; c < header.length; c++) {
+        const addr = XLSX.utils.encode_cell({ r: 7 + rowIndex, c });
+        if (ws[addr]) {
+          ws[addr].s = {
+            alignment: { horizontal: "right" },
+            numFmt: "0.00"
+          };
+        }
+      }
+    });
+
+    // Totals row styling
+    const totalRowIdx = 7 + allRates.length;
+    header.forEach((_, c) => {
+      const addr = XLSX.utils.encode_cell({ r: totalRowIdx, c });
+      if (ws[addr]) {
+        ws[addr].s = {
+          font: { bold: true },
+          fill: { patternType: "solid", fgColor: { rgb: "D9D9D9" } },
+          alignment: { horizontal: "right" },
+          // alignment: { horizontal: c === 0 ? "left" : "right" },
+          numFmt: "0.00"
+        };
+      }
+    });
+
+    // ---------- DARK VERTICAL LINE AFTER SALE CESS ----------
+    const splitCol = 5;
+    const startRow = 6;
+    const endRow = totalRowIdx;
+
+    for (let r = startRow; r <= endRow; r++) {
+      const addr = XLSX.utils.encode_cell({ r, c: splitCol });
+
+      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
+
+      const oldStyle = ws[addr].s || {};
+
+      ws[addr].s = {
+        ...oldStyle,
+        border: {
+          ...oldStyle.border,
+          right: { style: "medium", color: { rgb: "000000" } }
+        }
+      };
+    }
+
+    // ---------- EXPORT ----------
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "GST Summary");
+
+    const buffer = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true
+    });
+
+    saveAs(
+      new Blob([buffer], { type: "application/octet-stream" }),
+      `GST-Summary-${formatDateISO(new Date())}.xlsx`
+    );
   };
+
+  const handleChange = (e) => {
+    setRawValue(e.target.value);
+
+    const [d, m, y] = e.target.value.split("/");
+    if (d.length === 2 && m.length === 2 && y.length === 4) {
+      const dateObj = new Date(`${y}-${m}-${d}`);
+      if (!isNaN(dateObj.getTime())) setFromDate(dateObj);
+    }
+  };
+
+  const handleToChange = (e) => {
+    const val = e.target.value;
+    setToRaw(val);
+
+    const [d, m, y] = val.split("/");
+    if (d.length === 2 && m.length === 2 && y.length === 4) {
+      const dateObj = new Date(`${y}-${m}-${d}`);
+      if (!isNaN(dateObj.getTime())) setToDate(dateObj);
+    }
+  };
+
 
   return (
     <Box p={2}>
-      <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={3}>
+      <Paper style={{marginTop:-20}} elevation={2} sx={{ p: 1, mb: 1,}}>
+        <div style={{display:'flex',flexDirection:'row',alignItems:'center'}}>
+          <div style={{display:'flex',flexDirection:"column"}}> 
+            <div style={{ marginLeft: "10px", marginTop: "10px",display:'flex',flexDirection:'row',alignItems:'center' }}>
+              <label style={{ fontSize: "16px", color: "#555", marginRight:"10px" }}>From</label>
+              <InputMask
+                mask="99/99/9999"
+                placeholder="dd/mm/yyyy"
+                value={rawValue}
+                onChange={handleChange}
+              >
+                {(inputProps) => (
+                  <input {...inputProps} className="form-control" />
+                )}
+              </InputMask>
+            </div>
+
+            <div style={{ marginLeft: "10px", marginTop: "10px",display:'flex',flexDirection:'row',alignItems:'center' }}>
+              <label style={{ fontSize: "16px", color: "#555", marginRight:"12px" }}>Upto</label>
+              <InputMask
+                mask="99/99/9999"
+                placeholder="dd/mm/yyyy"
+                value={toRaw}
+                onChange={handleToChange}
+              >
+                {(inputProps) => <input {...inputProps} className="form-control" />}
+              </InputMask>
+            </div>
+
+          {/* <div style={{marginLeft:"10px",marginTop:"10px"}}>
             <TextField
               label="From"
               type="date"
@@ -315,8 +524,8 @@ export default function GstWorksheet() {
               onChange={(e) => setFromDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
             />
-          </Grid>
-          <Grid item xs={12} sm={3}>
+          </div>
+          <div style={{marginLeft:"10px",marginTop:"10px"}}>
             <TextField
               label="Upto"
               type="date"
@@ -325,11 +534,13 @@ export default function GstWorksheet() {
               onChange={(e) => setToDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={3}>
+          </div> */}
+          </div>
+          <div style={{display:'flex',flexDirection:"column",marginLeft:"30px"}}>
+          {/* state condition */}
+          <div >
             <FormControl component="fieldset">
-              <Typography variant="caption">State Condition</Typography>
+              <Typography style={{fontWeight:'bold',fontSize:16}} variant="caption">State Condition</Typography>
               <RadioGroup
                 row
                 value={stateCondition}
@@ -342,11 +553,11 @@ export default function GstWorksheet() {
                 <FormControlLabel value="Out" control={<Radio />} label="Out of State" />
               </RadioGroup>
             </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={3}>
+          </div>
+          {/* Regd / unredg */}
+          <div >
             <FormControl component="fieldset">
-              <Typography variant="caption">Regd / Unregd</Typography>
+              <Typography style={{fontWeight:'bold',fontSize:16}} variant="caption">Regd / Unregd</Typography>
               <RadioGroup
                 row
                 value={regdFilter}
@@ -359,31 +570,29 @@ export default function GstWorksheet() {
                 <FormControlLabel value="Un-Registered" control={<Radio />} label="Un-Registered" />
               </RadioGroup>
             </FormControl>
-          </Grid>
+          </div>
+          </div>
 
-          <Grid item xs={12} sm={12} container spacing={1} justifyContent="flex-end">
-            <Grid item>
-              <Button variant="contained" color="primary" onClick={handleView} disabled={loading}>
+          <div style={{display:'flex',flexDirection:'row'}}>
+            <div style={{display:'flex',flexDirection:'column'}}>
+              <Button className="Buttonz" variant="contained" color="primary" onClick={handleView} disabled={loading}>
                 View
               </Button>
-            </Grid>
-            <Grid item>
-              <Button variant="outlined" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
+                <Button style={{marginTop:"10px"}} className="Buttonz" variant="outlined" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
                 Exit
               </Button>
-            </Grid>
-            <Grid item>
-              <Button variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
+            </div>
+             <div style={{display:'flex',flexDirection:'column',marginLeft:"10px"}}>
+              <Button className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
                 Export
               </Button>
-            </Grid>
-            <Grid item>
-              <Button variant="contained" color="secondary" onClick={() => alert("Detail pressed (you can wire this)")}>
+                <Button style={{marginTop:"10px"}} className="Buttonz" variant="contained" color="secondary" onClick={() => alert("Detail pressed (you can wire this)")}>
                 Detail
               </Button>
-            </Grid>
-          </Grid>
-        </Grid>
+            </div>
+             
+          </div>
+        </div>
       </Paper>
 
       {error && (
@@ -492,63 +701,75 @@ export default function GstWorksheet() {
       )}
 
       {/* GRAND TOTAL SUMMARY */}
-<Box mt={3}>
-  <Paper sx={{ p: 2 }}>
-    <Typography variant="h6" align="center" gutterBottom>
-      TOTAL SUMMARY
-    </Typography>
+      <Box mt={1}>
+        <Paper sx={{ p: 2 }}>
+          <Typography variant="h6" align="center" gutterBottom>
+            TOTAL SUMMARY
+          </Typography>
 
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
-          <Typography variant="subtitle1"><strong>Sale Totals</strong></Typography>
-          <Typography>Total Value: {totals.sale.value.toFixed(2)}</Typography>
-          <Typography>CGST: {totals.sale.ctax.toFixed(2)}</Typography>
-          <Typography>SGST: {totals.sale.stax.toFixed(2)}</Typography>
-          <Typography>IGST: {totals.sale.itax.toFixed(2)}</Typography>
-          <Typography>Cess: {totals.sale.cess.toFixed(2)}</Typography>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Type</strong></TableCell>
+                <TableCell align="right"><strong>Total Value</strong></TableCell>
+                <TableCell align="right"><strong>CGST</strong></TableCell>
+                <TableCell align="right"><strong>SGST</strong></TableCell>
+                <TableCell align="right"><strong>IGST</strong></TableCell>
+                <TableCell align="right"><strong>Cess</strong></TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {/* SALE ROW */}
+              <TableRow>
+                <TableCell><strong>Sale</strong></TableCell>
+                <TableCell align="right">{totals.sale.value.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.sale.ctax.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.sale.stax.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.sale.itax.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.sale.cess.toFixed(2)}</TableCell>
+              </TableRow>
+
+              {/* PURCHASE ROW */}
+              <TableRow>
+                <TableCell><strong>Purchase</strong></TableCell>
+                <TableCell align="right">{totals.purchase.value.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.purchase.ctax.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.purchase.stax.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.purchase.itax.toFixed(2)}</TableCell>
+                <TableCell align="right">{totals.purchase.cess.toFixed(2)}</TableCell>
+              </TableRow>
+
+              {/* DIFFERENCE ROW */}
+              <TableRow sx={{ bgcolor: "#e8fbe8" }}>
+                <TableCell><strong>Difference</strong></TableCell>
+                <TableCell align="right">
+                  {(totals.sale.value - totals.purchase.value).toFixed(2)}
+                </TableCell>
+                <TableCell align="right">
+                  {(totals.sale.ctax - totals.purchase.ctax).toFixed(2)}
+                </TableCell>
+                <TableCell align="right">
+                  {(totals.sale.stax - totals.purchase.stax).toFixed(2)}
+                </TableCell>
+                <TableCell align="right">
+                  {(totals.sale.itax - totals.purchase.itax).toFixed(2)}
+                </TableCell>
+                <TableCell align="right">
+                  {(totals.sale.cess - totals.purchase.cess).toFixed(2)}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </Paper>
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
-          <Typography variant="subtitle1"><strong>Purchase Totals</strong></Typography>
-          <Typography>Total Value: {totals.purchase.value.toFixed(2)}</Typography>
-          <Typography>CGST: {totals.purchase.ctax.toFixed(2)}</Typography>
-          <Typography>SGST: {totals.purchase.stax.toFixed(2)}</Typography>
-          <Typography>IGST: {totals.purchase.itax.toFixed(2)}</Typography>
-          <Typography>Cess: {totals.purchase.cess.toFixed(2)}</Typography>
-        </Paper>
-      </Grid>
-
-      {/* DIFFERENCE */}
-      <Grid item xs={12}>
-        <Paper sx={{ p: 2, bgcolor: "#e3f7e3" }}>
-          <Typography variant="subtitle1"><strong>DIFFERENCE (Sale – Purchase)</strong></Typography>
-          <Typography>
-            Value Diff: {(totals.sale.value - totals.purchase.value).toFixed(2)}
-          </Typography>
-          <Typography>
-            CGST Diff: {(totals.sale.ctax - totals.purchase.ctax).toFixed(2)}
-          </Typography>
-          <Typography>
-            SGST Diff: {(totals.sale.stax - totals.purchase.stax).toFixed(2)}
-          </Typography>
-          <Typography>
-            IGST Diff: {(totals.sale.itax - totals.purchase.itax).toFixed(2)}
-          </Typography>
-          <Typography>
-            Cess Diff: {(totals.sale.cess - totals.purchase.cess).toFixed(2)}
-          </Typography>
-        </Paper>
-      </Grid>
-    </Grid>
-  </Paper>
-</Box>
-
+      </Box>
 
       {/* Detail Dialog */}
-      <Dialog open={detailDialog.open} maxWidth="md" fullWidth onClose={() => setDetailDialog({ open: false, entries: [] })}>
+      <Dialog open={detailDialog.open} maxWidth={false}  fullWidth onClose={() => setDetailDialog({ open: false, entries: [] })}
+          PaperProps={{
+            sx: { width: "90vw", maxWidth: "90vw" }   // custom width
+          }}
+        >
         <DialogTitle>
           {detailDialog.side === "sale" ? "Sale" : "Purchase"} — GST {detailDialog.gstRate}% Details
         </DialogTitle>
