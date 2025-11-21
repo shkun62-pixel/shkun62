@@ -26,7 +26,7 @@ import {
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 import useCompanySetup from "../Shared/useCompanySetup";
-import DatePicker from "react-datepicker";
+import WorksheetPrint from "./WorksheetPrint";
 import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
 
@@ -34,8 +34,6 @@ import InputMask from "react-input-mask";
 // --------- CONFIG ----------
 const SALE_API = "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
 const PURCHASE_API = "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
-// Set your company's / tenant's state for within/out check (adjust if needed)
-const COMPANY_STATE = "Punjab";
 // ---------------------------
 
 function formatDateISO(d) {
@@ -73,8 +71,9 @@ function sumSafe(arr, key) {
 
 export default function GstWorksheet() {
 
-  const {dateFrom, companyName,companyAdd, companyCity} = useCompanySetup();
+  const {dateFrom, companyName,companyAdd, companyCity, CompanyState} = useCompanySetup();
 
+  const [printOpen, setPrintOpen] = useState(false);
   const [fromDate, setFromDate] = useState("");
   useEffect(() => {
     if (!fromDate && dateFrom) {
@@ -179,7 +178,7 @@ export default function GstWorksheet() {
         (isSale
           ? record?.customerDetails?.[0]?.state
           : record?.supplierdetails?.[0]?.state) || "";
-      const within = (partyState || "").trim().toLowerCase() === (COMPANY_STATE || "").trim().toLowerCase();
+      const within = (partyState || "").trim().toLowerCase() === (CompanyState || "").trim().toLowerCase();
       if (stateCondition === "Within" && !within) return false;
       if (stateCondition === "Out" && within) return false;
     }
@@ -214,6 +213,7 @@ export default function GstWorksheet() {
       (rec.items || []).forEach((it) => {
         const gst = it?.gst ?? 0;
         const rateKey = String(gst);
+        const qty = Number(it?.weight ?? 0) || 0;
         const value = Number(it?.amount ?? 0) || 0; // amount is the taxable value in samples
         const ctax = Number(it?.ctax ?? 0) || 0;
         const stax = Number(it?.stax ?? 0) || 0;
@@ -243,11 +243,13 @@ export default function GstWorksheet() {
           date,
           vbillno: rec?.formData?.vbillno || "",
           vno: rec?.formData?.vno || "",
+          qty: qty,
           party: partyName,
           item: it,
           ctax,
           stax,
           itax,
+          cess: pcess,
           value,
           vamt,
         });
@@ -779,7 +781,9 @@ export default function GstWorksheet() {
               <TableRow>
                 <TableCell>Date</TableCell>
                 <TableCell>Bill No</TableCell>
-                <TableCell>Party</TableCell>
+                <TableCell>A/c Name</TableCell>
+                <TableCell>Gst</TableCell>
+                <TableCell align="right">Qty</TableCell>
                 <TableCell align="right">Taxable Value</TableCell>
                 <TableCell align="right">C.Tax</TableCell>
                 <TableCell align="right">S.Tax</TableCell>
@@ -793,11 +797,13 @@ export default function GstWorksheet() {
                   <TableCell>
                     {en.date?.includes("/") 
                       ? parseDMY(en.date).toLocaleDateString("en-GB") 
-                      : formatDateISO(en.date)
+                      : formatDate(en.date)
                     }
                   </TableCell>
                   <TableCell>{en.vbillno || en.vno}</TableCell>
-                  <TableCell>{en.party}</TableCell>
+                  <TableCell>{en.item?.sdisc}</TableCell>
+                  <TableCell>{en.item?.gst}%</TableCell>
+                  <TableCell align="right">{en.qty}</TableCell>
                   <TableCell align="right">{Number(en.value).toFixed(2)}</TableCell>
                   <TableCell align="right">{Number(en.ctax).toFixed(2)}</TableCell>
                   <TableCell align="right">{Number(en.stax).toFixed(2)}</TableCell>
@@ -809,7 +815,15 @@ export default function GstWorksheet() {
           </Table>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailDialog({ open: false, entries: [] })}>Close</Button>
+          <Button className="Buttonz" variant="contained" onClick={() => { setPrintOpen(true) }} >Print</Button>
+          <Button style={{backgroundColor:'grey'}} className="Buttonz" variant="contained" onClick={() => setDetailDialog({ open: false, entries: [] })}>Close</Button>
+          <WorksheetPrint
+            isOpen={printOpen}
+            handleClose={() => setPrintOpen(false)}
+            entries={detailDialog.entries}
+            fromDate={fromDate}
+            uptoDate={toDate}
+          />
         </DialogActions>
       </Dialog>
     </Box>
