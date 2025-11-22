@@ -1318,7 +1318,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     return;
   }
 
-  if (e.key === "Enter") {
+  if (e.key === "Enter" || e.key === "Tab") {
     e.preventDefault();
     let nextIndex = index + 1;
 
@@ -1908,23 +1908,21 @@ const handleAttachClick = () => {
           </div>
           <div>
           <FormControl
-          className="custom-bordered-input"
+            className="custom-bordered-input"
             fullWidth
             size="small"
             variant="filled"
-            sx={{
-              minWidth: 280,
-            }}
+            sx={{ minWidth: 280 }}
           >
             <InputLabel
               id="state-label"
               sx={{
-                color: formData.state ? "black" : "gray", // Label color based on value
+                color: formData.state ? "black" : "gray",
               }}
             >
               State
             </InputLabel>
-       
+
             <Select
               className="custom-bordered-input"
               labelId="state-label"
@@ -1932,29 +1930,39 @@ const handleAttachClick = () => {
               name="state"
               value={formData.state}
               onChange={(e) => {
-              if (!isEditMode || isDisabled) return; // prevent changing
-               handlechangeState(e);
+                if (!isEditMode || isDisabled) return;
+                handlechangeState(e);
               }}
               onOpen={(e) => {
                 if (!isEditMode || isDisabled) {
-                  e.preventDefault(); // prevent dropdown opening
+                  e.preventDefault();
                 }
               }}
-              // onChange={handlechangeState}
-              // onKeyDown={(e) => handleKeyDown(e, 7)}
-              // inputRef={(el) => (inputRefs.current[7] = el)}
+              inputRef={(el) => (inputRefs.current[7] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 7)} // Handle Enter key
               label="State"
               sx={{
-                backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white", // mimic disabled style
-                pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+                backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white",
+                pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto",
                 fontSize: 16,
-                color: formData.state ? "black" : "gray", // Dropdown text color
+                color: formData.state ? "black" : "gray",
                 height: "42px",
+              }}
+              MenuProps={{
+                sx: {
+                  zIndex: 200000,   // <<< FIX: dropdown above modal
+                },
+                PaperProps: {
+                  sx: {
+                    zIndex: 200000, // <<< also set for the menu paper
+                  },
+                },
               }}
             >
               <MenuItem value="">
                 <em>Select State</em>
               </MenuItem>
+
               {Object.values(stateCodes).map((state, index) => (
                 <MenuItem key={index} value={state}>
                   {state}
@@ -1972,10 +1980,10 @@ const handleAttachClick = () => {
             variant="filled"
             size="small"
             fullWidth
-            inputRef={(el) => (inputRefs.current[7] = el)}
+            inputRef={(el) => (inputRefs.current[8] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 8)}
             value={formData.opening_dr}
             onChange={handleNumericValue}
-            onKeyDown={(e) => handleKeyDown(e, 7)}
             onBlur={() => handleRateBlur("opening_dr")}
             inputProps={{
               maxLength: 15,
@@ -1995,10 +2003,10 @@ const handleAttachClick = () => {
             variant="filled"
             size="small"
             fullWidth
-            inputRef={(el) => (inputRefs.current[8] = el)}
+            inputRef={(el) => (inputRefs.current[9] = el)}
             value={formData.opening_cr}
             onChange={handleNumericValue}
-            onKeyDown={(e) => handleKeyDown(e, 8)}
+            onKeyDown={(e) => handleKeyDown(e, 9)}
             onBlur={() => handleRateBlur("opening_cr")}
             inputProps={{
               maxLength: 15,
@@ -2038,6 +2046,8 @@ const handleAttachClick = () => {
                 e.preventDefault(); // prevent dropdown opening
               }
             }}
+            inputRef={(el) => (inputRefs.current[10] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 10)}
             label="MSMED Status"
             sx={{
               fontSize: 16,
@@ -2063,8 +2073,8 @@ const handleAttachClick = () => {
             size="small"
             label="AREA"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[9] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 9)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[11] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 11)} // Handle Enter key
             inputProps={{
               maxLength: 48,
               style: {
@@ -2086,8 +2096,8 @@ const handleAttachClick = () => {
             size="small"
             label="CONTACT NO."
             onChange={handleInputChange}
-            inputRef={(el) => (inputRefs.current[10] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 10)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[12] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 12)} // Handle Enter key
             inputProps={{
               maxLength: 10,
               style: {
@@ -2107,8 +2117,8 @@ const handleAttachClick = () => {
             size="small"
             label="EMAIL"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[11] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 11)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[13] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 13)} // Handle Enter key
             onBlur={validateEmail}  
             inputProps={{
               maxLength: 48,
@@ -2131,8 +2141,8 @@ const handleAttachClick = () => {
             size="small"
             label="AGENT"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[12] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 12)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[14] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 14)} // Handle Enter key
             inputProps={{
               maxLength: 10,
               style: {
@@ -2152,8 +2162,8 @@ const handleAttachClick = () => {
             size="small"
             label="GROUP"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[13] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 13)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[15] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 15)} // Handle Enter key
             inputProps={{
               maxLength: 48,
               style: {
@@ -2176,8 +2186,8 @@ const handleAttachClick = () => {
             label="PAN NO."
             onChange={HandleValueChange}
             onBlur={handleBlur}
-            inputRef={(el) => (inputRefs.current[14] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 14)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[16] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 16)} // Handle Enter key
             inputProps={{
               maxLength: 10,
               style: {
@@ -2200,8 +2210,8 @@ const handleAttachClick = () => {
             size="small"
             label="TDS A/C NO."
             onChange={handleInputChange}
-            inputRef={(el) => (inputRefs.current[15] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 15)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[17] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 17)} // Handle Enter key
             inputProps={{
               maxLength: 15,
               style: {
@@ -2240,6 +2250,8 @@ const handleAttachClick = () => {
                 e.preventDefault(); // prevent dropdown opening
               }
             }}
+            inputRef={(el) => (inputRefs.current[18] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 18)}
             label="TURNOVER FOR 194-Q"
             sx={{
             fontSize: 16,
@@ -2282,6 +2294,8 @@ const handleAttachClick = () => {
                   e.preventDefault(); // prevent dropdown opening
                 }
               }}
+              inputRef={(el) => (inputRefs.current[19] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 19)}
               label="WHETHER APPROVED"
               sx={{
               fontSize: 16,
@@ -2307,8 +2321,8 @@ const handleAttachClick = () => {
             size="small"
             label="WORKS"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[16] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 16)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[20] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 20)} // Handle Enter key
             inputProps={{
               maxLength: 30,
               style: {
@@ -2330,8 +2344,8 @@ const handleAttachClick = () => {
             size="small"
             label="NAME & ADDRESS"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[17] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 17)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[21] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 21)} // Handle Enter key
             inputProps={{
               maxLength: 30,
               style: {
@@ -2356,8 +2370,8 @@ const handleAttachClick = () => {
             size="small"
             label="A/C"
             onChange={handleInputChange}
-            inputRef={(el) => (inputRefs.current[18] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 18)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[22] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 22)} // Handle Enter key
             inputProps={{
               maxLength: 15,
               style: {
@@ -2377,8 +2391,8 @@ const handleAttachClick = () => {
             size="small"
             label="RTGS#"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[19] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 19)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[23] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 23)} // Handle Enter key
             inputProps={{
               maxLength: 15,
               style: {
@@ -2400,8 +2414,8 @@ const handleAttachClick = () => {
             size="small"
             label="BANK NAME"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[20] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 20)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[24] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 24)} // Handle Enter key
             inputProps={{
               maxLength: 30,
               style: {
@@ -2423,8 +2437,8 @@ const handleAttachClick = () => {
             size="small"
             label="ADHAR NO."
             onChange={handleInputChange}
-            inputRef={(el) => (inputRefs.current[21] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 21)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[25] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 25)} // Handle Enter key
             inputProps={{
               maxLength: 15,
               style: {
@@ -2444,8 +2458,8 @@ const handleAttachClick = () => {
             size="small"
             label="SAC CODE"
             onChange={handleInputChange}
-            inputRef={(el) => (inputRefs.current[22] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 22)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[26] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 26)} // Handle Enter key
             inputProps={{
               maxLength: 15,
               style: {
@@ -2697,8 +2711,8 @@ const handleAttachClick = () => {
             size="small"
             label="CONTACT PERSON"
             onChange={HandleValueChange}
-            inputRef={(el) => (inputRefs.current[23] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 23)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[27] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 27)} // Handle Enter key
             inputProps={{
               maxLength: 40,
               style: {
@@ -2720,8 +2734,8 @@ const handleAttachClick = () => {
             size="small"
             label="INTT/DEPC.RATE"
             onChange={handleNumericValue}
-            inputRef={(el) => (inputRefs.current[24] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 24)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[28] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 28)} // Handle Enter key
             onBlur={() => handleRateBlur("irate")}
             inputProps={{
               maxLength: 6,
@@ -2744,8 +2758,8 @@ const handleAttachClick = () => {
             size="small"
             label="TDS RATE"
             onChange={handleNumericValue}
-            inputRef={(el) => (inputRefs.current[25] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 25)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[29] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 29)} // Handle Enter key
             onBlur={() => handleRateBlur("tds_rate")}
             inputProps={{
               maxLength: 6,
@@ -2768,8 +2782,8 @@ const handleAttachClick = () => {
             size="small"
             label="TCS RATE"
             onChange={handleNumericValue}
-            inputRef={(el) => (inputRefs.current[26] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 26)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[30] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 30)} // Handle Enter key
             onBlur={() => handleRateBlur("tcs_rate")}
             inputProps={{
               maxLength: 6,
@@ -2792,8 +2806,8 @@ const handleAttachClick = () => {
             size="small"
             label="GST / SHARE %"
             onChange={handleNumericValue}
-            inputRef={(el) => (inputRefs.current[27] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 27)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[31] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 31)} // Handle Enter key
             onBlur={() => handleRateBlur("sur_rate")}
             inputProps={{
               maxLength: 6,
@@ -2816,8 +2830,8 @@ const handleAttachClick = () => {
             size="small"
             label="QUANTITY"
             onChange={handleNumericValue}
-            inputRef={(el) => (inputRefs.current[28] = el)}
-            onKeyDown={(e) => handleKeyDown(e, 28)} // Handle Enter key
+            inputRef={(el) => (inputRefs.current[32] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 32)} // Handle Enter key
             onBlur={() => handleRateBlur("weight")}
             inputProps={{
               maxLength: 6,
@@ -2856,6 +2870,8 @@ const handleAttachClick = () => {
                   e.preventDefault(); // prevent dropdown opening
                 }
               }}
+              inputRef={(el) => (inputRefs.current[33] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 33)} // Handle Enter key
               label="COMPOSITION/RCM Y/N"
               sx={{
               fontSize: 16,
@@ -2973,7 +2989,7 @@ const handleAttachClick = () => {
           <div>
             <Button
               ref={(el) => (inputRefs.current[34] = el)} // Assign ref
-              onKeyDown={(e) => handleKeyDown(e, 34)} // Handle Enter key
+              // onKeyDown={(e) => handleKeyDown(e, 34)} // Handle Enter key
               className="Buttonz"
               onClick={handleSaveClick}
               disabled={!isSubmitEnabled}

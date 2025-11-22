@@ -6228,7 +6228,7 @@ const Sale = () => {
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
@@ -9061,7 +9061,8 @@ if (key === "name") {
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault(); // Stop default Tab navigation
       switch (field) {
         case "vcode":
           if (items[index].sdisc.trim() === "") {
@@ -9467,7 +9468,7 @@ if (key === "name") {
     setColor(event.target.value);
   };
   const handleKeyDowndown = (event, nextFieldRef) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault(); // Prevent form submission
       if (nextFieldRef.current) {
         nextFieldRef.current.focus();
@@ -9550,7 +9551,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
   }, [isModalOpenExp]);
 
   const handleKeyDownModal = (event, index) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (index < expRateRefs.current.length - 1) {
         expRateRefs.current[index + 1].focus(); // Move to the next Exp_rate input

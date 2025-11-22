@@ -6559,7 +6559,7 @@ const Purchase = () => {
   // }, []);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
@@ -8717,7 +8717,8 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault(); // Stop default Tab navigation
       switch (field) {
         case "vcode":
           if (items[index].sdisc.trim() === "") {
@@ -9014,7 +9015,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
   const cess2Ref = useRef(null);
 
   const handleKeyDowndown = (event, nextFieldRef) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault(); // Prevent form submission
       if (nextFieldRef.current) {
         nextFieldRef.current.focus();

@@ -1253,7 +1253,8 @@ const BankVoucher = () => {
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
 
   const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault(); // Stop default Tab navigation
       switch (field) {
         case "accountname":
           if (items[index].accountname.trim() === "") {
@@ -1598,7 +1599,7 @@ const BankVoucher = () => {
   };
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
@@ -1714,12 +1715,12 @@ const BankVoucher = () => {
                   id="Bankname"
                   value={item.Bankname}
                   onFocus={(e) => e.target.select()}
-                  label="Bank Name"
+                  label="BANK NAME"
                   size="small"
                   variant="filled"
                   onKeyDown={(e) => {
                     handleOpenModal(e, index, "Bankname");
-                    handleEnterKeyPress(BankRefs, null)(e);
+                    // handleEnterKeyPress(BankRefs, null)(e);
                   }}
                   inputProps={{
                     maxLength: 48,
@@ -1738,7 +1739,7 @@ const BankVoucher = () => {
                   id="code"
                   value={item.code}
                   onFocus={(e) => e.target.select()}
-                  label="Ac Code"
+                  label="AC CODE"
                   size="small"
                   variant="filled"
                   inputProps={{
@@ -1750,6 +1751,7 @@ const BankVoucher = () => {
                     readOnly: !isEditMode || isDisabled,
                   }}
                   sx={{ width: 150 }} // Adjust width as needed
+                   disabled     // ← ALWAYS DISABLED
                 />
               </div>
             </div>

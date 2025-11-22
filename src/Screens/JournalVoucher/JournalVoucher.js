@@ -968,7 +968,8 @@ const handleFirst = async () => {
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
 
 const handleKeyDown = (event, index, field) => {
-  if (event.key === "Enter") {
+  if (event.key === "Enter" || event.key === "Tab") {
+    event.preventDefault(); // Stop default Tab navigation
     switch (field) {
       case "accountname":
          if (items[index].accountname.trim() === "") {
@@ -1302,6 +1303,7 @@ const handleSearch = async (searchDate) => {
           variant="filled"
           className="custom-bordered-input"
           sx={{ width: 150,marginLeft:1 }}
+           disabled     // ← ALWAYS DISABLED
           />
         </div>  
       </div>

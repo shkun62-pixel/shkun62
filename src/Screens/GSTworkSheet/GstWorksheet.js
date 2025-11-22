@@ -464,6 +464,173 @@ export default function GstWorksheet() {
     );
   };
 
+  const handleExportDetailed = () => {
+    // CATEGORY LABELS ALWAYS (Option A)
+    const categories = [
+      { key: "reg_within", label: "Registered Within State" },
+      { key: "unreg_within", label: "Un-Registered Within State" },
+      { key: "reg_outside", label: "Registered Outside State" },
+      { key: "unreg_outside", label: "Un-Registered Outside State" },
+      { key: "outside_india", label: "Outside India" },
+    ];
+
+    // ---------- CLASSIFY RECORD ----------
+    // Uses your confirmed rules:
+    // - partyState === CompanyState => Within State
+    // - partyState !== CompanyState && partyState not empty => Outside State
+    // - empty/blank partyState => Outside India
+    const classifyRecord = (rec, isSale = true) => {
+      const gstno = isSale
+        ? rec?.customerDetails?.[0]?.gstno
+        : rec?.supplierdetails?.[0]?.gstno;
+
+      const partyStateRaw = isSale
+        ? rec?.customerDetails?.[0]?.state
+        : rec?.supplierdetails?.[0]?.state;
+
+      const partyState = (partyStateRaw || "").toString().trim();
+
+      // if no state -> treat as Outside India
+      if (!partyState) return "outside_india";
+
+      // compare normalized
+      const normalizedParty = partyState.toLowerCase();
+      const normalizedCompany = (CompanyState || "").toString().toLowerCase();
+
+      const isWithin = normalizedParty === normalizedCompany;
+      const isRegistered = String(gstno || "").trim() !== "";
+
+      if (isWithin && isRegistered) return "reg_within";
+      if (isWithin && !isRegistered) return "unreg_within";
+      if (!isWithin && isRegistered) return "reg_outside";
+      if (!isWithin && !isRegistered) return "unreg_outside";
+
+      // fallback
+      return "outside_india";
+    };
+
+    // ---------- AGGREGATE helper ----------
+    // Build map: map[categoryKey][gstRate] = { gst, value, ctax, stax, itax, cess }
+    const aggregateByCategory = (records, isSale = true) => {
+      const map = {};
+
+      (records || []).forEach((rec) => {
+        // each record may have multiple items; we classify by record party (customer/supplier)
+        const cat = classifyRecord(rec, isSale);
+
+        // ensure category exists
+        if (!map[cat]) map[cat] = {};
+
+        // pick cess from record-level if present (pcess), otherwise per-item cess if provided
+        const recCess = Number(rec?.formData?.pcess ?? 0) || 0;
+
+        (rec.items || []).forEach((it) => {
+          const gstKey = String(it?.gst ?? 0);
+          if (!map[cat][gstKey]) {
+            map[cat][gstKey] = {
+              gst: gstKey,
+              value: 0,
+              ctax: 0,
+              stax: 0,
+              itax: 0,
+              cess: 0,
+            };
+          }
+
+          const bucket = map[cat][gstKey];
+
+          // numeric safe conversions
+          const val = Number(it?.amount ?? it?.value ?? 0) || 0;
+          const ctax = Number(it?.ctax ?? 0) || 0;
+          const stax = Number(it?.stax ?? 0) || 0;
+          const itax = Number(it?.itax ?? 0) || 0;
+          // prefer per-item cess if provided, else record pcess
+          const cess = Number(it?.cess ?? it?.pcess ?? recCess ?? 0) || 0;
+
+          bucket.value += val;
+          bucket.ctax += ctax;
+          bucket.stax += stax;
+          bucket.itax += itax;
+          bucket.cess += cess;
+        });
+      });
+
+      return map;
+    };
+
+    // ---------- BUILD AOA (array of arrays) for a given grouped map ----------
+    const buildSheetRows = (groupedMap, isSale = true) => {
+      const rows = [];
+
+      // title row
+      rows.push([
+        isSale
+          ? `PERIOD FROM ${rawValue || ""} TO ${toRaw || ""}`
+          : `BREAK-UP OF PURCHASE SUMMARY`,
+      ]);
+      rows.push([]); // blank row for spacing
+
+      // header row
+      rows.push([
+        isSale ? "Sale Type" : "Purchase Type",
+        isSale ? "Sale Value" : "Pur. Value",
+        "Gst @",
+        "C.Tax",
+        "S.Tax",
+        "I.Tax",
+        "Cess",
+      ]);
+
+      // For each category (in the fixed order), output GST rows present for that category.
+      categories.forEach((cat) => {
+        const catData = groupedMap[cat.key];
+
+        // If category exists and has GST entries
+        if (catData && Object.keys(catData).length) {
+          // iterate GST groups sorted numerically ascending
+          Object.values(catData)
+            .sort((a, b) => Number(a.gst) - Number(b.gst))
+            .forEach((g) => {
+              rows.push([
+                cat.label,
+                Number(g.value || 0).toFixed(2),
+                g.gst,
+                Number(g.ctax || 0).toFixed(2),
+                Number(g.stax || 0).toFixed(2),
+                Number(g.itax || 0).toFixed(2),
+                Number(g.cess || 0).toFixed(2),
+              ]);
+            });
+        } else {
+          // If you prefer to still show the category with zero row, uncomment below:
+          // rows.push([cat.label, "0.00", "", "0.00", "0.00", "0.00", "0.00"]);
+        }
+      });
+
+      return rows;
+    };
+
+    // ---------- AGGREGATE data using saleData/purchaseData (your existing arrays) ----------
+    const saleGroupedByCat = aggregateByCategory(saleData || [], true);
+    const purchaseGroupedByCat = aggregateByCategory(purchaseData || [], false);
+
+    // ---------- BUILD SHEET ROWS ----------
+    const saleAoA = buildSheetRows(saleGroupedByCat, true);
+    const purchaseAoA = buildSheetRows(purchaseGroupedByCat, false);
+
+    // ---------- CREATE WORKBOOK & SHEETS ----------
+    const wb = XLSX.utils.book_new();
+    const saleSheet = XLSX.utils.aoa_to_sheet(saleAoA);
+    const purchaseSheet = XLSX.utils.aoa_to_sheet(purchaseAoA);
+
+    XLSX.utils.book_append_sheet(wb, saleSheet, "Sale Summary");
+    XLSX.utils.book_append_sheet(wb, purchaseSheet, "Purchase Summary");
+
+    // ---------- WRITE FILE ----------
+    XLSX.writeFile(wb, "GST_Detailed_Summary.xlsx");
+  };
+
+
   const handleChange = (e) => {
     setRawValue(e.target.value);
 
@@ -588,7 +755,7 @@ export default function GstWorksheet() {
               <Button className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
                 Export
               </Button>
-                <Button style={{marginTop:"10px"}} className="Buttonz" variant="contained" color="secondary" onClick={() => alert("Detail pressed (you can wire this)")}>
+                <Button style={{marginTop:"10px"}} className="Buttonz" variant="contained" color="secondary" onClick={handleExportDetailed}>
                 Detail
               </Button>
             </div>

@@ -1,1622 +1,740 @@
-// import React, { useEffect, useState,useRef } from "react";
-// import { Table, Button } from "react-bootstrap";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
-// import useCompanySetup from "./Shared/useCompanySetup";
-// import { useNavigate } from "react-router-dom";
-// import ReceiptModal from "./Modals/ReceiptModal";
-
-// const LOCAL_STORAGE_KEY = "PayementListTableData";
-
-// const Example = () => {
-  
-//   const navigate = useNavigate();
-//   const {dateFrom} = useCompanySetup();
-
-//   const defaultTableFields = {
-//     date: true,
-//     billno: true,
-//     weight: true, 
-//     pcs: false, 
-//     accountname: true,
-//     city: true,
-//     gstin: true,
-//     value: true,
-//     cgst: true,
-//     sgst: true,
-//     igst: true,
-//     netvalue: true,
-//     exp1: false,
-//     exp2: false,
-//     exp3: false,
-//     exp4: false,
-//     exp5: false,
-//     exp6: false,
-//     exp7: false,
-//     exp8: false,
-//     exp9: false,
-//     exp10: false,          
-//     description: false,  
-//     vehicleno: false,    
-//     remarks: false,     
-//     transport: false, 
-//     broker: false,    
-//     taxtype: false,                               
-//   };
-  
-//   const [tableData, settableData] = useState(() => {
-//     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-//     const parsed = saved ? JSON.parse(saved) : {};
-//     // Only keep keys that exist in defaultFormData
-//     const sanitized = Object.fromEntries(
-//       Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
-//         Object.hasOwn(defaultTableFields, key)
-//       )
-//     );
-    
-//     return sanitized;
-//   });
-
-//   const defaultColumnOrder = {
-//     date: 1,
-//     billno: 2,
-//     weight: 3,
-//     pcs: 4,
-//     accountname: 5,
-//     city: 6,
-//     gstin:7,
-//     value: 8,
-//     cgst: 9,
-//     sgst: 10,
-//     igst: 11,
-//     netvalue: 12,
-//     exp1: 13,
-//     exp2: 14,
-//     exp3: 15,
-//     exp4: 16,
-//     exp5: 17,
-//     exp6: 18,
-//     exp7: 19,
-//     exp8: 20,
-//     exp9: 21,
-//     exp10: 22,
-//     description: 23,
-//     vehicleno: 24,
-//     remarks: 25,
-//     transport: 26,
-//     broker:27,
-//     taxtype: 28,
-//   };
-
-//     const [columnOrder, setColumnOrder] = useState(() => {
-//       const saved = localStorage.getItem("ColumnOrderPList");
-//       console.log("saved:",saved);
-      
-//       const parsed = saved ? JSON.parse(saved) : {};
-//       return { ...defaultColumnOrder, ...parsed }; // ✅ merge saved over defaults
-//     });
-
-//     // Increase Decrease fontSize
-//     const [fontSize, setFontSize] = useState(() => {
-//       const saved = localStorage.getItem("FontSizePList");
-//       return saved ? parseInt(saved, 10) : 15;
-//     });
-
-//   // Payement Modal State
-//   const [showPaymentModal, setShowPaymentModal] = useState(false);
-//   const [selectedEntry, setSelectedEntry] = useState(null);
-//   const [activeRowIndex, setActiveRowIndex] = useState(0);
-//   const tableRef = useRef(null);
-//   const [entries, setEntries] = useState([]);
-//   const [filteredEntries, setFilteredEntries] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [fromDate, setFromDate] = useState(null);
-//   const [toDate, setToDate] = useState(() => new Date());
-//   const [selectedSupplier, setSelectedSupplier] = useState(""); 
-//   const [selectedItems, setSelectedItems] = useState(""); 
-//   const rowRefs = useRef([]);
-
-//   useEffect(() => {
-//     if (!fromDate && dateFrom) {
-//       setFromDate(new Date(dateFrom));
-//     }
-//   }, [dateFrom, fromDate]);
-
-  
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       if (tableRef.current) {
-//         tableRef.current.focus();
-//       }
-//     }, 0);
-
-//     return () => clearTimeout(timer);
-//   }, []);
-
-//  useEffect(() => {
-//    if (!fromDate || !toDate) return;
- 
-//    const fetchEntries = async () => {
-//      setLoading(true);
-//      try {
-//        // 1️⃣ Fetch Sale Entries
-//        const saleRes = await fetch(
-//          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
-//        );
-//        if (!saleRes.ok) throw new Error("Failed to fetch sale data");
-//        const saleData = await saleRes.json();
- 
-//        // Filter sales by date
-//        const filteredByDate = saleData.filter((entry) => {
-//          const entryDate = new Date(entry.formData?.date);
-//          return entryDate >= fromDate && entryDate <= toDate;
-//        });
- 
-//        // 2️⃣ Fetch Bank Voucher Entries
-//        const bankRes = await fetch(
-//          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
-//        );
-//        if (!bankRes.ok) throw new Error("Failed to fetch bank data");
-//        const bankData = await bankRes.json();
- 
-//        // Flatten bank voucher items
-//        const bankItems = bankData.flatMap((voucher) => voucher.items || []);
- 
-//        // 3️⃣ Filter out sales already received in bank
-//        const unpaidSales = filteredByDate.filter((sale) => {
-//          const accountName =
-//            sale.customerDetails?.[0]?.vacode?.trim().toLowerCase() || "";
-//          const saleAmount = parseFloat(sale.formData?.grandtotal || 0);
- 
-//          const isReceived = bankItems.some((item) => {
-//            const bankName = item.accountname?.trim().toLowerCase() || "";
-//            const bankAmount = parseFloat(item.receipt_credit || 0);
-//            const amountMatch = Math.abs(bankAmount - saleAmount) < 1; // ₹1 tolerance
- 
-//            return bankName === accountName && amountMatch;
-//          });
- 
-//          return !isReceived; // keep only unpaid
-//        });
- 
-//        // 4️⃣ Update state
-//        setEntries(unpaidSales);
-//        setFilteredEntries(unpaidSales);
-//      } catch (err) {
-//        setError(err.message);
-//      } finally {
-//        setLoading(false);
-//      }
-//    };
- 
-//    fetchEntries();
-//  }, [fromDate, toDate]);
-
-//   const uniqueItem = [...new Set(entries.map(entry => entry.items?.[0]?.sdisc))].filter(Boolean);
-//   const uniqueSuppliers = [...new Set(entries.map(entry => entry.customerDetails?.[0]?.vacode))].filter(Boolean);
-
-//   // Calculate totals based on filtered data
-//   const totalGrandTotal = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.grandtotal || 0), 0);
-//   const totalCGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.cgst || 0), 0);
-//   const totalSGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sgst || 0), 0);
-//   const totalIGST = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.igst || 0), 0);
-//   const totalTAX = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.sub_total || 0), 0);
-//   const totalWeight = filteredEntries.reduce((entryAcc, entry) => {
-//     const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.weight || 0), 0);
-//     return entryAcc + itemTotal;
-//   }, 0);
-//   const totalPcs = filteredEntries.reduce((entryAcc, entry) => {
-//   const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.pkgs || 0), 0);
-//   return entryAcc + itemTotal;
-//   }, 0);
-
-//   const totalexp1 = filteredEntries.reduce((entryAcc, entry) => {
-//   const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp1 || 0), 0);
-//   return entryAcc + itemTotal;
-//   }, 0);
-//     const totalexp2 = filteredEntries.reduce((entryAcc, entry) => {
-//   const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp2 || 0), 0);
-//   return entryAcc + itemTotal;
-//   }, 0);
-//     const totalexp3 = filteredEntries.reduce((entryAcc, entry) => {
-//   const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp3 || 0), 0);
-//   return entryAcc + itemTotal;
-//   }, 0);
-//     const totalexp4 = filteredEntries.reduce((entryAcc, entry) => {
-//   const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp4 || 0), 0);
-//   return entryAcc + itemTotal;
-//   }, 0);
-//     const totalexp5 = filteredEntries.reduce((entryAcc, entry) => {
-//   const itemTotal = entry.items?.reduce((itemAcc, item) => itemAcc + parseFloat(item.Exp5 || 0), 0);
-//   return entryAcc + itemTotal;
-//   }, 0);
-
-//   const totalexp6 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp6 || 0), 0);
-//   const totalexp7 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp7 || 0), 0);
-//   const totalexp8 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp8 || 0), 0);
-//   const totalexp9 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp9 || 0), 0);
-//   const totalexp10 = filteredEntries.reduce((acc, entry) => acc + parseFloat(entry.formData?.Exp10 || 0), 0);
-
-
-//   const formatDate = (dateValue) => {
-//     // Check if date is already in dd/mm/yyyy or d/m/yyyy format
-//     const ddmmyyyyPattern = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
-
-//     if (ddmmyyyyPattern.test(dateValue)) {
-//       return dateValue;  // already correctly formatted
-//     }
-
-//     const dateObj = new Date(dateValue);
-//     if (isNaN(dateObj)) {
-//       return "";  // invalid date fallback
-//     }
-//     const day = String(dateObj.getDate()).padStart(2, "0");
-//     const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-//     const year = dateObj.getFullYear();
-//     return `${day}/${month}/${year}`;
-//   };
-
-//   // Show loading only after user selects the dates
-//   if (loading) return <p>Loading...</p>;
-//   if (error) return <p>Error: {error}</p>;
-
-//   // Sorting Column Order
-//   const sortedVisibleFields = Object.keys(tableData)
-//   .filter(field => tableData[field]) // only visible ones
-//   .sort((a, b) => {
-//     const orderA = parseInt(columnOrder[a]) || 999;
-//     const orderB = parseInt(columnOrder[b]) || 999;
-//     return orderA - orderB;
-//   });
-
-//   return (
-//     <div>
-//       <h3 className="bank-title">📒 Receipt LIST</h3>
-
-//       <div style={{ display: "flex",flexDirection:"row", marginBottom: 10,marginLeft:10, marginTop:"20px" }}>
-//       <div>
-//         <span className="text-lg mr-2">Period From:</span>
-//           <DatePicker
-//             selected={fromDate}
-//             onChange={(date) => setFromDate(date)}
-//             dateFormat="dd/MM/yyyy"
-//             className="datepickerBank"
-//             placeholderText="From Date"
-//           />
-//         </div>
-//         <div>
-//         <span className="text-lg ml-3 mr-2">UpTo:</span>
-//         <DatePicker
-//           selected={toDate}
-//           onChange={(date) => setToDate(date)}
-//           dateFormat="dd/MM/yyyy"
-//           className="datepickerBank2"
-//           placeholderText="To Date"
-//         />
-//         </div>
-//       </div>
-//         <div
-//                ref={tableRef}
-//                tabIndex={0}
-//                style={{ maxHeight: 530, overflowY: "auto", padding: 5, outline: "none" }}
-//              >
-//              <Table className="custom-table" bordered>
-//              <thead style={{ backgroundColor: "skyblue", position: "sticky", top: -6, textAlign: 'center',    fontSize: `${fontSize}px` }}>
-//                <tr>
-//                  {sortedVisibleFields.map((field) => (
-//                    <th key={field}>
-//                      {field === "date" ? "Date" :
-//                      field === "billno" ? "BillNo." :
-//                      field === "accountname" ? "A/C Name" :
-//                      field === "weight" ? "Qty" :
-//                      field === "pcs" ? "Pcs" :
-//                      field === "city" ? "City" :
-//                      field === "gstin" ? "Gstin" :
-//                      field === "value" ? "Bill Value" :
-//                      field === "cgst" ? "C.Tax" :
-//                      field === "sgst" ? "S.Tax" :
-//                      field === "igst" ? "I.Tax" :
-//                      field === "netvalue" ? "Net value" :
-//                      field === "exp1" ? "Exp1" :
-//                      field === "exp2" ? "Exp2" :
-//                      field === "exp3" ? "Exp3" :
-//                      field === "exp4" ? "Exp4" :
-//                      field === "exp5" ? "Exp5" :
-//                      field === "exp6" ? "Exp6" :
-//                      field === "exp7" ? "Exp7" :
-//                      field === "exp8" ? "Exp8" :
-//                      field === "exp9" ? "Exp9" :
-//                      field === "exp10" ? "Exp10" : 
-//                      field === "description" ? "Description" : 
-//                      field === "vehicleno" ? "Vehicleno" :    
-//                      field === "remarks" ? "Remarks" :      
-//                      field === "transport" ? "Transport" :     
-//                      field === "broker" ? "Broker" :
-//                      field === "taxtype" ? "TaxType" :
-//                      field.toUpperCase()}
-//                    </th>
-//                  ))}
-//                  <th>Action</th>
-//                </tr>
-//              </thead>
-//              <tbody>
-//                {filteredEntries.map((entry, index) => {
-//                  const formData = entry.formData || {};
-//                  const customerDetails = entry.customerDetails?.[0] || {};
-//                  const item = entry.items?.[0] || {};
-//                  const totalItemWeight = entry.items?.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(3);
-//                  const totalItemPkgs = entry.items?.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(3);
-//                  const isActive = index === activeRowIndex;
-     
-//                  return (
-//                   <tr
-//                      key={index}
-//                      ref={(el) => (rowRefs.current[index] = el)}
-//                      tabIndex={0} // ✅ focusable row
-//                      onMouseEnter={() => setActiveRowIndex(index)}
-//                      onClick={() => {
-//                        navigate("/sale", { state: { saleId: entry._id, rowIndex: index } }); // ✅ pass via state
-//                         localStorage.setItem("selectedRowIndex", activeRowIndex); 
-//                      }}
-//                      style={{
-//                        backgroundColor: isActive ? "rgb(197, 190, 190)" : "",
-//                        cursor: "pointer",
-//                        fontSize: `${fontSize}px`,
-//                      }}
-//                      >
-//                      {sortedVisibleFields.map((field) => {
-//                        let value = "";
-//                        if (field === "date") value = formatDate(formData.date);
-//                        else if (field === "billno") value = formData.vno || "";
-//                        else if (field === "accountname") value = customerDetails.vacode || "";
-//                        else if (field === "weight") value = totalItemWeight;
-//                        else if (field === "pcs") value = totalItemPkgs;
-//                        else if (field === "city") value = customerDetails.city || "";
-//                        else if (field === "gstin") value = customerDetails.gstno || "";
-//                        else if (field === "value") value = formData.grandtotal || "";
-//                        else if (field === "cgst") value = formData.cgst || "";
-//                        else if (field === "sgst") value = formData.sgst || "";
-//                        else if (field === "igst") value = formData.igst || "";
-//                        else if (field === "netvalue") value = formData.sub_total || "";
-//                        else if (field === "exp1") value = item.Exp1 || "0.00";
-//                        else if (field === "exp2") value = item.Exp2 || "0.00";
-//                        else if (field === "exp3") value = item.Exp3 || "0.00";
-//                        else if (field === "exp4") value = item.Exp4 || "0.00";
-//                        else if (field === "exp5") value = item.Exp5 || "0.00";
-//                        else if (field === "exp6") value = formData.Exp6 || "";
-//                        else if (field === "exp7") value = formData.Exp7 || "";
-//                        else if (field === "exp8") value = formData.Exp8 || "";
-//                        else if (field === "exp9") value = formData.Exp9 || "";
-//                        else if (field === "exp10") value = formData.Exp10 || ""; 
-//                        else if (field === "description") value = item.sdisc || "";
-//                        else if (field === "vehicleno") value = formData.trpt || "";
-//                        else if (field === "remarks") value = formData.rem2 || "";
-//                        else if (field === "transport") value = formData.v_tpt || "";
-//                        else if (field === "broker") value = formData.broker || "" ;
-//                        else if (field === "taxtype") value = formData.stype || "" ;
-//                        return <td key={field}>{value}</td>;
-//                      })}
-//                      <td style={{ textAlign: "center" }}>
-//                       <Button
-//                        variant="success"
-//                        size="sm"
-//                        onClick={(e) => {
-//                          e.stopPropagation();
-//                          setSelectedEntry(entry);
-//                          setShowPaymentModal(true);
-//                        }}
-//                      >
-//                        Make Payment
-//                      </Button>
-//                      </td>
-//                    </tr>
-//                  );
-//                })}
-//              </tbody>
-//            <tfoot style={{ backgroundColor: "skyblue", position: "sticky", bottom: -6, fontSize: `${fontSize}px` }}>
-//                <tr>
-//                  {sortedVisibleFields.map((field, idx) => {
-//                    let value = "";
-//                    if (field === "date") value = "TOTAL";
-//                    else if (field === "value") value = totalGrandTotal.toFixed(2);
-//                    else if (field === "cgst") value = totalCGST.toFixed(2);
-//                    else if (field === "sgst") value = totalSGST.toFixed(2);
-//                    else if (field === "igst") value = totalIGST.toFixed(2);
-//                    else if (field === "netvalue") value = totalTAX.toFixed(2);
-//                    else if (field === "weight") value = totalWeight.toFixed(3);
-//                    else if (field === "pcs") value = totalPcs.toFixed(3);
-//                    else if (field === "exp1") value = totalexp1.toFixed(2);
-//                    else if (field === "exp2") value = totalexp2.toFixed(2);
-//                    else if (field === "exp3") value = totalexp3.toFixed(2);
-//                    else if (field === "exp4") value = totalexp4.toFixed(2);
-//                    else if (field === "exp5") value = totalexp5.toFixed(2);
-//                    else if (field === "exp6") value = totalexp6.toFixed(2);
-//                    else if (field === "exp7") value = totalexp7.toFixed(2);
-//                    else if (field === "exp8") value = totalexp8.toFixed(2);
-//                    else if (field === "exp9") value = totalexp9.toFixed(2);
-//                    else if (field === "exp10") value = totalexp10.toFixed(2);
-//                    return <td key={field} style={{ fontWeight: value ? "bold" : "", color: value ? "red" : "" }}>{value}</td>;
-//                  })}
-//                   <td></td>
-//                </tr>
-//              </tfoot>
-//              </Table>
-//         </div>
-//           <ReceiptModal
-//            show={showPaymentModal}
-//            onHide={() => setShowPaymentModal(false)}
-//            entry={selectedEntry}
-//          />
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-
-
-// import React, { useEffect, useState, useRef } from "react";
-// import { Table, Button } from "react-bootstrap";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
-// import useCompanySetup from "./Shared/useCompanySetup";
-// import { useNavigate } from "react-router-dom";
-// import ReceiptModal from "./Modals/ReceiptModal";
-
-// const LOCAL_STORAGE_KEY = "PayementListTableData";
-
-// const Example = () => {
-//   const navigate = useNavigate();
-//   const { dateFrom } = useCompanySetup();
-
-//   const defaultTableFields = {
-//     date: true,
-//     billno: true,
-//     accountname: true,
-//     city: true,
-//     gstin: true,
-//     value: true,
-//     paidamount: true,
-//     balance: true,
-//   };
-
-//   const [tableData, settableData] = useState(defaultTableFields);
-//   const [entries, setEntries] = useState([]);
-//   const [filteredEntries, setFilteredEntries] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [fromDate, setFromDate] = useState(null);
-//   const [toDate, setToDate] = useState(() => new Date());
-//   const [showPaymentModal, setShowPaymentModal] = useState(false);
-//   const [selectedEntry, setSelectedEntry] = useState(null);
-
-//   const tableRef = useRef(null);
-//   const [activeRowIndex, setActiveRowIndex] = useState(0);
-//   const rowRefs = useRef([]);
-
-//   // ✅ Helper to safely format amounts
-//   const formatAmount = (val) => {
-//     const num = parseFloat(val);
-//     return isNaN(num) ? "0.00" : num.toFixed(2);
-//   };
-
-//   // ✅ Format date safely
-//   const formatDate = (dateValue) => {
-//     if (!dateValue) return "";
-//     const d = new Date(dateValue);
-//     if (isNaN(d)) return "";
-//     return `${String(d.getDate()).padStart(2, "0")}/${String(
-//       d.getMonth() + 1
-//     ).padStart(2, "0")}/${d.getFullYear()}`;
-//   };
-
-//   // Load company start date
-//   useEffect(() => {
-//     if (!fromDate && dateFrom) setFromDate(new Date(dateFrom));
-//   }, [dateFrom, fromDate]);
-
-//   // Fetch data when date range changes
-//   useEffect(() => {
-//     if (!fromDate || !toDate) return;
-
-//     const fetchEntries = async () => {
-//       setLoading(true);
-//       try {
-//         // 1️⃣ Fetch sales
-//         const saleRes = await fetch(
-//           `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
-//         );
-//         if (!saleRes.ok) throw new Error("Failed to fetch sale data");
-//         const saleData = await saleRes.json();
-
-//         const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
-//           (entry) => {
-//             const entryDate = new Date(entry?.formData?.date || "");
-//             return entryDate >= fromDate && entryDate <= toDate;
-//           }
-//         );
-
-//         // 2️⃣ Fetch bank vouchers
-//         const bankRes = await fetch(
-//           `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
-//         );
-//         if (!bankRes.ok) throw new Error("Failed to fetch bank data");
-//         const bankRaw = await bankRes.json();
-
-//         const bankData = Array.isArray(bankRaw)
-//           ? bankRaw.map((b) => b?.data || b)
-//           : [];
-
-//         // 3️⃣ Create payment map
-//         const paymentMap = new Map();
-//         bankData.forEach((voucher) => {
-//           const vForm = voucher?.formData || {};
-//           const items = Array.isArray(voucher?.items)
-//             ? voucher.items
-//             : Array.isArray(voucher?.data?.items)
-//             ? voucher.data.items
-//             : [];
-
-//           const billNo = parseInt(vForm.againstbillno || 0);
-//           if (!billNo) return;
-
-//           const totalPaid = items.reduce(
-//             (sum, item) => sum + parseFloat(item?.receipt_credit || 0),
-//             0
-//           );
-//           paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
-//         });
-
-//         // 4️⃣ Merge payment info
-//         const updatedSales = filteredSales
-//           .map((sale) => {
-//             const formData = sale?.formData || {};
-//             const saleBillNo = parseInt(formData?.vno || 0);
-//             const saleAmount = parseFloat(formData?.grandtotal || 0);
-//             const paidAmount = paymentMap.get(saleBillNo) || 0;
-//             const balance = saleAmount - paidAmount;
-
-//             return {
-//               ...sale,
-//               formData: {
-//                 ...formData,
-//                 paidAmount,
-//                 balance,
-//               },
-//             };
-//           })
-//           .filter((sale) => sale?.formData?.balance > 0.5);
-
-//         setEntries(updatedSales);
-//         setFilteredEntries(updatedSales);
-//       } catch (err) {
-//         console.error("❌ Fetch Error:", err);
-//         setError(err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchEntries();
-//   }, [fromDate, toDate]);
-
-//   // Totals
-//   const totalGrandTotal = filteredEntries.reduce(
-//     (acc, e) => acc + parseFloat(e?.formData?.grandtotal || 0),
-//     0
-//   );
-//   const totalPaid = filteredEntries.reduce(
-//     (acc, e) => acc + parseFloat(e?.formData?.paidAmount || 0),
-//     0
-//   );
-//   const totalBalance = filteredEntries.reduce(
-//     (acc, e) => acc + parseFloat(e?.formData?.balance || 0),
-//     0
-//   );
-
-//   if (loading) return <p>Loading...</p>;
-//   if (error) return <p>Error: {error}</p>;
-
-//   const sortedFields = Object.keys(tableData);
-
-//   return (
-//     <div>
-//       <h3 className="bank-title">📒 Receipt LIST</h3>
-
-//       {/* Date Filters */}
-//       <div
-//         style={{
-//           display: "flex",
-//           flexDirection: "row",
-//           marginBottom: 10,
-//           marginLeft: 10,
-//           marginTop: "20px",
-//         }}
-//       >
-//         <div>
-//           <span className="text-lg mr-2">Period From:</span>
-//           <DatePicker
-//             selected={fromDate}
-//             onChange={(date) => setFromDate(date)}
-//             dateFormat="dd/MM/yyyy"
-//             className="datepickerBank"
-//           />
-//         </div>
-//         <div>
-//           <span className="text-lg ml-3 mr-2">UpTo:</span>
-//           <DatePicker
-//             selected={toDate}
-//             onChange={(date) => setToDate(date)}
-//             dateFormat="dd/MM/yyyy"
-//             className="datepickerBank2"
-//           />
-//         </div>
-//       </div>
-
-//       {/* Table */}
-//       <div
-//         ref={tableRef}
-//         tabIndex={0}
-//         style={{
-//           maxHeight: 530,
-//           overflowY: "auto",
-//           padding: 5,
-//           outline: "none",
-//         }}
-//       >
-//         <Table className="custom-table" bordered>
-//           <thead
-//             style={{
-//               backgroundColor: "skyblue",
-//               position: "sticky",
-//               top: -6,
-//               textAlign: "center",
-//               fontSize: "15px",
-//             }}
-//           >
-//             <tr>
-//               {sortedFields.map((field) => (
-//                 <th key={field}>
-//                   {field === "paidamount"
-//                     ? "Paid"
-//                     : field === "balance"
-//                     ? "Balance"
-//                     : field === "value"
-//                     ? "Bill Value"
-//                     : field.toUpperCase()}
-//                 </th>
-//               ))}
-//               <th>Action</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {filteredEntries.map((entry, index) => {
-//               const formData = entry?.formData || {};
-//               const customer = entry?.customerDetails?.[0] || {};
-
-//               return (
-//                 <tr
-//                   key={index}
-//                   ref={(el) => (rowRefs.current[index] = el)}
-//                   onMouseEnter={() => setActiveRowIndex(index)}
-//                   style={{
-//                     backgroundColor:
-//                       index === activeRowIndex ? "rgb(197,190,190)" : "",
-//                     cursor: "pointer",
-//                   }}
-//                 >
-//                   <td>{formatDate(formData?.date)}</td>
-//                   <td>{formData?.vno || ""}</td>
-//                   <td>{customer?.vacode || ""}</td>
-//                   <td>{customer?.city || ""}</td>
-//                   <td>{customer?.gstno || ""}</td>
-//                   <td>{formatAmount(formData?.grandtotal)}</td>
-//                   <td>{formatAmount(formData?.paidAmount)}</td>
-//                   <td>{formatAmount(formData?.balance)}</td>
-//                   <td style={{ textAlign: "center" }}>
-//                     <Button
-//                       variant="success"
-//                       size="sm"
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         setSelectedEntry(entry);
-//                         setShowPaymentModal(true);
-//                       }}
-//                     >
-//                       Make Payment
-//                     </Button>
-//                   </td>
-//                 </tr>
-//               );
-//             })}
-//           </tbody>
-
-//           <tfoot
-//             style={{
-//               backgroundColor: "skyblue",
-//               position: "sticky",
-//               bottom: -6,
-//               fontSize: "15px",
-//             }}
-//           >
-//             <tr>
-//               <td colSpan={5} style={{ fontWeight: "bold" }}>
-//                 TOTAL
-//               </td>
-//               <td style={{ fontWeight: "bold", color: "red" }}>
-//                 {formatAmount(totalGrandTotal)}
-//               </td>
-//               <td style={{ fontWeight: "bold", color: "red" }}>
-//                 {formatAmount(totalPaid)}
-//               </td>
-//               <td style={{ fontWeight: "bold", color: "red" }}>
-//                 {formatAmount(totalBalance)}
-//               </td>
-//               <td></td>
-//             </tr>
-//           </tfoot>
-//         </Table>
-//       </div>
-
-//       <ReceiptModal
-//         show={showPaymentModal}
-//         onHide={() => setShowPaymentModal(false)}
-//         entry={selectedEntry}
-//       />
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-
-// import React, { useEffect, useState, useRef, useCallback } from "react";
-// import { Table, Button } from "react-bootstrap";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
-// import useCompanySetup from "./Shared/useCompanySetup";
-// import { useNavigate } from "react-router-dom";
-// import ReceiptModal from "./Modals/ReceiptModal";
-
-// const LOCAL_STORAGE_KEY = "PayementListTableData";
-
-// const Example = () => {
-//   const navigate = useNavigate();
-//   const { dateFrom } = useCompanySetup();
-
-//   const defaultTableFields = {
-//     date: true,
-//     billno: true,
-//     accountname: true,
-//     city: true,
-//     gstin: true,
-//     value: true,
-//     paidamount: true,
-//     balance: true,
-//   };
-
-//   const [tableData, settableData] = useState(defaultTableFields);
-//   const [entries, setEntries] = useState([]);
-//   const [filteredEntries, setFilteredEntries] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [fromDate, setFromDate] = useState(null);
-//   const [toDate, setToDate] = useState(() => new Date());
-//   const [showPaymentModal, setShowPaymentModal] = useState(false);
-//   const [selectedEntry, setSelectedEntry] = useState(null);
-
-//   const tableRef = useRef(null);
-//   const [activeRowIndex, setActiveRowIndex] = useState(0);
-//   const rowRefs = useRef([]);
-
-//   const formatAmount = (val) => {
-//     const num = parseFloat(val);
-//     return isNaN(num) ? "0.00" : num.toFixed(2);
-//   };
-
-//   const formatDate = (dateValue) => {
-//     if (!dateValue) return "";
-//     const d = new Date(dateValue);
-//     if (isNaN(d)) return "";
-//     return `${String(d.getDate()).padStart(2, "0")}/${String(
-//       d.getMonth() + 1
-//     ).padStart(2, "0")}/${d.getFullYear()}`;
-//   };
-
-//   useEffect(() => {
-//     if (!fromDate && dateFrom) setFromDate(new Date(dateFrom));
-//   }, [dateFrom, fromDate]);
-
-//   // ✅ Fetch entries (reusable function)
-//   const fetchEntries = useCallback(async () => {
-//     if (!fromDate || !toDate) return;
-
-//     setLoading(true);
-//     try {
-//       // --- 1️⃣ Fetch sales ---
-//       const saleRes = await fetch(
-//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
-//       );
-//       if (!saleRes.ok) throw new Error("Failed to fetch sale data");
-//       const saleData = await saleRes.json();
-
-//       const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
-//         (entry) => {
-//           const entryDate = new Date(entry?.formData?.date || "");
-//           return entryDate >= fromDate && entryDate <= toDate;
-//         }
-//       );
-
-//       // --- 2️⃣ Fetch bank vouchers ---
-//       const bankRes = await fetch(
-//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
-//       );
-//       if (!bankRes.ok) throw new Error("Failed to fetch bank data");
-//       const bankRaw = await bankRes.json();
-
-//       const bankData = Array.isArray(bankRaw)
-//         ? bankRaw.map((b) => b?.data || b)
-//         : [];
-
-//       // --- 3️⃣ Create payment map ---
-//       const paymentMap = new Map();
-//       bankData.forEach((voucher) => {
-//         const vForm = voucher?.formData || {};
-//         const items = Array.isArray(voucher?.items)
-//           ? voucher.items
-//           : Array.isArray(voucher?.data?.items)
-//           ? voucher.data.items
-//           : [];
-
-//         const billNo = parseInt(vForm.againstbillno || 0);
-//         if (!billNo) return;
-
-//         const totalPaid = items.reduce(
-//           (sum, item) => sum + parseFloat(item?.receipt_credit || 0),
-//           0
-//         );
-//         paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
-//       });
-
-//       // --- 4️⃣ Merge payment info ---
-//       const updatedSales = filteredSales
-//         .map((sale) => {
-//           const formData = sale?.formData || {};
-//           const saleBillNo = parseInt(formData?.vno || 0);
-//           const saleAmount = parseFloat(formData?.grandtotal || 0);
-//           const paidAmount = paymentMap.get(saleBillNo) || 0;
-//           const balance = saleAmount - paidAmount;
-
-//           return {
-//             ...sale,
-//             formData: {
-//               ...formData,
-//               paidAmount,
-//               balance,
-//             },
-//           };
-//         })
-//         // ✅ Hide fully paid bills
-//         .filter((sale) => sale?.formData?.balance > 0.5);
-
-//       setEntries(updatedSales);
-//       setFilteredEntries(updatedSales);
-//     } catch (err) {
-//       console.error("❌ Fetch Error:", err);
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [fromDate, toDate]);
-
-//   // Fetch initially and when dates change
-//   useEffect(() => {
-//     fetchEntries();
-//   }, [fetchEntries]);
-
-//   // Totals
-//   const totalGrandTotal = filteredEntries.reduce(
-//     (acc, e) => acc + parseFloat(e?.formData?.grandtotal || 0),
-//     0
-//   );
-//   const totalPaid = filteredEntries.reduce(
-//     (acc, e) => acc + parseFloat(e?.formData?.paidAmount || 0),
-//     0
-//   );
-//   const totalBalance = filteredEntries.reduce(
-//     (acc, e) => acc + parseFloat(e?.formData?.balance || 0),
-//     0
-//   );
-
-//   if (loading) return <p>Loading...</p>;
-//   if (error) return <p>Error: {error}</p>;
-
-//   const sortedFields = Object.keys(tableData);
-
-//   return (
-//     <div>
-//       <h3 className="bank-title">📒 Receipt LIST</h3>
-
-//       {/* Date Filters */}
-//       <div
-//         style={{
-//           display: "flex",
-//           flexDirection: "row",
-//           marginBottom: 10,
-//           marginLeft: 10,
-//           marginTop: "20px",
-//         }}
-//       >
-//         <div>
-//           <span className="text-lg mr-2">Period From:</span>
-//           <DatePicker
-//             selected={fromDate}
-//             onChange={(date) => setFromDate(date)}
-//             dateFormat="dd/MM/yyyy"
-//             className="datepickerBank"
-//           />
-//         </div>
-//         <div>
-//           <span className="text-lg ml-3 mr-2">UpTo:</span>
-//           <DatePicker
-//             selected={toDate}
-//             onChange={(date) => setToDate(date)}
-//             dateFormat="dd/MM/yyyy"
-//             className="datepickerBank2"
-//           />
-//         </div>
-//       </div>
-
-//       {/* Table */}
-//       <div
-//         ref={tableRef}
-//         tabIndex={0}
-//         style={{
-//           maxHeight: 530,
-//           overflowY: "auto",
-//           padding: 5,
-//           outline: "none",
-//         }}
-//       >
-//         <Table className="custom-table" bordered>
-//           <thead
-//             style={{
-//               backgroundColor: "skyblue",
-//               position: "sticky",
-//               top: -6,
-//               textAlign: "center",
-//               fontSize: "15px",
-//             }}
-//           >
-//             <tr>
-//               {sortedFields.map((field) => (
-//                 <th key={field}>
-//                   {field === "paidamount"
-//                     ? "Paid"
-//                     : field === "balance"
-//                     ? "Balance"
-//                     : field === "value"
-//                     ? "Bill Value"
-//                     : field.toUpperCase()}
-//                 </th>
-//               ))}
-//               <th>Action</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {filteredEntries.map((entry, index) => {
-//               const formData = entry?.formData || {};
-//               const customer = entry?.customerDetails?.[0] || {};
-
-//               return (
-//                 <tr
-//                   key={index}
-//                   ref={(el) => (rowRefs.current[index] = el)}
-//                   onMouseEnter={() => setActiveRowIndex(index)}
-//                   style={{
-//                     backgroundColor:
-//                       index === activeRowIndex ? "rgb(197,190,190)" : "",
-//                     cursor: "pointer",
-//                   }}
-//                 >
-//                   <td>{formatDate(formData?.date)}</td>
-//                   <td>{formData?.vno || ""}</td>
-//                   <td>{customer?.vacode || ""}</td>
-//                   <td>{customer?.city || ""}</td>
-//                   <td>{customer?.gstno || ""}</td>
-//                   <td>{formatAmount(formData?.grandtotal)}</td>
-//                   <td>{formatAmount(formData?.paidAmount)}</td>
-//                   <td>{formatAmount(formData?.balance)}</td>
-//                   <td style={{ textAlign: "center" }}>
-//                     <Button
-//                       variant="success"
-//                       size="sm"
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         setSelectedEntry(entry);
-//                         setShowPaymentModal(true);
-//                       }}
-//                     >
-//                       Make Payment
-//                     </Button>
-//                   </td>
-//                 </tr>
-//               );
-//             })}
-//           </tbody>
-
-//           <tfoot
-//             style={{
-//               backgroundColor: "skyblue",
-//               position: "sticky",
-//               bottom: -6,
-//               fontSize: "15px",
-//             }}
-//           >
-//             <tr>
-//               <td colSpan={5} style={{ fontWeight: "bold" }}>
-//                 TOTAL
-//               </td>
-//               <td style={{ fontWeight: "bold", color: "red" }}>
-//                 {formatAmount(totalGrandTotal)}
-//               </td>
-//               <td style={{ fontWeight: "bold", color: "red" }}>
-//                 {formatAmount(totalPaid)}
-//               </td>
-//               <td style={{ fontWeight: "bold", color: "red" }}>
-//                 {formatAmount(totalBalance)}
-//               </td>
-//               <td></td>
-//             </tr>
-//           </tfoot>
-//         </Table>
-//       </div>
-
-//       {/* ✅ Pass refresh callback to modal */}
-//       <ReceiptModal
-//         show={showPaymentModal}
-//         onHide={() => setShowPaymentModal(false)}
-//         entry={selectedEntry}
-//         onPaymentSaved={fetchEntries}
-//       />
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-
-import React,{useState} from 'react'
-import Table from "react-bootstrap/Table";
-import ProductModalCustomer from './Modals/ProductModalCustomer';
-import { TextField } from '@mui/material';
-
-const Example = () => {
-
-  const tenant = "shkun_05062025_05062026"
-  const [formData, setFormData] = useState({
-  narr:""
+// GstSummary.jsx
+import React, { useEffect, useMemo, useState } from "react";
+import {Box,Button,CircularProgress,FormControl,FormControlLabel,Grid,Paper,Radio,RadioGroup,Table,TableBody,TableCell,TableContainer,TableHead,TableRow, Typography} from "@mui/material";
+import useCompanySetup from "./Shared/useCompanySetup";
+import "react-datepicker/dist/react-datepicker.css";
+import InputMask from "react-input-mask";
+import * as XLSX from "xlsx";
+
+// --------- CONFIG ----------
+const SALE_API = "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
+const PURCHASE_API = "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
+// ---------------------------
+
+function formatDateISO(d) {
+  if (!d) return "";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return "";
+  // YYYY-MM-DD for input date value match
+  return dt.toISOString().slice(0, 10);
+}
+
+function parseISODate(dateString) {
+  if (!dateString) return null;
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+function parseDMY(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return null;
+  const [day, month, year] = parts;
+  return new Date(`${year}-${month}-${day}`);
+}
+
+export default function Example() {
+
+  const {dateFrom, companyName,companyAdd, companyCity, CompanyState} = useCompanySetup();
+  const [fromDate, setFromDate] = useState("");
+  useEffect(() => {
+    if (!fromDate && dateFrom) {
+      setFromDate(new Date(dateFrom));
+    }
+  }, [dateFrom, fromDate]);
+
+  const [rawValue, setRawValue] = useState("");
+  useEffect(() => {
+    if (!rawValue && dateFrom) {
+      const d = new Date(dateFrom);
+
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const year = d.getFullYear();
+
+      setRawValue(`${day}/${month}/${year}`);
+      console.log(dateFrom, "dateFrom formatted");
+    }
+  }, [dateFrom, rawValue]);
+
+  const [toDate, setToDate] = useState(() => formatDateISO(new Date()));
+  const [toRaw, setToRaw] = useState("");
+
+  // Initialize to today's date
+  useEffect(() => {
+    if (!toRaw) {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Months 0-indexed
+      const year = today.getFullYear();
+      setToRaw(`${day}/${month}/${year}`);
+      setToDate(today);
+    }
+  }, [toRaw]);
+
+  const [stateCondition, setStateCondition] = useState("All"); // All | Within | Out
+  const [regdFilter, setRegdFilter] = useState("All"); // All | Registered | Un-Registered
+
+  const [saleData, setSaleData] = useState([]);
+  const [purchaseData, setPurchaseData] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [detailDialog, setDetailDialog] = useState({
+    open: false,
+    side: "sale",
+    gstRate: null,
+    entries: [],
   });
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      acode:"",
-      accountname: "",
-      narration: "",
-      payment_debit: "",
-      receipt_credit: "",
-      discount: "",
-      discounted_payment: "",
-      discounted_receipt: "",
-      disablePayment: false,
-      disableReceipt: false,
-    },
-  ]);
 
-  const capitalizeWords = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-const [narrationSuggestions, setNarrationSuggestions] = useState([]);
-const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
-
-const fetchNarrations = async () => {
-  try {
-    const res = await fetch(
-      "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash"
-    );
-    const data = await res.json();
-
-    // extract narrations from all items
-    const narrs = data
-      .flatMap(entry => entry.items || [])
-      .map(item => item.narration)
-      .filter(n => n && n.trim() !== "");  // remove empty narrations
-
-    // unique values
-    const uniqueNarrs = [...new Set(narrs)];
-
-    setNarrationSuggestions(uniqueNarrs);
-  } catch (err) {
-    console.error("Narration fetch failed:", err);
-  }
-};
-
-
-  // Modal For Customer
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const [productsCus, setProductsCus] = useState([]);
-  const [showModalCus, setShowModalCus] = useState(false);
-  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-  const [loadingCus, setLoadingCus] = useState(true);
-  const [errorCus, setErrorCus] = useState(null);
-  
-  React.useEffect(() => {
-    // Fetch products from the API when the component mounts
-    fetchCustomers();
-    fetchNarrations();  // new
-  }, []);
-
-  const fetchCustomers = async () => {
+  // Fetch function called when clicking View
+  const handleView = async () => {
+    setError("");
+    setLoading(true);
     try {
-      const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = await response.json();
-      // Ensure to extract the formData for easier access in the rest of your app
-      const formattedData = data.map((item) => ({
-        ...item.formData,
-        _id: item._id,
-      }));
-      setProductsCus(formattedData);
-      setLoadingCus(false);
-    } catch (error) {
-      setErrorCus(error.message);
-      setLoadingCus(false);
+      const [saleRes, purchaseRes] = await Promise.all([
+        fetch(SALE_API),
+        fetch(PURCHASE_API),
+      ]);
+
+      if (!saleRes.ok) throw new Error("Sale API fetch failed");
+      if (!purchaseRes.ok) throw new Error("Purchase API fetch failed");
+
+      const saleJson = await saleRes.json();
+      const purchaseJson = await purchaseRes.json();
+
+      setSaleData(saleJson || []);
+      setPurchaseData(purchaseJson || []);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "Failed to fetch APIs");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleItemChangeCus = (index, key, value) => {
-    if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
-      return; // reject invalid input
+  // Utility: returns whether a record (sale/purchase) passes filters:
+  const recordPassesFilters = (record, isSale = true) => {
+    // Date filter
+    let rawDate = record?.formData?.date || record?.formData?.duedate;
+
+    let recDate = null;
+
+    // If date contains "/" → DD/MM/YYYY
+    if (rawDate && rawDate.includes("/")) {
+      recDate = parseDMY(rawDate);
+    } else {
+      // Normal ISO
+      recDate = parseISODate(rawDate);
     }
-    const updatedItems = [...items];
-    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-    // If the key is 'name', find the corresponding product and set the price
-    if (key === "name") {
-      const selectedProduct = productsCus.find(
-        (product) => product.ahead === value
-      );
-      if (selectedProduct) {
-        updatedItems[index]["accountname"] = selectedProduct.ahead;
-      }
-    } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
-      const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
-      const discount = parseFloat(updatedItems[index]["discount"]) || 0;
-      const discountedPayment = payment - discount;
-      const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
+    const from = parseISODate(fromDate);
+    const to = parseISODate(toDate);
+    if (!recDate) return false;
+    if (from && recDate < from) return false;
+    if (to && recDate > new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59)) return false;
 
-      let discountedReceipt = receipt - discount;
-      if (updatedItems[index].disableReceipt) {
-        discountedReceipt = 0; // Set to zero if receipt field is disabled
-      }
-
-      let discounted_payment = discountedPayment;
-      if (updatedItems[index].disablePayment) {
-        discounted_payment = 0; // Set to zero if payment field is disabled
-      }
-
-      updatedItems[index]["payment_debit"] = payment.toFixed(2);
-      updatedItems[index]["discounted_payment"] = discounted_payment.toFixed(2);
-      updatedItems[index]["receipt_credit"] = receipt.toFixed(2);
-      updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
-      updatedItems[index]["discount"] = discount;
+    // State filter
+    if (stateCondition !== "All") {
+      const partyState =
+        (isSale
+          ? record?.customerDetails?.[0]?.state
+          : record?.supplierdetails?.[0]?.state) || "";
+      const within = (partyState || "").trim().toLowerCase() === (CompanyState || "").trim().toLowerCase();
+      if (stateCondition === "Within" && !within) return false;
+      if (stateCondition === "Out" && within) return false;
     }
-    setItems(updatedItems);
+
+    // Regd / Un-Registered
+    if (regdFilter !== "All") {
+      const gstno =
+        (isSale
+          ? record?.customerDetails?.[0]?.gstno
+          : record?.supplierdetails?.[0]?.gstno) || "";
+      const isRegd = String(gstno || "").trim() !== "";
+      if (regdFilter === "Registered" && !isRegd) return false;
+      if (regdFilter === "Un-Registered" && isRegd) return false;
+    }
+
+    return true;
   };
 
-  const handleProductSelectCus = (product) => {
-    if (!product) {
-      alert("No product received!");
-      setShowModalCus(false);
-      return;
-    }
-  
-    // clone the array
-    const newCustomers = [...items];
-  
-    // overwrite the one at the selected index
-    newCustomers[selectedItemIndexCus] = {
-      ...newCustomers[selectedItemIndexCus],
-      accountname: product.ahead || '', 
-      acode: product.acode || '', 
+  // Group and compute totals for a dataset (sale or purchase)
+  const computeGrouped = (dataset, isSale = true) => {
+    const groups = {}; // gstRate -> { value, ctax, stax, itax, cess, entries: [] }
+
+    dataset.forEach((rec) => {
+      if (!recordPassesFilters(rec, isSale)) return;
+
+      const date = rec?.formData?.date;
+      const partyName = isSale ? rec?.customerDetails?.[0]?.vacode : rec?.supplierdetails?.[0]?.vacode;
+      const gstFromForm = rec?.formData?.cgst ? null : null; // not used; we use items[].gst
+      const pcess = Number(rec?.formData?.pcess ?? 0) || 0;
+
+      // each rec may contain multiple items; aggregate each item's values under its gst rate
+      (rec.items || []).forEach((it) => {
+        const gst = it?.gst ?? 0;
+        const rateKey = String(gst);
+        const qty = Number(it?.weight ?? 0) || 0;
+        const value = Number(it?.amount ?? 0) || 0; // amount is the taxable value in samples
+        const ctax = Number(it?.ctax ?? 0) || 0;
+        const stax = Number(it?.stax ?? 0) || 0;
+        const itax = Number(it?.itax ?? 0) || 0;
+        const cess = 0; // sample data has no per-item cess; you can change to use rec.formData.pcess if needed
+        const vamt = Number(it?.vamt ?? 0) || 0; // value + taxes, not used in grouping columns but may be useful
+
+        if (!groups[rateKey]) {
+          groups[rateKey] = {
+            gst: gst,
+            value: 0,
+            ctax: 0,
+            stax: 0,
+            itax: 0,
+            cess: 0,
+            entries: [],
+          };
+        }
+        groups[rateKey].value += value;
+        groups[rateKey].ctax += ctax;
+        groups[rateKey].stax += stax;
+        groups[rateKey].itax += itax;
+        groups[rateKey].cess += cess;
+
+        groups[rateKey].entries.push({
+          id: rec._id,
+          date,
+          vbillno: rec?.formData?.vbillno || "",
+          vno: rec?.formData?.vno || "",
+          qty: qty,
+          party: partyName,
+          item: it,
+          ctax,
+          stax,
+          itax,
+          cess: pcess,
+          value,
+          vamt,
+        });
+      });
+    });
+
+    // produce sorted array by gst ascending
+    const arr = Object.values(groups).sort((a, b) => a.gst - b.gst);
+    return arr;
+  };
+
+  const saleGrouped = useMemo(() => computeGrouped(saleData, true), [saleData, fromDate, toDate, stateCondition, regdFilter]);
+  const purchaseGrouped = useMemo(() => computeGrouped(purchaseData, false), [purchaseData, fromDate, toDate, stateCondition, regdFilter]);
+
+  const totals = useMemo(() => {
+    const s = {
+      sale: { value: 0, ctax: 0, stax: 0, itax: 0, cess: 0 },
+      purchase: { value: 0, ctax: 0, stax: 0, itax: 0, cess: 0 },
     };
-    const nameValue = product.ahead || product.name || "";
-    if (selectedItemIndexCus !== null) {
-      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-      setShowModalCus(false);
+    saleGrouped.forEach((g) => {
+      s.sale.value += g.value;
+      s.sale.ctax += g.ctax;
+      s.sale.stax += g.stax;
+      s.sale.itax += g.itax;
+      s.sale.cess += g.cess;
+    });
+    purchaseGrouped.forEach((g) => {
+      s.purchase.value += g.value;
+      s.purchase.ctax += g.ctax;
+      s.purchase.stax += g.stax;
+      s.purchase.itax += g.itax;
+      s.purchase.cess += g.cess;
+    });
+    return s;
+  }, [saleGrouped, purchaseGrouped]);
+
+  const openDetail = (side, gstRate) => {
+    const groups = side === "sale" ? saleGrouped : purchaseGrouped;
+    const group = groups.find((g) => Number(g.gst) === Number(gstRate));
+    setDetailDialog({
+      open: true,
+      side,
+      gstRate,
+      entries: group?.entries ?? [],
+    });
+  };
+
+  const handleChange = (e) => {
+    setRawValue(e.target.value);
+
+    const [d, m, y] = e.target.value.split("/");
+    if (d.length === 2 && m.length === 2 && y.length === 4) {
+      const dateObj = new Date(`${y}-${m}-${d}`);
+      if (!isNaN(dateObj.getTime())) setFromDate(dateObj);
     }
-    setItems(newCustomers);
-    setShowModalCus(false);
-  
   };
 
-  const handleCloseModalCus = () => {
-    setShowModalCus(false);
-    setPressedKey(""); // resets for next modal open
+  const handleToChange = (e) => {
+    const val = e.target.value;
+    setToRaw(val);
+
+    const [d, m, y] = val.split("/");
+    if (d.length === 2 && m.length === 2 && y.length === 4) {
+      const dateObj = new Date(`${y}-${m}-${d}`);
+      if (!isNaN(dateObj.getTime())) setToDate(dateObj);
+    }
   };
 
-  const openModalForItemCus = (index) => {
-      setSelectedItemIndexCus(index);
-      setShowModalCus(true);
+  // const handleExportDetailed = () => {
+  //   // CATEGORY LABELS ALWAYS (Option A)
+  //   const categories = [
+  //     { key: "reg_within", label: "Registered Within State" },
+  //     { key: "unreg_within", label: "Un-Registered Within State" },
+  //     { key: "reg_outside", label: "Registered Outside State" },
+  //     { key: "unreg_outside", label: "Un-Registered Outside State" },
+  //     { key: "outside_india", label: "Outside India" },
+  //   ];
+
+  //   // helper: classify a record
+  //   const classifyRecord = (rec, isSale = true) => {
+  //     const gstno = isSale
+  //       ? rec?.customerDetails?.[0]?.gstno
+  //       : rec?.supplierdetails?.[0]?.gstno;
+
+  //     const partyState = isSale
+  //       ? rec?.customerDetails?.[0]?.state?.trim()
+  //       : rec?.supplierdetails?.[0]?.state?.trim();
+
+  //     const reg = gstno ? "Registered" : "Un-Registered";
+
+  //     if (!partyState || partyState === "" || partyState.toLowerCase() !== CompanyState.toLowerCase() && partyState.toLowerCase() === "india") {
+  //       return reg === "Registered" ? "reg_outside" : "unreg_outside";
+  //     }
+
+  //     if (!partyState || partyState.toLowerCase() === "india") {
+  //       return "outside_india";
+  //     }
+
+  //     const within = partyState.toLowerCase() === CompanyState.toLowerCase();
+
+  //     if (within && reg === "Registered") return "reg_within";
+  //     if (within && reg === "Un-Registered") return "unreg_within";
+  //     if (!within && reg === "Registered") return "reg_outside";
+  //     if (!within && reg === "Un-Registered") return "unreg_outside";
+
+  //     return "outside_india";
+  //   };
+
+  //   // build sheet data
+  //   const buildSheet = (groupedData, isSale = true) => {
+  //     const rows = [];
+
+  //     rows.push([
+  //       isSale
+  //         ? `PERIOD FROM ${rawValue} TO ${toRaw}`
+  //         : `BREAK-UP OF PURCHASE SUMMARY`,
+  //     ]);
+  //     rows.push([]); // blank row
+
+  //     rows.push([
+  //       isSale ? "Sale Type" : "Purchase Type",
+  //       isSale ? "Sale Value" : "Pur. Value",
+  //       "Gst @",
+  //       "C.Tax",
+  //       "S.Tax",
+  //       "I.Tax",
+  //       "Cess",
+  //     ]);
+
+  //     // map category → GST rows
+  //     categories.forEach((cat) => {
+  //       groupedData.forEach((g) => {
+  //         rows.push([
+  //           cat.label,
+  //           g.value.toFixed(2),
+  //           g.gst,
+  //           g.ctax.toFixed(2),
+  //           g.stax.toFixed(2),
+  //           g.itax.toFixed(2),
+  //           g.cess.toFixed(2),
+  //         ]);
+  //       });
+  //     });
+
+  //     return rows;
+  //   };
+
+  //   const saleRows = buildSheet(saleGrouped, true);
+  //   const purchaseRows = buildSheet(purchaseGrouped, false);
+
+  //   const wb = XLSX.utils.book_new();
+
+  //   const saleSheet = XLSX.utils.aoa_to_sheet(saleRows);
+  //   const purchaseSheet = XLSX.utils.aoa_to_sheet(purchaseRows);
+
+  //   XLSX.utils.book_append_sheet(wb, saleSheet, "Sale Summary");
+  //   XLSX.utils.book_append_sheet(wb, purchaseSheet, "Purchase Summary");
+
+  //   XLSX.writeFile(wb, "GST_Detailed_Summary.xlsx");
+  // };
+
+const handleExportDetailed = () => {
+  // CATEGORY LABELS ALWAYS (Option A)
+  const categories = [
+    { key: "reg_within", label: "Registered Within State" },
+    { key: "unreg_within", label: "Un-Registered Within State" },
+    { key: "reg_outside", label: "Registered Outside State" },
+    { key: "unreg_outside", label: "Un-Registered Outside State" },
+    { key: "outside_india", label: "Outside India" },
+  ];
+
+  // ---------- CLASSIFY RECORD ----------
+  // Uses your confirmed rules:
+  // - partyState === CompanyState => Within State
+  // - partyState !== CompanyState && partyState not empty => Outside State
+  // - empty/blank partyState => Outside India
+  const classifyRecord = (rec, isSale = true) => {
+    const gstno = isSale
+      ? rec?.customerDetails?.[0]?.gstno
+      : rec?.supplierdetails?.[0]?.gstno;
+
+    const partyStateRaw = isSale
+      ? rec?.customerDetails?.[0]?.state
+      : rec?.supplierdetails?.[0]?.state;
+
+    const partyState = (partyStateRaw || "").toString().trim();
+
+    // if no state -> treat as Outside India
+    if (!partyState) return "outside_india";
+
+    // compare normalized
+    const normalizedParty = partyState.toLowerCase();
+    const normalizedCompany = (CompanyState || "").toString().toLowerCase();
+
+    const isWithin = normalizedParty === normalizedCompany;
+    const isRegistered = String(gstno || "").trim() !== "";
+
+    if (isWithin && isRegistered) return "reg_within";
+    if (isWithin && !isRegistered) return "unreg_within";
+    if (!isWithin && isRegistered) return "reg_outside";
+    if (!isWithin && !isRegistered) return "unreg_outside";
+
+    // fallback
+    return "outside_india";
   };
 
-  const allFieldsCus = productsCus.reduce((fields, product) => {
-    Object.keys(product).forEach((key) => {
-      if (!fields.includes(key)) {
-        fields.push(key);
+  // ---------- AGGREGATE helper ----------
+  // Build map: map[categoryKey][gstRate] = { gst, value, ctax, stax, itax, cess }
+  const aggregateByCategory = (records, isSale = true) => {
+    const map = {};
+
+    (records || []).forEach((rec) => {
+      // each record may have multiple items; we classify by record party (customer/supplier)
+      const cat = classifyRecord(rec, isSale);
+
+      // ensure category exists
+      if (!map[cat]) map[cat] = {};
+
+      // pick cess from record-level if present (pcess), otherwise per-item cess if provided
+      const recCess = Number(rec?.formData?.pcess ?? 0) || 0;
+
+      (rec.items || []).forEach((it) => {
+        const gstKey = String(it?.gst ?? 0);
+        if (!map[cat][gstKey]) {
+          map[cat][gstKey] = {
+            gst: gstKey,
+            value: 0,
+            ctax: 0,
+            stax: 0,
+            itax: 0,
+            cess: 0,
+          };
+        }
+
+        const bucket = map[cat][gstKey];
+
+        // numeric safe conversions
+        const val = Number(it?.amount ?? it?.value ?? 0) || 0;
+        const ctax = Number(it?.ctax ?? 0) || 0;
+        const stax = Number(it?.stax ?? 0) || 0;
+        const itax = Number(it?.itax ?? 0) || 0;
+        // prefer per-item cess if provided, else record pcess
+        const cess = Number(it?.cess ?? it?.pcess ?? recCess ?? 0) || 0;
+
+        bucket.value += val;
+        bucket.ctax += ctax;
+        bucket.stax += stax;
+        bucket.itax += itax;
+        bucket.cess += cess;
+      });
+    });
+
+    return map;
+  };
+
+  // ---------- BUILD AOA (array of arrays) for a given grouped map ----------
+  const buildSheetRows = (groupedMap, isSale = true) => {
+    const rows = [];
+
+    // title row
+    rows.push([
+      isSale
+        ? `PERIOD FROM ${rawValue || ""} TO ${toRaw || ""}`
+        : `BREAK-UP OF PURCHASE SUMMARY`,
+    ]);
+    rows.push([]); // blank row for spacing
+
+    // header row
+    rows.push([
+      isSale ? "Sale Type" : "Purchase Type",
+      isSale ? "Sale Value" : "Pur. Value",
+      "Gst @",
+      "C.Tax",
+      "S.Tax",
+      "I.Tax",
+      "Cess",
+    ]);
+
+    // For each category (in the fixed order), output GST rows present for that category.
+    categories.forEach((cat) => {
+      const catData = groupedMap[cat.key];
+
+      // If category exists and has GST entries
+      if (catData && Object.keys(catData).length) {
+        // iterate GST groups sorted numerically ascending
+        Object.values(catData)
+          .sort((a, b) => Number(a.gst) - Number(b.gst))
+          .forEach((g) => {
+            rows.push([
+              cat.label,
+              Number(g.value || 0).toFixed(2),
+              g.gst,
+              Number(g.ctax || 0).toFixed(2),
+              Number(g.stax || 0).toFixed(2),
+              Number(g.itax || 0).toFixed(2),
+              Number(g.cess || 0).toFixed(2),
+            ]);
+          });
+      } else {
+        // If you prefer to still show the category with zero row, uncomment below:
+        // rows.push([cat.label, "0.00", "", "0.00", "0.00", "0.00", "0.00"]);
       }
     });
 
-    return fields;
-  }, []);
-
-    const handleNumberChange = (event, index, field) => {
-    const value = event.target.value;
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
-    }
-    const updatedItems = [...items];
-    updatedItems[index][field] = value;
-    const isValueGreaterThanZero = parseFloat(value) > 0;
-
-    if (field === "payment_debit") {
-      updatedItems[index].disableReceipt = isValueGreaterThanZero;
-    } else if (field === "receipt_credit") {
-      updatedItems[index].disablePayment = isValueGreaterThanZero;
-    }
-    setItems(updatedItems);
+    return rows;
   };
-  
+
+  // ---------- AGGREGATE data using saleData/purchaseData (your existing arrays) ----------
+  const saleGroupedByCat = aggregateByCategory(saleData || [], true);
+  const purchaseGroupedByCat = aggregateByCategory(purchaseData || [], false);
+
+  // ---------- BUILD SHEET ROWS ----------
+  const saleAoA = buildSheetRows(saleGroupedByCat, true);
+  const purchaseAoA = buildSheetRows(purchaseGroupedByCat, false);
+
+  // ---------- CREATE WORKBOOK & SHEETS ----------
+  const wb = XLSX.utils.book_new();
+  const saleSheet = XLSX.utils.aoa_to_sheet(saleAoA);
+  const purchaseSheet = XLSX.utils.aoa_to_sheet(purchaseAoA);
+
+  XLSX.utils.book_append_sheet(wb, saleSheet, "Sale Summary");
+  XLSX.utils.book_append_sheet(wb, purchaseSheet, "Purchase Summary");
+
+  // ---------- WRITE FILE ----------
+  XLSX.writeFile(wb, "GST_Detailed_Summary.xlsx");
+};
+
+
   return (
-    <div>
-       {showModalCus && (
-        <ProductModalCustomer
-          allFields={allFieldsCus}
-          onSelect={handleProductSelectCus}
-          onClose={handleCloseModalCus}
-          initialKey={pressedKey}
-          tenant={tenant}
-        />
-        )}
-         <TextField
-          id="voucherno"
-          value={formData.voucherno}
-          label="VOUCHER NO."
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontWeight: "bold",
-            },
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150 }}
-          />
-      <div className="TableSectionz">
-        <Table className="custom-table">
-          <thead
-            style={{
-              backgroundColor: "skyblue",
-              textAlign: "center",
-              position: "sticky",
-              top: 0,
-            }}
-          >
-            <tr style={{ color: "white" }}>
-              <th>ACCOUNTNAME</th>
-              <th>
-                NARRATION
-                <input 
-                  type="checkbox"
-                  style={{ marginLeft: 5 }}
-                  tabIndex={-1}       // ⬅⬅ prevents tab focus
-                  checked={showNarrationSuggestions}
-                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
-                />
-              </th>
-              <th>PAYMENT</th>
-              <th>RECEIPT</th>
-              <th>DISCOUNT</th>
-              <th className="text-center">DELETE</th>
-            </tr>
-          </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
-            {items.map((item, index) => (
-              <tr key={`${item.accountname}-${index}`}>
-                <td style={{ padding: 0 }}>
-                  <input
-                  className="Account"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.accountname}
-                    onChange={(e) => handleItemChangeCus(index, "accountname", e.target.value)}
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                <input
-                  className="Narration"
-                  list={showNarrationSuggestions ? "narrationList" : undefined}
-                  style={{
-                    height: 40,
-                    width: "100%",
-                    boxSizing: "border-box",
-                    border: "none",
-                    padding: 5,
-                  }}
-                  value={item.narration}
-                  onChange={(e) =>
-                    handleItemChangeCus(index, "narration", e.target.value)
-                  }
-                />
-
-                {showNarrationSuggestions && (
-                  <datalist id="narrationList">
-                    {narrationSuggestions.map((n, i) => (
-                      <option key={i} value={n} />
-                    ))}
-                  </datalist>
+    <Box p={2}>
+      <Paper style={{marginTop:-20}} elevation={2} sx={{ p: 1, mb: 1,}}>
+        <div style={{display:'flex',flexDirection:'row',alignItems:'center'}}>
+          <div style={{display:'flex',flexDirection:"column"}}> 
+            <div style={{ marginLeft: "10px", marginTop: "10px",display:'flex',flexDirection:'row',alignItems:'center' }}>
+              <label style={{ fontSize: "16px", color: "#555", marginRight:"10px" }}>From</label>
+              <InputMask
+                mask="99/99/9999"
+                placeholder="dd/mm/yyyy"
+                value={rawValue}
+                onChange={handleChange}
+              >
+                {(inputProps) => (
+                  <input {...inputProps} className="form-control" />
                 )}
+              </InputMask>
+            </div>
 
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Payment"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={item.payment_debit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "payment_debit")
-                    }
-                  />
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Receipt"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={item.receipt_credit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "receipt_credit")
-                    }
-                  />
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Discounts"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                    }}
-                    value={item.discount}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "discount", e.target.value)
-                    }
-                  />
-                </td>
-                <td style={{ padding: 0}}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center", // horizontally center
-                      alignItems: "center",      // vertically center
-                      height: "100%",            // takes full cell height
-                    }}
-                  >
-                    delete
-                  </div>
-                </td>
-           
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-    </div>
-  )
+            <div style={{ marginLeft: "10px", marginTop: "10px",display:'flex',flexDirection:'row',alignItems:'center' }}>
+              <label style={{ fontSize: "16px", color: "#555", marginRight:"12px" }}>Upto</label>
+              <InputMask
+                mask="99/99/9999"
+                placeholder="dd/mm/yyyy"
+                value={toRaw}
+                onChange={handleToChange}
+              >
+                {(inputProps) => <input {...inputProps} className="form-control" />}
+              </InputMask>
+            </div>
+          </div>
+          <div style={{display:'flex',flexDirection:"column",marginLeft:"30px"}}>
+          {/* state condition */}
+          <div >
+            <FormControl component="fieldset">
+              <Typography style={{fontWeight:'bold',fontSize:16}} variant="caption">State Condition</Typography>
+              <RadioGroup
+                row
+                value={stateCondition}
+                onChange={(e) => setStateCondition(e.target.value)}
+                aria-label="stateCondition"
+                name="stateCondition"
+              >
+                <FormControlLabel value="All" control={<Radio />} label="All" />
+                <FormControlLabel value="Within" control={<Radio />} label="Within State" />
+                <FormControlLabel value="Out" control={<Radio />} label="Out of State" />
+              </RadioGroup>
+            </FormControl>
+          </div>
+          {/* Regd / unredg */}
+          <div >
+            <FormControl component="fieldset">
+              <Typography style={{fontWeight:'bold',fontSize:16}} variant="caption">Regd / Unregd</Typography>
+              <RadioGroup
+                row
+                value={regdFilter}
+                onChange={(e) => setRegdFilter(e.target.value)}
+                aria-label="regdFilter"
+                name="regdFilter"
+              >
+                <FormControlLabel value="All" control={<Radio />} label="All" />
+                <FormControlLabel value="Registered" control={<Radio />} label="Registered" />
+                <FormControlLabel value="Un-Registered" control={<Radio />} label="Un-Registered" />
+              </RadioGroup>
+            </FormControl>
+          </div>
+          </div>
+
+          <div style={{display:'flex',flexDirection:'row'}}>
+            <div style={{display:'flex',flexDirection:'column'}}>
+              <Button className="Buttonz" variant="contained" color="primary" onClick={handleView} disabled={loading}>
+                View
+              </Button>
+                <Button style={{marginTop:"10px"}} className="Buttonz" variant="outlined" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
+                Exit
+              </Button>
+            </div>
+             <div style={{display:'flex',flexDirection:'column',marginLeft:"10px"}}>
+              <Button className="Buttonz" variant="outlined" disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
+                Export
+              </Button>
+                <Button onClick={handleExportDetailed} style={{marginTop:"10px"}} className="Buttonz" variant="contained" color="secondary">
+                Detail
+              </Button>
+            </div>
+             
+          </div>
+        </div>
+      </Paper>
+
+      {error && (
+        <Box mb={2}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      )}
+
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 1 }}>
+              <Typography variant="h6" align="center">Sale <span style={{ color: "red", fontSize: 12 }}>DoubleClick Detail</span></Typography>
+              <TableContainer sx={{ maxHeight: 420 }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Gst %</TableCell>
+                      <TableCell align="right">Value</TableCell>
+                      <TableCell align="right">C.Tax</TableCell>
+                      <TableCell align="right">S.Tax</TableCell>
+                      <TableCell align="right">I.Tax</TableCell>
+                      <TableCell align="right">Cess</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {saleGrouped.map((g) => (
+                      <TableRow
+                        key={`sale-${g.gst}`}
+                        hover
+                        onDoubleClick={() => openDetail("sale", g.gst)}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <TableCell>{g.gst}%</TableCell>
+                        <TableCell align="right">{g.value.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.ctax.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.stax.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.itax.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.cess.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                    {/* totals */}
+                    <TableRow>
+                      <TableCell><strong>TOTAL</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.sale.value.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.sale.ctax.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.sale.stax.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.sale.itax.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.sale.cess.toFixed(2)}</strong></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 1 }}>
+              <Typography variant="h6" align="center">Purchase <span style={{ color: "red", fontSize: 12 }}>DoubleClick Detail</span></Typography>
+              <TableContainer sx={{ maxHeight: 420 }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Gst %</TableCell>
+                      <TableCell align="right">Value</TableCell>
+                      <TableCell align="right">C.Tax</TableCell>
+                      <TableCell align="right">S.Tax</TableCell>
+                      <TableCell align="right">I.Tax</TableCell>
+                      <TableCell align="right">Cess</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {purchaseGrouped.map((g) => (
+                      <TableRow
+                        key={`purchase-${g.gst}`}
+                        hover
+                        onDoubleClick={() => openDetail("purchase", g.gst)}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <TableCell>{g.gst}%</TableCell>
+                        <TableCell align="right">{g.value.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.ctax.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.stax.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.itax.toFixed(2)}</TableCell>
+                        <TableCell align="right">{g.cess.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell><strong>TOTAL</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.purchase.value.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.purchase.ctax.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.purchase.stax.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.purchase.itax.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{totals.purchase.cess.toFixed(2)}</strong></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+        </Grid>
+      )}
+    </Box>
+  );
 }
-
-export default Example
-
-
-
-// import React, { useState, useEffect } from "react";
-// import TextField from "@mui/material/TextField";
-
-// const Example = () => {
-//   const [formData, setFormData] = useState({
-//     vbillno: "",
-//     p_entry: "",
-//   });
-
-//   const [supplierdetails, setSupplierdetails] = useState([
-//     { vacode: "" },
-//   ]);
-
-//   const [purchaseData, setPurchaseData] = useState([]);
-
-//   // 1️⃣ Fetch purchase API once
-//   useEffect(() => {
-//     const fetchPurchase = async () => {
-//       try {
-//         const res = await fetch(
-//           "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
-//         );
-//         const data = await res.json();
-//         setPurchaseData(data);
-//       } catch (err) {
-//         console.error("API Fetch Error", err);
-//       }
-//     };
-
-//     fetchPurchase();
-//   }, []);
-
-//   // 2️⃣ Function to check duplicate bill for same customer
-//   const checkDuplicateBill = (customerName, billNo) => {
-//     if (!customerName || !billNo) return false;
-
-//     return purchaseData.some((entry) => {
-//       const apiCustomer = entry.supplierdetails?.[0]?.vacode?.trim().toUpperCase();
-//       const apiBill = entry.formData?.vbillno?.trim().toUpperCase();
-
-//       return (
-//         apiCustomer === customerName.trim().toUpperCase() &&
-//         apiBill === billNo.trim().toUpperCase()
-//       );
-//     });
-//   };
-
-//   // ⭐ 3️⃣ Function to check duplicate SELF INVOICE p_entry (GLOBAL CHECK)
-// const checkDuplicatePEntry = (pEntry) => {
-//   if (!pEntry) return false;
-
-//   return purchaseData.some((entry) => {
-//     const apiPentry = entry.formData?.p_entry?.trim().toUpperCase();
-//     return apiPentry === pEntry.trim().toUpperCase();
-//   });
-// };
-
-//   // 3️⃣ Handle BILL NO change + Duplicate check
-//   const handleCapitalAlpha = (event) => {
-//     const { id, value } = event.target;
-//     const upper = value.toUpperCase();
-
-//     setFormData((prev) => ({
-//       ...prev,
-//       [id]: upper,
-//     }));
-
-//     const customerName = supplierdetails[0].vacode;
-
-//     if (customerName && checkDuplicateBill(customerName, upper)) {
-//       alert(`Bill No ${upper} already exists for this customer: ${customerName}`);
-//     }
-//   };
-
-//   const capitalizeWords = (str) => {
-//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
-//   };
-
-// const HandleInputsChanges = (event) => {
-//   const { id, value } = event.target;
-//   const cap = capitalizeWords(value);
-
-//   setFormData((prevData) => ({
-//     ...prevData,
-//     [id]: cap,
-//   }));
-
-//   // ⭐ If SELF INV field changed
-//   if (id === "p_entry") {
-//     const upper = value.toUpperCase();
-
-//     if (checkDuplicatePEntry(upper)) {
-//       alert(`Self Invoice No ${upper} already exists!`);
-//     }
-//   }
-// };
-
-
-//   return (
-//     <div>
-//     {supplierdetails.map((item, index) => (
-//     <div key={index}>
-//       <div className="customerdiv">
-//         <TextField
-//           label="CUSTOMER NAME"
-//           variant="filled"
-//           size="small"
-//           value={item.vacode}
-//           className="customerNAME custom-bordered-input"
-//           onChange={(e) => {
-//             const val = e.target.value.toUpperCase(); // optional uppercase
-
-//             setSupplierdetails((prev) => {
-//               const updated = [...prev];
-//               updated[index].vacode = val;
-//               return updated;
-//             });
-//           }}
-//           inputProps={{
-//             maxLength: 48,
-//             style: { height: "20px" }
-//           }}
-//         />
-//       </div>
-//     </div>
-//       ))}
-
-
-//       <TextField
-//         className="VbillzNo custom-bordered-input"
-//         id="vbillno"
-//         value={formData.vbillno}
-//         variant="filled"
-//         size="small"
-//         label="BILL NO"
-//         onChange={handleCapitalAlpha}
-//         inputProps={{
-//           maxLength: 48,
-//           style: { height: "20px" },
-//         }}
-//       />
-//       <TextField
-//         className="custom-bordered-input"
-//         id="p_entry"
-//         value={formData.p_entry}
-//         variant="filled"
-//         label="SELF INV#"
-//         size="small"
-//         onChange={HandleInputsChanges}
-//         inputProps={{
-//           maxLength: 48,
-//           style: {
-//             height: "20px",
-//           },
-//         }}
-//       />
-//     </div>
-//   );
-// };
-
-// export default Example;
