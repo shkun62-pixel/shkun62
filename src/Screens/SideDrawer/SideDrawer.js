@@ -53,6 +53,7 @@ import BalanceSheet from '../BalanceSheet/BalanceSheet';
 import CBookModal from '../Books/CashBook/CBookModal';
 import JournalBook from '../Books/JournalBook/JournalBook';
 import GstRateModal from '../Modals/GstRateModal';
+import { motion, AnimatePresence } from "framer-motion";
 
 const StyledDrawer = styled(Drawer)({
     '.MuiPaper-root': {
@@ -355,514 +356,745 @@ export default function App() {
                         </StyledIcon>
                         <StyledListItemText primary="HOME" />
                     </StyledListItem>
-                    <StyledListItem button onClick={handleSaleClick}>
+                    <StyledListItem button
+                        onMouseEnter={() => setIsSaleOpen(true)}
+                        onMouseLeave={() => setIsSaleOpen(false)}>
                         <StyledIcon>
                             <SyncAltIcon />
                         </StyledIcon>
                         <StyledListItemText primary="TRANSACTION" />
-                        {isSaleOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isSaleOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
+                    {/* FLOATING SUBMENU PANEL */}
+                    <AnimatePresence>
+                    {isSaleOpen && (
+                        <motion.div
+                            onMouseEnter={() => setIsSaleOpen(true)}
+                            onMouseLeave={() => setIsSaleOpen(false)}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -20, opacity: 0 }}
+                            transition={{ duration: 0.50, ease: "easeOut" }}
+                            style={{
+                                position: "fixed",
+                                top: "80px",
+                                left: "305px",
+                                width: "250px",
+                                background: "#2f3847",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                zIndex: 20000,
+                                border: "1px solid #444",
+                                boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                            }}
+                        >
+                        <List>
                             <StyledListItem button onClick={openSaleModal}>
-                                    <StyledIcon>
-                                        <LocalOfferIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Sale" />
-                                </StyledListItem>
-                               <SaleModal isOpen={isSaleModalOpen} onClose={closeSaleModal} onNavigate={handleModalNavigate}  />
-                               <StyledListItem button onClick={openPurModal}>
-                                    <StyledIcon>
-                                        <ShoppingCartIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Purchase" />
-                                </StyledListItem>
-                                <PurchaseModal isOpen={isPurModalOpen} onClose={closePurModal} onNavigate={handleModalNavigate}  />
-                                <StyledListItem button onClick={openCashModal}>
-                                    <StyledIcon>
-                                        <AttachMoneyIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Cash Voucher" />
-                                </StyledListItem>
-                                <CashModal isOpen={isCashModalOpen} onClose={closeCashModal} onNavigate={handleModalNavigate}  />
-                                <StyledListItem button onClick={() => handleNavigation('/JournalVoucher')}>
-                                    <StyledIcon>
-                                        <ReceiptIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Journal Voucher" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={openBankModal}>
-                                    <StyledIcon>
-                                        <AccountBalanceIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Bank Voucher" />
-                                </StyledListItem>
-                                <BankModal isOpen={isBankModalOpen} onClose={closeBankModal} onNavigate={handleModalNavigate}  />
-                                <StyledListItem button onClick={openTdsModal}>
-                                    <StyledIcon>
-                                        <ReceiptLongIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="TDS Voucher" />
-                                </StyledListItem>
-                                <TdsModal isOpen={isTdsModalOpen} onClose={closeTdsModal} onNavigate={handleModalNavigate}  />
-                                <StyledListItem button onClick={() => handleNavigation('/LedgerAcc')}>
-                                    <StyledIcon>
-                                        <AccountTreeIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Ledger Account" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={() => handleNavigation('/NewStockAcc')}>
-                                    <StyledIcon>
-                                        <InventoryIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Stock Account" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={openAnnexureParent}>
-                                    <StyledIcon>
-                                        <LocalOfferIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Annexure" />
-                                </StyledListItem>
-                               <AnnexureModalParent isOpen={isAnnexureOpen} onClose={closeAnnexureParent} onNavigate={handleModalNavigate}/>
-                               <StyledListItem button onClick={() => handleNavigation('/StockTransfer')}>
-                                    <StyledIcon>
-                                        <SwapVertIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Stock Transfer" />
-                                </StyledListItem>
-                               <StyledListItem button onClick={() => handleNavigation('/Productioncard')}>
-                                    <StyledIcon>
-                                    <BarChartIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Production Chart" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={handleGoodsReturn}>
-                                    <StyledIcon>
-                                        <AssignmentReturnIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Goods Return" />
-                                    {isGoodReturn ? <ExpandLess /> : <ExpandMore />}
-                                </StyledListItem>
-                                <div style={{ marginLeft: 10 }}>
-                                    <Collapse in={isGoodReturn} timeout="auto" unmountOnExit>
-                                        <List component="div" disablePadding>
-                                        <StyledListItem button onClick={() => handleNavigation('/SalesReturn')}>
-                                                <StyledIcon>
-                                                    <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Sales Return" />
-                                            </StyledListItem>
-                                            <StyledListItem button onClick={() => handleNavigation('/PurchasesReturn')}>
-                                                <StyledIcon>
-                                                <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Purchase Return" />
-                                            </StyledListItem>
-                                        </List>
-                                    </Collapse>
-                                </div>
-                            </List>
-                        </Collapse>
-                    </div>
+                                <StyledIcon>
+                                    <LocalOfferIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Sale" />
+                            </StyledListItem>
+                            <SaleModal isOpen={isSaleModalOpen} onClose={closeSaleModal} onNavigate={handleModalNavigate}  />
+                            <StyledListItem button onClick={openPurModal}>
+                                <StyledIcon>
+                                    <ShoppingCartIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Purchase" />
+                            </StyledListItem>
+                            <PurchaseModal isOpen={isPurModalOpen} onClose={closePurModal} onNavigate={handleModalNavigate}  />
+                            <StyledListItem button onClick={openCashModal}>
+                                <StyledIcon>
+                                    <AttachMoneyIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Cash Voucher" />
+                            </StyledListItem>
+                            <CashModal isOpen={isCashModalOpen} onClose={closeCashModal} onNavigate={handleModalNavigate}  />
+                            <StyledListItem button onClick={() => handleNavigation('/JournalVoucher')}>
+                                <StyledIcon>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Journal Voucher" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={openBankModal}>
+                                <StyledIcon>
+                                    <AccountBalanceIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Bank Voucher" />
+                            </StyledListItem>
+                            <BankModal isOpen={isBankModalOpen} onClose={closeBankModal} onNavigate={handleModalNavigate}  />
+                            <StyledListItem button onClick={openTdsModal}>
+                                <StyledIcon>
+                                    <ReceiptLongIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="TDS Voucher" />
+                            </StyledListItem>
+                            <TdsModal isOpen={isTdsModalOpen} onClose={closeTdsModal} onNavigate={handleModalNavigate}  />
+                            <StyledListItem button onClick={() => handleNavigation('/LedgerAcc')}>
+                                <StyledIcon>
+                                    <AccountTreeIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Ledger Account" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/NewStockAcc')}>
+                                <StyledIcon>
+                                    <InventoryIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Stock Account" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={openAnnexureParent}>
+                                <StyledIcon>
+                                    <LocalOfferIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Annexure" />
+                            </StyledListItem>
+                            <AnnexureModalParent isOpen={isAnnexureOpen} onClose={closeAnnexureParent} onNavigate={handleModalNavigate}/>
+                            <StyledListItem button onClick={() => handleNavigation('/StockTransfer')}>
+                                <StyledIcon>
+                                    <SwapVertIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Stock Transfer" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/Productioncard')}>
+                                <StyledIcon>
+                                <BarChartIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Production Chart" />
+                            </StyledListItem>
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsGoodReturn(true)}
+                                onMouseLeave={() => setIsGoodReturn(false)}
+                            >
+                                <StyledIcon><AssignmentReturnIcon /></StyledIcon>
+                                <StyledListItemText primary="Goods Return" />
+                            </StyledListItem>
+                        
+                            {isGoodReturn && (
+                            <motion.div
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                onMouseEnter={() => setIsGoodReturn(true)}
+                                onMouseLeave={() => setIsGoodReturn(false)}
+                                style={{
+                                    position: "fixed",
+                                    top: "558px",
+                                    left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "220px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                    boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                                }}
+                                >
+                                <List>
+                                    <StyledListItem button onClick={() => handleNavigation('/SalesReturn')}>
+                                        <StyledIcon><MenuBookIcon /></StyledIcon>
+                                        <StyledListItemText primary="Sales Return" />
+                                    </StyledListItem>
+
+                                    <StyledListItem button onClick={() => handleNavigation('/PurchasesReturn')}>
+                                        <StyledIcon><MenuBookIcon /></StyledIcon>
+                                        <StyledListItemText primary="Purchase Return" />
+                                    </StyledListItem>
+                                </List>
+                            </motion.div>
+                            )}
+                        </List>
+                        </motion.div>
+                    )}
+                    </AnimatePresence>
                     {/*Financial Reports Section  */}
-                    <StyledListItem button onClick={handleReportClick}>
+                    <StyledListItem button 
+                        onMouseEnter={() => setIsReportOpen(true)}
+                        onMouseLeave={() => setIsReportOpen(false)}>
                         <StyledIcon>
                             <AssessmentIcon />
                         </StyledIcon>
                         <StyledListItemText primary="FINANCIAL REPORTS" />
-                        {isReportOpen ? <ExpandLess /> : <ExpandMore />}
+
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isReportOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
+                    {/* Report – FLOATING RIGHT SUBMENU */}
+                    <AnimatePresence>
+                    {isReportOpen && (
+                    <motion.div
+                        onMouseEnter={() => setIsReportOpen(true)}
+                        onMouseLeave={() => setIsReportOpen(false)}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.50, ease: "easeOut" }}
+                        style={{
+                             position: "fixed",
+                            top: "208px",
+                            left: "305px",     // Aligns right of Drawer (Drawer width = 300)
+                            width: "250px",
+                            background: "#2f3847",
+                            borderRadius: "10px",
+                            // padding: "10px",
+                            zIndex: 20000,
+                            border: "1px solid #444",
+                            boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                        }}
+                    >
+                        <List>
                             <StyledListItem button onClick={() => handleNavigation('/LedgerList')}>
-                                    <StyledIcon style={{}}>
-                                        <DescriptionIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Account Statement" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={() => handleNavigation('/TrailBalance')}>
-                                    <StyledIcon style={{}}>
-                                        <BalanceIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Trail Balance" />
-                                </StyledListItem>
-                                <BalanceSheet isOpen={isBSheetOpen} onClose={closeBalanceSheet} onNavigate={handleModalNavigate}/>
-                                <StyledListItem button onClick={OpenBalanceSheet}>
-                                    <StyledIcon style={{}}>
-                                        <TableChartIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Balance Sheet" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={() => handleNavigation('/PaymentList')}>
-                                    <StyledIcon>
-                                        <MenuBookIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Payment List" />
-                                </StyledListItem>
-                                 <StyledListItem button onClick={() => handleNavigation('/ReceiptList')}>
-                                    <StyledIcon>
-                                        <MenuBookIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Receipt List" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={handleBooksClick}>
-                                    <StyledIcon>
-                                        <BookIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Books" />
-                                    {isBooksOpen ? <ExpandLess /> : <ExpandMore />}
-                                </StyledListItem>
-                                <div style={{ marginLeft: 10 }}>
-                                    <Collapse in={isBooksOpen} timeout="auto" unmountOnExit>
-                                        <List component="div" disablePadding>
-                                        <StyledListItem button onClick={() => handleNavigation('/SaleBook')}>
-                                                <StyledIcon>
-                                                    <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Sales Book" />
-                                        </StyledListItem>
-                                            <StyledListItem button onClick={() => handleNavigation('/PurchaseBook')}>
-                                                <StyledIcon>
-                                                <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Purchase Book" />
-                                            </StyledListItem>
-                                            <StyledListItem button onClick={openCashBOOk}>
-                                                <StyledIcon>
-                                                <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Cash Book" />
-                                            </StyledListItem>
-                                            <CBookModal isOpen={isModalOpenCBook} handleClose={closeCashbook} onNavigate={handleModalNavigate} />
-                                            <StyledListItem button onClick={openJournalBOOk}>
-                                                <StyledIcon>
-                                                <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Journal Book" />
-                                            </StyledListItem>
-                                            <JournalBook isOpen={isJBookOpen} handleClose={closeJournalbook} onNavigate={handleModalNavigate} />
-                                            <StyledListItem button onClick={() => handleNavigation('/BankBook')}>
-                                                <StyledIcon>
-                                                <MenuBookIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Bank Book" />
-                                            </StyledListItem>
-                                            </List>
-                                    </Collapse>
-                                </div>
-
-                                {/* OutStandiing Reports */}
-                                 <StyledListItem button onClick={handleOutStandingClick}>
-                                    <StyledIcon>
-                                        <SummarizeIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="OutStanding Reports" />
-                                    {isOutStandingOpen ? <ExpandLess /> : <ExpandMore />}
-                                </StyledListItem>
-                                <div style={{ marginLeft: 10 }}>
-                                <Collapse in={isOutStandingOpen} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                    <StyledListItem button onClick={() => handleNavigation('/DebtorsList')}>
+                                <StyledIcon style={{}}>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Account Statement" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/TrailBalance')}>
+                                <StyledIcon style={{}}>
+                                    <BalanceIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Trail Balance" />
+                            </StyledListItem>
+                            <BalanceSheet isOpen={isBSheetOpen} onClose={closeBalanceSheet} onNavigate={handleModalNavigate}/>
+                            <StyledListItem button onClick={OpenBalanceSheet}>
+                                <StyledIcon style={{}}>
+                                    <TableChartIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Balance Sheet" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/PaymentList')}>
+                                <StyledIcon>
+                                    <MenuBookIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Payment List" />
+                            </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/ReceiptList')}>
+                                <StyledIcon>
+                                    <MenuBookIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Receipt List" />
+                            </StyledListItem>
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsBooksOpen(true)}
+                                onMouseLeave={() => setIsBooksOpen(false)}
+                            >
+                                <StyledIcon>
+                                    <AssessmentIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Books" />
+                            </StyledListItem>
+                            {/* Books – FLOATING RIGHT SUBMENU */}
+                            {isBooksOpen && (
+                            <motion.div
+                                onMouseEnter={() => setIsBooksOpen(true)}
+                                onMouseLeave={() => setIsBooksOpen(false)}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                style={{
+                                    position: "fixed",
+                                    top: "328px",
+                                    left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "220px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                    // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                                }}
+                            >
+                            <List>
+                                <StyledListItem button onClick={() => handleNavigation('/SaleBook')}>
                                         <StyledIcon>
                                             <MenuBookIcon />
                                         </StyledIcon>
-                                        <StyledListItemText primary="Debtors" />
-                                    </StyledListItem>
-                                    <StyledListItem button onClick={() => handleNavigation('/CreditorsList')}>
-                                        <StyledIcon>
-                                            <MenuBookIcon />
-                                        </StyledIcon>
-                                        <StyledListItemText primary="Creditors" />
-                                    </StyledListItem>
-                                    </List>
-                                </Collapse>
-                                </div>
-
-                                {/* Stock Section */}
-                                <StyledListItem button onClick={handleStockClick}>
+                                        <StyledListItemText primary="Sales Book" />
+                                </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/PurchaseBook')}>
                                     <StyledIcon>
-                                        <ShowChartIcon  />
+                                    <MenuBookIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="Stocks..." />
-                                    {isStockOpen ? <ExpandLess /> : <ExpandMore />}
+                                    <StyledListItemText primary="Purchase Book" />
                                 </StyledListItem>
-                                <div style={{ marginLeft: 10 }}>
-                                    <Collapse in={isStockOpen} timeout="auto" unmountOnExit>
-                                        <List component="div" disablePadding>
-                                        <StyledListItem button onClick={() => handleNavigation('/StockReport')}>
-                                                <StyledIcon>
-                                                    <WidgetsIcon  />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Particular Item" />
-                                            </StyledListItem>
-                                        <StyledListItem button onClick={() => handleNavigation('/StockSummary')}>
-                                                <StyledIcon>
-                                                    <ViewModuleIcon />
-                                                </StyledIcon>
-                                                <StyledListItemText primary="Stock Pieces & Weight" />
-                                            </StyledListItem>
-                                        </List>
-                                    </Collapse>
-                                </div>
-                                <StyledListItem button onClick={() => setOpen(true)}>
-                                    <StyledIcon style={{}}>
-                                        <TableChartIcon />
+                                <StyledListItem button onClick={openCashBOOk}>
+                                    <StyledIcon>
+                                    <MenuBookIcon />
                                     </StyledIcon>
-                                    <StyledListItemText primary="Define GST Rate" />
+                                    <StyledListItemText primary="Cash Book" />
                                 </StyledListItem>
-                                <GstRateModal open={open} onClose={() => setOpen(false)} />
+                                <CBookModal isOpen={isModalOpenCBook} handleClose={closeCashbook} onNavigate={handleModalNavigate} />
+                                <StyledListItem button onClick={openJournalBOOk}>
+                                    <StyledIcon>
+                                    <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Journal Book" />
+                                </StyledListItem>
+                                <JournalBook isOpen={isJBookOpen} handleClose={closeJournalbook} onNavigate={handleModalNavigate} />
+                                <StyledListItem button onClick={() => handleNavigation('/BankBook')}>
+                                    <StyledIcon>
+                                    <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Bank Book" />
+                                </StyledListItem>
                             </List>
-                        </Collapse>
-                    </div>
-                    {/* GST  Reports */}
-                    <StyledListItem button onClick={handleGstReport}>
+                            </motion.div>
+                            )}
+                            {/* OutStanding Reports */}
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsOutStandingOpen(true)}
+                                onMouseLeave={() => setIsOutStandingOpen(false)}
+                            >
+                                <StyledIcon>
+                                    <SummarizeIcon />
+                                </StyledIcon>
+                            <StyledListItemText primary="OutStanding Reports" />
+                            </StyledListItem>
+                            {/* Outstanding – FLOATING RIGHT SUBMENU */}
+                            {isOutStandingOpen && (
+                            <motion.div
+                                onMouseEnter={() => setIsOutStandingOpen(true)}
+                                onMouseLeave={() => setIsOutStandingOpen(false)}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                style={{
+                                    position: "fixed",
+                                    top: "474px",
+                                    left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "220px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                    // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                                }}
+                            >
+                            <List>
+                               <StyledListItem button onClick={() => handleNavigation('/DebtorsList')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Debtors" />
+                                </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/CreditorsList')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Creditors" />
+                                </StyledListItem>
+                            </List>
+                            </motion.div>
+                            )}
+                            {/* OutStanding Reports */}
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsStockOpen(true)}
+                                onMouseLeave={() => setIsStockOpen(false)}
+                            >
+                                <StyledIcon>
+                                    <ShowChartIcon />
+                                </StyledIcon>
+                            <StyledListItemText primary="Stock Reports" />
+                            </StyledListItem>
+                            {/* Stock Report – FLOATING RIGHT SUBMENU */}
+                            {isStockOpen && (
+                            <motion.div
+                                onMouseEnter={() => setIsStockOpen(true)}
+                                onMouseLeave={() => setIsStockOpen(false)}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                style={{
+                                    position: "fixed",
+                                    top: "475px",
+                                    left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "300px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                    // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                                }}
+                            >
+                            <List>
+                               <StyledListItem button onClick={() => handleNavigation('/StockReport')}>
+                                <StyledIcon>
+                                    <WidgetsIcon  />
+                                </StyledIcon>
+                                <StyledListItemText primary="Particular Item" />
+                            </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/StockSummary')}>
+                                <StyledIcon>
+                                    <ViewModuleIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Stock Pieces & Weight" />
+                            </StyledListItem>
+                            </List>
+                            </motion.div>
+                            )}
+                        </List>
+                    </motion.div>
+                    )}
+                    </AnimatePresence>
+                    {/* GST Reports */}
+                    <StyledListItem button 
+                        onMouseEnter={() => setIsGstReportOpen(true)}
+                        onMouseLeave={() => setIsGstReportOpen(false)}>
                         <StyledIcon>
                             <DescriptionIcon />
                         </StyledIcon>
                         <StyledListItemText primary="GST REPORTS" />
-                        {isGstReportOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isGstReportOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Monthly Forms" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="GST Ledger" />
-                            </StyledListItem>
-                            {/*  */}
-                            <StyledListItem button onClick={() => handleNavigation('/GstWorksheet')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="WorkSheet" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="GSTR-2 Filed Status" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="GSTR-3B Yearly Summary" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="GSTR-3B Reconciliation" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Party Wise GST Details" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Party Wise GST Summary" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Account Wise GST Details" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Other Details" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Yearly GSTR-9" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Tax Wise Summary" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="GSTIN Wise Expenditure" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <DescriptionIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="HSN Wise Inward / Outward" />
-                            </StyledListItem>
-                            </List>
-                        </Collapse>
-                    </div>
-                    {/* TDS/TCS  Reports */}
-                    <StyledListItem button onClick={handleTdsTcs}>
+                    {/* GST Report – FLOATING RIGHT SUBMENU */}
+                    {isGstReportOpen && (
+                    <motion.div
+                        onMouseEnter={() => setIsGstReportOpen(true)}
+                        onMouseLeave={() => setIsGstReportOpen(false)}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.50, ease: "easeOut" }}
+                        style={{
+                            position: "fixed",
+                            top: "0px",
+                            left: "305px",
+                            width: "300px",
+                            background: "#2f3847",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            zIndex: 30000,
+                            border: "1px solid #444",
+                            // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                        }}
+                    >
+                    <List>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Monthly Forms" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="GST Ledger" />
+                        </StyledListItem>
+                        {/*  */}
+                        <StyledListItem button onClick={() => handleNavigation('/GstWorksheet')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="WorkSheet" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="GSTR-2 Filed Status" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="GSTR-3B Yearly Summary" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="GSTR-3B Reconciliation" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Party Wise GST Details" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Party Wise GST Summary" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Account Wise GST Details" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Other Details" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Yearly GSTR-9" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Tax Wise Summary" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="GSTIN Wise Expenditure" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <DescriptionIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="HSN Wise Inward / Outward" />
+                        </StyledListItem>
+                    </List>
+                    </motion.div>
+                    )}
+                    {/* TDS/TCS Reports */}
+                    <StyledListItem button 
+                        onMouseEnter={() => setIsTdsTcsOpen(true)}
+                        onMouseLeave={() => setIsTdsTcsOpen(false)}>
                         <StyledIcon>
                             <ReceiptIcon />
                         </StyledIcon>
                         <StyledListItemText primary="TDS/TCS REPORTS" />
-                        {isTdsTcsOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isTdsTcsOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Form 16-A" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Form 26-Q" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="194-Q Detail" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="194-Q Check List" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="TCS & TDS Combine List" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Commission List" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="TCS Reports" />
-                            </StyledListItem>
-                            </List>
-                        </Collapse>
-                    </div>
-                    {/* IncomeTax  Reports */}
-                    <StyledListItem button onClick={handleIncomeTax}>
+                    {/* Tds/Tcds Report – FLOATING RIGHT SUBMENU */}
+                    {isTdsTcsOpen && (
+                    <motion.div
+                        onMouseEnter={() => setIsTdsTcsOpen(true)}
+                        onMouseLeave={() => setIsTdsTcsOpen(false)}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.50, ease: "easeOut" }}
+                        style={{
+                            position: "fixed",
+                            top: "300px",
+                            left: "305px",
+                            width: "300px",
+                            background: "#2f3847",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            zIndex: 30000,
+                            border: "1px solid #444",
+                            // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                        }}
+                    >
+                    <List>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Form 16-A" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Form 26-Q" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="194-Q Detail" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="194-Q Check List" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="TCS & TDS Combine List" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Commission List" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="TCS Reports" />
+                        </StyledListItem>
+                    </List>
+                    </motion.div>
+                    )}
+                    {/* IncomeTax Reports */}
+                     <StyledListItem button     
+                        onMouseEnter={() => setIsIncomeTaxOpen(true)}
+                        onMouseLeave={() => setIsIncomeTaxOpen(false)}
+                        >
                         <StyledIcon>
                             <ReceiptLongIcon />
                         </StyledIcon>
                         <StyledListItemText primary="INCOME TAX REPORTS" />
-                        {isIncomeTaxOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isIncomeTaxOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptLongIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Purchase Report" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptLongIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Sale Reports" />
-                            </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                <StyledIcon style={{}}>
-                                    <ReceiptLongIcon />
-                                </StyledIcon>
-                                <StyledListItemText primary="Section 40A(3) Detail" />
-                            </StyledListItem>
-                            </List>
-                        </Collapse>
-                    </div>
+                    {/* IncomeTax Report – FLOATING RIGHT SUBMENU */}
+                    {isIncomeTaxOpen && (
+                    <motion.div
+                        onMouseEnter={() => setIsIncomeTaxOpen(true)}
+                        onMouseLeave={() => setIsIncomeTaxOpen(false)}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.50, ease: "easeOut" }}
+                        style={{
+                            position: "fixed",
+                            top: "350px",
+                            left: "305px",
+                            width: "300px",
+                            background: "#2f3847",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            zIndex: 30000,
+                            border: "1px solid #444",
+                            // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                        }}
+                    >
+                    <List>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptLongIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Purchase Report" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptLongIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Sale Reports" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <ReceiptLongIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Section 40A(3) Detail" />
+                        </StyledListItem>
+                    </List>
+                    </motion.div>
+                    )}
                     {/* Extra Features */}
-                    <StyledListItem button onClick={handleExtraFeature}>
+                    <StyledListItem button 
+                        onMouseEnter={() => setIsExtraFeatureOpen(true)}
+                        onMouseLeave={() => setIsExtraFeatureOpen(false)}>
                         <StyledIcon>
                             <ExtensionIcon />
                         </StyledIcon>
                         <StyledListItemText primary="EXTRA FEATURES" />
-                        {isExtraFeatureOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isExtraFeatureOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            <StyledListItem button onClick={() => handleNavigation('/companies')}>
-                                    <StyledIcon style={{}}>
-                                        <BalanceIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Change Company" />
-                                </StyledListItem>
-                                <StyledListItem button onClick={openModal}>
-                                    <StyledIcon>
-                                        <LockIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Password Setting" />
-                                </StyledListItem>
-                                {isModalOpen && <PasswordModal onClose={closeModal} />}
-                                <StyledListItem button onClick={() => handleNavigation('/Setup')}>
-                                    <StyledIcon>
-                                        <SettingsIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="Setup" />
-                                </StyledListItem>
-                                {/* <StyledListItem button onClick={openSale_WinModal}>
-                                    <StyledIcon>1
-                                        <SettingsIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="SALE WIN" />
-                                </StyledListItem>
-                                <SaleWin isOpen={isSale_winOpen} onClose={closeSale_WinModal} /> */}
-                            </List>
-                        </Collapse>
-                    </div>
+                    {/* Extra Feature Report – FLOATING RIGHT SUBMENU */}
+                    {isExtraFeatureOpen && (
+                    <motion.div
+                        onMouseEnter={() => setIsExtraFeatureOpen(true)}
+                        onMouseLeave={() => setIsExtraFeatureOpen(false)}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.50, ease: "easeOut" }}
+                        style={{
+                            position: "fixed",
+                            top: "390px",
+                            left: "305px",
+                            width: "300px",
+                            background: "#2f3847",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            zIndex: 30000,
+                            border: "1px solid #444",
+                            // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                        }}
+                    >
+                    <List>
+                        <StyledListItem button onClick={() => handleNavigation('/companies')}>
+                            <StyledIcon style={{}}>
+                                <BalanceIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Change Company" />
+                        </StyledListItem>
+                        <StyledListItem button onClick={openModal}>
+                            <StyledIcon>
+                                <LockIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Password Setting" />
+                        </StyledListItem>
+                        {isModalOpen && <PasswordModal onClose={closeModal} />}
+                        <StyledListItem button onClick={() => handleNavigation('/Setup')}>
+                            <StyledIcon>
+                                <SettingsIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="Setup" />
+                        </StyledListItem>
+                        {/* <StyledListItem button onClick={openSale_WinModal}>
+                            <StyledIcon>1
+                                <SettingsIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="SALE WIN" />
+                        </StyledListItem>
+                        <SaleWin isOpen={isSale_winOpen} onClose={closeSale_WinModal} /> */}
+                    </List>
+                    </motion.div>
+                    )}
                     {/* Data Security */}
-                    <StyledListItem button onClick={handleDataSecurtiy}>
+                    <StyledListItem button 
+                        onMouseEnter={() => setIsDataSecurityOpen(true)}
+                        onMouseLeave={() => setIsDataSecurityOpen(false)}>
                         <StyledIcon>
                             <SecurityIcon />
                         </StyledIcon>
                         <StyledListItemText primary="DATA SECURITY" />
-                        {isDataSecurityOpen ? <ExpandLess /> : <ExpandMore />}
                     </StyledListItem>
-                    <div style={{ marginLeft: 10 }}>
-                        <Collapse in={isDataSecurityOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
-                                    <StyledIcon style={{}}>
-                                        <BalanceIcon />
-                                    </StyledIcon>
-                                    <StyledListItemText primary="COPY FOLDER DATA" />
-                                </StyledListItem>
-                            </List>
-                        </Collapse>
-                    </div>
+                    {/* Extra Feature Report – FLOATING RIGHT SUBMENU */}
+                    {isDataSecurityOpen && (
+                    <motion.div
+                        onMouseEnter={() => setIsDataSecurityOpen(true)}
+                        onMouseLeave={() => setIsDataSecurityOpen(false)}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.50, ease: "easeOut" }}
+                        style={{
+                            position: "fixed",
+                            top: "440px",
+                            left: "305px",
+                            width: "300px",
+                            background: "#2f3847",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            zIndex: 30000,
+                            border: "1px solid #444",
+                            // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                        }}
+                    >
+                    <List>
+                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledIcon style={{}}>
+                                <BalanceIcon />
+                            </StyledIcon>
+                            <StyledListItemText primary="COPY FOLDER DATA" />
+                        </StyledListItem>
+                    </List>
+                    </motion.div>
+                    )}
                     <StyledListItem button onClick={() => handleNavigation('/')}>
                         <StyledIcon>
                             <ExitToAppIcon />
