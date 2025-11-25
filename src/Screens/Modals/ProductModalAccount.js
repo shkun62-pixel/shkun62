@@ -363,6 +363,44 @@ const fieldOrder = [
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [products, selectedIndex, onSelect, showLedgerModal]);
 
+  // Auto-scroll when selectedIndex changes
+  useEffect(() => {
+    if (!tableRef.current) return;
+
+    const container = document.querySelector(".table-container"); // scrollable wrapper
+    if (!container) return;
+
+    const rows = tableRef.current.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // ---- Heights / positions ----
+    const headerOffset = 40; // adjust if needed
+    const buffer = 12;
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // visible area
+    const visibleTop = container.scrollTop + buffer + headerOffset;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    // ---- SCROLL DOWN: row is below view ----
+    if (rowBottom > visibleBottom) {
+        const newScrollTop = rowBottom - containerHeight + buffer * 2;
+        container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+    // ---- SCROLL UP: row is above view ----
+    else if (rowTop < visibleTop) {
+        const newScrollTop = rowTop - headerOffset - buffer;
+        container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+    }
+  }, [selectedIndex, products]);
+
   // ---- Handlers ----
    const handleSearch = async (e) => {
     const value = e.target.value;

@@ -290,7 +290,7 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
 
   const fetchData = async () => {
       try {
-        console.log("ledgerId:",ledgerId);
+        console.log("ledger_Id:",ledgerId);
         
           let response;
           if (ledgerId) {
@@ -303,8 +303,8 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
             );
           }
           // const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`);
-          if (response.status === 200 && response.data.data) {
-            const lastEntry = response.data.data;
+          if (response.status === 200 && response.data.data || response.data) {
+            const lastEntry = response.data.data || response.data || null;
               // Set flags and update form data
               setFirstTimeCheckData("DataAvailable");
               setFormData(lastEntry.formData);
@@ -457,23 +457,44 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === "Escape" && ledgerId && !isEditMode) {
-        // ✅ Go back explicitly to LedgerList with state
-        navigate("/ledgerlist", {
-          state: {
-            rowIndex: location.state?.rowIndex || 0,
-            selectedLedger: location.state?.selectedLedger,
-            // keepModalOpen: true,
-          },
-        });
-      }
-    };
+    useEffect(() => {
+      const handleEsc = (e) => {
+        if (e.key === "Escape" && ledgerId) {
+          const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
+  
+          navigate(-1); // go back
+          setTimeout(() => {
+            // restore modal state after navigation
+            if (modalState.keepModalOpen) {
+              window.dispatchEvent(
+                new CustomEvent("reopenTrailModal", { detail: modalState })
+              );
+            }
+          }, 50);
+        }
+      };
+  
+      window.addEventListener("keydown", handleEsc);
+      return () => window.removeEventListener("keydown", handleEsc);
+    }, [isEditMode]);
 
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [navigate, ledgerId, location.state]);
+  // useEffect(() => {
+  //   const handleEsc = (e) => {
+  //     if (e.key === "Escape" && ledgerId && !isEditMode) {
+  //       // ✅ Go back explicitly to LedgerList with state
+  //       navigate( -1, {
+  //         state: {
+  //           rowIndex: location.state?.selectedIndex || 0,
+  //           // selectedLedger: location.state?.selectedLedger,
+  //           // keepModalOpen: true,
+  //         },
+  //       });
+  //     }
+  //   };
+
+  //   window.addEventListener("keydown", handleEsc);
+  //   return () => window.removeEventListener("keydown", handleEsc);
+  // }, [navigate, ledgerId, location.state]);
 
   useEffect(() => {
     if (data.length > 0) {

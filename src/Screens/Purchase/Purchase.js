@@ -7902,35 +7902,66 @@ const Purchase = () => {
 
   };
 
-  const handleDeleteClick = async (id) => {
-    if (!id) {
-      toast.error("Invalid ID. Please select an item to delete.", {
-        position: "top-center",
-      });
-      return;
-    }
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?"
-    );
-    if (!userConfirmed) return;
-    try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}`;
-      const response = await axios.delete(apiEndpoint);
+  // const handleDeleteClick = async (id) => {
+  //   if (!id) {
+  //     toast.error("Invalid ID. Please select an item to delete.", {
+  //       position: "top-center",
+  //     });
+  //     return;
+  //   }
+  //   const userConfirmed = window.confirm(
+  //     "Are you sure you want to delete this item?"
+  //   );
+  //   if (!userConfirmed) return;
+  //   try {
+  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}`;
+  //     const response = await axios.delete(apiEndpoint);
 
-      if (response.status === 200) {
-        toast.success("Data deleted successfully!", { position: "top-center" });
-        fetchData(); // Refresh the data after successful deletion
-      } else {
-        throw new Error(`Failed to delete data: ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      toast.error(`Failed to delete data. Error: ${error.message}`, {
-        position: "top-center",
-      });
-    } finally {
+  //     if (response.status === 200) {
+  //       toast.success("Data deleted successfully!", { position: "top-center" });
+  //       fetchData(); // Refresh the data after successful deletion
+  //     } else {
+  //       throw new Error(`Failed to delete data: ${response.statusText}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting data:", error);
+  //     toast.error(`Failed to delete data. Error: ${error.message}`, {
+  //       position: "top-center",
+  //     });
+  //   } finally {
+  //   }
+  // };
+  const handleDeleteClick = async (id) => {
+  if (!id) {
+    toast.error("Invalid ID. Please select an item to delete.", {
+      position: "top-center",
+    });
+    return;
+  }
+
+  const userConfirmed = window.confirm(
+    "Are you sure you want to delete this item?"
+  );
+  if (!userConfirmed) return;
+
+  try {
+    // ✅ use the id passed into the function, not data1._id
+    const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/${data1._id}`;
+    const response = await axios.delete(apiEndpoint);
+
+    if (response.status === 200) {
+      toast.success("Data deleted successfully!", { position: "top-center" });
+      fetchData(); // Refresh the data after successful deletion
+    } else {
+      throw new Error(`Failed to delete data: ${response.statusText}`);
     }
-  };
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    toast.error(`Failed to delete data. Error: ${error.message}`, {
+      position: "top-center",
+    });
+  }
+};
 
   useEffect(() => {
     if (shouldFocusPrint && isPrintEnabled && printButtonRef.current) {

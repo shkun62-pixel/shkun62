@@ -72,6 +72,8 @@ function sumSafe(arr, key) {
 export default function GstWorksheet() {
 
   const {dateFrom, companyName,companyAdd, companyCity, CompanyState} = useCompanySetup();
+  const [selectedGst, setSelectedGst] = useState(null);
+  const [selectedGst2, setSelectedGst2] = useState(null);
 
   const [printOpen, setPrintOpen] = useState(false);
   const [fromDate, setFromDate] = useState("");
@@ -741,26 +743,19 @@ export default function GstWorksheet() {
             </FormControl>
           </div>
           </div>
-
-          <div style={{display:'flex',flexDirection:'row'}}>
-            <div style={{display:'flex',flexDirection:'column'}}>
+          <div style={{display:'flex',flexDirection:"column"}}>
               <Button className="Buttonz" variant="contained" color="primary" onClick={handleView} disabled={loading}>
                 View
               </Button>
-                <Button style={{marginTop:"10px"}} className="Buttonz" variant="outlined" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
-                Exit
-              </Button>
-            </div>
-             <div style={{display:'flex',flexDirection:'column',marginLeft:"10px"}}>
-              <Button className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
+              <Button style={{marginTop:"5px"}} className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
                 Export
               </Button>
-                <Button style={{marginTop:"10px"}} className="Buttonz" variant="contained" color="secondary" onClick={handleExportDetailed}>
-                Detail
+               <Button style={{marginTop:"5px",backgroundColor:"grey"}} className="Buttonz" variant="contained" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
+                Exit
               </Button>
-            </div>
-             
           </div>
+
+        
         </div>
       </Paper>
 
@@ -778,26 +773,89 @@ export default function GstWorksheet() {
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <Paper sx={{ p: 1 }}>
-              <Typography variant="h6" align="center">Sale <span style={{ color: "red", fontSize: 12 }}>DoubleClick Detail</span></Typography>
+              <Typography variant="h6" align="center">SALE <span style={{ color: "red", fontSize: 12 }}>DoubleClick Detail</span></Typography>
               <TableContainer sx={{ maxHeight: 420 }}>
                 <Table size="small" stickyHeader>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Gst %</TableCell>
-                      <TableCell align="right">Value</TableCell>
-                      <TableCell align="right">C.Tax</TableCell>
-                      <TableCell align="right">S.Tax</TableCell>
-                      <TableCell align="right">I.Tax</TableCell>
-                      <TableCell align="right">Cess</TableCell>
-                    </TableRow>
-                  </TableHead>
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      sx={{
+                        backgroundColor: "#4F81BD !important",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Gst %
+                    </TableCell>
+
+                    <TableCell
+                      align="right"
+                      sx={{
+                        backgroundColor: "#4F81BD !important",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Value
+                    </TableCell>
+
+                    <TableCell
+                      align="right"
+                      sx={{
+                        backgroundColor: "#4F81BD !important",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      C.Tax
+                    </TableCell>
+
+                    <TableCell
+                      align="right"
+                      sx={{
+                        backgroundColor: "#4F81BD !important",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      S.Tax
+                    </TableCell>
+
+                    <TableCell
+                      align="right"
+                      sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}
+                    >
+                      I.Tax
+                    </TableCell>
+
+                    <TableCell
+                      align="right"
+                      sx={{
+                        backgroundColor: "#4F81BD !important",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Cess
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
                   <TableBody>
                     {saleGrouped.map((g) => (
                       <TableRow
                         key={`sale-${g.gst}`}
-                        hover
-                        onDoubleClick={() => openDetail("sale", g.gst)}
-                        sx={{ cursor: "pointer" }}
+                        onDoubleClick={() => {
+                          openDetail("sale", g.gst);
+                          setSelectedGst(g.gst);
+                        }}
+                        // onDoubleClick={() => openDetail("sale", g.gst)}
+                        sx={{
+                          cursor: "pointer",
+                          userSelect: "none", 
+                          backgroundColor: selectedGst === g.gst ? "#b6b9bdff" : "transparent",
+                          transition: "0.2s",
+                        }}
                       >
                         <TableCell>{g.gst}%</TableCell>
                         <TableCell align="right">{g.value.toFixed(2)}</TableCell>
@@ -824,26 +882,92 @@ export default function GstWorksheet() {
 
           <Grid item xs={12} md={6}>
             <Paper sx={{ p: 1 }}>
-              <Typography variant="h6" align="center">Purchase <span style={{ color: "red", fontSize: 12 }}>DoubleClick Detail</span></Typography>
+              <Typography variant="h6" align="center">PURCHASE <span style={{ color: "red", fontSize: 12 }}>DoubleClick Detail</span></Typography>
               <TableContainer sx={{ maxHeight: 420 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Gst %</TableCell>
-                      <TableCell align="right">Value</TableCell>
-                      <TableCell align="right">C.Tax</TableCell>
-                      <TableCell align="right">S.Tax</TableCell>
-                      <TableCell align="right">I.Tax</TableCell>
-                      <TableCell align="right">Cess</TableCell>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#4F81BD !important",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Gst %
+                      </TableCell>
+
+                      <TableCell
+                        align="right"
+                        sx={{
+                          backgroundColor: "#4F81BD !important",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Value
+                      </TableCell>
+
+                      <TableCell
+                        align="right"
+                        sx={{
+                          backgroundColor: "#4F81BD !important",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        C.Tax
+                      </TableCell>
+
+                      <TableCell
+                        align="right"
+                        sx={{
+                          backgroundColor: "#4F81BD !important",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        S.Tax
+                      </TableCell>
+
+                      <TableCell
+                        align="right"
+                        sx={{
+                          backgroundColor: "#4F81BD !important",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        I.Tax
+                      </TableCell>
+
+                      <TableCell
+                        align="right"
+                        sx={{
+                          backgroundColor: "#4F81BD !important",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Cess
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {purchaseGrouped.map((g) => (
                       <TableRow
                         key={`purchase-${g.gst}`}
-                        hover
-                        onDoubleClick={() => openDetail("purchase", g.gst)}
-                        sx={{ cursor: "pointer" }}
+                         onDoubleClick={() => {
+                          openDetail("purchase", g.gst);
+                          setSelectedGst2(g.gst);
+                        }}
+                        // onDoubleClick={() => openDetail("purchase", g.gst)}
+                        sx={{
+                          cursor: "pointer",
+                          userSelect: "none", 
+                          backgroundColor: selectedGst2 === g.gst ? "#b6b9bdff" : "transparent",
+                          transition: "0.2s",
+                        }}
                       >
                         <TableCell>{g.gst}%</TableCell>
                         <TableCell align="right">{g.value.toFixed(2)}</TableCell>
@@ -879,12 +1003,12 @@ export default function GstWorksheet() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell><strong>Type</strong></TableCell>
-                <TableCell align="right"><strong>Total Value</strong></TableCell>
-                <TableCell align="right"><strong>CGST</strong></TableCell>
-                <TableCell align="right"><strong>SGST</strong></TableCell>
-                <TableCell align="right"><strong>IGST</strong></TableCell>
-                <TableCell align="right"><strong>Cess</strong></TableCell>
+                <TableCell sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}><strong>Type</strong></TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}><strong>Total Value</strong></TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}><strong>CGST</strong></TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}><strong>SGST</strong></TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}><strong>IGST</strong></TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold" }}><strong>Cess</strong></TableCell>
               </TableRow>
             </TableHead>
 
@@ -946,16 +1070,36 @@ export default function GstWorksheet() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Bill No</TableCell>
-                <TableCell>A/c Name</TableCell>
-                <TableCell>Gst</TableCell>
-                <TableCell align="right">Qty</TableCell>
-                <TableCell align="right">Taxable Value</TableCell>
-                <TableCell align="right">C.Tax</TableCell>
-                <TableCell align="right">S.Tax</TableCell>
-                <TableCell align="right">I.Tax</TableCell>
-                <TableCell align="right">V.Amt</TableCell>
+                <TableCell sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  Date
+                </TableCell>
+                <TableCell sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  Bill No
+                </TableCell>
+                <TableCell sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}} >
+                  A/c Name
+                </TableCell>
+                <TableCell sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  Gst
+                </TableCell>
+                <TableCell sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}} align="right">
+                  Qty
+                </TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  Taxable Value
+                </TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  C.Tax
+                </TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  S.Tax
+                </TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                  I.Tax
+                </TableCell>
+                <TableCell align="right" sx={{backgroundColor: "#4F81BD !important", color: "white", fontWeight: "bold"}}>
+                V.Amt
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

@@ -8005,66 +8005,101 @@ const handleViewFAVoucher = () => {
     }
   }, [isPrintEnabled,shouldFocusPrint,isAddEnabled,shouldFocusAdd]);
 
+  // const handleDeleteClick = async (id) => {
+  //   if (!id) {
+  //     toast.error("Invalid ID. Please select an item to delete.", {
+  //       position: "top-center",
+  //     });
+  //     return;
+  //   }
+
+  //   const userConfirmed = window.confirm(
+  //     "Are you sure you want to delete this from records?"
+  //   );
+  //   if (!userConfirmed) return;
+
+  //   try {
+  //     // first API (salegst)
+  //     const salegstEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/${data1._id}`;
+  //     // second API (salefaFile)
+  //     const salefaFileEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salefaFile/${data1._id}`;
+
+  //     // fire both delete requests in parallel
+  //     const [salegstResponse, salefaFileResponse] = await Promise.allSettled([
+  //       axios.delete(salegstEndpoint),
+  //       axios.delete(salefaFileEndpoint),
+  //     ]);
+
+  //     let deletedFromSalegst = false;
+  //     let deletedFromSalefaFile = false;
+
+  //     if (
+  //       salegstResponse.status === "fulfilled" &&
+  //       salegstResponse.value.status === 200
+  //     ) {
+  //       deletedFromSalegst = true;
+  //     }
+
+  //     if (
+  //       salefaFileResponse.status === "fulfilled" &&
+  //       salefaFileResponse.value.status === 200
+  //     ) {
+  //       deletedFromSalefaFile = true;
+  //     }
+
+  //     if (deletedFromSalegst || deletedFromSalefaFile) {
+  //       toast.success("Data deleted successfully from relevant records.", {
+  //         position: "top-center",
+  //       });
+  //       fetchData();
+  //     } else {
+  //       toast.error("Deletion failed from both records.", {
+  //         position: "top-center",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting data:", error);
+  //     toast.error(`Failed to delete data. Error: ${error.message}`, {
+  //       position: "top-center",
+  //     });
+  //   }
+  // };
   const handleDeleteClick = async (id) => {
-  if (!id) {
-    toast.error("Invalid ID. Please select an item to delete.", {
-      position: "top-center",
-    });
-    return;
-  }
-
-  const userConfirmed = window.confirm(
-    "Are you sure you want to delete this from records?"
-  );
-  if (!userConfirmed) return;
-
-  try {
-    // first API (salegst)
-    const salegstEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/${data1._id}`;
-    // second API (salefaFile)
-    const salefaFileEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salefaFile/${data1._id}`;
-
-    // fire both delete requests in parallel
-    const [salegstResponse, salefaFileResponse] = await Promise.allSettled([
-      axios.delete(salegstEndpoint),
-      axios.delete(salefaFileEndpoint),
-    ]);
-
-    let deletedFromSalegst = false;
-    let deletedFromSalefaFile = false;
-
-    if (
-      salegstResponse.status === "fulfilled" &&
-      salegstResponse.value.status === 200
-    ) {
-      deletedFromSalegst = true;
-    }
-
-    if (
-      salefaFileResponse.status === "fulfilled" &&
-      salefaFileResponse.value.status === 200
-    ) {
-      deletedFromSalefaFile = true;
-    }
-
-    if (deletedFromSalegst || deletedFromSalefaFile) {
-      toast.success("Data deleted successfully from relevant records.", {
+    if (!id) {
+      toast.error("Invalid ID. Please select an item to delete.", {
         position: "top-center",
       });
-      fetchData();
-    } else {
-      toast.error("Deletion failed from both records.", {
+      return;
+    }
+
+    const userConfirmed = window.confirm(
+      "Are you sure you want to delete this from records?"
+    );
+    if (!userConfirmed) return;
+
+    try {
+      // Only one API – backend will delete SaleGst + FAFile (via saleId)
+      const salegstEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}`;
+
+      const response = await axios.delete(salegstEndpoint);
+
+      if (response.status === 200) {
+        toast.success("Data deleted successfully from records.", {
+          position: "top-center",
+        });
+        fetchData(); // refresh grid
+      } else {
+        toast.error("Deletion failed.", {
+          position: "top-center",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      toast.error(`Failed to delete data. Error: ${error.message}`, {
         position: "top-center",
       });
     }
-  } catch (error) {
-    console.error("Error deleting data:", error);
-    toast.error(`Failed to delete data. Error: ${error.message}`, {
-      position: "top-center",
-    });
-  }
-};
-
+  };
   // Update the blur handlers so that they always format the value to 2 decimals.
   const handlePkgsBlur = (index) => {
     const decimalPlaces = pkgsValue;

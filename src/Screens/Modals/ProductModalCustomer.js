@@ -1,256 +1,3 @@
-// import React, { useState, useEffect, useRef } from 'react';
-// import Modal from 'react-bootstrap/Modal';
-// import Button from 'react-bootstrap/Button';
-// import Table from 'react-bootstrap/Table';
-// import { TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-// import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-// import "./ProductModal.css";
-// import LedgerAcc from "../LedgerAcc/LedgerAcc"
-
-// const SelectModal = ({ allFields, selectedFields, handleFieldChange, onClose }) => (
-//     <Modal show={true} onHide={onClose}>
-//         <Modal.Header closeButton>
-//             <Modal.Title>Select Fields</Modal.Title>
-//         </Modal.Header>
-//         <Modal.Body>
-//             <FormControl fullWidth>
-//                 <InputLabel id="field-select-label">Select Fields</InputLabel>
-//                 <Select
-//                     labelId="field-select-label"
-//                     id="field-select"
-//                     multiple
-//                     value={selectedFields}
-//                     onChange={handleFieldChange}
-//                     IconComponent={CheckCircleIcon}
-//                     className="select-field"
-//                     renderValue={(selected) => (
-//                         <div>
-//                             {selected.map((value) => (
-//                                 <span key={value} className="selected-option">{value}</span>
-//                             ))}
-//                         </div>
-//                     )}
-//                 >
-//                     {allFields.map(field => (
-//                         <MenuItem key={field} value={field} className={selectedFields.includes(field) ? 'selected' : ''}>
-//                             {field}
-//                         </MenuItem>
-//                     ))}
-//                 </Select>
-//             </FormControl>
-//         </Modal.Body>
-//         <Modal.Footer>
-//             <Button variant="secondary" onClick={onClose}>
-//                 Close
-//             </Button>
-//         </Modal.Footer>
-//     </Modal>
-// );
-
-// const ProductModalCustomer = ({
-//     products,
-//     onSelect,
-//     onClose,
-//     allFields,
-//     initialKey,
-//     onRefresh
-// }) => {
-//     const [filteredProducts, setFilteredProducts] = useState(products);
-//     const [selectedIndex, setSelectedIndex] = useState(0);
-//     const [selectedFields, setSelectedFields] = useState(['ahead', 'gstNo', 'add1', 'city', 'pan', ...allFields.filter(field => !['ahead', 'gstNo', 'add1', 'city', 'pan'].includes(field))]);
-//     const [searchTerm, setSearchTerm] = useState(initialKey || '');
-//     const [searchField, setSearchField] = useState('ahead');
-//     const [showSelectModal, setShowSelectModal] = useState(false);
-//     const [showLedgerModal, setShowLedgerModal] = useState(false);
-
-//     const inputRef = useRef(null);
-//     const tableRef = useRef(null);
-
-//     // Focus search input on open or after modal closes
-//     useEffect(() => {
-//         if (inputRef.current && !showLedgerModal) inputRef.current.focus();
-//     }, [products, showLedgerModal]);
-
-//     // Keep filtered products in sync with searchTerm and products
-//     useEffect(() => {
-//         if (searchTerm) {
-//             const keyword = searchTerm.toLowerCase();
-//             const filtered = products.filter(product =>
-//                 (product[searchField]?.toLowerCase().includes(keyword)) ||
-//                 product.ahead?.toLowerCase().split(' ').some(namePart => namePart.startsWith(keyword))
-//             );
-//             setFilteredProducts(filtered);
-//         } else {
-//             setFilteredProducts(products);
-//         }
-//         setSelectedIndex(0); // Reset index after filter update
-//     }, [products, searchTerm, searchField]);
-
-//     // Handle initialKey if passed (for fresh search)
-//     useEffect(() => {
-//         if (initialKey) setSearchTerm(initialKey);
-//     }, [initialKey]);
-
-//     // Scroll highlighted row into view
-//     useEffect(() => {
-//         if (tableRef.current) {
-//             const selectedRow = tableRef.current.querySelector('.highlighted-row');
-//             if (selectedRow) selectedRow.scrollIntoView({ block: 'nearest' });
-//         }
-//     }, [selectedIndex, filteredProducts]);
-
-//     // Keyboard navigation
-//     useEffect(() => {
-//         const handleKeyDown = (event) => {
-//             if (showLedgerModal) return;
-//             if (event.key === 'ArrowUp') {
-//                 event.preventDefault();
-//                 setSelectedIndex(prevIndex => Math.max(prevIndex - 1, 0));
-//             } else if (event.key === 'ArrowDown') {
-//                 event.preventDefault();
-//                 setSelectedIndex(prevIndex => Math.min(prevIndex + 1, filteredProducts.length - 1));
-//             } else if (event.key === 'Enter') {
-//                 event.preventDefault();
-//                 onSelect(filteredProducts[selectedIndex]);
-//             }
-//         };
-//         document.addEventListener('keydown', handleKeyDown);
-//         return () => document.removeEventListener('keydown', handleKeyDown);
-//     }, [filteredProducts, selectedIndex, onSelect, showLedgerModal]);
-
-//     // Search handler (no filtering here, only update searchTerm)
-//     const handleSearch = (e) => {
-//         setSearchTerm(e.target.value);
-//     };
-
-//     const handleFieldChange = (event) => {
-//         setSearchField(event.target.value);
-//         setSearchTerm('');
-//     };
-
-//     const handleRowClick = (product, index) => {
-//         setSelectedIndex(index);
-//         onSelect(product);
-//     };
-
-//     const handleDataGridScroll = (event) => {
-//         event.stopPropagation();
-//     };
-
-//     const openLedgerModal = () => setShowLedgerModal(true);
-
-//     // When closing Ledger modal, refresh parent data, reset filter, focus input
-//     const handleLedgerModalClose = async () => {
-//         setShowLedgerModal(false);
-//         if (onRefresh) await onRefresh();
-//         setSearchTerm(''); // Show all after new entry (optional)
-//         setTimeout(() => {
-//             setSelectedIndex(0);
-//             if (inputRef.current) inputRef.current.focus();
-//         }, 100);
-//     };
-
-//     const handleModalHide = () => {
-//         onClose();
-//     };
-
-//     return (
-//         <>
-//             <Modal show={true} onHide={handleModalHide} fullscreen className="custom-modal" style={{ marginTop: 20 }}>
-//                 <Modal.Header closeButton>
-//                     <Modal.Title>LEDGER ACCOUNTS</Modal.Title>
-//                 </Modal.Header>
-//                 <Modal.Body>
-//                     <div className="list-container" onScroll={handleDataGridScroll}>
-//                         <TableContainer component={Paper} className="table-container">
-//                             <Table bordered ref={tableRef}>
-//                                 <TableHead style={{ backgroundColor: "lightgray" }}>
-//                                     <TableRow>
-//                                         {selectedFields.map(field => (
-//                                             <TableCell style={{ textTransform: "uppercase" }} key={field}>{field}</TableCell>
-//                                         ))}
-//                                     </TableRow>
-//                                 </TableHead>
-//                                 <TableBody>
-//                                     {filteredProducts.map((product, index) => (
-//                                         <TableRow
-//                                             key={index}
-//                                             className={selectedIndex === index ? 'highlighted-row' : ''}
-//                                             onClick={() => handleRowClick(product, index)}
-//                                         >
-//                                             {selectedFields.map(field => (
-//                                                 <TableCell key={field}>{product[field]}</TableCell>
-//                                             ))}
-//                                         </TableRow>
-//                                     ))}
-//                                 </TableBody>
-//                             </Table>
-//                         </TableContainer>
-//                     </div>
-//                 </Modal.Body>
-//                 <div className='searchdiv' style={{ marginBottom: 10 }}>
-//                     <input
-//                     type="text"
-//                     className="search"
-//                     placeholder="Search..."
-//                     onChange={handleSearch}
-//                     value={searchTerm}
-//                     ref={inputRef}
-//                     />
-//                     <span style={{ fontSize: 17, marginLeft: 20,marginTop:5 }} id="search-field-label">Search By:</span>
-//                     <select
-//                     className='SearchBy'
-//                     labelid="search-field-label"
-//                     value={searchField}
-//                     onChange={handleFieldChange}
-//                     >
-//                         {selectedFields.map(field => (
-//                             <option key={field} value={field}>
-//                                 {field.toUpperCase()}
-//                             </option>
-//                         ))}
-//                     </select>
-//                     <div className='buttondiv'>
-//                         <Button className='new' onClick={openLedgerModal}>New</Button>
-//                         <Button className='modify'>Modify</Button>
-//                         <Button className='select'>Select</Button>
-//                         <Button className='closebtn' variant="secondary" onClick={handleModalHide}>
-//                             Close
-//                         </Button>
-//                     </div>
-//                 </div>
-//             </Modal>
-//             {showSelectModal && (
-//                 <SelectModal
-//                     allFields={allFields}
-//                     selectedFields={selectedFields}
-//                     handleFieldChange={handleFieldChange}
-//                     onClose={() => setShowSelectModal(false)}
-//                 />
-//             )}
-//             {showLedgerModal && (
-//                 <Modal
-//                     dialogClassName="custom-full-width-modal"
-//                     show
-//                     onHide={() => setShowLedgerModal(false)}
-//                     size="lg"
-//                     style={{ zIndex: 100000 }}
-//                 >
-//                     <Modal.Body style={{ marginTop: 10, marginLeft: 10 }}>
-//                         <LedgerAcc
-//                             onClose={handleLedgerModalClose}
-//                             onRefresh={onRefresh}
-//                         />
-//                     </Modal.Body>
-//                 </Modal>
-//             )}
-//         </>
-//     );
-// };
-
-// export default ProductModalCustomer;
-
-
 //ProductModalCustomer 
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from 'react-bootstrap/Modal';
@@ -260,6 +7,7 @@ import { TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormC
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import "./ProductModal.css";
 import LedgerAcc from "../LedgerAcc/LedgerAcc"
+import { useNavigate } from "react-router-dom";
 
 const ProductModalCustomer = ({
     allFields,
@@ -280,6 +28,7 @@ const ProductModalCustomer = ({
     const [isLoading, setIsLoading] = useState(false);
     const inputRef = useRef(null);
     const tableRef = useRef(null);
+    const navigate = useNavigate();
 
     const [showFieldModal, setShowFieldModal] = useState(false);
     const FIELD_STORAGE_KEY = `customer2_modal_fields_${tenant}`;
@@ -379,6 +128,44 @@ const ProductModalCustomer = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
     }, [products, selectedIndex, onSelect, showLedgerModal]);
 
+    // Auto-scroll when selectedIndex changes
+    useEffect(() => {
+        if (!tableRef.current) return;
+
+        const container = document.querySelector(".table-container"); // scrollable wrapper
+        if (!container) return;
+
+        const rows = tableRef.current.querySelectorAll("tbody tr");
+        if (!rows.length) return;
+
+        const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+        const selectedRow = rows[idx];
+        if (!selectedRow) return;
+
+        // ---- Heights / positions ----
+        const headerOffset = 40; // adjust if needed
+        const buffer = 12;
+
+        const rowTop = selectedRow.offsetTop;
+        const rowBottom = rowTop + selectedRow.offsetHeight;
+        const containerHeight = container.clientHeight;
+
+        // visible area
+        const visibleTop = container.scrollTop + buffer + headerOffset;
+        const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+        // ---- SCROLL DOWN: row is below view ----
+        if (rowBottom > visibleBottom) {
+            const newScrollTop = rowBottom - containerHeight + buffer * 2;
+            container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+        }
+        // ---- SCROLL UP: row is above view ----
+        else if (rowTop < visibleTop) {
+            const newScrollTop = rowTop - headerOffset - buffer;
+            container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+        }
+    }, [selectedIndex, products]);
+
 
     // Search handler: fetch new list from backend
     const handleSearch = async (e) => {
@@ -454,7 +241,19 @@ const ProductModalCustomer = ({
 
     if (onRefresh) await onRefresh();
     };
-    
+
+    const handleModify = () => {
+    if (!products[selectedIndex]) {
+        alert("Please select a row first!");
+        return;
+    }
+
+    const selectedProduct = products[selectedIndex];
+
+    navigate("/LedgerAcc", { state: { ledgerId: selectedProduct._id, rowIndex: selectedIndex } });
+};
+
+ 
     return (
     <>
     <Modal show={true} onHide={onClose} fullscreen className="custom-modal" style={{ marginTop: 20 }}>
@@ -534,7 +333,7 @@ const ProductModalCustomer = ({
             </select>
             <div className='buttondiv'>
             <Button className='new' onClick={openLedgerModal}>New</Button>
-            <Button className='modify'onClick={openLedgerModal}>Modify</Button>
+            <Button className='modify' onClick={handleModify}>Modify</Button>
             <Button className='select'>Select</Button>
             <Button className='closebtn' variant="secondary" onClick={onClose}>Close</Button>
             </div>

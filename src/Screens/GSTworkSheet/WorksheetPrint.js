@@ -1,252 +1,9 @@
-// import React, { useRef } from "react";
-// import { Modal, Box, Button, Table } from "@mui/material";
-// import { useReactToPrint } from "react-to-print";
-// import useCompanySetup from "../Shared/useCompanySetup";
-
-// const WorksheetPrint = ({ isOpen, handleClose, entries, fromDate, uptoDate }) => {
-//   const { companyName, companyAdd, companyCity } = useCompanySetup();
-//   const componentRef = useRef();
-
-//   const handlePrint = useReactToPrint({
-//     content: () => componentRef.current,
-//   });
-
-//   // Format date → dd/mm/yyyy
-//   const formatDate = (d) => {
-//     if (!d) return "";
-//     const date = new Date(d);
-//     return date.toLocaleDateString("en-GB");
-//   };
-
-//   // If date given as dd/mm/yyyy → convert
-//   const parseDMY = (str) => {
-//     const [d, m, y] = str.split("/");
-//     return new Date(`${y}-${m}-${d}`);
-//   };
-
-//   return (
-//     <Modal open={isOpen} onClose={handleClose}>
-//       <Box
-//         sx={{
-//           bgcolor: "white",
-//           p: 4,
-//           width: "100%",
-//           height: "100%",
-//           margin: "auto",
-//           overflowY: "auto",
-//         }}
-//       >
-//         {/* ACTION BUTTONS */}
-//         <Button variant="contained" color="primary" onClick={handlePrint}>
-//           Print
-//         </Button>
-
-//         <Button
-//           variant="contained"
-//           color="secondary"
-//           onClick={handleClose}
-//           style={{ marginLeft: 10 }}
-//         >
-//           Close
-//         </Button>
-
-//         {/* PRINT AREA */}
-//         <div
-//           ref={componentRef}
-//           style={{
-//             width: "390mm",
-//             minHeight: "390mm",
-//             margin: "auto",
-//             padding: "30px",
-//             borderRadius: "5px",
-//             boxSizing: "border-box",
-//           }}
-//         >
-//           {/* Header */}
-//           <div style={{ display: "flex", flexDirection: "column" }}>
-//             <span
-//               style={{
-//                 textAlign: "center",
-//                 fontSize: 40,
-//                 fontWeight: "bolder",
-//               }}
-//             >
-//               {companyName}
-//             </span>
-//             <span style={{ textAlign: "center", fontSize: 35 }}>
-//               {companyAdd}
-//             </span>
-//             <span style={{ textAlign: "center", fontSize: 35 }}>
-//               {companyCity}
-//             </span>
-//           </div>
-
-//           {/* PERIOD */}
-//           <div style={{ display: "flex", marginTop: 10 }}>
-//             <span style={{ fontSize: 25, fontWeight: "bolder", marginLeft: 15 }}>
-//               Summary Detail Report
-//             </span>
-
-//             <span style={{ fontSize: 25, fontWeight: "bold", marginLeft: "auto" }}>
-//               From : {formatDate(fromDate)}
-//             </span>
-
-//             <span
-//               style={{
-//                 fontSize: 25,
-//                 fontWeight: "bold",
-//                 marginLeft: 10,
-//                 marginRight: 20,
-//               }}
-//             >
-//               Upto : {formatDate(uptoDate)}
-//             </span>
-//           </div>
-
-//           {/* TABLE */}
-//           <div style={{ padding: "15px" }}>
-//             <Table>
-//               <thead>
-//                 <tr style={{ backgroundColor: "lightgrey" }}>
-//                   <th style={styles.tableHeader}>Date</th>
-//                   <th style={styles.tableHeader}>Bill No</th>
-//                   <th style={styles.tableHeader}>A/c Name</th>
-//                   <th style={styles.tableHeader}>Gst</th>
-//                   <th style={styles.tableHeader}>Qty</th>
-//                   <th style={styles.tableHeader}>Taxable Value</th>
-//                   <th style={styles.tableHeader}>C.Tax</th>
-//                   <th style={styles.tableHeader}>S.Tax</th>
-//                   <th style={styles.tableHeader}>I.Tax</th>
-//                   <th style={styles.tableHeader}>V.Amt</th>
-//                 </tr>
-//               </thead>
-
-//               <tbody>
-//                 {(entries || []).map((en, idx) => (
-//                   <tr key={idx}>
-//                     <td style={styles.tableCell}>
-//                       {en?.date?.includes("/")
-//                         ? parseDMY(en.date).toLocaleDateString("en-GB")
-//                         : formatDate(en.date)}
-//                     </td>
-
-//                     <td style={styles.tableCell}>{en.vbillno || en.vno}</td>
-
-//                     <td style={styles.tableCell}>{en.item?.sdisc}</td>
-
-//                     <td style={styles.tableCell}>{en.item?.gst}%</td>
-
-//                     <td style={styles.tableCellRight}>{en.qty}</td>
-
-//                     <td style={styles.tableCellRight}>
-//                       {Number(en.value).toFixed(2)}
-//                     </td>
-
-//                     <td style={styles.tableCellRight}>
-//                       {Number(en.ctax).toFixed(2)}
-//                     </td>
-
-//                     <td style={styles.tableCellRight}>
-//                       {Number(en.stax).toFixed(2)}
-//                     </td>
-
-//                     <td style={styles.tableCellRight}>
-//                       {Number(en.itax).toFixed(2)}
-//                     </td>
-
-//                     <td style={styles.tableCellRight}>
-//                       {Number(en.vamt).toFixed(2)}
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-
-//               {/* TOTALS */}
-//               <tfoot>
-//                 <tr style={{ backgroundColor: "#d9d9d9", fontWeight: "bold" }}>
-//                   <td colSpan={4} style={styles.totalLabel}>
-//                     Totals:
-//                   </td>
-
-//                   <td style={styles.tableCellRight}>
-//                     {entries.reduce((s, e) => s + Number(e.qty || 0), 0)}
-//                   </td>
-
-//                   <td style={styles.tableCellRight}>
-//                     {entries
-//                       .reduce((s, e) => s + Number(e.value || 0), 0)
-//                       .toFixed(2)}
-//                   </td>
-
-//                   <td style={styles.tableCellRight}>
-//                     {entries
-//                       .reduce((s, e) => s + Number(e.ctax || 0), 0)
-//                       .toFixed(2)}
-//                   </td>
-
-//                   <td style={styles.tableCellRight}>
-//                     {entries
-//                       .reduce((s, e) => s + Number(e.stax || 0), 0)
-//                       .toFixed(2)}
-//                   </td>
-
-//                   <td style={styles.tableCellRight}>
-//                     {entries
-//                       .reduce((s, e) => s + Number(e.itax || 0), 0)
-//                       .toFixed(2)}
-//                   </td>
-
-//                   <td style={styles.tableCellRight}>
-//                     {entries
-//                       .reduce((s, e) => s + Number(e.vamt || 0), 0)
-//                       .toFixed(2)}
-//                   </td>
-//                 </tr>
-//               </tfoot>
-//             </Table>
-//           </div>
-//         </div>
-//       </Box>
-//     </Modal>
-//   );
-// };
-
-// // styles
-// const styles = {
-//   tableHeader: {
-//     border: "1px solid black",
-//     padding: "8px",
-//     textAlign: "center",
-//     fontWeight: "bold",
-//     fontSize: "25px",
-//   },
-//   tableCell: {
-//     border: "1px solid black",
-//     padding: "8px",
-//     textAlign: "left",
-//     fontSize: "22px",
-//   },
-//   tableCellRight: {
-//     border: "1px solid black",
-//     padding: "8px",
-//     textAlign: "right",
-//     fontSize: "22px",
-//   },
-//   totalLabel: {
-//     textAlign: "right",
-//     border: "1px solid black",
-//     padding: "8px",
-//     fontSize: "22px",
-//   },
-// };
-
-// export default WorksheetPrint;
-
-
 import React, { useRef } from "react";
 import { Modal, Box, Button, Table } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../Shared/useCompanySetup";
+import * as XLSX from 'sheetjs-style';
+import { saveAs } from 'file-saver';
 
 const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate }) => {
   const { companyName, companyAdd, companyCity } = useCompanySetup();
@@ -284,6 +41,163 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
   const totalItax = entries.reduce((s, e) => s + Number(e.itax || 0), 0);
   const totalVamt = entries.reduce((s, e) => s + Number(e.vamt || 0), 0);
 
+  // ---------------------- EXPORT EXCEL ----------------------
+  const handleExportExcel = () => {
+    let exportData = [];
+
+    (entries || []).forEach((en) => {
+      exportData.push({
+        "Date": en?.date?.includes("/")
+          ? parseDMY(en.date).toLocaleDateString("en-GB")
+          : formatDate(en.date),
+
+        "Bill No": en.vbillno || en.vno || "",
+        "A/C Name": en.item?.sdisc || "",
+        "Gst": (en.item?.gst || 0) + "%",
+        "Qty": Number(en.qty || 0),
+        "Taxable Value": Number(en.value || 0),
+        "C.Tax": Number(en.ctax || 0),
+        "S.Tax": Number(en.stax || 0),
+        "I.Tax": Number(en.itax || 0),
+        "V.Amt": Number(en.vamt || 0),
+      });
+    });
+
+    if (exportData.length === 0) return;
+
+    const header = Object.keys(exportData[0]);
+
+    // Period
+    const periodFrom = fromDate ? formatDate(fromDate) : "--";
+    const periodTo = uptoDate ? formatDate(uptoDate) : "--";
+
+    // BUILD SHEET
+    const sheetData = [
+      [companyName || "Company Name"],
+      [companyAdd || "Company Address"],
+      [`Summary Detail Report - Period From: ${periodFrom}  To: ${periodTo}`],
+      [],
+      header,
+      ...exportData.map((row) => header.map((h) => row[h])),
+    ];
+
+    // TOTALS
+    const numericFields = ["Qty", "Taxable Value", "C.Tax", "S.Tax", "I.Tax", "V.Amt"];
+    const totals = {};
+    header.forEach((h, index) => {
+      if (index === 0) {
+        totals[h] = "Total";
+      } else if (numericFields.includes(h)) {
+        const colLetter = XLSX.utils.encode_col(index);
+        const firstRow = 5; 
+        const lastRow = 4 + exportData.length;
+        totals[h] = { f: `SUBTOTAL(9,${colLetter}${firstRow + 1}:${colLetter}${lastRow + 1})` };
+      } else {
+        totals[h] = "";
+      }
+    });
+
+    sheetData.push(header.map((h) => totals[h]));
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Column Widths
+    worksheet["!cols"] = [
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 40 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+    ];
+    
+    // Force 2 decimal places
+    numericFields.forEach((field) => {
+      const colIdx = header.indexOf(field);
+      if (colIdx !== -1) {
+        for (let r = 5; r < exportData.length + 6; r++) {
+          const addr = XLSX.utils.encode_cell({ r, c: colIdx });
+          if (worksheet[addr]) {
+            worksheet[addr].t = "n";       // numeric type
+            worksheet[addr].z = "0.00";    // 2 decimal places
+          }
+        }
+      }
+    });
+
+    // HEADER STYLE
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: 4, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { patternType: "solid", fgColor: { rgb: "4F81BD" } },
+          alignment: { horizontal: "center", vertical: "center" },
+        };
+      }
+    });
+
+    // COMPANY STYLE
+    ["A1", "A2", "A3"].forEach((cell, idx) => {
+      if (worksheet[cell]) {
+        worksheet[cell].s = {
+          font: { bold: true, sz: idx === 0 ? 16 : 12, color: { rgb: "000000" } },
+          alignment: { horizontal: "center" },
+        };
+      }
+    });
+
+    // RIGHT ALIGN numeric fields
+    numericFields.forEach((field) => {
+      const colIdx = header.indexOf(field);
+      if (colIdx !== -1) {
+        for (let r = 5; r < exportData.length + 6; r++) {
+          const addr = XLSX.utils.encode_cell({ r, c: colIdx });
+          if (worksheet[addr]) {
+            worksheet[addr].s = { alignment: { horizontal: "right" } };
+          }
+        }
+      }
+    });
+
+    // TOTAL ROW STYLE
+    const totalRowIndex = exportData.length + 5;
+    header.forEach((_, colIdx) => {
+      const addr = XLSX.utils.encode_cell({ r: totalRowIndex, c: colIdx });
+      if (worksheet[addr]) {
+        worksheet[addr].s = {
+          font: { bold: true, color: { rgb: "000000" } },
+          fill: { patternType: "solid", fgColor: { rgb: "D9D9D9" } },
+          alignment: { horizontal: colIdx === 0 ? "left" : "right" },
+        };
+      }
+    });
+
+    // MERGE TOP ROWS
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Summary Detail");
+
+    const buffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true,
+    });
+
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, "SummaryDetail.xlsx");
+  };
+
+
   return (
     <Modal open={isOpen} onClose={handleClose}>
       <Box
@@ -299,6 +213,9 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
         {/* ACTION BUTTONS */}
         <Button className="Button" variant="contained" color="primary" onClick={handlePrint}>
           Print
+        </Button>
+        <Button className="Button" variant="contained" color="primary" onClick={handleExportExcel}  style={{ marginLeft: 10 }}>
+          Export
         </Button>
 
         <Button
