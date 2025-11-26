@@ -281,6 +281,13 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
   const [index, setIndex] = useState(0);
   const [isAddEnabled, setIsAddEnabled] = useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
+  const [isPreviousEnabled, setIsPreviousEnabled] = useState(true);
+  const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [isFirstEnabled, setIsFirstEnabled] = useState(true);
+  const [isLastEnabled, setIsLastEnabled] = useState(true);
+  const [isSearchEnabled, setIsSearchEnabled] = useState(true);
+  const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
+  const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
   const [isFetchEnabled, setIsFetchEnabled] = useState(false);
   const [isSubMasterEnabled, setIsSubMasterEnabled] = useState(false);
   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
@@ -694,6 +701,13 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
         setIndex(data.length);
         setIsAddEnabled(false);
         setIsSubmitEnabled(true);
+        setIsPreviousEnabled(false);
+        setIsNextEnabled(false);
+        setIsFirstEnabled(false);
+        setIsLastEnabled(false);
+        setIsSearchEnabled(false);
+        setIsSPrintEnabled(false);
+        setIsDeleteEnabled(false);
         setIsFetchEnabled(true);
         setIsSubMasterEnabled(true);
         setIsDisabled(false);
@@ -1018,6 +1032,13 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
       if (isDataSaved) {
         setIsSubmitEnabled(false); // Disable after successful save
         setIsAddEnabled(true);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsSearchEnabled(true);
+        setIsDeleteEnabled(true);
         setIsDisabled(true);
         setIsEditMode(false);
         setTitle("VIEW");
@@ -1091,7 +1112,15 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
     setTitle("EDIT");
     setIsDisabled(false); // Enable fields when editing
     setIsEditMode(true); // Enter edit mode when editing
+    setIsAddEnabled(false);
     setIsSubmitEnabled(true); // Enable the Save button when in edit mode
+    setIsPreviousEnabled(false);
+    setIsNextEnabled(false);
+    setIsFirstEnabled(false);
+    setIsLastEnabled(false);
+    setIsSearchEnabled(false);
+    setIsSPrintEnabled(false);
+    setIsDeleteEnabled(false);
     setIsFetchEnabled(true);
     setIsSubMasterEnabled(true);
     setIsAbcmode(true);
@@ -1142,8 +1171,18 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
             setFormData(lastEntry.formData); // Set form data
             setData1(response.data.data);
             setIndex(lastIndex);
-           setIsDisabled(true); // Disable fields after loading the data
-        } else {
+            setIsDisabled(true); // Disable fields after loading the data
+            setIsAddEnabled(true);
+            setIsEditMode(false);
+            setIsSubmitEnabled(false);
+            setIsPreviousEnabled(true);
+            setIsNextEnabled(true);
+            setIsFirstEnabled(true);
+            setIsLastEnabled(true);
+            setIsSearchEnabled(true);
+            setIsSPrintEnabled(true);
+            setIsDeleteEnabled(true);
+          } else {
             // If no data is available, initialize with default values
             console.log("No data available");
             const newData = {
@@ -2940,7 +2979,7 @@ const handleAttachClick = () => {
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[2] }}
             onClick={handlePrevious}
-            disabled={index === 0}
+            disabled={!isPreviousEnabled}
           >
             Previous
           </Button>
@@ -2948,7 +2987,7 @@ const handleAttachClick = () => {
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[3] }}
             onClick={handleNext}
-            disabled={index === data.length - 1}
+            disabled={!isNextEnabled}
           >
             Next
           </Button>
@@ -2956,7 +2995,7 @@ const handleAttachClick = () => {
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[4] }}
             onClick={handleFirst}
-            disabled={index === 0}
+            disabled={!isFirstEnabled}
           >
             First
           </Button>
@@ -2964,12 +3003,12 @@ const handleAttachClick = () => {
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[5] }}
             onClick={handleLast}
-            disabled={index === data.length - 1}
+            disabled={!isLastEnabled}
           >
             Last
           </Button>
           <Button
-          disabled={!isAddEnabled}
+            disabled={!isSearchEnabled}
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[6] }}
             onClick={() => openModalForItemCus(0)}
@@ -2986,14 +3025,14 @@ const handleAttachClick = () => {
           />
           )}
           <Button
-          disabled={!isAddEnabled}
+            disabled={!isPrintEnabled}
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[7] }}
           >
             Print
           </Button>
           <Button
-          disabled={!isAddEnabled}
+            disabled={!isDeleteEnabled}
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[8] }}
             onClick={handleDeleteClick}

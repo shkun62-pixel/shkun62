@@ -373,6 +373,13 @@ const NewStockAcc = ({ onSave }) => {
   const [index, setIndex] = useState(0);
   const [isAddEnabled, setIsAddEnabled] = useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
+  const [isPreviousEnabled, setIsPreviousEnabled] = useState(true);
+  const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [isFirstEnabled, setIsFirstEnabled] = useState(true);
+  const [isLastEnabled, setIsLastEnabled] = useState(true);
+  const [isSearchEnabled, setIsSearchEnabled] = useState(true);
+  const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
+  const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
   const [isAbcmode, setIsAbcmode] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
@@ -610,6 +617,13 @@ const NewStockAcc = ({ onSave }) => {
       setIndex(data.length);
       setIsAddEnabled(false);
       setIsSubmitEnabled(true);
+      setIsPreviousEnabled(false);
+      setIsNextEnabled(false);
+      setIsFirstEnabled(false);
+      setIsLastEnabled(false);
+      setIsSearchEnabled(false);
+      setIsSPrintEnabled(false);
+      setIsDeleteEnabled(false);
       setIsDisabled(false);
       setIsEditMode(true);
       if (inputRefs.current[0]) {
@@ -635,6 +649,16 @@ const NewStockAcc = ({ onSave }) => {
         setFormData(lastEntry.formData); // Set form data
         setData1(response.data.data);
         setIndex(lastIndex);
+        setIsAddEnabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
         const updatedPurAcc = lastEntry.PurchaseAcc.map((item) => ({
           ...item,
         }));
@@ -905,6 +929,13 @@ const NewStockAcc = ({ onSave }) => {
       isDataSaved ? setIsAddEnabled(true) : setIsAddEnabled(false);
       setIsDisabled(!isDataSaved);
       setIsEditMode(!isDataSaved);
+      setIsPreviousEnabled(true);
+      setIsNextEnabled(true);
+      setIsFirstEnabled(true);
+      setIsLastEnabled(true);
+      setIsSearchEnabled(true);
+      setIsSPrintEnabled(true);
+      setIsDeleteEnabled(true);
 
       const toastMsg = isDataSaved
         ? "Data Saved Successfully!"
@@ -985,10 +1016,17 @@ const NewStockAcc = ({ onSave }) => {
     }
   };
   const handleEditClick = () => {
-    // document.body.style.backgroundColor = '#F3F2C8';
     setIsDisabled(false);
     setIsEditMode(true);
     setIsSubmitEnabled(true);
+    setIsAddEnabled(false);
+    setIsPreviousEnabled(false);
+    setIsNextEnabled(false);
+    setIsFirstEnabled(false);
+    setIsLastEnabled(false);
+    setIsSearchEnabled(false);
+    setIsSPrintEnabled(false);
+    setIsDeleteEnabled(false);
     setIsAbcmode(true);
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
@@ -2289,7 +2327,7 @@ const NewStockAcc = ({ onSave }) => {
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[2] }}
           onClick={handlePrevious}
-          disabled={index === 0}
+          disabled={!isPreviousEnabled}
         >
           Previous
         </Button>
@@ -2297,7 +2335,7 @@ const NewStockAcc = ({ onSave }) => {
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[3] }}
           onClick={handleNext}
-          disabled={index === data.length - 1}
+          disabled={!isNextEnabled}
         >
           Next
         </Button>
@@ -2305,7 +2343,7 @@ const NewStockAcc = ({ onSave }) => {
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[4] }}
           onClick={handleFirst}
-          disabled={index === 0}
+          disabled={!isFirstEnabled}
         >
           First
         </Button>
@@ -2313,11 +2351,12 @@ const NewStockAcc = ({ onSave }) => {
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[5] }}
           onClick={handleLast}
-          disabled={index === data.length - 1}
+          disabled={!isLastEnabled}
         >
           Last
         </Button>
         <Button
+          disabled={!isSearchEnabled}
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[6] }}
           onClick={() => openModalForItem(0)}
@@ -2335,12 +2374,14 @@ const NewStockAcc = ({ onSave }) => {
         />
         )}
         <Button
+          disabled={!isPrintEnabled}
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[7] }}
         >
           Print
         </Button>
         <Button
+          disabled={!isDeleteEnabled}
           className="Buttonz"
           style={{ color: "black", backgroundColor: buttonColors[8] }}
           onClick={handleDeleteClick}
