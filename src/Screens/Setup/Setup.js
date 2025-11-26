@@ -423,16 +423,44 @@ const Setup = () => {
     }
   };
 
+  // const handlePanChange = (event) => {
+  //   const { id, value } = event.target;
+  //   // Allow only uppercase letters and digits, max 10 characters
+  //   if (/^[A-Z0-9]{0,10}$/.test(value) || value === "") {
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       [id]: value.toUpperCase(),
+  //     }));
+  //   }
+  // };
+
   const handlePanChange = (event) => {
     const { id, value } = event.target;
-    // Allow only uppercase letters and digits, max 10 characters
-    if (/^[A-Z0-9]{0,10}$/.test(value) || value === "") {
-      setFormData((prevData) => ({
-        ...prevData,
-        [id]: value.toUpperCase(),
-      }));
+    let newValue = value.toUpperCase();
+
+    // Position-based PAN validation
+    if (newValue.length <= 5) {
+      // First 5 must be A-Z
+      if (!/^[A-Z]*$/.test(newValue)) return;
+    } 
+    else if (newValue.length <= 9) {
+      // Next 4 must be 0-9
+      if (!/^[A-Z]{5}[0-9]*$/.test(newValue)) return;
+    } 
+    else if (newValue.length === 10) {
+      // Last must be A-Z
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]?$/.test(newValue)) return;
+    } 
+    else {
+      return; // Block beyond 10 characters
     }
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: newValue,
+    }));
   };
+
 
   const handleDateChange = (date, field) => {
     setFormData((prev) => ({ ...prev, [field]: date }));
@@ -453,6 +481,72 @@ const Setup = () => {
   const handleUnitType = (event) => {
     setFormData((prev) => ({ ...prev, unitType: event.target.value }));
   };
+
+  const handleGstChange = (event) => {
+    const { id, value } = event.target;
+    let gst = value.toUpperCase();
+
+    // Block if length > 15
+    if (gst.length > 15) return;
+
+    // Validate position-wise
+    const pos = gst.length;
+
+    if (pos <= 2) {
+      // First 2 must be digits
+      if (!/^[0-9]*$/.test(gst)) return;
+    }
+    else if (pos <= 7) {
+      // 3rd–7th must be letters
+      if (!/^[0-9]{2}[A-Z]*$/.test(gst)) return;
+    }
+    else if (pos <= 11) {
+      // 8th–11th must be numbers
+      if (!/^[0-9]{2}[A-Z]{5}[0-9]*$/.test(gst)) return;
+    }
+    else if (pos === 12) {
+      // 12th must be alphanumeric
+      if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z0-9]?$/.test(gst)) return;
+    }
+    else if (pos === 13) {
+      // 13th must be 'Z'
+      if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z0-9]Z?$/.test(gst)) return;
+    }
+    else if (pos === 14) {
+      // 14th alphanumeric
+      if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z0-9]Z[A-Z0-9]?$/.test(gst)) return;
+    }
+    else if (pos === 15) {
+      // 15th alphanumeric (checksum)
+      if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z0-9]Z[A-Z0-9][A-Z0-9]?$/.test(gst)) return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: gst,
+    }));
+  };
+
+
+  const handleEmailChange = (event) => {
+    const { id, value } = event.target;
+    let newValue = value;
+
+    // Block spaces
+    if (/\s/.test(newValue)) return;
+
+    // Allow only email-safe characters
+    if (!/^[A-Za-z0-9@._-]*$/.test(newValue)) return;
+
+    // Partial email validation while typing:
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: newValue,
+    }));
+  };
+
 
   const handleKeyDown = (e, index) => {
     if (e.key === "Enter") {
@@ -746,6 +840,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[0] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 0)} // Handle Enter key
+                inputProps={{ maxLength: 80 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={12}>
@@ -759,6 +854,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[1] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 1)} // Handle Enter key
+                inputProps={{ maxLength: 80 }}   // ← LIMIT SET HERE
               />
             </Grid>
           </Grid>
@@ -777,6 +873,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[2] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 2)} // Handle Enter key
+                inputProps={{ maxLength: 150 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -790,6 +887,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[3] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 3)} // Handle Enter key
+                inputProps={{ maxLength: 80 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -882,14 +980,11 @@ const Setup = () => {
                 value={formData.pan}
                 onChange={handlePanChange}
                 inputProps={{
-                  maxLength: 10,
-                  pattern: "[A-Z]{5}[0-9]{4}[A-Z]",
-                  title:
-                    "PAN format should be 5 letters, 4 numbers, 1 letter (e.g., ABCDE1234F)",
+                  maxLength: 10
                 }}
                 sx={textFieldStyle}
-                inputRef={(el) => (inputRefs.current[8] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 8)} // Handle Enter key
+                inputRef={(el) => (inputRefs.current[8] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 8)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -903,6 +998,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[9] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 9)} // Handle Enter key
+                inputProps={{ maxLength: 10 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -981,7 +1077,7 @@ const Setup = () => {
                 value={formData.Decimals}
                 onChange={handleNumericValue}
                 inputProps={{
-                  maxLength: 4,
+                  maxLength: 2,
                   inputMode: "numeric",
                   pattern: "[0-9]*",
                 }}
@@ -997,10 +1093,10 @@ const Setup = () => {
                 fullWidth
                 size="small"
                 value={formData.Email}
-                onChange={handleChange}
+                onChange={handleEmailChange}
                 sx={textFieldStyle}
-                inputRef={(el) => (inputRefs.current[14] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 14)} // Handle Enter key
+                inputRef={(el) => (inputRefs.current[14] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 14)}
               />
             </Grid>
           </Grid>
@@ -1054,6 +1150,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[16] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 16)} // Handle Enter key
+                inputProps={{ maxLength: 21 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -1067,6 +1164,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[17] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 17)} // Handle Enter key
+                inputProps={{ maxLength: 10 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -1080,6 +1178,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[18] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 18)} // Handle Enter key
+                inputProps={{ maxLength: 40 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -1093,6 +1192,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[19] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 19)} // Handle Enter key
+                inputProps={{ maxLength: 40 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -1106,6 +1206,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[20] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 20)} // Handle Enter key
+                inputProps={{ maxLength: 19 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -1119,6 +1220,7 @@ const Setup = () => {
                 sx={textFieldStyle}
                 inputRef={(el) => (inputRefs.current[21] = el)} // Assign ref
                 onKeyDown={(e) => handleKeyDown(e, 21)} // Handle Enter key
+                inputProps={{ maxLength: 21 }}   // ← LIMIT SET HERE
               />
             </Grid>
             <Grid item xs={6}>
@@ -1141,10 +1243,11 @@ const Setup = () => {
                 fullWidth
                 size="small"
                 value={formData.Gstno}
-                onChange={handleChange}
+                onChange={handleGstChange}
+                inputProps={{ maxLength: 15 }}
                 sx={textFieldStyle}
-                inputRef={(el) => (inputRefs.current[23] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 23)} // Handle Enter key
+                inputRef={(el) => (inputRefs.current[23] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 23)}
               />
             </Grid>
             <Grid item xs={6}>

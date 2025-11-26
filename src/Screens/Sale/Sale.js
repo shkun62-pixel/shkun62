@@ -9095,114 +9095,245 @@ if (key === "name") {
     setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault(); // Stop default Tab navigation
-      switch (field) {
-        case "vcode":
-          if (items[index].sdisc.trim() === "") {
-            remarksRef.current.focus();
-          } else {
-            desciptionRefs.current[index]?.focus();
-          }
-          break;
-        case "sdisc":
-          hsnCodeRefs.current[index]?.focus();
-          break;
-        case "tariff":
-          peciesRefs.current[index]?.focus();
-          break;
-        case "pkgs":
-          quantityRefs.current[index]?.focus();
-          break;
-        case "weight":
-          priceRefs.current[index]?.focus();
-          break;
-        case "rate":
-          discountRef.current[index]?.focus();
-          break;
-        case "disc":
-          discount2Ref.current[index]?.focus();
-          break;
-        case "discount":
-          othersRefs.current[index]?.focus();
-          break;
-        case "exp_before":
-          if (index === items.length - 1) {
-            handleAddItem();
-            itemCodeRefs.current[index + 1]?.focus();
-          } else {
-            itemCodeRefs.current[index + 1]?.focus();
-          }
-          break;
-        default:
-          break;
+  const fieldOrder = [
+  { name: "vcode",      refArray: itemCodeRefs },
+  { name: "sdisc",      refArray: desciptionRefs },
+  { name: "tariff",     refArray: hsnCodeRefs },
+  { name: "pkgs",       refArray: peciesRefs },
+  { name: "weight",     refArray: quantityRefs },
+  { name: "rate",       refArray: priceRefs },
+  { name: "amount",     refArray: amountRefs },
+  { name: "disc",       refArray: discountRef },
+  { name: "discount",   refArray: discount2Ref },
+  { name: "exp_before", refArray: othersRefs },
+];
+
+const focusRef = (refArray, rowIndex) => {
+  const el = refArray?.current?.[rowIndex];
+  if (el) {
+    el.focus();
+    // Safely call select if available
+    setTimeout(() => el.select && el.select(), 0);
+    return true;
+  }
+  return false;
+};
+
+const handleKeyDown = (event, index, field) => {
+  // --------------- ENTER / TAB: move to NEXT FIELD -----------------
+  if (event.key === "Enter" || event.key === "Tab") {
+    event.preventDefault();
+
+    // Special case for vcode: your existing behaviour
+    if (field === "vcode") {
+      if ((items[index].sdisc || "").trim() === "") {
+        // Go to remarks if description is empty
+        remarksRef.current?.focus();
+      } else {
+        focusRef(desciptionRefs, index);
+      }
+      return;
+    }
+
+    // Special case for exp_before: go to next row / add row
+    if (field === "exp_before") {
+      const isLastRow = index === items.length - 1;
+
+      if (isLastRow) {
+        handleAddItem();
+        // Focus ItemCode of newly added row
+        focusRef(itemCodeRefs, index + 1);
+      } else {
+        focusRef(itemCodeRefs, index + 1);
+      }
+      return;
+    }
+
+    // Generic: find current field in fieldOrder and move to next available
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+
+    if (currentPos !== -1) {
+      for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+        const nextField = fieldOrder[i];
+        // Only move if that ref exists for this row (means column is visible)
+        if (focusRef(nextField.refArray, index)) {
+          return;
+        }
       }
     }
-    // Move Right (→)
-    else if (event.key === "ArrowRight") {
-      if (field === "vcode") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-      } else if (field === "sdisc") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-      } else if (field === "tariff") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
-      } else if (field === "pkgs") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
-      } else if (field === "weight") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
-      } else if (field === "rate") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
-      } else if (field === "disc") {
-        discount2Ref.current[index]?.focus();
-        setTimeout(() => discount2Ref.current[index]?.select(), 0);
+
+    // If nothing else found, you can optionally jump to remarks or transport:
+    // focusRef(remarksRef, 0);  // if you make remarksRef an array or handle separately
+
+    return;
+  }
+
+  // -------------------- ARROW RIGHT --------------------
+  else if (event.key === "ArrowRight") {
+    if (field === "vcode") {
+      focusRef(desciptionRefs, index);
+    } else if (field === "sdisc") {
+      focusRef(hsnCodeRefs, index);
+    } else if (field === "tariff") {
+      focusRef(peciesRefs, index);
+    } else if (field === "pkgs") {
+      focusRef(quantityRefs, index);
+    } else if (field === "weight") {
+      focusRef(priceRefs, index);
+    } else if (field === "rate") {
+      // If amount column exists, go there first, else to disc
+      if (!focusRef(amountRefs, index)) {
+        focusRef(discountRef, index);
       }
-      else if (field === "discount") {
-        othersRefs.current[index]?.focus();
-        setTimeout(() => othersRefs.current[index]?.select(), 0);
-      }
+    } else if (field === "amount") {
+      focusRef(discountRef, index);
+    } else if (field === "disc") {
+      focusRef(discount2Ref, index);
+    } else if (field === "discount") {
+      focusRef(othersRefs, index);
     }
-    // Move Left (←)
-    else if (event.key === "ArrowLeft") {
-      if (field === "exp_before") {
-        discount2Ref.current[index]?.focus();
-        setTimeout(() => discount2Ref.current[index]?.select(), 0);
-      } else if (field === "discount") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
-      } else if (field === "disc") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
-      } else if (field === "rate") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
-      } else if (field === "weight") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
-      } else if (field === "pkgs") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-      } else if (field === "tariff") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-      } else if (field === "sdisc") {
-        itemCodeRefs.current[index]?.focus();
-        setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
-      } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
+  }
+
+  // -------------------- ARROW LEFT --------------------
+  else if (event.key === "ArrowLeft") {
+    if (field === "exp_before") {
+      focusRef(discount2Ref, index);
+    } else if (field === "discount") {
+      focusRef(discountRef, index);
+    } else if (field === "disc") {
+      focusRef(priceRefs, index);
+    } else if (field === "amount") {
+      focusRef(priceRefs, index);
+    } else if (field === "rate") {
+      focusRef(quantityRefs, index);
+    } else if (field === "weight") {
+      focusRef(peciesRefs, index);
+    } else if (field === "pkgs") {
+      focusRef(hsnCodeRefs, index);
+    } else if (field === "tariff") {
+      focusRef(desciptionRefs, index);
+    } else if (field === "sdisc") {
+      focusRef(itemCodeRefs, index);
+    } else if (field === "vcode") {
+      focusRef(itemCodeRefs, index);
     }
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-      setPressedKey(event.key);
-      openModalForItemCus(index);
-      event.preventDefault();
-    }
-  };
+  }
+
+  // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
+  else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+    setPressedKey(event.key);
+    openModalForItemCus(index);
+    event.preventDefault();
+  }
+};
+  // const handleKeyDown = (event, index, field) => {
+  //   if (event.key === "Enter" || event.key === "Tab") {
+  //     event.preventDefault(); // Stop default Tab navigation
+  //     switch (field) {
+  //       case "vcode":
+  //         if (items[index].sdisc.trim() === "") {
+  //           remarksRef.current.focus();
+  //         } else {
+  //           desciptionRefs.current[index]?.focus();
+  //         }
+  //         break;
+  //       case "sdisc":
+  //         hsnCodeRefs.current[index]?.focus();
+  //         break;
+  //       case "tariff":
+  //         peciesRefs.current[index]?.focus();
+  //         break;
+  //       case "pkgs":
+  //         quantityRefs.current[index]?.focus();
+  //         break;
+  //       case "weight":
+  //         priceRefs.current[index]?.focus();
+  //         break;
+  //       case "rate":
+  //         discountRef.current[index]?.focus();
+  //         break;
+  //       case "disc":
+  //         discount2Ref.current[index]?.focus();
+  //         break;
+  //       case "discount":
+  //         othersRefs.current[index]?.focus();
+  //         break;
+  //       case "exp_before":
+  //         if (index === items.length - 1) {
+  //           handleAddItem();
+  //           itemCodeRefs.current[index + 1]?.focus();
+  //         } else {
+  //           itemCodeRefs.current[index + 1]?.focus();
+  //         }
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   }
+  //   // Move Right (→)
+  //   else if (event.key === "ArrowRight") {
+  //     if (field === "vcode") {
+  //       desciptionRefs.current[index]?.focus();
+  //       setTimeout(() => desciptionRefs.current[index]?.select(), 0);
+  //     } else if (field === "sdisc") {
+  //       hsnCodeRefs.current[index]?.focus();
+  //       setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
+  //     } else if (field === "tariff") {
+  //       peciesRefs.current[index]?.focus();
+  //       setTimeout(() => peciesRefs.current[index]?.select(), 0);
+  //     } else if (field === "pkgs") {
+  //       quantityRefs.current[index]?.focus();
+  //       setTimeout(() => quantityRefs.current[index]?.select(), 0);
+  //     } else if (field === "weight") {
+  //       priceRefs.current[index]?.focus();
+  //       setTimeout(() => priceRefs.current[index]?.select(), 0);
+  //     } else if (field === "rate") {
+  //       discountRef.current[index]?.focus();
+  //       setTimeout(() => discountRef.current[index]?.select(), 0);
+  //     } else if (field === "disc") {
+  //       discount2Ref.current[index]?.focus();
+  //       setTimeout(() => discount2Ref.current[index]?.select(), 0);
+  //     }
+  //     else if (field === "discount") {
+  //       othersRefs.current[index]?.focus();
+  //       setTimeout(() => othersRefs.current[index]?.select(), 0);
+  //     }
+  //   }
+  //   // Move Left (←)
+  //   else if (event.key === "ArrowLeft") {
+  //     if (field === "exp_before") {
+  //       discount2Ref.current[index]?.focus();
+  //       setTimeout(() => discount2Ref.current[index]?.select(), 0);
+  //     } else if (field === "discount") {
+  //       discountRef.current[index]?.focus();
+  //       setTimeout(() => discountRef.current[index]?.select(), 0);
+  //     } else if (field === "disc") {
+  //       priceRefs.current[index]?.focus();
+  //       setTimeout(() => priceRefs.current[index]?.select(), 0);
+  //     } else if (field === "rate") {
+  //       quantityRefs.current[index]?.focus();
+  //       setTimeout(() => quantityRefs.current[index]?.select(), 0);
+  //     } else if (field === "weight") {
+  //       peciesRefs.current[index]?.focus();
+  //       setTimeout(() => peciesRefs.current[index]?.select(), 0);
+  //     } else if (field === "pkgs") {
+  //       hsnCodeRefs.current[index]?.focus();
+  //       setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
+  //     } else if (field === "tariff") {
+  //       desciptionRefs.current[index]?.focus();
+  //       setTimeout(() => desciptionRefs.current[index]?.select(), 0);
+  //     } else if (field === "sdisc") {
+  //       itemCodeRefs.current[index]?.focus();
+  //       setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
+  //     } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
+  //   }
+  //   // Open Modal on Letter Input in Account Name
+  //   else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+  //     setPressedKey(event.key);
+  //     openModalForItemCus(index);
+  //     event.preventDefault();
+  //   }
+  // };
 
   const handleOpenModalBack = (event, index, field) => {
     if (event.key === "Backspace" && field === "accountname" && isEditMode ) {

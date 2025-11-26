@@ -1,134 +1,631 @@
-//ProductModalCustomer 
+// //ProductModalCustomer 
+// import React, { useState, useEffect, useRef } from 'react';
+// import Modal from 'react-bootstrap/Modal';
+// import Button from 'react-bootstrap/Button';
+// import Table from 'react-bootstrap/Table';
+// import { TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+// import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+// import "./ProductModal.css";
+// import LedgerAcc from "../LedgerAcc/LedgerAcc"
+// import { useNavigate } from "react-router-dom";
+
+// const ProductModalCustomer = ({
+//     allFields,
+//     onSelect,
+//     onClose,
+//     initialKey,
+//     tenant,          // NEW: must be passed from parent!
+//     onRefresh
+// }) => {
+
+//     const [products, setProducts] = useState([]);
+//     const [selectedIndex, setSelectedIndex] = useState(0);
+//     const [searchTerm, setSearchTerm] = useState(initialKey || '');
+//     const [searchField, setSearchField] = useState('ahead');
+//     const [showLedgerModal, setShowLedgerModal] = useState(false);
+//     const [currentPage, setCurrentPage] = useState(1);
+//     const [totalRecords, setTotalRecords] = useState(0);
+//     const [isLoading, setIsLoading] = useState(false);
+//     const inputRef = useRef(null);
+//     const tableRef = useRef(null);
+//     const navigate = useNavigate();
+
+//     const [showFieldModal, setShowFieldModal] = useState(false);
+//     const FIELD_STORAGE_KEY = `customer2_modal_fields_${tenant}`;
+//     const [selectedFields, setSelectedFields] = useState(() => {
+//     const saved = localStorage.getItem(FIELD_STORAGE_KEY);
+//     return saved ? JSON.parse(saved) : [];
+//     });
+//     // const FIELD_STORAGE_KEY = `customer_modal_fields_${tenant}`;
+//     const allAvailableFields = useRef([]);
+//     const fieldOrder = [
+//   'ahead', 'gstNo', 'add1', 'city', 'pan', // your preferred fields first
+//   // fallback or extra fields will be added later if present in data
+// ];
+
+
+//    useEffect(() => {
+//   if (products.length) {
+//     const uniqueFields = [...new Set(products.flatMap(p => Object.keys(p)))];
+
+//     const orderedFields = fieldOrder.filter(field => uniqueFields.includes(field));
+//     const remainingFields = uniqueFields.filter(field => !fieldOrder.includes(field));
+
+//     allAvailableFields.current = [...orderedFields, ...remainingFields];
+
+//     if (selectedFields.length === 0) {
+//       setSelectedFields([...orderedFields, ...remainingFields]);
+//     }
+//   }
+// }, [products]);
+
+
+//     useEffect(() => {
+//         localStorage.setItem(FIELD_STORAGE_KEY, JSON.stringify(selectedFields));
+//     }, [selectedFields]);
+  
+
+//     // Backend paginated fetch
+//     const fetchCustomers = async ({ search = '', searchField = 'ahead', page = 1, append = false } = {}) => {
+//     setIsLoading(true);
+//     try {
+//         const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount?search=${encodeURIComponent(search)}&searchField=${encodeURIComponent(searchField)}&page=${page}&limit=30`;
+//         const res = await fetch(url);
+//         // console.log(res);
+//         // console.log("Tenant:",tenant);
+        
+//         if (!res.ok) throw new Error('Failed to fetch');
+//         const result = await res.json();
+//         const formattedData = result.data.map(item => ({
+//             ...item.formData,
+//             _id: item._id,
+//         }));
+//         if (append) {
+//             setProducts(prev => [...prev, ...formattedData]);
+//         } else {
+//             setProducts(formattedData);
+//         }
+//         setTotalRecords(result.total);
+//         setCurrentPage(page);
+//     } catch (err) {
+//         // Handle error if needed
+//     }
+//     setIsLoading(false);
+//     };
+
+//     // Focus search box on open
+//     useEffect(() => {
+//         if (inputRef.current && !showLedgerModal) inputRef.current.focus();
+//     }, [products, showLedgerModal]);
+
+//     // Fetch customers every time initialKey changes (modal open with a typed key)
+//     useEffect(() => {
+//         if (initialKey !== undefined && initialKey !== null) {
+//             setSearchTerm(initialKey);
+//             setCurrentPage(1);
+//             fetchCustomers({ search: initialKey, searchField, page: 1 });
+//             setSelectedIndex(0);
+//         }
+//         // eslint-disable-next-line
+//     }, [initialKey, searchField, tenant]);
+
+//     // Keyboard navigation
+//     useEffect(() => {
+//     const handleKeyDown = (event) => {
+//         if (showLedgerModal) return;
+//         if (event.key === 'ArrowUp') {
+//             event.preventDefault();
+//             setSelectedIndex(prevIndex => Math.max(prevIndex - 1, 0));
+//         } else if (event.key === 'ArrowDown') {
+//             event.preventDefault();
+//             setSelectedIndex(prevIndex => Math.min(prevIndex + 1, products.length - 1));
+//         } else if (event.key === 'Enter') {
+//             event.preventDefault();
+//             onSelect(products[selectedIndex]);
+//         }
+//     };
+//     document.addEventListener('keydown', handleKeyDown);
+//     return () => document.removeEventListener('keydown', handleKeyDown);
+//     }, [products, selectedIndex, onSelect, showLedgerModal]);
+
+//     // Auto-scroll when selectedIndex changes
+//     useEffect(() => {
+//         if (!tableRef.current) return;
+
+//         const container = document.querySelector(".table-container"); // scrollable wrapper
+//         if (!container) return;
+
+//         const rows = tableRef.current.querySelectorAll("tbody tr");
+//         if (!rows.length) return;
+
+//         const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+//         const selectedRow = rows[idx];
+//         if (!selectedRow) return;
+
+//         // ---- Heights / positions ----
+//         const headerOffset = 40; // adjust if needed
+//         const buffer = 12;
+
+//         const rowTop = selectedRow.offsetTop;
+//         const rowBottom = rowTop + selectedRow.offsetHeight;
+//         const containerHeight = container.clientHeight;
+
+//         // visible area
+//         const visibleTop = container.scrollTop + buffer + headerOffset;
+//         const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+//         // ---- SCROLL DOWN: row is below view ----
+//         if (rowBottom > visibleBottom) {
+//             const newScrollTop = rowBottom - containerHeight + buffer * 2;
+//             container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+//         }
+//         // ---- SCROLL UP: row is above view ----
+//         else if (rowTop < visibleTop) {
+//             const newScrollTop = rowTop - headerOffset - buffer;
+//             container.scrollTo({ top: newScrollTop, behavior: "smooth" });
+//         }
+//     }, [selectedIndex, products]);
+
+
+//     // Search handler: fetch new list from backend
+//     const handleSearch = async (e) => {
+//     const value = e.target.value;
+
+//     // Empty always allowed
+//     if (value === "") {
+//         setSearchTerm("");
+//         setCurrentPage(1);
+//         await fetchCustomers({ search: "", searchField, page: 1 });
+//         setSelectedIndex(0);
+//         return;
+//     }
+
+//     // Check if ANY product in current list has the searchField starting with value
+//     const hasMatch = products.some((p) => {
+//         const fieldVal = String(p[searchField] || "").toLowerCase();
+//         return fieldVal.startsWith(value.toLowerCase()); // ✅ prefix match
+//     });
+
+//     if (hasMatch) {
+//         setSearchTerm(value);
+//         setCurrentPage(1);
+//         await fetchCustomers({ search: value, searchField, page: 1 });
+//         setSelectedIndex(0);
+//     }
+//     // else: ignore (block wrong typing)
+//     };
+
+//     // const handleSearch = async (e) => {
+//     // const value = e.target.value;
+//     // setSearchTerm(value);
+//     // setCurrentPage(1);
+//     // await fetchCustomers({ search: value, searchField, page: 1 });
+//     // setSelectedIndex(0);
+//     // };
+
+//     const handleFieldChange = async (event) => {
+//     const field = event.target.value;
+//     setSearchField(field);
+//     setSearchTerm('');
+//     setCurrentPage(1);
+//     await fetchCustomers({ search: '', searchField: field, page: 1 });
+//     };
+
+//     const handleRowClick = (product, index) => {
+//     setSelectedIndex(index);
+//     onSelect(product);
+//     };
+
+//     const handleLoadMore = async () => {
+//     if (products.length >= totalRecords) return;
+//     const nextPage = currentPage + 1;
+//     await fetchCustomers({ search: searchTerm, searchField, page: nextPage, append: true });
+//     };
+
+//     const openLedgerModal = () => setShowLedgerModal(true);
+
+//     const handleLedgerModalClose = async () => {
+//     setShowLedgerModal(false);
+//     setCurrentPage(1);
+
+//     if (searchTerm && searchTerm.trim() !== "") {
+//         await fetchCustomers({ search: searchTerm, searchField, page: 1 });
+//     } else {
+//         await fetchCustomers({ search: "", searchField, page: 1 });
+//     }
+
+//     setTimeout(() => {
+//         setSelectedIndex(0);
+//         if (inputRef.current) inputRef.current.focus();
+//     }, 100);
+
+//     if (onRefresh) await onRefresh();
+//     };
+
+//     const handleModify = () => {
+//     if (!products[selectedIndex]) {
+//         alert("Please select a row first!");
+//         return;
+//     }
+
+//     const selectedProduct = products[selectedIndex];
+
+//     navigate("/LedgerAcc", { state: { ledgerId: selectedProduct._id, rowIndex: selectedIndex } });
+// };
+
+ 
+//     return (
+//     <>
+//     <Modal show={true} onHide={onClose} fullscreen className="custom-modal" style={{ marginTop: 20 }}>
+//         <Modal.Header closeButton>
+//         <Modal.Title>LEDGER ACCOUNTS</Modal.Title>
+//         <Button variant="info" style={{marginLeft:"70%"}}  onClick={() => setShowFieldModal(true)}>Fields</Button>
+//         </Modal.Header>
+//         <Modal.Body>
+//         <div className="list-container">
+//             <TableContainer component={Paper} className="table-container">
+//                 <Table bordered ref={tableRef}>
+//                     <TableHead style={{ backgroundColor: "lightgray" }}>
+//                         <TableRow>
+//                             {selectedFields.map(field => (
+//                                 <TableCell style={{ textTransform: "uppercase" }} key={field}>{field}</TableCell>
+//                             ))}
+//                              <th>Action</th> {/* This is the new column header */}
+//                         </TableRow>
+//                     </TableHead>
+//                     <TableBody>
+//                         {products.map((product, index) => (
+//                             <TableRow
+//                                 key={product._id || index}
+//                                 className={selectedIndex === index ? 'highlighted-row' : ''}
+//                                 onClick={() => handleRowClick(product, index)}
+//                             >
+//                                 {selectedFields.map(field => (
+//                                     <TableCell key={field}>{product[field]}</TableCell>
+//                                 ))}
+//                                 <td>
+//                                 <Button
+//                                     size="sm"
+//                                     variant="primary"
+//                                     // onClick={() => handleSelect(product)}
+//                                 >
+//                                     Select
+//                                 </Button>
+//                                 </td> {/* This is the new column cell */}
+//                             </TableRow>
+//                         ))}
+//                     </TableBody>
+//                 </Table>
+//             </TableContainer>
+//             {products.length < totalRecords && (
+//                 <Button
+//                     onClick={handleLoadMore}
+//                     disabled={isLoading}
+//                     style={{ margin: '15px auto', display: 'block' }}
+//                     variant="outline-primary"
+//                 >
+//                     {isLoading ? "Loading..." : "Load More"}
+//                 </Button>
+//             )}
+//         </div>
+//         </Modal.Body>
+//         <div className='searchdiv' style={{ marginBottom: 10 }}>
+//             <input
+//                 type="text"
+//                 className="search"
+//                 placeholder="Search..."
+//                 onChange={handleSearch}
+//                 value={searchTerm}
+//                 ref={inputRef}
+//             />
+//             <text style={{ fontSize: 20, marginLeft: 20 }} id="search-field-label">Search By:</text>
+//             <select
+//                 style={{ width: 200, height: 30, marginLeft: 10, border: "1px solid black" }}
+//                 labelid="search-field-label"
+//                 value={searchField}
+//                 onChange={handleFieldChange}
+//             >
+//                 {selectedFields.map(field => (
+//                     <option key={field} value={field}>
+//                         {field.toUpperCase()}
+//                     </option>
+//                 ))}
+//             </select>
+//             <div className='buttondiv'>
+//             <Button className='new' onClick={openLedgerModal}>New</Button>
+//             <Button className='modify' onClick={handleModify}>Modify</Button>
+//             <Button className='select'>Select</Button>
+//             <Button className='closebtn' variant="secondary" onClick={onClose}>Close</Button>
+//             </div>
+//         </div>
+//         </Modal>
+//         {showLedgerModal && (
+//         <Modal
+//             dialogClassName="custom-full-width-modal"
+//             show
+//             onHide={handleLedgerModalClose} // <-- this is key!
+//             size="lg"
+//             style={{ zIndex: 100000,marginTop:-25 }}
+//         >
+//             <Modal.Body style={{ marginTop: 10, marginLeft: 10 }}>
+//             <LedgerAcc
+//                 onClose={handleLedgerModalClose} // <-- pass this!
+//                 onRefresh={onRefresh}
+//             />
+//             </Modal.Body>
+//         </Modal>
+//         )}
+//         <Modal style={{ zIndex: 100000 }} show={showFieldModal} onHide={() => setShowFieldModal(false)}>
+//         <Modal.Header closeButton>
+//             <Modal.Title>Select Fields to Show</Modal.Title>
+//         </Modal.Header>
+//         <Modal.Body style={{ maxHeight: '500px', overflowY: 'auto' }}>
+//             {allAvailableFields.current.map((field) => (
+//             <div key={field}>
+//                 <input
+//                 type="checkbox"
+//                 checked={selectedFields.includes(field)}
+//                 onChange={() => {
+//                     if (selectedFields.includes(field)) {
+//                     setSelectedFields(selectedFields.filter(f => f !== field));
+//                     } else {
+//                     setSelectedFields([...selectedFields, field]);
+//                     }
+//                 }}
+//                 />
+//                 <label style={{ marginLeft: 8 }}>{field}</label>
+//             </div>
+//             ))}
+//         </Modal.Body>
+//         <Modal.Footer>
+//             <Button variant="secondary" onClick={() => setShowFieldModal(false)}>
+//             Done
+//             </Button>
+//         </Modal.Footer>
+//         </Modal>
+//     </>
+//     );
+// };
+
+// export default ProductModalCustomer;
+
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
-import { TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import "./ProductModal.css";
-import LedgerAcc from "../LedgerAcc/LedgerAcc"
+import LedgerAcc from "../LedgerAcc/LedgerAcc";
 import { useNavigate } from "react-router-dom";
 
 const ProductModalCustomer = ({
-    allFields,
-    onSelect,
-    onClose,
-    initialKey,
-    tenant,          // NEW: must be passed from parent!
-    onRefresh
+  allFields,
+  onSelect,
+  onClose,
+  initialKey,
+  tenant,          // must be passed from parent
+  onRefresh
 }) => {
+  const [products, setProducts] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState(initialKey || '');
+  const [lastValidTerm, setLastValidTerm] = useState(initialKey || '');
+  const [searchField, setSearchField] = useState('ahead');
+  const [showLedgerModal, setShowLedgerModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const [products, setProducts] = useState([]);
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [searchTerm, setSearchTerm] = useState(initialKey || '');
-    const [searchField, setSearchField] = useState('ahead');
-    const [showLedgerModal, setShowLedgerModal] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalRecords, setTotalRecords] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
-    const inputRef = useRef(null);
-    const tableRef = useRef(null);
-    const navigate = useNavigate();
+  const inputRef = useRef(null);
+  const tableRef = useRef(null);
+  const loadMoreTimeoutRef = useRef(null);
 
-    const [showFieldModal, setShowFieldModal] = useState(false);
-    const FIELD_STORAGE_KEY = `customer2_modal_fields_${tenant}`;
-    const [selectedFields, setSelectedFields] = useState(() => {
+  // For custom long-press navigation
+  const isDownPressedRef = useRef(false);
+  const isUpPressedRef = useRef(false);
+  const navIntervalRef = useRef(null);
+
+  const navigate = useNavigate();
+
+  const [showFieldModal, setShowFieldModal] = useState(false);
+  const FIELD_STORAGE_KEY = `customer2_modal_fields_${tenant}`;
+  const [selectedFields, setSelectedFields] = useState(() => {
     const saved = localStorage.getItem(FIELD_STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
-    });
-    // const FIELD_STORAGE_KEY = `customer_modal_fields_${tenant}`;
-    const allAvailableFields = useRef([]);
-    const fieldOrder = [
-  'ahead', 'gstNo', 'add1', 'city', 'pan', // your preferred fields first
-  // fallback or extra fields will be added later if present in data
-];
+  });
 
+  const allAvailableFields = useRef([]);
 
-   useEffect(() => {
-  if (products.length) {
-    const uniqueFields = [...new Set(products.flatMap(p => Object.keys(p)))];
+  const fieldOrder = [
+    'ahead', 'gstNo', 'add1', 'city', 'pan',
+  ];
 
-    const orderedFields = fieldOrder.filter(field => uniqueFields.includes(field));
-    const remainingFields = uniqueFields.filter(field => !fieldOrder.includes(field));
+  /* ---------------- Field list builder (from loaded products) ---------------- */
+  useEffect(() => {
+    if (products.length) {
+      const uniqueFields = [...new Set(products.flatMap(p => Object.keys(p)))];
 
-    allAvailableFields.current = [...orderedFields, ...remainingFields];
+      const orderedFields = fieldOrder.filter(field => uniqueFields.includes(field));
+      const remainingFields = uniqueFields.filter(field => !fieldOrder.includes(field));
 
-    if (selectedFields.length === 0) {
-      setSelectedFields([...orderedFields, ...remainingFields]);
+      allAvailableFields.current = [...orderedFields, ...remainingFields];
+
+      if (selectedFields.length === 0) {
+        setSelectedFields([...orderedFields, ...remainingFields]);
+      }
     }
-  }
-}, [products]);
+  }, [products]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* ---------------- Persist selected fields in localStorage ---------------- */
+  useEffect(() => {
+    localStorage.setItem(FIELD_STORAGE_KEY, JSON.stringify(selectedFields));
+  }, [selectedFields, FIELD_STORAGE_KEY]);
 
-    useEffect(() => {
-        localStorage.setItem(FIELD_STORAGE_KEY, JSON.stringify(selectedFields));
-    }, [selectedFields]);
-  
-
-    // Backend paginated fetch
-    const fetchCustomers = async ({ search = '', searchField = 'ahead', page = 1, append = false } = {}) => {
+  /* ---------------- Backend paginated fetch (returns counts) ---------------- */
+  const fetchCustomers = async ({
+    search = '',
+    searchField = 'ahead',
+    page = 1,
+    append = false,
+  } = {}) => {
     setIsLoading(true);
     try {
-        const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount?search=${encodeURIComponent(search)}&searchField=${encodeURIComponent(searchField)}&page=${page}&limit=30`;
-        const res = await fetch(url);
-        // console.log(res);
-        // console.log("Tenant:",tenant);
-        
-        if (!res.ok) throw new Error('Failed to fetch');
-        const result = await res.json();
-        const formattedData = result.data.map(item => ({
-            ...item.formData,
-            _id: item._id,
-        }));
-        if (append) {
-            setProducts(prev => [...prev, ...formattedData]);
-        } else {
-            setProducts(formattedData);
-        }
-        setTotalRecords(result.total);
-        setCurrentPage(page);
+      const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount?search=${encodeURIComponent(
+        search
+      )}&searchField=${encodeURIComponent(searchField)}&page=${page}&limit=30`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const result = await res.json();
+
+      const formattedData = (result.data || []).map(item => ({
+        ...item.formData,
+        _id: item._id,
+      }));
+
+      if (append) {
+        setProducts(prev => [...prev, ...formattedData]);
+      } else {
+        setProducts(formattedData);
+      }
+
+      const total = result.total || 0;
+      setTotalRecords(total);
+      setCurrentPage(page);
+
+      return { count: formattedData.length, total };
     } catch (err) {
-        // Handle error if needed
+      console.error("Error fetching customers:", err);
+      return { count: 0, total: 0 };
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-    };
+  };
 
-    // Focus search box on open
-    useEffect(() => {
-        if (inputRef.current && !showLedgerModal) inputRef.current.focus();
-    }, [products, showLedgerModal]);
+  /* ---------------- Focus search box on open ---------------- */
+  useEffect(() => {
+    if (inputRef.current && !showLedgerModal) inputRef.current.focus();
+  }, [products, showLedgerModal]);
 
-    // Fetch customers every time initialKey changes (modal open with a typed key)
-    useEffect(() => {
-        if (initialKey !== undefined && initialKey !== null) {
-            setSearchTerm(initialKey);
-            setCurrentPage(1);
-            fetchCustomers({ search: initialKey, searchField, page: 1 });
-            setSelectedIndex(0);
-        }
-        // eslint-disable-next-line
-    }, [initialKey, searchField, tenant]);
+  /* ---------------- Initial load when modal opens ---------------- */
+  useEffect(() => {
+    if (!initialKey && tenant) {
+      if (!products.length) {
+        fetchCustomers({ search: "", searchField, page: 1 });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenant, searchField, initialKey]);
 
-    // Keyboard navigation
-    useEffect(() => {
+  /* ---------------- Fetch when initialKey changes ---------------- */
+  useEffect(() => {
+    if (initialKey !== undefined && initialKey !== null && tenant) {
+      setSearchTerm(initialKey);
+      setLastValidTerm(initialKey);
+      setCurrentPage(1);
+      setSelectedIndex(0);
+      fetchCustomers({ search: initialKey, searchField, page: 1 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialKey, tenant]);
+
+  /* ---------------- Helper: start/stop navigation interval ---------------- */
+  const startNavInterval = (direction) => {
+    if (navIntervalRef.current) {
+      clearInterval(navIntervalRef.current);
+      navIntervalRef.current = null;
+    }
+
+    const step = direction === 'down' ? 1 : -1;
+    const SPEED_MS = 70; // 🔹 control speed here
+
+    navIntervalRef.current = setInterval(() => {
+      setSelectedIndex(prev => {
+        if (!products.length) return 0;
+        const maxIndex = products.length - 1;
+        let next = prev + step;
+        if (next < 0) next = 0;
+        if (next > maxIndex) next = maxIndex;
+        return next;
+      });
+    }, SPEED_MS);
+  };
+
+  const stopNavIntervalIfNoKey = () => {
+    if (!isDownPressedRef.current && !isUpPressedRef.current) {
+      if (navIntervalRef.current) {
+        clearInterval(navIntervalRef.current);
+        navIntervalRef.current = null;
+      }
+    }
+  };
+
+  /* ---------------- Keyboard navigation (with long-press control) ---------- */
+  useEffect(() => {
     const handleKeyDown = (event) => {
-        if (showLedgerModal) return;
-        if (event.key === 'ArrowUp') {
-            event.preventDefault();
-            setSelectedIndex(prevIndex => Math.max(prevIndex - 1, 0));
-        } else if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            setSelectedIndex(prevIndex => Math.min(prevIndex + 1, products.length - 1));
-        } else if (event.key === 'Enter') {
-            event.preventDefault();
-            onSelect(products[selectedIndex]);
-        }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [products, selectedIndex, onSelect, showLedgerModal]);
+      if (showLedgerModal) return;
+      if (!products.length) return;
 
-    // Auto-scroll when selectedIndex changes
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (!isDownPressedRef.current) {
+          isDownPressedRef.current = true;
+          isUpPressedRef.current = false;
+
+          // Move once immediately
+          setSelectedIndex(prev => {
+            const maxIndex = products.length - 1;
+            return Math.min(prev + 1, maxIndex);
+          });
+
+          // Start interval for continuous move
+          startNavInterval('down');
+        }
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (!isUpPressedRef.current) {
+          isUpPressedRef.current = true;
+          isDownPressedRef.current = false;
+
+          // Move once immediately
+          setSelectedIndex(prev => Math.max(prev - 1, 0));
+
+          // Start interval for continuous move
+          startNavInterval('up');
+        }
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        const selected = products[selectedIndex];
+        if (selected) onSelect(selected);
+      }
+    };
+
+    const handleKeyUp = (event) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        isDownPressedRef.current = false;
+        stopNavIntervalIfNoKey();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        isUpPressedRef.current = false;
+        stopNavIntervalIfNoKey();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+      if (navIntervalRef.current) {
+        clearInterval(navIntervalRef.current);
+        navIntervalRef.current = null;
+      }
+    };
+  }, [products.length, selectedIndex, onSelect, showLedgerModal]);
+
+  /* ---------------- Auto-scroll when selectedIndex changes ---------------- */
     useEffect(() => {
         if (!tableRef.current) return;
 
@@ -165,226 +662,360 @@ const ProductModalCustomer = ({
             container.scrollTo({ top: newScrollTop, behavior: "smooth" });
         }
     }, [selectedIndex, products]);
+//   useEffect(() => {
+//     if (!tableRef.current) return;
 
+//     // Find the scrollable container (.table-container)
+//     let container = tableRef.current.parentElement;
+//     while (container && !container.classList.contains("table-container")) {
+//       container = container.parentElement;
+//     }
+//     if (!container) return;
 
-    // Search handler: fetch new list from backend
-    const handleSearch = async (e) => {
+//     const rows = tableRef.current.querySelectorAll("tbody tr");
+//     if (!rows.length) return;
+
+//     const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
+//     const selectedRow = rows[idx];
+//     if (!selectedRow) return;
+
+//     const rowRect = selectedRow.getBoundingClientRect();
+//     const containerRect = container.getBoundingClientRect();
+
+//     const rowTop = rowRect.top;
+//     const rowBottom = rowRect.bottom;
+//     const visibleTop = containerRect.top + 4;      // small buffer
+//     const visibleBottom = containerRect.bottom - 4;
+
+//     // Instant adjust → no shaking
+//     if (rowBottom > visibleBottom) {
+//       const diff = rowBottom - visibleBottom;
+//       container.scrollTop += diff;
+//     } else if (rowTop < visibleTop) {
+//       const diff = visibleTop - rowTop;
+//       container.scrollTop -= diff;
+//     }
+//   }, [selectedIndex, products]);
+
+  /* ---------------- Auto-load more when at last row (after 2s) -------------- */
+  useEffect(() => {
+    if (loadMoreTimeoutRef.current) {
+      clearTimeout(loadMoreTimeoutRef.current);
+      loadMoreTimeoutRef.current = null;
+    }
+
+    if (
+      products.length > 0 &&
+      selectedIndex === products.length - 1 &&
+      products.length < totalRecords &&
+      !isLoading
+    ) {
+      loadMoreTimeoutRef.current = setTimeout(() => {
+        const nextPage = currentPage + 1;
+        fetchCustomers({
+          search: searchTerm,
+          searchField,
+          page: nextPage,
+          append: true,
+        });
+      }, 2000); // 2 seconds delay
+    }
+
+    return () => {
+      if (loadMoreTimeoutRef.current) {
+        clearTimeout(loadMoreTimeoutRef.current);
+      }
+    };
+  }, [
+    selectedIndex,
+    products.length,
+    totalRecords,
+    isLoading,
+    currentPage,
+    searchTerm,
+    searchField,
+  ]);
+
+  /* ---------------- Smart Search ---------------- */
+  const handleSearch = async (e) => {
     const value = e.target.value;
 
-    // Empty always allowed
     if (value === "") {
-        setSearchTerm("");
-        setCurrentPage(1);
-        await fetchCustomers({ search: "", searchField, page: 1 });
-        setSelectedIndex(0);
-        return;
+      setSearchTerm("");
+      setLastValidTerm("");
+      setCurrentPage(1);
+      setSelectedIndex(0);
+      await fetchCustomers({ search: "", searchField, page: 1 });
+      return;
     }
 
-    // Check if ANY product in current list has the searchField starting with value
-    const hasMatch = products.some((p) => {
-        const fieldVal = String(p[searchField] || "").toLowerCase();
-        return fieldVal.startsWith(value.toLowerCase()); // ✅ prefix match
+    if (value.length < searchTerm.length) {
+      setSearchTerm(value);
+      setLastValidTerm(value);
+      setCurrentPage(1);
+      setSelectedIndex(0);
+      await fetchCustomers({ search: value, searchField, page: 1 });
+      return;
+    }
+
+    const { total } = await fetchCustomers({
+      search: value,
+      searchField,
+      page: 1,
     });
 
-    if (hasMatch) {
-        setSearchTerm(value);
-        setCurrentPage(1);
-        await fetchCustomers({ search: value, searchField, page: 1 });
-        setSelectedIndex(0);
+    if (total > 0) {
+      setSearchTerm(value);
+      setLastValidTerm(value);
+      setCurrentPage(1);
+      setSelectedIndex(0);
+    } else {
+      setSearchTerm(lastValidTerm);
+      if (lastValidTerm !== "") {
+        await fetchCustomers({
+          search: lastValidTerm,
+          searchField,
+          page: 1,
+        });
+      }
     }
-    // else: ignore (block wrong typing)
-    };
+  };
 
-    // const handleSearch = async (e) => {
-    // const value = e.target.value;
-    // setSearchTerm(value);
-    // setCurrentPage(1);
-    // await fetchCustomers({ search: value, searchField, page: 1 });
-    // setSelectedIndex(0);
-    // };
-
-    const handleFieldChange = async (event) => {
+  /* ---------------- Change search field ---------------- */
+  const handleFieldChange = async (event) => {
     const field = event.target.value;
     setSearchField(field);
     setSearchTerm('');
+    setLastValidTerm('');
     setCurrentPage(1);
-    await fetchCustomers({ search: '', searchField: field, page: 1 });
-    };
+    setSelectedIndex(0);
 
-    const handleRowClick = (product, index) => {
+    await fetchCustomers({
+      search: '',
+      searchField: field,
+      page: 1,
+    });
+  };
+
+  /* ---------------- Row click ---------------- */
+  const handleRowClick = (product, index) => {
     setSelectedIndex(index);
     onSelect(product);
-    };
+  };
 
-    const handleLoadMore = async () => {
-    if (products.length >= totalRecords) return;
-    const nextPage = currentPage + 1;
-    await fetchCustomers({ search: searchTerm, searchField, page: nextPage, append: true });
-    };
+  /* ---------------- Ledger Modal handlers ---------------- */
+  const openLedgerModal = () => setShowLedgerModal(true);
 
-    const openLedgerModal = () => setShowLedgerModal(true);
-
-    const handleLedgerModalClose = async () => {
+  const handleLedgerModalClose = async () => {
     setShowLedgerModal(false);
     setCurrentPage(1);
 
-    if (searchTerm && searchTerm.trim() !== "") {
-        await fetchCustomers({ search: searchTerm, searchField, page: 1 });
-    } else {
-        await fetchCustomers({ search: "", searchField, page: 1 });
-    }
+    const term = (searchTerm || "").trim();
+
+    await fetchCustomers({
+      search: term,
+      searchField,
+      page: 1,
+    });
 
     setTimeout(() => {
-        setSelectedIndex(0);
-        if (inputRef.current) inputRef.current.focus();
+      setSelectedIndex(0);
+      if (inputRef.current) inputRef.current.focus();
     }, 100);
 
     if (onRefresh) await onRefresh();
-    };
+  };
 
-    const handleModify = () => {
+  /* ---------------- Modify ---------------- */
+  const handleModify = () => {
     if (!products[selectedIndex]) {
-        alert("Please select a row first!");
-        return;
+      alert("Please select a row first!");
+      return;
     }
 
     const selectedProduct = products[selectedIndex];
+    navigate("/LedgerAcc", {
+      state: { ledgerId: selectedProduct._id, rowIndex: selectedIndex },
+    });
 
-    navigate("/LedgerAcc", { state: { ledgerId: selectedProduct._id, rowIndex: selectedIndex } });
-};
+    alert("Selected ID: " + selectedProduct._id);
+  };
 
- 
-    return (
+  /* ---------------- Main render ---------------- */
+  return (
     <>
-    <Modal show={true} onHide={onClose} fullscreen className="custom-modal" style={{ marginTop: 20 }}>
+      <Modal
+        show={true}
+        onHide={onClose}
+        fullscreen
+        className="custom-modal"
+        style={{ marginTop: 20 }}
+      >
         <Modal.Header closeButton>
-        <Modal.Title>LEDGER ACCOUNTS</Modal.Title>
-        <Button variant="info" style={{marginLeft:"70%"}}  onClick={() => setShowFieldModal(true)}>Fields</Button>
+          <Modal.Title>LEDGER ACCOUNTS</Modal.Title>
+          <Button
+            variant="info"
+            style={{ marginLeft: "70%" }}
+            onClick={() => setShowFieldModal(true)}
+          >
+            Fields
+          </Button>
         </Modal.Header>
+
         <Modal.Body>
-        <div className="list-container">
+          <div className="list-container">
             <TableContainer component={Paper} className="table-container">
-                <Table bordered ref={tableRef}>
-                    <TableHead style={{ backgroundColor: "lightgray" }}>
-                        <TableRow>
-                            {selectedFields.map(field => (
-                                <TableCell style={{ textTransform: "uppercase" }} key={field}>{field}</TableCell>
-                            ))}
-                             <th>Action</th> {/* This is the new column header */}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {products.map((product, index) => (
-                            <TableRow
-                                key={product._id || index}
-                                className={selectedIndex === index ? 'highlighted-row' : ''}
-                                onClick={() => handleRowClick(product, index)}
-                            >
-                                {selectedFields.map(field => (
-                                    <TableCell key={field}>{product[field]}</TableCell>
-                                ))}
-                                <td>
-                                <Button
-                                    size="sm"
-                                    variant="primary"
-                                    // onClick={() => handleSelect(product)}
-                                >
-                                    Select
-                                </Button>
-                                </td> {/* This is the new column cell */}
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+              <Table bordered ref={tableRef}>
+                <TableHead style={{ backgroundColor: "lightgray" }}>
+                  <TableRow>
+                    {selectedFields.map(field => (
+                      <TableCell style={{ textTransform: "uppercase" }} key={field}>
+                        {field}
+                      </TableCell>
+                    ))}
+                    <TableCell>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {products.map((product, index) => (
+                    <TableRow
+                      key={product._id || index}
+                      className={selectedIndex === index ? 'highlighted-row' : ''}
+                      onClick={() => handleRowClick(product, index)}
+                    >
+                      {selectedFields.map(field => (
+                        <TableCell key={field}>{product[field]}</TableCell>
+                      ))}
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() => onSelect(product)}
+                        >
+                          Select
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </TableContainer>
-            {products.length < totalRecords && (
-                <Button
-                    onClick={handleLoadMore}
-                    disabled={isLoading}
-                    style={{ margin: '15px auto', display: 'block' }}
-                    variant="outline-primary"
-                >
-                    {isLoading ? "Loading..." : "Load More"}
-                </Button>
+
+            {/* 🔹 Loading More Indicator (after first 30, next 30, etc.) */}
+            {isLoading && products.length > 0 && products.length < totalRecords && (
+              <div
+                style={{
+                  marginTop: 8,
+                  textAlign: "center",
+                  fontSize: 12,
+                  color: "#555",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                <div
+                  className="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+                <span>Loading more...</span>
+              </div>
             )}
-        </div>
+          </div>
         </Modal.Body>
+
         <div className='searchdiv' style={{ marginBottom: 10 }}>
-            <input
-                type="text"
-                className="search"
-                placeholder="Search..."
-                onChange={handleSearch}
-                value={searchTerm}
-                ref={inputRef}
-            />
-            <text style={{ fontSize: 20, marginLeft: 20 }} id="search-field-label">Search By:</text>
-            <select
-                style={{ width: 200, height: 30, marginLeft: 10, border: "1px solid black" }}
-                labelid="search-field-label"
-                value={searchField}
-                onChange={handleFieldChange}
-            >
-                {selectedFields.map(field => (
-                    <option key={field} value={field}>
-                        {field.toUpperCase()}
-                    </option>
-                ))}
-            </select>
-            <div className='buttondiv'>
+          <input
+            type="text"
+            className="search"
+            placeholder="Search..."
+            onChange={handleSearch}
+            value={searchTerm}
+            ref={inputRef}
+          />
+          <span style={{ fontSize: 20, marginLeft: 20 }} id="search-field-label">
+            Search By:
+          </span>
+          <select
+            style={{ width: 200, height: 30, marginLeft: 10, border: "1px solid black" }}
+            aria-labelledby="search-field-label"
+            value={searchField}
+            onChange={handleFieldChange}
+          >
+            {selectedFields.map(field => (
+              <option key={field} value={field}>
+                {field.toUpperCase()}
+              </option>
+            ))}
+          </select>
+
+          <div className='buttondiv'>
             <Button className='new' onClick={openLedgerModal}>New</Button>
             <Button className='modify' onClick={handleModify}>Modify</Button>
-            <Button className='select'>Select</Button>
+            <Button className='select' onClick={() => {
+              const selected = products[selectedIndex];
+              if (selected) onSelect(selected);
+            }}>
+              Select
+            </Button>
             <Button className='closebtn' variant="secondary" onClick={onClose}>Close</Button>
-            </div>
+          </div>
         </div>
-        </Modal>
-        {showLedgerModal && (
+      </Modal>
+
+      {showLedgerModal && (
         <Modal
-            dialogClassName="custom-full-width-modal"
-            show
-            onHide={handleLedgerModalClose} // <-- this is key!
-            size="lg"
-            style={{ zIndex: 100000,marginTop:-25 }}
+          dialogClassName="custom-full-width-modal"
+          show
+          onHide={handleLedgerModalClose}
+          size="lg"
+          style={{ zIndex: 100000, marginTop: -30, height: "110vh" }}
         >
-            <Modal.Body style={{ marginTop: 10, marginLeft: 10 }}>
+          <Modal.Body style={{ marginTop: 10, marginLeft: 10 }}>
             <LedgerAcc
-                onClose={handleLedgerModalClose} // <-- pass this!
-                onRefresh={onRefresh}
+              onClose={handleLedgerModalClose}
+              onRefresh={onRefresh}
             />
-            </Modal.Body>
+          </Modal.Body>
         </Modal>
-        )}
-        <Modal style={{ zIndex: 100000 }} show={showFieldModal} onHide={() => setShowFieldModal(false)}>
+      )}
+
+      <Modal
+        style={{ zIndex: 100000 }}
+        show={showFieldModal}
+        onHide={() => setShowFieldModal(false)}
+      >
         <Modal.Header closeButton>
-            <Modal.Title>Select Fields to Show</Modal.Title>
+          <Modal.Title>Select Fields to Show</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ maxHeight: '500px', overflowY: 'auto' }}>
-            {allAvailableFields.current.map((field) => (
+          {allAvailableFields.current.map((field) => (
             <div key={field}>
-                <input
+              <input
                 type="checkbox"
                 checked={selectedFields.includes(field)}
                 onChange={() => {
-                    if (selectedFields.includes(field)) {
+                  if (selectedFields.includes(field)) {
                     setSelectedFields(selectedFields.filter(f => f !== field));
-                    } else {
+                  } else {
                     setSelectedFields([...selectedFields, field]);
-                    }
+                  }
                 }}
-                />
-                <label style={{ marginLeft: 8 }}>{field}</label>
+              />
+              <label style={{ marginLeft: 8 }}>{field}</label>
             </div>
-            ))}
+          ))}
         </Modal.Body>
         <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowFieldModal(false)}>
+          <Button variant="secondary" onClick={() => setShowFieldModal(false)}>
             Done
-            </Button>
+          </Button>
         </Modal.Footer>
-        </Modal>
+      </Modal>
     </>
-    );
+  );
 };
 
 export default ProductModalCustomer;

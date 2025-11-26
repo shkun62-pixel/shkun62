@@ -8747,140 +8747,261 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault(); // Stop default Tab navigation
-      switch (field) {
-        case "vcode":
-          if (items[index].sdisc.trim() === "") {
-            transportRef.current.focus();
-          } else {
-            desciptionRefs.current[index]?.focus();
-          }
-          break;
-        case "sdisc":
-          hsnCodeRefs.current[index]?.focus();
-          break;
-        case "tariff":
-          peciesRefs.current[index]?.focus();
-          break;
-        case "pkgs":
-          quantityRefs.current[index]?.focus();
-          break;
-        case "weight":
-          priceRefs.current[index]?.focus();
-          break;
-        case "rate":
-          discountRef.current[index]?.focus();
-          break;
-        case "disc":
-          discount2Ref.current[index]?.focus();
-          break;
-        case "discount":
-          othersRefs.current[index]?.focus();
-          break;
-        case "exp_before":
-          if (index === items.length - 1) {
-            handleAddItem();
-            itemCodeRefs.current[index + 1]?.focus();
-          } else {
-            itemCodeRefs.current[index + 1]?.focus();
-          }
-          break;
-        default:
-          break;
+  const fieldOrder = [
+    { name: "vcode",      refArray: itemCodeRefs },
+    { name: "sdisc",      refArray: desciptionRefs },
+    { name: "tariff",     refArray: hsnCodeRefs },
+    { name: "pkgs",       refArray: peciesRefs },
+    { name: "weight",     refArray: quantityRefs },
+    { name: "rate",       refArray: priceRefs },
+    { name: "amount",     refArray: amountRefs },
+    { name: "disc",       refArray: discountRef },
+    { name: "discount",   refArray: discount2Ref },
+    { name: "exp_before", refArray: othersRefs },
+  ];
+
+const focusRef = (refArray, rowIndex, select = true) => {
+  const el = refArray?.current?.[rowIndex];
+  if (el) {
+    el.focus();
+    if (select) {
+      setTimeout(() => el.select && el.select(), 0);
+    }
+    return true;
+  }
+  return false;
+};
+
+const handleKeyDown = (event, index, field) => {
+  // ------------- ENTER / TAB: move to next field -----------------
+  if (event.key === "Enter" || event.key === "Tab") {
+    event.preventDefault(); // Stop default Tab navigation
+
+    // Special behaviour for vcode in PURCHASE:
+    if (field === "vcode") {
+      if ((items[index].sdisc || "").trim() === "") {
+        // If description empty → go to TRANSPORT
+        transportRef.current?.focus();
+      } else {
+        // Otherwise go to description
+        focusRef(desciptionRefs, index);
+      }
+      return;
+    }
+
+    // Special behaviour for exp_before: next row / new row
+    if (field === "exp_before") {
+      const isLastRow = index === items.length - 1;
+
+      if (isLastRow) {
+        handleAddItem();
+        focusRef(itemCodeRefs, index + 1);
+      } else {
+        focusRef(itemCodeRefs, index + 1);
+      }
+      return;
+    }
+
+    // Generic: find current in fieldOrder and go to next available field in same row
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+
+    if (currentPos !== -1) {
+      for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+        const nextField = fieldOrder[i];
+        if (focusRef(nextField.refArray, index)) {
+          return;
+        }
       }
     }
-    // Move Right (→)
-    else if (event.key === "ArrowRight") {
-      if (field === "vcode") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-      } else if (field === "sdisc") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-      } else if (field === "tariff") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
-      } else if (field === "pkgs") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
-      } else if (field === "weight") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
-      } else if (field === "rate") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
-      } else if (field === "disc") {
-        discount2Ref.current[index]?.focus();
-        setTimeout(() => discount2Ref.current[index]?.select(), 0);
-      }
-      else if (field === "discount") {
-        othersRefs.current[index]?.focus();
-        setTimeout(() => othersRefs.current[index]?.select(), 0);
+
+    // If nothing else to move to, you can optionally jump somewhere like transport:
+    // transportRef.current?.focus();
+    return;
+  }
+
+  // ------------- ARROW RIGHT: next field in row -----------------
+  if (event.key === "ArrowRight") {
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+    if (currentPos !== -1) {
+      for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+        const nextField = fieldOrder[i];
+        if (focusRef(nextField.refArray, index)) return;
       }
     }
-    // Move Left (←)
-    else if (event.key === "ArrowLeft") {
-      if (field === "exp_before") {
-        discount2Ref.current[index]?.focus();
-        setTimeout(() => discount2Ref.current[index]?.select(), 0);
-      } else if (field === "discount") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
-      }else if (field === "disc") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
-      } else if (field === "rate") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
-      } else if (field === "weight") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
-      } else if (field === "pkgs") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-      } else if (field === "tariff") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-      } else if (field === "sdisc") {
-        itemCodeRefs.current[index]?.focus();
-        setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
-      } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
+  }
+
+  // ------------- ARROW LEFT: previous field in row -----------------
+  else if (event.key === "ArrowLeft") {
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+    if (currentPos !== -1) {
+      for (let i = currentPos - 1; i >= 0; i--) {
+        const prevField = fieldOrder[i];
+        if (focusRef(prevField.refArray, index)) return;
+      }
     }
-    // Move Up
-    else if (event.key === "ArrowUp" && index > 0) {
+  }
+
+  // ------------- ARROW UP: same field, previous row -----------------
+  else if (event.key === "ArrowUp" && index > 0) {
+    const cfg = fieldOrder.find((f) => f.name === field);
+    if (cfg) {
       setTimeout(() => {
-        if (field === "vcode") itemCodeRefs.current[index - 1]?.focus();
-        else if (field === "sdisc") desciptionRefs.current[index - 1]?.focus();
-        else if (field === "tariff") hsnCodeRefs.current[index - 1]?.focus();
-        else if (field === "pkgs") peciesRefs.current[index - 1]?.focus();
-        else if (field === "weight") quantityRefs.current[index - 1]?.focus();
-        else if (field === "rate") priceRefs.current[index - 1]?.focus();
-        else if (field === "disc") discountRef.current[index - 1]?.focus();
-        else if (field === "exp_before") othersRefs.current[index - 1]?.focus();
-      }, 100);
+        focusRef(cfg.refArray, index - 1);
+      }, 50);
     }
-    // Move Down
-    else if (event.key === "ArrowDown" && index < items.length - 1) {
+  }
+
+  // ------------- ARROW DOWN: same field, next row -----------------
+  else if (event.key === "ArrowDown" && index < items.length - 1) {
+    const cfg = fieldOrder.find((f) => f.name === field);
+    if (cfg) {
       setTimeout(() => {
-        if (field === "vcode") itemCodeRefs.current[index + 1]?.focus();
-        else if (field === "sdisc") desciptionRefs.current[index + 1]?.focus();
-        else if (field === "tariff") hsnCodeRefs.current[index + 1]?.focus();
-        else if (field === "pkgs") peciesRefs.current[index + 1]?.focus();
-        else if (field === "weight") quantityRefs.current[index + 1]?.focus();
-        else if (field === "rate") priceRefs.current[index + 1]?.focus();
-        else if (field === "disc") discountRef.current[index + 1]?.focus();
-        else if (field === "exp_before") othersRefs.current[index + 1]?.focus();
-      }, 100);
+        focusRef(cfg.refArray, index + 1);
+      }, 50);
     }
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-      setPressedKey(event.key);
-      openModalForItemCus(index);
-      event.preventDefault();
-    }
-  };
+  }
+
+  // ------------- OPEN MODAL on letter in account name -------------
+  else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+    setPressedKey(event.key);
+    openModalForItemCus(index);
+    event.preventDefault();
+  }
+};
+  // const handleKeyDown = (event, index, field) => {
+  //   if (event.key === "Enter" || event.key === "Tab") {
+  //     event.preventDefault(); // Stop default Tab navigation
+  //     switch (field) {
+  //       case "vcode":
+  //         if (items[index].sdisc.trim() === "") {
+  //           transportRef.current.focus();
+  //         } else {
+  //           desciptionRefs.current[index]?.focus();
+  //         }
+  //         break;
+  //       case "sdisc":
+  //         hsnCodeRefs.current[index]?.focus();
+  //         break;
+  //       case "tariff":
+  //         peciesRefs.current[index]?.focus();
+  //         break;
+  //       case "pkgs":
+  //         quantityRefs.current[index]?.focus();
+  //         break;
+  //       case "weight":
+  //         priceRefs.current[index]?.focus();
+  //         break;
+  //       case "rate":
+  //         discountRef.current[index]?.focus();
+  //         break;
+  //       case "disc":
+  //         discount2Ref.current[index]?.focus();
+  //         break;
+  //       case "discount":
+  //         othersRefs.current[index]?.focus();
+  //         break;
+  //       case "exp_before":
+  //         if (index === items.length - 1) {
+  //           handleAddItem();
+  //           itemCodeRefs.current[index + 1]?.focus();
+  //         } else {
+  //           itemCodeRefs.current[index + 1]?.focus();
+  //         }
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   }
+  //   // Move Right (→)
+  //   else if (event.key === "ArrowRight") {
+  //     if (field === "vcode") {
+  //       desciptionRefs.current[index]?.focus();
+  //       setTimeout(() => desciptionRefs.current[index]?.select(), 0);
+  //     } else if (field === "sdisc") {
+  //       hsnCodeRefs.current[index]?.focus();
+  //       setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
+  //     } else if (field === "tariff") {
+  //       peciesRefs.current[index]?.focus();
+  //       setTimeout(() => peciesRefs.current[index]?.select(), 0);
+  //     } else if (field === "pkgs") {
+  //       quantityRefs.current[index]?.focus();
+  //       setTimeout(() => quantityRefs.current[index]?.select(), 0);
+  //     } else if (field === "weight") {
+  //       priceRefs.current[index]?.focus();
+  //       setTimeout(() => priceRefs.current[index]?.select(), 0);
+  //     } else if (field === "rate") {
+  //       discountRef.current[index]?.focus();
+  //       setTimeout(() => discountRef.current[index]?.select(), 0);
+  //     } else if (field === "disc") {
+  //       discount2Ref.current[index]?.focus();
+  //       setTimeout(() => discount2Ref.current[index]?.select(), 0);
+  //     }
+  //     else if (field === "discount") {
+  //       othersRefs.current[index]?.focus();
+  //       setTimeout(() => othersRefs.current[index]?.select(), 0);
+  //     }
+  //   }
+  //   // Move Left (←)
+  //   else if (event.key === "ArrowLeft") {
+  //     if (field === "exp_before") {
+  //       discount2Ref.current[index]?.focus();
+  //       setTimeout(() => discount2Ref.current[index]?.select(), 0);
+  //     } else if (field === "discount") {
+  //       discountRef.current[index]?.focus();
+  //       setTimeout(() => discountRef.current[index]?.select(), 0);
+  //     }else if (field === "disc") {
+  //       priceRefs.current[index]?.focus();
+  //       setTimeout(() => priceRefs.current[index]?.select(), 0);
+  //     } else if (field === "rate") {
+  //       quantityRefs.current[index]?.focus();
+  //       setTimeout(() => quantityRefs.current[index]?.select(), 0);
+  //     } else if (field === "weight") {
+  //       peciesRefs.current[index]?.focus();
+  //       setTimeout(() => peciesRefs.current[index]?.select(), 0);
+  //     } else if (field === "pkgs") {
+  //       hsnCodeRefs.current[index]?.focus();
+  //       setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
+  //     } else if (field === "tariff") {
+  //       desciptionRefs.current[index]?.focus();
+  //       setTimeout(() => desciptionRefs.current[index]?.select(), 0);
+  //     } else if (field === "sdisc") {
+  //       itemCodeRefs.current[index]?.focus();
+  //       setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
+  //     } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
+  //   }
+  //   // Move Up
+  //   else if (event.key === "ArrowUp" && index > 0) {
+  //     setTimeout(() => {
+  //       if (field === "vcode") itemCodeRefs.current[index - 1]?.focus();
+  //       else if (field === "sdisc") desciptionRefs.current[index - 1]?.focus();
+  //       else if (field === "tariff") hsnCodeRefs.current[index - 1]?.focus();
+  //       else if (field === "pkgs") peciesRefs.current[index - 1]?.focus();
+  //       else if (field === "weight") quantityRefs.current[index - 1]?.focus();
+  //       else if (field === "rate") priceRefs.current[index - 1]?.focus();
+  //       else if (field === "disc") discountRef.current[index - 1]?.focus();
+  //       else if (field === "exp_before") othersRefs.current[index - 1]?.focus();
+  //     }, 100);
+  //   }
+  //   // Move Down
+  //   else if (event.key === "ArrowDown" && index < items.length - 1) {
+  //     setTimeout(() => {
+  //       if (field === "vcode") itemCodeRefs.current[index + 1]?.focus();
+  //       else if (field === "sdisc") desciptionRefs.current[index + 1]?.focus();
+  //       else if (field === "tariff") hsnCodeRefs.current[index + 1]?.focus();
+  //       else if (field === "pkgs") peciesRefs.current[index + 1]?.focus();
+  //       else if (field === "weight") quantityRefs.current[index + 1]?.focus();
+  //       else if (field === "rate") priceRefs.current[index + 1]?.focus();
+  //       else if (field === "disc") discountRef.current[index + 1]?.focus();
+  //       else if (field === "exp_before") othersRefs.current[index + 1]?.focus();
+  //     }, 100);
+  //   }
+  //   // Open Modal on Letter Input in Account Name
+  //   else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+  //     setPressedKey(event.key);
+  //     openModalForItemCus(index);
+  //     event.preventDefault();
+  //   }
+  // };
 
   const handleOpenModal = (event, index, field) => {
     if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
