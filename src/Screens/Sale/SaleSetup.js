@@ -4463,6 +4463,21 @@ const SaleSetup = ({ onClose }) => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
+  useEffect(() => {
+    // Check if formData has no keys or all values are empty
+    const isEmpty =
+      formData &&
+      Object.values(formData).every(
+        (v) =>
+          v === "" ||
+          v === null ||
+          v === undefined ||
+          (typeof v === "boolean" && v === false)
+      );
+
+    setIsSubmitEnabled(isEmpty);
+  }, [formData]);
+
   const fetchData = async () => {
     try {
       const response = await axios.get(

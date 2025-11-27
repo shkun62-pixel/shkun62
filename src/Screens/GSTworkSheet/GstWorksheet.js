@@ -854,15 +854,16 @@ export default function GstWorksheet() {
                           cursor: "pointer",
                           userSelect: "none", 
                           backgroundColor: selectedGst === g.gst ? "#b6b9bdff" : "transparent",
+                          fontWeight:"bold",
                           transition: "0.2s",
                         }}
                       >
-                        <TableCell>{g.gst}%</TableCell>
-                        <TableCell align="right">{g.value.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.ctax.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.stax.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.itax.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.cess.toFixed(2)}</TableCell>
+                        <TableCell sx={{fontWeight: selectedGst === g.gst ? "bold" : "normal"}}>{g.gst}%</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst === g.gst ? "bold" : "normal"}}>{g.value.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst === g.gst ? "bold" : "normal"}}>{g.ctax.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst === g.gst ? "bold" : "normal"}}>{g.stax.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst === g.gst ? "bold" : "normal"}}>{g.itax.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst === g.gst ? "bold" : "normal"}}>{g.cess.toFixed(2)}</TableCell>
                       </TableRow>
                     ))}
                     {/* totals */}
@@ -969,12 +970,12 @@ export default function GstWorksheet() {
                           transition: "0.2s",
                         }}
                       >
-                        <TableCell>{g.gst}%</TableCell>
-                        <TableCell align="right">{g.value.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.ctax.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.stax.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.itax.toFixed(2)}</TableCell>
-                        <TableCell align="right">{g.cess.toFixed(2)}</TableCell>
+                        <TableCell sx={{fontWeight: selectedGst2 === g.gst ? "bold" : "normal"}}>{g.gst}%</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst2 === g.gst ? "bold" : "normal"}}>{g.value.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst2 === g.gst ? "bold" : "normal"}}>{g.ctax.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst2 === g.gst ? "bold" : "normal"}}>{g.stax.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst2 === g.gst ? "bold" : "normal"}}>{g.itax.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{fontWeight: selectedGst2 === g.gst ? "bold" : "normal"}}>{g.cess.toFixed(2)}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
