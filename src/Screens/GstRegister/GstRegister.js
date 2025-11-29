@@ -482,7 +482,7 @@ export default function GstRegister({ show, onClose }) {
   // ---- Render ----
   return (
     <Modal show={show} onHide={onClose} className="custom-modal" backdrop="static" style={{marginTop:"10px"}}>
-      <div className="p-3 bg-light" style={{ minHeight: "90vh" }}>
+      <div className="p-3 bg-light">
         <h4 className="text-center fw-bold">GST REGISTER</h4>
 
         {/* Filters */}
