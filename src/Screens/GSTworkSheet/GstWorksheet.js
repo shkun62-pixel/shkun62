@@ -29,6 +29,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import WorksheetPrint from "./WorksheetPrint";
 import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
+import { useNavigate } from "react-router-dom";
 
 
 // --------- CONFIG ----------
@@ -71,6 +72,7 @@ function sumSafe(arr, key) {
 
 export default function GstWorksheet() {
 
+  const navigate = useNavigate();
   const {dateFrom, companyName,companyAdd, companyCity, CompanyState} = useCompanySetup();
   const [selectedGst, setSelectedGst] = useState(null);
   const [selectedGst2, setSelectedGst2] = useState(null);
@@ -129,30 +131,60 @@ export default function GstWorksheet() {
   });
 
   // Fetch function called when clicking View
-  const handleView = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const [saleRes, purchaseRes] = await Promise.all([
-        fetch(SALE_API),
-        fetch(PURCHASE_API),
-      ]);
+  // const handleView = async () => {
+  //   setError("");
+  //   setLoading(true);
+  //   try {
+  //     const [saleRes, purchaseRes] = await Promise.all([
+  //       fetch(SALE_API),
+  //       fetch(PURCHASE_API),
+  //     ]);
 
-      if (!saleRes.ok) throw new Error("Sale API fetch failed");
-      if (!purchaseRes.ok) throw new Error("Purchase API fetch failed");
+  //     if (!saleRes.ok) throw new Error("Sale API fetch failed");
+  //     if (!purchaseRes.ok) throw new Error("Purchase API fetch failed");
 
-      const saleJson = await saleRes.json();
-      const purchaseJson = await purchaseRes.json();
+  //     const saleJson = await saleRes.json();
+  //     const purchaseJson = await purchaseRes.json();
 
-      setSaleData(saleJson || []);
-      setPurchaseData(purchaseJson || []);
-    } catch (e) {
-      console.error(e);
-      setError(e.message || "Failed to fetch APIs");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setSaleData(saleJson || []);
+  //     setPurchaseData(purchaseJson || []);
+  //   } catch (e) {
+  //     console.error(e);
+  //     setError(e.message || "Failed to fetch APIs");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+   useEffect(() => {
+    const fetchEntries = async () => {
+      setError("");
+      setLoading(true);
+      try {
+        const [saleRes, purchaseRes] = await Promise.all([
+          fetch(SALE_API),
+          fetch(PURCHASE_API),
+        ]);
+
+        if (!saleRes.ok) throw new Error("Sale API fetch failed");
+        if (!purchaseRes.ok) throw new Error("Purchase API fetch failed");
+
+        const saleJson = await saleRes.json();
+        const purchaseJson = await purchaseRes.json();
+
+        setSaleData(saleJson || []);
+        setPurchaseData(purchaseJson || []);
+      } catch (e) {
+        console.error(e);
+        setError(e.message || "Failed to fetch APIs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Call it immediately when component mounts
+    fetchEntries();
+  }, []); // Empty dependency array => runs once on mount
+
 
   // Utility: returns whether a record (sale/purchase) passes filters:
   const recordPassesFilters = (record, isSale = true) => {
@@ -654,6 +686,25 @@ export default function GstWorksheet() {
     }
   };
 
+  // Define your navigation function
+  const handleRowDoubleClick = (entryId) => {
+
+    if (detailDialog.side === "sale") {
+      // Navigate to Sale entry
+      navigate("/Sale", {
+        state: {
+          saleId: entryId
+        },
+      });
+    } else if (detailDialog.side === "purchase") {
+      // Navigate to Purchase entry
+      navigate("/Purchase", {
+        state: {
+          purId: entryId
+        },
+      });
+    }
+  };
 
   return (
     <Box p={2}>
@@ -744,9 +795,9 @@ export default function GstWorksheet() {
           </div>
           </div>
           <div style={{display:'flex',flexDirection:"column"}}>
-              <Button className="Buttonz" variant="contained" color="primary" onClick={handleView} disabled={loading}>
-                View
-              </Button>
+                {/* <Button className="Buttonz" variant="contained" color="primary" onClick={handleView} disabled={loading}>
+                  View
+                </Button> */}
               <Button style={{marginTop:"5px"}} className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
                 Export
               </Button>
@@ -1105,7 +1156,8 @@ export default function GstWorksheet() {
             </TableHead>
             <TableBody>
               {detailDialog.entries.map((en, idx) => (
-                <TableRow key={idx}>
+                <TableRow key={idx} onDoubleClick={() => handleRowDoubleClick(en.id)}
+                 >
                   <TableCell>
                     {en.date?.includes("/") 
                       ? parseDMY(en.date).toLocaleDateString("en-GB") 

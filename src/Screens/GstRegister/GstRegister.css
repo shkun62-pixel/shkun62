@@ -1,0 +1,22 @@
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #print-gst-register,
+  #print-gst-register * {
+    visibility: visible !important;
+  }
+
+  #print-gst-register {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Optional: hide buttons while printing */
+  button {
+    display: none !important;
+  }
+}

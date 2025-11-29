@@ -780,7 +780,7 @@ export default function App() {
                             </StyledIcon>
                             <StyledListItemText primary="Monthly Forms" />
                         </StyledListItem>
-                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                        <StyledListItem button onClick={() => handleNavigation('/GstRegister')}>
                             <StyledIcon style={{}}>
                                 <DescriptionIcon />
                             </StyledIcon>
