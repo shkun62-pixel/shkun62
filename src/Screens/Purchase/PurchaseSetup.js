@@ -41,11 +41,11 @@ const PurchaseSetup = ({ onClose }) => {
     others: "",
     btype: "",
     stype: "",
-    weight: 0,
-    pkgs: 0,
+    weight: "",
+    pkgs: "",
     tax: "",
     exfor: "",
-    rate: 0,
+    rate: "",
     stkcode: "",
     balance: "",
     conv: "",
@@ -122,16 +122,16 @@ const PurchaseSetup = ({ onClose }) => {
     E8add: "",
     E9add: "",
     E10add: "",
-    E1rate: 0,
-    E2rate: 0,
-    E3rate: 0,
-    E4rate: 0,
-    E5rate: 0,
-    E6rate: 0,
-    E7rate: 0,
-    E8rate: 0,
-    E9rate: 0,
-    E10rate: 0,
+    E1rate: "",
+    E2rate: "",
+    E3rate: "",
+    E4rate: "",
+    E5rate: "",
+    E6rate: "",
+    E7rate: "",
+    E8rate: "",
+    E9rate: "",
+    E10rate: "",
   });
   const [cesscode, setcesscode] = useState([
     {
@@ -273,19 +273,19 @@ const PurchaseSetup = ({ onClose }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    // Check if formData has no keys or all values are empty
     const isEmpty =
       formData &&
-      Object.values(formData).every(
-        (v) =>
-          v === "" ||
-          v === null ||
-          v === undefined ||
-          (typeof v === "boolean" && v === false)
+      Object.values(formData).every((v) =>
+        v === "" ||
+        v === null ||
+        v === undefined ||
+        v === 0 ||
+        v === false
       );
 
     setIsSubmitEnabled(isEmpty);
   }, [formData]);
+
 
   const fetchData = async () => {
     try {

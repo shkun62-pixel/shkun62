@@ -4263,11 +4263,11 @@ const SaleSetup = ({ onClose }) => {
     others: "",
     btype: "",
     stype: "",
-    weight: 0,
-    pkgs: 0,
+    weight: "",
+    pkgs: "",
     tax: "",
     exfor: "",
-    rate: 0,
+    rate: "",
     stkcode: "",
     balance: "",
     conv: "",
@@ -4293,16 +4293,16 @@ const SaleSetup = ({ onClose }) => {
     Sale_code: "",
     Roundoff: "",
     Salef3: "",
-    Exp1: "Labour",
-    Exp2: "Freight",
-    Exp3: "Expense3",
-    Exp4: "Postage",
-    Exp5: "Expense5",
-    Exp6: "Expense6",
-    Exp7: "Expense7",
-    Exp8: "Expense8",
-    Exp9: "Expense9",
-    Exp10: "Expense10",
+    Exp1: "",
+    Exp2: "",
+    Exp3: "",
+    Exp4: "",
+    Exp5: "",
+    Exp6: "",
+    Exp7: "",
+    Exp8: "",
+    Exp9: "",
+    Exp10: "",
     T1: "",
     T2: "",
     T3: "",
@@ -4344,16 +4344,16 @@ const SaleSetup = ({ onClose }) => {
     E8: "",
     E9: "",
     E10: "",
-    E1rate: 0,
-    E2rate: 0,
-    E3rate: 0,
-    E4rate: 0,
-    E5rate: 0,
-    E6rate: 0,
-    E7rate: 0,
-    E8rate: 0,
-    E9rate: 0,
-    E10rate: 0,
+    E1rate: "",
+    E2rate: "",
+    E3rate: "",
+    E4rate: "",
+    E5rate: "",
+    E6rate: "",
+    E7rate: "",
+    E8rate: "",
+    E9rate: "",
+    E10rate: "",
   });
   const [cesscode, setcesscode] = useState([
     {
@@ -4464,15 +4464,14 @@ const SaleSetup = ({ onClose }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    // Check if formData has no keys or all values are empty
     const isEmpty =
       formData &&
-      Object.values(formData).every(
-        (v) =>
-          v === "" ||
-          v === null ||
-          v === undefined ||
-          (typeof v === "boolean" && v === false)
+      Object.values(formData).every((v) =>
+        v === "" ||
+        v === null ||
+        v === undefined ||
+        v === 0 ||
+        v === false
       );
 
     setIsSubmitEnabled(isEmpty);

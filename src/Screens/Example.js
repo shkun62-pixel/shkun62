@@ -741,18 +741,18 @@
 
 
 import React,{useState} from 'react'
-import GstRegister from './GstRegister/GstRegister'
+import PurchaseSummaryModal from './IncomeTaxReports/PurchaseSummaryModal';
 import { Button } from 'react-bootstrap';
 
 const Example = () => {
-  const [openLedgerModal, setOpenLedgerModal] = useState(false);
+  const [openPurRep, setopenPurRep] = useState(false);
 
   return (
     <div>
-      <Button onClick={() => setOpenLedgerModal(true)}>Open GST Ledger</Button>
-      <GstRegister 
-        show={openLedgerModal} 
-        onClose={() => setOpenLedgerModal(false)} 
+      <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button>
+      <PurchaseSummaryModal 
+        show={openPurRep} 
+        onClose={() => setopenPurRep(false)} 
       />
     </div>
   )

@@ -50,7 +50,7 @@ const CashBankSetup = ({ onClose }) => {
     B3: "",
     B4: "",
     B5: "",
-    decimals: 2,
+    decimals: "",
   });
   const [cashCode, setcashCode] = useState([
     {
@@ -118,15 +118,14 @@ const CashBankSetup = ({ onClose }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    // Check if formData has no keys or all values are empty
     const isEmpty =
       formData &&
-      Object.values(formData).every(
-        (v) =>
-          v === "" ||
-          v === null ||
-          v === undefined ||
-          (typeof v === "boolean" && v === false)
+      Object.values(formData).every((v) =>
+        v === "" ||
+        v === null ||
+        v === undefined ||
+        v === 0 ||
+        v === false
       );
 
     setIsSubmitEnabled(isEmpty);
