@@ -147,6 +147,8 @@ export default function App() {
     const [isGstReportOpen, setIsGstReportOpen] = useState(false);
     const [isTdsTcsOpen, setIsTdsTcsOpen] = useState(false);
     const [isIncomeTaxOpen, setIsIncomeTaxOpen] = useState(false);
+    const [isPurReportOpen, setIsPurReportOpen] = useState(false);
+    const [isSaleReportOpen, setIsSaleReportOpen] = useState(false);
     const [isBooksOpen, setIsBooksOpen] = useState(false); 
     const [isGoodReturn, setIsGoodReturn] = useState(false); 
     const [isStockOpen, setIsStockOpen] = useState(false); 
@@ -580,7 +582,7 @@ export default function App() {
                                 <StyledIcon>
                                     <AssessmentIcon />
                                 </StyledIcon>
-                                <StyledListItemText primary="Books" />
+                            <StyledListItemText primary="Books" />
                             </StyledListItem>
                             {/* Books – FLOATING RIGHT SUBMENU */}
                             {isBooksOpen && (
@@ -940,7 +942,7 @@ export default function App() {
                     </motion.div>
                     )}
                     {/* IncomeTax Reports */}
-                     <StyledListItem button     
+                    <StyledListItem button     
                         onMouseEnter={() => setIsIncomeTaxOpen(true)}
                         onMouseLeave={() => setIsIncomeTaxOpen(false)}
                         >
@@ -972,18 +974,146 @@ export default function App() {
                         }}
                     >
                     <List>
-                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                        <StyledListItem button 
+                            onMouseEnter={() => setIsPurReportOpen(true)}
+                            onMouseLeave={() => setIsPurReportOpen(false)}
+                        >
                             <StyledIcon style={{}}>
                                 <ReceiptLongIcon />
                             </StyledIcon>
                             <StyledListItemText primary="Purchase Report" />
                         </StyledListItem>
-                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                        {isPurReportOpen && (
+                        <motion.div
+                            onMouseEnter={() => setIsPurReportOpen(true)}
+                            onMouseLeave={() => setIsPurReportOpen(false)}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -20, opacity: 0 }}
+                            transition={{ duration: 0.50, ease: "easeOut" }}
+                            style={{
+                                position: "fixed",
+                                top: "350px",
+                                left: "600px",   // Drawer(300) + First submenu(250) + 15px gap
+                                width: "300px",
+                                background: "#2f3847",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                zIndex: 30000,
+                                border: "1px solid #444",
+                                // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                            }}
+                        >
+                        <List>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Party Wise Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                     <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="A/C Wise Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Product Wise Purchase" />
+                            </StyledListItem>
+                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Product Wise Detail" />
+                            </StyledListItem>
+                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="State Wise Summary" />
+                            </StyledListItem>
+                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Broker Wise Summary" />
+                            </StyledListItem>
+                        </List>
+                        </motion.div>
+                        )}
+                        <StyledListItem button 
+                            onMouseEnter={() => setIsSaleReportOpen(true)}
+                            onMouseLeave={() => setIsSaleReportOpen(false)}
+                        >
                             <StyledIcon style={{}}>
                                 <ReceiptLongIcon />
                             </StyledIcon>
                             <StyledListItemText primary="Sale Reports" />
                         </StyledListItem>
+                        {isSaleReportOpen && (
+                        <motion.div
+                            onMouseEnter={() => setIsSaleReportOpen(true)}
+                            onMouseLeave={() => setIsSaleReportOpen(false)}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -20, opacity: 0 }}
+                            transition={{ duration: 0.50, ease: "easeOut" }}
+                            style={{
+                                position: "fixed",
+                                top: "350px",
+                                left: "600px",   // Drawer(300) + First submenu(250) + 15px gap
+                                width: "300px",
+                                background: "#2f3847",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                zIndex: 30000,
+                                border: "1px solid #444",
+                                // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
+                            }}
+                        >
+                        <List>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Party Wise Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                     <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="A/C Wise Summary" />
+                            </StyledListItem>
+                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Product Wise Sale" />
+                            </StyledListItem>
+                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Product Wise Detail" />
+                            </StyledListItem>
+                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="State Wise Summary" />
+                            </StyledListItem>
+                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                                <StyledIcon>
+                                    <DescriptionIcon />
+                                </StyledIcon>
+                                <StyledListItemText primary="Broker Wise Summary" />
+                            </StyledListItem>
+                        </List>
+                        </motion.div>
+                        )}
                         <StyledListItem button onClick={() => handleNavigation('/')}>
                             <StyledIcon style={{}}>
                                 <ReceiptLongIcon />
