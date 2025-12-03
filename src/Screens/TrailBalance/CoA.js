@@ -221,6 +221,7 @@ const CoA = ({
               flexDirection: "row",
               justifyContent: "space-between",
               fontFamily: "Courier New",
+              marginTop:"20px"
             }}
           >
             <div style={{ display: "flex", flexDirection: "column", }}>
