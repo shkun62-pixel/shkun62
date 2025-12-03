@@ -808,6 +808,17 @@ export default function PurchaseSummaryModal({ show, onClose }) {
     return Array.from(map.values());
   }
 
+  const format = (d) => {
+    if (!d) return "";
+    if (d instanceof Date) {
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yy = d.getFullYear();
+      return `${dd}/${mm}/${yy}`;
+    }
+    return d;
+  };
+
   return (
     <>
       {/* MAIN FILTER MODAL */}
@@ -1105,8 +1116,8 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                 <PurSummPrint
                   ref={printRef}
                   groupedData={groupedData}
-                  periodFrom={fromDate}
-                  periodTo={toDate}
+                  periodFrom={format(fromDate)}
+                  periodTo={format(toDate)}
                   companyName={companyName}
                   companyAdd={companyAdd}
                   companyCity={companyCity}
