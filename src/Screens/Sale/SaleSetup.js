@@ -4463,19 +4463,19 @@ const SaleSetup = ({ onClose }) => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
-  useEffect(() => {
-    const isEmpty =
-      formData &&
-      Object.values(formData).every((v) =>
-        v === "" ||
-        v === null ||
-        v === undefined ||
-        v === 0 ||
-        v === false
-      );
+  // useEffect(() => {
+  //   const isEmpty =
+  //     formData &&
+  //     Object.values(formData).every((v) =>
+  //       v === "" ||
+  //       v === null ||
+  //       v === undefined ||
+  //       v === 0 ||
+  //       v === false
+  //     );
 
-    setIsSubmitEnabled(isEmpty);
-  }, [formData]);
+  //   setIsSubmitEnabled(isEmpty);
+  // }, [formData]);
 
   const fetchData = async () => {
     try {
@@ -8748,7 +8748,7 @@ const SaleSetup = ({ onClose }) => {
         </Stepper>
         <form>
           {getStepContent(activeStep)}
-          <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+          <Stack direction="row" spacing={2} sx={{ justifyContent: "center",marginTop:"auto" }}>
             <Button
               disabled={activeStep === 0}
               onClick={() => setActiveStep((prev) => prev - 1)}

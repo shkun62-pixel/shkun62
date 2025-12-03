@@ -117,19 +117,19 @@ const CashBankSetup = ({ onClose }) => {
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [activeStep, setActiveStep] = useState(0);
 
-  useEffect(() => {
-    const isEmpty =
-      formData &&
-      Object.values(formData).every((v) =>
-        v === "" ||
-        v === null ||
-        v === undefined ||
-        v === 0 ||
-        v === false
-      );
+  // useEffect(() => {
+  //   const isEmpty =
+  //     formData &&
+  //     Object.values(formData).every((v) =>
+  //       v === "" ||
+  //       v === null ||
+  //       v === undefined ||
+  //       v === 0 ||
+  //       v === false
+  //     );
 
-    setIsSubmitEnabled(isEmpty);
-  }, [formData]);
+  //   setIsSubmitEnabled(isEmpty);
+  // }, [formData]);
   
   const fetchData = async () => {
     try {
