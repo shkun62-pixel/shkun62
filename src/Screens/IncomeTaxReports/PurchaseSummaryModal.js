@@ -492,7 +492,7 @@
 
 // PurchaseSummaryModal.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Table } from "react-bootstrap";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import PurSummPrint from "./PurSummPrint";
@@ -520,6 +520,14 @@ export default function PurchaseSummaryModal({ show, onClose }) {
   const [maxValue, setMaxValue] = useState("");
   const [lessDrCrNote, setLessDrCrNote] = useState(false);
   const [summaryType, setSummaryType] = useState("total"); 
+
+  // Ledger selection modal state
+  const [ledgerModalOpen, setLedgerModalOpen] = useState(false);
+  const [ledgers, setLedgers] = useState([]);                 // All ledger names from API
+  const [selectedLedgers, setSelectedLedgers] = useState([]); // Only checked
+  const [ledgerSearch, setLedgerSearch] = useState("");       // Search input
+  const [selectAll, setSelectAll] = useState(false);          // Select All toggle
+
 
   // Print preview modal state
   const [printOpen, setPrintOpen] = useState(false);
@@ -618,6 +626,13 @@ export default function PurchaseSummaryModal({ show, onClose }) {
 
         return cityMatch && stateMatch;
       });
+
+      // FILTER BY LEDGERS IF SELECTED
+      if (selectedLedgers.length > 0) {
+        arr = arr.filter(rec =>
+          selectedLedgers.includes(rec.supplierdetails?.[0]?.vacode)
+        );
+      }
 
       // GROUP AFTER FILTERING
     let grouped = [];
@@ -820,6 +835,77 @@ export default function PurchaseSummaryModal({ show, onClose }) {
     }
     return d;
   };
+
+  // useEffect(() => {
+  //   axios.get(API_URL).then((res) => {
+  //     if (Array.isArray(res.data)) {
+  //       const list = res.data
+  //         .map(r => r.supplierdetails?.[0]?.vacode)
+  //         .filter(Boolean);
+
+  //       const uniqueList = [...new Set(list)];
+
+  //       setLedgers(uniqueList);
+
+  //       // ⭐ MAKE ALL ACCOUNTS SELECTED BY DEFAULT
+  //       setSelectedLedgers(uniqueList);
+  //       setSelectAll(true);
+  //     }
+  //   });
+  // }, []);
+
+  useEffect(() => {
+  axios.get(API_URL).then((res) => {
+    if (Array.isArray(res.data)) {
+
+      const list = res.data
+        .map(r => ({
+          vacode: r.supplierdetails?.[0]?.vacode || "",
+          city: r.supplierdetails?.[0]?.city || ""
+        }))
+        .filter(x => x.vacode !== "");
+
+      // remove duplicates by vacode
+      const unique = [];
+      const map = new Map();
+      for (const item of list) {
+        if (!map.has(item.vacode)) {
+          map.set(item.vacode, true);
+          unique.push(item);
+        }
+      }
+
+      setLedgers(unique);
+
+      // select all default
+      setSelectedLedgers(unique.map(x => x.vacode));
+      setSelectAll(true);
+    }
+  });
+}, []);
+
+
+
+    // Toggle single ledger
+  function toggleLedger(name) {
+    setSelectedLedgers((prev) =>
+      prev.includes(name)
+        ? prev.filter((x) => x !== name)
+        : [...prev, name]
+    );
+  }
+
+  // Select all
+  function toggleSelectAll() {
+    if (selectAll) {
+      setSelectedLedgers([]);
+    } else {
+      setSelectedLedgers([...ledgers]);
+    }
+    setSelectAll(!selectAll);
+  }
+
+
 
   return (
     <>
@@ -1075,9 +1161,10 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                     gap: "10px",
                   }}
                 >
-                  <Button variant="outline-secondary">
-                    Select Ledger Accounts
-                  </Button>
+                <Button variant="outline-secondary" onClick={() => setLedgerModalOpen(true)}>
+                  Select Ledger Accounts
+                </Button>
+
 
                   <Button variant="outline-secondary" disabled>
                     Select Stock Items
@@ -1142,6 +1229,103 @@ export default function PurchaseSummaryModal({ show, onClose }) {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* LEDGER SELECTION MODAL */}
+    <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Select Ledger Accounts</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+
+        {/* LEDGER TABLE */}
+        <div
+          style={{
+            maxHeight: "350px",
+            overflowY: "auto",
+            padding: "10px",
+          }}
+        >
+          <Table className="custom-table" size="sm">
+            <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
+              <tr>
+                <th style={{ width: "50px", textAlign: "center" }}>Select</th>
+                <th>Account Name</th>
+                <th>City</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {ledgers
+                .filter(
+                  (x) =>
+                    x.vacode.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
+                    x.city.toLowerCase().includes(ledgerSearch.toLowerCase())
+                )
+                .map((x, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLedgers.includes(x.vacode)}
+                        onChange={() => toggleLedger(x.vacode)}
+                      />
+                    </td>
+                    <td>{x.vacode}</td>
+                    <td>{x.city}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
+
+      </Modal.Body>
+
+      <Modal.Footer
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {/* SEARCH BAR ON LEFT */}
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search ledger..."
+          style={{ width: "300px" }}
+          value={ledgerSearch}
+          onChange={(e) => setLedgerSearch(e.target.value)}
+        />
+
+        {/* <div className="">
+            <input
+              type="checkbox"
+              checked={selectAll}
+              onChange={toggleSelectAll}
+            />{" "}
+            <strong>Select All</strong>
+          </div> */}
+
+        {/* BUTTONS ON RIGHT */}
+        <div>
+          <Button
+            variant={selectAll ? "warning" : "success"}
+            onClick={toggleSelectAll}
+          >
+            {selectAll ? "Unselect All" : "Select All"}
+          </Button>{" "}
+          <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
+            Close
+          </Button>{" "}
+          <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
+            Apply
+          </Button>
+        </div>
+      </Modal.Footer>
+
+    </Modal>
     </>
   );
 }

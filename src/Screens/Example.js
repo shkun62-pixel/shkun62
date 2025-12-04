@@ -740,19 +740,232 @@
 // }
 
 
+// import React,{useState} from 'react'
+// import PurchaseSummaryModal from './IncomeTaxReports/PurchaseSummaryModal';
+// import { Button } from 'react-bootstrap';
+
+// const Example = () => {
+//   const [openPurRep, setopenPurRep] = useState(false);
+
+//   return (
+//     <div>
+//       <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button>
+//       <PurchaseSummaryModal 
+//         show={openPurRep} 
+//         onClose={() => setopenPurRep(false)} 
+//       />
+//     </div>
+//   )
+// }
+
+// export default Example
+
+
+
 import React,{useState} from 'react'
-import PurchaseSummaryModal from './IncomeTaxReports/PurchaseSummaryModal';
-import { Button } from 'react-bootstrap';
+import ProductModalCustomer from './Modals/ProductModalCustomer';
+import TextField from "@mui/material/TextField";
 
 const Example = () => {
-  const [openPurRep, setopenPurRep] = useState(false);
+
+  const [formData, setFormData] = useState({
+    broker: "",
+  });
+  const [customerDetails, setcustomerDetails] = useState([
+    {
+      Vcode: "",
+      vacode: "",
+      gstno: "",
+      pan: "",
+      Add1: "",
+      city: "",
+      state: "",
+      Tcs206c1H: "",
+      TDS194Q: "",
+    },
+  ]);
+  const tenant = "shkun_05062025_05062026";
+
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key  
+  const handleKeyDown = (event, index, field) => {
+    // --------------- ENTER / TAB: move to NEXT FIELD -----------------
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+      return;
+    }
+  
+    // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
+    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+      setPressedKey(event.key);
+      openModalForItemCus(index);
+      event.preventDefault();
+    }
+  };
+
+  // Modal For CustomerDetails
+  const [productsCus, setProductsCus] = useState([]);
+  const [showModalCus, setShowModalCus] = useState(false);
+  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+  const [loadingCus, setLoadingCus] = useState(true);
+  const [errorCus, setErrorCus] = useState(null);
+
+  const handleItemChangeCus = (index, key, value) => {
+    const updatedItems = [...customerDetails];
+    updatedItems[index][key] = value;
+
+if (key === "name") {
+  const selectedProduct = productsCus.find(
+    (product) => product.ahead === value
+  );
+  if (selectedProduct) {
+    updatedItems[index] = {
+      ...updatedItems[index],
+      Vcode: selectedProduct.acode,
+      vacode: selectedProduct.ahead,
+      gstno: selectedProduct.gstNo,
+      pan: selectedProduct.pan,
+      Add1: selectedProduct.add1,
+      city: selectedProduct.city,
+      state: selectedProduct.state,
+      Tcs206c1H: selectedProduct.tcs206,
+      TDS194Q: selectedProduct.tds194q,
+    };
+  }
+}
+    setcustomerDetails(updatedItems);
+  };
+
+  const handleProductSelectCus = (product) => {
+    if (!product) {
+      alert("No product received!");
+      setShowModalCus(false);
+      return;
+    }
+  
+    // clone the array
+    const newCustomers = [...customerDetails];
+  
+    // overwrite the one at the selected index
+    newCustomers[selectedItemIndexCus] = {
+      ...newCustomers[selectedItemIndexCus],
+      Vcode: product.acode || '',
+      vacode: product.ahead || '',
+      city:   product.city  || '',
+      gstno:  product.gstNo  || '',
+      pan:    product.pan    || '',
+      Add1: product.add1 || '',
+      state: product.state    || '',
+      Tcs206c1H: product.tcs206    || '',
+      TDS194Q: product.tds194q    || '',  
+    };
+
+    const nameValue = product.ahead || product.name || "";
+    if (selectedItemIndexCus !== null) {
+      // 👉 NEW: set broker in formData
+      setFormData((prev) => ({
+        ...prev,
+        broker: product.agent || ""   // <-- change key name based on your API
+      }));
+      if (selectedItemIndexCus === "v_tpt") {
+        // setFormData((prevData) => ({
+        //   ...prevData,
+        //   v_tpt: nameValue,
+        // }));
+      } else {
+        handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+      }
+    }
+    setcustomerDetails(newCustomers);
+    setShowModalCus(false);
+  };
+
+  const handleCloseModalCus = () => {
+    setShowModalCus(false);
+    setPressedKey(""); // resets for next modal open
+  };
+
+  const openModalForItemCus = (index) => {
+      setSelectedItemIndexCus(index);
+      setShowModalCus(true);
+  };
+
+  const allFieldsCus = productsCus.reduce((fields, product) => {
+  Object.keys(product).forEach((key) => {
+    if (!fields.includes(key)) {
+      fields.push(key);
+    }
+  });
+
+  return fields;
+    }, []);
 
   return (
     <div>
-      <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button>
-      <PurchaseSummaryModal 
-        show={openPurRep} 
-        onClose={() => setopenPurRep(false)} 
+      {customerDetails.map((item, index) => (
+        <div key={item.vacode}>
+          <div className="CUS">
+            <div className="customerdiv">
+              <TextField
+                label="CUSTOMER NAME"
+                variant="filled"
+                size="small"
+                value={item.vacode}
+                className="customerNAME custom-bordered-input"
+                onKeyDown={(e) => {
+                  handleKeyDown(e, index, "accountname");
+                }}
+                onFocus={(e) => e.target.select()}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: "20px",
+                  },
+                }}
+              />
+            </div>
+            <div className="citydivZ">
+              <TextField
+                className="cityName custom-bordered-input"
+                value={item.city}
+                variant="filled"
+                label="CITY"
+                size="small"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: "20px",
+                  },
+                }}
+                onChange={(e) =>
+                  handleItemChangeCus(index, "city", e.target.value)
+                }
+                onFocus={(e) => e.target.select()}
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+      {showModalCus && (
+      <ProductModalCustomer
+        allFields={allFieldsCus}
+        onSelect={handleProductSelectCus}
+        onClose={handleCloseModalCus}
+        initialKey={pressedKey}
+        tenant={tenant}
+      />
+      )}
+      <TextField
+        className="Remz custom-bordered-input"
+        id="broker"
+        value={formData.broker}
+        label='BROKER'
+        inputProps={{
+        maxLength: 48,
+        style: {
+          height: 20,
+        },}}
+        size="small"
+        variant="filled"
       />
     </div>
   )
