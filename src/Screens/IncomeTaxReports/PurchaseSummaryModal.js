@@ -493,6 +493,7 @@
 // PurchaseSummaryModal.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form, Table } from "react-bootstrap";
+import "./IncomeTax.css"
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import PurSummPrint from "./PurSummPrint";
@@ -509,6 +510,7 @@ export default function PurchaseSummaryModal({ show, onClose }) {
   const [toDate, setToDate] = useState("");
   const [city, setCity] = useState("");
   const [stateName, setStateName] = useState("");
+  const [agent, setAgent] = useState("");
   const [isB2B, setIsB2B] = useState(false);
   const [reportType, setReportType] = useState("With GST");
   const [fullAddress, setFullAddress] = useState("Yes");
@@ -836,57 +838,37 @@ export default function PurchaseSummaryModal({ show, onClose }) {
     return d;
   };
 
-  // useEffect(() => {
-  //   axios.get(API_URL).then((res) => {
-  //     if (Array.isArray(res.data)) {
-  //       const list = res.data
-  //         .map(r => r.supplierdetails?.[0]?.vacode)
-  //         .filter(Boolean);
-
-  //       const uniqueList = [...new Set(list)];
-
-  //       setLedgers(uniqueList);
-
-  //       // ⭐ MAKE ALL ACCOUNTS SELECTED BY DEFAULT
-  //       setSelectedLedgers(uniqueList);
-  //       setSelectAll(true);
-  //     }
-  //   });
-  // }, []);
-
   useEffect(() => {
-  axios.get(API_URL).then((res) => {
-    if (Array.isArray(res.data)) {
+    axios.get(API_URL).then((res) => {
+      if (Array.isArray(res.data)) {
 
-      const list = res.data
-        .map(r => ({
-          vacode: r.supplierdetails?.[0]?.vacode || "",
-          city: r.supplierdetails?.[0]?.city || ""
-        }))
-        .filter(x => x.vacode !== "");
+        const list = res.data
+          .map(r => ({
+            vacode: r.supplierdetails?.[0]?.vacode || "",
+            city: r.supplierdetails?.[0]?.city || ""
+          }))
+          .filter(x => x.vacode !== "");
 
-      // remove duplicates by vacode
-      const unique = [];
-      const map = new Map();
-      for (const item of list) {
-        if (!map.has(item.vacode)) {
-          map.set(item.vacode, true);
-          unique.push(item);
+        // remove duplicates by vacode
+        const unique = [];
+        const map = new Map();
+        for (const item of list) {
+          if (!map.has(item.vacode)) {
+            map.set(item.vacode, true);
+            unique.push(item);
+          }
         }
+
+        setLedgers(unique);
+
+        // select all default
+        setSelectedLedgers(unique.map(x => x.vacode));
+        setSelectAll(true);
       }
+    });
+  }, []);
 
-      setLedgers(unique);
-
-      // select all default
-      setSelectedLedgers(unique.map(x => x.vacode));
-      setSelectAll(true);
-    }
-  });
-}, []);
-
-
-
-    // Toggle single ledger
+  // Toggle single ledger
   function toggleLedger(name) {
     setSelectedLedgers((prev) =>
       prev.includes(name)
@@ -895,17 +877,50 @@ export default function PurchaseSummaryModal({ show, onClose }) {
     );
   }
 
-  // Select all
-  function toggleSelectAll() {
-    if (selectAll) {
-      setSelectedLedgers([]);
-    } else {
-      setSelectedLedgers([...ledgers]);
-    }
-    setSelectAll(!selectAll);
+  // helper: currently visible (filtered) ledgers based on search
+  function getVisibleLedgers() {
+    const q = (ledgerSearch || "").toLowerCase();
+    return ledgers.filter(
+      (x) =>
+        x.vacode.toLowerCase().includes(q) ||
+        (x.city || "").toLowerCase().includes(q)
+    );
   }
 
+  // Select all
+  function toggleSelectAll() {
+    const visible = getVisibleLedgers();
+    const visibleVacodes = visible.map(x => x.vacode);
 
+    // If every visible vacode is already selected => unselect visible ones
+    const allVisibleSelected = visibleVacodes.length > 0 &&
+      visibleVacodes.every(v => selectedLedgers.includes(v));
+
+    if (allVisibleSelected) {
+      // remove visible vacodes from selectedLedgers
+      setSelectedLedgers(prev => prev.filter(v => !visibleVacodes.includes(v)));
+      setSelectAll(false);
+    } else {
+      // add visible vacodes to selectedLedgers (avoid duplicates)
+      setSelectedLedgers(prev => {
+        const set = new Set(prev);
+        visibleVacodes.forEach(v => set.add(v));
+        return Array.from(set);
+      });
+      setSelectAll(true);
+    }
+  }
+
+  useEffect(() => {
+    const visible = getVisibleLedgers();
+    if (visible.length === 0) {
+      setSelectAll(false);
+      return;
+    }
+    const visibleVacodes = visible.map(x => x.vacode);
+    const allVisibleSelected = visibleVacodes.every(v => selectedLedgers.includes(v));
+    setSelectAll(allVisibleSelected);
+  }, [ledgerSearch, ledgers, selectedLedgers]);
 
   return (
     <>
@@ -938,8 +953,8 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                 <div style={rowStyle}>
                   <label style={labelStyle}>From</label>
                     <InputMask
-                      mask="99/99/9999"
-                      placeholder="dd/mm/yyyy"
+                      mask="99-99-9999"
+                      placeholder="dd-mm-yyyy"
                       value={rawValue}
                       onChange={handleChange}
                     >
@@ -957,8 +972,8 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                 <div style={rowStyle}>
                   <label style={labelStyle}>Upto</label>
                   <InputMask
-                    mask="99/99/9999"
-                    placeholder="dd/mm/yyyy"
+                    mask="99-99-9999"
+                    placeholder="dd-mm-yyyy"
                     value={toRaw}
                     onChange={handleToChange}
                   >
@@ -990,18 +1005,29 @@ export default function PurchaseSummaryModal({ show, onClose }) {
 
                 {/* B2B Checkbox */}
                 <div style={rowStyle}>
-                  <label>Agent | B2B</label>
+                  <label>Agent</label>
+                  <div>
                   <input
+                    style={{ transform: "scale(1.2)", marginRight: "5px",marginLeft:"5px" }}
                     type="checkbox"
                     checked={isB2B}
                     onChange={(e) => setIsB2B(e.target.checked)}
                   />
+                  <label style={{marginRight:"10px"}}>B2B</label>
+                  </div>
+                  <div>
+                  <Form.Control
+                    value={agent}
+                    onChange={(e) => setAgent(e.target.value)}
+                  />
+                  </div>
                 </div>
 
                 {/* Report Type */}
                 <div style={rowStyle}>
-                  <label style={labelStyle}>Report Type</label>
+                  <label style={{}}>Report Type</label>
                   <Form.Select
+                    className="reportType"
                     value={reportType}
                     onChange={(e) => setReportType(e.target.value)}
                   >
@@ -1011,7 +1037,7 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                 </div>
 
                 {/* Full Address */}
-                <div style={rowStyle}>
+                {/* <div style={rowStyle}>
                   <label style={labelStyle}>Full Address</label>
                   <Form.Select
                     value={fullAddress}
@@ -1020,12 +1046,13 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                     <option>Yes</option>
                     <option>No</option>
                   </Form.Select>
-                </div>
+                </div> */}
 
                 {/* Tax Type */}
                 <div style={rowStyle}>
-                  <label style={labelStyle}>Tax Type</label>
+                  <label style={{}}>Tax Type</label>
                   <Form.Select
+                  className="taxType"
                     value={taxType}
                     onChange={(e) => setTaxType(e.target.value)}
                   >
@@ -1036,14 +1063,14 @@ export default function PurchaseSummaryModal({ show, onClose }) {
                 </div>
 
                 {/* Order By */}
-                <div style={rowStyle}>
+                {/* <div style={rowStyle}>
                   <label style={labelStyle}>Order By</label>
                   <Form.Control
                     value={orderBy}
                     onChange={(e) => setOrderBy(e.target.value)}
                     placeholder="Order By"
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* RIGHT SIDE */}

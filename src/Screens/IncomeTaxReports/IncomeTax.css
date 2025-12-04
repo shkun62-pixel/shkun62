@@ -1,0 +1,18 @@
+.taxType{
+    height: 40px;
+    width: 46%;
+    margin-left: 40px;
+    font-weight: bold;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+.reportType{
+    height: 40px;
+    width: 46%;
+    margin-left: 19px;
+    font-weight: bold;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
