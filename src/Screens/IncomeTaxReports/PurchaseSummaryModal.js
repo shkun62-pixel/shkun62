@@ -492,7 +492,7 @@
 
 // PurchaseSummaryModal.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import PurSummPrint from "./PurSummPrint";
@@ -536,6 +536,12 @@ export default function PurchaseSummaryModal({ show, onClose }) {
 
   const [rawValue, setRawValue] = useState("");
   const [toRaw, setToRaw] = useState("");
+
+  useEffect(() => {
+    if (!fromDate && dateFrom) {
+      setFromDate(new Date(dateFrom));
+    }
+  }, [dateFrom, fromDate]);
 
   // intialize fromDate input with formatted dateFrom
   useEffect(() => {
@@ -595,9 +601,7 @@ export default function PurchaseSummaryModal({ show, onClose }) {
       const res = await axios.get(API_URL);
       let arr = Array.isArray(res.data) ? res.data : [];
 
-      //-----------------------------------------------------
       // ⭐ FILTER BY CITY & STATE (case-insensitive)
-      //-----------------------------------------------------
       const filterCity = city.trim().toLowerCase();
       const filterState = stateName.trim().toLowerCase();
 
@@ -615,9 +619,7 @@ export default function PurchaseSummaryModal({ show, onClose }) {
         return cityMatch && stateMatch;
       });
 
-      //-----------------------------------------------------
       // GROUP AFTER FILTERING
-      //-----------------------------------------------------
     let grouped = [];
 
     if (summaryType === "total") {
