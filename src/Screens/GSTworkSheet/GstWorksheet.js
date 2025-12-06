@@ -798,12 +798,12 @@ export default function GstWorksheet() {
                 {/* <Button className="Buttonz" variant="contained" color="primary" onClick={handleView} disabled={loading}>
                   View
                 </Button> */}
-              <Button style={{marginTop:"5px"}} className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
+              <Button className="Buttonz" variant="outlined" onClick={handleExport} disabled={loading || (!saleGrouped.length && !purchaseGrouped.length)}>
                 Export
               </Button>
-               <Button style={{marginTop:"5px",backgroundColor:"grey"}} className="Buttonz" variant="contained" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
+               {/* <Button style={{marginTop:"5px",backgroundColor:"grey"}} className="Buttonz" variant="contained" onClick={() => { setSaleData([]); setPurchaseData([]); }}>
                 Exit
-              </Button>
+              </Button> */}
           </div>
 
         

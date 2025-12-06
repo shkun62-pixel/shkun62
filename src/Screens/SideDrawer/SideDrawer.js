@@ -967,7 +967,7 @@ export default function App() {
                             width: "300px",
                             background: "#2f3847",
                             borderRadius: "10px",
-                            padding: "10px",
+                            // padding: "10px",
                             zIndex: 30000,
                             border: "1px solid #444",
                             // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
@@ -1005,7 +1005,7 @@ export default function App() {
                             }}
                         >
                         <List>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>

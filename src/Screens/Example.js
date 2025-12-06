@@ -740,17 +740,22 @@
 // }
 
 
-import React,{useState} from 'react'
-import PurchaseSummaryModal from './IncomeTaxReports/PurchaseSummaryModal';
+import React,{useState,useEffect} from 'react'
 import { Button } from 'react-bootstrap';
+import AccountWiseSummPur from './IncomeTaxReports/AccountWiseSummPur';
 
 const Example = () => {
   const [openPurRep, setopenPurRep] = useState(false);
 
+    useEffect(() => {
+    // Auto open the modal when component mounts
+    setopenPurRep(true);
+  }, []);
+
   return (
     <div>
-      <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button>
-      <PurchaseSummaryModal 
+      {/* <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button> */}
+      <AccountWiseSummPur 
         show={openPurRep} 
         onClose={() => setopenPurRep(false)} 
       />

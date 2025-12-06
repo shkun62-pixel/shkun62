@@ -503,7 +503,7 @@ import InputMask from "react-input-mask";
 const API_URL =
   "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
 
-export default function PurchaseSummaryModal({ show, onClose }) {
+export default function PartyWiseSummPur({ show, onClose }) {
   const {dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
   // form state
   const [fromDate, setFromDate] = useState("");
