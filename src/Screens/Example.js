@@ -766,6 +766,51 @@ const Example = () => {
 export default Example
 
 
+// import React, { useState, useEffect } from 'react';
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+// import financialYear from './Shared/financialYear';
+
+// const Example = () => {
+//   const [startDate, setStartDate] = useState(null);
+//   const [endDate, setEndDate] = useState(null);
+
+//   // Auto-set financial year when component loads
+//   useEffect(() => {
+//     const fy = financialYear.getFYDates();
+//     setStartDate(fy.start);
+//     setEndDate(fy.end);
+//   }, []);
+
+//   return (
+//     <div>
+//       <div>
+//         <span className="date-label">From:</span>
+//         <DatePicker
+//           className="datepickerBank"
+//           selected={startDate}
+//           onChange={(date) => setStartDate(date)}
+//           dateFormat="dd/MM/yyyy"
+//         />
+//       </div>
+
+//       <div>
+//         <span className="date-label">To:</span>
+//         <DatePicker
+//           className="datepickerBank2"
+//           selected={endDate}
+//           onChange={(date) => setEndDate(date)}
+//           dateFormat="dd/MM/yyyy"
+//         />
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+
+
 
 // import React,{useState} from 'react'
 // import ProductModalCustomer from './Modals/ProductModalCustomer';

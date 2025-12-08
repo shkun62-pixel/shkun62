@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
@@ -9,9 +9,10 @@ const API_URL =
   "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
 
 export default function AccountWiseSummPur({ show, onClose }) {
+
   // filters
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [fromDate, setFromDate] = useState("01-04-2025");
+  const [toDate, setToDate] = useState("31-03-2026");
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
   const [reportType, setReportType] = useState("With GST");
@@ -25,20 +26,6 @@ export default function AccountWiseSummPur({ show, onClose }) {
   const handlePrint = useReactToPrint({
     content: () => printRef.current
   });
-
-  function parseDMY(dateStr) {
-    if (!dateStr) return null;
-
-    const [day, month, year] = dateStr.split("/").map(Number);
-    // month - 1 because JS months start from 0
-    return new Date(year, month - 1, day);
-  }
-
-  function parseInputDate(dateStr) {
-    if (!dateStr || dateStr.includes("_")) return null;
-    const [d, m, y] = dateStr.split("-");
-    return new Date(`${y}-${m}-${d}`);
-  }
 
   function parseAnyDate(dateStr) {
     if (!dateStr) return null;
@@ -71,8 +58,6 @@ export default function AccountWiseSummPur({ show, onClose }) {
 
     return null; // invalid format
   }
-
-
 
   // group into single row per account
   function summarizeByAccount(purchases) {
@@ -112,79 +97,63 @@ export default function AccountWiseSummPur({ show, onClose }) {
   // OPEN PRINT MODAL
   const onOpenPrint = () => {
 
-  // ❗ Stop if dates are empty or incomplete
-  if (!fromDate || fromDate.includes("_") || !toDate || toDate.includes("_")) {
-    alert("Please select both From and To dates.");
-    return;
-  }
-
-  setFetching(true);
-
-  axios.get(API_URL)
-    .then(res => {
-
-      let data = res.data;
-
-    // DATE FILTER
-    let from = parseAnyDate(fromDate);
-    let to   = parseAnyDate(toDate);
-
-    const isValid = (d) => d instanceof Date && !isNaN(d);
-
-    if (isValid(from) && isValid(to)) {
-      data = data.filter(p => {
-        const apiDate = parseAnyDate(p.formData?.date);
-        if (!isValid(apiDate)) return false;
-        return apiDate >= from && apiDate <= to;
-      });
+    // ❗ Stop if dates are empty or incomplete
+    if (!fromDate || fromDate.includes("_") || !toDate || toDate.includes("_")) {
+      alert("Please select both From and To dates.");
+      return;
     }
 
-      // CITY FILTER
-      if (city.trim() !== "") {
+    setFetching(true);
+
+    axios.get(API_URL)
+      .then(res => {
+
+        let data = res.data;
+
+      // DATE FILTER
+      let from = parseAnyDate(fromDate);
+      let to   = parseAnyDate(toDate);
+
+      const isValid = (d) => d instanceof Date && !isNaN(d);
+
+      if (isValid(from) && isValid(to)) {
         data = data.filter(p => {
-          const apiCity =
-            p.supplierdetails?.[0]?.city ||
-            p.formData?.city ||
-            "";
-          return apiCity.toLowerCase().includes(city.toLowerCase());
+          const apiDate = parseAnyDate(p.formData?.date);
+          if (!isValid(apiDate)) return false;
+          return apiDate >= from && apiDate <= to;
         });
       }
 
-      // GROUP SUMMARY
-      const summary = summarizeByAccount(data);
-      setGroupedData(summary);
-    })
+        // CITY FILTER
+        if (city.trim() !== "") {
+          data = data.filter(p => {
+            const apiCity =
+              p.supplierdetails?.[0]?.city ||
+              p.formData?.city ||
+              "";
+            return apiCity.toLowerCase().includes(city.toLowerCase());
+          });
+        }
 
-    .catch(() => alert("Failed to load data"))
+        // GROUP SUMMARY
+        const summary = summarizeByAccount(data);
+        setGroupedData(summary);
+      })
 
-    .finally(() => {
-      setFetching(false);
-      setPrintOpen(true);
-    });
-};
+      .catch(() => alert("Failed to load data"))
 
-  // const onOpenPrint = () => {
-  //   setFetching(true);
-
-  //   axios.get(API_URL)
-  //     .then(res => {
-  //       const summary = summarizeByAccount(res.data);
-  //       setGroupedData(summary);
-  //     })
-  //     .catch(() => alert("Failed to load data"))
-  //     .finally(() => {
-  //       setFetching(false);
-  //       setPrintOpen(true);
-  //     });
-  // };
+      .finally(() => {
+        setFetching(false);
+        setPrintOpen(true);
+      });
+  };
 
   return (
     <>
-      {/* MAIN FILTER MODAL */}
-      <Modal show={show} onHide={onClose} size="lg" centered>
+    {/* MAIN FILTER MODAL */}
+    <Modal show={show} onHide={onClose} size="xl" centered>
       <Modal.Body style={{ padding: "30px", background: "#f8f9fa" }}>
 
-        {/* TITLE */}
         <h4
           style={{
             textAlign: "center",
@@ -201,109 +170,26 @@ export default function AccountWiseSummPur({ show, onClose }) {
             padding: "25px",
             borderRadius: "12px",
             boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "18px",
           }}
         >
 
-          {/* FROM DATE */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label className="form-label">From Date</label>
-            <InputMask
-              mask="99-99-9999"
-              placeholder="dd-mm-yyyy"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
+          {/* MAIN 2-COLUMN CONTAINER */}
+          <div style={{ display: "flex", gap: "25px" }}>
+
+            {/* LEFT CONTAINER */}
+            <div
+              style={{
+                flex: 1,
+                background: "#f5f6f7",
+                padding: "20px",
+                borderRadius: "10px",
+              }}
             >
-              {(inputProps) => <input {...inputProps} className="form-control" />}
-            </InputMask>
-          </div>
+              <h5 style={{ marginBottom: "18px", fontWeight: 600 }}>Filters</h5>
 
-          {/* TO DATE */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label className="form-label">To Date</label>
-            <InputMask
-              mask="99-99-9999"
-              placeholder="dd-mm-yyyy"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-            >
-              {(inputProps) => <input {...inputProps} className="form-control" />}
-            </InputMask>
-          </div>
-
-          {/* CITY */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label className="form-label">City</label>
-            <Form.Control
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
-          </div>
-
-          <hr />
-
-          {/* SUMMARY TYPE */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: 600 }}>Summary Type</label>
-
-            <div className="form-check">
-              <input
-                type="radio"
-                className="form-check-input"
-                name="summaryType"
-                value="account"
-                checked={summaryType === "account"}
-                onChange={(e) => setSummaryType(e.target.value)}
-              />
-              <label className="form-check-label">Account Wise</label>
-            </div>
-
-            <Form.Select
-              className="reportType"
-              value={reportType}
-              onChange={(e) => setReportType(e.target.value)}
-              style={{ maxWidth: "100%" }}
-            >
-              <option>With GST</option>
-              <option>Without GST</option>
-            </Form.Select>
-          </div>
-
-          {/* BUTTONS */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
-              marginTop: "10px",
-            }}
-          >
-            <Button variant="primary" onClick={onOpenPrint}>
-              Print
-            </Button>
-
-            <Button variant="secondary" onClick={onClose}>
-              Exit
-            </Button>
-          </div>
-
-        </Form>
-      </Modal.Body>
-      </Modal>
-
-      {/* <Modal show={show} onHide={onClose} size="xl" centered>
-        <Modal.Body>
-          <h4 style={{ textAlign: "center" }}>Account Wise Purchase Summary</h4>
-
-          <Form>
-
-      
-            <div style={{ display: "flex", gap: "20px" }}>
-
-              <div>
-                <label>From</label>
+              {/* FROM DATE ROW */}
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <label className="form-label" style={{ width: "120px" }}>From Date</label>
                 <InputMask
                   mask="99-99-9999"
                   placeholder="dd-mm-yyyy"
@@ -314,8 +200,9 @@ export default function AccountWiseSummPur({ show, onClose }) {
                 </InputMask>
               </div>
 
-              <div>
-                <label>To</label>
+              {/* TO DATE ROW */}
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <label className="form-label" style={{ width: "120px"}}>To Date</label>
                 <InputMask
                   mask="99-99-9999"
                   placeholder="dd-mm-yyyy"
@@ -326,22 +213,41 @@ export default function AccountWiseSummPur({ show, onClose }) {
                 </InputMask>
               </div>
 
-              <div>
-                <label>City</label>
+              {/* CITY ROW */}
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <label className="form-label" style={{ width: "120px" }}>City</label>
                 <Form.Control
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                 />
               </div>
+              
+              <div style={{ display: "flex", alignItems: "center" }}>
+              <label className="form-label">Report Type</label>
+              <Form.Select
+                className="reportType"
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+              >
+                <option>With GST</option>
+                <option>Without GST</option>
+              </Form.Select>
+              </div>
 
             </div>
 
-            <br />
+            {/* RIGHT CONTAINER */}
+            <div
+              style={{
+                flex: 1,
+                background: "#f5f6f7",
+                padding: "20px",
+                borderRadius: "10px",
+              }}
+            >
+              <h5 style={{ marginBottom: "15px", fontWeight: 600 }}>Summary Type</h5>
 
-          
-            <div>
-              <strong>Select Summary Type</strong>
-              <div className="form-check">
+              <div className="form-check mb-3">
                 <input
                   type="radio"
                   className="form-check-input"
@@ -352,52 +258,54 @@ export default function AccountWiseSummPur({ show, onClose }) {
                 />
                 <label className="form-check-label">Account Wise</label>
               </div>
-              <Form.Select
-                className="reportType"
-                value={reportType}
-                onChange={(e) => setReportType(e.target.value)}
-              >
-                <option>With GST</option>
-                <option>Without GST</option>
-              </Form.Select>
             </div>
+          </div>
 
-            <br />
+          {/* BUTTONS */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "10px",
+              marginTop: "25px",
+            }}
+          >
+            <Button variant="primary" onClick={onOpenPrint}>
+              Print
+            </Button>
+            <Button variant="secondary" onClick={onClose}>
+              Exit
+            </Button>
+          </div>
+        </Form>
+      </Modal.Body>
+    </Modal>
 
-      
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-              <Button variant="primary" onClick={onOpenPrint}>Print</Button>
-              <Button variant="secondary" onClick={onClose}>Exit</Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal> */}
+    {/* PRINT PREVIEW MODAL */}
+    <Modal
+      show={printOpen}
+      onHide={() => setPrintOpen(false)}
+      size="xl"
+      centered
+    >
+      <Modal.Body>
+        {fetching ? (
+          <div className="text-center">Loading...</div>
+        ) : (
+          <AccountWisePrint
+            ref={printRef}
+            rows={groupedData}
+            fromDate={fromDate}
+            toDate={toDate}
+          />
+        )}
+      </Modal.Body>
 
-      {/* PRINT PREVIEW MODAL */}
-      <Modal
-        show={printOpen}
-        onHide={() => setPrintOpen(false)}
-        size="xl"
-        centered
-      >
-        <Modal.Body>
-          {fetching ? (
-            <div className="text-center">Loading...</div>
-          ) : (
-            <AccountWisePrint
-              ref={printRef}
-              rows={groupedData}
-              fromDate={fromDate}
-              toDate={toDate}
-            />
-          )}
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setPrintOpen(false)}>Close</Button>
-          <Button variant="primary" onClick={handlePrint}>Send to Printer</Button>
-        </Modal.Footer>
-      </Modal>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setPrintOpen(false)}>Close</Button>
+        <Button variant="primary" onClick={handlePrint}>Send to Printer</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 }

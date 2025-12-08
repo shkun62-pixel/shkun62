@@ -9,6 +9,7 @@ import { CompanyContext } from "../../Context/CompanyContext";
 import { useContext } from "react";
 import styles from "../books.module.css";
 import useCompanySetup from "../../Shared/useCompanySetup";
+import financialYear from "../../Shared/financialYear";
 
 const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
 
@@ -29,11 +30,12 @@ const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isSplitByDate, setIsSplitByDate] = useState(false);
 
+  // Auto-set financial year when component loads
   useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start);
+    setUptoDate(fy.end);
+  }, []);
 
   useEffect(() => {
     if (isOpen) fetchData();

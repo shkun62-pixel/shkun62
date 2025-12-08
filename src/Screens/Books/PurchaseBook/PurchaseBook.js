@@ -9,6 +9,7 @@ import { useContext } from "react";
 import useCompanySetup from "../../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import financialYear from "../../Shared/financialYear";
 
 const LOCAL_STORAGE_KEY = "FieldsPurVisibility";
 
@@ -213,11 +214,12 @@ const PurchaseBook = () => {
   const [selectedItems, setSelectedItems] = useState(""); 
   const rowRefs = useRef([]);
 
+  // Auto-set financial year when component loads
   useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start);
+    setToDate(fy.end);
+  }, []);
 
   
   useEffect(() => {

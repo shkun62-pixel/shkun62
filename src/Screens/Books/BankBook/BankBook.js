@@ -8,6 +8,7 @@ import useCompanySetup from "../../Shared/useCompanySetup";
 import { useNavigate } from "react-router-dom";
 import BankBookPrint from "./BankBookPrint";
 import { Button, Modal, Form } from "react-bootstrap";
+import financialYear from "../../Shared/financialYear";
 
 const BankBook = () => {
   const rowRefs = useRef([]);
@@ -43,11 +44,12 @@ const BankBook = () => {
     fetchAnexure();
   }, []);
 
+  // Auto-set financial year when component loads
   useEffect(() => {
-    if (!startDate && dateFrom) {
-      setStartDate(new Date(dateFrom));
-    }
-  }, [dateFrom, startDate]);
+    const fy = financialYear.getFYDates();
+    setStartDate(fy.start);
+    setEndDate(fy.end);
+  }, []);
 
   // ✅ Fetch API data
   useEffect(() => {
@@ -203,7 +205,7 @@ const BankBook = () => {
             <span className="date-label">From:</span>
             <DatePicker
               className="datepickerBank"
-              selected={startDate}
+              selected={formatDate(startDate)}
               onChange={(date) => setStartDate(date)}
               dateFormat="MM/dd/yyyy"
             />

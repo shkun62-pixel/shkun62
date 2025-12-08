@@ -1083,57 +1083,56 @@ export default function PartyWiseSummPur({ show, onClose }) {
                   boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
                 }}
               >
-                {/* <h6 className="text-primary fw-bold mb-2">Quantity & Value</h6> */}
-                          {/* SUMMARY TYPE RADIO BUTTONS */}
-      <div style={{ padding: "10px"}}>
-        <div className="form-check">
-          <input
-            type="radio"
-            className="form-check-input"
-            name="summaryType"
-            value="total"
-            checked={summaryType === "total"}
-            onChange={(e) => setSummaryType(e.target.value)}
-          />
-          <label className="form-check-label">Total Summary</label>
-        </div>
+                {/* SUMMARY TYPE RADIO BUTTONS */}
+                <div style={{ padding: "10px"}}>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="summaryType"
+                      value="total"
+                      checked={summaryType === "total"}
+                      onChange={(e) => setSummaryType(e.target.value)}
+                    />
+                    <label className="form-check-label">Total Summary</label>
+                  </div>
 
-        <div className="form-check">
-          <input
-            type="radio"
-            className="form-check-input"
-            name="summaryType"
-            value="month"
-            checked={summaryType === "month"}
-            onChange={(e) => setSummaryType(e.target.value)}
-          />
-          <label className="form-check-label">Month Wise</label>
-        </div>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="summaryType"
+                      value="month"
+                      checked={summaryType === "month"}
+                      onChange={(e) => setSummaryType(e.target.value)}
+                    />
+                    <label className="form-check-label">Month Wise</label>
+                  </div>
 
-        <div className="form-check">
-          <input
-            type="radio"
-            className="form-check-input"
-            name="summaryType"
-            value="date"
-            checked={summaryType === "date"}
-            onChange={(e) => setSummaryType(e.target.value)}
-          />
-          <label className="form-check-label">Date Wise</label>
-        </div>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="summaryType"
+                      value="date"
+                      checked={summaryType === "date"}
+                      onChange={(e) => setSummaryType(e.target.value)}
+                    />
+                    <label className="form-check-label">Date Wise</label>
+                  </div>
 
-        <div className="form-check">
-          <input
-            type="radio"
-            className="form-check-input"
-            name="summaryType"
-            value="account"
-            checked={summaryType === "account"}
-            onChange={(e) => setSummaryType(e.target.value)}
-          />
-          <label className="form-check-label">Account Wise</label>
-        </div>
-      </div>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="summaryType"
+                      value="account"
+                      checked={summaryType === "account"}
+                      onChange={(e) => setSummaryType(e.target.value)}
+                    />
+                    <label className="form-check-label">Account Wise</label>
+                  </div>
+                </div>
 
                 {/* Min Max Qty */}
                 <div style={rowStyle}>

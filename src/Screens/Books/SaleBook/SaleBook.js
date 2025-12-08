@@ -9,6 +9,7 @@ import { useContext } from "react";
 import useCompanySetup from "../../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import financialYear from "../../Shared/financialYear";
 
 const LOCAL_STORAGE_KEY = "FieldsVisibility";
 
@@ -212,11 +213,12 @@ const SaleBook = () => {
   const [selectedItems, setSelectedItems] = useState(""); 
   const rowRefs = useRef([]);
 
+  // Auto-set financial year when component loads
   useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start);
+    setToDate(fy.end);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -448,7 +450,7 @@ const SaleBook = () => {
       <h3 className="bank-title">📒 SALE BOOK</h3>
 
       <div style={{ display: "flex",flexDirection:"row", marginBottom: 10,marginLeft:10, marginTop:"20px" }}>
-      <div>
+        <div>
         <span className="text-lg mr-2">Period From:</span>
          <DatePicker
             selected={fromDate}
