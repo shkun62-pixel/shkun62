@@ -14,6 +14,7 @@ import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 import CoA from "./CoA";
 import InputMask from "react-input-mask";
+import financialYear from "../Shared/financialYear";
 
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
@@ -51,19 +52,8 @@ const TrailBalance = () => {
   const [currentGroupName, setCurrentGroupName] = useState("");
   const [selectedGroupRows, setSelectedGroupRows] = useState(new Set());
 
-    // odler
-  // ✅ Convert API format → dd/mm/yyyy
-  const formatApiDate = (isoString) => {
-    if (!isoString) return "";
-    const date = new Date(isoString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
-  const [ledgerToDate, setLedgerToDate] = useState(() => formatApiDate(new Date()));
+  const [ledgerToDate, setLedgerToDate] = useState(null);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
     Balance: "Active Balance",
@@ -84,12 +74,10 @@ const TrailBalance = () => {
   };
 
   useEffect(() => {
-    if (!ledgerFromDate && dateFrom) {
-      const formatted = formatApiDate(dateFrom);
-      setLedgerFromDate(formatted);
-      console.log("Setting ledgerFromDate to dateFrom:", dateFrom);
-    }
-  }, [dateFrom, ledgerFromDate]);
+    const fy = financialYear.getFYDates();
+    setLedgerFromDate(formatDate(fy.start)); // converted
+    setLedgerToDate(formatDate(fy.end));     // converted
+  }, []);
 
   // Filters Transactions Account Statement 
   const [vtypeFilters, setVtypeFilters] = useState({
@@ -256,6 +244,12 @@ const TrailBalance = () => {
   //   }
   // }, [activeRowIndex, showModal]);
 
+  const parseDDMMYYYY = (str) => {
+    if (!str) return null;
+    const [dd, mm, yyyy] = str.split("/").map(Number);
+    return new Date(yyyy, mm - 1, dd);
+  };
+
   // fetch ledger + fa
   useEffect(() => {
     const fetchData = async () => {
@@ -276,21 +270,29 @@ const TrailBalance = () => {
 
         const ledgerTotals = {};
         faData.forEach((entry) => {
-          entry.transactions.forEach((txn) => {
-            const txnDate = new Date(txn.date);
-            if (ledgerFromDate && txnDate < ledgerFromDate) return;
-            if (ledgerToDate && txnDate > ledgerToDate) return;
+          
+        const from = parseDDMMYYYY(ledgerFromDate);
+        const to = parseDDMMYYYY(ledgerToDate);
 
-            const acc = txn.account.trim();
-            if (!ledgerTotals[acc]) {
-              ledgerTotals[acc] = { debit: 0, credit: 0 };
-            }
-            if (txn.type.toLowerCase() === "debit") {
-              ledgerTotals[acc].debit += txn.amount;
-            } else if (txn.type.toLowerCase() === "credit") {
-              ledgerTotals[acc].credit += txn.amount;
-            }
-          });
+        entry.transactions.forEach((txn) => {
+          const txnDate = new Date(txn.date);
+
+          if (from && txnDate < from) return;
+          if (to && txnDate > to) return;
+
+          const acc = txn.account.trim();
+
+          if (!ledgerTotals[acc]) {
+            ledgerTotals[acc] = { debit: 0, credit: 0 };
+          }
+
+          if (txn.type.toLowerCase() === "debit") {
+            ledgerTotals[acc].debit += txn.amount;
+          } else if (txn.type.toLowerCase() === "credit") {
+            ledgerTotals[acc].credit += txn.amount;
+          }
+        });
+
         });
 
         const enrichedLedgers = ledgersData.map((ledger) => {
@@ -730,68 +732,75 @@ useEffect(() => {
     }
   };
 
-  const fetchLedgerTransactions = (ledger) => {
-    setSelectedLedger(ledger);
-    axios
-      .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-      .then((res) => {
-        const allTxns = res.data.data || [];
+const loadLedgerData = (selectedLedger = null) => {
+  axios
+    .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+    .then((res) => {
+      const allTxns = res.data.data || [];
 
-        // Flatten transactions and attach saleId from parent voucher
+      // -----------------------------------------
+      // 1️⃣ Compute Totals for All Ledgers
+      // -----------------------------------------
+      const totals = {};
+      allLedgers.forEach((ledger) => {
+        const ledgerTxns = allTxns.flatMap((entry) =>
+          entry.transactions.filter(
+            (txn) => txn.account.trim() === ledger.formData.ahead.trim()
+          )
+        );
+
+        let netWeight = 0;
+        let netPcs = 0;
+
+        ledgerTxns.forEach((txn) => {
+          if (txn.vtype === "P") {
+            netWeight += txn.weight || 0;
+            netPcs += txn.pkgs || 0;
+          } else if (txn.vtype === "S") {
+            netWeight -= txn.weight || 0;
+            netPcs -= txn.pkgs || 0;
+          }
+        });
+
+        totals[ledger._id] = { netWeight, netPcs };
+      });
+
+      setLedgerTotals(totals);
+
+      // -----------------------------------------
+      // 2️⃣ If a ledger is selected → prepare its txns
+      // -----------------------------------------
+      if (selectedLedger) {
         const ledgerTxns = allTxns.flatMap((entry) =>
           entry.transactions
-            .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
+            .filter(
+              (txn) =>
+                txn.account.trim() === selectedLedger.formData.ahead.trim()
+            )
             .map((txn) => ({
               ...txn,
-              saleId: entry.saleId || null,   // attach saleId for Sales
-              purId: entry.purchaseId || null,  
-              bankId: entry.bankId || null,  
-              cashId: entry.cashId || null,  
-              journalId: entry.journalId || null,  
+              saleId: entry.saleId || null,
+              purId: entry.purchaseId || null,
+              bankId: entry.bankId || null,
+              cashId: entry.cashId || null,
+              journalId: entry.journalId || null,
             }))
         );
 
+        setSelectedLedger(selectedLedger);
         setTransactions(ledgerTxns);
         setShowModal(true);
-      })
-      .catch((err) => console.error(err));
-  };
-  // For calculating net pcs and weight
-  useEffect(() => {
-    // Fetch all transactions once
-    axios.get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-      .then((res) => {
-        const allTxns = res.data.data || [];
-        
-        // Compute totals for each ledger
-        const totals = {};
-        allLedgers.forEach((ledger) => {
-          const ledgerTxns = allTxns.flatMap((entry) =>
-            entry.transactions.filter(
-              (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-            )
-          );
+      }
+    })
+    .catch((err) => console.error(err));
+};
+useEffect(() => {
+  loadLedgerData();
+}, [allLedgers]);
 
-          let netWeight = 0;
-          let netPcs = 0;
-
-          ledgerTxns.forEach((txn) => {
-            if (txn.vtype === "P") {
-              netWeight += txn.weight || 0;
-              netPcs += txn.pkgs || 0;
-            } else if (txn.vtype === "S") {
-              netWeight -= txn.weight || 0;
-              netPcs -= txn.pkgs || 0;
-            }
-          });
-
-          totals[ledger._id] = { netWeight, netPcs };
-        });
-
-        setLedgerTotals(totals);
-      })
-      .catch((err) => console.error(err));
-  }, [allLedgers]);
+const fetchLedgerTransactions = (ledger) => {
+  loadLedgerData(ledger);
+};
 
 
   const handleCheckboxChange = (id) => {

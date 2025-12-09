@@ -15,6 +15,7 @@ import { saveAs } from 'file-saver';
 import CoA from "../TrailBalance/CoA";
 import InputMask from "react-input-mask";
 import PrintOutStanding from "./PrintOutStanding";
+import financialYear from "../Shared/financialYear";
 
 const DebtorsList = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
@@ -52,19 +53,9 @@ const DebtorsList = () => {
   const [currentGroupName, setCurrentGroupName] = useState("");
   const [selectedGroupRows, setSelectedGroupRows] = useState(new Set());
 
-    // odler
-  // ✅ Convert API format → dd/mm/yyyy
-  const formatApiDate = (isoString) => {
-    if (!isoString) return "";
-    const date = new Date(isoString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
-  const [ledgerToDate, setLedgerToDate] = useState(() => formatApiDate(new Date()));
+  const [ledgerToDate, setLedgerToDate] = useState(null);
+  // const [ledgerToDate, setLedgerToDate] = useState(() => formatApiDate(new Date()));
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
     Balance: "Debit Balance",
@@ -88,13 +79,13 @@ const DebtorsList = () => {
     setIsOptionOpen(false);
   };
 
+  // Auto-set financial year when component loads
   useEffect(() => {
-    if (!ledgerFromDate && dateFrom) {
-      const formatted = formatApiDate(dateFrom);
-      setLedgerFromDate(formatted);
-      console.log("Setting ledgerFromDate to dateFrom:", dateFrom);
-    }
-  }, [dateFrom, ledgerFromDate]);
+    const fy = financialYear.getFYDates();
+    setLedgerFromDate(formatDate(fy.start)); // converted
+    setLedgerToDate(formatDate(fy.end));     // converted
+  }, []);
+
 
   // Filters Transactions Account Statement 
   const [vtypeFilters, setVtypeFilters] = useState({
@@ -238,6 +229,12 @@ const DebtorsList = () => {
     }
   }, []);
 
+  const parseDDMMYYYY = (str) => {
+    if (!str) return null;
+    const [dd, mm, yyyy] = str.split("/").map(Number);
+    return new Date(yyyy, mm - 1, dd);
+  };
+
   // fetch ledger + fa
   useEffect(() => {
     const fetchData = async () => {
@@ -258,21 +255,27 @@ const DebtorsList = () => {
 
         const ledgerTotals = {};
         faData.forEach((entry) => {
-          entry.transactions.forEach((txn) => {
-            const txnDate = new Date(txn.date);
-            if (ledgerFromDate && txnDate < ledgerFromDate) return;
-            if (ledgerToDate && txnDate > ledgerToDate) return;
+        const from = parseDDMMYYYY(ledgerFromDate);
+        const to = parseDDMMYYYY(ledgerToDate);
 
-            const acc = txn.account.trim();
-            if (!ledgerTotals[acc]) {
-              ledgerTotals[acc] = { debit: 0, credit: 0 };
-            }
-            if (txn.type.toLowerCase() === "debit") {
-              ledgerTotals[acc].debit += txn.amount;
-            } else if (txn.type.toLowerCase() === "credit") {
-              ledgerTotals[acc].credit += txn.amount;
-            }
-          });
+        entry.transactions.forEach((txn) => {
+          const txnDate = new Date(txn.date);
+
+          if (from && txnDate < from) return;
+          if (to && txnDate > to) return;
+
+          const acc = txn.account.trim();
+
+          if (!ledgerTotals[acc]) {
+            ledgerTotals[acc] = { debit: 0, credit: 0 };
+          }
+
+          if (txn.type.toLowerCase() === "debit") {
+            ledgerTotals[acc].debit += txn.amount;
+          } else if (txn.type.toLowerCase() === "credit") {
+            ledgerTotals[acc].credit += txn.amount;
+          }
+        });
         });
 
         const enrichedLedgers = ledgersData.map((ledger) => {

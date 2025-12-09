@@ -10,6 +10,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import ReceiptModal from "../Modals/ReceiptModal";
+import financialYear from "../Shared/financialYear";
 
 const LOCAL_STORAGE_KEY = "ReceiptTableData";
 
@@ -220,10 +221,11 @@ const ReceiptList = () => {
   const rowRefs = useRef([]);
 
   useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start); // converted
+    setToDate(fy.end);     // converted
+  }, []);
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -239,36 +241,6 @@ const ReceiptList = () => {
     const num = parseFloat(val);
     return isNaN(num) ? "0.00" : num.toFixed(2);
   };
-
-  // useEffect(() => {
-  //   if (!fromDate || !toDate) return;
-
-  //   const fetchEntries = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch(
-  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale`
-  //       );
-  //       if (!response.ok) throw new Error("Failed to fetch data");
-
-  //       const data = await response.json();
-  //       const filteredData = data.filter((entry) => {
-  //         const entryDate = new Date(entry.formData?.date);
-  //         return entryDate >= fromDate && entryDate <= toDate;
-  //       });
-
-  //       // setEntries(data);
-  //       setEntries(filteredData);
-  //       setFilteredEntries(filteredData);
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchEntries();
-  // }, [fromDate, toDate]);
 
  const fetchEntries = useCallback(async () => {
     if (!fromDate || !toDate) return;

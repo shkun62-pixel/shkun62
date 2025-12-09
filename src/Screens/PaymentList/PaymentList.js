@@ -10,6 +10,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PaymentModal from "../Modals/PaymentModal";
+import financialYear from "../Shared/financialYear";
 
 const LOCAL_STORAGE_KEY = "PayementListTableData";
 
@@ -207,10 +208,10 @@ const PaymentList = () => {
   const rowRefs = useRef([]);
 
   useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start); // converted
+    setToDate(fy.end);     // converted
+  }, []);
 
   
   useEffect(() => {
@@ -330,121 +331,11 @@ const PaymentList = () => {
       setLoading(false);
     }
   }, [fromDate, toDate]);
-
-
-  //  const fetchEntries = useCallback(async () => {
-  //     if (!fromDate || !toDate) return;
   
-  //     setLoading(true);
-  //     try {
-  //       // --- 1️⃣ Fetch sales ---
-  //       const saleRes = await fetch(
-  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`
-  //       );
-  //       if (!saleRes.ok) throw new Error("Failed to fetch sale data");
-  //       const saleData = await saleRes.json();
-  
-  //       const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
-  //         (entry) => {
-  //           const entryDate = new Date(entry?.formData?.date || "");
-  //           return entryDate >= fromDate && entryDate <= toDate;
-  //         }
-  //       );
-  
-  //       // --- 2️⃣ Fetch bank vouchers ---
-  //       const bankRes = await fetch(
-  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank`
-  //       );
-  //       if (!bankRes.ok) throw new Error("Failed to fetch bank data");
-  //       const bankRaw = await bankRes.json();
-  
-  //       const bankData = Array.isArray(bankRaw)
-  //         ? bankRaw.map((b) => b?.data || b)
-  //         : [];
-  
-  //       // --- 3️⃣ Create payment map ---
-  //       const paymentMap = new Map();
-  //       bankData.forEach((voucher) => {
-  //         const vForm = voucher?.formData || {};
-  //         const items = Array.isArray(voucher?.items)
-  //           ? voucher.items
-  //           : Array.isArray(voucher?.data?.items)
-  //           ? voucher.data.items
-  //           : [];
-  
-  //         const billNo = parseInt(vForm.againstbillno || 0);
-  //         if (!billNo) return;
-  
-  //         const totalPaid = items.reduce(
-  //           (sum, item) => sum + parseFloat(item?.payment_debit || 0),
-  //           0
-  //         );
-  //         paymentMap.set(billNo, (paymentMap.get(billNo) || 0) + totalPaid);
-  //       });
-  
-  //       // --- 4️⃣ Merge payment info ---
-  //       const updatedSales = filteredSales
-  //         .map((sale) => {
-  //           const formData = sale?.formData || {};
-  //           const saleBillNo = parseInt(formData?.vno || 0);
-  //           const saleAmount = parseFloat(formData?.grandtotal || 0);
-  //           const paidAmount = paymentMap.get(saleBillNo) || 0;
-  //           const balance = saleAmount - paidAmount;
-  
-  //           return {
-  //             ...sale,
-  //             formData: {
-  //               ...formData,
-  //               paidAmount,
-  //               balance,
-  //             },
-  //           };
-  //         })
-  //         // ✅ Hide fully paid bills
-  //         .filter((sale) => sale?.formData?.balance > 0.5);
-  
-  //       setEntries(updatedSales);
-  //       setFilteredEntries(updatedSales);
-  //     } catch (err) {
-  //       console.error("❌ Fetch Error:", err);
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }, [fromDate, toDate]);
-  
-    // Fetch initially and when dates change
-    useEffect(() => {
-      fetchEntries();
-    }, [fetchEntries]);
-
-  // useEffect(() => {
-  //   if (!fromDate || !toDate) return;
-
-  //   const fetchEntries = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
-  //       if (!response.ok) throw new Error("Failed to fetch data");
-
-  //       const data = await response.json();
-  //       const filteredData = data.filter((entry) => {
-  //         const entryDate = new Date(entry.formData?.date);
-  //         return entryDate >= fromDate && entryDate <= toDate;
-  //       });
-
-  //       // setEntries(data);
-  //       setEntries(filteredData);
-  //       setFilteredEntries(filteredData);
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchEntries();
-  // }, [fromDate, toDate]);
+  // Fetch initially and when dates change
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
 
   useEffect(() => {
     const filtered = entries.filter((entry) => {

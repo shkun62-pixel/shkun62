@@ -24,60 +24,6 @@
 // export default Example
 
 
-// import React, { useState, useEffect } from 'react';
-// import InputMask from "react-input-mask";
-// import "react-datepicker/dist/react-datepicker.css";
-// import financialYear from './Shared/financialYear';
-
-// const Example = () => {
-//   const [fromDate, setFromDate] = useState(null);
-//   const [toDate, setToDate] = useState(null);
-
-//   // // Auto-set financial year when component loads
-//   useEffect(() => {
-//     const fy = financialYear.getFYDates();
-//     setFromDate(fy.start);
-//     setToDate(fy.end);
-//     console.log(
-//       "fy Start:",fy.start
-//     );
-    
-//   }, []);
-
-//   return (
-//     <div>
-//       <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
-//         <label className="form-label" style={{ width: "120px" }}>From Date</label>
-//         <InputMask
-//           mask="99-99-9999"
-//           placeholder="dd-mm-yyyy"
-//           value={fromDate}
-//           onChange={(e) => setFromDate(e.target.value)}
-//         >
-//           {(inputProps) => <input {...inputProps} className="form-control" />}
-//         </InputMask>
-//       </div>
-
-//       {/* TO DATE ROW */}
-//       <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
-//         <label className="form-label" style={{ width: "120px"}}>To Date</label>
-//         <InputMask
-//           mask="99-99-9999"
-//           placeholder="dd-mm-yyyy"
-//           value={toDate}
-//           onChange={(e) => setToDate(e.target.value)}
-//         >
-//           {(inputProps) => <input {...inputProps} className="form-control" />}
-//         </InputMask>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-
-
 import React, { useState, useEffect } from 'react';
 import InputMask from "react-input-mask";
 import financialYear from './Shared/financialYear';
@@ -131,3 +77,15 @@ const Example = () => {
 };
 
 export default Example;
+
+
+
+
+
+
+
+
+
+
+
+

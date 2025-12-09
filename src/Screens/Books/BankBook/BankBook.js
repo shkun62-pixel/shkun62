@@ -205,9 +205,9 @@ const BankBook = () => {
             <span className="date-label">From:</span>
             <DatePicker
               className="datepickerBank"
-              selected={formatDate(startDate)}
+              selected={startDate}
               onChange={(date) => setStartDate(date)}
-              dateFormat="MM/dd/yyyy"
+              dateFormat="dd/MM/yyyy"
             />
           </div>
           <div>
@@ -216,7 +216,7 @@ const BankBook = () => {
               className="datepickerBank2"
               selected={endDate}
               onChange={(date) => setEndDate(date)}
-              dateFormat="MM/dd/yyyy"
+             dateFormat="dd/MM/yyyy"
             />
           </div>
         </div>

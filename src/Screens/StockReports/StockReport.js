@@ -7,13 +7,28 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import StockRpPrint from "./StockRpPrint";
 import { useNavigate } from "react-router-dom";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import financialYear from "../Shared/financialYear";
+import InputMask from "react-input-mask";
 
 const StockReport = () => {
   const tenant = "shkun_05062025_05062026"
-  const [fromDate, setFromDate] = useState(new Date());
-  const [uptoDate, setUptoDate] = useState(new Date());
+  const [fromDate, setFromDate] = useState("");
+  const [uptoDate, setUptoDate] = useState("");
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  useEffect(() => {
+    const fy = financialYear.getFYDates();
+    setFromDate(formatDate(fy.start)); // converted
+    setUptoDate(formatDate(fy.end));     // converted
+  }, []);
 
   const [items, setItems] = useState([
     {
@@ -65,6 +80,33 @@ const StockReport = () => {
     fetchAheads();
   }, []);
 
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+
+    // If ISO format → let JS handle it
+    if (!isNaN(Date.parse(dateStr))) {
+      return new Date(dateStr);
+    }
+
+    // dd/mm/yyyy OR dd-mm-yyyy
+    const parts = dateStr.includes("/")
+      ? dateStr.split("/")
+      : dateStr.split("-");
+
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      let year = parseInt(parts[2], 10);
+
+      // handle 2-digit year
+      if (year < 100) year += 2000;
+
+      return new Date(year, month, day);
+    }
+
+    return null;
+  };
+
   useEffect(() => {
     if (!selectedAhead) return;
     setLoading(true);
@@ -96,8 +138,11 @@ const StockReport = () => {
 
         const normalizedAhead = selectedAhead.trim().toLowerCase();
         const isWithinDateRange = (date) => {
-          const d = new Date(date);
-          return d >= fromDate && d <= uptoDate;
+          const d = parseDate(date);
+          const f = parseDate(fromDate);
+          const u = parseDate(uptoDate);
+          if (!d || !f || !u) return false;
+          return d >= f && d <= u;
         };
 
         const purchases = purchaseRes.data.flatMap((purchase) =>
@@ -205,53 +250,6 @@ const StockReport = () => {
 
     fetchData();
   }, [selectedAhead, fromDate, uptoDate]); // 👈 Add these dependencies
-
-  useEffect(() => {
-  const fetchInitialAfromDate = async () => {
-    try {
-      const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/company"
-      );
-
-      // Choose which company to use for fromDate initialization
-      // Example: use the first one, or filter by some known Ahead
-      const matchingCompany = res.data[0]; // 👈 You can adjust this logic
-
-      if (matchingCompany?.formData?.Afrom) {
-        const afromDate = new Date(matchingCompany.formData.Afrom);
-        if (!isNaN(afromDate.getTime())) {
-          setFromDate(afromDate);
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching initial Afrom date:", e);
-    }
-  };
-
-  fetchInitialAfromDate(); // Run once when component mounts
-  }, []);
-
-//   useEffect(() => {
-//   const handleKeyDown = (e) => {
-//     if (items.length === 0) return;
-
-//     if (e.key === "ArrowDown") {
-//       setActiveRow((prev) => Math.min(prev + 1, items.length - 1));
-//     } 
-//     else if (e.key === "ArrowUp") {
-//       setActiveRow((prev) => Math.max(prev - 1, 0));
-//     }
-//     else if (e.key === "Enter") {
-//       const row = items[activeRow];
-//       if (!row) return;
-
-//       alert("Document _id: " + row.docId);
-//     }
-//   };
-
-//   window.addEventListener("keydown", handleKeyDown);
-//   return () => window.removeEventListener("keydown", handleKeyDown);
-// }, [items, activeRow]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -400,12 +398,19 @@ const StockReport = () => {
             }}
           >
             <text style={{ marginRight: "8px" }}>From:</text>
-            <DatePicker
+              <InputMask
+                mask="99/99/9999"
+                placeholder="dd/mm/yyyy"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className={styles.From}
+              />
+            {/* <DatePicker
               selected={fromDate}
               onChange={(date) => setFromDate(date)}
               className={styles.From}
               dateFormat="dd/MM/yyyy"
-            />
+            /> */}
           </div>
           <div
             style={{
@@ -416,12 +421,19 @@ const StockReport = () => {
             }}
           >
             <text style={{ marginRight: "8px" }}>Upto:</text>
-            <DatePicker
+            <InputMask
+              mask="99/99/9999"
+              placeholder="dd/mm/yyyy"
+              value={uptoDate}
+              onChange={(e) => setUptoDate(e.target.value)}
+              className={styles.Upto}
+            />
+            {/* <DatePicker
               selected={uptoDate}
               onChange={(date) => setUptoDate(date)}
               className={styles.Upto}
               dateFormat="dd/MM/yyyy"
-            />
+            /> */}
           </div>
         </div>
         <div style={{marginLeft:"20px",marginTop:"auto"}}>
