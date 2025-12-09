@@ -30,6 +30,7 @@ import WorksheetPrint from "./WorksheetPrint";
 import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
+import financialYear from "../Shared/financialYear";
 
 
 // --------- CONFIG ----------
@@ -79,40 +80,26 @@ export default function GstWorksheet() {
 
   const [printOpen, setPrintOpen] = useState(false);
   const [fromDate, setFromDate] = useState("");
-  useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
-
   const [rawValue, setRawValue] = useState("");
-  useEffect(() => {
-    if (!rawValue && dateFrom) {
-      const d = new Date(dateFrom);
-
-      const day = String(d.getDate()).padStart(2, "0");
-      const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-      const year = d.getFullYear();
-
-      setRawValue(`${day}/${month}/${year}`);
-      console.log(dateFrom, "dateFrom formatted");
-    }
-  }, [dateFrom, rawValue]);
-
   const [toDate, setToDate] = useState(() => formatDateISO(new Date()));
   const [toRaw, setToRaw] = useState("");
 
-  // Initialize to today's date
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   useEffect(() => {
-    if (!toRaw) {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0"); // Months 0-indexed
-      const year = today.getFullYear();
-      setToRaw(`${day}/${month}/${year}`);
-      setToDate(today);
-    }
-  }, [toRaw]);
+    const fy = financialYear.getFYDates();
+    setFromDate(formatDate(fy.start)); // converted
+    setToDate(formatDate(fy.end));     // converted
+    setRawValue(formatDate(fy.start)); // converted
+    setToRaw(formatDate(fy.end));     // converted
+  }, []);
 
   const [stateCondition, setStateCondition] = useState("All"); // All | Within | Out
   const [regdFilter, setRegdFilter] = useState("All"); // All | Registered | Un-Registered

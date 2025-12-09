@@ -10,6 +10,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import CoA from "../TrailBalance/CoA";
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
+import financialYear from "../Shared/financialYear";
 
 const LedgerList = () => {
 
@@ -75,10 +76,10 @@ const LedgerList = () => {
   };
 
   useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start); // converted
+    setToDate(fy.end);     // converted
+  }, []);
 
   // ✅ Update filtered transactions whenever filterType or transactions change
     // ✅ Update filtered transactions whenever filters or transactions change
@@ -1097,13 +1098,16 @@ const LedgerList = () => {
                   <Form.Label>From Date</Form.Label>
                   <DatePicker
                     selected={fromDate}
-                    onChange={(date) => setFromDate(date)}   // ✅ FIXED
+                    onChange={(date) => setFromDate(date)}
                     onChangeRaw={(e) => {
+                      if (!e.target.value) return; // ✅ prevent crash
+
                       let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+
                       if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                       if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-      
-                      e.target.value = val; // Show formatted input
+
+                      e.target.value = val; // Update formatted value
                     }}
                     dateFormat="dd/MM/yyyy"
                     className={styles.from}
@@ -1114,13 +1118,16 @@ const LedgerList = () => {
                   <Form.Label>Upto Date</Form.Label>
                   <DatePicker
                     selected={toDate}
-                    onChange={(date) => setToDate(date)}     // ✅ FIXED
+                    onChange={(date) => setToDate(date)}
                     onChangeRaw={(e) => {
+                      if (!e.target.value) return; // ✅ prevent crash
+
                       let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+
                       if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                       if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-      
-                      e.target.value = val; // Show formatted input
+
+                      e.target.value = val; // Update formatted value
                     }}
                     dateFormat="dd/MM/yyyy"
                     className={styles.to}
