@@ -39,6 +39,7 @@ import ReceiptList from './Screens/ReceiptList/ReceiptList';
 import GstWorksheet from './Screens/GSTworkSheet/GstWorksheet';
 import GstRegister from './Screens/GstRegister/GstRegister';
 import IncomeTaxReport from './Screens/IncomeTaxReports/IncomeTaxReport';
+import AccWiseSumm from './Screens/IncomeTaxReports/AccWiseSumm';
 // import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
@@ -97,6 +98,7 @@ function App() {
         <Route path='/GstWorksheet' element={<GstWorksheet />}></Route>
         <Route path='/GstRegister' element={<GstRegister />}></Route>
         <Route path='/IncomeTaxReport' element={<IncomeTaxReport />}></Route>
+        <Route path='/AccWiseSumm' element={<AccWiseSumm />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>

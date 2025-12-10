@@ -1011,7 +1011,7 @@ export default function App() {
                                 </StyledIcon>
                                 <StyledListItemText primary="Party Wise Summary" />
                             </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledListItem button onClick={() => handleNavigation('/AccWiseSumm')}>
                                 <StyledIcon>
                                      <DescriptionIcon />
                                 </StyledIcon>
