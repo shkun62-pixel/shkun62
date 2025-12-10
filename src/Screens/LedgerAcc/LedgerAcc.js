@@ -25,7 +25,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
-const LedgerAcc = ({ onClose, onRefresh}) => {
+const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
 
   const location = useLocation();
   const ledgerId = location.state?.ledgerId;
@@ -303,6 +303,10 @@ const LedgerAcc = ({ onClose, onRefresh}) => {
           if (ledgerId) {
             response = await axios.get(
               `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount1/${ledgerId}`
+            );
+          }else if (ledgerId2) {
+            response = await axios.get(
+              `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount1/${ledgerId2}`
             );
           } else {
             response = await axios.get(
@@ -2952,7 +2956,7 @@ const handleAttachClick = () => {
           </div>
         </div>
         {/* </div> */}
-        <div style={{marginTop:"1%", justifyContent:'center'}} className="Buttonsgroupz">
+        <div style={{marginTop:"1%"}} className="Buttonsgroupz">
           <Button
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[0] }}

@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
-import ProductModalAccount from "../Modals/ProductModalAccount";
+
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -2171,7 +2171,7 @@ const allFieldsAcc = productsAcc.reduce((fields, product) => {
           </Table>
         </div>
         {showModalAcc && (
-          <ProductModalAccount
+          <ProductModalCustomer
           allFieldsAcc={allFieldsAcc}
           productsAcc={productsAcc}
           onSelectAcc={handleProductSelectAcc}

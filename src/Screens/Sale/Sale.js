@@ -11,7 +11,6 @@ import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProductModalAccount from "../Modals/ProductModalAccount";
 import { FaPlus, FaMinus, FaCog, FaTimes } from "react-icons/fa";
 import SaleSetup from "./SaleSetup";
 import InvoicePDF from "../InvoicePDF/InvoicePDF";
@@ -4181,7 +4180,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   </div>
                 ))}
                 {showModalAcc && (
-               <ProductModalAccount
+               <ProductModalCustomer
                 allFields={allFieldsAcc}
                 onSelect={handleProductSelectAcc}
                 onClose={() => setShowModalAcc(false)} 

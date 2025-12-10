@@ -35,7 +35,7 @@ import SaleSetup from "../Sale/SaleSetup";
 import PurchaseSetup from "../Purchase/PurchaseSetup";
 import ExciseSetup from "./ExciseSetup/ExciseSetup";
 import GstSetup from "./GstSetup";
-import ProductModalAccount from "../Modals/ProductModalAccount";
+import ProductModalCustomer from "../Modals/ProductModalCustomer";
 
 const DRAWER_WIDTH = 220;
 
@@ -1313,7 +1313,7 @@ const Setup = () => {
                 />
               ))}
               {showModalTdsname && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFieldsAcc={allFieldsTdsname}
                   productsAcc={productsTdsname}
                   onSelectAcc={handleProductSelectTdsname}
@@ -1360,7 +1360,7 @@ const Setup = () => {
                 />
               ))}
               {showModalTdsname1 && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFieldsAcc={allFieldsTdsname1}
                   productsAcc={productsTdsname1}
                   onSelectAcc={handleProductSelectTdsname1}

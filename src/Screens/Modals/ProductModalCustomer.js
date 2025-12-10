@@ -4,8 +4,8 @@ import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import { TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import "./ProductModal.css";
-import LedgerAcc from "../LedgerAcc/LedgerAcc";
 import { useNavigate } from "react-router-dom";
+import LedgerAcc from '../LedgerAcc/LedgerAcc';
 
 const ProductModalCustomer = ({
   allFields,
@@ -24,6 +24,10 @@ const ProductModalCustomer = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [showExampleModal, setShowExampleModal] = useState(false);
+  const [exampleLedgerId, setExampleLedgerId] = useState(null);
+
 
   const inputRef = useRef(null);
   const tableRef = useRef(null);
@@ -409,12 +413,27 @@ const ProductModalCustomer = ({
     }
 
     const selectedProduct = products[selectedIndex];
-    navigate("/Example", {
-      state: { ledgerId: selectedProduct._id, rowIndex: selectedIndex },
-    });
 
-    alert("Selected ID: " + selectedProduct._id);
+    // Set Ledger ID for Example modal
+    setExampleLedgerId(selectedProduct._id);
+
+    // Open modal
+    setShowLedgerModal(true);
   };
+
+  // const handleModify = () => {
+  //   if (!products[selectedIndex]) {
+  //     alert("Please select a row first!");
+  //     return;
+  //   }
+
+  //   const selectedProduct = products[selectedIndex];
+  //   navigate("/Example", {
+  //     state: { ledgerId: selectedProduct._id, rowIndex: selectedIndex },
+  //   });
+
+  //   alert("Selected ID: " + selectedProduct._id);
+  // };
 
   /* ---------------- Main render ---------------- */
   return (
@@ -550,6 +569,7 @@ const ProductModalCustomer = ({
         >
           <Modal.Body style={{ marginTop: 10, marginLeft: 10 }}>
             <LedgerAcc
+               ledgerId2={exampleLedgerId}   // pass ID to Example
               onClose={handleLedgerModalClose}
               onRefresh={onRefresh}
             />
@@ -589,6 +609,25 @@ const ProductModalCustomer = ({
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* {showExampleModal && (
+        <Modal
+          dialogClassName="custom-full-width-modal"
+          show
+          onHide={() => setShowExampleModal(false)}
+          size="xl"
+          style={{ zIndex: 100000, marginTop: -30, height: "110vh" }}
+        >
+          <Modal.Body style={{ marginTop: 10, marginLeft: "8%" }}>
+            <LedgerAcc
+              ledgerId2={exampleLedgerId}   // pass ID to Example
+              onRefresh={onRefresh}
+              onClose={() => setShowExampleModal(false)}
+            />
+          </Modal.Body>
+        </Modal>
+      )} */}
+
     </>
   );
 };

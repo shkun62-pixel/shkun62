@@ -8,7 +8,6 @@ import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { BiTrash } from "react-icons/bi";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
-import ProductModalAccount from "../Modals/ProductModalAccount";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -2075,7 +2074,7 @@ const BankVoucher = () => {
         </Button>
       </div>
       {showModalAcc && (
-        <ProductModalAccount
+        <ProductModalCustomer
         allFields={allFieldsAcc}
         onSelect={handleProductSelectAcc}
         onClose={() => setShowModalAcc(false)} 

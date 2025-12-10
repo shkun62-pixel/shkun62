@@ -4,7 +4,6 @@ import { Button } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
-import ProductModalAccount from "../Modals/ProductModalAccount";
 import { CompanyContext } from '../Context/CompanyContext';
 import { useContext } from "react";
 
@@ -948,7 +947,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
               </div>
             ))}
             {showModalAcc && (
-              <ProductModalAccount
+              <ProductModalCustomer
                 allFieldsAcc={allFieldsAcc}
                 productsAcc={productsAcc}
                 onSelectAcc={handleProductSelectAcc}
@@ -984,7 +983,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
               </div>
             ))}
             {showModalsgst && (
-              <ProductModalAccount
+              <ProductModalCustomer
                 allFieldsAcc={allFieldsgst}
                 productsAcc={productsgst}
                 onSelectAcc={handleProductSelectsgst}
@@ -1020,7 +1019,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
               </div>
             ))}
             {showModaligst && (
-              <ProductModalAccount
+              <ProductModalCustomer
                 allFieldsAcc={allFieldsigst}
                 productsAcc={productigst}
                 onSelectAcc={handleProductSelectigst}
@@ -1062,7 +1061,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalCgstcodePur && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsCgstcodePur}
                     productsAcc={productsCgstcodePur}
                     onSelectAcc={handleProductSelectCgstcodePur}
@@ -1102,7 +1101,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalcgstPur1 && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldcgstPur1}
                     productsAcc={productcgstPur1}
                     onSelectAcc={handleProductSelectcgstPur1}
@@ -1141,7 +1140,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalcgstPur2 && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldcgstPur2}
                     productsAcc={productcgstPur2}
                     onSelectAcc={handleProductSelectcgstPur2}
@@ -1180,7 +1179,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalsgstPur && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsgstPur}
                     productsAcc={productsgstPur}
                     onSelectAcc={handleProductSelectsgstPur}
@@ -1213,7 +1212,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalsgstPur1 && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsgstPur1}
                     productsAcc={productsgstPur1}
                     onSelectAcc={handleProductSelectsgstPur1}
@@ -1246,7 +1245,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalsgstPur2 && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsgstPur2}
                     productsAcc={productsgstPur2}
                     onSelectAcc={handleProductSelectsgstPur2}
@@ -1285,7 +1284,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModaligstPur && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsigstPur}
                     productsAcc={productigstPur}
                     onSelectAcc={handleProductSelectigstPur}
@@ -1318,7 +1317,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModaligstPur1 && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsigstPur1}
                     productsAcc={productigstPur1}
                     onSelectAcc={handleProductSelectigstPur1}
@@ -1351,7 +1350,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModaligstPur2 && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsigstPur2}
                     productsAcc={productigstPur2}
                     onSelectAcc={handleProductSelectigstPur2}
@@ -1391,7 +1390,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalcgstBank && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldscgstBank}
                     productsAcc={productcgstBank}
                     onSelectAcc={handleProductSelectcgstBank}
@@ -1426,7 +1425,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModalsgstBank && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsgstBank}
                     productsAcc={productsgstBank}
                     onSelectAcc={handleProductSelectsgstBank}
@@ -1461,7 +1460,7 @@ cigst_acBank: igstcodeBank.length > 0 ? igstcodeBank[0].igst_acBank : '',
                   </div>
                 ))}
                 {showModaligstBank && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFieldsAcc={allFieldsigstBank}
                     productsAcc={productigstBank}
                     onSelectAcc={handleProductSelectigstBank}

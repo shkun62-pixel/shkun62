@@ -83,7 +83,7 @@ import React,{useState, useEffect} from 'react'
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const Example = () => {
+const Example = ({ ledgerId2, onClose }) => {
 
   const location = useLocation();
   const ledgerId = location.state?.ledgerId;
@@ -323,12 +323,12 @@ const Example = () => {
     fetchData();
   }, []);
   return (
-    <div>
-      <h1>{formData.ahead}</h1>
-      <h1>{formData.Bsgroup}</h1>
-      <h1>{formData.add1}</h1>
-      <h1>{formData.gstNo}</h1>
-      <h1>{formData.city}</h1>
+    <div style={{marginLeft:"50%"}}>
+      <h1>AHEAD: {formData.ahead}</h1>
+      <h1>BSGROUP: {formData.Bsgroup}</h1>
+      <h1>ADD: {formData.add1}</h1>
+      <h1>GST NO: {formData.gstNo}</h1>
+      <h1>CITY: {formData.city}</h1>
     </div>
   )
 }

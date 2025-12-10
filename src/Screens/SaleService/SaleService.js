@@ -12,7 +12,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { useReactToPrint } from "react-to-print";
 import Modal from "@mui/material/Modal";
 import CloseIcon from "@mui/icons-material/Close";
-import ProductModalAccount from "../Modals/ProductModalAccount";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { Select, MenuItem, FormControl, Box } from "@mui/material";
 import { event } from "jquery";
@@ -2907,7 +2906,7 @@ const allFieldsAcc = productsAcc.reduce((fields, product) => {
           </Table>
         </div>
         {showModalAcc && (
-          <ProductModalAccount
+          <ProductModalCustomer
           allFieldsAcc={allFieldsAcc}
           productsAcc={productsAcc}
           onSelectAcc={handleProductSelectAcc}

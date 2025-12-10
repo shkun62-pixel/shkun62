@@ -7,7 +7,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import ProductModal from "../Modals/ProductModal";
-import ProductModalAccount from "../Modals/ProductModalAccount";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import { useEditMode } from "../../EditModeContext";
 import { Modal, Box, Autocomplete, TextField, Typography } from "@mui/material";
@@ -1608,7 +1607,7 @@ const NewStockAcc = ({ onSave }) => {
             ))}
 
             {showModalAcc && (
-              <ProductModalAccount
+              <ProductModalCustomer
               allFields={allFieldsAcc}
               onSelect={handleProductSelectAcc}
               onClose={() => setShowModalAcc(false)} 

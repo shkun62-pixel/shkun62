@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import "../Sale/SaleSetup.css";
-import ProductModalAccount from "../Modals/ProductModalAccount";
+import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import InvoicePDFPur from "../InvoicePdfPur";
@@ -3220,7 +3220,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE1name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE1name}
                     onSelect={handleProductSelectE1name}
                     onClose={() => setShowModalAcc(false)} 
@@ -3289,7 +3289,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE2name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE2name}
                     onSelect={handleProductSelectE2name}
                     onClose={() => setShowModalE2name(false)} 
@@ -3358,7 +3358,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE3name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE3name}
                     onSelect={handleProductSelectE3name}
                     onClose={() => setShowModalE3name(false)} 
@@ -3427,7 +3427,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE4name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE4name}
                     onSelect={handleProductSelectE4name}
                     onClose={() => setShowModalE4name(false)} 
@@ -3496,7 +3496,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE5name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE5name}
                     onSelect={handleProductSelectE5name}
                     onClose={() => setShowModalE5name(false)} 
@@ -3565,7 +3565,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE6name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE6name}
                     onSelect={handleProductSelectE6name}
                     onClose={() => setShowModalE6name(false)} 
@@ -3634,7 +3634,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE7name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE7name}
                     onSelect={handleProductSelectE7name}
                     onClose={() => setShowModalE7name(false)} 
@@ -3703,7 +3703,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE8name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE8name}
                     onSelect={handleProductSelectE8name}
                     onClose={() => setShowModalE8name(false)} 
@@ -3772,7 +3772,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE9name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE9name}
                     onSelect={handleProductSelectE9name}
                     onClose={() => setShowModalE9name(false)} 
@@ -3841,7 +3841,7 @@ const PurchaseSetup = ({ onClose }) => {
                   </div>
                 ))}
                 {showModalE10name && (
-                  <ProductModalAccount
+                  <ProductModalCustomer
                     allFields={allFieldsE10name}
                     onSelect={handleProductSelectE10name}
                     onClose={() => setShowModalE10name(false)} 
@@ -3889,7 +3889,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalAcc && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsAcc}
                         onSelect={handleProductSelectAcc}
                         onClose={() => setShowModalAcc(false)} 
@@ -3917,7 +3917,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalcgst1 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldcgst1}
                         onSelect={handleProductSelectcgst1}
                         onClose={() => setShowModalcgst1(false)} 
@@ -3945,7 +3945,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalcgst2 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldcgst2}
                         onSelect={handleProductSelectcgst2}
                         onClose={() => setShowModalcgst2(false)} 
@@ -3988,7 +3988,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalsgst && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsgst}
                         onSelect={handleProductSelectsgst}
                         onClose={() => setShowModalsgst(false)} 
@@ -4016,7 +4016,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalsgst1 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsgst1}
                         onSelect={handleProductSelectsgst1}
                         onClose={() => setShowModalsgst1(false)} 
@@ -4044,7 +4044,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalsgst2 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsgst2}
                         onSelect={handleProductSelectsgst2}
                         onClose={() => setShowModalsgst2(false)} 
@@ -4087,7 +4087,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaligst && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsigst}
                         onSelect={handleProductSelectigst}
                         onClose={() => setShowModaligst(false)} 
@@ -4115,7 +4115,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaligst1 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsigst1}
                         onSelect={handleProductSelectigst1}
                         onClose={() => setShowModaligst1(false)} 
@@ -4143,7 +4143,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaligst2 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsigst2}
                         onSelect={handleProductSelectigst2}
                         onClose={() => setShowModaligst2(false)} 
@@ -4174,7 +4174,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalcTds && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldscTds}
                         onSelect={handleProductSelectcTds}
                         onClose={() => setShowModalcTds(false)} 
@@ -4202,7 +4202,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalsTds && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldssTds}
                         onSelect={handleProductSelectsTds}
                         onClose={() => setShowModalsTds(false)} 
@@ -4230,7 +4230,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaliTds && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsiTds}
                         onSelect={handleProductSelectiTds}
                         onClose={() => setShowModaliTds(false)} 
@@ -4261,7 +4261,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalAdcode && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsAdcode}
                         onSelect={handleProductSelectAdcode}
                         onClose={() => setShowModalAdcode(false)} 
@@ -4289,7 +4289,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalCus && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldsCus}
                         onSelect={handleProductSelectCus}
                         onClose={() => setShowModalCus(false)} 
@@ -4317,7 +4317,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaltcs206 && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldstcs206}
                         onSelect={handleProductSelecttcs206}
                         onClose={() => setShowModaltcs206(false)} 
@@ -4348,7 +4348,7 @@ const PurchaseSetup = ({ onClose }) => {
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaltcs && (
-                      <ProductModalAccount
+                      <ProductModalCustomer
                         allFields={allFieldstcs}
                         onSelect={handleProductSelecttcs}
                         onClose={() => setShowModaltcs(false)} 
@@ -4376,7 +4376,7 @@ const PurchaseSetup = ({ onClose }) => {
                     InputProps={{ readOnly: !isEditMode || isDisabled }}
                   />
                   {showModalDis && (
-                    <ProductModalAccount
+                    <ProductModalCustomer
                       allFields={allFieldsDis}
                       onSelect={handleProductSelectDis}
                       onClose={() => setShowModalDis(false)} 

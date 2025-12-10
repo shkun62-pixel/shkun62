@@ -8,8 +8,6 @@ import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
-import ProductModalAccount from "../Modals/ProductModalAccount";
-import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import { useEditMode } from "../../EditModeContext";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";

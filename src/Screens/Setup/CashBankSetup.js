@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./CashBankSetup.css";
-import ProductModalAccount from "../Modals/ProductModalAccount";
+import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import { Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -1145,7 +1145,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModalCashAc && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFields={allFieldsCashAc}
                   onSelect={handleProductSelectCashAc}
                   onClose={() => setShowModalCashAc(false)} 
@@ -1175,7 +1175,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModalCus && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFields={allFieldsCus}
                   onSelect={handleProductSelectCus}
                   onClose={() => setShowModalCus(false)} 
@@ -1205,7 +1205,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModalAcc && (
-                 <ProductModalAccount
+                 <ProductModalCustomer
                   allFields={allFieldsAcc}
                   onSelect={handleProductSelectAcc}
                   onClose={() => setShowModalAcc(false)} 
@@ -1235,7 +1235,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModalbankchrg && (
-                 <ProductModalAccount
+                 <ProductModalCustomer
                   allFields={allFieldsbankchrg}
                   onSelect={handleProductSelectbankchrg}
                   onClose={() => setShowModalbankchrg(false)} 
@@ -1265,7 +1265,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModaldefaultname && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFields={allFieldsdefaultname}
                   onSelect={handleProductSelectdefaultname}
                   onClose={() => setShowModaldefaultname(false)} 
@@ -1273,7 +1273,7 @@ const CashBankSetup = ({ onClose }) => {
                   tenant={tenant}
                   onRefresh={fetchCustomers}
                 />
-                // <ProductModalAccount
+                // <ProductModalCustomer
                 //   allFieldsAcc={allFieldsdefaultname}  
                 //   productsAcc={productdefaultname}
                 //   onSelectAcc={handleProductSelectdefaultname}
@@ -1303,7 +1303,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModalcgst && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFields={allFieldscgst}
                   onSelect={handleProductSelectcgst}
                   onClose={() => setShowModalcgst(false)} 
@@ -1311,7 +1311,7 @@ const CashBankSetup = ({ onClose }) => {
                   tenant={tenant}
                   onRefresh={fetchCustomers}
                 />
-                // <ProductModalAccount
+                // <ProductModalCustomer
                 //   allFieldsAcc={allFieldscgst}
                 //   productsAcc={productcgst}
                 //   onSelectAcc={handleProductSelectcgst}
@@ -1341,7 +1341,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModalsgst && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFields={allFieldsgst}
                   onSelect={handleProductSelectsgst}
                   onClose={() => setShowModalsgst(false)} 
@@ -1349,7 +1349,7 @@ const CashBankSetup = ({ onClose }) => {
                   tenant={tenant}
                   onRefresh={fetchCustomers}
                 />
-                // <ProductModalAccount
+                // <ProductModalCustomer
                 //   allFieldsAcc={allFieldsgst}
                 //   productsAcc={productsgst}
                 //   onSelectAcc={handleProductSelectsgst}
@@ -1379,7 +1379,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModaligst && (
-                <ProductModalAccount
+                <ProductModalCustomer
                   allFields={allFieldsigst}
                   onSelect={handleProductSelectigst}
                   onClose={() => setShowModaligst(false)} 
@@ -1387,7 +1387,7 @@ const CashBankSetup = ({ onClose }) => {
                   tenant={tenant}
                   onRefresh={fetchCustomers}
                 />
-                // <ProductModalAccount
+                // <ProductModalCustomer
                 //   allFieldsAcc={allFieldsigst}
                 //   productsAcc={productigst}
                 //   onSelectAcc={handleProductSelectigst}
@@ -1417,7 +1417,7 @@ const CashBankSetup = ({ onClose }) => {
                 />
               ))}
               {showModaltcs206 && (
-                 <ProductModalAccount
+                 <ProductModalCustomer
                   allFields={allFieldstcs206}
                   onSelect={handleProductSelecttcs206}
                   onClose={() => setShowModaltcs206(false)} 
@@ -1425,7 +1425,7 @@ const CashBankSetup = ({ onClose }) => {
                   tenant={tenant}
                   onRefresh={fetchCustomers}
                 />
-                // <ProductModalAccount
+                // <ProductModalCustomer
                 //   allFieldsAcc={allFieldstcs206}
                 //   productsAcc={producttcs206}
                 //   onSelectAcc={handleProductSelecttcs206}
