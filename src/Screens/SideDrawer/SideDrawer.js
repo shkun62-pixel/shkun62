@@ -1005,13 +1005,13 @@ export default function App() {
                             }}
                         >
                         <List>
-                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport')}>
+                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=party')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>
                                 <StyledListItemText primary="Party Wise Summary" />
                             </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/AccWiseSumm')}>
+                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=account')}>
                                 <StyledIcon>
                                      <DescriptionIcon />
                                 </StyledIcon>

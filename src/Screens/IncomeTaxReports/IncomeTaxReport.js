@@ -1,27 +1,72 @@
+// import React,{useEffect,useState} from "react";
+// import PartyWiseSummPur from "./PartyWiseSummPur";
+// import AccountWiseSummPur from "./AccountWiseSummPur";
+// import { useNavigate } from "react-router-dom";
+
+// const IncomeTaxReport = () => {
+//   const [openPurRep, setopenPurRep] = useState(false);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     // Auto open the modal when component mounts
+//     setopenPurRep(true);
+//   }, []);
+
+//     const handleClose = () => {
+//         setopenPurRep(false);
+//         navigate("/")
+//     };
+
+//   return (
+//     <div>
+//       <PartyWiseSummPur
+//         show={openPurRep}
+//         onClose={handleClose}
+//       />
+
+//        <AccountWiseSummPur
+//         show={openPurRep}
+//         onClose={() => setopenPurRep(false)}
+//       />
+//     </div>
+//   );
+// };
+
+// export default IncomeTaxReport;
+
+
 import React,{useEffect,useState} from "react";
 import PartyWiseSummPur from "./PartyWiseSummPur";
-import { useNavigate } from "react-router-dom";
+import AccountWiseSummPur from "./AccountWiseSummPur";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const IncomeTaxReport = () => {
   const [openPurRep, setopenPurRep] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Read query parameter
+  const query = new URLSearchParams(location.search);
+  const type = query.get("type");  // "party" or "account"
 
   useEffect(() => {
-    // Auto open the modal when component mounts
     setopenPurRep(true);
   }, []);
 
-    const handleClose = () => {
-        setopenPurRep(false);
-        navigate("/")
-    };
+  const handleClose = () => {
+    setopenPurRep(false);
+    navigate("/");
+  };
 
   return (
     <div>
-      <PartyWiseSummPur
-        show={openPurRep}
-        onClose={handleClose}
-      />
+      {type === "party" && (
+        <PartyWiseSummPur show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "account" && (
+        <AccountWiseSummPur show={openPurRep} onClose={handleClose} />
+      )}
     </div>
   );
 };

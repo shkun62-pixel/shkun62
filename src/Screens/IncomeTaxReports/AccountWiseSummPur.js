@@ -185,8 +185,6 @@ export default function AccountWiseSummPur({ show, onClose }) {
                 borderRadius: "10px",
               }}
             >
-              <h5 style={{ marginBottom: "18px", fontWeight: 600 }}>Filters</h5>
-
               {/* FROM DATE ROW */}
               <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
                 <label className="form-label" style={{ width: "120px" }}>From Date</label>
