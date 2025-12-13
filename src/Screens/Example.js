@@ -1,6 +1,6 @@
 import React,{useState,useEffect} from 'react'
 import { Button } from 'react-bootstrap';
-import AccountWiseSummPur from './IncomeTaxReports/AccountWiseSummPur';
+import AccountWiseSummPur from './IncomeTaxReports/PurchaseReports/AccountWiseSummPur';
 
 const Example = () => {
   const [openPurRep, setopenPurRep] = useState(false);

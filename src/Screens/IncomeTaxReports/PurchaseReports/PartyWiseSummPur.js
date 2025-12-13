@@ -1,14 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form, Table } from "react-bootstrap";
-import "./IncomeTax.css"
+import "../IncomeTax.css"
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import PurSummPrint from "./PurSummPrint";
-import useCompanySetup from "../Shared/useCompanySetup";
+import useCompanySetup from "../../Shared/useCompanySetup";
 import InputMask from "react-input-mask";
-import financialYear from "../Shared/financialYear";
+import financialYear from "../../Shared/financialYear";
 import * as XLSX from 'sheetjs-style';
-import { saveAs } from 'file-saver';
 
 const API_URL =
   "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";

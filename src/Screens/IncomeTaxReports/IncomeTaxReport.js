@@ -36,8 +36,8 @@
 
 
 import React,{useEffect,useState} from "react";
-import PartyWiseSummPur from "./PartyWiseSummPur";
-import AccountWiseSummPur from "./AccountWiseSummPur";
+import PartyWiseSummPur from "./PurchaseReports/PartyWiseSummPur";
+import AccountWiseSummPur from "./PurchaseReports/AccountWiseSummPur";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const IncomeTaxReport = () => {
