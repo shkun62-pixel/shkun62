@@ -1075,7 +1075,7 @@ export default function App() {
                             }}
                         >
                         <List>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=saleParty')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>

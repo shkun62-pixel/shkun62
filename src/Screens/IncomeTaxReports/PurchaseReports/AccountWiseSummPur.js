@@ -4,12 +4,15 @@ import axios from "axios";
 import InputMask from "react-input-mask";
 import AccountWisePrint from "./AccountWisePrint";
 import { useReactToPrint } from "react-to-print";
+import useCompanySetup from "../../Shared/useCompanySetup";
+import * as XLSX from 'sheetjs-style';
 
 const API_URL =
   "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
 
 export default function AccountWiseSummPur({ show, onClose }) {
-
+    
+  const { companyName, companyAdd, companyCity } = useCompanySetup();
   // filters
   const [fromDate, setFromDate] = useState("01-04-2025");
   const [toDate, setToDate] = useState("31-03-2026");
@@ -103,6 +106,97 @@ export default function AccountWiseSummPur({ show, onClose }) {
     }));
   }
 
+  function formatMonth(dateStr) {
+    const d = parseAnyDate(dateStr);
+    if (!d) return "";
+    return d.toLocaleString("en-IN", {
+      month: "short",
+      year: "numeric",
+    }); // Apr 2025
+  }
+
+  function formatDateKey(dateStr) {
+    const d = parseAnyDate(dateStr);
+    if (!d) return "";
+    return d.toLocaleDateString("en-IN"); // 01/04/2025
+  }
+
+  function summarizeByMonth(purchases) {
+    const result = {};
+
+    purchases.forEach(p => {
+      const month = formatMonth(p.formData?.date);
+
+      p.items.forEach(item => {
+        const account = item.Pcodess;
+        const key = `${month}__${account}`;
+
+        if (!result[key]) {
+          result[key] = {
+            month,
+            account,
+            city: p.formData.city || "",
+            bags: 0,
+            qty: 0,
+            value: 0,
+          };
+        }
+
+        result[key].bags += Number(item.pkgs || 0);
+        result[key].qty += Number(item.weight || 0);
+
+        if (reportType === "Without GST") {
+          result[key].value += Number(item.amount || 0);
+        } else {
+          result[key].value += Number(item.vamt || 0);
+        }
+      });
+    });
+
+    return Object.values(result).map(r => ({
+      ...r,
+      avg: r.qty > 0 ? r.value / r.qty : 0,
+    }));
+  }
+
+  function summarizeByDate(purchases) {
+    const result = {};
+
+    purchases.forEach(p => {
+      const date = formatDateKey(p.formData?.date);
+
+      p.items.forEach(item => {
+        const account = item.Pcodess;
+        const key = `${date}__${account}`;
+
+        if (!result[key]) {
+          result[key] = {
+            date,
+            account,
+            city: p.formData.city || "",
+            bags: 0,
+            qty: 0,
+            value: 0,
+          };
+        }
+
+        result[key].bags += Number(item.pkgs || 0);
+        result[key].qty += Number(item.weight || 0);
+
+        if (reportType === "Without GST") {
+          result[key].value += Number(item.amount || 0);
+        } else {
+          result[key].value += Number(item.vamt || 0);
+        }
+      });
+    });
+
+    return Object.values(result).map(r => ({
+      ...r,
+      avg: r.qty > 0 ? r.value / r.qty : 0,
+    }));
+  }
+
   // OPEN PRINT MODAL
   const onOpenPrint = () => {
 
@@ -166,55 +260,200 @@ export default function AccountWiseSummPur({ show, onClose }) {
         );
       }
 
+      // GROUP SUMMARY
+      let summary = [];
 
+      if (summaryType === "account") {
+        summary = summarizeByAccount(data);
+      }
+      else if (summaryType === "month") {
+        summary = summarizeByMonth(data);
+      }
+      else if (summaryType === "date") {
+        summary = summarizeByDate(data);
+      }
 
-        // GROUP SUMMARY
-      let summary = summarizeByAccount(data);
+      // APPLY QTY / VALUE RANGE (same for all)
+      if (minQty !== "") summary = summary.filter(r => r.qty >= Number(minQty));
+      if (maxQty !== "") summary = summary.filter(r => r.qty <= Number(maxQty));
+      if (minValue !== "") summary = summary.filter(r => r.value >= Number(minValue));
+      if (maxValue !== "") summary = summary.filter(r => r.value <= Number(maxValue));
 
-// QTY FILTER
-if (minQty !== "") {
-  summary = summary.filter(r => r.qty >= Number(minQty));
-}
-if (maxQty !== "") {
-  summary = summary.filter(r => r.qty <= Number(maxQty));
-}
+      setGroupedData(summary);
+    })
 
-// VALUE FILTER
-if (minValue !== "") {
-  summary = summary.filter(r => r.value >= Number(minValue));
-}
-if (maxValue !== "") {
-  summary = summary.filter(r => r.value <= Number(maxValue));
-}
+    .catch(() => alert("Failed to load data"))
 
-setGroupedData(summary);
+    .finally(() => {
+      setFetching(false);
+      setPrintOpen(true);
+    });
+  };
 
-      })
+  const exportToExcel = () => {
+    if (!groupedData || groupedData.length === 0) {
+      alert("No data to export");
+      return;
+    }
 
-      .catch(() => alert("Failed to load data"))
+    const wb = XLSX.utils.book_new();
+    const ws = {};
 
-      .finally(() => {
-        setFetching(false);
-        setPrintOpen(true);
+    const title = `Purchase Summary - From: ${fromDate} To: ${toDate}`;
+
+    // ----------------------------
+    // Header map
+    // ----------------------------
+    const headerMap = {
+      month: "Month",
+      date: "Date",
+      account: "Account",
+      supplier: "Account",
+      city: "City",
+      pan: "PAN No",
+      bags: "Bags",
+      qty: "Quantity",
+      value: "Total Value",
+      avg: "Avg"
+    };
+
+    // ----------------------------
+    // Dynamic headers
+    // ----------------------------
+    let headers = Object.keys(groupedData[0]).map(k => headerMap[k] || k);
+    if (summaryType === "date") {
+      headers = [
+        "Date",
+        "Account",
+        ...headers.filter(h => !["Date", "Account"].includes(h))
+      ];
+    }
+
+    const numericColumns = ["Bags", "Quantity", "Total Value", "Avg"];
+    let rowIndex = 0;
+
+    // ----------------------------
+    // Company Name
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [[companyName]], { origin: rowIndex });
+    ws["A1"] = ws["A1"] || { t: "s", v: companyName };
+    ws["A1"].s = { font: { bold: true, sz: 16 }, alignment: { horizontal: "center" } };
+    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
+    rowIndex++;
+
+    // ----------------------------
+    // Company Address
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [[companyAdd]], { origin: rowIndex });
+    ws["A2"] = ws["A2"] || { t: "s", v: companyAdd };
+    ws["A2"].s = { font: { bold: true }, alignment: { horizontal: "center" } };
+    ws["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } });
+    rowIndex++;
+
+    // ----------------------------
+    // Title
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [[title]], { origin: rowIndex });
+    ws["A3"] = ws["A3"] || { t: "s", v: title };
+    ws["A3"].s = { font: { bold: true }, alignment: { horizontal: "center" } };
+    ws["!merges"].push({ s: { r: 2, c: 0 }, e: { r: 2, c: headers.length - 1 } });
+    rowIndex += 2;
+
+    // ----------------------------
+    // Header Row
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: rowIndex });
+    headers.forEach((h, i) => {
+      const ref = XLSX.utils.encode_cell({ r: rowIndex, c: i });
+      if (!ws[ref]) ws[ref] = { t: "s", v: h };
+      ws[ref].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4472C4" } },
+        alignment: { horizontal: "center" },
+        border: { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } },
+      };
+    });
+
+    rowIndex++;
+    const dataStartRow = rowIndex + 1;
+
+    // ----------------------------
+    // Data Rows
+    // ----------------------------
+    groupedData.forEach(r => {
+      const row = headers.map((h, i) => {
+        const key = Object.keys(headerMap).find(k => headerMap[k] === h);
+        let val = r[key] ?? "";
+
+        // Force numeric columns as numbers and apply decimal format
+        if (numericColumns.includes(h)) {
+          val = Number(val) || 0;
+          let format = "0.00"; // default 2 decimals
+          if (h === "Bags" || h === "Quantity") format = "0.000";
+          const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: i });
+          ws[cellRef] = { t: "n", v: val, z: format };
+          return val;
+        }
+
+        return val;
       });
+
+      XLSX.utils.sheet_add_aoa(ws, [row], { origin: rowIndex });
+      rowIndex++;
+    });
+
+    const totalRowExcel = rowIndex + 1;
+
+    // ----------------------------
+    // Total / Subtotal row
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [["Total"]], { origin: rowIndex });
+    headers.forEach((h, i) => {
+      const col = XLSX.utils.encode_col(i);
+      const ref = `${col}${totalRowExcel}`;
+      if (numericColumns.includes(h)) {
+        let format = "0.00";
+        if (h === "Bags" || h === "Quantity") format = "0.000";
+        ws[ref] = {
+          t: "n",
+          f: `SUBTOTAL(9,${col}${dataStartRow}:${col}${totalRowExcel - 1})`,
+          z: format
+        };
+      } else {
+        ws[ref] = ws[ref] || { t: "s", v: "" };
+      }
+
+      ws[ref].s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: "D9E1F2" } },
+        alignment: { horizontal: i === 0 ? "left" : "right" },
+      };
+    });
+
+    // ----------------------------
+    // Column widths
+    // ----------------------------
+    ws["!cols"] = headers.map(() => ({ wch: 18 }));
+
+    // ----------------------------
+    // Autofilter
+    // ----------------------------
+    ws["!autofilter"] = {
+      ref: `A${dataStartRow - 1}:${XLSX.utils.encode_col(headers.length - 1)}${totalRowExcel - 1}`
+    };
+
+    // ----------------------------
+    // Append Sheet & Save
+    // ----------------------------
+    XLSX.utils.book_append_sheet(wb, ws, "Purchase Summary");
+    XLSX.writeFile(wb, "Purchase_Summary.xlsx");
   };
 
   return (
     <>
     {/* MAIN FILTER MODAL */}
-    <Modal show={show} onHide={onClose} size="xl" centered>
-      <Modal.Body style={{ padding: "30px", background: "#f8f9fa" }}>
-
-        <h4
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            fontWeight: 600,
-          }}
-        >
-          Account Wise Purchase Summary
-        </h4>
-
+    <Modal show={show} onHide={onClose} size="xl" centered backdrop="static" keyboard={true}>
+      <Modal.Body style={{ background: "#f8f9fa" }}>
         <Form
           style={{
             background: "white",
@@ -223,9 +462,15 @@ setGroupedData(summary);
             boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
           }}
         >
+        <h4
+          className="header"
+          style={{marginTop:0,marginLeft:"30%",fontSize:"22px"}}
+        >
+          ACCOUNT WISE PURCHASE SUMMARY
+        </h4>
 
           {/* MAIN 2-COLUMN CONTAINER */}
-          <div style={{ display: "flex", gap: "25px" }}>
+          <div style={{ display: "flex", gap: "25px", marginTop:"5px" }}>
 
             {/* LEFT CONTAINER */}
             <div
@@ -382,42 +627,45 @@ setGroupedData(summary);
                 <label className="form-check-label">Date Wise</label>
               </div>
 
-              <h6>Quantity Range</h6>
-              <Form.Control
-                placeholder="Minimum Qty"
-                value={minQty}
-                onChange={(e) => setMinQty(e.target.value)}
-                className="mb-2"
-              />
-              <Form.Control
-                placeholder="Maximum Qty"
-                value={maxQty}
-                onChange={(e) => setMaxQty(e.target.value)}
-              />
+              <div style={rowStyle}>
+                  <label style={labelStyle}>Min Qty</label>
+                  <Form.Control
+                    value={minQty}
+                    onChange={(e) => setMinQty(e.target.value)}
+                  />
+              </div>
 
-              <h6 className="mt-3">Value Range</h6>
-              <Form.Control
-                placeholder="Minimum Value"
-                value={minValue}
-                onChange={(e) => setMinValue(e.target.value)}
-                className="mb-2"
-              />
-              <Form.Control
-                placeholder="Maximum Value"
-                value={maxValue}
-                onChange={(e) => setMaxValue(e.target.value)}
-              />
-            </div>
-          </div>
+              <div style={rowStyle}>
+                <label style={labelStyle}>Max Qty</label>
+                <Form.Control
+                  value={maxQty}
+                  onChange={(e) => setMaxQty(e.target.value)}
+                />
+              </div>
 
-          {/* BUTTONS */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
-              marginTop: "25px",
-            }}
+              {/* Min Max Value */}
+              <div style={rowStyle}>
+                <label style={labelStyle}>Min Value</label>
+                <Form.Control
+                  value={minValue}
+                  onChange={(e) => setMinValue(e.target.value)}
+                />
+              </div>
+
+              <div style={rowStyle}>
+                <label style={labelStyle}>Max Value</label>
+                <Form.Control
+                  value={maxValue}
+                  onChange={(e) => setMaxValue(e.target.value)}
+                />
+              </div>
+              <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "25px",
+              }}
           >
             <Button variant="primary" onClick={onOpenPrint}>
               Print
@@ -425,7 +673,11 @@ setGroupedData(summary);
             <Button variant="secondary" onClick={onClose}>
               Exit
             </Button>
+              </div>
+            </div>
           </div>
+
+          {/* BUTTONS */}
         </Form>
       </Modal.Body>
     </Modal>
@@ -434,8 +686,10 @@ setGroupedData(summary);
     <Modal
       show={printOpen}
       onHide={() => setPrintOpen(false)}
-      size="xl"
-      centered
+      fullscreen
+      className="custom-modal"
+      style={{ marginTop: 20 }}
+      backdrop="static" keyboard={true}
     >
       <Modal.Body>
         {fetching ? (
@@ -446,16 +700,31 @@ setGroupedData(summary);
             rows={groupedData}
             fromDate={fromDate}
             toDate={toDate}
+            companyName={companyName}
+            companyAdd={companyAdd}
+            companyCity={companyCity}
           />
         )}
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setPrintOpen(false)}>Close</Button>
-        <Button variant="primary" onClick={handlePrint}>Send to Printer</Button>
+        <Button variant="primary" onClick={handlePrint}>PRINT</Button>
+        <Button variant="success" onClick={exportToExcel}> EXPORT </Button>
+        <Button variant="secondary" onClick={() => setPrintOpen(false)}>CLOSE</Button>
       </Modal.Footer>
     </Modal>
     </>
   );
 }
+
+const rowStyle = {
+  display: "flex",
+  alignItems: "center",
+  marginBottom: "10px",
+};
+
+const labelStyle = {
+  width: "120px",
+  fontWeight: "600",
+};
 

@@ -93,7 +93,7 @@ const PurSummPrint = forwardRef(
             Customer Wise Details
           </strong>
           <strong>
-            Purchase Summary (From: {periodFrom} To: {periodTo})
+            Sale Summary (From: {periodFrom} To: {periodTo})
           </strong>
         </div>
 
@@ -106,9 +106,9 @@ const PurSummPrint = forwardRef(
                 <th style={thtd}>Month</th>
                 <th style={thtd}>Supplier</th>
                 <th style={thtd}>City</th>
-                <th style={{...thtd, textAlign:'right'}}>Bags</th>
-                <th style={{...thtd, textAlign:'right'}}>Qty</th>
-                <th style={{...thtd, textAlign:'right'}}>Value</th>
+                <th style={thtd}>Bags</th>
+                <th style={thtd}>Qty</th>
+                <th style={thtd}>Value</th>
               </tr>
             )}
 
@@ -117,9 +117,9 @@ const PurSummPrint = forwardRef(
               <tr>
                 <th style={thtd}>Date</th>
                 <th style={thtd}>Supplier</th>
-                <th style={{...thtd, textAlign:'right'}}>Bags</th>
-                <th style={{...thtd, textAlign:'right'}}>Qty</th>
-                <th style={{...thtd, textAlign:'right'}}>Value</th>
+                <th style={thtd}>Bags</th>
+                <th style={thtd}>Qty</th>
+                <th style={thtd}>Value</th>
               </tr>
             )}
 
@@ -129,9 +129,9 @@ const PurSummPrint = forwardRef(
                 <th style={thtd}>Supplier</th>
                 <th style={thtd}>City</th>
                 <th style={thtd}>PAN</th>
-                <th style={{...thtd, textAlign:'right'}}>Bags</th>
-                <th style={{...thtd, textAlign:'right'}}>Qty</th>
-                <th style={{...thtd, textAlign:'right'}}>Value</th>
+                <th style={thtd}>Bags</th>
+                <th style={thtd}>Qty</th>
+                <th style={thtd}>Value</th>
               </tr>
             )}
           </thead>
@@ -144,9 +144,9 @@ const PurSummPrint = forwardRef(
                   <td style={thtd}>{m.month}</td>
                   <td style={thtd}>{m.supplierName}</td>
                   <td style={thtd}>{m.city}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{m.bags.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{m.qty.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{m.value.toFixed(2)}</td>
+                  <td style={thtd}>{m.bags.toFixed(2)}</td>
+                  <td style={thtd}>{m.qty.toFixed(2)}</td>
+                  <td style={thtd}>{m.value.toFixed(2)}</td>
                 </tr>
               ))}
 
@@ -156,9 +156,9 @@ const PurSummPrint = forwardRef(
                 <tr key={i}>
                   <td style={thtd}>{d.date}</td>
                   <td style={thtd}>{d.supplier}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{d.bags.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{d.qty.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{d.value.toFixed(2)}</td>
+                  <td style={thtd}>{d.bags.toFixed(2)}</td>
+                  <td style={thtd}>{d.qty.toFixed(2)}</td>
+                  <td style={thtd}>{d.value.toFixed(2)}</td>
                 </tr>
               ))}
 
@@ -169,9 +169,9 @@ const PurSummPrint = forwardRef(
                   <td style={thtd}>{s.supplierName}</td>
                   <td style={thtd}>{s.city}</td>
                   <td style={thtd}>{s.pan}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{s.bags.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{s.qty.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{s.value.toFixed(2)}</td>
+                  <td style={thtd}>{s.bags.toFixed(2)}</td>
+                  <td style={thtd}>{s.qty.toFixed(2)}</td>
+                  <td style={thtd}>{s.value.toFixed(2)}</td>
                 </tr>
               ))}
           </tbody>
@@ -198,13 +198,13 @@ const PurSummPrint = forwardRef(
                 TOTAL
               </td>
 
-              <td style={{...thtd, textAlign:'right'}}>
+              <td style={thtd}>
                 <strong>{totalBags}</strong>
               </td>
-              <td style={{...thtd, textAlign:'right'}}>
+              <td style={thtd}>
                 <strong>{totalQty}</strong>
               </td>
-              <td style={{...thtd, textAlign:'right'}}>
+              <td style={thtd}>
                 <strong>{totalValue}</strong>
               </td>
             </tr>
