@@ -16,6 +16,15 @@ export default function AccountWiseSummPur({ show, onClose }) {
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
   const [reportType, setReportType] = useState("With GST");
+  const [stateName, setStateName] = useState("");
+  const [minQty, setMinQty] = useState("");
+  const [maxQty, setMaxQty] = useState("");
+  const [minValue, setMinValue] = useState("");
+  const [maxValue, setMaxValue] = useState("");
+  const [agent, setAgent] = useState("");
+  const [taxType, setTaxType] = useState("All");
+  const [lessDrCr, setLessDrCr] = useState(true);
+
 
   // print modal
   const [printOpen, setPrintOpen] = useState(false);
@@ -124,20 +133,62 @@ export default function AccountWiseSummPur({ show, onClose }) {
         });
       }
 
-        // CITY FILTER
-        if (city.trim() !== "") {
-          data = data.filter(p => {
-            const apiCity =
-              p.supplierdetails?.[0]?.city ||
-              p.formData?.city ||
-              "";
-            return apiCity.toLowerCase().includes(city.toLowerCase());
-          });
-        }
+      // CITY FILTER
+      if (city.trim() !== "") {
+        data = data.filter(p => {
+          const apiCity =
+            p.supplierdetails?.[0]?.city ||
+            p.formData?.city ||
+            "";
+          return apiCity.toLowerCase().includes(city.toLowerCase());
+        });
+      }
+      // STATE FILTER
+      if (stateName.trim() !== "") {
+        data = data.filter(p => {
+          const apiState =
+            p.supplierdetails?.[0]?.state ||
+            p.formData?.state ||
+            "";
+          return apiState.toLowerCase().includes(stateName.toLowerCase());
+        });
+      }
+      // Agent FILTER
+      if (agent.trim() !== "") {
+        data = data.filter(p =>
+          p.formData?.broker?.toLowerCase().includes(agent.toLowerCase())
+        );
+      }
+      // Tax Type FILTER
+      if (taxType !== "All") {
+        data = data.filter(p =>
+          p.formData?.stype === taxType
+        );
+      }
+
+
 
         // GROUP SUMMARY
-        const summary = summarizeByAccount(data);
-        setGroupedData(summary);
+      let summary = summarizeByAccount(data);
+
+// QTY FILTER
+if (minQty !== "") {
+  summary = summary.filter(r => r.qty >= Number(minQty));
+}
+if (maxQty !== "") {
+  summary = summary.filter(r => r.qty <= Number(maxQty));
+}
+
+// VALUE FILTER
+if (minValue !== "") {
+  summary = summary.filter(r => r.value >= Number(minValue));
+}
+if (maxValue !== "") {
+  summary = summary.filter(r => r.value <= Number(maxValue));
+}
+
+setGroupedData(summary);
+
       })
 
       .catch(() => alert("Failed to load data"))
@@ -219,8 +270,25 @@ export default function AccountWiseSummPur({ show, onClose }) {
                   onChange={(e) => setCity(e.target.value)}
                 />
               </div>
+
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <label className="form-label" style={{ width: "120px" }}>State</label>
+                <Form.Control
+                  value={stateName}
+                  onChange={(e) => setStateName(e.target.value)}
+                />
+              </div>
               
-              <div style={{ display: "flex", alignItems: "center" }}>
+              {/* AGENT */}
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <label className="form-label" style={{ width: "120px" }}>Agent</label>
+                <Form.Control
+                  value={agent}
+                  onChange={(e) => setAgent(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px"  }}>
               <label className="form-label">Report Type</label>
               <Form.Select
                 className="reportType"
@@ -232,6 +300,39 @@ export default function AccountWiseSummPur({ show, onClose }) {
               </Form.Select>
               </div>
 
+              {/* TAX TYPE */}
+               <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                  <label style={{}}>Tax Type</label>
+                  <Form.Select
+                    className="taxType"
+                    value={taxType}
+                    onChange={(e) => setTaxType(e.target.value)}
+                  >
+                    <option>All</option>
+                    <option value="GST Sale (RD)">GST Sale (RD)</option>
+                    <option value="IGST Sale (RD)">IGST Sale (RD)</option>
+                    <option value="GST (URD)">GST (URD)</option>
+                    <option value="IGST (URD)">IGST (URD)</option>
+                    <option value="Tax Free Within State">Tax Free Within State</option>
+                    <option value="Tax Free Interstate">Tax Free Interstate</option>
+                    <option value="Export Sale">Export Sale</option>
+                    <option value="Export Sale(IGST)">Export Sale(IGST)</option>
+                    <option value="Including GST">Including GST</option>
+                    <option value="Including IGST">Including IGST</option>
+                    <option value="Not Applicable">Not Applicable</option>
+                    <option value="Exempted Sale">Exempted Sale</option>
+                  </Form.Select>
+                </div>
+              {/* LESS DR/CR */}
+              <div className="form-check mt-2">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={lessDrCr}
+                  onChange={(e) => setLessDrCr(e.target.checked)}
+                />
+                <label className="form-check-label">Less Dr/Cr Note</label>
+              </div>
             </div>
 
             {/* RIGHT CONTAINER */}
@@ -245,7 +346,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
             >
               <h5 style={{ marginBottom: "15px", fontWeight: 600 }}>Summary Type</h5>
 
-              <div className="form-check mb-3">
+              <div className="form-check mb-1">
                 <input
                   type="radio"
                   className="form-check-input"
@@ -256,6 +357,56 @@ export default function AccountWiseSummPur({ show, onClose }) {
                 />
                 <label className="form-check-label">Account Wise</label>
               </div>
+
+              <div className="form-check mb-1">
+  <input
+    type="radio"
+    className="form-check-input"
+    name="summaryType"
+    value="month"
+    checked={summaryType === "month"}
+    onChange={(e) => setSummaryType(e.target.value)}
+  />
+  <label className="form-check-label">Month Wise</label>
+              </div>
+
+              <div className="form-check mb-4">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name="summaryType"
+                  value="date"
+                  checked={summaryType === "date"}
+                  onChange={(e) => setSummaryType(e.target.value)}
+                />
+                <label className="form-check-label">Date Wise</label>
+              </div>
+
+              <h6>Quantity Range</h6>
+              <Form.Control
+                placeholder="Minimum Qty"
+                value={minQty}
+                onChange={(e) => setMinQty(e.target.value)}
+                className="mb-2"
+              />
+              <Form.Control
+                placeholder="Maximum Qty"
+                value={maxQty}
+                onChange={(e) => setMaxQty(e.target.value)}
+              />
+
+              <h6 className="mt-3">Value Range</h6>
+              <Form.Control
+                placeholder="Minimum Value"
+                value={minValue}
+                onChange={(e) => setMinValue(e.target.value)}
+                className="mb-2"
+              />
+              <Form.Control
+                placeholder="Maximum Value"
+                value={maxValue}
+                onChange={(e) => setMaxValue(e.target.value)}
+              />
             </div>
           </div>
 
