@@ -1017,7 +1017,7 @@ export default function App() {
                                 </StyledIcon>
                                 <StyledListItemText primary="A/C Wise Summary" />
                             </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=PPur')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>
@@ -1087,7 +1087,7 @@ export default function App() {
                                 </StyledIcon>
                                 <StyledListItemText primary="A/C Wise Summary" />
                             </StyledListItem>
-                            <StyledListItem button onClick={() => handleNavigation('/')}>
+                            <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=PSale')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>

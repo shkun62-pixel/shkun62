@@ -30,8 +30,8 @@ const subHeader = {
 
 const center = { textAlign: "center" };
 
-const AccWisePrint = forwardRef(
-  ({ rows, fromDate, toDate, companyName, companyAdd, companyCity, tittle }, ref) => {
+const ProductWisePrint = forwardRef(
+  ({ rows, fromDate, toDate, companyName, companyAdd, companyCity }, ref) => {
     if (!rows || rows.length === 0) {
       return (
         <div ref={ref}>
@@ -65,9 +65,9 @@ const AccWisePrint = forwardRef(
             justifyContent: "space-between",
           }}
         >
-          <strong>{tittle}</strong>
+          <strong>Account Wise Details</strong>
           <strong>
-          (From: {fromDate} UpTo: {toDate})
+            Sale Summary (From: {fromDate} To: {toDate})
           </strong>
         </div>
 
@@ -126,4 +126,4 @@ const AccWisePrint = forwardRef(
   }
 );
 
-export default AccWisePrint;
+export default ProductWisePrint;

@@ -2,15 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
-import AccountWisePrint from "./AccountWisePrint";
+import ProductWisePrint from "./ProductWisePrint";
 import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
+import AccWisePrint from "./AccWisePrint";
 
 const API_URL =
-  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
+  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
 
-export default function AccountWiseSummPur({ show, onClose }) {
+export default function ProductWiseSaleSum({ show, onClose }) {
     
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   // filters
@@ -77,7 +78,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
 
     purchases.forEach((p) => {
       p.items.forEach((item) => {
-        const acc = item.Pcodess;
+        const acc = item.sdisc;
 
         if (!result[acc]) {
           result[acc] = {
@@ -128,7 +129,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
       const month = formatMonth(p.formData?.date);
 
       p.items.forEach(item => {
-        const account = item.Pcodess;
+        const account = item.sdisc;
         const key = `${month}__${account}`;
 
         if (!result[key]) {
@@ -166,7 +167,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
       const date = formatDateKey(p.formData?.date);
 
       p.items.forEach(item => {
-        const account = item.Pcodess;
+        const account = item.sdisc;
         const key = `${date}__${account}`;
 
         if (!result[key]) {
@@ -231,7 +232,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
       if (city.trim() !== "") {
         data = data.filter(p => {
           const apiCity =
-            p.supplierdetails?.[0]?.city ||
+            p.customerDetails?.[0]?.city ||
             p.formData?.city ||
             "";
           return apiCity.toLowerCase().includes(city.toLowerCase());
@@ -241,7 +242,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
       if (stateName.trim() !== "") {
         data = data.filter(p => {
           const apiState =
-            p.supplierdetails?.[0]?.state ||
+            p.customerDetails?.[0]?.state ||
             p.formData?.state ||
             "";
           return apiState.toLowerCase().includes(stateName.toLowerCase());
@@ -299,7 +300,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
     const wb = XLSX.utils.book_new();
     const ws = {};
 
-    const title = `Purchase Summary - From: ${fromDate} To: ${toDate}`;
+    const title = `Sale Summary - From: ${fromDate} To: ${toDate}`;
 
     // ----------------------------
     // Header map
@@ -445,8 +446,8 @@ export default function AccountWiseSummPur({ show, onClose }) {
     // ----------------------------
     // Append Sheet & Save
     // ----------------------------
-    XLSX.utils.book_append_sheet(wb, ws, "Purchase Summary");
-    XLSX.writeFile(wb, "Purchase_Summary.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Sale Summary");
+    XLSX.writeFile(wb, "Sale_Summary.xlsx");
   };
 
   return (
@@ -464,9 +465,9 @@ export default function AccountWiseSummPur({ show, onClose }) {
         >
         <h4
           className="header"
-          style={{marginTop:0,marginLeft:"30%",fontSize:"22px"}}
+          style={{marginTop:0,marginLeft:"35%",fontSize:"22px"}}
         >
-          ACCOUNT WISE PURCHASE SUMMARY
+          PRODUCT WISE SALE SUMMARY
         </h4>
 
           {/* MAIN 2-COLUMN CONTAINER */}
@@ -695,7 +696,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
         {fetching ? (
           <div className="text-center">Loading...</div>
         ) : (
-          <AccountWisePrint
+          <AccWisePrint
             ref={printRef}
             rows={groupedData}
             fromDate={fromDate}
@@ -703,7 +704,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
             companyName={companyName}
             companyAdd={companyAdd}
             companyCity={companyCity}
-            tittle = {"ACCOUNT WISE PURCHASE SUMMARY"}
+            tittle = {"PRODUCT WISE SALE SUMMARY"}
           />
         )}
       </Modal.Body>

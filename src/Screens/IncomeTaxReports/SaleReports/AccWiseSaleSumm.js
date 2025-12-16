@@ -703,6 +703,7 @@ export default function AccWiseSaleSumm({ show, onClose }) {
             companyName={companyName}
             companyAdd={companyAdd}
             companyCity={companyCity}
+            tittle = {"ACCOUNT WISE SALE SUMMARY"}
           />
         )}
       </Modal.Body>

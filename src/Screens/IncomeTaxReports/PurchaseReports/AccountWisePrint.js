@@ -155,7 +155,7 @@ const subHeader = {
 const center = { textAlign: "center" };
 
 const AccountWisePrint = forwardRef(
-  ({ rows, fromDate, toDate, companyName, companyAdd, companyCity }, ref) => {
+  ({ rows, fromDate, toDate, companyName, companyAdd, companyCity, tittle }, ref) => {
     if (!rows || rows.length === 0) {
       return (
         <div ref={ref}>
@@ -189,9 +189,9 @@ const AccountWisePrint = forwardRef(
             justifyContent: "space-between",
           }}
         >
-          <strong>Account Wise Details</strong>
+          <strong>{tittle}</strong>
           <strong>
-            Purchase Summary (From: {fromDate} To: {toDate})
+            (From: {fromDate} To: {toDate})
           </strong>
         </div>
 
@@ -227,7 +227,7 @@ const AccountWisePrint = forwardRef(
           {/* Footer with totals */}
           <tfoot>
             <tr>
-              <td style={thtd} colSpan={isMonthWise || isDateWise ? 4 : 2}>
+              <td style={thtd} colSpan={isMonthWise || isDateWise ? 3 : 2}>
                 <strong>Total</strong>
               </td>
               <td style={{ ...thtd, textAlign: "right" }}>
