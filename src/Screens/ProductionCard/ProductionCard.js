@@ -114,33 +114,49 @@ const ProductionCard = () => {
     return daysOfWeek[date.getDay()];
   };
 
+  const formatDDMMYYYY = (date) => {
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+  };
   useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
     if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
+      const parts = formData.date.split("/");
+
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // JS months are 0-based
+        const year = parseInt(parts[2], 10);
+
+        const parsedDate = new Date(year, month, day);
+
+        if (!isNaN(parsedDate.getTime())) {
+          setSelectedDate(parsedDate);
         } else {
-          console.error("Invalid date value in formData.date:", formData.date);
+          console.error("Invalid parsed date:", formData.date);
+          setSelectedDate(null);
         }
-      } catch (error) {
-        console.error("Error parsing date:", error);
+      } else {
+        console.error("Date format should be dd/mm/yyyy:", formData.date);
+        setSelectedDate(null);
       }
     } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
       setSelectedDate(null);
     }
   }, [formData.date]);
-
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
       setSelectedDate(date);
 
-      // Format or store date in formData as needed
-      // const formattedDate = date.toISOString().split("T")[0]; // e.g. "2025-03-10"
-      setFormData((prev) => ({ ...prev, date: date, duedate: date }));
+      const formattedDate = formatDDMMYYYY(date);
+
+      setFormData((prev) => ({
+        ...prev,
+        date: formattedDate,
+        duedate: formattedDate,
+      }));
+
       setDayName(getDayName(date));
     } else {
       console.error("Invalid date value");
@@ -353,22 +369,7 @@ const ProductionCard = () => {
     if (!isAddEnabled && formData.SelectAuto === "Auto Selection One by One") {
       fetchProducts2();
     } else {
-      setItems([
-        {
-          id: 1,
-          Aheads: "",
-          Acodes: "",
-          Narration: "",
-          pcsIssue: "",
-          pcsReceipt: "",
-          qtyIssue: "",
-          qtyReceipt: "",
-          Types: "",
-          Psrno: "",
-          PUnitno: "",
-          Percentage: "",
-        },
-      ]); // Clear items for manual selection
+      fetchProducts();
     }
   }, [formData.SelectAuto]);
 
@@ -1091,27 +1092,6 @@ const ProductionCard = () => {
         <span style={styles2.days}>{currentDay}</span>
       </div>
       <div className="TopCard" style={{ padding: 5 }}>
-        {/* <div
-          className="datediv"
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <text style={{ marginRight: 8 }}>VOUCHER DATE:</text>
-          <DatePicker
-            ref={datePickerRef}
-            className="cashdate"
-            id="date"
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-          />
-          <span style={{ fontWeight: "bold", marginLeft: 10 }}>{dayName}</span>
-        </div> */}
           <span style={{fontWeight:'bold'}}>DATE</span>
            <DatePicker
             ref={datePickerRef}
@@ -1172,7 +1152,6 @@ const ProductionCard = () => {
             },
           }}
           size="small"
-          disabled={!isEditMode || isDisabled}
           variant="filled"
         >
           <InputLabel id="supply-label">SELECTION TYPE</InputLabel>
@@ -1180,13 +1159,23 @@ const ProductionCard = () => {
             labelId="supply-label"
             id="SelectAuto"
             value={formData.SelectAuto}
-            onChange={handleSelectAuto}
+            onChange={(e) => {
+            if (!isEditMode || isDisabled) return; // prevent changing
+              handleSelectAuto(e);
+            }}
+            onOpen={(e) => {
+              if (!isEditMode || isDisabled) {
+                e.preventDefault(); // prevent dropdown opening
+              }
+            }}
+            // onChange={handleSelectAuto}
             label="SUPPLY TYPE"
             displayEmpty
             inputProps={{
               sx: {
                 fontSize: 17,
-                width:"258px"
+                width:"258px",
+                pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
               },
             }}
             MenuProps={{ disablePortal: true }}

@@ -36,9 +36,12 @@
 
 
 import React,{useEffect,useState} from "react";
+// Purchase Reports
 import PartyWiseSummPur from "./PurchaseReports/PartyWiseSummPur";
 import AccountWiseSummPur from "./PurchaseReports/AccountWiseSummPur";
+// Sale Reports
 import PartyWiseSumSale from "./SaleReports/PartyWiseSumSale";
+import AccWiseSaleSumm from "./SaleReports/AccWiseSaleSumm";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const IncomeTaxReport = () => {
@@ -71,6 +74,10 @@ const IncomeTaxReport = () => {
       
       {type === "saleParty" && (
         <PartyWiseSumSale show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "AccSale" && (
+        <AccWiseSaleSumm show={openPurRep} onClose={handleClose} />
       )}
     </div>
   );
