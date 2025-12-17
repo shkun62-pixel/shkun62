@@ -5100,7 +5100,7 @@ const handleKeyDown = (event, index, field) => {
           <Button
           ref={addButtonRef}
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[0] }}
+            style={{backgroundColor: buttonColors[0] }}
             onClick={handleAdd}
             disabled={!isAddEnabled}
           >
@@ -5108,7 +5108,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[1] }}
+            style={{  backgroundColor: buttonColors[1] }}
             onClick={handleEditClick}
             disabled={!isAddEnabled}
           >
@@ -5116,7 +5116,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[2] }}
+            style={{  backgroundColor: buttonColors[2] }}
             onClick={handlePrevious}
             disabled={!isPreviousEnabled}
           >
@@ -5124,7 +5124,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[3] }}
+            style={{  backgroundColor: buttonColors[3] }}
             onClick={handleNext}
             disabled={!isNextEnabled}
           >
@@ -5132,7 +5132,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[4] }}
+            style={{  backgroundColor: buttonColors[4] }}
             onClick={handleFirst}
             disabled={!isFirstEnabled}
           >
@@ -5140,7 +5140,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[5] }}
+            style={{  backgroundColor: buttonColors[5] }}
             onClick={handleLast}
             disabled={!isLastEnabled}
           >
@@ -5148,7 +5148,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[6] }}
+            style={{  backgroundColor: buttonColors[6] }}
             disabled={!isSearchEnabled}
             onClick={() => {
               fetchAllBills();
@@ -5166,21 +5166,13 @@ const handleKeyDown = (event, index, field) => {
               voucherno={formData.vno}
               vtype="P"
             />
-            // <PurFAVoucherModal
-            //   open={isFAModalOpen}
-            //   onClose={() => setIsFAModalOpen(false)}
-            //   tenant={"shkun_05062025_05062026"}
-            //   voucherno={formData?.vno}
-            //   vtype="P"
-            //   headerTitle="FA VOUCHER (PURCHASE)"
-            // />
           )}
 
           <Button
             ref={printButtonRef}
             className="Buttonz"
             onClick={openPrintMenu}
-            style={{ color: "black", backgroundColor: buttonColors[7] }}
+            style={{  backgroundColor: buttonColors[7] }}
             disabled={!isPrintEnabled}
           >
             Print
@@ -5195,8 +5187,8 @@ const handleKeyDown = (event, index, field) => {
           onFaView={handleViewFAVoucher}
             />
           <Button
-            className="delete"
-            style={{ color: "black", backgroundColor: buttonColors[8] }}
+            className="Buttonz"
+            style={{  backgroundColor: buttonColors[8] }}
             onClick={handleDeleteClick}
             disabled={!isDeleteEnabled}
           >
@@ -5205,7 +5197,7 @@ const handleKeyDown = (event, index, field) => {
           <Button
             onClick={handleExit}
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[9] }}
+            style={{ backgroundColor: buttonColors[9] }}
           >
             Exit
           </Button>
@@ -5214,7 +5206,7 @@ const handleKeyDown = (event, index, field) => {
             className="Buttonz"
             onClick={handleDataSave}
             disabled={!isSubmitEnabled}
-            style={{ color: "black", backgroundColor: buttonColors[10] }}
+            style={{ backgroundColor: buttonColors[10] }}
           >
             Save
           </Button>

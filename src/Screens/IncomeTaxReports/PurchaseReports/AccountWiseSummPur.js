@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Table } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
 import AccountWisePrint from "./AccountWisePrint";
@@ -28,6 +28,12 @@ export default function AccountWiseSummPur({ show, onClose }) {
   const [taxType, setTaxType] = useState("All");
   const [lessDrCr, setLessDrCr] = useState(true);
 
+  // Ledger selection modal state
+  const [ledgerModalOpen, setLedgerModalOpen] = useState(false);
+  const [ledgers, setLedgers] = useState([]);                 // All ledger names from API
+  const [selectedLedgers, setSelectedLedgers] = useState([]); // Only checked
+  const [ledgerSearch, setLedgerSearch] = useState("");       // Search input
+  const [selectAll, setSelectAll] = useState(false);          // Select All toggle
 
   // print modal
   const [printOpen, setPrintOpen] = useState(false);
@@ -227,6 +233,13 @@ export default function AccountWiseSummPur({ show, onClose }) {
         });
       }
 
+      // FILTER BY LEDGERS IF SELECTED
+      if (selectedLedgers.length > 0) {
+        data = data.filter(rec =>
+          selectedLedgers.includes(rec.items?.[0]?.sdisc)
+        );
+      }
+
       // CITY FILTER
       if (city.trim() !== "") {
         data = data.filter(p => {
@@ -289,6 +302,90 @@ export default function AccountWiseSummPur({ show, onClose }) {
       setPrintOpen(true);
     });
   };
+
+  useEffect(() => {
+    axios.get(API_URL).then((res) => {
+      if (Array.isArray(res.data)) {
+
+        const list = res.data
+          .map(r => ({
+            sdisc: r.items?.[0]?.sdisc || "",
+            vcode: r.items?.[0]?.vcode || ""
+          }))
+          .filter(x => x.sdisc !== "");
+
+        // remove duplicates by vacode
+        const unique = [];
+        const map = new Map();
+        for (const item of list) {
+          if (!map.has(item.sdisc)) {
+            map.set(item.sdisc, true);
+            unique.push(item);
+          }
+        }
+
+        setLedgers(unique);
+
+        // select all default
+        setSelectedLedgers(unique.map(x => x.sdisc));
+        setSelectAll(true);
+      }
+    });
+  }, []);
+
+  // Toggle single ledger
+  function toggleLedger(name) {
+    setSelectedLedgers((prev) =>
+      prev.includes(name)
+        ? prev.filter((x) => x !== name)
+        : [...prev, name]
+    );
+  }
+
+  // helper: currently visible (filtered) ledgers based on search
+  function getVisibleLedgers() {
+    const q = (ledgerSearch || "").toLowerCase();
+    return ledgers.filter(
+      (x) =>
+        x.sdisc.toLowerCase().includes(q) ||
+        (x.vcode || "").toLowerCase().includes(q)
+    );
+  }
+
+  // Select all
+  function toggleSelectAll() {
+    const visible = getVisibleLedgers();
+    const visibleVacodes = visible.map(x => x.sdisc);
+
+    // If every visible vacode is already selected => unselect visible ones
+    const allVisibleSelected = visibleVacodes.length > 0 &&
+      visibleVacodes.every(v => selectedLedgers.includes(v));
+
+    if (allVisibleSelected) {
+      // remove visible vacodes from selectedLedgers
+      setSelectedLedgers(prev => prev.filter(v => !visibleVacodes.includes(v)));
+      setSelectAll(false);
+    } else {
+      // add visible vacodes to selectedLedgers (avoid duplicates)
+      setSelectedLedgers(prev => {
+        const set = new Set(prev);
+        visibleVacodes.forEach(v => set.add(v));
+        return Array.from(set);
+      });
+      setSelectAll(true);
+    }
+  }
+
+  useEffect(() => {
+    const visible = getVisibleLedgers();
+    if (visible.length === 0) {
+      setSelectAll(false);
+      return;
+    }
+    const visibleVacodes = visible.map(x => x.sdisc);
+    const allVisibleSelected = visibleVacodes.every(v => selectedLedgers.includes(v));
+    setSelectAll(allVisibleSelected);
+  }, [ledgerSearch, ledgers, selectedLedgers]);
 
   const exportToExcel = () => {
     if (!groupedData || groupedData.length === 0) {
@@ -667,6 +764,9 @@ export default function AccountWiseSummPur({ show, onClose }) {
                 marginTop: "25px",
               }}
           >
+            <Button variant="outline-secondary" onClick={() => setLedgerModalOpen(true)}>
+              Select Stock Accounts
+            </Button>
             <Button variant="primary" onClick={onOpenPrint}>
               Print
             </Button>
@@ -713,6 +813,94 @@ export default function AccountWiseSummPur({ show, onClose }) {
         <Button variant="success" onClick={exportToExcel}> EXPORT </Button>
         <Button variant="secondary" onClick={() => setPrintOpen(false)}>CLOSE</Button>
       </Modal.Footer>
+    </Modal>
+
+    {/* LEDGER SELECTION MODAL */}
+    <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Select Stock Accounts</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+
+        {/* LEDGER TABLE */}
+        <div
+          style={{
+            maxHeight: "350px",
+            overflowY: "auto",
+            padding: "10px",
+          }}
+        >
+          <Table className="custom-table" size="sm">
+            <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
+              <tr>
+                <th style={{ width: "50px", textAlign: "center" }}>Select</th>
+                <th>Account Name</th>
+                <th>Ac Code</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {ledgers
+                .filter(
+                  (x) =>
+                    x.sdisc.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
+                    x.vcode.toLowerCase().includes(ledgerSearch.toLowerCase())
+                )
+                .map((x, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLedgers.includes(x.sdisc)}
+                        onChange={() => toggleLedger(x.sdisc)}
+                      />
+                    </td>
+                    <td>{x.sdisc}</td>
+                    <td>{x.vcode}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
+
+      </Modal.Body>
+
+      <Modal.Footer
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {/* SEARCH BAR ON LEFT */}
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search ledger..."
+          style={{ width: "300px" }}
+          value={ledgerSearch}
+          onChange={(e) => setLedgerSearch(e.target.value)}
+        />
+
+        {/* BUTTONS ON RIGHT */}
+        <div>
+          <Button
+            variant={selectAll ? "warning" : "success"}
+            onClick={toggleSelectAll}
+          >
+            {selectAll ? "Unselect All" : "Select All"}
+          </Button>{" "}
+          <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
+            Close
+          </Button>{" "}
+          <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
+            Apply
+          </Button>
+        </div>
+      </Modal.Footer>
+
     </Modal>
     </>
   );
