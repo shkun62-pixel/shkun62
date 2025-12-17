@@ -152,8 +152,6 @@ const subHeader = {
   color: "darkblue",
 };
 
-const center = { textAlign: "center" };
-
 const AccountWisePrint = forwardRef(
   ({ rows, fromDate, toDate, companyName, companyAdd, companyCity, tittle }, ref) => {
     if (!rows || rows.length === 0) {
