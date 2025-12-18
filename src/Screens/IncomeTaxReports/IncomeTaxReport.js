@@ -40,6 +40,7 @@ import React,{useEffect,useState} from "react";
 import PartyWiseSummPur from "./PurchaseReports/PartyWiseSummPur";
 import AccountWiseSummPur from "./PurchaseReports/AccountWiseSummPur";
 import ProductWisePur from "./PurchaseReports/ProductWisePur";
+import ProdWiseDetail from "./PurchaseReports/ProdWiseDetail";
 // Sale Reports
 import PartyWiseSumSale from "./SaleReports/PartyWiseSumSale";
 import AccWiseSaleSumm from "./SaleReports/AccWiseSaleSumm";
@@ -89,6 +90,10 @@ const IncomeTaxReport = () => {
 
       {type === "PPur" && (
         <ProductWisePur show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "PDetail" && (
+        <ProdWiseDetail show={openPurRep} onClose={handleClose} />
       )}
     </div>
   );

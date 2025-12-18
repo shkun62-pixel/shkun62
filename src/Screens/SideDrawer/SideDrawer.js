@@ -1023,7 +1023,7 @@ export default function App() {
                                 </StyledIcon>
                                 <StyledListItemText primary="Product Wise Purchase" />
                             </StyledListItem>
-                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                             <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=PDetail')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>
