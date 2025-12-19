@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form, Table } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
-import PWiseDetailPrint from "./PwiseDetailPrint";
+import PWiseDetailPrint from "../PurchaseReports/PwiseDetailPrint";
 import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../../Shared/useCompanySetup";
 
 const API_URL =
-  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
+  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
 
-export default function ProdWiseDetail({ show, onClose }) {
+export default function ProdWiseDetailSale({ show, onClose }) {
     
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   // filters
@@ -80,7 +80,7 @@ export default function ProdWiseDetail({ show, onClose }) {
 
     purchases.forEach(p => {
       const city = p.formData?.city || "";
-      const accountname = p.supplierdetails?.[0]?.vacode || "UNKNOWN";
+      const accountname = p.customerDetails?.[0]?.vacode || "UNKNOWN";
 
       p.items.forEach(item => {
         const account = accountname;
@@ -167,7 +167,7 @@ export default function ProdWiseDetail({ show, onClose }) {
       if (city.trim() !== "") {
         data = data.filter(p => {
           const apiCity =
-            p.supplierdetails?.[0]?.city ||
+            p.customerDetails?.[0]?.city ||
             p.formData?.city ||
             "";
           return apiCity.toLowerCase().includes(city.toLowerCase());
@@ -177,7 +177,7 @@ export default function ProdWiseDetail({ show, onClose }) {
       if (stateName.trim() !== "") {
         data = data.filter(p => {
           const apiState =
-            p.supplierdetails?.[0]?.state ||
+            p.customerDetails?.[0]?.state ||
             p.formData?.state ||
             "";
           return apiState.toLowerCase().includes(stateName.toLowerCase());
@@ -319,7 +319,7 @@ export default function ProdWiseDetail({ show, onClose }) {
           className="header"
           style={{marginTop:0,marginLeft:"35%",fontSize:"22px"}}
         >
-          PRODUCT WISE REPORT PURCHASE
+          PRODUCT WISE REPORT SALE
         </h4>
 
           {/* MAIN 2-COLUMN CONTAINER */}
@@ -506,12 +506,12 @@ export default function ProdWiseDetail({ show, onClose }) {
       onHide={() => setPrintOpen(false)}
       fullscreen
       className="custom-modal"
-      style={{ marginTop: 20, overflow: "auto" }}
+      style={{ marginTop: 20, overflowY: "auto" }}
       backdrop="static" keyboard={true}
     >
       <Modal.Body style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}>
         {fetching ? (
-          <div style={{overflow:"auto"}} className="text-center">Loading...</div>
+          <div className="text-center">Loading...</div>
         ) : (
           <PWiseDetailPrint
             ref={printRef}
@@ -521,7 +521,7 @@ export default function ProdWiseDetail({ show, onClose }) {
             companyName={companyName}
             companyAdd={companyAdd}
             companyCity={companyCity}
-            tittle = {"PRODUCT WISE DETAIL PURCHASE"}
+            tittle = {"PRODUCT WISE DETAIL SALE"}
           />
         )}
       </Modal.Body>

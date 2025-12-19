@@ -45,6 +45,7 @@ import ProdWiseDetail from "./PurchaseReports/ProdWiseDetail";
 import PartyWiseSumSale from "./SaleReports/PartyWiseSumSale";
 import AccWiseSaleSumm from "./SaleReports/AccWiseSaleSumm";
 import ProductWiseSaleSum from "./SaleReports/ProductWiseSaleSum";
+import ProdWiseDetailSale from "./SaleReports/ProdWiseDetailSale";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -94,6 +95,10 @@ const IncomeTaxReport = () => {
 
       {type === "PDetail" && (
         <ProdWiseDetail show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "PDetailSale" && (
+        <ProdWiseDetailSale show={openPurRep} onClose={handleClose} />
       )}
     </div>
   );

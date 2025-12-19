@@ -912,7 +912,7 @@ export default function PartyWiseSummPur({ show, onClose }) {
         style={{ marginTop: 20 }}
         backdrop="static" keyboard={true}
       >
-        <Modal.Body>
+        <Modal.Body style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}>
           {fetching ? (
             <div className="text-center">Loading...</div>
           ) : error ? (
