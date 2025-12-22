@@ -1,38 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Button, Form, Table } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
-import PWiseDetailPrint from "./PwiseDetailPrint";
 import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../../Shared/useCompanySetup";
-import financialYear from "../../Shared/financialYear";
+import * as XLSX from 'sheetjs-style';
+import AccWisePrint from "./AccWisePrint";
 
 const API_URL =
-  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
+  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
 
-export default function ProdWiseDetail({ show, onClose }) {
+export default function StateWiseSale({ show, onClose }) {
     
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   // filters
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
-  useEffect(() => {
-    const fy = financialYear.getFYDates();
-    setFromDate(formatDate(fy.start)); // converted
-    setToDate(formatDate(fy.end));     // converted
-  }, []);
-
+  const [fromDate, setFromDate] = useState("01-04-2025");
+  const [toDate, setToDate] = useState("31-03-2026");
   const [city, setCity] = useState("");
+  const [summaryType, setSummaryType] = useState("account");
   const [reportType, setReportType] = useState("With GST");
   const [stateName, setStateName] = useState("");
   const [minQty, setMinQty] = useState("");
@@ -43,12 +28,6 @@ export default function ProdWiseDetail({ show, onClose }) {
   const [taxType, setTaxType] = useState("All");
   const [lessDrCr, setLessDrCr] = useState(true);
 
-  // Ledger selection modal state
-  const [ledgerModalOpen, setLedgerModalOpen] = useState(false);
-  const [ledgers, setLedgers] = useState([]);                 // All ledger names from API
-  const [selectedLedgers, setSelectedLedgers] = useState([]); // Only checked
-  const [ledgerSearch, setLedgerSearch] = useState("");       // Search input
-  const [selectAll, setSelectAll] = useState(false);          // Select All toggle
 
   // print modal
   const [printOpen, setPrintOpen] = useState(false);
@@ -92,55 +71,133 @@ export default function ProdWiseDetail({ show, onClose }) {
     return null; // invalid format
   }
 
-  function summarizeAccountProductWise(purchases) {
+  // group into single row per account
+  function summarizeByAccount(purchases) {
     const result = {};
 
-    purchases.forEach(p => {
-      const city = p.formData?.city || "";
-      const accountname = p.supplierdetails?.[0]?.vacode || "UNKNOWN";
+    purchases.forEach((p) => {
+      p.items.forEach((item) => {
+        // const acc = item.sdisc;
+        const acc = p.customerDetails?.[0]?.state || "UNKNOWN";
 
-      p.items.forEach(item => {
-        const account = accountname;
-        const product = item.sdisc || item.sdisc || "UNKNOWN";
-
-        if (!result[account]) {
-          result[account] = {
-            account,
-            city,
-            products: {},
-            totalBags: 0,
-            totalQty: 0,
-            totalValue: 0,
-          };
-        }
-
-        if (!result[account].products[product]) {
-          result[account].products[product] = {
-            product,
+        if (!result[acc]) {
+          result[acc] = {
+            account: acc,
+            city: p.formData.city || "",
             bags: 0,
             qty: 0,
             value: 0,
           };
         }
 
-        const bags = Number(item.pkgs || 0);
-        const qty = Number(item.weight || 0);
-        const value =
-          reportType === "Without GST"
-            ? Number(item.amount || 0)
-            : Number(item.vamt || 0);
-
-        result[account].products[product].bags += bags;
-        result[account].products[product].qty += qty;
-        result[account].products[product].value += value;
-
-        result[account].totalBags += bags;
-        result[account].totalQty += qty;
-        result[account].totalValue += value;
+        result[acc].bags += Number(item.pkgs || 0);
+        result[acc].qty += Number(item.weight || 0);
+        if(reportType === "Without GST"){
+          result[acc].value += Number(item.amount || 0);
+        } else{
+          result[acc].value += Number(item.vamt || 0);
+        }
+        
       });
     });
 
-    return Object.values(result);
+    return Object.values(result).map((r) => ({
+      ...r,
+      avg: r.qty > 0 ? r.value / r.qty : 0,
+    }));
+  }
+
+  function formatMonth(dateStr) {
+    const d = parseAnyDate(dateStr);
+    if (!d) return "";
+    return d.toLocaleString("en-IN", {
+      month: "short",
+      year: "numeric",
+    }); // Apr 2025
+  }
+
+  function formatDateKey(dateStr) {
+    const d = parseAnyDate(dateStr);
+    if (!d) return "";
+    return d.toLocaleDateString("en-IN"); // 01/04/2025
+  }
+
+  function summarizeByMonth(purchases) {
+    const result = {};
+
+    purchases.forEach(p => {
+      const month = formatMonth(p.formData?.date);
+
+      p.items.forEach(item => {
+        // const account = item.sdisc;
+        const account = p.customerDetails?.[0]?.state || "UNKNOWN";
+        const key = `${month}__${account}`;
+
+        if (!result[key]) {
+          result[key] = {
+            month,
+            account,
+            city: p.formData.city || "",
+            bags: 0,
+            qty: 0,
+            value: 0,
+          };
+        }
+
+        result[key].bags += Number(item.pkgs || 0);
+        result[key].qty += Number(item.weight || 0);
+
+        if (reportType === "Without GST") {
+          result[key].value += Number(item.amount || 0);
+        } else {
+          result[key].value += Number(item.vamt || 0);
+        }
+      });
+    });
+
+    return Object.values(result).map(r => ({
+      ...r,
+      avg: r.qty > 0 ? r.value / r.qty : 0,
+    }));
+  }
+
+  function summarizeByDate(purchases) {
+    const result = {};
+
+    purchases.forEach(p => {
+      const date = formatDateKey(p.formData?.date);
+
+      p.items.forEach(item => {
+        // const account = item.sdisc;
+        const account = p.customerDetails?.[0]?.state || "UNKNOWN";
+        const key = `${date}__${account}`;
+
+        if (!result[key]) {
+          result[key] = {
+            date,
+            account,
+            city: p.formData.city || "",
+            bags: 0,
+            qty: 0,
+            value: 0,
+          };
+        }
+
+        result[key].bags += Number(item.pkgs || 0);
+        result[key].qty += Number(item.weight || 0);
+
+        if (reportType === "Without GST") {
+          result[key].value += Number(item.amount || 0);
+        } else {
+          result[key].value += Number(item.vamt || 0);
+        }
+      });
+    });
+
+    return Object.values(result).map(r => ({
+      ...r,
+      avg: r.qty > 0 ? r.value / r.qty : 0,
+    }));
   }
 
   // OPEN PRINT MODAL
@@ -173,18 +230,11 @@ export default function ProdWiseDetail({ show, onClose }) {
         });
       }
 
-      // FILTER BY LEDGERS IF SELECTED
-      if (selectedLedgers.length > 0) {
-        data = data.filter(rec =>
-          selectedLedgers.includes(rec.items?.[0]?.sdisc)
-        );
-      }
-
       // CITY FILTER
       if (city.trim() !== "") {
         data = data.filter(p => {
           const apiCity =
-            p.supplierdetails?.[0]?.city ||
+            p.customerDetails?.[0]?.city ||
             p.formData?.city ||
             "";
           return apiCity.toLowerCase().includes(city.toLowerCase());
@@ -194,7 +244,7 @@ export default function ProdWiseDetail({ show, onClose }) {
       if (stateName.trim() !== "") {
         data = data.filter(p => {
           const apiState =
-            p.supplierdetails?.[0]?.state ||
+            p.customerDetails?.[0]?.state ||
             p.formData?.state ||
             "";
           return apiState.toLowerCase().includes(stateName.toLowerCase());
@@ -216,7 +266,15 @@ export default function ProdWiseDetail({ show, onClose }) {
       // GROUP SUMMARY
       let summary = [];
 
-      summary = summarizeAccountProductWise(data);
+      if (summaryType === "account") {
+        summary = summarizeByAccount(data);
+      }
+      else if (summaryType === "month") {
+        summary = summarizeByMonth(data);
+      }
+      else if (summaryType === "date") {
+        summary = summarizeByDate(data);
+      }
 
       // APPLY QTY / VALUE RANGE (same for all)
       if (minQty !== "") summary = summary.filter(r => r.qty >= Number(minQty));
@@ -235,89 +293,164 @@ export default function ProdWiseDetail({ show, onClose }) {
     });
   };
 
-  useEffect(() => {
-    axios.get(API_URL).then((res) => {
-      if (Array.isArray(res.data)) {
-
-        const list = res.data
-          .map(r => ({
-            sdisc: r.items?.[0]?.sdisc || "",
-            vcode: r.items?.[0]?.vcode || ""
-          }))
-          .filter(x => x.sdisc !== "");
-
-        // remove duplicates by vacode
-        const unique = [];
-        const map = new Map();
-        for (const item of list) {
-          if (!map.has(item.sdisc)) {
-            map.set(item.sdisc, true);
-            unique.push(item);
-          }
-        }
-
-        setLedgers(unique);
-
-        // select all default
-        setSelectedLedgers(unique.map(x => x.sdisc));
-        setSelectAll(true);
-      }
-    });
-  }, []);
-
-  // Toggle single ledger
-  function toggleLedger(name) {
-    setSelectedLedgers((prev) =>
-      prev.includes(name)
-        ? prev.filter((x) => x !== name)
-        : [...prev, name]
-    );
-  }
-
-  // helper: currently visible (filtered) ledgers based on search
-  function getVisibleLedgers() {
-    const q = (ledgerSearch || "").toLowerCase();
-    return ledgers.filter(
-      (x) =>
-        x.sdisc.toLowerCase().includes(q) ||
-        (x.vcode || "").toLowerCase().includes(q)
-    );
-  }
-
-  // Select all
-  function toggleSelectAll() {
-    const visible = getVisibleLedgers();
-    const visibleVacodes = visible.map(x => x.sdisc);
-
-    // If every visible vacode is already selected => unselect visible ones
-    const allVisibleSelected = visibleVacodes.length > 0 &&
-      visibleVacodes.every(v => selectedLedgers.includes(v));
-
-    if (allVisibleSelected) {
-      // remove visible vacodes from selectedLedgers
-      setSelectedLedgers(prev => prev.filter(v => !visibleVacodes.includes(v)));
-      setSelectAll(false);
-    } else {
-      // add visible vacodes to selectedLedgers (avoid duplicates)
-      setSelectedLedgers(prev => {
-        const set = new Set(prev);
-        visibleVacodes.forEach(v => set.add(v));
-        return Array.from(set);
-      });
-      setSelectAll(true);
-    }
-  }
-
-  useEffect(() => {
-    const visible = getVisibleLedgers();
-    if (visible.length === 0) {
-      setSelectAll(false);
+  const exportToExcel = () => {
+    if (!groupedData || groupedData.length === 0) {
+      alert("No data to export");
       return;
     }
-    const visibleVacodes = visible.map(x => x.sdisc);
-    const allVisibleSelected = visibleVacodes.every(v => selectedLedgers.includes(v));
-    setSelectAll(allVisibleSelected);
-  }, [ledgerSearch, ledgers, selectedLedgers]);
+
+    const wb = XLSX.utils.book_new();
+    const ws = {};
+
+    const title = `State Wise Sale Summary - From: ${fromDate} To: ${toDate}`;
+
+    // ----------------------------
+    // Header map
+    // ----------------------------
+    const headerMap = {
+      month: "Month",
+      date: "Date",
+      account: "Account",
+      supplier: "Account",
+      city: "City",
+      pan: "PAN No",
+      bags: "Bags",
+      qty: "Quantity",
+      value: "Total Value",
+      avg: "Avg"
+    };
+
+    // ----------------------------
+    // Dynamic headers
+    // ----------------------------
+    let headers = Object.keys(groupedData[0]).map(k => headerMap[k] || k);
+    if (summaryType === "date") {
+      headers = [
+        "Date",
+        "Account",
+        ...headers.filter(h => !["Date", "Account"].includes(h))
+      ];
+    }
+
+    const numericColumns = ["Bags", "Quantity", "Total Value", "Avg"];
+    let rowIndex = 0;
+
+    // ----------------------------
+    // Company Name
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [[companyName]], { origin: rowIndex });
+    ws["A1"] = ws["A1"] || { t: "s", v: companyName };
+    ws["A1"].s = { font: { bold: true, sz: 16 }, alignment: { horizontal: "center" } };
+    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
+    rowIndex++;
+
+    // ----------------------------
+    // Company Address
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [[companyAdd]], { origin: rowIndex });
+    ws["A2"] = ws["A2"] || { t: "s", v: companyAdd };
+    ws["A2"].s = { font: { bold: true }, alignment: { horizontal: "center" } };
+    ws["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } });
+    rowIndex++;
+
+    // ----------------------------
+    // Title
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [[title]], { origin: rowIndex });
+    ws["A3"] = ws["A3"] || { t: "s", v: title };
+    ws["A3"].s = { font: { bold: true }, alignment: { horizontal: "center" } };
+    ws["!merges"].push({ s: { r: 2, c: 0 }, e: { r: 2, c: headers.length - 1 } });
+    rowIndex += 2;
+
+    // ----------------------------
+    // Header Row
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: rowIndex });
+    headers.forEach((h, i) => {
+      const ref = XLSX.utils.encode_cell({ r: rowIndex, c: i });
+      if (!ws[ref]) ws[ref] = { t: "s", v: h };
+      ws[ref].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4472C4" } },
+        alignment: { horizontal: "center" },
+        border: { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } },
+      };
+    });
+
+    rowIndex++;
+    const dataStartRow = rowIndex + 1;
+
+    // ----------------------------
+    // Data Rows
+    // ----------------------------
+    groupedData.forEach(r => {
+      const row = headers.map((h, i) => {
+        const key = Object.keys(headerMap).find(k => headerMap[k] === h);
+        let val = r[key] ?? "";
+
+        // Force numeric columns as numbers and apply decimal format
+        if (numericColumns.includes(h)) {
+          val = Number(val) || 0;
+          let format = "0.00"; // default 2 decimals
+          if (h === "Bags" || h === "Quantity") format = "0.000";
+          const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: i });
+          ws[cellRef] = { t: "n", v: val, z: format };
+          return val;
+        }
+
+        return val;
+      });
+
+      XLSX.utils.sheet_add_aoa(ws, [row], { origin: rowIndex });
+      rowIndex++;
+    });
+
+    const totalRowExcel = rowIndex + 1;
+
+    // ----------------------------
+    // Total / Subtotal row
+    // ----------------------------
+    XLSX.utils.sheet_add_aoa(ws, [["Total"]], { origin: rowIndex });
+    headers.forEach((h, i) => {
+      const col = XLSX.utils.encode_col(i);
+      const ref = `${col}${totalRowExcel}`;
+      if (numericColumns.includes(h)) {
+        let format = "0.00";
+        if (h === "Bags" || h === "Quantity") format = "0.000";
+        ws[ref] = {
+          t: "n",
+          f: `SUBTOTAL(9,${col}${dataStartRow}:${col}${totalRowExcel - 1})`,
+          z: format
+        };
+      } else {
+        ws[ref] = ws[ref] || { t: "s", v: "" };
+      }
+
+      ws[ref].s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: "D9E1F2" } },
+        alignment: { horizontal: i === 0 ? "left" : "right" },
+      };
+    });
+
+    // ----------------------------
+    // Column widths
+    // ----------------------------
+    ws["!cols"] = headers.map(() => ({ wch: 18 }));
+
+    // ----------------------------
+    // Autofilter
+    // ----------------------------
+    ws["!autofilter"] = {
+      ref: `A${dataStartRow - 1}:${XLSX.utils.encode_col(headers.length - 1)}${totalRowExcel - 1}`
+    };
+
+    // ----------------------------
+    // Append Sheet & Save
+    // ----------------------------
+    XLSX.utils.book_append_sheet(wb, ws, "StateWise Summary");
+    XLSX.writeFile(wb, "StateWiseSale.xlsx");
+  };
 
   return (
     <>
@@ -334,9 +467,9 @@ export default function ProdWiseDetail({ show, onClose }) {
         >
         <h4
           className="header"
-          style={{marginTop:0,marginLeft:"35%",fontSize:"22px"}}
+          style={{marginTop:0,marginLeft:"32%",fontSize:"22px"}}
         >
-          PRODUCT WISE REPORT PURCHASE
+          STATE WISE SALE SUMMARY
         </h4>
 
           {/* MAIN 2-COLUMN CONTAINER */}
@@ -459,6 +592,44 @@ export default function ProdWiseDetail({ show, onClose }) {
                 borderRadius: "10px",
               }}
             >
+              <h5 style={{ marginBottom: "15px", fontWeight: 600 }}>Summary Type</h5>
+
+              <div className="form-check mb-1">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name="summaryType"
+                  value="account"
+                  checked={summaryType === "account"}
+                  onChange={(e) => setSummaryType(e.target.value)}
+                />
+                <label className="form-check-label">Account Wise</label>
+              </div>
+
+              <div className="form-check mb-1">
+  <input
+    type="radio"
+    className="form-check-input"
+    name="summaryType"
+    value="month"
+    checked={summaryType === "month"}
+    onChange={(e) => setSummaryType(e.target.value)}
+  />
+  <label className="form-check-label">Month Wise</label>
+              </div>
+
+              <div className="form-check mb-4">
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name="summaryType"
+                  value="date"
+                  checked={summaryType === "date"}
+                  onChange={(e) => setSummaryType(e.target.value)}
+                />
+                <label className="form-check-label">Date Wise</label>
+              </div>
+
               <div style={rowStyle}>
                   <label style={labelStyle}>Min Qty</label>
                   <Form.Control
@@ -499,9 +670,6 @@ export default function ProdWiseDetail({ show, onClose }) {
                 marginTop: "25px",
               }}
           >
-            <Button variant="outline-secondary" onClick={() => setLedgerModalOpen(true)}>
-              Select Stock Accounts
-            </Button>
             <Button variant="primary" onClick={onOpenPrint}>
               Print
             </Button>
@@ -523,14 +691,14 @@ export default function ProdWiseDetail({ show, onClose }) {
       onHide={() => setPrintOpen(false)}
       fullscreen
       className="custom-modal"
-      style={{ marginTop: 20, overflow: "auto" }}
+      style={{ marginTop: 20 }}
       backdrop="static" keyboard={true}
     >
       <Modal.Body style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}>
         {fetching ? (
-          <div style={{overflow:"auto"}} className="text-center">Loading...</div>
+          <div className="text-center">Loading...</div>
         ) : (
-          <PWiseDetailPrint
+          <AccWisePrint
             ref={printRef}
             rows={groupedData}
             fromDate={fromDate}
@@ -538,103 +706,16 @@ export default function ProdWiseDetail({ show, onClose }) {
             companyName={companyName}
             companyAdd={companyAdd}
             companyCity={companyCity}
-            tittle = {"PRODUCT WISE DETAIL PURCHASE"}
+            tittle = {"STATE WISE SALE SUMMARY"}
           />
         )}
       </Modal.Body>
 
       <Modal.Footer>
         <Button variant="primary" onClick={handlePrint}>PRINT</Button>
+        <Button variant="success" onClick={exportToExcel}> EXPORT </Button>
         <Button variant="secondary" onClick={() => setPrintOpen(false)}>CLOSE</Button>
       </Modal.Footer>
-    </Modal>
-
-    {/* LEDGER SELECTION MODAL */}
-    <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title>Select Stock Accounts</Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-
-        {/* LEDGER TABLE */}
-        <div
-          style={{
-            maxHeight: "350px",
-            overflowY: "auto",
-            padding: "10px",
-          }}
-        >
-          <Table className="custom-table" size="sm">
-            <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
-              <tr>
-                <th style={{ width: "50px", textAlign: "center" }}>Select</th>
-                <th>Account Name</th>
-                <th>Ac Code</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {ledgers
-                .filter(
-                  (x) =>
-                    x.sdisc.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
-                    x.vcode.toLowerCase().includes(ledgerSearch.toLowerCase())
-                )
-                .map((x, idx) => (
-                  <tr key={idx}>
-                    <td style={{ textAlign: "center" }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedLedgers.includes(x.sdisc)}
-                        onChange={() => toggleLedger(x.sdisc)}
-                      />
-                    </td>
-                    <td>{x.sdisc}</td>
-                    <td>{x.vcode}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </Table>
-        </div>
-
-      </Modal.Body>
-
-      <Modal.Footer
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        {/* SEARCH BAR ON LEFT */}
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Search ledger..."
-          style={{ width: "300px" }}
-          value={ledgerSearch}
-          onChange={(e) => setLedgerSearch(e.target.value)}
-        />
-
-        {/* BUTTONS ON RIGHT */}
-        <div>
-          <Button
-            variant={selectAll ? "warning" : "success"}
-            onClick={toggleSelectAll}
-          >
-            {selectAll ? "Unselect All" : "Select All"}
-          </Button>{" "}
-          <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
-            Close
-          </Button>{" "}
-          <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
-            Apply
-          </Button>
-        </div>
-      </Modal.Footer>
-
     </Modal>
     </>
   );

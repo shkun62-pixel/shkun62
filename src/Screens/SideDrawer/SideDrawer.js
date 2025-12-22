@@ -1029,13 +1029,13 @@ export default function App() {
                                 </StyledIcon>
                                 <StyledListItemText primary="Product Wise Detail" />
                             </StyledListItem>
-                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                             <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=StatePur')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>
                                 <StyledListItemText primary="State Wise Summary" />
                             </StyledListItem>
-                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                             <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=BrokerPur')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>
@@ -1099,13 +1099,13 @@ export default function App() {
                                 </StyledIcon>
                                 <StyledListItemText primary="Product Wise Detail" />
                             </StyledListItem>
-                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                             <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=StateSale')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>
                                 <StyledListItemText primary="State Wise Summary" />
                             </StyledListItem>
-                             <StyledListItem button onClick={() => handleNavigation('/')}>
+                             <StyledListItem button onClick={() => handleNavigation('/IncomeTaxReport?type=BrokerSale')}>
                                 <StyledIcon>
                                     <DescriptionIcon />
                                 </StyledIcon>

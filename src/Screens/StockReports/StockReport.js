@@ -60,6 +60,11 @@ const StockReport = () => {
   const [activeRow, setActiveRow] = useState(0);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (selectedAhead) {
+      localStorage.setItem("stock_selectedAhead", selectedAhead);
+    }
+  }, [selectedAhead]);
 
   // Fetch unique Aheads list
   useEffect(() => {
@@ -71,8 +76,16 @@ const StockReport = () => {
         const list = res.data.data
           .map((item) => item.formData?.Aheads?.trim())
           .filter((v, i, arr) => v && arr.indexOf(v) === i);
-        setAheads(list);
-        if (list.length > 0) setSelectedAhead(list[0]);
+          setAheads(list);
+
+          const savedAhead = localStorage.getItem("stock_selectedAhead");
+
+          if (savedAhead && list.includes(savedAhead)) {
+            setSelectedAhead(savedAhead);
+          } else if (list.length > 0) {
+            setSelectedAhead(list[0]);
+          }
+
       } catch (e) {
         console.error("Error loading Aheads", e);
       }
@@ -105,6 +118,95 @@ const StockReport = () => {
     }
 
     return null;
+  };
+
+  const applyReportType = (items, reportType) => {
+    if (!reportType) return items;
+
+    switch (reportType) {
+
+      // ----------------------------
+      // RECORD WISE (ACTIVE)
+      // ----------------------------
+      case "record_active":
+        return items.filter(
+          (item) => Number(item.purRec) !== 0 || Number(item.sale) !== 0
+        );
+
+      // ----------------------------
+      // RECORD WISE (ALL)
+      // ----------------------------
+      case "record_all":
+        return items;
+
+      // ----------------------------
+      // DATE WISE (ACTIVE)
+      // ----------------------------
+      case "date_active": {
+        const map = {};
+        items.forEach((i) => {
+          if (!map[i.date]) {
+            map[i.date] = { ...i };
+          } else {
+            map[i.date].purRec =
+              (Number(map[i.date].purRec) + Number(i.purRec)).toFixed(2);
+            map[i.date].sale =
+              (Number(map[i.date].sale) + Number(i.sale)).toFixed(2);
+            map[i.date].closing = i.closing;
+          }
+        });
+        return Object.values(map).filter(
+          (i) => Number(i.purRec) !== 0 || Number(i.sale) !== 0
+        );
+      }
+
+      // ----------------------------
+      // DATE WISE (ALL)
+      // ----------------------------
+      case "date_all": {
+        const map = {};
+        items.forEach((i) => {
+          if (!map[i.date]) {
+            map[i.date] = { ...i };
+          } else {
+            map[i.date].purRec =
+              (Number(map[i.date].purRec) + Number(i.purRec)).toFixed(2);
+            map[i.date].sale =
+              (Number(map[i.date].sale) + Number(i.sale)).toFixed(2);
+            map[i.date].closing = i.closing;
+          }
+        });
+        return Object.values(map);
+      }
+
+      // ----------------------------
+      // MONTH WISE
+      // ----------------------------
+      case "Month Wise Display": {
+        const map = {};
+        items.forEach((i) => {
+          const [dd, mm, yyyy] = i.date.split("/");
+          const key = `${mm}/${yyyy}`;
+
+          if (!map[key]) {
+            map[key] = {
+              ...i,
+              date: key,
+            };
+          } else {
+            map[key].purRec =
+              (Number(map[key].purRec) + Number(i.purRec)).toFixed(2);
+            map[key].sale =
+              (Number(map[key].sale) + Number(i.sale)).toFixed(2);
+            map[key].closing = i.closing;
+          }
+        });
+        return Object.values(map);
+      }
+
+      default:
+        return items;
+    }
   };
 
   useEffect(() => {
@@ -156,7 +258,8 @@ const StockReport = () => {
               id: item.id,            // item number
               docId: purchase._id,    // Mongo document ID
               type: "purchase",
-              date: new Date(purchase.formData.date),
+              date: parseDate(purchase.formData.date),
+              // date: new Date(purchase.formData.date),
               sdisc: purchase.supplierdetails?.[0]?.vacode || "",
               purRec: parseFloat(item.weight),
               sale: 0,
@@ -203,7 +306,9 @@ const StockReport = () => {
           };
         });
 
-        setItems(finalItems);
+        const filteredItems = applyReportType(finalItems, reportType);
+        setItems(filteredItems);
+        // setItems(finalItems);
       } catch (err) {
         console.error("Error loading data", err);
       } finally {
@@ -214,7 +319,7 @@ const StockReport = () => {
     };
 
     fetchData();
-  }, [selectedAhead, fromDate, uptoDate]); // 👈 Add these dependencies
+  }, [selectedAhead, fromDate, uptoDate, reportType]); // 👈 Add these dependencies
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -228,8 +333,11 @@ const StockReport = () => {
       }
       else if (e.key === "Enter") {
         const row = items[activeRow];
-        if (!row) return;
+        if (!row || reportType === 'Month Wise Display') return;
 
+        // ✅ SAVE ACTIVE ROW INDEX
+        sessionStorage.setItem("stock_activeRow", activeRow);
+        
         // 🔥 Navigation Logic
         if (row.type === "sale") {
           navigate("/sale", {
@@ -251,6 +359,31 @@ const StockReport = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [items, activeRow]);
+
+  useEffect(() => {
+    const savedRow = sessionStorage.getItem("stock_activeRow");
+
+    if (savedRow !== null) {
+      const index = parseInt(savedRow, 10);
+      if (!isNaN(index)) {
+        setActiveRow(index);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedRow = sessionStorage.getItem("stock_activeRow");
+
+    if (savedRow !== null && items.length > 0) {
+      const index = Math.min(
+        parseInt(savedRow, 10),
+        items.length - 1
+      );
+      setActiveRow(index);
+    }
+  }, [items]);
+
+
 
   // Auto -scroll effect
   useEffect(() => {
@@ -298,7 +431,6 @@ const StockReport = () => {
     }
   }, [activeRow, items]);
 
-
   return (
     <div style={{ padding: "10px" }}>
       <Card className={styles.cardL}>
@@ -342,7 +474,6 @@ const StockReport = () => {
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
             >
-              <option value="">-- Select Report Type --</option>
               <option value="record_active">Record Wise Active</option>
               <option value="record_all">Record Wise All</option>
               <option value="date_active">Date Wise Active</option>
@@ -426,7 +557,7 @@ const StockReport = () => {
               }}
             >
               <tr style={{ color: "#575a5a" }}>
-                <th>DATE</th>
+                <th>{reportType === "Month Wise Display" ? "MONTH" : "DATE"}</th>
                 <th>DESCRIPTION</th>
                 <th>OPENING</th>
                 <th>PUR/REC.</th>
@@ -449,7 +580,9 @@ const StockReport = () => {
                   onClick={() => setActiveRow(index)}
                 >
                   <td className={styles.font} style={{ padding: "8px" }}>{item.date}</td>
-                  <td className={styles.font} style={{ padding: "8px" }}>{item.sdisc}</td>
+                  <td className={styles.font} style={{ padding: "8px" }}>
+                    {reportType === "Month Wise Display" ? "" : item.sdisc}
+                  </td>
                   <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.opening}</td>
                   <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.purRec}</td>
                   <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.production}</td>

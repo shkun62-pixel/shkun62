@@ -73,3 +73,14 @@
   padding: 20px;
   margin-top: -10px;
 }
+
+/* 📱 Mobile view */
+@media (max-width: 768px) {
+  .TopPart {
+    flex-direction: column;
+  }
+  .cardL{
+    padding: 0px;
+    margin-top: -10px;
+  }
+}

@@ -5,6 +5,7 @@ import InputMask from "react-input-mask";
 import AccWisePrint from "./AccWisePrint";
 import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../../Shared/useCompanySetup";
+import financialYear from "../../Shared/financialYear";
 import * as XLSX from 'sheetjs-style';
 
 const API_URL =
@@ -14,8 +15,23 @@ export default function AccWiseSaleSumm({ show, onClose }) {
     
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   // filters
-  const [fromDate, setFromDate] = useState("01-04-2025");
-  const [toDate, setToDate] = useState("31-03-2026");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  useEffect(() => {
+    const fy = financialYear.getFYDates();
+    setFromDate(formatDate(fy.start)); // converted
+    setToDate(formatDate(fy.end));     // converted
+  }, []);
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
   const [reportType, setReportType] = useState("With GST");

@@ -41,11 +41,16 @@ import PartyWiseSummPur from "./PurchaseReports/PartyWiseSummPur";
 import AccountWiseSummPur from "./PurchaseReports/AccountWiseSummPur";
 import ProductWisePur from "./PurchaseReports/ProductWisePur";
 import ProdWiseDetail from "./PurchaseReports/ProdWiseDetail";
+import StateWisePur from "./PurchaseReports/StateWisePur";
+import BrokerWisePur from "./PurchaseReports/BrokerWisePur";
+
 // Sale Reports
 import PartyWiseSumSale from "./SaleReports/PartyWiseSumSale";
 import AccWiseSaleSumm from "./SaleReports/AccWiseSaleSumm";
 import ProductWiseSaleSum from "./SaleReports/ProductWiseSaleSum";
 import ProdWiseDetailSale from "./SaleReports/ProdWiseDetailSale";
+import StateWiseSale from "./SaleReports/StateWiseSale";
+import BrokerWiseSale from "./SaleReports/BrokerWiseSale";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -99,6 +104,22 @@ const IncomeTaxReport = () => {
 
       {type === "PDetailSale" && (
         <ProdWiseDetailSale show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "StatePur" && (
+        <StateWisePur show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "StateSale" && (
+        <StateWiseSale show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "BrokerPur" && (
+        <BrokerWisePur show={openPurRep} onClose={handleClose} />
+      )}
+
+      {type === "BrokerSale" && (
+        <BrokerWiseSale show={openPurRep} onClose={handleClose} />
       )}
     </div>
   );

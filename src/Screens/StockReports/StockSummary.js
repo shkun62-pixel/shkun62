@@ -56,6 +56,33 @@ const StockSummary = () => {
     fetchAheads();
   }, []);
 
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+
+    // If ISO format → let JS handle it
+    if (!isNaN(Date.parse(dateStr))) {
+      return new Date(dateStr);
+    }
+
+    // dd/mm/yyyy OR dd-mm-yyyy
+    const parts = dateStr.includes("/")
+      ? dateStr.split("/")
+      : dateStr.split("-");
+
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      let year = parseInt(parts[2], 10);
+
+      // handle 2-digit year
+      if (year < 100) year += 2000;
+
+      return new Date(year, month, day);
+    }
+
+    return null;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -99,7 +126,8 @@ const StockSummary = () => {
                   isWithinDateRange(purchase.formData.date)
               )
               .map((item) => ({
-                date: new Date(purchase.formData.date),
+                date: parseDate(purchase.formData.date),
+                // date: new Date(purchase.formData.date),
                 sdisc: purchase.supplierdetails?.[0]?.vacode || "",
                 purRec: parseFloat(item.weight),
                 pcsPur: parseFloat(item.pkgs || 0), // ADDED

@@ -37,9 +37,7 @@ const StockRpPrint = React.forwardRef(
     const formattedFrom = fromDate
       ? new Date(fromDate).toLocaleDateString("en-GB")
       : "";
-    const formattedUpto = uptoDate
-      ? new Date(uptoDate).toLocaleDateString("en-GB")
-      : "";
+
     // Split items into chunks of 10
     const chunks = chunkItems(items, 30, 30);
     const style = {
@@ -76,7 +74,7 @@ const StockRpPrint = React.forwardRef(
 
     // Add an empty row at the top with the shop name
     const periodFrom = formattedFrom;
-    const periodTo = formattedUpto;
+    const periodTo = uptoDate;
 
     const sheetData = [
       [companyName || "Company Name"],                        // Row 0
@@ -251,7 +249,7 @@ exportData.forEach((row, rowIdx) => {
                   {/* <text style={{ fontSize: 20 }}>{"MANDI GOBINDGARH"}</text> */}
                 </div>
                 <text style={{fontSize:18, fontFamily: "Courier New"}}>Stock Statement of : {selectedAhead}</text>
-                <text style={{fontSize:18,marginLeft:'30%', fontFamily: "Courier New"}}>From: {formattedFrom} &nbsp;&nbsp; Upto: {formattedUpto}</text>
+                <text style={{fontSize:18,marginLeft:'30%', fontFamily: "Courier New"}}>From: {formattedFrom} &nbsp;&nbsp; Upto: {uptoDate}</text>
                 <table
                   style={{
                     width: "100%",
