@@ -181,41 +181,6 @@ const StockReport = () => {
             }))
         );
 
-
-        // const purchases = purchaseRes.data.flatMap((purchase) =>
-        //   purchase.items
-        //     .filter(
-        //       (item) =>
-        //         item.sdisc?.trim().toLowerCase() === normalizedAhead &&
-        //         isWithinDateRange(purchase.formData.date)
-        //     )
-        //     .map((item) => ({
-        //       id: `purchase-${purchase.id}-${item.id}`,
-        //       type: "purchase",
-        //       date: new Date(purchase.formData.date),
-        //       sdisc: purchase.supplierdetails?.[0]?.vacode || "",
-        //       purRec: parseFloat(item.weight),
-        //       sale: 0,
-        //     }))
-        // );
-
-        // const sales = saleRes.data.flatMap((sale) =>
-        //   sale.items
-        //     .filter(
-        //       (item) =>
-        //         item.sdisc?.trim().toLowerCase() === normalizedAhead &&
-        //         isWithinDateRange(sale.formData.date)
-        //     )
-        //     .map((item) => ({
-        //       id: `sale-${sale.id}-${item.id}`,
-        //       type: "sale",
-        //       date: new Date(sale.formData.date),
-        //       sdisc: sale.customerDetails?.[0]?.vacode || "",
-        //       purRec: 0,
-        //       sale: parseFloat(item.weight),
-        //     }))
-        // );
-
         setPurchaseItems(purchases);
         setSaleItems(sales);
 
@@ -450,12 +415,6 @@ const StockReport = () => {
           />
         </div>
       </div>
-      {loading ? (
-        <div style={{ textAlign: "center", marginTop: 20 }}>
-          <span className="spinner-border text-primary" role="status" />
-          <span style={{ marginLeft: 10 }}>Loading...</span>
-        </div>
-      ) : (
         <div ref={tableContainerRef} className={styles.TableDIV}>
           <Table className="custom-table">
             <thead
@@ -503,7 +462,7 @@ const StockReport = () => {
 
           </Table>
         </div>
-      )}
+    
       </Card>
     </div>
   );

@@ -259,13 +259,7 @@ const StockSummary = () => {
           />
         </div>
       </div>
-      {loading ? (
-        <div style={{ textAlign: "center", marginTop: 20 }}>
-          <span className="spinner-border text-primary" role="status" />
-          <span style={{ marginLeft: 10 }}>Loading...</span>
-        </div>
-      ) : (
-        <div className="tablediv">
+        <div className={styles.TableDIV}>
           <Table className="custom-table">
             <thead
               style={{
@@ -424,7 +418,7 @@ const StockSummary = () => {
             </tbody>
           </Table>
         </div>
-      )}
+    
       </Card>
     </div>
   );
