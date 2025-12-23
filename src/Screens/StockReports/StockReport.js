@@ -9,8 +9,11 @@ import StockRpPrint from "./StockRpPrint";
 import { useNavigate } from "react-router-dom";
 import financialYear from "../Shared/financialYear";
 import InputMask from "react-input-mask";
+import { useLocation } from "react-router-dom";
 
 const StockReport = () => {
+  const location = useLocation();
+
   const tenant = "shkun_05062025_05062026"
   const [fromDate, setFromDate] = useState("");
   const [uptoDate, setUptoDate] = useState("");
@@ -65,6 +68,23 @@ const StockReport = () => {
       localStorage.setItem("stock_selectedAhead", selectedAhead);
     }
   }, [selectedAhead]);
+
+  useEffect(() => {
+    if (location.state?.selectedAhead) {
+      setSelectedAhead(location.state.selectedAhead);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && location.state?.selectedAhead) {
+        navigate(-1); // go back
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   // Fetch unique Aheads list
   useEffect(() => {
@@ -382,8 +402,6 @@ const StockReport = () => {
       setActiveRow(index);
     }
   }, [items]);
-
-
 
   // Auto -scroll effect
   useEffect(() => {
