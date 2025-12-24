@@ -7,21 +7,26 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import StockSummPrint from "./StockSummPrint";
 import { useNavigate } from "react-router-dom";
+import financialYear from "../Shared/financialYear";
 
 const StockSummary = () => {
 
   const navigate = useNavigate();
+  const handleRowKeyDown = (e, sdisc) => {
+    if (e.key === "Enter") {
+      navigate("/StockReport", {
+        state: { selectedAhead: sdisc }
+      });
+    }
+  };
 
-const handleRowKeyDown = (e, sdisc) => {
-  if (e.key === "Enter") {
-    navigate("/StockReport", {
-      state: { selectedAhead: sdisc }
-    });
-  }
-};
-
-  const [fromDate, setFromDate] = useState(new Date());
-  const [uptoDate, setUptoDate] = useState(new Date());
+  const [fromDate, setFromDate] = useState("");
+  const [uptoDate, setUptoDate] = useState("");
+  useEffect(() => {
+    const fy = financialYear.getFYDates();
+    setFromDate(fy.start); // converted
+    setUptoDate(fy.end);     // converted
+  }, []);
 
   const [items, setItems] = useState([
     {
@@ -225,123 +230,97 @@ const handleRowKeyDown = (e, sdisc) => {
   }, [aheads, fromDate, uptoDate]);
 
   useEffect(() => {
-    const fetchInitialAfromDate = async () => {
-      try {
-        const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/company"
-        );
-  
-        // Choose which company to use for fromDate initialization
-        // Example: use the first one, or filter by some known Ahead
-        const matchingCompany = res.data[0]; // 👈 You can adjust this logic
-  
-        if (matchingCompany?.formData?.Afrom) {
-          const afromDate = new Date(matchingCompany.formData.Afrom);
-          if (!isNaN(afromDate.getTime())) {
-            setFromDate(afromDate);
-          }
-        }
-      } catch (e) {
-        console.error("Error fetching initial Afrom date:", e);
-      }
-    };
-  
-    fetchInitialAfromDate(); // Run once when component mounts
-  }, []);
+    const handleKeyDown = (e) => {
+      if (items.length === 0) return;
 
-    useEffect(() => {
-      const handleKeyDown = (e) => {
-        if (items.length === 0) return;
-  
-        if (e.key === "ArrowDown") {
-          setActiveRow((prev) => Math.min(prev + 1, items.length - 1));
-        } 
-        else if (e.key === "ArrowUp") {
-          setActiveRow((prev) => Math.max(prev - 1, 0));
-        }
-        else if (e.key === "Enter") {
-          const selectedItem = items[activeRow];
-           // ✅ SAVE ACTIVE ROW INDEX
-          sessionStorage.setItem("stock_activeRow1", activeRow);
-          if (selectedItem) {
-            navigate("/StockReport", {
-              state: { selectedAhead: selectedItem.sdisc }
-            });
-          }  
-      }};
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [items, activeRow]);
-  
-    useEffect(() => {
-      const savedRow = sessionStorage.getItem("stock_activeRow1");
-  
-      if (savedRow !== null) {
-        const index = parseInt(savedRow, 10);
-        if (!isNaN(index)) {
-          setActiveRow(index);
-        }
+      if (e.key === "ArrowDown") {
+        setActiveRow((prev) => Math.min(prev + 1, items.length - 1));
+      } 
+      else if (e.key === "ArrowUp") {
+        setActiveRow((prev) => Math.max(prev - 1, 0));
       }
-    }, []);
-  
-    useEffect(() => {
-      const savedRow = sessionStorage.getItem("stock_activeRow1");
-  
-      if (savedRow !== null && items.length > 0) {
-        const index = Math.min(
-          parseInt(savedRow, 10),
-          items.length - 1
-        );
+      else if (e.key === "Enter") {
+        const selectedItem = items[activeRow];
+          // ✅ SAVE ACTIVE ROW INDEX
+        sessionStorage.setItem("stock_activeRow1", activeRow);
+        if (selectedItem) {
+          navigate("/StockReport", {
+            state: { selectedAhead: selectedItem.sdisc }
+          });
+        }  
+    }};
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [items, activeRow]);
+
+  useEffect(() => {
+    const savedRow = sessionStorage.getItem("stock_activeRow1");
+
+    if (savedRow !== null) {
+      const index = parseInt(savedRow, 10);
+      if (!isNaN(index)) {
         setActiveRow(index);
       }
-    }, [items]);
-  
-    // Auto -scroll effect
-    useEffect(() => {
-      const container = tableContainerRef.current;
-      if (!container) return;
-  
-      const rows = container.querySelectorAll("tbody tr");
-      if (!rows.length) return;
-  
-      const idx = Math.max(0, Math.min(activeRow, rows.length - 1));
-      const selectedRow = rows[idx];
-      if (!selectedRow) return;
-  
-      // Adjust for header height (if your thead is sticky)
-      const headerOffset = 40;  // Adjust if your header height is different
-      const buffer = 25;        // Extra space above/below row
-  
-      const rowTop = selectedRow.offsetTop;
-      const rowBottom = rowTop + selectedRow.offsetHeight;
-  
-      const containerHeight = container.clientHeight;
-      const visibleTop = container.scrollTop + buffer + headerOffset;
-      const visibleBottom = container.scrollTop + containerHeight - buffer;
-  
-      // If row is below visible area → scroll down
-      if (rowBottom > visibleBottom) {
-        const newScroll =
-          rowBottom - containerHeight + buffer * 2;
-  
-        container.scrollTo({
-          top: newScroll,
-          behavior: "smooth",
-        });
-      }
-  
-      // If row is above visible area → scroll up
-      else if (rowTop < visibleTop) {
-        const newScroll =
-          rowTop - headerOffset - buffer;
-  
-        container.scrollTo({
-          top: newScroll,
-          behavior: "smooth",
-        });
-      }
-    }, [activeRow, items]);
+    }
+  }, []);
 
+  useEffect(() => {
+    const savedRow = sessionStorage.getItem("stock_activeRow1");
+
+    if (savedRow !== null && items.length > 0) {
+      const index = Math.min(
+        parseInt(savedRow, 10),
+        items.length - 1
+      );
+      setActiveRow(index);
+    }
+  }, [items]);
+
+  // Auto -scroll effect
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const rows = container.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+
+    const idx = Math.max(0, Math.min(activeRow, rows.length - 1));
+    const selectedRow = rows[idx];
+    if (!selectedRow) return;
+
+    // Adjust for header height (if your thead is sticky)
+    const headerOffset = 40;  // Adjust if your header height is different
+    const buffer = 25;        // Extra space above/below row
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+
+    const containerHeight = container.clientHeight;
+    const visibleTop = container.scrollTop + buffer + headerOffset;
+    const visibleBottom = container.scrollTop + containerHeight - buffer;
+
+    // If row is below visible area → scroll down
+    if (rowBottom > visibleBottom) {
+      const newScroll =
+        rowBottom - containerHeight + buffer * 2;
+
+      container.scrollTo({
+        top: newScroll,
+        behavior: "smooth",
+      });
+    }
+
+    // If row is above visible area → scroll up
+    else if (rowTop < visibleTop) {
+      const newScroll =
+        rowTop - headerOffset - buffer;
+
+      container.scrollTo({
+        top: newScroll,
+        behavior: "smooth",
+      });
+    }
+  }, [activeRow, items]);
 
   return (
     <div style={{padding:"10px"}}>
@@ -433,168 +412,40 @@ const handleRowKeyDown = (e, sdisc) => {
                   onClick={() => setActiveRow(index)}
                 >
                   <td style={{ padding: 5, minWidth: "400px" }} className={styles.font}>
-  {item.sdisc}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.pcsOp}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.opening}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.pcsPur}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.purRec}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.pcsSale}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.sale}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.pcsClosing}
-</td>
-
-<td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
-  {item.closing}
-</td>
-
-                  {/* <td style={{ padding: 0, minWidth: "400px" }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                      }}
-                      maxLength={48}
-                      value={item.sdisc}
-                    />
+                    {item.sdisc}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.pcsOp}
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.pcsOp}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.opening}
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.opening}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.pcsPur}
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.pcsPur}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.purRec} // Show raw value during input
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.purRec}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.pcsSale}
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.pcsSale}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      maxLength={48}
-                      value={item.sale}
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.sale}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.pcsClosing}
-                    />
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.pcsClosing}
                   </td>
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className={styles.font}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={item.closing}
-                    />
-                  </td> */}
+
+                  <td style={{ padding: 5, textAlign: "right" }} className={styles.font}>
+                    {item.closing}
+                  </td>
                 </tr>
               ))}
             </tbody>
