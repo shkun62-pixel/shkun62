@@ -253,6 +253,13 @@ const StockSummary = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [items, activeRow]);
 
+  const handleRowNavigate = (sdisc, index) => {
+    sessionStorage.setItem("stock_activeRow1", index);
+    navigate("/StockReport", {
+      state: { selectedAhead: sdisc },
+    });
+  };
+
   useEffect(() => {
     const savedRow = sessionStorage.getItem("stock_activeRow1");
 
@@ -410,6 +417,7 @@ const StockSummary = () => {
                   tabIndex={0}        // ⭐ REQUIRED for key events
                   onKeyDown={(e) => handleRowKeyDown(e, item.sdisc)}
                   onClick={() => setActiveRow(index)}
+                  onDoubleClick={() => handleRowNavigate(item.sdisc, index)}   // ✅ ADD THIS
                 >
                   <td style={{ padding: 5, minWidth: "400px" }} className={styles.font}>
                     {item.sdisc}
@@ -458,3 +466,323 @@ const StockSummary = () => {
 };
 
 export default StockSummary;
+
+
+// import React, { useState, useEffect, useRef } from "react";
+// import styles from "./StockReport.module.css";
+// import { Button, Card } from "react-bootstrap";
+// import Table from "react-bootstrap/Table";
+// import axios from "axios";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+// import StockSummPrint from "./StockSummPrint";
+// import { useNavigate } from "react-router-dom";
+// import financialYear from "../Shared/financialYear";
+
+// const StockSummary = () => {
+//   const navigate = useNavigate();
+//   const tableContainerRef = useRef(null);
+
+//   const [fromDate, setFromDate] = useState(null);
+//   const [uptoDate, setUptoDate] = useState(null);
+
+//   const [items, setItems] = useState([]);
+//   const [aheads, setAheads] = useState([]);
+//   const [loading, setLoading] = useState(false);
+
+//   const [activeRow, setActiveRow] = useState(0);
+//   const [open, setOpen] = useState(false);
+
+//   const handleOpen = () => setOpen(true);
+//   const handleClose = () => setOpen(false);
+
+//   /* =========================
+//      INITIAL FY DATES
+//   ========================== */
+//   useEffect(() => {
+//     const fy = financialYear.getFYDates();
+//     setFromDate(new Date(fy.start));
+//     setUptoDate(new Date(fy.end));
+//   }, []);
+
+//   /* =========================
+//      FETCH AHEADS
+//   ========================== */
+//   useEffect(() => {
+//     const fetchAheads = async () => {
+//       try {
+//         const res = await axios.get(
+//           "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster"
+//         );
+
+//         const list = res.data.data
+//           .map(i => i.formData?.Aheads?.trim())
+//           .filter((v, i, a) => v && a.indexOf(v) === i);
+
+//         setAheads(list);
+//       } catch (err) {
+//         console.error("Aheads load error", err);
+//       }
+//     };
+//     fetchAheads();
+//   }, []);
+
+//   /* =========================
+//      MAIN DATA FETCH (OPTIMIZED)
+//   ========================== */
+//   useEffect(() => {
+//     if (!fromDate || !uptoDate || aheads.length === 0) return;
+
+//     const fetchData = async () => {
+//       try {
+//         setLoading(true);
+
+//         const from = new Date(fromDate).setHours(0, 0, 0, 0);
+//         const upto = new Date(uptoDate).setHours(23, 59, 59, 999);
+
+//         const [saleRes, purchaseRes, stockRes] = await Promise.all([
+//           axios.get(
+//             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale"
+//           ),
+//           axios.get(
+//             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+//           ),
+//           axios.get(
+//             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster"
+//           )
+//         ]);
+
+//         /* =========================
+//            PRE-GROUP PURCHASES
+//         ========================== */
+//         const purchaseMap = {};
+//         purchaseRes.data.forEach(p => {
+//           const d = new Date(p.formData.date).getTime();
+//           if (d < from || d > upto) return;
+
+//           p.items.forEach(i => {
+//             const key = i.sdisc?.trim().toLowerCase();
+//             if (!key) return;
+
+//             if (!purchaseMap[key]) purchaseMap[key] = [];
+//             purchaseMap[key].push({
+//               weight: +i.weight || 0,
+//               pkgs: +i.pkgs || 0
+//             });
+//           });
+//         });
+
+//         /* =========================
+//            PRE-GROUP SALES
+//         ========================== */
+//         const saleMap = {};
+//         saleRes.data.forEach(s => {
+//           const d = new Date(s.formData.date).getTime();
+//           if (d < from || d > upto) return;
+
+//           s.items.forEach(i => {
+//             const key = i.sdisc?.trim().toLowerCase();
+//             if (!key) return;
+
+//             if (!saleMap[key]) saleMap[key] = [];
+//             saleMap[key].push({
+//               weight: +i.weight || 0,
+//               pkgs: +i.pkgs || 0
+//             });
+//           });
+//         });
+
+//         /* =========================
+//            BUILD FINAL ROWS
+//         ========================== */
+//         const rows = aheads.map(ahead => {
+//           const key = ahead.trim().toLowerCase();
+
+//           const stock = stockRes.data.data.find(
+//             s => s.formData?.Aheads?.trim().toLowerCase() === key
+//           );
+
+//           const opening = +stock?.formData?.openwts || 0;
+//           const pcsOpening = +stock?.formData?.openpcs || 0;
+
+//           const pList = purchaseMap[key] || [];
+//           const sList = saleMap[key] || [];
+
+//           const totalPurRec = pList.reduce((a, b) => a + b.weight, 0);
+//           const totalPcsPur = pList.reduce((a, b) => a + b.pkgs, 0);
+//           const totalSale = sList.reduce((a, b) => a + b.weight, 0);
+//           const totalPcsSale = sList.reduce((a, b) => a + b.pkgs, 0);
+
+//           return {
+//             id: key,
+//             sdisc: ahead,
+//             pcsOp: pcsOpening.toFixed(2),
+//             opening: opening.toFixed(2),
+//             pcsPur: totalPcsPur.toFixed(2),
+//             purRec: totalPurRec.toFixed(2),
+//             pcsSale: totalPcsSale.toFixed(2),
+//             sale: totalSale.toFixed(2),
+//             pcsClosing: (pcsOpening + totalPcsPur - totalPcsSale).toFixed(2),
+//             closing: (opening + totalPurRec - totalSale).toFixed(2)
+//           };
+//         });
+
+//         setItems(rows);
+//       } catch (err) {
+//         console.error("Stock Summary error", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchData();
+//   }, [aheads, fromDate, uptoDate]);
+
+//   /* =========================
+//      KEYBOARD NAVIGATION
+//   ========================== */
+//   useEffect(() => {
+//     const handleKey = e => {
+//       if (items.length === 0) return;
+
+//       if (e.key === "ArrowDown") {
+//         setActiveRow(r => Math.min(r + 1, items.length - 1));
+//       } else if (e.key === "ArrowUp") {
+//         setActiveRow(r => Math.max(r - 1, 0));
+//       } else if (e.key === "Enter") {
+//         const row = items[activeRow];
+//         if (row) {
+//           sessionStorage.setItem("stock_activeRow1", activeRow);
+//           navigate("/StockReport", {
+//             state: { selectedAhead: row.sdisc }
+//           });
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKey);
+//     return () => window.removeEventListener("keydown", handleKey);
+//   }, [items, activeRow, navigate]);
+
+//   /* =========================
+//      AUTO SCROLL TO ACTIVE ROW
+//   ========================== */
+//   useEffect(() => {
+//     const container = tableContainerRef.current;
+//     if (!container) return;
+
+//     const rows = container.querySelectorAll("tbody tr");
+//     const row = rows[activeRow];
+//     if (!row) return;
+
+//     const headerOffset = 40;
+//     const buffer = 25;
+
+//     const top = row.offsetTop - headerOffset - buffer;
+//     const bottom = top + row.offsetHeight + buffer * 2;
+
+//     if (bottom > container.scrollTop + container.clientHeight) {
+//       container.scrollTo({ top, behavior: "smooth" });
+//     } else if (top < container.scrollTop) {
+//       container.scrollTo({ top, behavior: "smooth" });
+//     }
+//   }, [activeRow, items]);
+
+//   useEffect(() => {
+//     const savedRow = sessionStorage.getItem("stock_activeRow1");
+
+//     if (savedRow !== null) {
+//       const index = parseInt(savedRow, 10);
+//       if (!isNaN(index)) {
+//         setActiveRow(index);
+//       }
+//     }
+//   }, []);
+
+//   return (
+//     <div style={{ padding: "10px" }}>
+//       <Card className={styles.cardL}>
+//         <h1 className={styles.header}>STOCK SUMMARY</h1>
+
+//         <div className={styles.TopPart}>
+//           <div className={styles.Column}>
+//             <div style={{ display: "flex", alignItems: "center" }}>
+//               <span>From:</span>
+//               <DatePicker
+//                 selected={fromDate}
+//                 onChange={setFromDate}
+//                 className={styles.From}
+//                 dateFormat="dd/MM/yyyy"
+//               />
+//             </div>
+//             <div style={{ display: "flex", alignItems: "center", marginTop: 5 }}>
+//               <span>Upto:</span>
+//               <DatePicker
+//                 selected={uptoDate}
+//                 onChange={setUptoDate}
+//                 className={styles.Upto}
+//                 dateFormat="dd/MM/yyyy"
+//               />
+//             </div>
+//           </div>
+
+//           <Button className="Buttonz" onClick={handleOpen}>
+//             Print
+//           </Button>
+
+//           <div style={{ visibility: "hidden" }}>
+//             <StockSummPrint
+//               items={items}
+//               isOpen={open}
+//               handleClose={handleClose}
+//               fromDate={fromDate}
+//               uptoDate={uptoDate}
+//             />
+//           </div>
+//         </div>
+
+//         <div ref={tableContainerRef} className={styles.TableDIV}>
+//           <Table className="custom-table">
+//             <thead style={{ background: "skyblue", position: "sticky", top: 0 }}>
+//               <tr>
+//                 <th style={{ minWidth: 400 }}>ACCOUNT NAME</th>
+//                 <th>Op.</th>
+//                 <th>OPENING</th>
+//                 <th>Rec.</th>
+//                 <th>PUR/REC.</th>
+//                 <th>ISSUE</th>
+//                 <th>ISSUE QTY</th>
+//                 <th>Cls.</th>
+//                 <th>CLOSING</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {items.map((item, i) => (
+//                 <tr
+//                   key={item.id}
+//                   style={{
+//                     background: i === activeRow ? "#ffe08a" : "white",
+//                     fontWeight: i === activeRow ? "bold" : "normal"
+//                   }}
+//                   onClick={() => setActiveRow(i)}
+//                 >
+//                   <td className={styles.font}>{item.sdisc}</td>
+//                   <td className={styles.font} align="right">{item.pcsOp}</td>
+//                   <td className={styles.font} align="right">{item.opening}</td>
+//                   <td className={styles.font} align="right">{item.pcsPur}</td>
+//                   <td className={styles.font} align="right">{item.purRec}</td>
+//                   <td className={styles.font} align="right">{item.pcsSale}</td>
+//                   <td className={styles.font} align="right">{item.sale}</td>
+//                   <td className={styles.font} align="right">{item.pcsClosing}</td>
+//                   <td className={styles.font} align="right">{item.closing}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </Table>
+//         </div>
+//       </Card>
+//     </div>
+//   );
+// };
+
+// export default StockSummary;
