@@ -40,6 +40,7 @@ import GstWorksheet from './Screens/GSTworkSheet/GstWorksheet';
 import GstRegister from './Screens/GstRegister/GstRegister';
 import IncomeTaxReport from './Screens/IncomeTaxReports/IncomeTaxReport';
 import SaleSumm from './Screens/Summary/SaleSummary/SaleSumm';
+import PurchaseSumm from './Screens/Summary/PurchaseSummary/PurchaseSumm';
 // import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
@@ -98,7 +99,8 @@ function App() {
         <Route path='/GstWorksheet' element={<GstWorksheet />}></Route>
         <Route path='/GstRegister' element={<GstRegister />}></Route>
         <Route path='/IncomeTaxReport' element={<IncomeTaxReport />}></Route>
-         <Route path='/SaleSumm' element={<SaleSumm />}></Route>
+        <Route path='/SaleSumm' element={<SaleSumm />}></Route>
+        <Route path='/PurchaseSumm' element={<PurchaseSumm />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>
