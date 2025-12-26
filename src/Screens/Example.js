@@ -1,27 +1,27 @@
-import React,{useState,useEffect} from 'react'
-import { Button } from 'react-bootstrap';
-import AccountWiseSummPur from './IncomeTaxReports/PurchaseReports/AccountWiseSummPur';
+// import React,{useState,useEffect} from 'react'
+// import { Button } from 'react-bootstrap';
+// import AccountWiseSummPur from './IncomeTaxReports/PurchaseReports/AccountWiseSummPur';
 
-const Example = () => {
-  const [openPurRep, setopenPurRep] = useState(false);
+// const Example = () => {
+//   const [openPurRep, setopenPurRep] = useState(false);
 
-    useEffect(() => {
-    // Auto open the modal when component mounts
-    setopenPurRep(true);
-  }, []);
+//     useEffect(() => {
+//     // Auto open the modal when component mounts
+//     setopenPurRep(true);
+//   }, []);
 
-  return (
-    <div>
-      {/* <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button> */}
-      <AccountWiseSummPur 
-        show={openPurRep} 
-        onClose={() => setopenPurRep(false)} 
-      />
-    </div>
-  )
-}
+//   return (
+//     <div>
+//       {/* <Button onClick={() => setopenPurRep(true)}>Open Pur Report</Button> */}
+//       <AccountWiseSummPur 
+//         show={openPurRep} 
+//         onClose={() => setopenPurRep(false)} 
+//       />
+//     </div>
+//   )
+// }
 
-export default Example
+// export default Example
 
 
 // import React, { useState, useEffect } from 'react';
@@ -77,3 +77,38 @@ export default Example
 // };
 
 // export default Example;
+
+import React,{useEffect} from 'react'
+import { useNavigate, useLocation } from "react-router-dom";
+
+const Example = () => {
+    const location = useLocation();
+    const saleId = location.state?.saleId;
+    const navigate = useNavigate();
+
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      navigate(-1, {
+        state: {
+          keepModalOpen: true,
+          accountName: location.state?.accountName,
+        },
+        replace: true,
+      });
+    }
+  };
+
+  window.addEventListener("keyup", handleEsc);
+  return () => window.removeEventListener("keyup", handleEsc);
+}, [navigate, location.state]);
+
+
+  return (
+    <div>
+      <h1>{saleId}</h1>
+    </div>
+  )
+}
+
+export default Example

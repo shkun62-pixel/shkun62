@@ -6,7 +6,6 @@ import Form from "react-bootstrap/Form";
 import styles from "../summary.module.css";
 import InputMask from "react-input-mask";
 import financialYear from "../../Shared/financialYear";
-import { useRef } from "react";
 import AccountEntriesModal from "../AccountEntriesModal";
 
 const API_URL =
@@ -71,7 +70,6 @@ const SaleSumm = () => {
 
     return null;
   };
-
 
   const isDateInRange = (voucherDate, fromDate, toDate) => {
     const vDate = parseAnyDate(voucherDate);
@@ -174,16 +172,20 @@ const SaleSumm = () => {
 
     allVouchers.forEach((voucher) => {
       const { formData, items, customerDetails } = voucher;
+      const customer = customerDetails?.[0]?.vacode || "";
 
-      // SALE ACCOUNT ENTRIES
+      // 🔹 SALE ACCOUNT ENTRIES
       items.forEach((item) => {
         if (item.Scodess === selectedAccount) {
           entries.push({
+            _id: voucher._id, // add this
             type: "SALE",
             date: formData.date,
             vno: formData.vbillno,
-            customer: customerDetails?.[0]?.vacode || "",
+            customer,
+            sdisc: item.sdisc,
             qty: item.weight,
+            rate: item.rate,
             value: item.amount,
             cgst: item.ctax,
             sgst: item.stax,
@@ -192,39 +194,52 @@ const SaleSumm = () => {
           });
         }
       });
-
-      // GST ACCOUNT ENTRIES
-      if (formData.cgst_ac === selectedAccount) {
+      // 🔹 CGST ACCOUNT
+      if (formData.cgst_ac === selectedAccount && Number(formData.cgst) > 0) {
         entries.push({
+          _id: voucher._id, // add this
           type: "CGST",
           date: formData.date,
           vno: formData.vbillno,
-          customer: customerDetails?.[0]?.vacode || "",
-          value: formData.cgst,
+          customer,
+          value: Number(formData.cgst || 0),
+          total: Number(formData.cgst || 0),
         });
       }
-
-      if (formData.sgst_ac === selectedAccount) {
+      // 🔹 SGST ACCOUNT
+      if (formData.sgst_ac === selectedAccount && Number(formData.sgst) > 0) {
         entries.push({
+          _id: voucher._id, // add this
           type: "SGST",
           date: formData.date,
           vno: formData.vbillno,
-          customer: customerDetails?.[0]?.vacode || "",
-          value: formData.sgst,
+          customer,
+          value: Number(formData.sgst || 0),
+          total: Number(formData.sgst || 0),
         });
       }
-
-      if (formData.igst_ac === selectedAccount) {
+      // 🔹 IGST ACCOUNT
+      if (formData.igst_ac === selectedAccount && Number(formData.igst) > 0) {
         entries.push({
+          _id: voucher._id, // add this
           type: "IGST",
           date: formData.date,
           vno: formData.vbillno,
-          customer: customerDetails?.[0]?.vacode || "",
-          value: formData.igst,
+          customer,
+          value: Number(formData.igst || 0),
+          total: Number(formData.igst || 0),
         });
       }
     });
 
+    // Sort entries by date and vno so they appear in order in modal
+    entries.sort((a, b) => {
+      const d1 = parseAnyDate(a.date);
+      const d2 = parseAnyDate(b.date);
+      if (d1 < d2) return -1;
+      if (d1 > d2) return 1;
+      return a.vno.toString().localeCompare(b.vno.toString());
+    });
     return entries;
   };
 

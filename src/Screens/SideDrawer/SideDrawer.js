@@ -165,6 +165,7 @@ export default function App() {
     const [isModalOpenCBook, setModalOpenCBook] = useState(false);
     const [isJBookOpen, setJBookOpen] = useState(false);
     const [isOutStandingOpen, setIsOutStandingOpen] = useState(false); 
+    const [isSummaryOpen, setIsSummaryOpen] = useState(false); 
     const [open, setOpen] = useState(false);
 
     const handleNavigation = (path) => {
@@ -178,6 +179,7 @@ export default function App() {
             setIsIncomeTaxOpen(false);
             setIsBooksOpen(false);
             setIsOutStandingOpen(false);
+            setIsSummaryOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -192,6 +194,7 @@ export default function App() {
             setIsIncomeTaxOpen(false);
             setIsBooksOpen(false);
             setIsOutStandingOpen(false);
+            setIsSummaryOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -283,49 +286,11 @@ export default function App() {
         setIsIncomeTaxOpen(false);
         setIsBooksOpen(false);
         setIsOutStandingOpen(false);
+        setIsSummaryOpen(false);
         setIsStockOpen(false);
         setIsExtraFeatureOpen(false);
         setIsDataSecurityOpen(false);
         setIsGoodReturn(false);
-    };
-    
-    const handleSaleClick = () => {
-        setIsSaleOpen(!isSaleOpen);
-    };
-    const handleReportClick = () => {
-        setIsReportOpen(!isReportOpen);
-    };
-    const handleGstReport = () => {
-        setIsGstReportOpen(!isGstReportOpen);
-    };
-    const handleTdsTcs = () => {
-        setIsTdsTcsOpen(!isTdsTcsOpen);
-    };
-    const handleIncomeTax = () => {
-        setIsIncomeTaxOpen(!isIncomeTaxOpen);
-    };
-    const handleExtraFeature = () => {
-        setIsExtraFeatureOpen(!isExtraFeatureOpen);
-    };
-
-    const handleDataSecurtiy = () => {
-        setIsDataSecurityOpen(!isDataSecurityOpen);
-    };
-
-    const handleBooksClick = () => {
-        setIsBooksOpen(!isBooksOpen); // Toggle BOOKS section
-    };
-
-    const handleOutStandingClick = () => {
-        setIsOutStandingOpen(!isOutStandingOpen); // Toggle OutStanding section
-    };
-
-    const handleGoodsReturn = () => {
-        setIsGoodReturn(!isGoodReturn); // Toggle Goods Return section
-    };
-
-        const handleStockClick = () => {
-        setIsStockOpen(!isStockOpen); // Toggle Stock section
     };
     
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -642,6 +607,54 @@ export default function App() {
                             </List>
                             </motion.div>
                             )}
+                               {/* Summary Reports */}
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsSummaryOpen(true)}
+                                onMouseLeave={() => setIsSummaryOpen(false)}
+                            >
+                                <StyledIcon>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                            <StyledListItemText primary="Summary" />
+                            </StyledListItem>
+                            {/* Summary – FLOATING RIGHT SUBMENU */}
+                            {isSummaryOpen && (
+                            <motion.div
+                                onMouseEnter={() => setIsSummaryOpen(true)}
+                                onMouseLeave={() => setIsSummaryOpen(false)}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                style={{
+                                    position: "fixed",
+                                    top: "474px",
+                                    left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "250px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                }}
+                            >
+                            <List>
+                               <StyledListItem button onClick={() => handleNavigation('/SaleSumm')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Sale Summary" />
+                                </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/PurchaseSumm')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Purchase Summary" />
+                                </StyledListItem>
+                            </List>
+                            </motion.div>
+                            )}
                             {/* OutStanding Reports */}
                             <StyledListItem
                                 button
@@ -672,7 +685,6 @@ export default function App() {
                                     padding: "10px",
                                     zIndex: 30000,
                                     border: "1px solid #444",
-                                    // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
                                 }}
                             >
                             <List>
@@ -691,7 +703,7 @@ export default function App() {
                             </List>
                             </motion.div>
                             )}
-                            {/* OutStanding Reports */}
+                            {/* Stock Reports */}
                             <StyledListItem
                                 button
                                 onMouseEnter={() => setIsStockOpen(true)}
