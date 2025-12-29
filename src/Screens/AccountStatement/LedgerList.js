@@ -81,91 +81,63 @@ const LedgerList = () => {
     setToDate(fy.end);     // converted
   }, []);
 
-  // ✅ Update filtered transactions whenever filterType or transactions change
-    // ✅ Update filtered transactions whenever filters or transactions change
-    useEffect(() => {
-      let data = transactions;
-  
-      // ✅ Filter by Debit/Credit
-      if (filterType !== "All") {
-        data = data.filter(
-          (txn) => txn.type.toLowerCase() === filterType.toLowerCase()
-        );
-      }
-  
-      // ✅ Filter by narration
-      if (narrationFilter.trim() !== "") {
-        data = data.filter((txn) =>
-          txn.narration?.toLowerCase().includes(narrationFilter.toLowerCase())
-        );
-      }
-  
-      // ✅ Filter by Date range
-      if (fromDate) {
-        data = data.filter((txn) => new Date(txn.date) >= fromDate);
-      }
-      if (toDate) {
-        data = data.filter((txn) => new Date(txn.date) <= toDate);
-      }
-  
-      // ✅ Filter by VType checkboxes
-      const selectedVtypes = [];
-      if (vtypeFilters.cash) selectedVtypes.push("C");
-      if (vtypeFilters.journal) selectedVtypes.push("J");
-      if (vtypeFilters.bank) selectedVtypes.push("B");
-      if (vtypeFilters.sale) selectedVtypes.push("S");
-      if (vtypeFilters.purchase) selectedVtypes.push("P");
-      if (vtypeFilters.tds) selectedVtypes.push("TDS");
-  
-      if (selectedVtypes.length > 0) {
-        data = data.filter((txn) => selectedVtypes.includes(txn.vtype));
-      }
-  
-      // ✅ Filter by selection (Selected / Unselected / All)
-      if (selectionFilter === "Selected") {
-        data = data.filter((txn) => selectedRows[txn._id]);
-      } else if (selectionFilter === "Unselected") {
-        data = data.filter((txn) => !selectedRows[txn._id]);
-      }
-  
-      setFilteredTransactions(data);
-    }, [
-      filterType,
-      narrationFilter,
-      fromDate,
-      toDate,
-      vtypeFilters,
-      selectionFilter,   // 👈 added dependency
-      selectedRows,      // 👈 added dependency
-      transactions,
-    ]);
-  // useEffect(() => {
-  //   let data = transactions;
+  // ✅ Update filtered transactions whenever filters or transactions change
+  useEffect(() => {
+    let data = transactions;
 
-  //   // ✅ Filter by Debit/Credit
-  //   if (filterType !== "All") {
-  //     data = data.filter(
-  //       (txn) => txn.type.toLowerCase() === filterType.toLowerCase()
-  //     );
-  //   }
+    // ✅ Filter by Debit/Credit
+    if (filterType !== "All") {
+      data = data.filter(
+        (txn) => txn.type.toLowerCase() === filterType.toLowerCase()
+      );
+    }
 
-  //   // ✅ Filter by narration
-  //   if (narrationFilter.trim() !== "") {
-  //     data = data.filter((txn) =>
-  //       txn.narration?.toLowerCase().includes(narrationFilter.toLowerCase())
-  //     );
-  //   }
+    // ✅ Filter by narration
+    if (narrationFilter.trim() !== "") {
+      data = data.filter((txn) =>
+        txn.narration?.toLowerCase().includes(narrationFilter.toLowerCase())
+      );
+    }
 
-  //   // ✅ Filter by Date range
-  //   if (fromDate) {
-  //     data = data.filter((txn) => new Date(txn.date) >= fromDate);
-  //   }
-  //   if (toDate) {
-  //     data = data.filter((txn) => new Date(txn.date) <= toDate);
-  //   }
+    // ✅ Filter by Date range
+    if (fromDate) {
+      data = data.filter((txn) => new Date(txn.date) >= fromDate);
+    }
+    if (toDate) {
+      data = data.filter((txn) => new Date(txn.date) <= toDate);
+    }
 
-  //   setFilteredTransactions(data);
-  // }, [filterType, narrationFilter, fromDate, toDate, transactions]);
+    // ✅ Filter by VType checkboxes
+    const selectedVtypes = [];
+    if (vtypeFilters.cash) selectedVtypes.push("C");
+    if (vtypeFilters.journal) selectedVtypes.push("J");
+    if (vtypeFilters.bank) selectedVtypes.push("B");
+    if (vtypeFilters.sale) selectedVtypes.push("S");
+    if (vtypeFilters.purchase) selectedVtypes.push("P");
+    if (vtypeFilters.tds) selectedVtypes.push("TDS");
+
+    if (selectedVtypes.length > 0) {
+      data = data.filter((txn) => selectedVtypes.includes(txn.vtype));
+    }
+
+    // ✅ Filter by selection (Selected / Unselected / All)
+    if (selectionFilter === "Selected") {
+      data = data.filter((txn) => selectedRows[txn._id]);
+    } else if (selectionFilter === "Unselected") {
+      data = data.filter((txn) => !selectedRows[txn._id]);
+    }
+
+    setFilteredTransactions(data);
+  }, [
+    filterType,
+    narrationFilter,
+    fromDate,
+    toDate,
+    vtypeFilters,
+    selectionFilter,   // 👈 added dependency
+    selectedRows,      // 👈 added dependency
+    transactions,
+  ]);
 
   useEffect(() => {
     if (!transactions.length || activeRowIndex < 0) {
@@ -204,29 +176,6 @@ const LedgerList = () => {
       searchRef.current.focus();
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (showModal && rowRefs.current[activeRowIndex]) {
-  //     const row = rowRefs.current[activeRowIndex];
-  //     const container = row.closest(`.${styles.tableHeight}`);
-
-  //     if (container && row) {
-  //       const rowTop = row.offsetTop;
-  //       const rowBottom = rowTop + row.offsetHeight;
-  //       const containerTop = container.scrollTop;
-  //       const containerBottom = containerTop + container.clientHeight;
-
-  //       // 🔹 Scroll down if row is below view
-  //       if (rowBottom > containerBottom) {
-  //         container.scrollTop = rowBottom - container.clientHeight;
-  //       }
-  //       // 🔹 Scroll up if row is above view
-  //       else if (rowTop < containerTop) {
-  //         container.scrollTop = rowTop;
-  //       }
-  //     }
-  //   }
-  // }, [activeRowIndex, showModal]);
 
   // Fetch ledger list
   useEffect(() => {
@@ -407,23 +356,6 @@ const LedgerList = () => {
     .catch((err) => console.error(err));
 };
 
-  // const openLedgerDetails = (ledger) => {
-  //   setSelectedLedger(ledger);
-  //   axios
-  //     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-  //     .then((res) => {
-  //       const allTxns = res.data.data || [];
-  //       const ledgerTxns = allTxns.flatMap((entry) =>
-  //         entry.transactions.filter(
-  //           (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-  //         )
-  //       );
-  //       setTransactions(ledgerTxns);
-  //       setShowModal(true);
-  //     })
-  //     .catch((err) => console.error(err));
-  // };
-
   const handleCheckboxChange = (id) => {
     setCheckedRows((prev) => ({
       ...prev,
@@ -479,7 +411,6 @@ const LedgerList = () => {
       container.scrollTo({ top: newScrollTop, behavior: "smooth" });
     }
   }, [selectedIndex, filteredLedgers]);
-
 
   // ✅ Auto-scroll inside ACCOUNT STATEMENT modal
   useEffect(() => {
@@ -749,503 +680,21 @@ const LedgerList = () => {
 
       </Card>
       {/* ... Modal code remains same ... */}
-            {/* ... Modal Account Statement ... */}
-            <Modal
-              show={showModal}
-              onHide={() => {
-                setShowModal(false);
-                setActiveRowIndex(0); // ✅ reset highlight when closing modal manually
-              }}
-             className="custom-modal"
-             style={{marginTop:20}}
-              centered
-            >
-              <Modal.Header closeButton>
-                <Modal.Title>
-                  ACCOUNT STATEMENT
-                  {/* Ledger Details - {selectedLedger?.formData?.ahead} */}
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                {selectedLedger && (
-                  <div>
-                    <div style={{display:'flex',flexDirection:"row",justifyContent:'space-between'}}>             
-                      <p>
-                        <span style={{fontSize:17}}><b>Code:</b> {selectedLedger.formData.acode} <br /></span>
-                        <span style={{fontSize:17}}><b>GST No:</b> {selectedLedger.formData.gstNo} <br /></span>
-                        <span style={{fontSize:17}}><b>PAN:</b> {selectedLedger.formData.pan} <br /></span>
-                        <span style={{fontSize:17}}><b>Phone:</b>  {selectedLedger.formData.phone}  <br /></span>
-                        <span style={{fontSize:17}}><b>Email:</b> {selectedLedger.formData.email} <br /></span>
-                      </p>
-                      <div style={{display:'flex',flexDirection:'column',textAlign:'center'}}>
-                        <b style={{fontSize:20}}>{selectedLedger.formData.ahead}{" "}</b> 
-                        <b style={{fontSize:20}}>{selectedLedger.formData.add1}{" "}</b> 
-                        <b style={{fontSize:20}}>{selectedLedger.formData.city}{" "}</b> 
-                        {/* ✅ Closing Balance Display */}
-                        {transactions.length > 0 && (
-                          <div style={{ fontSize: "20px" }}>
-                            {(() => {
-                              let balance = 0;
-                              transactions.forEach((txn) => {
-                                if (txn.type.toLowerCase() === "debit") {
-                                  balance += txn.amount;
-                                } else if (txn.type.toLowerCase() === "credit") {
-                                  balance -= txn.amount;
-                                }
-                              });
-                              const drcr = balance >= 0 ? "DR" : "CR";
-                              const color = drcr === "DR" ? "darkblue" : "red";
-                              return (
-                                <b style={{ color }}>
-                                  Balance Rs: {Math.abs(balance).toFixed(2)} {drcr}
-                                </b>
-                              );
-                            })()}
-                          </div>
-                        )}
-                    </div>
-                    <div style={{display:'flex',flexDirection:'column',textAlign:'center'}}>
-                      <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
-                        <b style={{fontSize:16,marginRight:"14px"}}>Progressive DR</b>
-                          <TextField
-                            className="custom-bordered-input"
-                            size="small"
-                            value={progressiveDebit.toFixed(2)}   // ✅ show progressive debit
-                            inputProps={{
-                              maxLength: 48,
-                              style: { height: "10px", width:"206px" },
-                            }}
-                          />
-                      </div>
-                      <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
-                        <b style={{fontSize:16,marginRight:"14px"}}>Progressive CR</b>
-                           <TextField
-                            className="custom-bordered-input"
-                            size="small"
-                            value={progressiveCredit.toFixed(2)}  // ✅ show progressive credit
-                            inputProps={{
-                              maxLength: 48,
-                              style: { height: "10px", width:"206px" },
-                            }}
-                          />
-                      </div>
-                      <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
-                        <b style={{fontSize:16,marginRight:"10px"}}>Progressive Qty</b>
-                         <TextField
-                            className="custom-bordered-input"
-                            size="small"
-                            inputProps={{
-                              maxLength: 48,
-                              style: {
-                                height: "10px",
-                                width:"206px"
-                              },
-                            }}
-                          />
-                      </div>
-                      <div style={{display:'flex',flexDirection:"row",alignItems:'center', marginTop:5}}>
-                        <b style={{fontSize:16,marginRight:"77px"}}>Period</b>
-                         <TextField
-                            className="custom-bordered-input"
-                            size="small"
-                            value={formatDate(fromDate)}   // 👈 formatted here
-                            inputProps={{
-                              maxLength: 48,
-                              style: {
-                                height: "10px",
-                                width:"90px"
-                              },
-                            }}
-                          />
-                           <TextField
-                            className="custom-bordered-input"
-                            size="small"
-                            value={formatDate(toDate)}   // 👈 formatted here
-                            inputProps={{
-                              maxLength: 48,
-                              style: {
-                                height: "10px",
-                                width:"90px"
-                              },
-                            }}
-                          />
-                      </div>
-                    </div>
-                    </div>
-      
-                    <div className={styles.tableHeight} ref={txnContainerRef}>
-                      <Table size="sm" className="custom-table">
-                        <thead
-                          style={{
-                            position: "sticky",
-                            top: 0,
-                            background: "skyblue",
-                            fontSize: 17,
-                            textAlign: "center",
-                            zIndex: 2,
-                          }}
-                        >
-                          <tr>
-                            <th>
-                              <input
-                                type="checkbox"
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  const newSelections = {};
-                                  filteredTransactions.forEach((txn) => {
-                                    newSelections[txn._id] = checked;
-                                  });
-                                  setSelectedRows(newSelections);
-                                }}
-                                checked={
-                                  filteredTransactions.length > 0 &&
-                                  filteredTransactions.every((txn) => selectedRows[txn._id])
-                                }
-                              />
-                            </th>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Narration</th>
-                            <th>Pcs</th>
-                            <th>Qty</th>
-                            <th>Debit</th>
-                            <th>Credit</th>
-                            <th>Balance</th>
-                            <th>DR/CR</th>
-                          </tr>
-                        </thead>
-      
-                        <tbody>
-                          {transactions.length > 0 ? (
-                            (() => {
-                              let balance = 0;
-                              let totalDebit = 0;
-                              let totalCredit = 0;
-      
-                              return filteredTransactions.map((txn,index) => {
-                                if (txn.type.toLowerCase() === "debit") {
-                                  balance += txn.amount;
-                                  totalDebit += txn.amount;
-                                } else if (txn.type.toLowerCase() === "credit") {
-                                  balance -= txn.amount;
-                                  totalCredit += txn.amount;
-                                }
-      
-                                const drcr = balance >= 0 ? "DR" : "CR";
-                                const color = drcr === "DR" ? "darkblue" : "red";
-      
-                                return (
-                                 <tr
-                                  key={txn._id}
-                                  ref={(el) => (rowRefs.current[index] = el)}
-                                  style={{
-                                    fontWeight: "bold",
-                                    fontSize: 16,
-                                    backgroundColor:
-                                      index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() => {
-                                    setActiveRowIndex(index);
-                                    handleTransactionSelect(txn);
-                                  }}
-                                  // onClick={() => handleTransactionSelect(txn)}
-                                  // onMouseEnter={() => setActiveRowIndex(index)}
-                                >
-                                  <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-                                      <input
-                                      type="checkbox"
-                                      checked={!!selectedRows[txn._id]}
-                                      onChange={() => handleRowCheckboxChange(txn._id)}
-                                      style={{ transform: "scale(1.3)", cursor: "pointer" }}
-                                    />
-                                  </td>
-                                  <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
-                                  <td style={{ textAlign: "center" }}>{txn.vtype}</td>
-                                  <td>{txn.narration}</td>
-                                  <td style={{ textAlign: "right" }}>{txn.pkgs}</td>
-                                  <td style={{ textAlign: "right" }}>{txn.weight}</td>                
-                                  <td style={{ textAlign: "right", color: "darkblue" }}>
-                                    {txn.type.toLowerCase() === "debit" ? txn.amount.toFixed(2) : ""}
-                                  </td>
-                                  <td style={{ textAlign: "right", color: "red" }}>
-                                    {txn.type.toLowerCase() === "credit" ? txn.amount.toFixed(2) : ""}
-                                  </td>
-                                  <td style={{ textAlign: "right", color }}>
-                                    {Math.abs(balance).toFixed(2)}
-                                  </td>
-                                  <td style={{ textAlign: "center", fontWeight: "bold", color }}>
-                                    {drcr}
-                                  </td>
-                                 </tr>
-      
-                                );
-                              });
-                            })()
-                          ) : (
-                            <tr>
-                              <td colSpan={10} className="text-center">
-                                No transactions found
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-      
-                        {/* ✅ Proper footer row */}
-                        {transactions.length > 0 && (() => {
-                          let totalDebit = 0;
-                          let totalCredit = 0;
-                          let balance = 0;
-                          let netWeight = 0;
-                          let netPcs = 0;
-      
-                          filteredTransactions.forEach((txn) => {
-                            if (txn.type.toLowerCase() === "debit") {
-                              balance += txn.amount;
-                              totalDebit += txn.amount;
-                            } else if (txn.type.toLowerCase() === "credit") {
-                              balance -= txn.amount;
-                              totalCredit += txn.amount;
-                            }
-      
-                            // ✅ Weight handling
-                            if (txn.vtype === "P") {
-                              netWeight += txn.weight || 0;   // Purchase positive
-                            } else if (txn.vtype === "S") {
-                              netWeight -= txn.weight || 0;   // Sale negative
-                            }
-                             // ✅ Pcs handling
-                            if (txn.vtype === "P") {
-                              netPcs += txn.pkgs || 0;   // Purchase positive
-                            } else if (txn.vtype === "S") {
-                              netPcs -= txn.pkgs || 0;   // Sale negative
-                            }
-                          });
-      
-                          const drcrFinal = balance >= 0 ? "DR" : "CR";
-                          const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
-      
-                          return (
-                            <tfoot>
-                              <tr
-                                style={{
-                                  position: "sticky",
-                                  bottom: -1,
-                                  background: "skyblue",
-                                  fontWeight: "bold",
-                                  fontSize: 16,
-                                }}
-                              >
-                                <td colSpan={4} style={{ textAlign: "center" }}>
-                                  Totals
-                                </td>
-                                <td style={{ textAlign: "right"}}>
-                                  {netPcs.toFixed(3)}
-                                </td>
-                                {/* ✅ Net weight (sale in minus, purchase in plus) */}
-                                <td style={{ textAlign: "right" }}>
-                                  {netWeight.toFixed(3)}
-                                </td>
-                                <td style={{ textAlign: "right", color: "darkblue" }}>
-                                  {totalDebit.toFixed(2)}
-                                </td>
-                                <td style={{ textAlign: "right", color: "red" }}>
-                                  {totalCredit.toFixed(2)}
-                                </td>
-                                <td style={{ textAlign: "right", color: colorFinal }}>
-                                  {Math.abs(balance).toFixed(2)}
-                                </td>
-                                <td style={{ textAlign: "center", color: colorFinal }}>
-                                  {drcrFinal}
-                                </td>
-                              </tr>
-                            </tfoot>
-                          );
-                        })()}
-                      </Table>
-                    </div>
-                    <div className="d-flex justify-content-between mt-2">
-                    <div>
-                      <Button className="Buttonz"  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                      <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "}
-                      <Button className="Buttonz"  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
-                      <CoA
-                        isOpen={isPrintOpen}
-                        handleClose={() => setIsPrintOpen(false)}
-                        filteredTransactions={filteredTransactions}
-                        selectedLedger = {selectedLedger}
-                        ledgerFrom={ledgerFromDate}
-                        ledgerTo={ledgerToDate}
-                      />
-                      <Button className="Buttonz"  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
-                    </div>
-                  </div>
-                  </div>
-                )}
-              </Modal.Body>
-            </Modal>
-      
-            {/* Option Account Statement */}
-            <Modal style={{zIndex:100000}} show={showOptions} onHide={() => setShowOptions(false)} centered>
-              <Modal.Header closeButton>
-                <Modal.Title>Filter Transactions</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-              <div style={{display:'flex',flexDirection:'row',alignItems:'center'}}>
-                <div style={{display:'flex', flexDirection:'column'}}>
-                     
-                <Form.Group>
-                  <Form.Label>From Date</Form.Label>
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={(date) => setFromDate(date)}
-                    onChangeRaw={(e) => {
-                      if (!e.target.value) return; // ✅ prevent crash
-
-                      let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-
-                      if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                      if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-                      e.target.value = val; // Update formatted value
-                    }}
-                    dateFormat="dd/MM/yyyy"
-                    className={styles.from}
-                  />
-                </Form.Group>
-      
-                <Form.Group className="mb-3">
-                  <Form.Label>Upto Date</Form.Label>
-                  <DatePicker
-                    selected={toDate}
-                    onChange={(date) => setToDate(date)}
-                    onChangeRaw={(e) => {
-                      if (!e.target.value) return; // ✅ prevent crash
-
-                      let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-
-                      if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                      if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-                      e.target.value = val; // Update formatted value
-                    }}
-                    dateFormat="dd/MM/yyyy"
-                    className={styles.to}
-                  />
-                </Form.Group>
-      
-                {/* Debit / Credit Select */}
-                <Form.Group >
-                  <Form.Label>Select Type</Form.Label>
-                  <Form.Select
-                    className={styles.tType}
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                  >
-                    <option value="All">All</option>
-                    <option value="Debit">Debit</option>
-                    <option value="Credit">Credit</option>
-                  </Form.Select>
-                </Form.Group>
-      
-                <div style={{display:'flex',flexDirection:'row'}}>
-                  <Form.Label style={{marginTop:5}}>Narration</Form.Label>
-                  <input
-                    className={styles.nar}
-                    type="text"
-                    value={narrationFilter}
-                    onChange={(e) => setNarrationFilter(e.target.value)}
-                  />
-                </div>
-      
-                <Form.Group>
-                  <Form.Label>Filter</Form.Label>
-                  <Form.Select
-                    className= 'filterselect'
-                    value={selectionFilter}
-                    onChange={(e) => setSelectionFilter(e.target.value)}
-                  >
-                    <option value="All">All</option>
-                    <option value="Selected">Selected</option>
-                    <option value="Unselected">Unselected</option>
-                  </Form.Select>
-                </Form.Group>
-      
-                </div>   
-      
-                <div style={{display:'flex', flexDirection:'column',marginLeft:"50px"}}>
-                  <b style={{fontSize:18,marginBottom:"10px"}}>Vouchers</b>
-                  <Form.Check
-                    type="checkbox"
-                    label="Cash"
-                    name="cash"
-                    checked={vtypeFilters.cash}
-                    onChange={handleVtypeChange}
-                    style={{ transform: "scale(1.2)", marginRight: "8px", }} 
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    label="Journal"
-                    name="journal"
-                    checked={vtypeFilters.journal}
-                    onChange={handleVtypeChange}
-                    style={{ transform: "scale(1.2)", marginRight: "8px" }} 
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    label="Bank"
-                    name="bank"
-                    checked={vtypeFilters.bank}
-                    onChange={handleVtypeChange}
-                    style={{ transform: "scale(1.2)", marginRight: "8px" }} 
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    label="Sale"
-                    name="sale"
-                    checked={vtypeFilters.sale}
-                    onChange={handleVtypeChange}
-                    style={{ transform: "scale(1.2)", marginRight: "8px" }} 
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    label="Purchase"
-                    name="purchase"
-                    checked={vtypeFilters.purchase}
-                    onChange={handleVtypeChange}
-                    style={{ transform: "scale(1.2)", marginRight: "8px" }} 
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    label="TDS"
-                    name="tds"
-                    checked={vtypeFilters.tds}
-                    onChange={handleVtypeChange}
-                    style={{ transform: "scale(1.2)", marginRight: "8px" }} 
-                  />
-                </div>
-      
-              </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button className="Buttonz" variant="secondary" onClick={() => setShowOptions(false)}>
-                  Close
-                </Button>
-              </Modal.Footer>
-            </Modal>
-      {/* <Modal
+      {/* ... Modal Account Statement ... */}
+      <Modal
         show={showModal}
         onHide={() => {
           setShowModal(false);
           setActiveRowIndex(0); // ✅ reset highlight when closing modal manually
         }}
-       className="custom-modal"
-       style={{marginTop:20}}
+        className="custom-modal"
+        style={{marginTop:20}}
         centered
       >
         <Modal.Header closeButton>
           <Modal.Title>
             ACCOUNT STATEMENT
+            {/* Ledger Details - {selectedLedger?.formData?.ahead} */}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -1263,7 +712,7 @@ const LedgerList = () => {
                   <b style={{fontSize:20}}>{selectedLedger.formData.ahead}{" "}</b> 
                   <b style={{fontSize:20}}>{selectedLedger.formData.add1}{" "}</b> 
                   <b style={{fontSize:20}}>{selectedLedger.formData.city}{" "}</b> 
-                
+                  {/* ✅ Closing Balance Display */}
                   {transactions.length > 0 && (
                     <div style={{ fontSize: "20px" }}>
                       {(() => {
@@ -1289,35 +738,31 @@ const LedgerList = () => {
               <div style={{display:'flex',flexDirection:'column',textAlign:'center'}}>
                 <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
                   <b style={{fontSize:16,marginRight:"14px"}}>Progressive DR</b>
-                   <TextField
+                    <TextField
                       className="custom-bordered-input"
                       size="small"
+                      value={progressiveDebit.toFixed(2)}   // ✅ show progressive debit
                       inputProps={{
                         maxLength: 48,
-                        style: {
-                          height: "10px",
-                          width:"206px"
-                        },
+                        style: { height: "10px", width:"206px" },
                       }}
                     />
                 </div>
                 <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
                   <b style={{fontSize:16,marginRight:"14px"}}>Progressive CR</b>
-                   <TextField
+                      <TextField
                       className="custom-bordered-input"
                       size="small"
+                      value={progressiveCredit.toFixed(2)}  // ✅ show progressive credit
                       inputProps={{
                         maxLength: 48,
-                        style: {
-                          height: "10px",
-                          width:"206px"
-                        },
+                        style: { height: "10px", width:"206px" },
                       }}
                     />
                 </div>
                 <div style={{display:'flex',flexDirection:"row",alignItems:'center'}}>
                   <b style={{fontSize:16,marginRight:"10px"}}>Progressive Qty</b>
-                   <TextField
+                    <TextField
                       className="custom-bordered-input"
                       size="small"
                       inputProps={{
@@ -1329,12 +774,12 @@ const LedgerList = () => {
                       }}
                     />
                 </div>
-                  <div style={{display:'flex',flexDirection:"row",alignItems:'center', marginTop:5}}>
+                <div style={{display:'flex',flexDirection:"row",alignItems:'center', marginTop:5}}>
                   <b style={{fontSize:16,marginRight:"77px"}}>Period</b>
-                   <TextField
+                    <TextField
                       className="custom-bordered-input"
                       size="small"
-                      value={fromDate}
+                      value={formatDate(fromDate)}   // 👈 formatted here
                       inputProps={{
                         maxLength: 48,
                         style: {
@@ -1343,9 +788,10 @@ const LedgerList = () => {
                         },
                       }}
                     />
-                     <TextField
+                      <TextField
                       className="custom-bordered-input"
                       size="small"
+                      value={formatDate(toDate)}   // 👈 formatted here
                       inputProps={{
                         maxLength: 48,
                         style: {
@@ -1371,9 +817,28 @@ const LedgerList = () => {
                     }}
                   >
                     <tr>
+                      <th>
+                        <input
+                          type="checkbox"
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const newSelections = {};
+                            filteredTransactions.forEach((txn) => {
+                              newSelections[txn._id] = checked;
+                            });
+                            setSelectedRows(newSelections);
+                          }}
+                          checked={
+                            filteredTransactions.length > 0 &&
+                            filteredTransactions.every((txn) => selectedRows[txn._id])
+                          }
+                        />
+                      </th>
                       <th>Date</th>
                       <th>Type</th>
                       <th>Narration</th>
+                      <th>Pcs</th>
+                      <th>Qty</th>
                       <th>Debit</th>
                       <th>Credit</th>
                       <th>Balance</th>
@@ -1401,68 +866,92 @@ const LedgerList = () => {
                           const color = drcr === "DR" ? "darkblue" : "red";
 
                           return (
-                            <tr key={txn._id}     
-                              ref={(el) => (rowRefs.current[index] = el)} // ✅ attach ref
-                              style={{
-                                  fontWeight: "bold",
-                                  fontSize: 16,
-                                  backgroundColor: index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent", // ✅ highlight
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                  setActiveRowIndex(index);
-                                  handleTransactionSelect(txn);
-                                }}
-                                // onClick={() => handleTransactionSelect(txn)}
-                                // onMouseEnter={() => setActiveRowIndex(index)}   // ✅ highlight on hover
-                              >
-                              <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
-                              <td style={{ textAlign: "center" }}>{txn.vtype}</td>
-                              <td>{txn.narration}</td>
-                              <td style={{ textAlign: "right", color: "darkblue" }}>
-                                {txn.type.toLowerCase() === "debit"
-                                  ? txn.amount.toFixed(2)
-                                  : ""}
-                              </td>
-                              <td style={{ textAlign: "right", color: "red" }}>
-                                {txn.type.toLowerCase() === "credit"
-                                  ? txn.amount.toFixed(2)
-                                  : ""}
-                              </td>
-                              <td style={{ textAlign: "right", color }}>
-                                {Math.abs(balance).toFixed(2)}
-                              </td>
-                              <td style={{ textAlign: "center", fontWeight: "bold", color }}>
-                                {drcr}
-                              </td>
+                            <tr
+                            key={txn._id}
+                            ref={(el) => (rowRefs.current[index] = el)}
+                            style={{
+                              fontWeight: "bold",
+                              fontSize: 16,
+                              backgroundColor:
+                                index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              setActiveRowIndex(index);
+                              handleTransactionSelect(txn);
+                            }}
+                            // onClick={() => handleTransactionSelect(txn)}
+                            // onMouseEnter={() => setActiveRowIndex(index)}
+                          >
+                            <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                                <input
+                                type="checkbox"
+                                checked={!!selectedRows[txn._id]}
+                                onChange={() => handleRowCheckboxChange(txn._id)}
+                                style={{ transform: "scale(1.3)", cursor: "pointer" }}
+                              />
+                            </td>
+                            <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
+                            <td style={{ textAlign: "center" }}>{txn.vtype}</td>
+                            <td>{txn.narration}</td>
+                            <td style={{ textAlign: "right" }}>{txn.pkgs}</td>
+                            <td style={{ textAlign: "right" }}>{txn.weight}</td>                
+                            <td style={{ textAlign: "right", color: "darkblue" }}>
+                              {txn.type.toLowerCase() === "debit" ? txn.amount.toFixed(2) : ""}
+                            </td>
+                            <td style={{ textAlign: "right", color: "red" }}>
+                              {txn.type.toLowerCase() === "credit" ? txn.amount.toFixed(2) : ""}
+                            </td>
+                            <td style={{ textAlign: "right", color }}>
+                              {Math.abs(balance).toFixed(2)}
+                            </td>
+                            <td style={{ textAlign: "center", fontWeight: "bold", color }}>
+                              {drcr}
+                            </td>
                             </tr>
+
                           );
                         });
                       })()
                     ) : (
                       <tr>
-                        <td colSpan={7} className="text-center">
+                        <td colSpan={10} className="text-center">
                           No transactions found
                         </td>
                       </tr>
                     )}
                   </tbody>
 
-             
+                  {/* ✅ Proper footer row */}
                   {transactions.length > 0 && (() => {
                     let totalDebit = 0;
                     let totalCredit = 0;
                     let balance = 0;
+                    let netWeight = 0;
+                    let netPcs = 0;
 
-                 filteredTransactions.forEach((txn) => {
-                  if (txn.type.toLowerCase() === "debit") {
-                    balance += txn.amount;
-                    totalDebit += txn.amount;
-                  } else if (txn.type.toLowerCase() === "credit") {
-                    balance -= txn.amount;
-                    totalCredit += txn.amount;
-                  }
-                });
+                    filteredTransactions.forEach((txn) => {
+                      if (txn.type.toLowerCase() === "debit") {
+                        balance += txn.amount;
+                        totalDebit += txn.amount;
+                      } else if (txn.type.toLowerCase() === "credit") {
+                        balance -= txn.amount;
+                        totalCredit += txn.amount;
+                      }
+
+                      // ✅ Weight handling
+                      if (txn.vtype === "P") {
+                        netWeight += txn.weight || 0;   // Purchase positive
+                      } else if (txn.vtype === "S") {
+                        netWeight -= txn.weight || 0;   // Sale negative
+                      }
+                        // ✅ Pcs handling
+                      if (txn.vtype === "P") {
+                        netPcs += txn.pkgs || 0;   // Purchase positive
+                      } else if (txn.vtype === "S") {
+                        netPcs -= txn.pkgs || 0;   // Sale negative
+                      }
+                    });
 
                     const drcrFinal = balance >= 0 ? "DR" : "CR";
                     const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
@@ -1478,8 +967,15 @@ const LedgerList = () => {
                             fontSize: 16,
                           }}
                         >
-                          <td colSpan={3} style={{ textAlign: "center" }}>
+                          <td colSpan={4} style={{ textAlign: "center" }}>
                             Totals
+                          </td>
+                          <td style={{ textAlign: "right"}}>
+                            {netPcs.toFixed(3)}
+                          </td>
+                          {/* ✅ Net weight (sale in minus, purchase in plus) */}
+                          <td style={{ textAlign: "right" }}>
+                            {netWeight.toFixed(3)}
                           </td>
                           <td style={{ textAlign: "right", color: "darkblue" }}>
                             {totalDebit.toFixed(2)}
@@ -1501,35 +997,48 @@ const LedgerList = () => {
               </div>
               <div className="d-flex justify-content-between mt-2">
               <div>
-                <Button size="sm" variant="secondary">Refresh</Button>{" "}
-                <Button size="sm" variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                <Button size="sm" variant="secondary">Select</Button>{" "}
-                <Button size="sm" variant="secondary">Export</Button>{" "}
-                <Button size="sm" variant="secondary">Print</Button>{" "}
-                <Button size="sm" variant="secondary">Email</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "}
+                <Button className="Buttonz"  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
+                <CoA
+                  isOpen={isPrintOpen}
+                  handleClose={() => setIsPrintOpen(false)}
+                  filteredTransactions={filteredTransactions}
+                  selectedLedger = {selectedLedger}
+                  ledgerFrom={ledgerFromDate}
+                  ledgerTo={ledgerToDate}
+                />
+                <Button className="Buttonz"  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
               </div>
             </div>
             </div>
           )}
         </Modal.Body>
       </Modal>
-      
+
+      {/* Option Account Statement */}
       <Modal style={{zIndex:100000}} show={showOptions} onHide={() => setShowOptions(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Filter Transactions</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+        <div style={{display:'flex',flexDirection:'row',alignItems:'center'}}>
+          <div style={{display:'flex', flexDirection:'column'}}>
+                
           <Form.Group>
             <Form.Label>From Date</Form.Label>
             <DatePicker
               selected={fromDate}
-              onChange={(date) => setFromDate(date)}   // ✅ FIXED
+              onChange={(date) => setFromDate(date)}
               onChangeRaw={(e) => {
+                if (!e.target.value) return; // ✅ prevent crash
+
                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+
                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
 
-                e.target.value = val; // Show formatted input
+                e.target.value = val; // Update formatted value
               }}
               dateFormat="dd/MM/yyyy"
               className={styles.from}
@@ -1540,19 +1049,23 @@ const LedgerList = () => {
             <Form.Label>Upto Date</Form.Label>
             <DatePicker
               selected={toDate}
-              onChange={(date) => setToDate(date)}     // ✅ FIXED
+              onChange={(date) => setToDate(date)}
               onChangeRaw={(e) => {
+                if (!e.target.value) return; // ✅ prevent crash
+
                 let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
+
                 if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
                 if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
 
-                e.target.value = val; // Show formatted input
+                e.target.value = val; // Update formatted value
               }}
               dateFormat="dd/MM/yyyy"
               className={styles.to}
             />
           </Form.Group>
 
+          {/* Debit / Credit Select */}
           <Form.Group >
             <Form.Label>Select Type</Form.Label>
             <Form.Select
@@ -1566,7 +1079,6 @@ const LedgerList = () => {
             </Form.Select>
           </Form.Group>
 
-            
           <div style={{display:'flex',flexDirection:'row'}}>
             <Form.Label style={{marginTop:5}}>Narration</Form.Label>
             <input
@@ -1576,24 +1088,82 @@ const LedgerList = () => {
               onChange={(e) => setNarrationFilter(e.target.value)}
             />
           </div>
+
+          <Form.Group>
+            <Form.Label>Filter</Form.Label>
+            <Form.Select
+              className= 'filterselect'
+              value={selectionFilter}
+              onChange={(e) => setSelectionFilter(e.target.value)}
+            >
+              <option value="All">All</option>
+              <option value="Selected">Selected</option>
+              <option value="Unselected">Unselected</option>
+            </Form.Select>
+          </Form.Group>
+
+          </div>   
+
+          <div style={{display:'flex', flexDirection:'column',marginLeft:"50px"}}>
+            <b style={{fontSize:18,marginBottom:"10px"}}>Vouchers</b>
+            <Form.Check
+              type="checkbox"
+              label="Cash"
+              name="cash"
+              checked={vtypeFilters.cash}
+              onChange={handleVtypeChange}
+              style={{ transform: "scale(1.2)", marginRight: "8px", }} 
+            />
+            <Form.Check
+              type="checkbox"
+              label="Journal"
+              name="journal"
+              checked={vtypeFilters.journal}
+              onChange={handleVtypeChange}
+              style={{ transform: "scale(1.2)", marginRight: "8px" }} 
+            />
+            <Form.Check
+              type="checkbox"
+              label="Bank"
+              name="bank"
+              checked={vtypeFilters.bank}
+              onChange={handleVtypeChange}
+              style={{ transform: "scale(1.2)", marginRight: "8px" }} 
+            />
+            <Form.Check
+              type="checkbox"
+              label="Sale"
+              name="sale"
+              checked={vtypeFilters.sale}
+              onChange={handleVtypeChange}
+              style={{ transform: "scale(1.2)", marginRight: "8px" }} 
+            />
+            <Form.Check
+              type="checkbox"
+              label="Purchase"
+              name="purchase"
+              checked={vtypeFilters.purchase}
+              onChange={handleVtypeChange}
+              style={{ transform: "scale(1.2)", marginRight: "8px" }} 
+            />
+            <Form.Check
+              type="checkbox"
+              label="TDS"
+              name="tds"
+              checked={vtypeFilters.tds}
+              onChange={handleVtypeChange}
+              style={{ transform: "scale(1.2)", marginRight: "8px" }} 
+            />
+          </div>
+
+        </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowOptions(false)}>
+          <Button className="Buttonz" variant="secondary" onClick={() => setShowOptions(false)}>
             Close
           </Button>
-          <Button
-            variant="warning"
-            onClick={() => {
-              setFilterType("All");
-              setNarrationFilter("");
-              setFromDate("");
-              setToDate("");
-            }}
-          >
-            Clear Filters
-          </Button>
         </Modal.Footer>
-      </Modal> */}
+      </Modal>
     </div>
   );
 };

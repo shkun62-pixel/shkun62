@@ -120,9 +120,10 @@ const StockSummary = () => {
             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster"
           ),
         ]);
-
-        const isWithinDateRange = (date) => {
-          const d = new Date(date);
+        
+        const isWithinDateRange = (dateStr) => {
+          const d = parseDate(dateStr);
+          if (!d) return false;
           return d >= fromDate && d <= uptoDate;
         };
 
@@ -135,7 +136,7 @@ const StockSummary = () => {
             (item) =>
               item.formData?.Aheads?.trim().toLowerCase() === normalizedAhead
           );
-          const opening = parseFloat(matchingStock?.formData?.openwts || 0);
+          const opening = parseFloat(matchingStock?.formData?.openwtsz || 0);
 
           const purchases = purchaseRes.data.flatMap((purchase) =>
             purchase.items
@@ -163,7 +164,7 @@ const StockSummary = () => {
                   isWithinDateRange(sale.formData.date)
               )
               .map((item) => ({
-                date: new Date(sale.formData.date),
+                date: parseDate(sale.formData.date),
                 sdisc: sale.customerDetails?.[0]?.vacode || "",
                 purRec: 0,
                 pcsPur: 0,
@@ -181,7 +182,7 @@ const StockSummary = () => {
           let totalSale = 0;
 
           // NEW for PKGS
-          let pcsOpening = parseFloat(matchingStock?.formData?.openpcs || 0);
+          let pcsOpening = parseFloat(matchingStock?.formData?.openpcsz || 0);
           let pcsClosing = pcsOpening;
           let totalPcsPur = 0;
           let totalPcsSale = 0;
@@ -205,14 +206,14 @@ const StockSummary = () => {
             id: `ahead-${normalizedAhead}`,
             date: "",
             sdisc: ahead,
-            pcsOp: pcsOpening.toFixed(2),
-            opening: opening.toFixed(2),
-            pcsPur: totalPcsPur.toFixed(2),
-            purRec: totalPurRec.toFixed(2),
-            pcsSale: totalPcsSale.toFixed(2),
-            sale: totalSale.toFixed(2),
-            pcsClosing: pcsClosing.toFixed(2),
-            closing: prevClosing.toFixed(2),
+            pcsOp: pcsOpening.toFixed(3),
+            opening: opening.toFixed(3),
+            pcsPur: totalPcsPur.toFixed(3),
+            purRec: totalPurRec.toFixed(3),
+            pcsSale: totalPcsSale.toFixed(3),
+            sale: totalSale.toFixed(3),
+            pcsClosing: pcsClosing.toFixed(3),
+            closing: prevClosing.toFixed(3),
           });
         }
 
