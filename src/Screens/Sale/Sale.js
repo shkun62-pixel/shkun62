@@ -73,6 +73,7 @@ const Sale = () => {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [title, setTitle] = useState("(View)");
   const datePickerRef = useRef(null);
+  const tableContainerRef = useRef(null);
   const itemCodeRefs = useRef([]);
   const desciptionRefs = useRef([]);
   const peciesRefs = useRef([]);
@@ -1816,251 +1817,251 @@ const handleViewFAVoucher = () => {
   //     }
   // };
   const handleSaveClickwithSetup = async () => {
-  document.body.style.backgroundColor = "white";
-  let isDataSaved = false;
+    document.body.style.backgroundColor = "white";
+    let isDataSaved = false;
 
-  try {
-    // 1) Validate
-    const isValid = customerDetails.every((item) => item.vacode !== "");
-    if (!isValid) {
-      toast.error("Please Fill the Customer Details", { position: "top-center" });
-      return;
-    }
-
-    const nonEmptyItems = items.filter((item) => (item.sdisc || "").trim() !== "");
-    if (nonEmptyItems.length === 0) {
-      toast.error("Please fill in at least one Items name.", { position: "top-center" });
-      return;
-    }
-
-    // 2) Build base form with setup codes (common to both add/edit)
-    const baseForm = {
-      date: selectedDate.toLocaleDateString("en-IN"),
-      vtype: formData.vtype,
-      vbillno: formData.vbillno,
-      vno: formData.vno,
-      gr: formData.gr,
-      exfor: formData.exfor,
-      trpt: formData.trpt,
-      stype: formData.stype,
-      btype: formData.btype,
-      conv: formData.conv,
-      rem1: formData.rem1,
-      rem2: formData.rem2,
-      v_tpt: formData.v_tpt,
-      broker: formData.broker,
-      srv_rate: formData.srv_rate,
-      srv_tax: formData.srv_tax,
-      tcs1_rate: formData.tcs1_rate,
-      tcs1: formData.tcs1,
-      tcs206_rate: formData.tcs206_rate,
-      tcs206: formData.tcs206,
-      duedate: expiredDate.toLocaleDateString("en-IN"),
-      pcess: formData.pcess,
-      tax: formData.tax,
-      sub_total: formData.sub_total,
-      exp_before: formData.exp_before,
-      Exp_rate6: formData.Exp_rate6,
-      Exp_rate7: formData.Exp_rate7,
-      Exp_rate8: formData.Exp_rate8,
-      Exp_rate9: formData.Exp_rate9,
-      Exp_rate10: formData.Exp_rate10,
-      Exp6: formData.Exp6,
-      Exp7: formData.Exp7,
-      Exp8: formData.Exp8,
-      Exp9: formData.Exp9,
-      Exp10: formData.Exp10,
-      Tds2: formData.Tds2,
-      Ctds: formData.Ctds,
-      Stds: formData.Stds,
-      iTds: formData.iTds,
-      cgst: formData.cgst,
-      sgst: formData.sgst,
-      igst: formData.igst,
-      expafterGST: formData.expafterGST,
-      grandtotal: formData.grandtotal,
-
-      // setupFormData mapping
-      cgst_ac: setupFormData.cgst_ac,
-      cgst_code: setupFormData.cgst_code,
-      sgst_ac: setupFormData.sgst_ac,
-      sgst_code: setupFormData.sgst_code,
-      igst_ac: setupFormData.igst_ac,
-      igst_code: setupFormData.igst_code,
-
-      cesscode: setupFormData.cesscode,
-      cessAc: setupFormData.cessAc,
-
-      tds_code: setupFormData.tds_code,
-      tds_ac: setupFormData.tds_ac,
-
-      tcs_code: setupFormData.tcs_code,
-      tcs_ac: setupFormData.tcs_ac,
-      tcs206_code: setupFormData.tcs206_code,
-      tcs206_ac: setupFormData.tcs206_ac,
-
-      discount_code: setupFormData.discount_code,
-      discount_ac: setupFormData.discount_ac, // NOTE: account name
-
-      // TDS ACCOUNTS
-      cTds_code: setupFormData.cTds_code,
-      cTds_ac: setupFormData.cTds_ac,
-      sTds_code: setupFormData.sTds_code,
-      sTds_ac: setupFormData.sTds_ac,
-      iTds_code: setupFormData.iTds_code,
-      iTds_ac: setupFormData.iTds_ac,
-
-      expense1_code: setupFormData.E1Code,  expense1_ac: setupFormData.E1name,
-      expense2_code: setupFormData.E2Code,  expense2_ac: setupFormData.E2name,
-      expense3_code: setupFormData.E3Code,  expense3_ac: setupFormData.E3name,
-      expense4_code: setupFormData.E4Code,  expense4_ac: setupFormData.E4name,
-      expense5_code: setupFormData.E5Code,  expense5_ac: setupFormData.E5name,
-      expense6_code: setupFormData.E6Code,  expense6_ac: setupFormData.E6name,
-      expense7_code: setupFormData.E7Code,  expense7_ac: setupFormData.E7name,
-      expense8_code: setupFormData.E8Code,  expense8_ac: setupFormData.E8name,
-      expense9_code: setupFormData.E9Code,  expense9_ac: setupFormData.E9name,
-      expense10_code: setupFormData.E10Code, expense10_ac: setupFormData.E10name,
-    };
-
-    const itemsPayload = nonEmptyItems.map((item) => ({
-      id: item.id,
-      vcode: item.vcode,
-      sdisc: item.sdisc,
-      Units: item.Units,
-      pkgs: item.pkgs,
-      weight: item.weight,
-      rate: item.rate,
-      amount: item.amount,
-      disc: item.disc,
-      discount: item.discount,
-      gst: item.gst,
-      Pcodes01: item.Pcodes01,
-      Pcodess: item.Pcodess,
-      Scodes01: item.Scodes01,
-      Scodess: item.Scodess,
-      exp_before: item.exp_before,
-      Exp_rate1: item.Exp_rate1,
-      Exp_rate2: item.Exp_rate2,
-      Exp_rate3: item.Exp_rate3,
-      Exp_rate4: item.Exp_rate4,
-      Exp_rate5: item.Exp_rate5,
-      Exp1: item.Exp1,
-      Exp2: item.Exp2,
-      Exp3: item.Exp3,
-      Exp4: item.Exp4,
-      Exp5: item.Exp5,
-      Exp6: item.Exp6,
-      ctax: item.ctax,
-      stax: item.stax,
-      itax: item.itax,
-      tariff: item.tariff,
-      vamt: item.vamt,
-    }));
-
-    const combinedData = {
-      _id: formData._id,
-      formData: baseForm,
-      items: itemsPayload,
-      customerDetails: customerDetails.map((item) => ({
-        Vcode: item.Vcode,
-        vacode: item.vacode,
-        gstno: item.gstno,
-        pan: item.pan,
-        Add1: item.Add1,
-        city: item.city,
-        state: item.state,
-        Tcs206c1H: item.Tcs206c1H,
-        TDS194Q: item.TDS194Q,
-      })),
-      shipped: shipped.map((item) => ({
-        shippedto: item.shippedto,
-        shippingAdd: item.shippingAdd,
-        shippingcity: item.shippingcity,
-        shippingState: item.shippingState,
-        shippingGst: item.shippingGst,
-        shippingPan: item.shippingPan,
-      })),
-    };
-
-    // 3) Save Sale GST (add/edit)
-    const saleGstUrl = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
-    const saleGstMethod = isAbcmode ? "put" : "post";
-    const saleRes = await axios({ method: saleGstMethod, url: saleGstUrl, data: combinedData });
-
-    // Try to extract saleId from response; fallbacks included for PUT/legacy responses
-    const saleId =
-      saleRes?.data?.saleId ||
-      saleRes?.data?._id ||
-      (isAbcmode ? data1?._id : null);
-
-    if (!saleId) {
-      console.warn("saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.");
-    }
-
-    if (saleRes?.status === 200 || saleRes?.status === 201) {
-      // 4) Update Stock (SALE => subtract)
-      try {
-        await axios.post(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stock/update`, {
-          mode: "sale",
-          items: nonEmptyItems.map((item) => ({
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            weight: Number(item.weight) || 0,
-            pkgs: Number(item.pkgs) || 0,
-          })),
-        });
-      } catch (stkErr) {
-        console.error("Stock update error:", stkErr);
-        // Continue even if stock update fails
+    try {
+      // 1) Validate
+      const isValid = customerDetails.every((item) => item.vacode !== "");
+      if (!isValid) {
+        toast.error("Please Fill the Customer Details", { position: "top-center" });
+        return;
       }
 
-      // 5) Post FA entries (with setup codes) — include saleId
-      try {
-        const faUrl = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
-        const faBody = saleId ? { ...combinedData, saleId } : combinedData;
-
-        await axios({
-          method: isAbcmode ? "put" : "post",
-          url: faUrl,
-          data: faBody,
-        });
-      } catch (faErr) {
-        console.error("salefaFile error:", faErr);
-        toast.warn(
-          "Sale saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
-          { position: "top-center" }
-        );
+      const nonEmptyItems = items.filter((item) => (item.sdisc || "").trim() !== "");
+      if (nonEmptyItems.length === 0) {
+        toast.error("Please fill in at least one Items name.", { position: "top-center" });
+        return;
       }
 
-      fetchData();
-      isDataSaved = true;
+      // 2) Build base form with setup codes (common to both add/edit)
+      const baseForm = {
+        date: selectedDate.toLocaleDateString("en-IN"),
+        vtype: formData.vtype,
+        vbillno: formData.vbillno,
+        vno: formData.vno,
+        gr: formData.gr,
+        exfor: formData.exfor,
+        trpt: formData.trpt,
+        stype: formData.stype,
+        btype: formData.btype,
+        conv: formData.conv,
+        rem1: formData.rem1,
+        rem2: formData.rem2,
+        v_tpt: formData.v_tpt,
+        broker: formData.broker,
+        srv_rate: formData.srv_rate,
+        srv_tax: formData.srv_tax,
+        tcs1_rate: formData.tcs1_rate,
+        tcs1: formData.tcs1,
+        tcs206_rate: formData.tcs206_rate,
+        tcs206: formData.tcs206,
+        duedate: expiredDate.toLocaleDateString("en-IN"),
+        pcess: formData.pcess,
+        tax: formData.tax,
+        sub_total: formData.sub_total,
+        exp_before: formData.exp_before,
+        Exp_rate6: formData.Exp_rate6,
+        Exp_rate7: formData.Exp_rate7,
+        Exp_rate8: formData.Exp_rate8,
+        Exp_rate9: formData.Exp_rate9,
+        Exp_rate10: formData.Exp_rate10,
+        Exp6: formData.Exp6,
+        Exp7: formData.Exp7,
+        Exp8: formData.Exp8,
+        Exp9: formData.Exp9,
+        Exp10: formData.Exp10,
+        Tds2: formData.Tds2,
+        Ctds: formData.Ctds,
+        Stds: formData.Stds,
+        iTds: formData.iTds,
+        cgst: formData.cgst,
+        sgst: formData.sgst,
+        igst: formData.igst,
+        expafterGST: formData.expafterGST,
+        grandtotal: formData.grandtotal,
+
+        // setupFormData mapping
+        cgst_ac: setupFormData.cgst_ac,
+        cgst_code: setupFormData.cgst_code,
+        sgst_ac: setupFormData.sgst_ac,
+        sgst_code: setupFormData.sgst_code,
+        igst_ac: setupFormData.igst_ac,
+        igst_code: setupFormData.igst_code,
+
+        cesscode: setupFormData.cesscode,
+        cessAc: setupFormData.cessAc,
+
+        tds_code: setupFormData.tds_code,
+        tds_ac: setupFormData.tds_ac,
+
+        tcs_code: setupFormData.tcs_code,
+        tcs_ac: setupFormData.tcs_ac,
+        tcs206_code: setupFormData.tcs206_code,
+        tcs206_ac: setupFormData.tcs206_ac,
+
+        discount_code: setupFormData.discount_code,
+        discount_ac: setupFormData.discount_ac, // NOTE: account name
+
+        // TDS ACCOUNTS
+        cTds_code: setupFormData.cTds_code,
+        cTds_ac: setupFormData.cTds_ac,
+        sTds_code: setupFormData.sTds_code,
+        sTds_ac: setupFormData.sTds_ac,
+        iTds_code: setupFormData.iTds_code,
+        iTds_ac: setupFormData.iTds_ac,
+
+        expense1_code: setupFormData.E1Code,  expense1_ac: setupFormData.E1name,
+        expense2_code: setupFormData.E2Code,  expense2_ac: setupFormData.E2name,
+        expense3_code: setupFormData.E3Code,  expense3_ac: setupFormData.E3name,
+        expense4_code: setupFormData.E4Code,  expense4_ac: setupFormData.E4name,
+        expense5_code: setupFormData.E5Code,  expense5_ac: setupFormData.E5name,
+        expense6_code: setupFormData.E6Code,  expense6_ac: setupFormData.E6name,
+        expense7_code: setupFormData.E7Code,  expense7_ac: setupFormData.E7name,
+        expense8_code: setupFormData.E8Code,  expense8_ac: setupFormData.E8name,
+        expense9_code: setupFormData.E9Code,  expense9_ac: setupFormData.E9name,
+        expense10_code: setupFormData.E10Code, expense10_ac: setupFormData.E10name,
+      };
+
+      const itemsPayload = nonEmptyItems.map((item) => ({
+        id: item.id,
+        vcode: item.vcode,
+        sdisc: item.sdisc,
+        Units: item.Units,
+        pkgs: item.pkgs,
+        weight: item.weight,
+        rate: item.rate,
+        amount: item.amount,
+        disc: item.disc,
+        discount: item.discount,
+        gst: item.gst,
+        Pcodes01: item.Pcodes01,
+        Pcodess: item.Pcodess,
+        Scodes01: item.Scodes01,
+        Scodess: item.Scodess,
+        exp_before: item.exp_before,
+        Exp_rate1: item.Exp_rate1,
+        Exp_rate2: item.Exp_rate2,
+        Exp_rate3: item.Exp_rate3,
+        Exp_rate4: item.Exp_rate4,
+        Exp_rate5: item.Exp_rate5,
+        Exp1: item.Exp1,
+        Exp2: item.Exp2,
+        Exp3: item.Exp3,
+        Exp4: item.Exp4,
+        Exp5: item.Exp5,
+        Exp6: item.Exp6,
+        ctax: item.ctax,
+        stax: item.stax,
+        itax: item.itax,
+        tariff: item.tariff,
+        vamt: item.vamt,
+      }));
+
+      const combinedData = {
+        _id: formData._id,
+        formData: baseForm,
+        items: itemsPayload,
+        customerDetails: customerDetails.map((item) => ({
+          Vcode: item.Vcode,
+          vacode: item.vacode,
+          gstno: item.gstno,
+          pan: item.pan,
+          Add1: item.Add1,
+          city: item.city,
+          state: item.state,
+          Tcs206c1H: item.Tcs206c1H,
+          TDS194Q: item.TDS194Q,
+        })),
+        shipped: shipped.map((item) => ({
+          shippedto: item.shippedto,
+          shippingAdd: item.shippingAdd,
+          shippingcity: item.shippingcity,
+          shippingState: item.shippingState,
+          shippingGst: item.shippingGst,
+          shippingPan: item.shippingPan,
+        })),
+      };
+
+      // 3) Save Sale GST (add/edit)
+      const saleGstUrl = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
+      const saleGstMethod = isAbcmode ? "put" : "post";
+      const saleRes = await axios({ method: saleGstMethod, url: saleGstUrl, data: combinedData });
+
+      // Try to extract saleId from response; fallbacks included for PUT/legacy responses
+      const saleId =
+        saleRes?.data?.saleId ||
+        saleRes?.data?._id ||
+        (isAbcmode ? data1?._id : null);
+
+      if (!saleId) {
+        console.warn("saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.");
+      }
+
+      if (saleRes?.status === 200 || saleRes?.status === 201) {
+        // 4) Update Stock (SALE => subtract)
+        try {
+          await axios.post(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stock/update`, {
+            mode: "sale",
+            items: nonEmptyItems.map((item) => ({
+              vcode: item.vcode,
+              sdisc: item.sdisc,
+              weight: Number(item.weight) || 0,
+              pkgs: Number(item.pkgs) || 0,
+            })),
+          });
+        } catch (stkErr) {
+          console.error("Stock update error:", stkErr);
+          // Continue even if stock update fails
+        }
+
+        // 5) Post FA entries (with setup codes) — include saleId
+        try {
+          const faUrl = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
+          const faBody = saleId ? { ...combinedData, saleId } : combinedData;
+
+          await axios({
+            method: isAbcmode ? "put" : "post",
+            url: faUrl,
+            data: faBody,
+          });
+        } catch (faErr) {
+          console.error("salefaFile error:", faErr);
+          toast.warn(
+            "Sale saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
+            { position: "top-center" }
+          );
+        }
+
+        fetchData();
+        isDataSaved = true;
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      toast.error("Failed to save data. Please try again.", { position: "top-center" });
+    } finally {
+      setIsSubmitEnabled(false);
+      if (isDataSaved) {
+        setTitle("(View)");
+        setIsAddEnabled(true);
+        setIsDisabled(true);
+        setIsEditMode(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsSearchEnabled(true);
+        setIsDeleteEnabled(true);
+        toast.success("Data Saved Successfully!", { position: "top-center" });
+        if (Defaultbutton === "Print") setShouldFocusPrint(true);
+        else if (Defaultbutton === "Add") setShouldFocusAdd(true);
+      } else {
+        setIsAddEnabled(true);
+        setIsDisabled(false);
+      }
     }
-  } catch (error) {
-    console.error("Error saving data:", error);
-    toast.error("Failed to save data. Please try again.", { position: "top-center" });
-  } finally {
-    setIsSubmitEnabled(false);
-    if (isDataSaved) {
-      setTitle("(View)");
-      setIsAddEnabled(true);
-      setIsDisabled(true);
-      setIsEditMode(false);
-      setIsPreviousEnabled(true);
-      setIsNextEnabled(true);
-      setIsFirstEnabled(true);
-      setIsLastEnabled(true);
-      setIsSPrintEnabled(true);
-      setIsSearchEnabled(true);
-      setIsDeleteEnabled(true);
-      toast.success("Data Saved Successfully!", { position: "top-center" });
-      if (Defaultbutton === "Print") setShouldFocusPrint(true);
-      else if (Defaultbutton === "Add") setShouldFocusAdd(true);
-    } else {
-      setIsAddEnabled(true);
-      setIsDisabled(false);
-    }
-  }
-};
+  };
 
   const handleDataSave = async () => {
     // handleSaveClick();
@@ -3196,7 +3197,25 @@ const focusRef = (refArray, rowIndex) => {
   }
   return false;
 };
+const focusScrollRow = (refArray, rowIndex) => {
+  const inputEl = refArray?.current?.[rowIndex];
+  const container = tableContainerRef.current;
 
+  if (!inputEl || !container) return;
+
+  inputEl.focus();
+  setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+  const rowEl = inputEl.closest("tr");
+  if (!rowEl) return;
+
+  const rowTop = rowEl.offsetTop;
+  const rowHeight = rowEl.offsetHeight;
+  const containerHeight = container.clientHeight;
+
+  container.scrollTop =
+    rowTop - containerHeight + rowHeight + 45;
+};
 const handleKeyDown = (event, index, field) => {
   // --------------- ENTER / TAB: move to NEXT FIELD -----------------
   if (event.key === "Enter" || event.key === "Tab") {
@@ -3217,12 +3236,20 @@ const handleKeyDown = (event, index, field) => {
     if (field === "exp_before") {
       const isLastRow = index === items.length - 1;
 
+      // if (isLastRow) {
+      //   handleAddItem();
+      //   // Focus ItemCode of newly added row
+      //   focusRef(itemCodeRefs, index + 1);
+      // }
       if (isLastRow) {
         handleAddItem();
-        // Focus ItemCode of newly added row
-        focusRef(itemCodeRefs, index + 1);
-      } else {
-        focusRef(itemCodeRefs, index + 1);
+
+        setTimeout(() => {
+          focusScrollRow(itemCodeRefs, index + 1);
+        }, 0);
+      }
+       else {
+        focusScrollRow(itemCodeRefs, index + 1);
       }
       return;
     }
@@ -4415,7 +4442,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
       </div>
       {/* Top Part Ends Here */}
       {/* Table Part */}
-      <div style={{marginTop:5}} className="TableContainer">
+      <div ref={tableContainerRef} style={{marginTop:5}} className="TableContainer">
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{

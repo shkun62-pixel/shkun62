@@ -603,22 +603,103 @@ const LedgerList = () => {
     saveAs(blob, `${selectedLedger?.formData?.ahead || "Account"}_COA.xlsx`);
   };
 
+  // ✅ Define all possible columns for Modify functionality
+  const ALL_COLUMNS = [
+    { key: "ahead", label: "NAME"},
+    { key: "Bsgroup", label: "GROUP", width: "200px" },
+    { key: "acode", label: "A/C CODE", width: "90px" },
+    { key: "gstNo", label: "GST NO" },
+    { key: "city", label: "CITY" },
+    { key: "distt", label: "DISTRICT" },
+    { key: "state", label: "STATE" },
+    { key: "pinCode", label: "PINCODE" },
+    { key: "area", label: "AREA" },
+    { key: "distance", label: "DISTANCE" },
+    { key: "pan", label: "PAN" },
+    { key: "phone", label: "PHONE" },
+    { key: "email", label: "EMAIL" },
+    { key: "agent", label: "AGENT" },
+    { key: "add1", label: "ADDRESS" },
+    { key: "opening_dr", label: "OPENING DR" },
+    { key: "opening_cr", label: "OPENING CR" },
+    { key: "msmed", label: "MSMED" },
+    { key: "group", label: "GROUP NAME" },
+    { key: "tcs206", label: "TCS 206" },
+    { key: "tds194q", label: "TDS 194Q" },
+    { key: "tdsno", label: "TDS NO" },
+    { key: "tds_rate", label: "TDS RATE" },
+    { key: "tcs_rate", label: "TCS RATE" },
+    { key: "sur_rate", label: "SURCHARGE RATE" },
+    { key: "wahead", label: "WAREHOUSE NAME" },
+    { key: "wadd1", label: "WAREHOUSE ADD 1" },
+    { key: "wadd2", label: "WAREHOUSE ADD 2" },
+    { key: "Rc", label: "RC" },
+    { key: "Ecc", label: "ECC" },
+    { key: "erange", label: "E RANGE" },
+    { key: "collc", label: "COLLECTION" },
+    { key: "srvno", label: "SERVICE NO" },
+    { key: "cperson", label: "CONTACT PERSON" },
+    { key: "irate", label: "INTEREST RATE" },
+    { key: "weight", label: "WEIGHT" },
+    { key: "bank_ac", label: "BANK A/C" },
+    { key: "narration", label: "NARRATION" },
+    { key: "subname", label: "SUB NAME" },
+    { key: "subaddress", label: "SUB ADDRESS" },
+    { key: "subcity", label: "SUB CITY" },
+    { key: "subgstNo", label: "SUB GST NO" },
+    { key: "payLimit", label: "PAY LIMIT" },
+    { key: "payDuedays", label: "PAY DUE DAYS" },
+    { key: "graceDays", label: "GRACE DAYS" },
+    { key: "sortingindex", label: "SORTING INDEX" },
+    { key: "qtyBsheet", label: "QTY B/SHEET" },
+    { key: "discount", label: "DISCOUNT" },
+    { key: "Terms", label: "TERMS" },
+    { key: "tradingAc", label: "TRADING A/C" },
+    { key: "prefixPurInvoice", label: "PREFIX PUR INV" },
+    { key: "status", label: "STATUS" },
+  ];
+
+  const [showColumnModal, setShowColumnModal] = useState(false);
+  const STORAGE_KEY = "ledger_visible_columns";
+
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+
+    // default columns (first time only)
+    return ALL_COLUMNS.reduce((acc, col) => {
+      acc[col.key] = ["ahead", "Bsgroup", "city", "gstNo", "phone"].includes(col.key);
+      return acc;
+    }, {});
+  });
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
   return (
     <div style={{ padding: "20px" }}>
       <Card className={styles.cardL}>
         <h3 className={styles.headerlist}>LEDGER ACCOUNTS</h3>
-
         <div className={styles.tablecont} ref={tableContainerRef}>
           <Table size="sm" className="custom-table" hover ref={tableRef}>
             <thead style={{ position: "sticky", top: 0, background: "skyblue", fontSize: 17, textAlign: "center" }}>
               <tr>
-                <th></th>  {/* ✅ Checkbox column header (empty) */}
-                <th>NAME</th>
-                <th>GROUP</th>
-                <th>CITY</th>
-                <th>GST NO</th>
-                <th>PHONE</th>
-              </tr>
+              <th></th>
+              {ALL_COLUMNS.filter(col => visibleColumns[col.key]).map(col => (
+                <th
+                  key={col.key}
+                  style={{
+                    width: col.width,
+                    minWidth: col.width,
+                    maxWidth: col.width,
+                  }}
+                >
+                  {col.label}
+                </th>
+              ))}
+            </tr>
             </thead>
             <tbody>
               {filteredLedgers.map((ledger, index) => (
@@ -631,28 +712,37 @@ const LedgerList = () => {
                       ? "rgb(187, 186, 186)"
                       : "transparent",
                     cursor: "pointer",
-                    fontSize: 16,
                   }}
                   onClick={() => {
                     setSelectedIndex(index);
                     openLedgerDetails(ledger);
                   }}
-                  // onMouseEnter={() => setSelectedIndex(index)}   // ✅ highlight on hover
                 >
-                  <td style={{ textAlign: "center" }}
-                    onClick={(e) => e.stopPropagation()}
-                    >
+                  {/* Row checkbox */}
+                  <td onClick={(e) => e.stopPropagation()} style={{ textAlign: "center" }}>
                     <input
                       type="checkbox"
                       checked={!!checkedRows[ledger._id]}
                       onChange={() => handleCheckboxChange(ledger._id)}
                     />
                   </td>
-                  <td>{ledger.formData.ahead}</td>
-                  <td>{ledger.formData.Bsgroup}</td>
-                  <td>{ledger.formData.city}</td>
-                  <td>{ledger.formData.gstNo}</td>
-                  <td>{ledger.formData.phone}</td>
+
+                  {/* Dynamic columns */}
+                 {ALL_COLUMNS.filter(col => visibleColumns[col.key]).map(col => (
+                    <td
+                      key={col.key}
+                      style={{
+                        width: col.width,
+                        minWidth: col.width,
+                        maxWidth: col.width,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {ledger.formData[col.key] || ""}
+                    </td>
+                 ))}
                 </tr>
               ))}
             </tbody>
@@ -660,7 +750,7 @@ const LedgerList = () => {
         </div>
 
         {/* ✅ Search Input */}
-        <div style={{display:'flex',flexDirection:"row",justifyContent:"space-between"}}>
+        <div style={{display:'flex',flexDirection:"row"}}>
           <Form.Control
           ref={searchRef}
           className={styles.Search}
@@ -669,6 +759,12 @@ const LedgerList = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+         <Button 
+            style={{ marginLeft: "10px",marginRight: "10px", marginTop: "10px" }}
+            onClick={() => setShowColumnModal(true)}
+          >
+            Select Fields
+          </Button>
           <Button 
             style={{ marginRight: "20px", marginTop: "10px" }}
             onClick={handleModify}
@@ -679,7 +775,6 @@ const LedgerList = () => {
         </div>
 
       </Card>
-      {/* ... Modal code remains same ... */}
       {/* ... Modal Account Statement ... */}
       <Modal
         show={showModal}
@@ -1162,6 +1257,33 @@ const LedgerList = () => {
           <Button className="Buttonz" variant="secondary" onClick={() => setShowOptions(false)}>
             Close
           </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Column Selection Modal */}
+      <Modal show={showColumnModal} onHide={() => setShowColumnModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Columns</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body style={{ maxHeight: "400px", overflowY: "auto" }}>
+          {ALL_COLUMNS.map((col) => (
+            <Form.Check
+              key={col.key}
+              type="checkbox"
+              label={col.label}
+              checked={!!visibleColumns[col.key]}
+              onChange={() =>
+                setVisibleColumns((prev) => ({
+                  ...prev,
+                  [col.key]: !prev[col.key],
+                }))
+              }
+            />
+          ))}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button onClick={() => setShowColumnModal(false)}>Apply</Button>
         </Modal.Footer>
       </Modal>
     </div>

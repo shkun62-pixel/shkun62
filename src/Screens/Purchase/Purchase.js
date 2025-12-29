@@ -75,6 +75,7 @@ const Purchase = () => {
   const [title, setTitle] = useState("(View)");
   const [currentIndex, setCurrentIndex] = useState(null);
   const itemCodeRefs = useRef([]);
+  const tableContainerRef = useRef(null);
   const datePickerRef = useRef([]);
   const desciptionRefs = useRef([]);
   const peciesRefs = useRef([]);
@@ -2461,7 +2462,25 @@ const focusRef = (refArray, rowIndex, select = true) => {
   }
   return false;
 };
+const focusScrollRow = (refArray, rowIndex) => {
+  const inputEl = refArray?.current?.[rowIndex];
+  const container = tableContainerRef.current;
 
+  if (!inputEl || !container) return;
+
+  inputEl.focus();
+  setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+  const rowEl = inputEl.closest("tr");
+  if (!rowEl) return;
+
+  const rowTop = rowEl.offsetTop;
+  const rowHeight = rowEl.offsetHeight;
+  const containerHeight = container.clientHeight;
+
+  container.scrollTop =
+    rowTop - containerHeight + rowHeight + 45;
+};
 const handleKeyDown = (event, index, field) => {
   // ------------- ENTER / TAB: move to next field -----------------
   if (event.key === "Enter" || event.key === "Tab") {
@@ -2483,11 +2502,15 @@ const handleKeyDown = (event, index, field) => {
     if (field === "exp_before") {
       const isLastRow = index === items.length - 1;
 
-      if (isLastRow) {
+     if (isLastRow) {
         handleAddItem();
-        focusRef(itemCodeRefs, index + 1);
-      } else {
-        focusRef(itemCodeRefs, index + 1);
+
+        setTimeout(() => {
+          focusScrollRow(itemCodeRefs, index + 1);
+        }, 0);
+      }
+       else {
+        focusScrollRow(itemCodeRefs, index + 1);
       }
       return;
     }
@@ -3830,7 +3853,7 @@ const handleKeyDown = (event, index, field) => {
         </div>
       </div>
       {/* Table content */}
-      <div className="tablestylez">
+      <div ref={tableContainerRef} className="tablestylez">
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{
@@ -3858,7 +3881,7 @@ const handleKeyDown = (event, index, field) => {
             {isEditMode && <th className="text-center">DELETE</th>}
             </tr>
           </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+          <tbody>
             {items.map((item, index) => (
               <tr key={item.id}>
                 {tableData.itemcode && (
