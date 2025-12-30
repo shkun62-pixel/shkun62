@@ -114,12 +114,48 @@
 // export default Example
 
 
-import React,{useState,useRef} from 'react'
+import React,{useState,useRef,useEffect} from 'react'
 import ProductModal from './Modals/ProductModal';
 import { Table,Button } from 'react-bootstrap';
 
 const Example = () => {
   const tenant = "shkun_05062025_05062026";
+  const createEmptyRow = (id) => ({
+    id,
+    vcode: "",
+    sdisc: "",
+    Units: "",
+    pkgs: "0.00",
+    weight: "0.00",
+    rate: "0.00",
+    amount: "0.00",
+    disc: 0,
+    discount: "",
+    gst: 0,
+    Pcodes01: "",
+    Pcodess: "",
+    Scodes01: "",
+    Scodess: "",
+    Exp_rate1: 0,
+    Exp_rate2: 0,
+    Exp_rate3: 0,
+    Exp_rate4: 0,
+    Exp_rate5: 0,
+    Exp1: 0,
+    Exp2: 0,
+    Exp3: 0,
+    Exp4: 0,
+    Exp5: 0,
+    exp_before: 0,
+    RateCal: "",
+    Qtyperpc: 0,
+    ctax: "0.00",
+    stax: "0.00",
+    itax: "0.00",
+    tariff: "",
+    vamt: "0.00",
+  });
+
   const [items, setItems] = useState([
     {
       id: 1,
@@ -157,6 +193,15 @@ const Example = () => {
       vamt: "0.00",
     },
   ]);
+  useEffect(() => {
+  setItems([
+    createEmptyRow(1),
+    createEmptyRow(2),
+    createEmptyRow(3),
+    createEmptyRow(4),
+  ]);
+}, []);
+
   
     React.useEffect(() => {
       // Fetch products from the API when the component mounts

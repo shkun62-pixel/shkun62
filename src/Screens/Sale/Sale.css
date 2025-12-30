@@ -87,7 +87,7 @@
 }
 
 .TableContainer {
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
   margin: 5px;
 }
