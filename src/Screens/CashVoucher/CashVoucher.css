@@ -210,9 +210,10 @@
 }
 
 .TableSectionz {
-  max-height: 462px;
+  max-height: 470px;
   overflow-y: auto;
   margin: 5px;
+  margin-top: 10px;
 }
 .Account{
   background-color: lightyellow;

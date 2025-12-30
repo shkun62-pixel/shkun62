@@ -178,43 +178,90 @@ const Purchase = () => {
       TDS194Q: "",
     },
   ]);
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      vcode: "",
-      sdisc: "",
-      Units: "",
-      pkgs: "",
-      weight: "",
-      rate: 0,
-      amount: 0,
-      disc: "",
-      discount: "",
-      gst: 0,
-      Pcodes01: "",
-      Pcodess: "",
-      Scodes01: "",
-      Scodess: "",
-      Exp_rate1: 0,
-      Exp_rate2: 0,
-      Exp_rate3: 0,
-      Exp_rate4: 0,
-      Exp_rate5: 0,
-      Exp1: 0,
-      Exp2: 0,
-      Exp3: 0,
-      Exp4: 0,
-      Exp5: 0,
-      RateCal: "",
-      Qtyperpc: 0,
-      exp_before: 0,
-      ctax: 0,
-      stax: 0,
-      itax: 0,
-      tariff: "",
-      vamt: 0,
-    },
-  ]);
+  const MIN_ROWS = 5;
+
+  const createEmptyRow = (id, expRates = {}) => ({
+    id,
+    vcode: "",
+    sdisc: "",
+    Units: "",
+    pkgs: "0",
+    weight: "0",
+    rate: "0",
+    amount: "0",
+    disc: 0,
+    discount: "",
+    gst: 0,
+    Pcodes01: "",
+    Pcodess: "",
+    Scodes01: "",
+    Scodess: "",
+    Exp_rate1: expRates.ExpRate1 ?? 0,
+    Exp_rate2: expRates.ExpRate2 ?? 0,
+    Exp_rate3: expRates.ExpRate3 ?? 0,
+    Exp_rate4: expRates.ExpRate4 ?? 0,
+    Exp_rate5: expRates.ExpRate5 ?? 0,
+    Exp1: 0,
+    Exp2: 0,
+    Exp3: 0,
+    Exp4: 0,
+    Exp5: 0,
+    exp_before: 0,
+    ctax: "0.00",
+    stax: "0.00",
+    itax: "0.00",
+    tariff: "",
+    vamt: "0.00",
+  });
+
+  const normalizeItems = (items = [], expRates = {}) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1, expRates));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+  // const [items, setItems] = useState([
+  //   {
+  //     id: 1,
+  //     vcode: "",
+  //     sdisc: "",
+  //     Units: "",
+  //     pkgs: "",
+  //     weight: "",
+  //     rate: 0,
+  //     amount: 0,
+  //     disc: "",
+  //     discount: "",
+  //     gst: 0,
+  //     Pcodes01: "",
+  //     Pcodess: "",
+  //     Scodes01: "",
+  //     Scodess: "",
+  //     Exp_rate1: 0,
+  //     Exp_rate2: 0,
+  //     Exp_rate3: 0,
+  //     Exp_rate4: 0,
+  //     Exp_rate5: 0,
+  //     Exp1: 0,
+  //     Exp2: 0,
+  //     Exp3: 0,
+  //     Exp4: 0,
+  //     Exp5: 0,
+  //     RateCal: "",
+  //     Qtyperpc: 0,
+  //     exp_before: 0,
+  //     ctax: 0,
+  //     stax: 0,
+  //     itax: 0,
+  //     tariff: "",
+  //     vamt: 0,
+  //   },
+  // ]);
 
   useEffect(() => {
     if (addButtonRef.current && !purId) {
@@ -432,6 +479,18 @@ const Purchase = () => {
     selectedInvoice,
     Defaultbutton
   ]);
+
+  useEffect(() => {
+    setItems((prev) =>
+      normalizeItems(prev, {
+        ExpRate1,
+        ExpRate2,
+        ExpRate3,
+        ExpRate4,
+        ExpRate5,
+      })
+    );
+  }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
 
   // Getting UnitType From the Company Setup
   const getUnitTypeFromLocalStorage = () => {
@@ -761,7 +820,8 @@ const Purchase = () => {
         const updatedCustomer = lastEntry.supplierdetails.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        // setItems(updatedItems);
+        setItems(normalizeItems(lastEntry.items));
         setsupplierdetails(updatedCustomer);
 
         // Set custGst from the supplier details
@@ -886,7 +946,8 @@ const Purchase = () => {
     ];
     // Set the empty data
     setFormData(emptyFormData);
-    setItems(emptyItems);
+    setItems(normalizeItems([]));
+    // setItems(emptyItems);
     setsupplierdetails(emptysupplier);
     setData1({
       formData: emptyFormData,
@@ -899,24 +960,6 @@ const Purchase = () => {
   useEffect(() => {
     fetchData(); // Fetch data when component mounts
   }, []);
-
-  // useEffect(() => {
-  //   const handleEsc = (e) => {
-  //     if (e.key === "Escape" && purId && !isEditMode) {
-  //       // ✅ Go back explicitly to LedgerList with state
-  //          navigate( -1, {
-  //         state: {
-  //           rowIndex: location.state?.rowIndex || 0,
-  //           selectedLedger: location.state?.selectedLedger,
-  //           keepModalOpen: true,
-  //         },
-  //       });
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleEsc);
-  //   return () => window.removeEventListener("keydown", handleEsc);
-  // }, [navigate, purId, location.state]);
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -1033,7 +1076,7 @@ const Purchase = () => {
           const updatedCustomer = nextData.supplierdetails.map((item) => ({
             ...item,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setsupplierdetails(updatedCustomer);
 
           // Set custGst from the supplier details
@@ -1071,7 +1114,7 @@ const Purchase = () => {
           const updatedCustomer = prevData.supplierdetails.map((item) => ({
             ...item,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setsupplierdetails(updatedCustomer);
 
           // Set custGst from the supplier details
@@ -1107,7 +1150,7 @@ const Purchase = () => {
         const updatedCustomer = firstData.supplierdetails.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setsupplierdetails(updatedCustomer);
 
         // Set custGst from the supplier details
@@ -1144,7 +1187,7 @@ const Purchase = () => {
         const updatedCustomer = lastData.supplierdetails.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setsupplierdetails(updatedCustomer);
 
         // Set custGst from the supplier details
@@ -1217,41 +1260,15 @@ const Purchase = () => {
       };
       setData([...data, newData]);
       setFormData(newData);
-      setItems([
-        {
-          id: 1,
-          vcode: "",
-          sdisc: "",
-          Units: "",
-          pkgs: 0,
-          weight: 0,
-          rate: 0,
-          amount: 0,
-          disc: "",
-          discount: "",
-          gst: 0,
-          Pcodes01: "",
-          Pcodess: "",
-          Scodes01: "",
-          Scodess: "",
-          Exp_rate1: ExpRate1 || 0,
-          Exp_rate2: ExpRate2 || 0,
-          Exp_rate3: ExpRate3 || 0,
-          Exp_rate4: ExpRate4 || 0,
-          Exp_rate5: ExpRate5 || 0,
-          Exp1: 0,
-          Exp2: 0,
-          Exp3: 0,
-          Exp4: 0,
-          Exp5: 0,
-          exp_before: 0,
-          ctax: 0,
-          stax: 0,
-          itax: 0,
-          tariff: "",
-          vamt: 0,
-        },
-      ]);
+      setItems(
+        normalizeItems([], {
+          ExpRate1,
+          ExpRate2,
+          ExpRate3,
+          ExpRate4,
+          ExpRate5,
+        })
+      );
       setsupplierdetails([
         {
           // VcodeSup
@@ -1285,6 +1302,115 @@ const Purchase = () => {
       }
     } catch (error) {
       console.error("Error adding new entry:", error);
+    }
+  };
+
+  const handleExit = async () => {
+    // Check if grandtotal is Greater Than zero
+    if (formData.grandtotal > 0 && isEditMode) {
+      const confirmExit = window.confirm(
+        "Are you sure you want to Exit? Unsaved changes may be lost."
+      );
+      if (!confirmExit) {
+        return;
+      }
+    }
+
+    setTitle("(View)");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
+      );
+
+      if (response.status === 200 && response.data.data) {
+        const lastEntry = response.data.data;
+        setFormData(lastEntry.formData);
+        setData1(response.data.data);
+        setItems(normalizeItems(lastEntry.items));
+        setsupplierdetails(
+          lastEntry.supplierdetails.map((item) => ({ ...item }))
+        );
+
+        setIsDisabled(true);
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+      } else {
+        console.log("No data available");
+        const newData = {
+          date: "",
+          vtype: "P",
+          vno: 0,
+          vbillno: 0,
+          exfor: "",
+          trpt: "",
+          p_entry: "",
+          stype: "",
+          btype: "",
+          conv: "",
+          vacode1: "",
+          rem2: "",
+          v_tpt: "",
+          broker: "",
+          srv_rate: "",
+          srv_tax: "",
+          tcs1_rate: "",
+          tcs1: "",
+          tcs206_rate: "",
+          tcs206: "",
+          duedate: "",
+          gr: "",
+          tdson: "",
+          pcess: "",
+          tax: "",
+          cess1: "",
+          cess2: "",
+          sub_total: "",
+          exp_before: "",
+          Exp_rate6: "",
+          Exp_rate7: "",
+          Exp_rate8: "",
+          Exp_rate9: "",
+          Exp_rate10: "",
+          Exp6: "",
+          Exp7: "'",
+          Exp8: "",
+          Exp9: "",
+          Exp10: "",
+          cgst: "",
+          sgst: "",
+          igst: "",
+          expafterGST: "",
+          grandtotal: "",
+        };
+        setFormData(newData); // Set default form data
+        setItems(normalizeItems([]));
+        setsupplierdetails([
+          {
+            Vcode: "",
+            vacode: "",
+            gstno: "",
+            pan: "",
+            Add1: "",
+            city: "",
+            state: "",
+            bsGroup: "",
+            Tcs206c1H: "",
+            TDS194Q: "",
+          },
+        ]);
+        setIsDisabled(true);
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
     }
   };
 
@@ -1620,35 +1746,6 @@ const Purchase = () => {
 
   };
 
-  // const handleDeleteClick = async (id) => {
-  //   if (!id) {
-  //     toast.error("Invalid ID. Please select an item to delete.", {
-  //       position: "top-center",
-  //     });
-  //     return;
-  //   }
-  //   const userConfirmed = window.confirm(
-  //     "Are you sure you want to delete this item?"
-  //   );
-  //   if (!userConfirmed) return;
-  //   try {
-  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}`;
-  //     const response = await axios.delete(apiEndpoint);
-
-  //     if (response.status === 200) {
-  //       toast.success("Data deleted successfully!", { position: "top-center" });
-  //       fetchData(); // Refresh the data after successful deletion
-  //     } else {
-  //       throw new Error(`Failed to delete data: ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting data:", error);
-  //     toast.error(`Failed to delete data. Error: ${error.message}`, {
-  //       position: "top-center",
-  //     });
-  //   } finally {
-  //   }
-  // };
   const handleDeleteClick = async (id) => {
   if (!id) {
     toast.error("Invalid ID. Please select an item to delete.", {
@@ -1723,31 +1820,6 @@ const Purchase = () => {
     }
     setLoading(false);
   };
-
-  // const fetchProducts = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster`
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch products");
-  //     }
-  //     const data = await response.json();
-  //     // Flatten the data to make the nested formData directly accessible
-  //     const flattenedData = data.map((item) => ({
-  //       ...item.formData,
-  //       _id: item._id,
-  //       PurchaseAcc: item.PurchaseAcc,
-  //       SaleAcc: item.SaleAcc,
-  //     }));
-  //     setProducts(flattenedData);
-  //     setLoading(false);
-  //     //console.log(flattenedData);
-  //   } catch (error) {
-  //     setError(error.message);
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleItemChange = (index, key, value, field) => {
     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
@@ -1921,6 +1993,47 @@ const Purchase = () => {
     setIsEditMode(true);
   };
 
+  // const handleAddItem = () => {
+  //   if (isEditMode) {
+  //     const newItem = {
+  //       id: items.length + 1,
+  //       vcode: "",
+  //       sdisc: "",
+  //       Units: "",
+  //       pkgs: 0,
+  //       weight: 0,
+  //       rate: 0,
+  //       amount: 0,
+  //       disc: "",
+  //       discount: "",
+  //       gst: 0,
+  //       Pcodes01: "",
+  //       Pcodess: "",
+  //       Scodes01: "",
+  //       Scodess: "",
+  //       Exp_rate1: 0,
+  //       Exp_rate2: 0,
+  //       Exp_rate3: 0,
+  //       Exp_rate4: 0,
+  //       Exp_rate5: 0,
+  //       Exp1: 0,
+  //       Exp2: 0,
+  //       Exp3: 0,
+  //       Exp4: 0,
+  //       Exp5: 0,
+  //       exp_before: 0,
+  //       ctax: 0,
+  //       stax: 0,
+  //       itax: 0,
+  //       tariff: "",
+  //       vamt: 0,
+  //     };
+  //     setItems((prevItems) => [...prevItems, newItem]);
+  //     setTimeout(() => {
+  //       itemCodeRefs.current[items.length].focus();
+  //     }, 100);
+  //   }
+  // };
   const handleAddItem = () => {
     if (isEditMode) {
       const newItem = {
@@ -1932,18 +2045,18 @@ const Purchase = () => {
         weight: 0,
         rate: 0,
         amount: 0,
-        disc: "",
+        disc: 0,
         discount: "",
         gst: 0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
         Scodess: "",
-        Exp_rate1: 0,
-        Exp_rate2: 0,
-        Exp_rate3: 0,
-        Exp_rate4: 0,
-        Exp_rate5: 0,
+        Exp_rate1: ExpRate1 || 0,
+        Exp_rate2: ExpRate2 || 0,
+        Exp_rate3: ExpRate3 || 0,
+        Exp_rate4: ExpRate4 || 0,
+        Exp_rate5: ExpRate5 || 0,
         Exp1: 0,
         Exp2: 0,
         Exp3: 0,
@@ -2347,17 +2460,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }
   };
 
-
-  // const handleCapitalAlpha = (event) => {
-  // const { id, value } = event.target;
-  // // force all letters to uppercase
-  // const uppercasedValue = value.toUpperCase();
-  // setFormData((prevData) => ({
-  //   ...prevData,
-  //   [id]: uppercasedValue,
-  // }));
-  // };
-
     // 1️⃣ Fetch purchase API once
     useEffect(() => {
       const fetchPurchase = async () => {
@@ -2479,7 +2581,7 @@ const focusScrollRow = (refArray, rowIndex) => {
   const containerHeight = container.clientHeight;
 
   container.scrollTop =
-    rowTop - containerHeight + rowHeight + 45;
+    rowTop - containerHeight + rowHeight + 60;
 };
 const handleKeyDown = (event, index, field) => {
   // ------------- ENTER / TAB: move to next field -----------------
@@ -2581,289 +2683,12 @@ const handleKeyDown = (event, index, field) => {
     event.preventDefault();
   }
 };
-  // const handleKeyDown = (event, index, field) => {
-  //   if (event.key === "Enter" || event.key === "Tab") {
-  //     event.preventDefault(); // Stop default Tab navigation
-  //     switch (field) {
-  //       case "vcode":
-  //         if (items[index].sdisc.trim() === "") {
-  //           transportRef.current.focus();
-  //         } else {
-  //           desciptionRefs.current[index]?.focus();
-  //         }
-  //         break;
-  //       case "sdisc":
-  //         hsnCodeRefs.current[index]?.focus();
-  //         break;
-  //       case "tariff":
-  //         peciesRefs.current[index]?.focus();
-  //         break;
-  //       case "pkgs":
-  //         quantityRefs.current[index]?.focus();
-  //         break;
-  //       case "weight":
-  //         priceRefs.current[index]?.focus();
-  //         break;
-  //       case "rate":
-  //         discountRef.current[index]?.focus();
-  //         break;
-  //       case "disc":
-  //         discount2Ref.current[index]?.focus();
-  //         break;
-  //       case "discount":
-  //         othersRefs.current[index]?.focus();
-  //         break;
-  //       case "exp_before":
-  //         if (index === items.length - 1) {
-  //           handleAddItem();
-  //           itemCodeRefs.current[index + 1]?.focus();
-  //         } else {
-  //           itemCodeRefs.current[index + 1]?.focus();
-  //         }
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   }
-  //   // Move Right (→)
-  //   else if (event.key === "ArrowRight") {
-  //     if (field === "vcode") {
-  //       desciptionRefs.current[index]?.focus();
-  //       setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-  //     } else if (field === "sdisc") {
-  //       hsnCodeRefs.current[index]?.focus();
-  //       setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-  //     } else if (field === "tariff") {
-  //       peciesRefs.current[index]?.focus();
-  //       setTimeout(() => peciesRefs.current[index]?.select(), 0);
-  //     } else if (field === "pkgs") {
-  //       quantityRefs.current[index]?.focus();
-  //       setTimeout(() => quantityRefs.current[index]?.select(), 0);
-  //     } else if (field === "weight") {
-  //       priceRefs.current[index]?.focus();
-  //       setTimeout(() => priceRefs.current[index]?.select(), 0);
-  //     } else if (field === "rate") {
-  //       discountRef.current[index]?.focus();
-  //       setTimeout(() => discountRef.current[index]?.select(), 0);
-  //     } else if (field === "disc") {
-  //       discount2Ref.current[index]?.focus();
-  //       setTimeout(() => discount2Ref.current[index]?.select(), 0);
-  //     }
-  //     else if (field === "discount") {
-  //       othersRefs.current[index]?.focus();
-  //       setTimeout(() => othersRefs.current[index]?.select(), 0);
-  //     }
-  //   }
-  //   // Move Left (←)
-  //   else if (event.key === "ArrowLeft") {
-  //     if (field === "exp_before") {
-  //       discount2Ref.current[index]?.focus();
-  //       setTimeout(() => discount2Ref.current[index]?.select(), 0);
-  //     } else if (field === "discount") {
-  //       discountRef.current[index]?.focus();
-  //       setTimeout(() => discountRef.current[index]?.select(), 0);
-  //     }else if (field === "disc") {
-  //       priceRefs.current[index]?.focus();
-  //       setTimeout(() => priceRefs.current[index]?.select(), 0);
-  //     } else if (field === "rate") {
-  //       quantityRefs.current[index]?.focus();
-  //       setTimeout(() => quantityRefs.current[index]?.select(), 0);
-  //     } else if (field === "weight") {
-  //       peciesRefs.current[index]?.focus();
-  //       setTimeout(() => peciesRefs.current[index]?.select(), 0);
-  //     } else if (field === "pkgs") {
-  //       hsnCodeRefs.current[index]?.focus();
-  //       setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-  //     } else if (field === "tariff") {
-  //       desciptionRefs.current[index]?.focus();
-  //       setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-  //     } else if (field === "sdisc") {
-  //       itemCodeRefs.current[index]?.focus();
-  //       setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
-  //     } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
-  //   }
-  //   // Move Up
-  //   else if (event.key === "ArrowUp" && index > 0) {
-  //     setTimeout(() => {
-  //       if (field === "vcode") itemCodeRefs.current[index - 1]?.focus();
-  //       else if (field === "sdisc") desciptionRefs.current[index - 1]?.focus();
-  //       else if (field === "tariff") hsnCodeRefs.current[index - 1]?.focus();
-  //       else if (field === "pkgs") peciesRefs.current[index - 1]?.focus();
-  //       else if (field === "weight") quantityRefs.current[index - 1]?.focus();
-  //       else if (field === "rate") priceRefs.current[index - 1]?.focus();
-  //       else if (field === "disc") discountRef.current[index - 1]?.focus();
-  //       else if (field === "exp_before") othersRefs.current[index - 1]?.focus();
-  //     }, 100);
-  //   }
-  //   // Move Down
-  //   else if (event.key === "ArrowDown" && index < items.length - 1) {
-  //     setTimeout(() => {
-  //       if (field === "vcode") itemCodeRefs.current[index + 1]?.focus();
-  //       else if (field === "sdisc") desciptionRefs.current[index + 1]?.focus();
-  //       else if (field === "tariff") hsnCodeRefs.current[index + 1]?.focus();
-  //       else if (field === "pkgs") peciesRefs.current[index + 1]?.focus();
-  //       else if (field === "weight") quantityRefs.current[index + 1]?.focus();
-  //       else if (field === "rate") priceRefs.current[index + 1]?.focus();
-  //       else if (field === "disc") discountRef.current[index + 1]?.focus();
-  //       else if (field === "exp_before") othersRefs.current[index + 1]?.focus();
-  //     }, 100);
-  //   }
-  //   // Open Modal on Letter Input in Account Name
-  //   else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-  //     setPressedKey(event.key);
-  //     openModalForItemCus(index);
-  //     event.preventDefault();
-  //   }
-  // };
 
   const handleOpenModal = (event, index, field) => {
     if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
       setPressedKey(event.key); // Set the pressed key
       openModalForItem(index);
       event.preventDefault(); // Prevent any default action
-    }
-  };
-
-  const handleExit = async () => {
-    // Check if grandtotal is Greater Than zero
-    if (formData.grandtotal > 0 && isEditMode) {
-      const confirmExit = window.confirm(
-        "Are you sure you want to Exit? Unsaved changes may be lost."
-      );
-      if (!confirmExit) {
-        return;
-      }
-    }
-
-    setTitle("(View)");
-    try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
-      );
-
-      if (response.status === 200 && response.data.data) {
-        const lastEntry = response.data.data;
-        setFormData(lastEntry.formData);
-        setData1(response.data.data);
-        setItems(lastEntry.items.map((item) => ({ ...item })));
-        setsupplierdetails(
-          lastEntry.supplierdetails.map((item) => ({ ...item }))
-        );
-
-        setIsDisabled(true);
-        setIndex(lastEntry.formData);
-        setIsAddEnabled(true);
-        setIsEditMode(false);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-      } else {
-        console.log("No data available");
-        const newData = {
-          date: "",
-          vtype: "P",
-          vno: 0,
-          vbillno: 0,
-          exfor: "",
-          trpt: "",
-          p_entry: "",
-          stype: "",
-          btype: "",
-          conv: "",
-          vacode1: "",
-          rem2: "",
-          v_tpt: "",
-          broker: "",
-          srv_rate: "",
-          srv_tax: "",
-          tcs1_rate: "",
-          tcs1: "",
-          tcs206_rate: "",
-          tcs206: "",
-          duedate: "",
-          gr: "",
-          tdson: "",
-          pcess: "",
-          tax: "",
-          cess1: "",
-          cess2: "",
-          sub_total: "",
-          exp_before: "",
-          Exp_rate6: "",
-          Exp_rate7: "",
-          Exp_rate8: "",
-          Exp_rate9: "",
-          Exp_rate10: "",
-          Exp6: "",
-          Exp7: "'",
-          Exp8: "",
-          Exp9: "",
-          Exp10: "",
-          cgst: "",
-          sgst: "",
-          igst: "",
-          expafterGST: "",
-          grandtotal: "",
-        };
-        setFormData(newData); // Set default form data
-        setItems([
-          {
-            id: 1,
-            vcode: "",
-            sdisc: "",
-            Units: "",
-            pkgs: "",
-            weight: "",
-            rate: 0,
-            amount: 0,
-            disc: "",
-            discount: "",
-            gst: 0,
-            Pcodes01: "",
-            Pcodess: "",
-            Scodes01: "",
-            Scodess: "",
-            Exp_rate1: 0,
-            Exp_rate2: 0,
-            Exp_rate3: 0,
-            Exp_rate4: 0,
-            Exp_rate5: 0,
-            Exp1: 0,
-            Exp2: 0,
-            Exp3: 0,
-            Exp4: 0,
-            Exp5: 0,
-            exp_before: 0,
-            ctax: 0,
-            stax: 0,
-            itax: 0,
-            tariff: "",
-            vamt: 0,
-          },
-        ]);
-        setsupplierdetails([
-          {
-            Vcode: "",
-            vacode: "",
-            gstno: "",
-            pan: "",
-            Add1: "",
-            city: "",
-            state: "",
-            bsGroup: "",
-            Tcs206c1H: "",
-            TDS194Q: "",
-          },
-        ]);
-        setIsDisabled(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
     }
   };
 
@@ -3203,57 +3028,25 @@ const handleKeyDown = (event, index, field) => {
       setIsModalOpenExp(true); // Open the modal
     }
   };
-  const handleExpAfterGst = (event) => {
-    const { id, value } = event.target;
-    const subTotal = parseFloat(formData.sub_total) || 0;
 
-    // Initialize newFormData and expenses
-    let newFormData = { ...formData, [id]: value };
-    let expense = 0;
+  const expRateRefs = useRef([]); // Store refs for Exp_rate fields
+  const closeButtonRef = useRef(null); // Ref for the close button
 
-    // Check if the value is empty; if so, set corresponding Exp value to 0
-    if (value === "") {
-      newFormData[id] = 0; // Ensure Exp_rate is set to 0
-    } else {
-      const expRate = parseFloat(value) || 0;
+  useEffect(() => {
+    if (isModalOpenExp && expRateRefs.current[0]) {
+      expRateRefs.current[0].focus(); // Focus on the first Exp_rate input when modal opens
+    }
+  }, [isModalOpenExp]);
 
-      // Calculate percentage for Exp_rate7 to Exp_rate12
-      switch (id) {
-        case "Exp_rate7":
-          newFormData.Exp7 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate8":
-          newFormData.Exp8 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate9":
-          newFormData.Exp9 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate10":
-          newFormData.Exp10 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate11":
-          newFormData.Exp11 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate12":
-          newFormData.Exp12 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        default:
-          break;
+  const handleKeyDownModal = (event, index) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+      if (index < expRateRefs.current.length - 1) {
+        expRateRefs.current[index + 1].focus(); // Move to the next Exp_rate input
+      } else {
+        closeButtonRef.current.focus(); // Move focus to Close button when on Exp_rate5
       }
     }
-
-    // Calculate total of Exp7 to Exp12 and update expafterGST
-    const totalExpenses =
-      parseFloat(newFormData.Exp7 || 0) +
-      parseFloat(newFormData.Exp8 || 0) +
-      parseFloat(newFormData.Exp9 || 0) +
-      parseFloat(newFormData.Exp10 || 0) +
-      parseFloat(newFormData.Exp11 || 0) +
-      parseFloat(newFormData.Exp12 || 0);
-
-    newFormData.expafterGST = totalExpenses.toFixed(2);
-
-    setFormData(newFormData);
   };
 
   // Update the blur handlers so that they always format the value to 2 decimals.
@@ -4233,6 +4026,7 @@ const handleKeyDown = (event, index, field) => {
                           </label>
 
                           <input
+                            ref={(el) => (expRateRefs.current[idx] = el)} // Assign ref dynamically
                             value={items[currentIndex][field.rate]}
                             style={{
                               border: "1px solid black",
@@ -4248,6 +4042,7 @@ const handleKeyDown = (event, index, field) => {
                                 e.target.value
                               )
                             }
+                            onKeyDown={(e) => handleKeyDownModal(e, idx)}
                           />
 
                           <input
@@ -4270,10 +4065,18 @@ const handleKeyDown = (event, index, field) => {
                         </div>
                       ))}
                       <Button
+                        ref={closeButtonRef}
                         onClick={() => {
+                          const idx = currentIndex; // store before reset
+
                           setIsModalOpenExp(false);
-                          setCurrentIndex(null); // Reset the index when closing the modal
-                          handleAddItem();
+                          setCurrentIndex(null);
+
+                          // restore focus to Others field
+                          setTimeout(() => {
+                            othersRefs.current[idx]?.focus();
+                            othersRefs.current[idx]?.select();
+                          }, 0);
                         }}
                         style={{
                           borderColor: "transparent",

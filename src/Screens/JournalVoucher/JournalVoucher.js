@@ -87,17 +87,39 @@ const JournalVoucher = () => {
     totaldebit: "",
     totalcredit: "",
   });
-  const [items, setItems] = useState([
-    {
-      id: "",
-      accountname: "",
-      narration: "",
-      debit: "",
-      credit: "",
-      disableDebit: false,
-      disableCredit: false,
-    },
-  ]);
+  const MIN_ROWS = 9;
+  const createEmptyRow = (id) => ({
+    id,
+    accountname: "",
+    narration: "",
+    debit: "",
+    credit: "",
+    disableDebit: false,
+    disableCredit: false,
+  });
+
+  const normalizeItems = (items = []) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+  // const [items, setItems] = useState([
+  //   {
+  //     id: "",
+  //     accountname: "",
+  //     narration: "",
+  //     debit: "",
+  //     credit: "",
+  //     disableDebit: false,
+  //     disableCredit: false,
+  //   },
+  // ]);
 
   useEffect(() => {
     if (addButtonRef.current && !journalId) {
@@ -700,7 +722,7 @@ const JournalVoucher = () => {
           ...item, // Ensure immutability
           disableCredit: item.disableCredit || false, // Handle disableReceipt flag safely
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
   
         // Calculate total debit and total credit
         const totalDebit = updatedItems.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0).toFixed(2);
@@ -743,7 +765,7 @@ const JournalVoucher = () => {
   
         // Set the empty data
         setFormData(emptyFormData);
-        setItems(emptyItems);
+        setItems(normalizeItems([]));
         setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
         setIndex(0); // Set index to 0 for the empty voucher
   
@@ -778,7 +800,7 @@ const JournalVoucher = () => {
       }];
       
       setFormData(emptyFormData);
-      setItems(emptyItems);
+      setItems(normalizeItems([]));
       setData1({ formData: emptyFormData, items: emptyItems });
       setIndex(0);
       
@@ -811,31 +833,6 @@ const JournalVoucher = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isEditMode]);
 
-  // useEffect(() => {
-  //   const handleEsc = (e) => {
-  //     if (e.key === "Escape" && journalId && !isEditMode) {
-  //       // ✅ Go back explicitly to LedgerList with state
-  //       navigate( -1, {
-  //         state: {
-  //           rowIndex: location.state?.rowIndex || 0,
-  //           selectedLedger: location.state?.selectedLedger,
-  //           keepModalOpen: true,
-  //         },
-  //       });
-  //       // navigate("/ledgerlist", {
-  //       //   state: {
-  //       //     rowIndex: location.state?.rowIndex || 0,
-  //       //     selectedLedger: location.state?.selectedLedger,
-  //       //     keepModalOpen: true,
-  //       //   },
-  //       // });
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleEsc);
-  //   return () => window.removeEventListener("keydown", handleEsc);
-  // }, [navigate, journalId, location.state]);
-
   useEffect(() => {
     if (data.length > 0) {
       setFormData(data[data.length - 1]); // Set currentData to the last record
@@ -851,26 +848,25 @@ const JournalVoucher = () => {
   const handleNext = async () => {
     document.body.style.backgroundColor = 'white';
     setTitle("View");
-console.log(data1._id)
     try {
-        if (data1) {
-            const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`);
-            if (response.status === 200 && response.data) {
-                const nextData = response.data.data;
-                setData1(response.data.data);
-                setIndex(index + 1);
-                setFormData(nextData.formData);
-                if (nextData.formData.date) {
-                  setSelectedDate(new Date(nextData.formData.date)); // Convert to Date object
-                }
-                const updatedItems = nextData.items.map(item => ({
-                    ...item, 
-                    disableReceipt: item.disableReceipt || false,
-                }));
-                setItems(updatedItems);
-                setIsDisabled(true);
+      if (data1) {
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`);
+        if (response.status === 200 && response.data) {
+            const nextData = response.data.data;
+            setData1(response.data.data);
+            setIndex(index + 1);
+            setFormData(nextData.formData);
+            if (nextData.formData.date) {
+              setSelectedDate(new Date(nextData.formData.date)); // Convert to Date object
             }
+            const updatedItems = nextData.items.map(item => ({
+                ...item, 
+                disableReceipt: item.disableReceipt || false,
+            }));
+              setItems(normalizeItems(updatedItems));
+            setIsDisabled(true);
         }
+      }
     } catch (error) {
         console.error("Error fetching next record:", error);
     }
@@ -895,7 +891,7 @@ const handlePrevious = async () => {
                     ...item, 
                     disableReceipt: item.disableReceipt || false,
                 }));
-                setItems(updatedItems);
+                setItems(normalizeItems(updatedItems));
                 setIsDisabled(true);
             }
         }
@@ -920,7 +916,7 @@ const handleFirst = async () => {
                 ...item, 
                 disableReceipt: item.disableReceipt || false,
             }));
-            setItems(updatedItems);
+            setItems(normalizeItems(updatedItems));
             setIsDisabled(true);
         }
     } catch (error) {
@@ -947,7 +943,7 @@ const handleFirst = async () => {
                 ...item, 
                 disableReceipt: item.disableReceipt || false,
             }));
-            setItems(updatedItems);
+            setItems(normalizeItems(updatedItems));
             setIsDisabled(true);
         }
     } catch (error) {
@@ -971,15 +967,7 @@ const handleFirst = async () => {
         };
         setData([...data, newData]);
         setFormData(newData);
-        setItems([{ 
-          id: "1",
-          accountname: "",
-          narration: "",
-          debit: "",
-          credit: "",
-          disableDebit: false,
-          disableCredit: false,
-        }]);
+        setItems(normalizeItems([]));
         setIndex(data.length);
         setIsAddEnabled(false);
         setIsSubmitEnabled(true);
@@ -1001,133 +989,6 @@ const handleFirst = async () => {
         console.error("Error adding new entry:", error);
     }
   };
-  
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-
-const handleKeyDown = (event, index, field) => {
-  if (event.key === "Enter" || event.key === "Tab") {
-    event.preventDefault(); // Stop default Tab navigation
-    switch (field) {
-      case "accountname":
-         if (items[index].accountname.trim() === "") {
-          saveButtonRef.current?.focus();
-        }else{
-          narrationRefs.current[index]?.focus();
-        }
-        break;
-      case "narration":
-        if (items[index].disableDebit) {
-          // If debit is disabled, move focus to credit
-          credittRefs.current[index]?.focus();
-        } else {
-          debitRefs.current[index]?.focus();
-        }
-      break;
-      case "debit":
-        if (!items[index].disableCredit) {
-          credittRefs.current[index]?.focus();
-        } else {
-          // If credit is also disabled, move to next row
-          if (index === items.length - 1) {
-            handleAddItem();
-            accountNameRefs.current[index + 1]?.focus();
-          } else {
-            accountNameRefs.current[index + 1]?.focus();
-          }
-        }
-        break;
-
-      case "credit":
-        if (index === items.length - 1) {
-          handleAddItem();
-          accountNameRefs.current[index + 1]?.focus();
-        } else {
-          accountNameRefs.current[index + 1]?.focus();
-        }
-        break;
-
-      default:
-        break;
-    }
-  }
-  // Move Right (→)
-else if (event.key === "ArrowRight") {
-  if (field === "accountname") { 
-      narrationRefs.current[index]?.focus();
-      setTimeout(() => narrationRefs.current[index]?.select(), 0);
-  }
-  else if (field === "narration") {
-      if (items[index].disableDebit) {
-          // If debit is disabled, move focus to credit
-          credittRefs.current[index]?.focus();
-          setTimeout(() => credittRefs.current[index]?.select(), 0);
-      } else {
-          debitRefs.current[index]?.focus();
-          setTimeout(() => debitRefs.current[index]?.select(), 0);
-      }
-  }
-  else if (field === "debit") {
-      if (!items[index].disableCredit) {
-          credittRefs.current[index]?.focus();
-          setTimeout(() => credittRefs.current[index]?.select(), 0);
-      }
-  } else if (field === "credit") {
-      if (index === items.length - 1) {
-          // handleAddItem(); (If needed, uncomment this)
-          accountNameRefs.current[index + 1]?.focus();
-          setTimeout(() => accountNameRefs.current[index]?.select(), 0);
-      } else {
-          accountNameRefs.current[index + 1]?.focus();
-          setTimeout(() => accountNameRefs.current[index]?.select(), 0);
-      }
-  }
-}
-// Move Left (←)
-else if (event.key === "ArrowLeft") {
-  if (field === "credit") { 
-      if (!items[index].disableDebit) {
-          debitRefs.current[index]?.focus();
-          setTimeout(() => debitRefs.current[index]?.select(), 0);
-      } else {
-          // If debit is disabled, move to narration
-          narrationRefs.current[index]?.focus();
-          setTimeout(() => narrationRefs.current[index]?.select(), 0);
-      }
-  }
-  else if (field === "debit") { 
-      narrationRefs.current[index]?.focus();
-      setTimeout(() => narrationRefs.current[index]?.select(), 0);
-  }
-  else if (field === "narration") { 
-      accountNameRefs.current[index]?.focus();
-      setTimeout(() => accountNameRefs.current[index]?.select(), 0);
-  }
-}
- // Move Up
- else if (event.key === "ArrowUp" && index > 0) {
-  setTimeout(() => {
-    if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
-    else if (field === "narration") narrationRefs.current[index - 1]?.focus();
-    else if (field === "debit") debitRefs.current[index - 1]?.focus();
-    else if (field === "credit") credittRefs.current[index - 1]?.focus();
-  }, 100);
-} 
-// Move Down
-else if (event.key === "ArrowDown" && index < items.length - 1) {
-  setTimeout(() => {
-    if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
-    else if (field === "narration") narrationRefs.current[index + 1]?.focus();
-    else if (field === "debit") debitRefs.current[index + 1]?.focus();
-    else if (field === "credit") credittRefs.current[index + 1]?.focus();
-  }, 100);
-} 
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-        setPressedKey(event.key);
-        openModalForItemCus(index);
-        event.preventDefault();
-    }
-};
   const handleExit = async () => {
     document.body.style.backgroundColor = 'white'; // Reset background color
     setIsAddEnabled(true); // Enable "Add" button
@@ -1144,8 +1005,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
                 ...item,
                 disableReceipt: item.disableReceipt || false,
             }));
-            setItems(updatedItems); // Set items array with updated items
-
+            setItems(normalizeItems(updatedItems));
             // Update totals
             const totaldebit = updatedItems.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0).toFixed(2);
             const totalcredit = updatedItems.reduce((sum, item) => sum + parseFloat(item.credit || 0), 0).toFixed(2);
@@ -1179,21 +1039,174 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
               totalcredit: "",
             };
             setFormData(newData); 
-            setItems([{
-              id: "",
-              accountname: "",
-              narration: "",
-              debit: "",
-              credit: "",
-              disableDebit: false,
-              disableCredit: false,
-            }]);
+            setItems(normalizeItems([]));
             setIsDisabled(true); // Disable fields after loading the default data
         }
     } catch (error) {
         console.error("Error fetching data", error);
     }
 };
+  
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const tableScrollRef = useRef(null);
+  const focusAndScroll = (refArray, rowIndex) => {
+    const inputEl = refArray.current?.[rowIndex];
+    const container = tableScrollRef.current;
+
+    if (!inputEl || !container) return;
+
+    // focus & select
+    inputEl.focus();
+    setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+    // find row
+    const rowEl = inputEl.closest("tr");
+    if (!rowEl) return;
+
+    const rowTop = rowEl.offsetTop;
+    const rowHeight = rowEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // 🔥 key line — force visibility
+    container.scrollTop =
+      rowTop - containerHeight + rowHeight + 60;
+  };
+
+  const handleKeyDown = (event, index, field) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault(); // Stop default Tab navigation
+      switch (field) {
+        case "accountname":
+          if (items[index].accountname.trim() === "") {
+            saveButtonRef.current?.focus();
+          }else{
+            narrationRefs.current[index]?.focus();
+          }
+          break;
+        case "narration":
+          if (items[index].disableDebit) {
+            // If debit is disabled, move focus to credit
+            credittRefs.current[index]?.focus();
+          } else {
+            debitRefs.current[index]?.focus();
+          }
+        break;
+        case "debit":
+          if (!items[index].disableCredit) {
+            credittRefs.current[index]?.focus();
+          } else {
+            // If credit is also disabled, move to next row
+            if (index === items.length - 1) {
+              handleAddItem();
+              accountNameRefs.current[index + 1]?.focus();
+            } else {
+              accountNameRefs.current[index + 1]?.focus();
+            }
+          }
+          break;
+        case "credit":
+          if (index === items.length - 1) {
+            handleAddItem();
+            setTimeout(() => {
+              focusAndScroll(accountNameRefs, index + 1);
+            }, 0);
+          } else {
+            focusAndScroll(accountNameRefs, index + 1);
+          }
+          break;
+
+        // case "credit":
+        //   if (index === items.length - 1) {
+        //     handleAddItem();
+        //     accountNameRefs.current[index + 1]?.focus();
+        //   } else {
+        //     accountNameRefs.current[index + 1]?.focus();
+        //   }
+        //   break;
+
+        default:
+          break;
+      }
+    }
+    // Move Right (→)
+  else if (event.key === "ArrowRight") {
+    if (field === "accountname") { 
+        narrationRefs.current[index]?.focus();
+        setTimeout(() => narrationRefs.current[index]?.select(), 0);
+    }
+    else if (field === "narration") {
+        if (items[index].disableDebit) {
+            // If debit is disabled, move focus to credit
+            credittRefs.current[index]?.focus();
+            setTimeout(() => credittRefs.current[index]?.select(), 0);
+        } else {
+            debitRefs.current[index]?.focus();
+            setTimeout(() => debitRefs.current[index]?.select(), 0);
+        }
+    }
+    else if (field === "debit") {
+        if (!items[index].disableCredit) {
+            credittRefs.current[index]?.focus();
+            setTimeout(() => credittRefs.current[index]?.select(), 0);
+        }
+    } else if (field === "credit") {
+        if (index === items.length - 1) {
+            // handleAddItem(); (If needed, uncomment this)
+            accountNameRefs.current[index + 1]?.focus();
+            setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+        } else {
+            accountNameRefs.current[index + 1]?.focus();
+            setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+        }
+    }
+  }
+  // Move Left (←)
+  else if (event.key === "ArrowLeft") {
+    if (field === "credit") { 
+        if (!items[index].disableDebit) {
+            debitRefs.current[index]?.focus();
+            setTimeout(() => debitRefs.current[index]?.select(), 0);
+        } else {
+            // If debit is disabled, move to narration
+            narrationRefs.current[index]?.focus();
+            setTimeout(() => narrationRefs.current[index]?.select(), 0);
+        }
+    }
+    else if (field === "debit") { 
+        narrationRefs.current[index]?.focus();
+        setTimeout(() => narrationRefs.current[index]?.select(), 0);
+    }
+    else if (field === "narration") { 
+        accountNameRefs.current[index]?.focus();
+        setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+    }
+  }
+  // Move Up
+  else if (event.key === "ArrowUp" && index > 0) {
+    setTimeout(() => {
+      if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
+      else if (field === "narration") narrationRefs.current[index - 1]?.focus();
+      else if (field === "debit") debitRefs.current[index - 1]?.focus();
+      else if (field === "credit") credittRefs.current[index - 1]?.focus();
+    }, 100);
+  } 
+  // Move Down
+  else if (event.key === "ArrowDown" && index < items.length - 1) {
+    setTimeout(() => {
+      if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
+      else if (field === "narration") narrationRefs.current[index + 1]?.focus();
+      else if (field === "debit") debitRefs.current[index + 1]?.focus();
+      else if (field === "credit") credittRefs.current[index + 1]?.focus();
+    }, 100);
+  } 
+      // Open Modal on Letter Input in Account Name
+      else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+          setPressedKey(event.key);
+          openModalForItemCus(index);
+          event.preventDefault();
+      }
+  };
+
   const handleSearchClick = () => {
     setSearchResults([]); // Clear the search results when reopening the modal
     setShowSearchModal(true); // Open the modal
@@ -1278,28 +1291,6 @@ const handleSearch = async (searchDate) => {
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
           />
-         {/* <DatePicker
-            popperClassName="custom-datepicker-popper"
-            ref={datePickerRef}
-            className="DatePICKER"
-            id="date"
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => checkFutureDate(selectedDate)} // ✅ call function on blur
-            onChangeRaw={(e) => {
-              if (!e.target.value) return; // ✅ avoid undefined error
-
-              let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
-              if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
-
-              e.target.value = val; // Show formatted input
-            }}
-            readOnly={!isEditMode || isDisabled}
-          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
           id="voucherno"
@@ -1344,7 +1335,7 @@ const handleSearch = async (searchDate) => {
           />
         </div>  
       </div>
-      <div className="Tablesection">
+      <div ref={tableScrollRef} className="Tablesection">
         <Table className="custom-table">
           <thead
             style={{
@@ -1537,6 +1528,14 @@ const handleSearch = async (searchDate) => {
               <td style={{ padding: 0 }}></td>
             </tr> */}
           </tbody>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+            <td colSpan={2}></td>
+            <td>{formData.totaldebit}</td>
+            <td>{formData.totalcredit}</td>
+            {isEditMode && <td></td>}
+          </tr>
+          </tfoot>
         </Table>
       </div>
       <div className="addbutton">
@@ -1554,44 +1553,6 @@ const handleSearch = async (searchDate) => {
       />
       )}
       <div className="Belowcontent">
-     <div style={{display:'flex',flexDirection:'row',marginLeft:"70%"}}>
-        <TextField
-          id="totaldebit"
-          value={formData.totaldebit}
-          label="TOTAL DEBIT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 200}}
-          />
-          <TextField
-          id="totalcredit"
-          value={formData.totalcredit}
-          label="TOTAL CREDIT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 200}}
-          />
-      </div>
         <div className="Buttonsgroupz">
           <Button
             ref={addButtonRef}

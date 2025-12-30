@@ -98,28 +98,61 @@ const BankVoucher = () => {
     totalbankcharges: "",
     againstbillno: "",
   });
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      accountname: "",
-      pan:"",
-      Add1:"",
-      bsGroup:"",
-      payment_debit: "",
-      receipt_credit: "",
-      discount: "",
-      Total: "",
-      bankchargers: "",
-      tdsRs: "",
-      chqnoBank: "",
-      remarks: "",
-      discounted_payment: "",
-      discounted_receipt: "",
-      destination: "",
-      disablePayment: false,
-      disableReceipt: false,
-    },
-  ]);
+  // const [items, setItems] = useState([
+  //   {
+  //     id: 1,
+  //     accountname: "",
+  //     pan:"",
+  //     Add1:"",
+  //     bsGroup:"",
+  //     payment_debit: "",
+  //     receipt_credit: "",
+  //     discount: "",
+  //     Total: "",
+  //     bankchargers: "",
+  //     tdsRs: "",
+  //     chqnoBank: "",
+  //     remarks: "",
+  //     discounted_payment: "",
+  //     discounted_receipt: "",
+  //     destination: "",
+  //     disablePayment: false,
+  //     disableReceipt: false,
+  //   },
+  // ]);
+  const MIN_ROWS = 9;
+  const createEmptyRow = (id) => ({
+    id,
+    accountname: "",
+    pan:"",
+    Add1:"",
+    bsGroup:"",
+    payment_debit: "",
+    receipt_credit: "",
+    discount: "",
+    Total: "",
+    bankchargers: "",
+    tdsRs: "",
+    chqnoBank: "",
+    remarks: "",
+    discounted_payment: "",
+    discounted_receipt: "",
+    destination: "",
+    disablePayment: false,
+    disableReceipt: false,
+  });
+
+  const normalizeItems = (items = []) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
   const [bankdetails, setbankdetails] = useState([
     {
       Bankname: "",
@@ -583,7 +616,8 @@ const BankVoucher = () => {
           ...item, // Ensure immutability
           disableReceipt: item.disableReceipt || false, // Handle disableReceipt flag safely
         }));
-        setItems(updatedItems);
+        // setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         const updatedItems2 = lastEntry.bankdetails.map((item) => ({
           ...item, // Ensure immutability
         }));
@@ -661,7 +695,7 @@ const BankVoucher = () => {
         ];
         // Set the empty data
         setFormData(emptyFormData);
-        setItems(emptyItems);
+        setItems(normalizeItems([]));
         setbankdetails(emptybankdetails);
         setData1({
           formData: emptyFormData,
@@ -708,7 +742,7 @@ const BankVoucher = () => {
         },
       ];
       setFormData(emptyFormData);
-      setItems(emptyItems);
+      setItems(normalizeItems([]));
       setData1({ formData: emptyFormData, items: emptyItems });
       setIndex(0);
     }
@@ -717,24 +751,6 @@ const BankVoucher = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  // useEffect(() => {
-  //   const handleEsc = (e) => {
-  //     if (e.key === "Escape" && bankId && !isEditMode) {
-  //       // ✅ Go back explicitly to LedgerList with state
-  //       navigate( -1, {
-  //         state: {
-  //           rowIndex: location.state?.rowIndex || 0,
-  //           selectedLedger: location.state?.selectedLedger,
-  //           keepModalOpen: true,
-  //         },
-  //       });
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleEsc);
-  //   return () => window.removeEventListener("keydown", handleEsc);
-  // }, [navigate, bankId, location.state]);
 
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
@@ -789,7 +805,6 @@ const BankVoucher = () => {
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
-    console.log(data1._id);
     try {
       if (data1) {
         const response = await axios.get(
@@ -804,7 +819,7 @@ const BankVoucher = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           const updatedItems2 = nextData.bankdetails.map((item) => ({
             ...item,
           }));
@@ -835,7 +850,7 @@ const BankVoucher = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           const updatedItems2 = prevData.bankdetails.map((item) => ({
             ...item,
           }));
@@ -865,7 +880,7 @@ const BankVoucher = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         const updatedItems2 = firstData.bankdetails.map((item) => ({
           ...item,
         }));
@@ -895,7 +910,7 @@ const BankVoucher = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         const updatedItems2 = lastData.bankdetails.map((item) => ({
           ...item,
         }));
@@ -926,28 +941,7 @@ const BankVoucher = () => {
       };
       setData([...data, newData]);
       setFormData(newData);
-      setItems([
-        {
-          id: 1,
-          accountname: "",
-          pan:"",
-          Add1:"",
-          bsGroup:"",
-          payment_debit: "",
-          receipt_credit: "",
-          discount: "",
-          Total: "",
-          bankchargers: "",
-          tdsRs: "",
-          chqnoBank: "",
-          remarks: "",
-          discounted_payment: "",
-          discounted_receipt: "",
-          destination: "",
-          disablePayment: false,
-          disableReceipt: false,
-        },
-      ]);
+      setItems(normalizeItems([]));
       setIndex(data.length);
       setIsAddEnabled(false);
       setIsSubmitEnabled(true);
@@ -966,6 +960,81 @@ const BankVoucher = () => {
       }
     } catch (error) {
       console.error("Error adding new entry:", error);
+    }
+  };
+
+  const handleExit = async () => {
+    document.body.style.backgroundColor = "white"; // Reset background color
+    setTitle("View");
+    try {
+      const response = await axios.get(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last"
+      ); // Fetch the latest data
+      if (response.status === 200 && response.data.data) {
+        // If data is available
+        const lastEntry = response.data.data;
+        setFormData(lastEntry.formData);
+        const updatedItems = lastEntry.items.map((item) => ({
+          ...item,
+          disableReceipt: item.disableReceipt || false,
+        }));
+        const updatedItems2 = lastEntry.bankdetails.map((item) => ({
+          ...item,
+          disableReceipt: item.disableReceipt || false,
+        }));
+        setItems(normalizeItems(updatedItems));
+        setbankdetails(updatedItems2);
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        // Update totals
+        const totalpayment = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
+          .toFixed(2);
+        const totalreceipt = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
+          .toFixed(2);
+        const totaldiscount = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
+          .toFixed(2);
+        const totalbankcharges = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.bankchargers || 0), 0)
+          .toFixed(2);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          totalpayment: totalpayment,
+          totalreceipt: totalreceipt,
+          totaldiscount: totaldiscount,
+          totalbankcharges: totalbankcharges,
+        }));
+        setIsDisabled(true); // Disable fields after loading the data
+      } else {
+        // If no data is available, initialize with default values
+        console.log("No data available");
+        const newData = {
+          vtype: "B",
+          date: "",
+          voucherno: 0,
+          user: "Owner",
+          totalpayment: "",
+          totalreceipt: "",
+          totaldiscount: "",
+          totalbankcharges: "",
+          againstbillno: "",
+        };
+        setFormData(newData);
+        setItems(normalizeItems([]));
+        setIsDisabled(true); // Disable fields after loading the default data
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
     }
   };
 
@@ -1218,38 +1287,6 @@ const BankVoucher = () => {
     }
   };
 
-  // const handleDeleteClick = async (id) => {
-  //   if (!id) {
-  //     toast.error("Invalid ID. Please select an item to delete.", {
-  //       position: "top-center",
-  //     });
-  //     return;
-  //   }
-  //   const userConfirmed = window.confirm(
-  //     "Are you sure you want to delete this item?"
-  //   );
-  //   if (!userConfirmed) return;
-  //   setIsSaving(true);
-  //   try {
-  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/${data1._id}`;
-  //     const response = await axios.delete(apiEndpoint);
-
-  //     if (response.status === 200) {
-  //       toast.success("Data deleted successfully!", { position: "top-center" });
-  //       fetchData(); // Refresh the data after successful deletion
-  //     } else {
-  //       throw new Error(`Failed to delete data: ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting data:", error);
-  //     toast.error(`Failed to delete data. Error: ${error.message}`, {
-  //       position: "top-center",
-  //     });
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
-  // };
-
   const handleDeleteClick = async (id) => {
     if (!id) {
       toast.error("Invalid ID. Please select an item to delete.", {
@@ -1283,7 +1320,29 @@ const BankVoucher = () => {
     }
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const tableScrollRef = useRef(null);
+  const focusAndScroll = (refArray, rowIndex) => {
+    const inputEl = refArray.current?.[rowIndex];
+    const container = tableScrollRef.current;
 
+    if (!inputEl || !container) return;
+
+    // focus & select
+    inputEl.focus();
+    setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+    // find row
+    const rowEl = inputEl.closest("tr");
+    if (!rowEl) return;
+
+    const rowTop = rowEl.offsetTop;
+    const rowHeight = rowEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // 🔥 key line — force visibility
+    container.scrollTop =
+      rowTop - containerHeight + rowHeight + 60;
+  };
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault(); // Stop default Tab navigation
@@ -1331,11 +1390,21 @@ const BankVoucher = () => {
         case "remarks":
           if (index === items.length - 1) {
             handleAddItem();
-            accountNameRefs.current[index + 1]?.focus();
+            setTimeout(() => {
+              focusAndScroll(accountNameRefs, index + 1);
+            }, 0);
           } else {
-            accountNameRefs.current[index + 1]?.focus();
+            focusAndScroll(accountNameRefs, index + 1);
           }
           break;
+        // case "remarks":
+        //   if (index === items.length - 1) {
+        //     handleAddItem();
+        //     accountNameRefs.current[index + 1]?.focus();
+        //   } else {
+        //     accountNameRefs.current[index + 1]?.focus();
+        //   }
+        //   break;
         default:
           break;
       }
@@ -1469,102 +1538,7 @@ const BankVoucher = () => {
       event.preventDefault(); // Prevent any default action
     }
   };
-  const handleExit = async () => {
-    document.body.style.backgroundColor = "white"; // Reset background color
-    setTitle("View");
-    try {
-      const response = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last"
-      ); // Fetch the latest data
-      if (response.status === 200 && response.data.data) {
-        // If data is available
-        const lastEntry = response.data.data;
-        setFormData(lastEntry.formData);
-        const updatedItems = lastEntry.items.map((item) => ({
-          ...item,
-          disableReceipt: item.disableReceipt || false,
-        }));
-        const updatedItems2 = lastEntry.bankdetails.map((item) => ({
-          ...item,
-          disableReceipt: item.disableReceipt || false,
-        }));
-        setItems(updatedItems); // Set items array with updated items
-        setbankdetails(updatedItems2);
-        setIndex(lastEntry.formData);
-        setIsAddEnabled(true);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-        // Update totals
-        const totalpayment = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
-          .toFixed(2);
-        const totalreceipt = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
-          .toFixed(2);
-        const totaldiscount = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
-          .toFixed(2);
-        const totalbankcharges = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.bankchargers || 0), 0)
-          .toFixed(2);
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          totalpayment: totalpayment,
-          totalreceipt: totalreceipt,
-          totaldiscount: totaldiscount,
-          totalbankcharges: totalbankcharges,
-        }));
-        setIsDisabled(true); // Disable fields after loading the data
-      } else {
-        // If no data is available, initialize with default values
-        console.log("No data available");
-        const newData = {
-          vtype: "B",
-          date: "",
-          voucherno: 0,
-          user: "Owner",
-          totalpayment: "",
-          totalreceipt: "",
-          totaldiscount: "",
-          totalbankcharges: "",
-          againstbillno: "",
-        };
-        setFormData(newData);
-        setItems([
-          {
-            id: 1,
-            accountname: "",
-            pan: "",
-            Add1: "",
-            bsGroup: "",
-            payment_debit: "",
-            receipt_credit: "",
-            discount: "",
-            Total: "",
-            bankchargers: "",
-            tdsRs: "",
-            chqnoBank: "",
-            remarks: "",
-            discounted_payment: "",
-            discounted_receipt: "",
-            destination: "",
-            disablePayment: false,
-            disableReceipt: false,
-          },
-        ]);
-        setIsDisabled(true); // Disable fields after loading the default data
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  };
-
+ 
   const handleNumericValue = (event) => {
     const { id, value } = event.target;
     // Allow only numeric values, including optional decimal points
@@ -1800,7 +1774,7 @@ const BankVoucher = () => {
           )}
         </div>
       </div>
-      <div className="Tablesections">
+      <div ref={tableScrollRef} className="Tablesections">
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{
@@ -2066,6 +2040,18 @@ const BankVoucher = () => {
               </tr>
             ))}
           </tbody>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+            <td></td>
+            <td>{formData.totalpayment}</td>
+            <td>{formData.totalreceipt}</td>
+            <td>{formData.totaldiscount}</td>
+            <td></td>
+            <td>{formData.totalbankcharges}</td>
+             <td colSpan={3}></td>
+            {isEditMode && <td></td>}
+          </tr>
+          </tfoot>
         </Table>
       </div>
       <div className="addbutton">
@@ -2084,74 +2070,6 @@ const BankVoucher = () => {
         />
       )}
       <div className="Belowcontent">
-        <div
-          style={{ display: "flex", flexDirection: "row", marginLeft: "15%" }}
-        >
-          <TextField
-            className="custom-bordered-input"
-            value={formData.totalpayment}
-            label="TOTAL PAYEMNT"
-            size="small"
-            variant="filled"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            sx={{ width: 200 }} // Adjust width as needed
-          />
-          <TextField
-            className="custom-bordered-input"
-            value={formData.totalreceipt}
-            label="TOTAL RECEIPT"
-            size="small"
-            variant="filled"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            sx={{ width: 200 }} // Adjust width as needed
-          />
-          <TextField
-            className="custom-bordered-input"
-            value={formData.totaldiscount}
-            label="TOTAL DISCOUNT"
-            size="small"
-            variant="filled"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            sx={{ width: 200 }} // Adjust width as needed
-          />
-          <TextField
-            className="custom-bordered-input"
-            value={formData.totalbankcharges}
-            label="TOTAL BANK CHARGES"
-            size="small"
-            variant="filled"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            sx={{ width: 200 }} // Adjust width as needed
-          />
-        </div>
         <PrintChoiceModal
           open={printChoiceOpen}
           onClose={() => setPrintChoiceOpen(false)}

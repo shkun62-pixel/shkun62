@@ -24,6 +24,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useCompanySetup from "../Shared/useCompanySetup";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
+import useCashBankSetup from "../Shared/useCashBankSetup";
 
 // Register font
 Font.register({
@@ -47,7 +48,7 @@ const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
 const CashVoucher = () => {
 
   const companySetup = useCompanySetup();
-
+  const { decimals } = useCashBankSetup();
   const location = useLocation();
   const cashId = location.state?.cashId;
   const navigate = useNavigate();
@@ -81,6 +82,7 @@ const CashVoucher = () => {
   const receiptRefs = useRef([]);
   const discountRefs = useRef([]);
   const saveButtonRef = useRef(null);
+  const tableScrollRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
   const initialColors = [
     "#E9967A",
@@ -109,21 +111,48 @@ const CashVoucher = () => {
     totalreceipt: "",
     totaldiscount: "",
   });
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      acode:"",
-      accountname: "",
-      narration: "",
-      payment_debit: "",
-      receipt_credit: "",
-      discount: "",
-      discounted_payment: "",
-      discounted_receipt: "",
-      disablePayment: false,
-      disableReceipt: false,
-    },
-  ]);
+  const MIN_ROWS = 8;
+
+  const createEmptyRow = (id) => ({
+    id,
+    acode:"",
+    accountname: "",
+    narration: "",
+    payment_debit: "",
+    receipt_credit: "",
+    discount: "",
+    discounted_payment: "",
+    discounted_receipt: "",
+    disablePayment: false,
+    disableReceipt: false,
+  });
+
+  const normalizeItems = (items = []) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+  // const [items, setItems] = useState([
+  //   {
+  //     id: 1,
+  //     acode:"",
+  //     accountname: "",
+  //     narration: "",
+  //     payment_debit: "",
+  //     receipt_credit: "",
+  //     discount: "",
+  //     discounted_payment: "",
+  //     discounted_receipt: "",
+  //     disablePayment: false,
+  //     disableReceipt: false,
+  //   },
+  // ]);
 
   useEffect(() => {
     if (addButtonRef.current && !cashId) {
@@ -147,44 +176,24 @@ const CashVoucher = () => {
 
   // Date
   useEffect(() => {
-  if (formData.date) {
-    try {
-      // Expecting date in format "DD/MM/YYYY"
-      const [day, month, year] = formData.date.split("/").map(Number);
-      const date = new Date(year, month - 1, day); // month is 0-based
+    if (formData.date) {
+      try {
+        // Expecting date in format "DD/MM/YYYY"
+        const [day, month, year] = formData.date.split("/").map(Number);
+        const date = new Date(year, month - 1, day); // month is 0-based
 
-      if (!isNaN(date.getTime())) {
-        setSelectedDate(date);
-      } else {
-        console.error("Invalid date value in formData.date:", formData.date);
+        if (!isNaN(date.getTime())) {
+          setSelectedDate(date);
+        } else {
+          console.error("Invalid date value in formData.date:", formData.date);
+        }
+      } catch (error) {
+        console.error("Error parsing date:", error);
       }
-    } catch (error) {
-      console.error("Error parsing date:", error);
+    } else {
+      setSelectedDate(null);
     }
-  } else {
-    setSelectedDate(null);
-  }
-}, [formData.date]);
-
-  // useEffect(() => {
-  //   // If formData.date has a valid date string, parse it and set selectedDate
-  //   if (formData.date) {
-  //     try {
-  //       const date = new Date(formData.date);
-  //       if (!isNaN(date.getTime())) {
-  //         setSelectedDate(date);
-  //       } else {
-  //         console.error("Invalid date value in formData.date:", formData.date);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing date:", error);
-  //     }
-  //   } else {
-  //     // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-  //     // but we can still have it open on today's date via openToDate
-  //     setSelectedDate(null);
-  //   }
-  // }, [formData.date]);
+  }, [formData.date]);
 
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
@@ -210,28 +219,6 @@ const CashVoucher = () => {
       });
     }
   };
-
-  // const handleDateChange = (date) => {
-  //   if (date instanceof Date && !isNaN(date)) {
-  //     const today = new Date();
-  //     today.setHours(0, 0, 0, 0); // Set today's date to midnight
-
-  //     const selectedDate = new Date(date);
-  //     selectedDate.setHours(0, 0, 0, 0); // Set selected date to midnight too
-
-  //     if (selectedDate > today) {
-  //       toast.info("You Have Selected a Future Date.", {
-  //         position: "top-center",
-  //       });
-  //     }
-
-  //     setSelectedDate(date);
-  //     const formattedDate = date.toISOString().split("T")[0];
-  //     setFormData((prev) => ({ ...prev, date: date }));
-  //   } else {
-  //     console.error("Invalid date value");
-  //   }
-  // };
 
   const handleCalendarClose = () => {
     // If no date is selected when the calendar closes, default to today's date
@@ -329,14 +316,14 @@ const CashVoucher = () => {
         // Set flags and update form data
         setFirstTimeCheckData("DataAvailable");
         setFormData(lastEntry.formData);
-        // console.log(lastEntry.formData, "fetchFormdata");
 
         // Update items with the last entry's items
         const updatedItems = lastEntry.items.map((item) => ({
           ...item, // Ensure immutability
           disableReceipt: item.disableReceipt || false, // Handle disableReceipt flag safely
         }));
-        setItems(updatedItems);
+        // setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
 
         // Calculate total payment, total receipt, and total discount
         const totalPayment = updatedItems
@@ -393,7 +380,7 @@ const CashVoucher = () => {
 
         // Set the empty data
         setFormData(emptyFormData);
-        setItems(emptyItems);
+        setItems(normalizeItems([]));
         setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
         setIndex(0); // Set index to 0 for the empty voucher
       }
@@ -457,25 +444,6 @@ const CashVoucher = () => {
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isEditMode]);
-
-
-  // useEffect(() => {
-  //   const handleEsc = (e) => {
-  //     if (e.key === "Escape" && cashId && !isEditMode) {
-  //       // ✅ Go back explicitly to LedgerList with state
-  //       navigate( -1, {
-  //         state: {
-  //           rowIndex: location.state?.rowIndex || 0,
-  //           selectedLedger: location.state?.selectedLedger,
-  //           keepModalOpen: true,
-  //         },
-  //       });
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleEsc);
-  //   return () => window.removeEventListener("keydown", handleEsc);
-  // }, [navigate, cashId, location.state]);
   
   useEffect(() => {
     if (data.length > 0) {
@@ -507,7 +475,7 @@ const CashVoucher = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setIsDisabled(true);
         }
       }
@@ -534,7 +502,7 @@ const CashVoucher = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setIsDisabled(true);
         }
       }
@@ -560,7 +528,7 @@ const CashVoucher = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
       }
     } catch (error) {
@@ -586,7 +554,7 @@ const CashVoucher = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
       }
     } catch (error) {
@@ -613,21 +581,7 @@ const CashVoucher = () => {
       };
       setData([...data, newData]);
       setFormData(newData);
-      setItems([
-        {
-          id: 1,
-          acode:"",
-          accountname: "",
-          narration: "",
-          payment_debit: "",
-          receipt_credit: "",
-          discount: "",
-          discounted_payment: "",
-          discounted_receipt: "",
-          disablePayment: false,
-          disableReceipt: false,
-        },
-      ]);
+      setItems(normalizeItems([]));
       setIndex(data.length);
       setIsAddEnabled(false);
       setIsSubmitEnabled(true);
@@ -648,6 +602,75 @@ const CashVoucher = () => {
       console.error("Error adding new entry:", error);
     }
   };
+  
+  const handleExit = async () => {
+    document.body.style.backgroundColor = "white"; // Reset background color
+    setTitle("View");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash/last`
+      ); // Fetch the latest data
+
+      if (response.status === 200 && response.data.data) {
+        // If data is available
+        const lastEntry = response.data.data;
+        setFormData(lastEntry.formData); // Set form data
+
+        const updatedItems = lastEntry.items.map((item) => ({
+          ...item,
+          disableReceipt: item.disableReceipt || false,
+        }));
+        // setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
+        setIsDisabled(true);
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        // Update totals
+        const totalPayment = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
+          .toFixed(2);
+        const totalReceipt = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
+          .toFixed(2);
+        const totalDiscount = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
+          .toFixed(2);
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          totalpayment: totalPayment,
+          totalreceipt: totalReceipt,
+          totaldiscount: totalDiscount,
+        }));
+      } else {
+        // If no data is available, initialize with default values
+        console.log("No data available");
+        const newData = {
+          date: "",
+          voucherno: 0,
+          cashinhand: "",
+          owner: "Owner",
+          user: "",
+          totalpayment: "",
+          totalreceipt: "",
+          totaldiscount: "",
+        };
+        setFormData(newData); // Set default form data
+        setItems(normalizeItems([]));
+        setIsDisabled(true); // Disable fields after loading the default data
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
+  };
 
   const handleEditClick = () => {
     setTitle("EDIT");
@@ -666,15 +689,6 @@ const CashVoucher = () => {
     if (accountNameRefs.current[0]) {
       accountNameRefs.current[0].focus();
     }
-  };
-  const calculateCashInHand = () => {
-    const totalPayment = parseFloat(formData.totalpayment) || 0;
-    const totalReceipt = parseFloat(formData.totalreceipt) || 0;
-    const cashInHand = totalPayment - totalReceipt;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      cashinhand: cashInHand.toFixed(2),
-    }));
   };
 
   const calculateTotalDiscount = () => {
@@ -868,16 +882,6 @@ const CashVoucher = () => {
     }
   };
 
-  // const handleProductSelectCus = (product) => {
-  //   if (selectedItemIndexCus !== null) {
-  //     handleItemChangeCus(selectedItemIndexCus, "name", product.ahead);
-  //     setShowModalCus(false);
-  //     setTimeout(() => {
-  //       narrationRefs.current[selectedItemIndexCus].focus();
-  //     }, 100);
-  //   }
-  // };
-
   const handleProductSelectCus = (product) => {
     if (!product) {
       alert("No product received!");
@@ -1037,128 +1041,6 @@ const CashVoucher = () => {
     }
   };
 
-
-  // const handleSaveClick = async () => {
-  //     document.body.style.backgroundColor = 'white';
-
-  //     // Validate if at least one row is filled
-  //     const filledRows = items.filter(item => item.accountname !== '');
-  //     if (filledRows.length === 0) {
-  //         toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
-  //         return;
-  //     }
-
-  //     // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
-  //     const isValidTransaction = filledRows.every(item => 
-  //         parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
-  //     );
-
-  //     if (!isValidTransaction) {
-  //         toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
-  //         return;
-  //     }
-
-  //     // Only disable the save button AFTER validation passes
-  //     setIsSaving(true);
-  //     try {
-  //         let combinedData = {
-  //           _id: formData._id,
-  //           formData: {
-  //               date: selectedDate.toLocaleDateString("en-US"),
-  //               vtype: formData.vtype,
-  //               voucherno: formData.voucherno,
-  //               cashinhand: formData.cashinhand || "",
-  //               owner: formData.owner,
-  //               user: formData.user || "",
-  //               totalpayment: formData.totalpayment,
-  //               totalreceipt: formData.totalreceipt,
-  //               totaldiscount: formData.totaldiscount,
-  //           },
-  //           items: filledRows.map(item => ({
-  //               id: item.id,
-  //               acode: item.acode,
-  //               accountname: item.accountname,
-  //               narration: item.narration,
-  //               payment_debit: item.payment_debit,
-  //               receipt_credit: item.receipt_credit,
-  //               discount: item.discount,
-  //               discounted_payment: item.discounted_payment,
-  //               discounted_receipt: item.discounted_receipt,
-  //               name: item.name,
-  //               disableReceipt: item.disableReceipt,
-  //               disablePayment: item.disablePayment,
-  //           }))
-  //         };
-
-  //         console.log('Combined Data:', combinedData);
-  //         const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${isAbcmode ? `/${data1._id}` : ''}`;
-  //         const method = isAbcmode ? 'put' : 'post';
-
-  //         const response = await axios({
-  //             method,
-  //             url: apiEndpoint,
-  //             data: combinedData,
-  //         });
-
-  //         console.log('API Response:', response);
-
-  //         if (response?.status === 200 || response?.status === 201) {
-  //             toast.success("Data Saved Successfully!", { position: "top-center" });
-  //             setIsAddEnabled(true);
-  //             setIsDisabled(true);
-  //             setIsEditMode(false);
-  //             setIsSubmitEnabled(false);
-  //             setIsPreviousEnabled(true);
-  //             setIsNextEnabled(true);
-  //             setIsFirstEnabled(true);
-  //             setIsLastEnabled(true);
-  //             setIsSearchEnabled(true);
-  //             setIsSPrintEnabled(true);
-  //             setIsDeleteEnabled(true);
-  //             setTitle('VIEW');
-  //         } else {
-  //             throw new Error(`Unexpected response status: ${response?.status}`);
-  //         }
-  //     } catch (error) {
-  //         console.error('Error saving data:', error?.response?.data || error.message);
-  //         toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, { position: "top-center" });
-  //     } finally {
-  //         setIsSaving(false);
-  //     }
-  // };
-
-  // const handleDeleteClick = async (id) => {
-  //   if (!id) {
-  //     toast.error("Invalid ID. Please select an item to delete.", {
-  //       position: "top-center",
-  //     });
-  //     return;
-  //   }
-  //   const userConfirmed = window.confirm(
-  //     "Are you sure you want to delete this item?"
-  //   );
-  //   if (!userConfirmed) return;
-  //   setIsSaving(true);
-  //   try {
-  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash/${data1._id}`;
-  //     const response = await axios.delete(apiEndpoint);
-
-  //     if (response.status === 200) {
-  //       toast.success("Data deleted successfully!", { position: "top-center" });
-  //       fetchData(); // Refresh the data after successful deletion
-  //     } else {
-  //       throw new Error(`Failed to delete data: ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting data:", error);
-  //     toast.error(`Failed to delete data. Error: ${error.message}`, {
-  //       position: "top-center",
-  //     });
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
-  // };
-
   const handleDeleteClick = async (id) => {
     if (!id) {
       toast.error("Invalid ID. Please select an item to delete.", {
@@ -1213,6 +1095,28 @@ const CashVoucher = () => {
   };
 
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const focusAndScroll = (refArray, rowIndex) => {
+    const inputEl = refArray.current?.[rowIndex];
+    const container = tableScrollRef.current;
+
+    if (!inputEl || !container) return;
+
+    // focus & select
+    inputEl.focus();
+    setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+    // find row
+    const rowEl = inputEl.closest("tr");
+    if (!rowEl) return;
+
+    const rowTop = rowEl.offsetTop;
+    const rowHeight = rowEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // 🔥 key line — force visibility
+    container.scrollTop =
+      rowTop - containerHeight + rowHeight + 60;
+  };
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault(); // Stop default Tab navigation
@@ -1259,14 +1163,25 @@ const CashVoucher = () => {
             receiptRefs.current[index]?.focus();
           }
           break;
-        case "discount":
+          case "discount":
           if (index === items.length - 1) {
             handleAddItem();
-            accountNameRefs.current[index + 1]?.focus();
+            setTimeout(() => {
+              focusAndScroll(accountNameRefs, index + 1);
+            }, 0);
           } else {
-            accountNameRefs.current[index + 1]?.focus();
+            focusAndScroll(accountNameRefs, index + 1);
           }
           break;
+
+        // case "discount":
+        //   if (index === items.length - 1) {
+        //     handleAddItem();
+        //     accountNameRefs.current[index + 1]?.focus();
+        //   } else {
+        //     accountNameRefs.current[index + 1]?.focus();
+        //   }
+        //   break;
         default:
           break;
       }
@@ -1284,9 +1199,6 @@ const CashVoucher = () => {
         setTimeout(() => receiptRefs.current[index]?.select(), 0);
         }
       }
-      // else if (field === "narration"){ paymentRefs.current[index]?.focus();
-      //   setTimeout(() => paymentRefs.current[index]?.select(), 0);
-      // }
       else if (field === "payment_debit" && !items[index].disableReceipt){
         receiptRefs.current[index]?.focus();
         setTimeout(() => receiptRefs.current[index]?.select(), 0);
@@ -1310,16 +1222,13 @@ const CashVoucher = () => {
         }
       } 
       if (field === "receipt_credit") {
-        if (!items[index].disablePayment){ discountRefs.current[index]?.focus();
-          setTimeout(() => discountRefs.current[index]?.select(), 0);
+        if (!items[index].disablePayment){ paymentRefs.current[index]?.focus();
+          setTimeout(() => paymentRefs.current[index]?.select(), 0);
         }
         else {narrationRefs.current[index]?.focus();
         setTimeout(() => narrationRefs.current[index]?.select(), 0);
         }
       } 
-      // else if (field === "receipt_credit"){ paymentRefs.current[index]?.focus();
-      //   setTimeout(() => paymentRefs.current[index]?.select(), 0);
-      // }
       else if (field === "payment_debit"){ narrationRefs.current[index]?.focus();
         setTimeout(() => narrationRefs.current[index]?.select(), 0);
       }
@@ -1329,25 +1238,55 @@ const CashVoucher = () => {
     } 
 
     // Move Up
- else if (event.key === "ArrowUp" && index > 0) {
-  setTimeout(() => {
-    if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
-    else if (field === "narration") narrationRefs.current[index - 1]?.focus();
-    else if (field === "payment_debit") paymentRefs.current[index - 1]?.focus();
-    else if (field === "receipt_credit") receiptRefs.current[index - 1]?.focus();
-    else if (field === "discount") discountRefs.current[index - 1]?.focus();
-  }, 100);
-} 
+    else if (event.key === "ArrowUp" && index > 0) {
+      setTimeout(() => {
+        if (field === "accountname")
+          focusAndScroll(accountNameRefs, index - 1);
+        else if (field === "narration")
+          focusAndScroll(narrationRefs, index - 1);
+        else if (field === "payment_debit")
+          focusAndScroll(paymentRefs, index - 1);
+        else if (field === "receipt_credit")
+          focusAndScroll(receiptRefs, index - 1);
+        else if (field === "discount")
+          focusAndScroll(discountRefs, index - 1);
+      }, 0);
+    }
+
+// else if (event.key === "ArrowUp" && index > 0) {
+//   setTimeout(() => {
+//     if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
+//     else if (field === "narration") narrationRefs.current[index - 1]?.focus();
+//     else if (field === "payment_debit") paymentRefs.current[index - 1]?.focus();
+//     else if (field === "receipt_credit") receiptRefs.current[index - 1]?.focus();
+//     else if (field === "discount") discountRefs.current[index - 1]?.focus();
+//   }, 100);
+// } 
 // Move Down
-else if (event.key === "ArrowDown" && index < items.length - 1) {
-  setTimeout(() => {
-    if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
-    else if (field === "narration") narrationRefs.current[index + 1]?.focus();
-    else if (field === "payment_debit") paymentRefs.current[index + 1]?.focus();
-    else if (field === "receipt_credit") receiptRefs.current[index + 1]?.focus();
-    else if (field === "discount") discountRefs.current[index + 1]?.focus();
-  }, 100);
-} 
+  else if (event.key === "ArrowDown" && index < items.length - 1) {
+    setTimeout(() => {
+      if (field === "accountname")
+        focusAndScroll(accountNameRefs, index + 1);
+      else if (field === "narration")
+        focusAndScroll(narrationRefs, index + 1);
+      else if (field === "payment_debit")
+        focusAndScroll(paymentRefs, index + 1);
+      else if (field === "receipt_credit")
+        focusAndScroll(receiptRefs, index + 1);
+      else if (field === "discount")
+        focusAndScroll(discountRefs, index + 1);
+    }, 0);
+  }
+
+// else if (event.key === "ArrowDown" && index < items.length - 1) {
+//   setTimeout(() => {
+//     if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
+//     else if (field === "narration") narrationRefs.current[index + 1]?.focus();
+//     else if (field === "payment_debit") paymentRefs.current[index + 1]?.focus();
+//     else if (field === "receipt_credit") receiptRefs.current[index + 1]?.focus();
+//     else if (field === "discount") discountRefs.current[index + 1]?.focus();
+//   }, 100);
+// } 
     // Open Modal on Letter Input in Account Name
     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
@@ -1355,120 +1294,10 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
       event.preventDefault();
     }
   };
-  
-
-  const handleExit = async () => {
-    document.body.style.backgroundColor = "white"; // Reset background color
-    setTitle("View");
-    try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash/last`
-      ); // Fetch the latest data
-
-      if (response.status === 200 && response.data.data) {
-        // If data is available
-        const lastEntry = response.data.data;
-        setFormData(lastEntry.formData); // Set form data
-
-        const updatedItems = lastEntry.items.map((item) => ({
-          ...item,
-          disableReceipt: item.disableReceipt || false,
-        }));
-        setItems(updatedItems);
-        setIsDisabled(true);
-        setIndex(lastEntry.formData);
-        setIsAddEnabled(true);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-        // Update totals
-        const totalPayment = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
-          .toFixed(2);
-        const totalReceipt = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
-          .toFixed(2);
-        const totalDiscount = updatedItems
-          .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
-          .toFixed(2);
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          totalpayment: totalPayment,
-          totalreceipt: totalReceipt,
-          totaldiscount: totalDiscount,
-        }));
-      } else {
-        // If no data is available, initialize with default values
-        console.log("No data available");
-        const newData = {
-          date: "",
-          voucherno: 0,
-          cashinhand: "",
-          owner: "Owner",
-          user: "",
-          totalpayment: "",
-          totalreceipt: "",
-          totaldiscount: "",
-        };
-        setFormData(newData); // Set default form data
-
-        // Initialize with a single empty item
-        setItems([
-          {
-            accountname: "",
-            narration: "",
-            payment_debit: "",
-            receipt_credit: "",
-            discount: "",
-            discounted_payment: "",
-            discounted_receipt: "",
-            disablePayment: false,
-            disableReceipt: false,
-          },
-        ]);
-
-        setIsDisabled(true); // Disable fields after loading the default data
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  };
-
-  const [decimalValue, setdecimalValue] = useState(0);
-    const fetchCashBankSetup = async () => {
-      try {
-        const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cashbanksetup`
-        );
-        if (!response.ok) throw new Error("Failed to fetch sales setup");
-  
-        const data = await response.json();
-  
-        if (Array.isArray(data) && data.length > 0 && data[0].formData) {
-          const formDataFromAPI = data[0].formData;
-          setdecimalValue(formDataFromAPI.decimals);
-          // console.log(decimalValue);
-          
-        } else {
-          throw new Error("Invalid response structure");
-        }
-      } catch (error) {
-        console.error("Error fetching sales setup:", error.message);
-      }
-    };
-    useEffect(() => {
-      fetchCashBankSetup();
-    }, [decimalValue]);
 
   // Update the blur handlers so that they always format the value to 2 decimals.
   const handlePkgsBlur = (index) => {
-    const decimalPlaces = decimalValue;
+    const decimalPlaces = decimals;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].payment_debit);
     if (isNaN(value)) {
@@ -1479,7 +1308,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
   };
 
   const handleWeightBlur = (index) => {
-    const decimalPlaces = decimalValue;
+    const decimalPlaces = decimals;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].receipt_credit);
     if (isNaN(value)) {
@@ -1490,7 +1319,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
   };
 
   const handleRateBlur = (index) => {
-    const decimalPlaces = decimalValue;
+    const decimalPlaces = decimals;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].discount);
     if (isNaN(value)) {
@@ -1501,12 +1330,12 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
   };
 
   const handleOpenModalBack = (event, index, field) => {
-    if (event.key === "Backspace" && field === "accountname") {
-        setSelectedItemIndexCus(index);
-        setShowModalCus(true);
-        event.preventDefault();
-    }
-};
+      if (event.key === "Backspace" && field === "accountname") {
+          setSelectedItemIndexCus(index);
+          setShowModalCus(true);
+          event.preventDefault();
+      }
+  };
 
   return (
     <div>
@@ -1541,28 +1370,6 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
           />
-          {/* <DatePicker
-            popperClassName="custom-datepicker-popper"
-            ref={datePickerRef}
-            className="DatePICKER"
-            id="date"
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => checkFutureDate(selectedDate)} // ✅ call function on blur
-            onChangeRaw={(e) => {
-              if (!e.target.value) return; // ✅ avoid undefined error
-
-              let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
-              if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
-
-              e.target.value = val; // Show formatted input
-            }}
-            readOnly={!isEditMode || isDisabled}
-          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
           id="voucherno"
@@ -1608,7 +1415,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
           />
         </div>  
       </div>
-      <div className="TableSectionz">
+      <div ref={tableScrollRef} className="TableSectionz">
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{
@@ -1789,6 +1596,15 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
               </tr>
             ))}
           </tbody>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+            <td colSpan={2}></td>
+            <td>{formData.totalpayment}</td>
+            <td>{formData.totalreceipt}</td>
+            <td>{formData.totaldiscount}</td>
+            {isEditMode && <td></td>}
+          </tr>
+          </tfoot>
         </Table>
       </div>
      
@@ -1807,7 +1623,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
       />
       )}
       <div className="Belowcontent">
-        <div style={{display:'flex',flexDirection:'row',justifyContent:'end',marginRight:20}}>
+        {/* <div style={{display:'flex',flexDirection:'row',justifyContent:'end',marginRight:20}}>
         <TextField
           id="totalpayment"
           value={formData.totalpayment}
@@ -1862,7 +1678,7 @@ else if (event.key === "ArrowDown" && index < items.length - 1) {
           className="custom-bordered-input"
           sx={{ width: 150}}
           />
-        </div>
+        </div> */}
 
         <PrintChoiceModal
           open={printChoiceOpen}

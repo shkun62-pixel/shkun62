@@ -677,7 +677,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "474px",
+                                    top: "522px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "220px",
                                     background: "#2f3847",
@@ -725,7 +725,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "475px",
+                                    top: "522px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "300px",
                                     background: "#2f3847",

@@ -6,6 +6,7 @@ export default function useCompanySetup() {
   const [b3, setb3] = useState(null);
   const [b4, setb4] = useState(null);
   const [b5, setb5] = useState(null);
+  const [decimals, setDecimals] = useState(null);
   
   useEffect(() => {
     const fetchCashBankSetup = async () => {
@@ -24,6 +25,7 @@ export default function useCompanySetup() {
           setb3(formDataFromAPI.B3);
           setb4(formDataFromAPI.B4);
           setb5(formDataFromAPI.B5);
+          setDecimals(formDataFromAPI.decimals);
         } else {
           throw new Error("Invalid response structure");
         }
@@ -35,5 +37,5 @@ export default function useCompanySetup() {
     fetchCashBankSetup();
   }, []);
 
-  return { b1, b2, b3, b4, b5 };
+  return { b1, b2, b3, b4, b5, decimals };
 }

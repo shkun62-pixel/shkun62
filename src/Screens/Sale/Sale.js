@@ -191,15 +191,17 @@ const Sale = () => {
       TDS194Q: "",
     },
   ]);
-  const createEmptyRow = (id) => ({
+  const MIN_ROWS = 5;
+
+  const createEmptyRow = (id, expRates = {}) => ({
     id,
     vcode: "",
     sdisc: "",
     Units: "",
-    pkgs: "0.00",
-    weight: "0.00",
-    rate: "0.00",
-    amount: "0.00",
+    pkgs: "0",
+    weight: "0",
+    rate: "0",
+    amount: "0",
     disc: 0,
     discount: "",
     gst: 0,
@@ -207,40 +209,35 @@ const Sale = () => {
     Pcodess: "",
     Scodes01: "",
     Scodess: "",
-    Exp_rate1: 0,
-    Exp_rate2: 0,
-    Exp_rate3: 0,
-    Exp_rate4: 0,
-    Exp_rate5: 0,
+    Exp_rate1: expRates.ExpRate1 ?? 0,
+    Exp_rate2: expRates.ExpRate2 ?? 0,
+    Exp_rate3: expRates.ExpRate3 ?? 0,
+    Exp_rate4: expRates.ExpRate4 ?? 0,
+    Exp_rate5: expRates.ExpRate5 ?? 0,
     Exp1: 0,
     Exp2: 0,
     Exp3: 0,
     Exp4: 0,
     Exp5: 0,
     exp_before: 0,
-    RateCal: "",
-    Qtyperpc: 0,
     ctax: "0.00",
     stax: "0.00",
     itax: "0.00",
     tariff: "",
     vamt: "0.00",
   });
-  const MIN_ROWS = 5;
 
-  const normalizeItems = (items = []) => {
-    const normalized = [...items];
+  const normalizeItems = (items = [], expRates = {}) => {
+    const rows = [...items];
 
-    while (normalized.length < MIN_ROWS) {
-      normalized.push(createEmptyRow(normalized.length + 1));
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1, expRates));
     }
 
-    return normalized;
+    return rows;
   };
-  
-  const [items, setItems] = useState(() =>
-    normalizeItems([])
-  );
+
+  const [items, setItems] = useState(() => normalizeItems());
 
   const [shipped, setshipped] = useState([
     {
@@ -466,6 +463,19 @@ const Sale = () => {
     fetchSalesSetup();
   }, [T11,T21,T12,ExpRate1,ExpRate2,ExpRate3,ExpRate4,ExpRate5,ExpRate6,ExpRate7,ExpRate8,ExpRate9,ExpRate10,Defaultbutton,BillType,SupplyType
   ]);
+
+  useEffect(() => {
+    setItems((prev) =>
+      normalizeItems(prev, {
+        ExpRate1,
+        ExpRate2,
+        ExpRate3,
+        ExpRate4,
+        ExpRate5,
+      })
+    );
+  }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
+
 
   // Calculate Total GST
   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
@@ -1232,41 +1242,51 @@ const handleViewFAVoucher = () => {
       setData([...data, newData]);
       setFormData(newData);
       // setItems(normalizeItems([]));
-      setItems([
-        {
-          id: 1,
-          vcode: "",
-          sdisc: "",
-          Units: "",
-          pkgs: "0",
-          weight: "0",
-          rate: "0",
-          amount: "0",
-          disc: 0,
-          discount: "",
-          gst: 0,
-          Pcodes01: "",
-          Pcodess: "",
-          Scodes01: "",
-          Scodess: "",
-          Exp_rate1: ExpRate1 || 0,
-          Exp_rate2: ExpRate2 || 0,
-          Exp_rate3: ExpRate3 || 0,
-          Exp_rate4: ExpRate4 || 0,
-          Exp_rate5: ExpRate5 || 0,
-          Exp1: 0,
-          Exp2: 0,
-          Exp3: 0,
-          Exp4: 0,
-          Exp5: 0,
-          exp_before: 0,
-          ctax: "0.00",
-          stax: "0.00",
-          itax: "0.00",
-          tariff: "",
-          vamt: "0.00",
-        },
-      ]);
+      setItems(
+        normalizeItems([], {
+          ExpRate1,
+          ExpRate2,
+          ExpRate3,
+          ExpRate4,
+          ExpRate5,
+        })
+      );
+
+      // setItems([
+      //   {
+      //     id: 1,
+      //     vcode: "",
+      //     sdisc: "",
+      //     Units: "",
+      //     pkgs: "0",
+      //     weight: "0",
+      //     rate: "0",
+      //     amount: "0",
+      //     disc: 0,
+      //     discount: "",
+      //     gst: 0,
+      //     Pcodes01: "",
+      //     Pcodess: "",
+      //     Scodes01: "",
+      //     Scodess: "",
+      //     Exp_rate1: ExpRate1 || 0,
+      //     Exp_rate2: ExpRate2 || 0,
+      //     Exp_rate3: ExpRate3 || 0,
+      //     Exp_rate4: ExpRate4 || 0,
+      //     Exp_rate5: ExpRate5 || 0,
+      //     Exp1: 0,
+      //     Exp2: 0,
+      //     Exp3: 0,
+      //     Exp4: 0,
+      //     Exp5: 0,
+      //     exp_before: 0,
+      //     ctax: "0.00",
+      //     stax: "0.00",
+      //     itax: "0.00",
+      //     tariff: "",
+      //     vamt: "0.00",
+      //   },
+      // ]);
       setcustomerDetails([
         {
           Vcode: "",
@@ -2756,7 +2776,7 @@ const focusScrollRow = (refArray, rowIndex) => {
   const containerHeight = container.clientHeight;
 
   container.scrollTop =
-    rowTop - containerHeight + rowHeight + 45;
+    rowTop - containerHeight + rowHeight + 60;
 };
 const handleKeyDown = (event, index, field) => {
   // --------------- ENTER / TAB: move to NEXT FIELD -----------------
@@ -4045,12 +4065,19 @@ const handleKeyDownExp = (e, fieldName, index) => {
                           />
                         </div>
                       ))}
-                      <Button
-                        ref={closeButtonRef} // Assign ref to close button
+                     <Button
+                        ref={closeButtonRef}
                         onClick={() => {
+                          const idx = currentIndex; // store before reset
+
                           setIsModalOpenExp(false);
-                          setCurrentIndex(null); // Reset the index when closing the modal
-                          handleAddItem();
+                          setCurrentIndex(null);
+
+                          // restore focus to Others field
+                          setTimeout(() => {
+                            othersRefs.current[idx]?.focus();
+                            othersRefs.current[idx]?.select();
+                          }, 0);
                         }}
                         style={{
                           borderColor: "transparent",
@@ -4059,7 +4086,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                         }}
                       >
                         CLOSE
-                      </Button>
+                     </Button>
                     </div>
                   </div>
                 )}
