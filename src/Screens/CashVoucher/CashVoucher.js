@@ -1337,6 +1337,22 @@ const CashVoucher = () => {
       }
   };
 
+  const isRowFilled = (row) => {
+    return (row.accountname || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+    // First row is always editable
+    if (rowIndex === 0) return true;
+
+    // ALL rows above must be filled
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -1448,6 +1464,7 @@ const CashVoucher = () => {
               <tr key={`${item.accountname}-${index}`}>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                   className="Account"
                     style={{
                       height: 40,
@@ -1473,6 +1490,7 @@ const CashVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="Narration"
                     list={showNarrationSuggestions ? "narrationList" : undefined}
                     style={{
@@ -1519,7 +1537,7 @@ const CashVoucher = () => {
                     onChange={(e) =>
                       handleNumberChange(e, index, "payment_debit")
                     }
-                    disabled={item.disablePayment}
+                    disabled={!canEditRow(index) || item.disablePayment}
                     ref={(el) => (paymentRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
                     onBlur={() => handlePkgsBlur(index)}
@@ -1543,7 +1561,7 @@ const CashVoucher = () => {
                     onChange={(e) =>
                       handleNumberChange(e, index, "receipt_credit")
                     }
-                    disabled={item.disableReceipt}
+                    disabled={!canEditRow(index) || item.disableReceipt}
                     ref={(el) => (receiptRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
                     onBlur={() => handleWeightBlur(index)}
@@ -1552,6 +1570,7 @@ const CashVoucher = () => {
                 </td>
                 <td style={{ padding: 0, width: 160 }}>
                   <input
+                  disabled={!canEditRow(index)}
                   className="Discounts"
                     style={{
                       height: 40,

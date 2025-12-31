@@ -317,12 +317,6 @@ const Purchase = () => {
   const vBillNoRef = useRef(null);
   const tableRef = useRef(null);
 
-  // useEffect(() => {
-  //   if (customerNameRef.current) {
-  //     customerNameRef.current.focus();
-  //   }
-  // }, []);
-
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
@@ -776,6 +770,12 @@ const Purchase = () => {
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
+  const parseDDMMYYYY = (dateStr) => {
+    if (!dateStr) return null;
+    const [dd, mm, yyyy] = dateStr.split("/");
+    return new Date(yyyy, mm - 1, dd);
+  };
+
   const fetchData = async () => {
     try {
       let response;
@@ -796,21 +796,26 @@ const Purchase = () => {
 
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
-        // Ensure date is valid
-        const isValidDate = (date) => {
-          return !isNaN(Date.parse(date));
-        };
+        // // Ensure date is valid
+        // const isValidDate = (date) => {
+        //   return !isNaN(Date.parse(date));
+        // };
 
-        // Update form data, use current date if date is invalid or not available
-        const updatedFormData = {
-          ...lastEntry.formData,
-          date: isValidDate(lastEntry.formData.date)
-            ? lastEntry.formData.date
-            : new Date().toLocaleDateString("en-IN"),
-        };
+        // // Update form data, use current date if date is invalid or not available
+        // const updatedFormData = {
+        //   ...lastEntry.formData,
+        //   date: isValidDate(lastEntry.formData.date)
+        //     ? lastEntry.formData.date
+        //     : new Date().toLocaleDateString("en-IN"),
+        // };
 
-        setFirstTimeCheckData("DataAvailable");
-        setFormData(updatedFormData);
+        // setFirstTimeCheckData("DataAvailable");
+        // setFormData(updatedFormData);
+        const apiDate = lastEntry.formData.date; // "29/12/2025"
+        const parsedDate = parseDDMMYYYY(apiDate);
+
+        setFormData(lastEntry.formData);     // keep string as-is
+        setSelectedDate(parsedDate);     // Date object for DatePicker
         //console.log(updatedFormData, "Formdata2");
 
         // Update items and supplier details
@@ -830,8 +835,10 @@ const Purchase = () => {
         }
 
         // Set data and index
-        setData1({ ...lastEntry, formData: updatedFormData });
-        setIndex(lastEntry.vno);
+        setData1(lastEntry);
+        // setData1({ ...lastEntry, formData: updatedFormData });
+         setIndex(lastEntry.formData.vno);
+        // setIndex(lastEntry.vno);
         return lastEntry; // ✅ Return this for use in handleAdd
       } else {
         setFirstTimeCheckData("DataNotAvailable");
@@ -1068,6 +1075,9 @@ const Purchase = () => {
           setData1(nextData);
           setIndex(index + 1);
           setFormData(nextData.formData);
+          const apiDate = nextData.formData.date; // "29/12/2025"
+          const parsedDate = parseDDMMYYYY(apiDate);
+          setSelectedDate(parsedDate);     // Date object for DatePicker
 
           // Update items and supplier details
           const updatedItems = nextData.items.map((item) => ({
@@ -1106,6 +1116,9 @@ const Purchase = () => {
           setData1(prevData);
           setIndex(index - 1);
           setFormData(prevData.formData);
+          const apiDate = prevData.formData.date; // "29/12/2025"
+          const parsedDate = parseDDMMYYYY(apiDate);
+          setSelectedDate(parsedDate);     // Date object for DatePicker
 
           // Update items and supplier details
           const updatedItems = prevData.items.map((item) => ({
@@ -1142,6 +1155,9 @@ const Purchase = () => {
         setData1(firstData);
         setIndex(0);
         setFormData(firstData.formData);
+        const apiDate = firstData.formData.date; // "29/12/2025"
+        const parsedDate = parseDDMMYYYY(apiDate);
+        setSelectedDate(parsedDate);     // Date object for DatePicker
 
         // Update items and supplier details
         const updatedItems = firstData.items.map((item) => ({
@@ -1179,6 +1195,9 @@ const Purchase = () => {
         const lastIndex = response.data.length - 1;
         setIndex(lastIndex);
         setFormData(lastData.formData);
+        const apiDate = lastData.formData.date; // "29/12/2025"
+        const parsedDate = parseDDMMYYYY(apiDate);
+        setSelectedDate(parsedDate);     // Date object for DatePicker
 
         // Update items and supplier details
         const updatedItems = lastData.items.map((item) => ({
@@ -1325,6 +1344,9 @@ const Purchase = () => {
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
         setFormData(lastEntry.formData);
+        const apiDate = lastEntry.formData.date; // "29/12/2025"
+        const parsedDate = parseDDMMYYYY(apiDate);
+        setSelectedDate(parsedDate);     // Date object for DatePicker
         setData1(response.data.data);
         setItems(normalizeItems(lastEntry.items));
         setsupplierdetails(
@@ -2356,33 +2378,32 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  useEffect(() => {
-    if (formData.date) {
-      try {
-        let date;
+  // useEffect(() => {
+  //   if (formData.date) {
+  //     try {
+  //       let date;
 
-        // Check for dd/mm/yyyy
-        if (/^\d{2}\/\d{2}\/\d{4}$/.test(formData.date)) {
-          const [day, month, year] = formData.date.split("/").map(Number);
-          date = new Date(year, month - 1, day); // JS months are 0-based
-        } else {
-          // Otherwise try normal parsing (ISO etc.)
-          date = new Date(formData.date);
-        }
+  //       // Check for dd/mm/yyyy
+  //       if (/^\d{2}\/\d{2}\/\d{4}$/.test(formData.date)) {
+  //         const [day, month, year] = formData.date.split("/").map(Number);
+  //         date = new Date(year, month - 1, day); // JS months are 0-based
+  //       } else {
+  //         // Otherwise try normal parsing (ISO etc.)
+  //         date = new Date(formData.date);
+  //       }
 
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-
+  //       if (!isNaN(date.getTime())) {
+  //         setSelectedDate(date);
+  //       } else {
+  //         console.error("Invalid date value:", formData.date);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error parsing date:", error);
+  //     }
+  //   } else {
+  //     setSelectedDate(null);
+  //   }
+  // }, [formData.date]);
 
   const [expiredDate, setexpiredDate] = useState(null);
 
@@ -2713,7 +2734,7 @@ const handleKeyDown = (event, index, field) => {
     }
   };
   const gradientOptions = [
-    { label: "Lavender", value: "linear-gradient(to right, #e6e6fa, #b19cd9)" },
+    { label: "Lavender", value: "linear-gradient(to right, #d4d4fcff, #b19cd9)" },
     { label: "Yellow", value: "linear-gradient(to right, #fffac2, #ffdd57)" },
     { label: "Skyblue", value: "linear-gradient(to right, #ceedf0, #7fd1e4)" },
     { label: "Green", value: "linear-gradient(to right, #9ff0c3, #45a049)" },
@@ -3114,13 +3135,30 @@ const handleKeyDown = (event, index, field) => {
       onAfterPrint: () => setOpen(false), // auto-close after print
     });
   
-    const handlePrintClick = () => {
+  const handlePrintClick = () => {
     setOpen(true);
     setTimeout(() => {
       handlePrint();
       setOpen(false); // hide right after print
     }, 300);
-    };
+  };
+
+  const isRowFilled = (row) => {
+    return (row.sdisc || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+    // First row is always editable
+    if (rowIndex === 0) return true;
+
+    // ALL rows above must be filled
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <div>
       <div>
@@ -3159,28 +3197,6 @@ const handleKeyDown = (event, index, field) => {
             onBlur={() => validateDate(selectedDate)}
             customInput={<MaskedInput />}
           />
-          {/* <DatePicker
-            popperClassName="custom-datepicker-popper"
-            ref={datePickerRef}
-            className="DatePICKER"
-            id="date"
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => validateDate(selectedDate)} // ✅ call on blur
-            onChangeRaw={(e) => {
-              if (!e.target.value) return; // ✅ avoid undefined error
-
-              let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
-              if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
-
-              e.target.value = val; // Show formatted input
-            }}
-            readOnly={!isEditMode || isDisabled}
-          /> */}
           <div className="billdivz">
             <TextField
               className="billzNo custom-bordered-input"
@@ -3680,6 +3696,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.itemcode && (
                 <td style={{ padding: 0, width: 30 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="ItemCode"
                     style={{
                       height: 40,
@@ -3708,6 +3725,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.sdisc && (
                 <td style={{ padding: 0, width: 300 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="desc"
                     style={{
                       height: 40,
@@ -3734,6 +3752,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.hsncode && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Hsn"
                     style={{
                       height: 40,
@@ -3761,6 +3780,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.pcs && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="PCS"
                     style={{
                       height: 40,
@@ -3789,6 +3809,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.qty && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="QTY"
                     style={{
                       height: 40,
@@ -3817,6 +3838,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.rate && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Price"
                     style={{
                       height: 40,
@@ -3845,6 +3867,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.amount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Amount"
                     style={{
                       height: 40,
@@ -3873,6 +3896,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Disc"
                     style={{
                       height: 40,
@@ -3900,6 +3924,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="discount"
                     style={{
                       height: 40,
@@ -3927,6 +3952,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.gst && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Others"
                     style={{
                       height: 40,
@@ -3946,6 +3972,7 @@ const handleKeyDown = (event, index, field) => {
                 {tableData.others && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Others"
                     style={{
                       height: 40,
@@ -4926,7 +4953,7 @@ const handleKeyDown = (event, index, field) => {
           <Button
           ref={addButtonRef}
             className="Buttonz"
-            style={{backgroundColor: buttonColors[0] }}
+            style={{background: color }}
             onClick={handleAdd}
             disabled={!isAddEnabled}
           >
@@ -4934,7 +4961,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[1] }}
+            style={{background: color }}
             onClick={handleEditClick}
             disabled={!isAddEnabled}
           >
@@ -4942,7 +4969,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[2] }}
+            style={{background: color }}
             onClick={handlePrevious}
             disabled={!isPreviousEnabled}
           >
@@ -4950,7 +4977,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[3] }}
+            style={{background: color }}
             onClick={handleNext}
             disabled={!isNextEnabled}
           >
@@ -4958,7 +4985,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[4] }}
+            style={{background: color }}
             onClick={handleFirst}
             disabled={!isFirstEnabled}
           >
@@ -4966,7 +4993,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[5] }}
+            style={{background: color }}
             onClick={handleLast}
             disabled={!isLastEnabled}
           >
@@ -4974,7 +5001,7 @@ const handleKeyDown = (event, index, field) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[6] }}
+            style={{background: color }}
             disabled={!isSearchEnabled}
             onClick={() => {
               fetchAllBills();
@@ -4998,7 +5025,7 @@ const handleKeyDown = (event, index, field) => {
             ref={printButtonRef}
             className="Buttonz"
             onClick={openPrintMenu}
-            style={{  backgroundColor: buttonColors[7] }}
+            style={{background: color }}
             disabled={!isPrintEnabled}
           >
             Print
@@ -5014,7 +5041,7 @@ const handleKeyDown = (event, index, field) => {
             />
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[8] }}
+            style={{background: color }}
             onClick={handleDeleteClick}
             disabled={!isDeleteEnabled}
           >
@@ -5023,7 +5050,7 @@ const handleKeyDown = (event, index, field) => {
           <Button
             onClick={handleExit}
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[9] }}
+            style={{background: color }}
           >
             Exit
           </Button>
@@ -5032,7 +5059,7 @@ const handleKeyDown = (event, index, field) => {
             className="Buttonz"
             onClick={handleDataSave}
             disabled={!isSubmitEnabled}
-            style={{ backgroundColor: buttonColors[10] }}
+            style={{background: color }}
           >
             Save
           </Button>

@@ -8,9 +8,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import StockSummPrint from "./StockSummPrint";
 import { useNavigate } from "react-router-dom";
 import financialYear from "../Shared/financialYear";
+import useCompanySetup from "../Shared/useCompanySetup";
 
 const StockSummary = () => {
 
+  const {decimals} = useCompanySetup();
   const navigate = useNavigate();
   const handleRowKeyDown = (e, sdisc) => {
     if (e.key === "Enter") {
@@ -136,7 +138,7 @@ const StockSummary = () => {
             (item) =>
               item.formData?.Aheads?.trim().toLowerCase() === normalizedAhead
           );
-          const opening = parseFloat(matchingStock?.formData?.openwtsz || 0);
+          const opening = parseFloat(matchingStock?.formData?.openwts || 0);
 
           const purchases = purchaseRes.data.flatMap((purchase) =>
             purchase.items
@@ -182,7 +184,7 @@ const StockSummary = () => {
           let totalSale = 0;
 
           // NEW for PKGS
-          let pcsOpening = parseFloat(matchingStock?.formData?.openpcsz || 0);
+          let pcsOpening = parseFloat(matchingStock?.formData?.openpcs || 0);
           let pcsClosing = pcsOpening;
           let totalPcsPur = 0;
           let totalPcsSale = 0;
@@ -206,14 +208,14 @@ const StockSummary = () => {
             id: `ahead-${normalizedAhead}`,
             date: "",
             sdisc: ahead,
-            pcsOp: pcsOpening.toFixed(3),
-            opening: opening.toFixed(3),
-            pcsPur: totalPcsPur.toFixed(3),
-            purRec: totalPurRec.toFixed(3),
-            pcsSale: totalPcsSale.toFixed(3),
-            sale: totalSale.toFixed(3),
-            pcsClosing: pcsClosing.toFixed(3),
-            closing: prevClosing.toFixed(3),
+            pcsOp: pcsOpening.toFixed(decimals),
+            opening: opening.toFixed(decimals),
+            pcsPur: totalPcsPur.toFixed(decimals),
+            purRec: totalPurRec.toFixed(decimals),
+            pcsSale: totalPcsSale.toFixed(decimals),
+            sale: totalSale.toFixed(decimals),
+            pcsClosing: pcsClosing.toFixed(decimals),
+            closing: prevClosing.toFixed(decimals),
           });
         }
 

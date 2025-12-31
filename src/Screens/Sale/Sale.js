@@ -2926,7 +2926,7 @@ const handleKeyDown = (event, index, field) => {
   };
 
   const gradientOptions = [
-    { label: "Lavender", value: "linear-gradient(to right, #e6e6fa, #b19cd9)" },
+    { label: "Lavender", value: "linear-gradient(to right, #d4d4fcff, #b19cd9)" },
     { label: "Yellow", value: "linear-gradient(to right, #fffac2, #ffdd57)" },
     { label: "Skyblue", value: "linear-gradient(to right, #ceedf0, #7fd1e4)" },
     { label: "Green", value: "linear-gradient(to right, #9ff0c3, #45a049)" },
@@ -3079,6 +3079,22 @@ const handleKeyDownExp = (e, fieldName, index) => {
       handlePrint();
       setOpen(false); // hide right after print
     }, 300);
+    };
+
+    const isRowFilled = (row) => {
+      return (row.sdisc || "").trim() !== "";
+    };
+    const canEditRow = (rowIndex) => {
+      // First row is always editable
+      if (rowIndex === 0) return true;
+
+      // ALL rows above must be filled
+      for (let i = 0; i < rowIndex; i++) {
+        if (!isRowFilled(items[i])) {
+          return false;
+        }
+      }
+      return true;
     };
 
   return (
@@ -3682,6 +3698,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.itemcode && (
                 <td style={{ padding: 0, width: 30 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="ItemCode"
                     style={{
                       height: 40,
@@ -3710,6 +3727,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.sdisc && (
                 <td style={{ padding: 0, width: 300 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="desc"
                     style={{
                       height: 40,
@@ -3736,6 +3754,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.hsncode && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Hsn"
                     style={{
                       height: 40,
@@ -3763,6 +3782,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.pcs && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="PCS"
                     style={{
                       height: 40,
@@ -3791,6 +3811,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.qty && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="QTY"
                     style={{
                       height: 40,
@@ -3819,6 +3840,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.rate && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Price"
                     style={{
                       height: 40,
@@ -3847,6 +3869,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.amount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Amount"
                     style={{
                       height: 40,
@@ -3875,6 +3898,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Disc"
                     style={{
                       height: 40,
@@ -3902,6 +3926,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                   id="discount"
                     className="discount"
                     style={{
@@ -3930,6 +3955,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.gst && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Others"
                     style={{
                       height: 40,
@@ -3949,6 +3975,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 {tableData.others && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Others"
                     style={{
                       height: 40,
@@ -4780,7 +4807,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           <Button
             ref={addButtonRef} 
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[0] }}
+            style={{ background: color }}
             onClick={handleAdd}
             disabled={!isAddEnabled}
           >
@@ -4797,7 +4824,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           )}
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[1] }}
+            style={{ background: color }}
             onClick={handleEditClick}
             disabled={!isAddEnabled}
           >
@@ -4805,7 +4832,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{backgroundColor: buttonColors[2] }}
+            style={{background: color }}
             onClick={handlePrevious}
             disabled={!isPreviousEnabled}
           >
@@ -4813,7 +4840,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{backgroundColor: buttonColors[3] }}
+            style={{background: color }}
             onClick={handleNext}
             disabled={!isNextEnabled}
           >
@@ -4821,7 +4848,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[4] }}
+            style={{background: color }}
             onClick={handleFirst}
             disabled={!isFirstEnabled}
           >
@@ -4829,7 +4856,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[5] }}
+            style={{background: color }}
             onClick={handleLast}
             disabled={!isLastEnabled}
           >
@@ -4837,7 +4864,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[6] }}
+            style={{background: color }}
             disabled={!isSearchEnabled}
             onClick={() => {
               fetchAllBills();
@@ -4852,7 +4879,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
             // onClick={handleOpen}
             onClick={openPrintMenu}
             // onClick={handleViewFAVoucher}
-            style={{  backgroundColor: buttonColors[7] }}
+            style={{background: color }}
             disabled={!isPrintEnabled}
           >
             Print
@@ -4870,7 +4897,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           
           <Button
             className="delete"
-            style={{ backgroundColor: buttonColors[8] }}
+            style={{background: color }}
             onClick={handleDeleteClick}
             disabled={!isDeleteEnabled}
           >
@@ -4878,7 +4905,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[9] }}
+            style={{background: color }}
             onClick={handleExit}
           >
             Exit
@@ -4888,7 +4915,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
             className="Buttonz"
             onClick={handleDataSave}
             disabled={!isSubmitEnabled}
-            style={{ backgroundColor: buttonColors[10] }}
+            style={{background: color }}
           >
             Save
           </Button>

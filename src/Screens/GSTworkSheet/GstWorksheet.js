@@ -117,31 +117,6 @@ export default function GstWorksheet() {
     entries: [],
   });
 
-  // Fetch function called when clicking View
-  // const handleView = async () => {
-  //   setError("");
-  //   setLoading(true);
-  //   try {
-  //     const [saleRes, purchaseRes] = await Promise.all([
-  //       fetch(SALE_API),
-  //       fetch(PURCHASE_API),
-  //     ]);
-
-  //     if (!saleRes.ok) throw new Error("Sale API fetch failed");
-  //     if (!purchaseRes.ok) throw new Error("Purchase API fetch failed");
-
-  //     const saleJson = await saleRes.json();
-  //     const purchaseJson = await purchaseRes.json();
-
-  //     setSaleData(saleJson || []);
-  //     setPurchaseData(purchaseJson || []);
-  //   } catch (e) {
-  //     console.error(e);
-  //     setError(e.message || "Failed to fetch APIs");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
    useEffect(() => {
     const fetchEntries = async () => {
       setError("");

@@ -20,3 +20,7 @@
     display: none !important;
   }
 }
+
+.selected-rowId {
+  background-color: #fff3cd !important; /* light yellow */
+}

@@ -1260,6 +1260,24 @@ const handleSearch = async (searchDate) => {
     updatedItems[index].credit = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
+
+  const isRowFilled = (row) => {
+    return (row.accountname || "").trim() !== "";
+  };
+
+  const canEditRow = (rowIndex) => {
+    // First row is always editable
+    if (rowIndex === 0) return true;
+
+    // ALL rows above must be filled
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -1375,6 +1393,7 @@ const handleSearch = async (searchDate) => {
                 {/* Use a combination of accountname and index as key */}
                 <td style={{ padding: 0}}>
                   <input
+                  disabled={!canEditRow(index)}
                   className="Account"
                     style={{
                       height: 40,
@@ -1396,6 +1415,7 @@ const handleSearch = async (searchDate) => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                   className="Narration"
                   list={showNarrationSuggestions ? "narrationList" : undefined}
                     style={{
@@ -1439,7 +1459,7 @@ const handleSearch = async (searchDate) => {
                     readOnly={!isEditMode || isDisabled}
                     value={item.debit}
                     onChange={(e) => handleNumberChange(e, index, "debit")}
-                    disabled={item.disableDebit} // Disable debit field if disableDebit is true
+                    disabled={!canEditRow(index) || item.disableDebit}
                     ref={(el) => (debitRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "debit")}
                     onBlur={() => handlePkgsBlur(index)}
@@ -1460,7 +1480,7 @@ const handleSearch = async (searchDate) => {
                     readOnly={!isEditMode || isDisabled}
                     value={item.credit}
                     onChange={(e) => handleNumberChange(e, index, "credit")}
-                    disabled={item.disableCredit} // Disable credit field if disableCredit is true
+                    disabled={!canEditRow(index) || item.disableCredit}
                     ref={(el) => (credittRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "credit")}
                     onBlur={() => handleWeightBlur(index)}

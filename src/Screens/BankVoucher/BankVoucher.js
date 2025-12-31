@@ -1620,6 +1620,21 @@ const BankVoucher = () => {
     }
   };
 
+  const isRowFilled = (row) => {
+    return (row.accountname || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+    // First row is always editable
+    if (rowIndex === 0) return true;
+
+    // ALL rows above must be filled
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
+      }
+    }
+    return true;
+  };
   return (
     <div>
       <ToastContainer />
@@ -1645,28 +1660,6 @@ const BankVoucher = () => {
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
           />
-          {/* <DatePicker
-            popperClassName="custom-datepicker-popper"
-            ref={datePickerRef}
-            className="DatePICKER"
-            id="date"
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => checkFutureDate(selectedDate)} // ✅ call function on blur
-            onChangeRaw={(e) => {
-              if (!e.target.value) return; // ✅ avoid undefined error
-
-              let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
-              if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
-
-              e.target.value = val; // Show formatted input
-            }}
-            readOnly={!isEditMode || isDisabled}
-          /> */}
           <div style={{ marginLeft: 5 }}>
             <TextField
               className="custom-bordered-input"
@@ -1811,6 +1804,7 @@ const BankVoucher = () => {
               <tr key={index}>
                 <td style={{ padding: 0}}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="Account"
                     style={{
                       height: 40,
@@ -1846,7 +1840,7 @@ const BankVoucher = () => {
                     onChange={(e) =>
                       handleNumberChange(e, index, "payment_debit")
                     }
-                    disabled={item.disablePayment}
+                    disabled={!canEditRow(index) || item.disablePayment}
                     ref={(el) => (paymentDebitRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
                     onBlur={() => handlePkgsBlur(index)}
@@ -1869,7 +1863,7 @@ const BankVoucher = () => {
                     onChange={(e) =>
                       handleNumberChange(e, index, "receipt_credit")
                     }
-                    disabled={item.disableReceipt}
+                    disabled={!canEditRow(index) || item.disableReceipt}
                     ref={(el) => (receiptCreditRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
                     onBlur={() => handleWeightBlur(index)}
@@ -1878,6 +1872,7 @@ const BankVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="Discounts"
                     readOnly={!isEditMode || isDisabled}
                     style={{
@@ -1900,6 +1895,7 @@ const BankVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="Totals"
                     readOnly
                     style={{
@@ -1922,6 +1918,7 @@ const BankVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="Bankcharges"
                     readOnly={!isEditMode || isDisabled}
                     style={{
@@ -1944,6 +1941,7 @@ const BankVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="TDSrs"
                     readOnly={!isEditMode || isDisabled}
                     style={{
@@ -1966,6 +1964,7 @@ const BankVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="chnqBank"
                     readOnly={!isEditMode || isDisabled}
                     style={{
@@ -1988,6 +1987,7 @@ const BankVoucher = () => {
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="REM"
                     list={showNarrationSuggestions ? "narrationList" : undefined}
                     readOnly={!isEditMode || isDisabled}
