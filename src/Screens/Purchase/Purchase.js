@@ -3147,16 +3147,19 @@ const handleKeyDown = (event, index, field) => {
     return (row.sdisc || "").trim() !== "";
   };
   const canEditRow = (rowIndex) => {
-    // First row is always editable
-    if (rowIndex === 0) return true;
+      // 🔒 If not in edit mode, nothing is editable
+      if (!isEditMode) return false;
 
-    // ALL rows above must be filled
-    for (let i = 0; i < rowIndex; i++) {
-      if (!isRowFilled(items[i])) {
-        return false;
+      // First row is editable in edit mode
+      if (rowIndex === 0) return true;
+
+      // All previous rows must be filled
+      for (let i = 0; i < rowIndex; i++) {
+        if (!isRowFilled(items[i])) {
+          return false;
+        }
       }
-    }
-    return true;
+      return true;
   };
 
   return (
@@ -3793,7 +3796,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.pkgs} // Show raw value during input
+                    value={Number(item.pkgs) === 0 ? "" : item.pkgs}
                     onChange={(e) =>
                       handleItemChange(index, "pkgs", e.target.value)
                     }
@@ -3822,7 +3825,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.weight} // Show raw value during input
+                    value={Number(item.weight) === 0 ? "" : item.weight}
                     onChange={(e) =>
                       handleItemChange(index, "weight", e.target.value)
                     }
@@ -3851,7 +3854,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.rate} // Show raw value during input
+                    value={Number(item.rate) === 0 ? "" : item.rate}
                     onChange={(e) =>
                       handleItemChange(index, "rate", e.target.value)
                     }
@@ -3880,7 +3883,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.amount}
+                    value={Number(item.amount) === 0 ? "" : item.amount}
                     onChange={(e) =>
                       handleItemChange(index, "amount", e.target.value)
                     }
@@ -3907,7 +3910,7 @@ const handleKeyDown = (event, index, field) => {
                       padding: 5,
                       textAlign: "right",
                     }}
-                    value={item.disc}
+                    value={Number(item.disc) === 0 ? "" : item.disc}
                     onChange={(e) =>
                       handleItemChange(index, "disc", e.target.value)
                     }
@@ -3935,7 +3938,7 @@ const handleKeyDown = (event, index, field) => {
                       padding: 5,
                       textAlign: "right",
                     }}
-                    value={item.discount}
+                    value={Number(item.discount) === 0 ? "" : item.discount}
                     onChange={(e) =>
                       handleItemChange(index, "discount", e.target.value)
                     }
@@ -3964,7 +3967,7 @@ const handleKeyDown = (event, index, field) => {
                       textAlign: "center",
                     }}
                     maxLength={2}
-                    value={item.gst +"%"}
+                    value={Number(item.gst) === 0 ? "" : item.gst +"%"}
                     readOnly={!isEditMode || isDisabled}
                   />
                 </td>
@@ -3985,7 +3988,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     type="text"
-                    value={item.exp_before}
+                    value={Number(item.exp_before) === 0 ? "" : item.exp_before}
                     readOnly={!isEditMode || isDisabled}
                     onDoubleClick={() =>
                       handleDoubleClickAfter("exp_before", index)
@@ -4132,7 +4135,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     disabled
-                    value={item.ctax}
+                    value={Number(item.ctax) === 0 ? "" : item.ctax}
                     onChange={(e) =>
                       handleItemChange(index, "ctax", e.target.value)
                     }
@@ -4160,7 +4163,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     disabled
-                    value={item.stax}
+                    value={Number(item.stax) === 0 ? "" : item.stax}
                     onChange={(e) =>
                       handleItemChange(index, "stax", e.target.value)
                     }
@@ -4189,7 +4192,7 @@ const handleKeyDown = (event, index, field) => {
                     }}
                     maxLength={48}
                     disabled
-                    value={item.itax}
+                    value={Number(item.itax) === 0 ? "" : item.itax}
                     onChange={(e) =>
                       handleItemChange(index, "itax", e.target.value)
                     }

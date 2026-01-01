@@ -1264,12 +1264,14 @@ const handleSearch = async (searchDate) => {
   const isRowFilled = (row) => {
     return (row.accountname || "").trim() !== "";
   };
-
   const canEditRow = (rowIndex) => {
-    // First row is always editable
+    // 🔒 If not in edit mode, nothing is editable
+    if (!isEditMode) return false;
+
+    // First row is editable in edit mode
     if (rowIndex === 0) return true;
 
-    // ALL rows above must be filled
+    // All previous rows must be filled
     for (let i = 0; i < rowIndex; i++) {
       if (!isRowFilled(items[i])) {
         return false;
@@ -1457,7 +1459,7 @@ const handleSearch = async (searchDate) => {
                       paddingRight: 10,
                     }}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.debit}
+                    value={Number(item.debit) === 0 ? "" : item.debit}
                     onChange={(e) => handleNumberChange(e, index, "debit")}
                     disabled={!canEditRow(index) || item.disableDebit}
                     ref={(el) => (debitRefs.current[index] = el)}
@@ -1478,7 +1480,7 @@ const handleSearch = async (searchDate) => {
                       paddingRight: 10,
                     }}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.credit}
+                    value={Number(item.credit) === 0 ? "" : item.credit}
                     onChange={(e) => handleNumberChange(e, index, "credit")}
                     disabled={!canEditRow(index) || item.disableCredit}
                     ref={(el) => (credittRefs.current[index] = el)}

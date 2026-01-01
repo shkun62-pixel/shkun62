@@ -1624,16 +1624,19 @@ const BankVoucher = () => {
     return (row.accountname || "").trim() !== "";
   };
   const canEditRow = (rowIndex) => {
-    // First row is always editable
-    if (rowIndex === 0) return true;
+      // 🔒 If not in edit mode, nothing is editable
+      if (!isEditMode) return false;
 
-    // ALL rows above must be filled
-    for (let i = 0; i < rowIndex; i++) {
-      if (!isRowFilled(items[i])) {
-        return false;
+      // First row is editable in edit mode
+      if (rowIndex === 0) return true;
+
+      // All previous rows must be filled
+      for (let i = 0; i < rowIndex; i++) {
+        if (!isRowFilled(items[i])) {
+          return false;
+        }
       }
-    }
-    return true;
+      return true;
   };
   return (
     <div>
@@ -1836,7 +1839,7 @@ const BankVoucher = () => {
                       border: "none",
                       padding: 5,
                     }}
-                    value={item.payment_debit}
+                    value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
                     onChange={(e) =>
                       handleNumberChange(e, index, "payment_debit")
                     }
@@ -1859,7 +1862,7 @@ const BankVoucher = () => {
                       border: "none",
                       padding: 5,
                     }}
-                    value={item.receipt_credit}
+                    value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
                     onChange={(e) =>
                       handleNumberChange(e, index, "receipt_credit")
                     }
@@ -1883,7 +1886,7 @@ const BankVoucher = () => {
                       border: "none",
                       padding: 5,
                     }}
-                    value={item.discount}
+                    value={Number(item.discount) === 0 ? "" : item.discount}
                     onChange={(e) =>
                       handleItemChangeAcc(index, "discount", e.target.value)
                     }
@@ -1907,7 +1910,7 @@ const BankVoucher = () => {
                       padding: 5,
                       backgroundColor: "#e3f8e3",
                     }}
-                    value={item.Total}
+                    value={Number(item.Total) === 0 ? "" : item.Total}
                     onChange={(e) =>
                       handleItemChangeAcc(index, "Total", e.target.value)
                     }
@@ -1929,7 +1932,7 @@ const BankVoucher = () => {
                       border: "none",
                       padding: 5,
                     }}
-                    value={item.bankchargers}
+                    value={Number(item.bankchargers) === 0 ? "" : item.bankchargers}
                     onChange={(e) =>
                       handleItemChangeAcc(index, "bankchargers", e.target.value)
                     }
@@ -1952,7 +1955,7 @@ const BankVoucher = () => {
                       border: "none",
                       padding: 5,
                     }}
-                    value={item.tdsRs}
+                    value={Number(item.tdsRs) === 0 ? "" : item.tdsRs}
                     onChange={(e) =>
                       handleItemChangeAcc(index, "tdsRs", e.target.value)
                     }
@@ -2043,12 +2046,12 @@ const BankVoucher = () => {
           <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
             <td></td>
-            <td>{formData.totalpayment}</td>
-            <td>{formData.totalreceipt}</td>
-            <td>{formData.totaldiscount}</td>
+            <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
+            <td>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
+            <td>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
             <td></td>
-            <td>{formData.totalbankcharges}</td>
-             <td colSpan={3}></td>
+            <td>{Number(formData.totalbankcharges) === 0 ? "" : formData.totalbankcharges}</td>
+            <td colSpan={3}></td>
             {isEditMode && <td></td>}
           </tr>
           </tfoot>

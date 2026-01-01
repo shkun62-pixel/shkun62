@@ -12,6 +12,8 @@ import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 import financialYear from "../Shared/financialYear";
 
+const SEARCH_COL_STORAGE_KEY = "ledger_search_columns";
+
 const LedgerList = () => {
 
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
@@ -170,11 +172,33 @@ const LedgerList = () => {
     localStorage.setItem("flaggedRows", JSON.stringify([...flaggedRows]));
   }, [flaggedRows]);
 
-  // Auto focus search field on mount
   useEffect(() => {
-    if (searchRef.current) {
-      searchRef.current.focus();
-    }
+    const handleKeyDown = (e) => {
+      // Ignore modifier keys
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      const tag = document.activeElement?.tagName;
+
+      // If already typing in search → do nothing
+      if (document.activeElement === searchRef.current) return;
+
+      // If typing in any input/textarea EXCEPT search → ignore
+      if (tag === "INPUT" || tag === "TEXTAREA") {
+        if (document.activeElement.type === "checkbox") {
+          // checkbox focused → move focus back to search
+          searchRef.current?.focus();
+        }
+        return;
+      }
+
+      // Any printable key → focus search
+      if (e.key.length === 1 || e.key === "Backspace") {
+        searchRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Fetch ledger list
@@ -188,19 +212,6 @@ const LedgerList = () => {
       })
       .catch((err) => console.error(err));
   }, []);
-
-  // ✅ Handle search filtering
-  useEffect(() => {
-    const lower = searchTerm.toLowerCase();
-    const filtered = ledgers.filter((ledger) =>
-      ledger.formData.ahead.toLowerCase().includes(lower) ||
-      ledger.formData.city?.toLowerCase().includes(lower) ||
-      ledger.formData.gstNo?.toLowerCase().includes(lower) ||
-      ledger.formData.phone?.toLowerCase().includes(lower)
-    );
-    setFilteredLedgers(filtered);
-    setSelectedIndex(0); // reset highlight
-  }, [searchTerm, ledgers]);
 
   // 👉 Function to handle navigation based on vtype
   const handleTransactionSelect = (txn) => {
@@ -677,6 +688,92 @@ const LedgerList = () => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
+  const [searchColumns, setSearchColumns] = useState(() => {
+    const saved = localStorage.getItem(SEARCH_COL_STORAGE_KEY);
+  
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  
+    // default (first load only)
+    return ALL_COLUMNS.reduce((acc, col) => {
+      acc[col.key] = false;
+      return acc;
+    }, {});
+  });
+  useEffect(() => {
+    localStorage.setItem(
+      SEARCH_COL_STORAGE_KEY,
+      JSON.stringify(searchColumns)
+    );
+  }, [searchColumns]);
+  
+  
+  // ✅ Handle search filtering
+  useEffect(() => {
+    // ✅ If search is empty → show all ledgers
+    if (!searchTerm.trim()) {
+      setFilteredLedgers(ledgers);
+      setSelectedIndex(0);
+      return;
+    }
+
+    const lower = searchTerm.toLowerCase();
+
+    const activeCols = Object.keys(searchColumns).filter(
+      (key) => searchColumns[key]
+    );
+
+    const filtered = ledgers.filter((ledger) => {
+      const colsToSearch =
+        activeCols.length > 0 ? activeCols : ["ahead"];
+
+      return colsToSearch.some((key) => {
+        const value = ledger.formData[key]?.toString().toLowerCase();
+        if (!value) return false;
+
+        // No checkbox → prefix search on NAME
+        if (activeCols.length === 0) {
+          return value.startsWith(lower);
+        }
+
+        // Checkbox selected → contains search
+        return value.includes(lower);
+      });
+    });
+
+    setFilteredLedgers(filtered);
+    setSelectedIndex(0);
+  }, [searchTerm, ledgers, searchColumns]);
+
+  // useEffect(() => {
+  //   const lower = searchTerm.toLowerCase();
+  
+  //   const activeCols = Object.keys(searchColumns).filter(
+  //     (key) => searchColumns[key]
+  //   );
+  
+  //   const filtered = ledgers.filter((ledger) => {
+  //     const colsToSearch =
+  //       activeCols.length > 0 ? activeCols : ["ahead"];
+  
+  //     return colsToSearch.some((key) => {
+  //       const value = ledger.formData[key]?.toString().toLowerCase();
+  //       if (!value) return false;
+  
+  //       // ✅ No checkbox → prefix search
+  //       if (activeCols.length === 0) {
+  //         return value.startsWith(lower);
+  //       }
+  
+  //       // ✅ Checkbox selected → contains search
+  //       return value.includes(lower);
+  //     });
+  //   });
+  
+  //   setFilteredLedgers(filtered);
+  //   setSelectedIndex(0);
+  // }, [searchTerm, ledgers, searchColumns]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -694,9 +791,36 @@ const LedgerList = () => {
                     width: col.width,
                     minWidth: col.width,
                     maxWidth: col.width,
+                    textAlign: "center",
+                    verticalAlign: "middle",
                   }}
                 >
-                  {col.label}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",   // 👈 center the group horizontally
+                      alignItems: "center",       // 👈 center vertically
+                      gap: "6px",                 // spacing between text & checkbox
+                    }}
+                  >
+                    {/* Column Label */}
+                    <span style={{ fontSize: "13px", whiteSpace: "nowrap" }}>
+                      {col.label}
+                    </span>
+
+                    {/* Header Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={!!searchColumns[col.key]}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setSearchColumns(prev => ({
+                          ...prev,
+                          [col.key]: !prev[col.key],
+                        }));
+                      }}
+                    />
+                  </div>
                 </th>
               ))}
             </tr>

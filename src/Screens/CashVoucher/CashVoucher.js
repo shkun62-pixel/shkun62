@@ -1341,16 +1341,19 @@ const CashVoucher = () => {
     return (row.accountname || "").trim() !== "";
   };
   const canEditRow = (rowIndex) => {
-    // First row is always editable
-    if (rowIndex === 0) return true;
+      // 🔒 If not in edit mode, nothing is editable
+      if (!isEditMode) return false;
 
-    // ALL rows above must be filled
-    for (let i = 0; i < rowIndex; i++) {
-      if (!isRowFilled(items[i])) {
-        return false;
+      // First row is editable in edit mode
+      if (rowIndex === 0) return true;
+
+      // All previous rows must be filled
+      for (let i = 0; i < rowIndex; i++) {
+        if (!isRowFilled(items[i])) {
+          return false;
+        }
       }
-    }
-    return true;
+      return true;
   };
 
   return (
@@ -1533,7 +1536,7 @@ const CashVoucher = () => {
                       padding: 5,
                     }}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.payment_debit}
+                    value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
                     onChange={(e) =>
                       handleNumberChange(e, index, "payment_debit")
                     }
@@ -1557,7 +1560,7 @@ const CashVoucher = () => {
                       padding: 5,
                     }}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.receipt_credit}
+                    value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
                     onChange={(e) =>
                       handleNumberChange(e, index, "receipt_credit")
                     }
@@ -1581,7 +1584,7 @@ const CashVoucher = () => {
                       border: "none",
                     }}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.discount}
+                    value={Number(item.discount) === 0 ? "" : item.discount}
                     onChange={(e) =>
                       handleItemChangeCus(index, "discount", e.target.value)
                     }
@@ -1618,9 +1621,9 @@ const CashVoucher = () => {
           <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
             <td colSpan={2}></td>
-            <td>{formData.totalpayment}</td>
-            <td>{formData.totalreceipt}</td>
-            <td>{formData.totaldiscount}</td>
+            <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
+            <td>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
+            <td>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
             {isEditMode && <td></td>}
           </tr>
           </tfoot>
