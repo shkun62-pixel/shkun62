@@ -423,36 +423,6 @@ const JournalVoucher = () => {
     }
 };
 
-  // const handleDeleteClick = async (id) => {
-  //   if (!id) {
-  //     toast.error("Invalid ID. Please select an item to delete.", {
-  //       position: "top-center",
-  //     });
-  //     return;
-  //   }
-  //   const userConfirmed = window.confirm("Are you sure you want to delete this item?");
-  //   if (!userConfirmed) return;
-  //   setIsSaving(true);
-  //   try {
-  //     const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/${data1._id}`;
-  //     const response = await axios.delete(apiEndpoint);
-
-  //     if (response.status === 200) {
-  //       toast.success("Data deleted successfully!", { position: "top-center" });
-  //       fetchData(); // Refresh the data after successful deletion
-  //     } else {
-  //       throw new Error(`Failed to delete data: ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting data:", error);
-  //     toast.error(`Failed to delete data. Error: ${error.message}`, {
-  //       position: "top-center",
-  //     });
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
-  // };
-
   const handleDeleteClick = async (id) => {
     if (!id) {
       toast.error("Invalid ID. Please select an item to delete.", {
@@ -573,16 +543,6 @@ const JournalVoucher = () => {
     setItems(filteredItems);
   };
 
-  // const handleProductSelectCus = (product) => {
-  //   setIsEditMode(true);
-  //   if (selectedItemIndexCus !== null) {
-  //     handleItemChangeCus(selectedItemIndexCus, "name", product.ahead);
-  //     setShowModalCus(false);
-  //     setTimeout(() => {
-  //       narrationRefs.current[selectedItemIndexCus].focus();
-  //     }, 100);
-  //   }
-  // };
   const handleProductSelectCus = (product) => {
     if (!product) {
       alert("No product received!");
@@ -863,7 +823,7 @@ const JournalVoucher = () => {
                 ...item, 
                 disableReceipt: item.disableReceipt || false,
             }));
-              setItems(normalizeItems(updatedItems));
+            setItems(normalizeItems(updatedItems));
             setIsDisabled(true);
         }
       }
@@ -1490,65 +1450,29 @@ const handleSearch = async (searchDate) => {
                   />
                 </td>
                 {isEditMode && (
-                <td style={{ padding: 0}}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center", // horizontally center
-                      alignItems: "center",      // vertically center
-                      height: "100%",            // takes full cell height
-                    }}
-                  >
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteItem(index)}
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
-                </td>
+                  <td style={{ padding: 0 }}>
+                    {canEditRow(index) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
+                      >
+                        <IconButton
+                          color="error"
+                          size="small"
+                          tabIndex={-1}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    )}
+                  </td>
                 )}
               </tr>
             ))}
-            {/* Total Row */}
-            {/* <tr style={{ backgroundColor: "white" }}>
-              <td style={{ padding: 5, fontWeight: "bold" }}> Total:</td>
-              <td style={{ padding: 0 }}></td>
-              <td style={{ padding: 0 }}>
-                <input
-                  style={{
-                    fontSize: `${fontSize}px`,
-                    width: "100%",
-                    boxSizing: "border-box",
-                    border: "none",
-                    paddingRight: 10,
-                    fontWeight: "bold",
-                    color:'black',textAlign:'right'
-                  }}
-                  value={formData.totaldebit}
-                  onChange={handleInputChange}
-                 disabled
-                />
-              </td>
-              <td style={{ padding: 0 }}>
-                <input
-                  style={{
-                    fontSize: `${fontSize}px`,
-                    width: "100%",
-                    boxSizing: "border-box",
-                    border: "none",
-                    paddingRight: 15,
-                    fontWeight: "bold",
-                      color:'black',textAlign:'right'
-                  }}
-                  value={formData.totalcredit}
-                  onChange={handleInputChange}
-                  disabled
-                />
-              </td>
-              <td style={{ padding: 0 }}></td>
-            </tr> */}
           </tbody>
           <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>

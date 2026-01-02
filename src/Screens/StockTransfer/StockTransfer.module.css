@@ -4,3 +4,9 @@
     margin-left: 50px;
     margin-top: -100px;
 }
+
+.TableStock {
+    max-height: 470px;
+    overflow-y: auto;
+    margin: 5px;
+}

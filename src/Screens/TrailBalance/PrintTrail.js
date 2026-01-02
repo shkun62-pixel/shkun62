@@ -19,7 +19,7 @@ const chunkItems = (items = [], firstChunkSize, otherChunkSize) => {
   return chunks;
 };
 
-const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate, currentGroupName }, ref) => {
+const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate, currentGroupName, handleExport }, ref) => {
 
   const { companyName, companyAdd, companyCity } = useCompanySetup();
 
@@ -42,14 +42,50 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
     maxHeight: "100vh",
   };
 
-    const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
+  // const formatDate = (date) => {
+  // if (!date) return "";
+  // const d = new Date(date);
+  // const day = String(d.getDate()).padStart(2, "0");
+  // const month = String(d.getMonth() + 1).padStart(2, "0");
+  // const year = d.getFullYear();
+  // return `${day}/${month}/${year}`;
+  // };
+
+  const formatDate = (input) => {
+    if (!input) return "";
+
+    // If already in dd/mm/yyyy format
+    if (typeof input === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+      return input;
+    }
+
+    let date;
+
+    // If input is dd-mm-yyyy or dd.mm.yyyy → normalize
+    if (typeof input === "string") {
+      const normalized = input.replace(/[-.]/g, "/");
+      const parts = normalized.split("/");
+
+      // Handle dd/mm/yyyy
+      if (parts.length === 3 && parts[0].length === 2) {
+        const [dd, mm, yyyy] = parts;
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      date = new Date(input);
+    } else {
+      date = new Date(input);
+    }
+
+    // Invalid date check
+    if (isNaN(date.getTime())) return "";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
     return `${day}/${month}/${year}`;
-    };
+  };
 
 
   return (
@@ -64,6 +100,18 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
                 style={{ background: "lightcoral", color: "black", marginRight: "10px" }}
             >
                 Print
+            </Button>
+             <Button
+                onClick={handleExport}
+                style={{
+                border: "none",
+                background: "darkred",
+                cursor: "pointer",
+                color: "white",
+                 marginRight: "10px"
+                }}
+            >
+                Export
             </Button>
 
             {/* Close button */}
@@ -117,7 +165,7 @@ const PrintTrail = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFro
               <h2 style={{ fontWeight: "bold", fontSize:"18px", marginTop: "10px" }}>{currentGroupName}</h2>
             )}
             <h2 style={{ fontWeight: "bold", marginTop: "10px",fontSize:"18px",marginRight:"10px" }}>
-                Period: {formatDate(ledgerFrom)} To {ledgerTo}
+                Period: {ledgerFrom} To {ledgerTo}
             </h2>
           </div>
         

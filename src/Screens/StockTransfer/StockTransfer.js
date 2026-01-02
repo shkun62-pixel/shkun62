@@ -52,21 +52,48 @@ const StockTransfer = () => {
     owner: "Owner",
     Balance:"",
     UOM:"",
-    totalIssue:"",
-    totalReceipt:"",
+    totalQtyIssue:"",
+    totalPcsIssue:"",
+    totalQtyReceipt:"",
+    totalPcsReceipt:"",
+
   });
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      Aheads: "",
-      Acodes: "",
-      Narration:"",
-      pcsIssue:"",
-      pcsReceipt:"",
-      qtyIssue:"",
-      qtyReceipt:"",
-    },
-  ]);
+  const MIN_ROWS = 9;
+
+  const createEmptyRow = (id) => ({
+    id,
+    Aheads: "",
+    Acodes: "",
+    Narration:"",
+    pcsIssue:"",
+    pcsReceipt:"",
+    qtyIssue:"",
+    qtyReceipt:"",
+  });
+
+  const normalizeItems = (items = []) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+  // const [items, setItems] = useState([
+  //   {
+  //     id: 1,
+  //     Aheads: "",
+  //     Acodes: "",
+  //     Narration:"",
+  //     pcsIssue:"",
+  //     pcsReceipt:"",
+  //     qtyIssue:"",
+  //     qtyReceipt:"",
+  //   },
+  // ]);
 // DateError
   useEffect(() => {
     const date = new Date();
@@ -182,7 +209,7 @@ const StockTransfer = () => {
           const updatedItems = lastEntry.items.map(item => ({
             ...item,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           // Set data and index
           setData1({ ...lastEntry, formData: updatedFormData });
           setIndex(lastEntry.voucherno);
@@ -203,22 +230,26 @@ const StockTransfer = () => {
       owner: "Owner",
       Balance:"",
       UOM:"",
+      totalQtyIssue:"",
+      totalPcsIssue:"",
+      totalQtyReceipt:"",
+      totalPcsReceipt:"",
       };
       const emptyItems = [
        {
-         id: 1,
-         Aheads: "",
-         Acodes: "",
-         Narration:"",
-         pcsIssue:"",
-      pcsReceipt:"",
-      qtyIssue:"",
-      qtyReceipt:"",
+        id: 1,
+        Aheads: "",
+        Acodes: "",
+        Narration:"",
+        pcsIssue:"",
+        pcsReceipt:"",
+        qtyIssue:"",
+        qtyReceipt:"",
        },
       ];
       // Set the empty data
       setFormData(emptyFormData);
-      setItems(emptyItems);
+      setItems(normalizeItems([]));
       setData1({
         formData: emptyFormData,
         items: emptyItems,
@@ -233,6 +264,29 @@ const StockTransfer = () => {
     }, []);
 
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const tableScrollRef = useRef(null);
+  const focusAndScroll = (refArray, rowIndex) => {
+    const inputEl = refArray.current?.[rowIndex];
+    const container = tableScrollRef.current;
+
+    if (!inputEl || !container) return;
+
+    // focus & select
+    inputEl.focus();
+    setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+    // find row
+    const rowEl = inputEl.closest("tr");
+    if (!rowEl) return;
+
+    const rowTop = rowEl.offsetTop;
+    const rowHeight = rowEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    // 🔥 key line — force visibility
+    container.scrollTop =
+      rowTop - containerHeight + rowHeight + 60;
+  };
 
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter") {
@@ -256,20 +310,40 @@ const StockTransfer = () => {
           break;
         case "pcsReceipt":
           if (qtyIssueRef.current[index]?.disabled) {
-            SaveButtonRef.current.focus();
+            handleAddItem();
+            setTimeout(() => {
+              focusAndScroll(StockNameRef, index + 1);
+            }, 0);
           } else {
-            qtyIssueRef.current[index]?.focus();
+            focusAndScroll(qtyIssueRef, index);
           }
           break;
+        // case "pcsReceipt":
+        //   if (qtyIssueRef.current[index]?.disabled) {
+        //     handleAddItem();
+        //   } else {
+        //     qtyIssueRef.current[index]?.focus();
+        //   }
+        //   break;
           case "qtyIssue":
             qtyreceiptRef.current[index]?.focus();
             break;
           case "qtyReceipt":
-            if (index === items.length - 1) {
-              handleAddItem();
-            }
-            StockNameRef.current[index + 1]?.focus();
-            break;
+          if (index === items.length - 1) {
+            handleAddItem();
+            setTimeout(() => {
+              focusAndScroll(StockNameRef, index + 1);
+            }, 0);
+          } else {
+            focusAndScroll(StockNameRef, index + 1);
+          }
+          break;
+          // case "qtyReceipt":
+          //   if (index === items.length - 1) {
+          //     handleAddItem();
+          //   }
+          //   StockNameRef.current[index + 1]?.focus();
+          //   break;
         default:
           break;
       }
@@ -327,8 +401,10 @@ const StockTransfer = () => {
           updatedItems[index]["Aheads"] = ""; // Reset gst if product not found
         }
       }
-      calculateTotalIssue();
-      calculateTotalReceipt();
+      calculateQtyIssue();
+      calculatePcsIssue();
+      calculateQtyRec();
+      calculatePcsRec();
       setItems(updatedItems);
     };
 
@@ -423,7 +499,7 @@ const StockTransfer = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setIsDisabled(true);
         }
       }
@@ -450,7 +526,7 @@ const handlePrevious = async () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setIsDisabled(true);
         }
       }
@@ -476,7 +552,7 @@ const handleFirst = async () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
       }
     } catch (error) {
@@ -502,7 +578,7 @@ const handleLast = async () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
       }
     } catch (error) {
@@ -520,21 +596,14 @@ const handleAdd = async () => {
       owner: "Owner",
       Balance:"",
       UOM:"",
+      totalQtyIssue:"",
+      totalPcsIssue:"",
+      totalQtyReceipt:"",
+      totalPcsReceipt:"",
     };
     setData([...data, newData]);
     setFormData(newData);
-    setItems([
-      {
-        id: 1,
-        Aheads: "",
-        Acodes: "",
-        Narration: "",
-        pcsIssue:"",
-        pcsReceipt:"",
-        qtyIssue:"",
-        qtyReceipt:"",
-      },
-    ]);
+    setItems(normalizeItems([]));
     setIndex(data.length);
     setIsAddEnabled(false);
     setIsSubmitEnabled(true);
@@ -619,7 +688,7 @@ const handleExit = async () => {
         const updatedItems = lastEntry.items.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
         setIndex(lastEntry.formData);
         setIsAddEnabled(true);
@@ -640,20 +709,13 @@ const handleExit = async () => {
           owner: "Owner",
           Balance:"",
           UOM:"",
+          totalQtyIssue:"",
+          totalPcsIssue:"",
+          totalQtyReceipt:"",
+          totalPcsReceipt:"",
         };
         setFormData(newData); // Set default form data
-        setItems([
-          {
-            id: 1,
-            Aheads: "",
-            Acodes: "",
-            Narration:"",
-            pcsIssue:"",
-            pcsReceipt:"",
-            qtyIssue:"",
-            qtyReceipt:"",
-          },
-        ]);
+        setItems(normalizeItems([]));
         setIsDisabled(true); // Disable fields after loading the default data
       }
     } catch (error) {
@@ -683,8 +745,10 @@ const handleSaveClick = async () => {
             owner: formData.owner,
             Balance: formData.Balance,
             UOM: formData.UOM,
-            totalIssue: formData.totalIssue,
-            totalReceipt: formData.totalReceipt,
+            totalQtyIssue: formData.totalQtyIssue,
+            totalPcsIssue: formData.totalPcsIssue,
+            totalQtyReceipt: formData.totalQtyReceipt,
+            totalPcsReceipt: formData.totalPcsReceipt,
           },
           items: nonEmptyItems.map((item) => ({
             id: item.id,
@@ -706,8 +770,10 @@ const handleSaveClick = async () => {
             owner: formData.owner,
             Balance: formData.Balance,
             UOM: formData.UOM,
-            totalIssue: formData.totalIssue,
-            totalReceipt: formData.totalReceipt,
+            totalQtyIssue: formData.totalQtyIssue,
+            totalPcsIssue: formData.totalPcsIssue,
+            totalQtyReceipt: formData.totalQtyReceipt,
+            totalPcsReceipt: formData.totalPcsReceipt,
           },
           items: nonEmptyItems.map((item) => ({
             id: item.id,
@@ -779,33 +845,44 @@ const handleItemRateBlur = (id, field) => {
     }));
   };
 
-    const calculateTotalIssue = () => {
-    // Calculate the total payment by summing up all payment_debit values
+  const calculateQtyIssue = () => {
     const QtyIssue = items.reduce((acc, item) => {
       return acc + parseFloat(item.qtyIssue || 0);
     }, 0);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalQtyIssue: QtyIssue.toFixed(3),
+    }));
+  };
+  const calculatePcsIssue = () => {
     const PcsIssue = items.reduce((acc, item) => {
       return acc + parseFloat(item.pcsIssue || 0);
     }, 0);
-    let TotalIssue = QtyIssue + PcsIssue;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalIssue: TotalIssue.toFixed(2),
+      totalPcsIssue: PcsIssue.toFixed(3),
     }));
   };
 
-  const calculateTotalReceipt = () => {
+  const calculateQtyRec = () => {
     // Calculate the total receipt by summing up all receipt_credit values
     const QtyReceipt = items.reduce((acc, item) => {
       return acc + parseFloat(item.qtyReceipt || 0);
     }, 0);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalQtyReceipt: QtyReceipt.toFixed(3),
+    }));
+  };
+
+  const calculatePcsRec = () => {
+    // Calculate the total receipt by summing up all receipt_credit values
     const PcsReceipt = items.reduce((acc, item) => {
       return acc + parseFloat(item.pcsReceipt || 0);
     }, 0);
-    let TotalReceipt = QtyReceipt + PcsReceipt;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalReceipt: TotalReceipt.toFixed(2),
+      totalPcsReceipt: PcsReceipt.toFixed(3),
     }));
   };
 
@@ -889,290 +966,226 @@ const handleItemRateBlur = (id, field) => {
         </FormControl>
         </div>
         </div>
-      <div style={{marginTop:5}} className="tablediv">
-              <Table  className="custom-table">
-                <thead style={{background: "skyblue", textAlign: "center", position: "sticky", top: 0,}}>
-                  <tr style={{ color: "#575a5a" }}>
-                    <th>STOCK ITEM NAME</th>
-                    <th>NARRATION</th>
-                    <th>A.CODE</th>
-                    <th>PCS ISSUE</th>  
-                    <th>PCS RECEIPT</th>
-                    <th> QTY ISSUE</th>
-                    <th>QTY RECEIPT</th>
-                    {isEditMode && <th className="text-center">DELETE</th>}
-                  </tr>
-                </thead>
-                <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
-                  {items.map((item, index) => (
-                    <tr key={item.id}>
-                      <td style={{ padding: 0,width:400}}>
-                        <input
-                        className="ItemCode"
-                          style={{height: 40,fontSize: `${fontSize}px`,width: "100%",boxSizing: "border-box",border: "none",padding: 5,}}
-                          type="text"
-                          value={item.Aheads}
-                          onKeyDown={(e) => {handleOpenModal(e, index, "Aheads");
-                          //  handleOpenModalBack(e, index, "vcode");
-                          handleKeyDown(e, index, "Aheads");
-                          }}
-                          readOnly={!isEditMode || isDisabled}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          ref={(el) => (StockNameRef.current[index] = el)}
-                        />
-                      </td>
-                      <td style={{ padding: 0,width:350}}>
-                        <input
-                          className="Hsn"
-                          style={{
-                            height: 40,
-                            fontSize: `${fontSize}px`,
-                            width: "100%",
-                            boxSizing: "border-box",
-                            border: "none",
-                            padding: 5,
-                          }}
-                          readOnly={!isEditMode || isDisabled}
-                          value={item.Narration}
-                          onChange={(e) =>handleItemChange(index, "Narration", e.target.value)}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          onKeyDown={(e) => {  handleKeyDown(e, index, "Narration")}}
-                          ref={(el) => (NarrationRef.current[index] = el)}
-                        />
-                      </td>
-                      <td style={{ padding: 0,width:120}}>
-                        <input
-                        className="desc"
-                          style={{
-                            height: 40,
-                            fontSize: `${fontSize}px`,
-                            width: "100%",
-                            boxSizing: "border-box",
-                            border: "none",
-                            padding: 5,
-                          }}
-                          readOnly
-                          value={item.Acodes}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          onKeyDown={(e) => {  handleKeyDown(e, index, "Acodes")}}
-                          ref={(el) => (AcCodeRef.current[index] = el)}
-                        />
-                      </td>
-                      <td style={{ padding: 0 }}>
-                        <input
-                        className="Amount"
-                          style={{
-                            height: 40,
-                            fontSize: `${fontSize}px`,
-                            width: "100%",
-                            boxSizing: "border-box",
-                            border: "none",
-                            padding: 5,
-                            textAlign: "right",
-                          }}
-                          readOnly={!isEditMode || isDisabled}
-                          maxLength={48}
-                          value={item.pcsIssue}
-                          onChange={(e) =>handleItemChange(index, "pcsIssue", e.target.value)}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          onBlur={() => handleItemRateBlur(item.id, "pcsIssue")}
-                          onKeyDown={(e) => {  handleKeyDown(e, index, "pcsIssue")}}
-                          ref={(el) => (pcsIssueRef.current[index] = el)}
-                          disabled={parseFloat(item.qtyIssue) > 0}
-                        />
-                      </td>
-                      <td style={{ padding: 0 }}>
-                        <input
-                        className="Amount"
-                          style={{
-                            height: 40,
-                            fontSize: `${fontSize}px`,
-                            width: "100%",
-                            boxSizing: "border-box",
-                            border: "none",
-                            padding: 5,
-                            textAlign: "right",
-                          }}
-                          readOnly={!isEditMode || isDisabled}
-                          maxLength={48}
-                          value={item.pcsReceipt}
-                          onChange={(e) =>handleItemChange(index, "pcsReceipt", e.target.value)}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          onBlur={() => handleItemRateBlur(item.id, "pcsReceipt")}
-                          onKeyDown={(e) => {  handleKeyDown(e, index, "pcsReceipt")}}
-                          ref={(el) => (pcsReceiptRef.current[index] = el)}
-                          disabled={parseFloat(item.qtyReceipt) > 0}
-                        />
-                      </td>
-                      <td style={{ padding: 0 }}>
-                        <input
-                        className="Amount"
-                          style={{
-                            height: 40,
-                            fontSize: `${fontSize}px`,
-                            width: "100%",
-                            boxSizing: "border-box",
-                            border: "none",
-                            padding: 5,
-                            textAlign: "right",
-                          }}
-                          readOnly={!isEditMode || isDisabled}
-                          maxLength={48}
-                          value={item.qtyIssue}
-                          onChange={(e) =>handleItemChange(index, "qtyIssue", e.target.value)}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          onBlur={() => handleItemRateBlur(item.id, "qtyIssue")}
-                          onKeyDown={(e) => {  handleKeyDown(e, index, "qtyIssue")}}
-                          ref={(el) => (qtyIssueRef.current[index] = el)}
-                          disabled={parseFloat(item.pcsIssue) > 0}
-                        />
-                      </td>
-                      <td style={{padding:0}}>
-                        <input
-                        className="Amount"
-                         style={{
-                            height: 40,
-                            fontSize: `${fontSize}px`,
-                            width: "100%",
-                            boxSizing: "border-box",
-                            border: "none",
-                            padding: 5,
-                            textAlign: "right",
-                          }}
-                          readOnly={!isEditMode || isDisabled}
-                          value={item.qtyReceipt}
-                          onChange={(e) =>handleItemChange(index, "qtyReceipt", e.target.value)}
-                          onFocus={(e) => e.target.select()}  // Select text on focus
-                          onBlur={() => handleItemRateBlur(item.id, "qtyReceipt")}
-                          onKeyDown={(e) => {  handleKeyDown(e, index, "qtyReceipt")}}
-                          ref={(el) => (qtyreceiptRef.current[index] = el)}
-                          disabled={parseFloat(item.pcsReceipt) > 0}
-                        />
-                      </td>
-                      {isEditMode && (
-                      <td style={{ padding: 0}}>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "center", // horizontally center
-                            alignItems: "center",      // vertically center
-                            height: "100%",            // takes full cell height
-                          }}
-                        >
-                          <IconButton
-                            color="error"
-                            onClick={() => handleDeleteItem(index)}
-                            size="small"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </div>
-                      </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-            {showModal && (
-            <ProductModal
-              products={products}
-              allFields={allFields}
-              onSelect={handleProductSelect}
-              onClose={handleModalDone}
-              tenant={tenant}
-              initialKey={pressedKey}
-              fetchParentProducts={fetchProducts}
-            />
-              // <ProductModal
-              //   allFields={allFields}
-              //   products={products}
-              //   onSelect={handleProductSelect}
-              //   onClose={() => setShowModal(false)}
-              //   fetchProducts={fetchProducts}
-              //   initialKey={pressedKey} // Pass the pressed key to the modal
-              // />
-            )}
+      <div ref={tableScrollRef} style={{marginTop:5}} className={styles.TableStock}>
+        <Table  className="custom-table">
+          <thead style={{background: "skyblue", textAlign: "center", position: "sticky", top: 0,}}>
+            <tr style={{ color: "#575a5a" }}>
+              <th>STOCK ITEM NAME</th>
+              <th>NARRATION</th>
+              <th>A.CODE</th>
+              <th>PCS ISSUE</th>  
+              <th>PCS RECEIPT</th>
+              <th> QTY ISSUE</th>
+              <th>QTY RECEIPT</th>
+              {isEditMode && <th className="text-center">DELETE</th>}
+            </tr>
+          </thead>
+          <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+            {items.map((item, index) => (
+              <tr key={item.id}>
+                <td style={{ padding: 0,width:400}}>
+                  <input
+                  className="ItemCode"
+                    style={{height: 40,fontSize: `${fontSize}px`,width: "100%",boxSizing: "border-box",border: "none",padding: 5,}}
+                    type="text"
+                    value={item.Aheads}
+                    onKeyDown={(e) => {handleOpenModal(e, index, "Aheads");
+                    //  handleOpenModalBack(e, index, "vcode");
+                    handleKeyDown(e, index, "Aheads");
+                    }}
+                    readOnly={!isEditMode || isDisabled}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    ref={(el) => (StockNameRef.current[index] = el)}
+                  />
+                </td>
+                <td style={{ padding: 0,width:350}}>
+                  <input
+                    className="Hsn"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    readOnly={!isEditMode || isDisabled}
+                    value={item.Narration}
+                    onChange={(e) =>handleItemChange(index, "Narration", e.target.value)}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onKeyDown={(e) => {  handleKeyDown(e, index, "Narration")}}
+                    ref={(el) => (NarrationRef.current[index] = el)}
+                  />
+                </td>
+                <td style={{ padding: 0,width:120}}>
+                  <input
+                  className="desc"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    readOnly
+                    value={item.Acodes}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onKeyDown={(e) => {  handleKeyDown(e, index, "Acodes")}}
+                    ref={(el) => (AcCodeRef.current[index] = el)}
+                  />
+                </td>
+                <td style={{ padding: 0 }}>
+                  <input
+                  className="Amount"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                      textAlign: "right",
+                    }}
+                    readOnly={!isEditMode || isDisabled}
+                    maxLength={48}
+                    value={item.pcsIssue}
+                    onChange={(e) =>handleItemChange(index, "pcsIssue", e.target.value)}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onBlur={() => handleItemRateBlur(item.id, "pcsIssue")}
+                    onKeyDown={(e) => {  handleKeyDown(e, index, "pcsIssue")}}
+                    ref={(el) => (pcsIssueRef.current[index] = el)}
+                    disabled={parseFloat(item.qtyIssue) > 0}
+                  />
+                </td>
+                <td style={{ padding: 0 }}>
+                  <input
+                  className="Amount"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                      textAlign: "right",
+                    }}
+                    readOnly={!isEditMode || isDisabled}
+                    maxLength={48}
+                    value={item.pcsReceipt}
+                    onChange={(e) =>handleItemChange(index, "pcsReceipt", e.target.value)}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onBlur={() => handleItemRateBlur(item.id, "pcsReceipt")}
+                    onKeyDown={(e) => {  handleKeyDown(e, index, "pcsReceipt")}}
+                    ref={(el) => (pcsReceiptRef.current[index] = el)}
+                    disabled={parseFloat(item.qtyReceipt) > 0}
+                  />
+                </td>
+                <td style={{ padding: 0 }}>
+                  <input
+                  className="Amount"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                      textAlign: "right",
+                    }}
+                    readOnly={!isEditMode || isDisabled}
+                    maxLength={48}
+                    value={item.qtyIssue}
+                    onChange={(e) =>handleItemChange(index, "qtyIssue", e.target.value)}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onBlur={() => handleItemRateBlur(item.id, "qtyIssue")}
+                    onKeyDown={(e) => {  handleKeyDown(e, index, "qtyIssue")}}
+                    ref={(el) => (qtyIssueRef.current[index] = el)}
+                    disabled={parseFloat(item.pcsIssue) > 0}
+                  />
+                </td>
+                <td style={{padding:0}}>
+                  <input
+                  className="Amount"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                      textAlign: "right",
+                    }}
+                    readOnly={!isEditMode || isDisabled}
+                    value={item.qtyReceipt}
+                    onChange={(e) =>handleItemChange(index, "qtyReceipt", e.target.value)}
+                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onBlur={() => handleItemRateBlur(item.id, "qtyReceipt")}
+                    onKeyDown={(e) => {  handleKeyDown(e, index, "qtyReceipt")}}
+                    ref={(el) => (qtyreceiptRef.current[index] = el)}
+                    disabled={parseFloat(item.pcsReceipt) > 0}
+                  />
+                </td>
+                {isEditMode && (
+                <td style={{ padding: 0}}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center", // horizontally center
+                      alignItems: "center",      // vertically center
+                      height: "100%",            // takes full cell height
+                    }}
+                  >
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDeleteItem(index)}
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
+                </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+              <td colSpan={3}></td>
+              <td>{Number(formData.totalPcsIssue) === 0 ? "" : formData.totalPcsIssue}</td>
+              <td>{Number(formData.totalPcsReceipt) === 0 ? "" : formData.totalPcsReceipt}</td>
+              <td>{Number(formData.totalQtyIssue) === 0 ? "" : formData.totalQtyIssue}</td>
+              <td>{Number(formData.totalQtyReceipt) === 0 ? "" : formData.totalQtyReceipt}</td>
+              {isEditMode && <td></td>}
+            </tr>
+          </tfoot>
+        </Table>
+      </div>
+      {showModal && (
+      <ProductModal
+        products={products}
+        allFields={allFields}
+        onSelect={handleProductSelect}
+        onClose={handleModalDone}
+        tenant={tenant}
+        initialKey={pressedKey}
+        fetchParentProducts={fetchProducts}
+      />
+        // <ProductModal
+        //   allFields={allFields}
+        //   products={products}
+        //   onSelect={handleProductSelect}
+        //   onClose={() => setShowModal(false)}
+        //   fetchProducts={fetchProducts}
+        //   initialKey={pressedKey} // Pass the pressed key to the modal
+        // />
+      )}
       <div className="addbutton" style={{ marginTop: 10 }}>
         <Button className="fw-bold btn-secondary">
           Add Row
         </Button>
       </div>
       <div className="Belowcontent">
-        <div style={{ display: "flex", flexDirection: "row", marginLeft: "25%" }}>
-          <TextField
-          // id="totalreceipt"
-          // value={formData.totalIssue}
-          // label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 160}}
-          />
-          <TextField
-          // id="totalreceipt"
-          // value={formData.totalIssue}
-          // label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 300,ml:1}}
-          />
-          <TextField
-          id="totalIssue"
-          value={formData.totalIssue}
-          label="TOTAL ISSUE"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150,ml:1}}
-          />
-          <TextField
-          id="totalReceipt"
-          value={formData.totalReceipt}
-          label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150,ml:1}}
-          />
-        </div>
           <div className="Buttonsgroupz">
           <Button
             disabled={!isAddEnabled}

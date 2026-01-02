@@ -16,6 +16,10 @@ export default function useCompanySetup() {
   const [cPin, setCPin] = useState(null);
   const [decimals, setDecimals] = useState(3);
 
+  const normalizeDecimals = (value) => {
+    const num = Number(value);
+    return !num ? 3 : num;
+  };
   useEffect(() => {
     const fetchCompanySetup = async () => {
       try {
@@ -41,7 +45,7 @@ export default function useCompanySetup() {
           setunitType(formDataFromAPI.unitType);
           setdateFrom(formDataFromAPI.Afrom);
           setCPin(formDataFromAPI.pin);
-          setDecimals(formDataFromAPI.Decimals);
+          setDecimals(normalizeDecimals(formDataFromAPI.Decimals));
         } else {
           throw new Error("Invalid response structure");
         }

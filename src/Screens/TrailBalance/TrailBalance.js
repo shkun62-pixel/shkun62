@@ -54,6 +54,8 @@ const TrailBalance = () => {
 
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
   const [ledgerToDate, setLedgerToDate] = useState(null);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
     Balance: "Active Balance",
@@ -77,6 +79,8 @@ const TrailBalance = () => {
     const fy = financialYear.getFYDates();
     setLedgerFromDate(formatDate(fy.start)); // converted
     setLedgerToDate(formatDate(fy.end));     // converted
+    setFromDate(fy.start); // converted
+    setToDate(fy.end);     // converted
   }, []);
 
   // Filters Transactions Account Statement 
@@ -98,15 +102,6 @@ const TrailBalance = () => {
   const [ledgerTotals, setLedgerTotals] = useState({}); // { ledgerId: { netPcs, netWeight } }
   const [progressiveDebit, setProgressiveDebit] = useState(0);
   const [progressiveCredit, setProgressiveCredit] = useState(0);
-
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState(() => new Date());
-
-  useEffect(() => {
-    if (!fromDate && dateFrom) {
-      setFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, fromDate]);
 
   const handleVtypeChange = (e) => {
     const { name, checked } = e.target;
@@ -1437,22 +1432,6 @@ const groupTotals = useMemo(() => {
               onChange={(e) => setLedgerFromDate(e.target.value)}
               className="fDate"
             />
-            {/* <DatePicker
-              className="fDate"
-              selected={ledgerFromDate}
-              onChange={(date) => setLedgerFromDate(date)}
-              onChangeRaw={(e) => {
-                if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
-
-                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-                e.target.value = val; // Show formatted input
-              }}
-              dateFormat="dd/MM/yyyy"
-            /> */}
-
             </div>
             <div style={{display:'flex',flexDirection:'row'}}>
             <span className="textform"><b>To:</b></span>
@@ -1463,41 +1442,6 @@ const groupTotals = useMemo(() => {
               onChange={(e) => setLedgerToDate(e.target.value)}
               className="toDate"
             />
-             {/* <DatePicker
-              className="toDate"
-              selected={ledgerToDate}
-              onChange={(date) => setLedgerToDate(date)}
-              onChangeRaw={(e) => {
-                if (!e?.target?.value) return; // ✅ Prevent crash when value is undefined
-
-                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-                e.target.value = val; // Show formatted input
-              }}
-              dateFormat="dd/MM/yyyy"
-            /> */}
-            {/* <DatePicker
-              className="toDate"
-              selected={ledgerToDate}
-              onChange={(date) => setLedgerToDate(date)}
-              onChangeRaw={(e) => {
-                let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-                if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
-
-                e.target.value = val; // Show formatted input
-              }}
-              dateFormat="dd/MM/yyyy"
-            /> */}
-
-            {/* <DatePicker
-              className="toDate"
-              selected={ledgerToDate}
-              onChange={(date) => setLedgerToDate(date)}
-              dateFormat="dd/MM/yyyy"
-            /> */}
             </div>
           </div>
            <h3 className="headerTrail">TRAIL BALANCE</h3>
@@ -1666,8 +1610,9 @@ const groupTotals = useMemo(() => {
             ledgerFrom={ledgerFromDate}
             ledgerTo={ledgerToDate}
             currentDate = {printDateValue}  // ✅ pass actual date
+            handleExport = {exportToExcel}
           />
-          <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}  onClick={exportToExcel}>Export </Button>
+          {/* <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}  onClick={exportToExcel}>Export </Button> */}
           <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}>Exit</Button>
           </div>
         </div>
@@ -1991,7 +1936,7 @@ const groupTotals = useMemo(() => {
               <div className="d-flex justify-content-between mt-2">
               <div>
                 <Button className="Buttonz"  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "}
+                {/* <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "} */}
                 <Button className="Buttonz"  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
                 <CoA
                   isOpen={isPrintOpen}
@@ -2001,6 +1946,7 @@ const groupTotals = useMemo(() => {
                   ledgerFrom={ledgerFromDate}
                   ledgerTo={ledgerToDate}
                   currentDate = {printDateValue}  // ✅ pass actual date
+                  handleExport = {exportAccountStatementToExcel}
                 />
                 <Button className="Buttonz"  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
               </div>
@@ -2339,8 +2285,9 @@ const groupTotals = useMemo(() => {
             ledgerTo={ledgerToDate}
             currentDate = {printDateValue}  // ✅ pass actual date
             currentGroupName = {currentGroupName}
+            handleExport = {exportGroupToExcel}
           />
-            <Button className="Buttonz" style={{marginRight:"10px"}} onClick={exportGroupToExcel}>Export</Button>
+            {/* <Button className="Buttonz" style={{marginRight:"10px"}} onClick={exportGroupToExcel}>Export</Button> */}
             <Button className="Buttonz" variant="secondary" onClick={() => setShowGroupModal(false)}>Close</Button>
           </div>
       

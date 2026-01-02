@@ -27,6 +27,7 @@ const CoA = ({
   ledgerTo,
   currentDate,
   selectedLedger,
+  handleExport
 }) => {
   const { companyName, companyAdd, companyCity, companyPAN } = useCompanySetup();
 
@@ -65,14 +66,42 @@ const CoA = ({
   const drcrFinal = finalBalance >= 0 ? "DR" : "CR";
   const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
 
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
+  const formatDate = (input) => {
+    if (!input) return "";
+
+    // If already in dd/mm/yyyy format
+    if (typeof input === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+      return input;
+    }
+
+    let date;
+
+    // If input is dd-mm-yyyy or dd.mm.yyyy → normalize
+    if (typeof input === "string") {
+      const normalized = input.replace(/[-.]/g, "/");
+      const parts = normalized.split("/");
+
+      // Handle dd/mm/yyyy
+      if (parts.length === 3 && parts[0].length === 2) {
+        const [dd, mm, yyyy] = parts;
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      date = new Date(input);
+    } else {
+      date = new Date(input);
+    }
+
+    // Invalid date check
+    if (isNaN(date.getTime())) return "";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
     return `${day}/${month}/${year}`;
   };
+
 
   return (
     <Modal style={{ zIndex: 100000 }} open={isOpen} onClose={handleClose}>
@@ -100,6 +129,14 @@ const CoA = ({
           >
             {loadingPrint ? "Preparing..." : "Print"}
           </Button>
+              <Button
+          variant="contained"
+            style={{
+              background: "lightcoral",
+              color: "black",
+              marginRight: "10px",
+            }}
+             onClick={handleExport}>Export</Button>
           <Button
             onClick={handleClose}
             style={{

@@ -4208,26 +4208,27 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 </td>
                 )}
                 {isEditMode && (
-                <td style={{ padding: 0}}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",  // horizontally center
-                      alignItems: "center",      // vertically center
-                      height: "100%",            // takes full cell height
-                    }}
-                  >
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteItem(index)}
-                      size="small"
-                      tabIndex={-1} // ✅ prevent focus when tabbing
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
-                </td>
-                )}
+                    <td style={{ padding: 0 }}>
+                      {canEditRow(index) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "100%",
+                          }}
+                        >
+                          <IconButton
+                            color="error"
+                            size="small"
+                            tabIndex={-1}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </div>
+                      )}
+                    </td>
+                  )}
               </tr>
             ))}
           </tbody>

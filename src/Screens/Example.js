@@ -118,6 +118,8 @@ import React,{useState,useRef,useEffect} from 'react'
 import ProductModal from './Modals/ProductModal';
 import { Table,Button } from 'react-bootstrap';
 import { useEditMode } from '../EditModeContext';
+import {IconButton} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Example = () => {
   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
@@ -460,6 +462,7 @@ const handleKeyDown = (event, index, field) => {
               <th>QTY</th>
               <th>RATE</th>
               <th>AMOUNT</th>
+              {isEditMode && <th className="text-center">DELETE</th>}
             </tr>
           </thead>
           <tbody>
@@ -593,7 +596,29 @@ const handleKeyDown = (event, index, field) => {
                     }}
                       ref={(el) => (amountRefs.current[index] = el)}
                   />
-                </td>      
+                </td>    
+                {isEditMode && (
+                  <td style={{ padding: 0 }}>
+                    {canEditRow(index) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
+                      >
+                        <IconButton
+                          color="error"
+                          size="small"
+                          tabIndex={-1}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -606,6 +631,7 @@ const handleKeyDown = (event, index, field) => {
               <td>{items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(3)}</td>
               <td></td>
               <td>{items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}</td>
+              <td></td>
           </tr>
           </tfoot>
 

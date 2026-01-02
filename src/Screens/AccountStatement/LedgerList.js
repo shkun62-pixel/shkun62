@@ -40,11 +40,11 @@ const LedgerList = () => {
   const [ledgerFromDate, setLedgerFromDate] = useState(null);
   const [ledgerToDate, setLedgerToDate] = useState(() => new Date());
 
-  useEffect(() => {
-    if (!ledgerFromDate && dateFrom) {
-      setLedgerFromDate(new Date(dateFrom));
-    }
-  }, [dateFrom, ledgerFromDate]);
+  // useEffect(() => {
+  //   if (!ledgerFromDate && dateFrom) {
+  //     setLedgerFromDate(new Date(dateFrom));
+  //   }
+  // }, [dateFrom, ledgerFromDate]);
 
   // Filters Transactions
   const [vtypeFilters, setVtypeFilters] = useState({
@@ -81,6 +81,8 @@ const LedgerList = () => {
     const fy = financialYear.getFYDates();
     setFromDate(fy.start); // converted
     setToDate(fy.end);     // converted
+    setLedgerFromDate(fy.start); // converted
+    setLedgerToDate(fy.end);     // converted
   }, []);
 
   // ✅ Update filtered transactions whenever filters or transactions change
@@ -1217,7 +1219,7 @@ const LedgerList = () => {
               <div className="d-flex justify-content-between mt-2">
               <div>
                 <Button className="Buttonz"  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "}
+                {/* <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "} */}
                 <Button className="Buttonz"  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
                 <CoA
                   isOpen={isPrintOpen}
@@ -1226,6 +1228,7 @@ const LedgerList = () => {
                   selectedLedger = {selectedLedger}
                   ledgerFrom={ledgerFromDate}
                   ledgerTo={ledgerToDate}
+                  handleExport = {exportAccountStatementToExcel} 
                 />
                 <Button className="Buttonz"  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
               </div>
