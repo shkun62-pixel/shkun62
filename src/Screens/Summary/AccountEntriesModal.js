@@ -234,14 +234,14 @@ const AccountEntriesModal = ({
   
   if (!show) return null;
   return (
-    <Modal show={show} onHide={onClose} size="xl" centered>
+    <Modal show={show} onHide={onClose} className="custom-modal" style={{marginTop:"10px"}}>
       <Modal.Header closeButton>
         <Modal.Title>{accountName}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <Table bordered size="sm">
-          <thead style={{ textAlign: "center" }}>
+        <Table bordered size="sm" className="custom-table">
+          <thead style={{ textAlign: "center",backgroundColor:"skyblue" }}>
             <tr>
               <th>Date</th>
               <th>Bill No</th>
@@ -271,7 +271,7 @@ const AccountEntriesModal = ({
                     key={`${gi}-${i}`}
                     style={{
                       backgroundColor:
-                        activeRow === flatIndex ? "#d0ebff" : "transparent"
+                        activeRow === flatIndex ? "#ffeeba" : "transparent"
                     }}
                   >
                     {/* Show date, vno, customer only on first row */}
