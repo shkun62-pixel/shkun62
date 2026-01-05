@@ -594,26 +594,6 @@ const JournalVoucher = () => {
     return fields;
   }, []);
 
-  const handleEditClick = () => {
-    setTitle("Edit");
-    setIsDisabled(false);
-    setIsEditMode(true);
-    setIsAddEnabled(false);
-    setIsSubmitEnabled(true);
-    setIsPreviousEnabled(false);
-    setIsNextEnabled(false);
-    setIsFirstEnabled(false);
-    setIsLastEnabled(false);
-    setIsSearchEnabled(false);
-    setIsPreviousEnabled(false);
-    setIsSPrintEnabled(false);
-    setIsDeleteEnabled(false);
-    setIsAbcmode(true);
-    if (accountNameRefs.current[0]) {
-      accountNameRefs.current[0].focus();
-    }
-  };
-
   // Api Response
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
@@ -806,84 +786,82 @@ const JournalVoucher = () => {
   }, []);
 
   const handleNext = async () => {
-    document.body.style.backgroundColor = 'white';
-    setTitle("View");
-    try {
-      if (data1) {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`);
-        if (response.status === 200 && response.data) {
-            const nextData = response.data.data;
-            setData1(response.data.data);
-            setIndex(index + 1);
-            setFormData(nextData.formData);
-            if (nextData.formData.date) {
-              setSelectedDate(new Date(nextData.formData.date)); // Convert to Date object
-            }
-            const updatedItems = nextData.items.map(item => ({
-                ...item, 
-                disableReceipt: item.disableReceipt || false,
-            }));
-            setItems(normalizeItems(updatedItems));
-            setIsDisabled(true);
-        }
-      }
-    } catch (error) {
-        console.error("Error fetching next record:", error);
-    }
-};
-
-const handlePrevious = async () => {
-    document.body.style.backgroundColor = 'white';
-    setTitle("View");
-    try {
+      document.body.style.backgroundColor = 'white';
+      setTitle("View");
+      try {
         if (data1) {
-            const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/previous/${data1._id}`);
-            if (response.status === 200 && response.data) {
-                console.log(response);
-                setData1(response.data.data);
-                const prevData = response.data.data;
-                setIndex(index - 1);
-                setFormData(prevData.formData);      
-                if (prevData.formData.date) {
-                  setSelectedDate(new Date(prevData.formData.date)); // Convert to Date object
-                }          
-                const updatedItems = prevData.items.map(item => ({
-                    ...item, 
-                    disableReceipt: item.disableReceipt || false,
-                }));
-                setItems(normalizeItems(updatedItems));
-                setIsDisabled(true);
-            }
+          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`);
+          if (response.status === 200 && response.data) {
+              const nextData = response.data.data;
+              setData1(response.data.data);
+              setIndex(index + 1);
+              setFormData(nextData.formData);
+              if (nextData.formData.date) {
+                setSelectedDate(new Date(nextData.formData.date)); // Convert to Date object
+              }
+              const updatedItems = nextData.items.map(item => ({
+                  ...item, 
+                  disableReceipt: item.disableReceipt || false,
+              }));
+              setItems(normalizeItems(updatedItems));
+              setIsDisabled(true);
+          }
         }
-    } catch (error) {
-        console.error("Error fetching previous record:", error);
-    }
-};
-const handleFirst = async () => {
-    document.body.style.backgroundColor = 'white';
-    setTitle("View");
-    try {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/first`);
-        if (response.status === 200 && response.data) {
-            const firstData = response.data.data;
-            setIndex(0);
-            setFormData(firstData.formData);
-            setData1(response.data.data);
-            if (firstData.formData.date) {
-              setSelectedDate(new Date(firstData.formData.date)); // Convert to Date object
-            }
-            const updatedItems = firstData.items.map(item => ({
-                ...item, 
-                disableReceipt: item.disableReceipt || false,
-            }));
-            setItems(normalizeItems(updatedItems));
-            setIsDisabled(true);
-        }
-    } catch (error) {
-        console.error("Error fetching first record:", error);
-    }
-};
-
+      } catch (error) {
+          console.error("Error fetching next record:", error);
+      }
+  };
+  const handlePrevious = async () => {
+      document.body.style.backgroundColor = 'white';
+      setTitle("View");
+      try {
+          if (data1) {
+              const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/previous/${data1._id}`);
+              if (response.status === 200 && response.data) {
+                  console.log(response);
+                  setData1(response.data.data);
+                  const prevData = response.data.data;
+                  setIndex(index - 1);
+                  setFormData(prevData.formData);      
+                  if (prevData.formData.date) {
+                    setSelectedDate(new Date(prevData.formData.date)); // Convert to Date object
+                  }          
+                  const updatedItems = prevData.items.map(item => ({
+                      ...item, 
+                      disableReceipt: item.disableReceipt || false,
+                  }));
+                  setItems(normalizeItems(updatedItems));
+                  setIsDisabled(true);
+              }
+          }
+      } catch (error) {
+          console.error("Error fetching previous record:", error);
+      }
+  };
+  const handleFirst = async () => {
+      document.body.style.backgroundColor = 'white';
+      setTitle("View");
+      try {
+          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/first`);
+          if (response.status === 200 && response.data) {
+              const firstData = response.data.data;
+              setIndex(0);
+              setFormData(firstData.formData);
+              setData1(response.data.data);
+              if (firstData.formData.date) {
+                setSelectedDate(new Date(firstData.formData.date)); // Convert to Date object
+              }
+              const updatedItems = firstData.items.map(item => ({
+                  ...item, 
+                  disableReceipt: item.disableReceipt || false,
+              }));
+              setItems(normalizeItems(updatedItems));
+              setIsDisabled(true);
+          }
+      } catch (error) {
+          console.error("Error fetching first record:", error);
+      }
+  };
   const handleLast = async () => {
     document.body.style.backgroundColor = 'white';
     setTitle("View");
@@ -910,7 +888,7 @@ const handleFirst = async () => {
         console.error("Error fetching last record:", error);
     }
   };
-  
+  const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW")
     try {
@@ -941,6 +919,7 @@ const handleFirst = async () => {
         setIsDeleteEnabled(false);
         setIsDisabled(false);
         setIsEditMode(true);
+        skipItemCodeFocusRef.current = true;
         if (datePickerRef.current) {
           datePickerRef.current.setFocus();
         }
@@ -949,63 +928,98 @@ const handleFirst = async () => {
         console.error("Error adding new entry:", error);
     }
   };
-  const handleExit = async () => {
-    document.body.style.backgroundColor = 'white'; // Reset background color
-    setIsAddEnabled(true); // Enable "Add" button
-    setTitle("View");
-    try {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`); // Fetch the latest data
-
-        if (response.status === 200 && response.data.data) {
-            // If data is available
-            const lastEntry = response.data.data;
-            setFormData(lastEntry.formData); // Set form data
-
-            const updatedItems = lastEntry.items.map(item => ({
-                ...item,
-                disableReceipt: item.disableReceipt || false,
-            }));
-            setItems(normalizeItems(updatedItems));
-            // Update totals
-            const totaldebit = updatedItems.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0).toFixed(2);
-            const totalcredit = updatedItems.reduce((sum, item) => sum + parseFloat(item.credit || 0), 0).toFixed(2);
-    
-            setFormData(prevFormData => ({
-                ...prevFormData,
-                totaldebit: totaldebit,
-                totalcredit: totalcredit,
-               
-            }));
-            setIsDisabled(true); // Disable fields after loading the data
-            setIndex(lastEntry.formData)
-            setIsAddEnabled(true);
-            setIsSubmitEnabled(false);
-            setIsPreviousEnabled(true);
-            setIsNextEnabled(true);
-            setIsFirstEnabled(true);
-            setIsLastEnabled(true);
-            setIsSearchEnabled(true);
-            setIsSPrintEnabled(true);
-            setIsDeleteEnabled(true);
-        } else {
-            // If no data is available, initialize with default values
-            console.log("No data available");
-            const newData = {
-              vtype: "J",
-              date: "",
-              voucherno: 0,
-              owner: "",
-              totaldebit: "",
-              totalcredit: "",
-            };
-            setFormData(newData); 
-            setItems(normalizeItems([]));
-            setIsDisabled(true); // Disable fields after loading the default data
-        }
-    } catch (error) {
-        console.error("Error fetching data", error);
+    const handleEditClick = () => {
+    setTitle("Edit");
+    setIsDisabled(false);
+    setIsEditMode(true);
+    setIsAddEnabled(false);
+    setIsSubmitEnabled(true);
+    setIsPreviousEnabled(false);
+    setIsNextEnabled(false);
+    setIsFirstEnabled(false);
+    setIsLastEnabled(false);
+    setIsSearchEnabled(false);
+    setIsPreviousEnabled(false);
+    setIsSPrintEnabled(false);
+    setIsDeleteEnabled(false);
+    setIsAbcmode(true);
+    if (accountNameRefs.current[0]) {
+      accountNameRefs.current[0].focus();
     }
-};
+  };
+  useEffect(() => {
+    if (isEditMode) {
+      if (skipItemCodeFocusRef.current) {
+        skipItemCodeFocusRef.current = false; // reset
+        return;
+      }
+
+      setTimeout(() => {
+        const el = accountNameRefs.current[0];
+        if (el && !el.disabled) {
+          el.focus();
+          el.select && el.select();
+        }
+      }, 0);
+    }
+  }, [isEditMode]);
+  const handleExit = async () => {
+      document.body.style.backgroundColor = 'white'; // Reset background color
+      setIsAddEnabled(true); // Enable "Add" button
+      setTitle("View");
+      try {
+          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`); // Fetch the latest data
+
+          if (response.status === 200 && response.data.data) {
+              // If data is available
+              const lastEntry = response.data.data;
+              setFormData(lastEntry.formData); // Set form data
+
+              const updatedItems = lastEntry.items.map(item => ({
+                  ...item,
+                  disableReceipt: item.disableReceipt || false,
+              }));
+              setItems(normalizeItems(updatedItems));
+              // Update totals
+              const totaldebit = updatedItems.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0).toFixed(2);
+              const totalcredit = updatedItems.reduce((sum, item) => sum + parseFloat(item.credit || 0), 0).toFixed(2);
+      
+              setFormData(prevFormData => ({
+                  ...prevFormData,
+                  totaldebit: totaldebit,
+                  totalcredit: totalcredit,
+                
+              }));
+              setIsDisabled(true); // Disable fields after loading the data
+              setIndex(lastEntry.formData)
+              setIsAddEnabled(true);
+              setIsSubmitEnabled(false);
+              setIsPreviousEnabled(true);
+              setIsNextEnabled(true);
+              setIsFirstEnabled(true);
+              setIsLastEnabled(true);
+              setIsSearchEnabled(true);
+              setIsSPrintEnabled(true);
+              setIsDeleteEnabled(true);
+          } else {
+              // If no data is available, initialize with default values
+              console.log("No data available");
+              const newData = {
+                vtype: "J",
+                date: "",
+                voucherno: 0,
+                owner: "",
+                totaldebit: "",
+                totalcredit: "",
+              };
+              setFormData(newData); 
+              setItems(normalizeItems([]));
+              setIsDisabled(true); // Disable fields after loading the default data
+          }
+      } catch (error) {
+          console.error("Error fetching data", error);
+      }
+  };
   
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const tableScrollRef = useRef(null);

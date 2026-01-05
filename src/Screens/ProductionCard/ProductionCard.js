@@ -68,25 +68,55 @@ const ProductionCard = () => {
     owner: "Owner",
     UnitNo: "",
     SelectAuto: "",
-    totalIssue: "",
-    totalReceipt: "",
+    totalQtyIssue:"",
+    totalPcsIssue:"",
+    totalQtyReceipt:"",
+    totalPcsReceipt:"",
   });
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      Aheads: "",
-      Acodes: "",
-      Narration: "",
-      pcsIssue: "",
-      pcsReceipt: "",
-      qtyIssue: "",
-      qtyReceipt: "",
-      Types: "",
-      Psrno: "",
-      PUnitno: "",
-      Percentage: "",
-    },
-  ]);
+  const MIN_ROWS = 8;
+
+  const createEmptyRow = (id) => ({
+    id,
+    Aheads: "",
+    Acodes: "",
+    Narration: "",
+    pcsIssue: "",
+    pcsReceipt: "",
+    qtyIssue: "",
+    qtyReceipt: "",
+    Types: "",
+    Psrno: "",
+    PUnitno: "",
+    Percentage: "",
+  });
+
+  const normalizeItems = (items = []) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+  // const [items, setItems] = useState([
+  //   {
+  //     id: 1,
+  //     Aheads: "",
+  //     Acodes: "",
+  //     Narration: "",
+  //     pcsIssue: "",
+  //     pcsReceipt: "",
+  //     qtyIssue: "",
+  //     qtyReceipt: "",
+  //     Types: "",
+  //     Psrno: "",
+  //     PUnitno: "",
+  //     Percentage: "",
+  //   },
+  // ]);
 
   useEffect(() => {
     const date = new Date();
@@ -217,7 +247,7 @@ const ProductionCard = () => {
         const updatedItems = lastEntry.items.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         // Set data and index
         setData1({ ...lastEntry, formData: updatedFormData });
         setIndex(lastEntry.voucherno);
@@ -238,8 +268,10 @@ const ProductionCard = () => {
       owner: "Owner",
       UnitNo: "",
       SelectAuto: "",
-      totalIssue: "",
-      totalReceipt: "",
+      totalQtyIssue:"",
+      totalPcsIssue:"",
+      totalQtyReceipt:"",
+      totalPcsReceipt:"",
     };
     const emptyItems = [
       {
@@ -259,7 +291,7 @@ const ProductionCard = () => {
     ];
     // Set the empty data
     setFormData(emptyFormData);
-    setItems(emptyItems);
+    setItems(normalizeItems([]));
     setData1({
       formData: emptyFormData,
       items: emptyItems,
@@ -333,33 +365,44 @@ const ProductionCard = () => {
     }
   };
 
-  const calculateTotalIssue = () => {
-    // Calculate the total payment by summing up all payment_debit values
+  const calculateQtyIssue = () => {
     const QtyIssue = items.reduce((acc, item) => {
       return acc + parseFloat(item.qtyIssue || 0);
     }, 0);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalQtyIssue: QtyIssue.toFixed(3),
+    }));
+  };
+  const calculatePcsIssue = () => {
     const PcsIssue = items.reduce((acc, item) => {
       return acc + parseFloat(item.pcsIssue || 0);
     }, 0);
-    let TotalIssue = QtyIssue + PcsIssue;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalIssue: TotalIssue.toFixed(2),
+      totalPcsIssue: PcsIssue.toFixed(3),
     }));
   };
 
-  const calculateTotalReceipt = () => {
+  const calculateQtyRec = () => {
     // Calculate the total receipt by summing up all receipt_credit values
     const QtyReceipt = items.reduce((acc, item) => {
       return acc + parseFloat(item.qtyReceipt || 0);
     }, 0);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalQtyReceipt: QtyReceipt.toFixed(3),
+    }));
+  };
+
+  const calculatePcsRec = () => {
+    // Calculate the total receipt by summing up all receipt_credit values
     const PcsReceipt = items.reduce((acc, item) => {
       return acc + parseFloat(item.pcsReceipt || 0);
     }, 0);
-    let TotalReceipt = QtyReceipt + PcsReceipt;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalReceipt: TotalReceipt.toFixed(2),
+      totalPcsReceipt: PcsReceipt.toFixed(3),
     }));
   };
 
@@ -416,7 +459,8 @@ const ProductionCard = () => {
           PUnitno: item.formData.PUnitno || "",
           Percentage: item.formData.percentage || "",
         }));
-      setItems(filteredData);
+        setItems(normalizeItems(filteredData));
+      // setItems(filteredData);
     } catch (error) {
       console.error("Failed to fetch products", error);
     }
@@ -547,8 +591,10 @@ const ProductionCard = () => {
         }
       });
     }
-    calculateTotalIssue();
-    calculateTotalReceipt();
+    calculateQtyIssue();
+    calculatePcsIssue();
+    calculateQtyRec();
+    calculatePcsRec();
     setItems(updatedItems);
   };
   // Function to handle adding a new item
@@ -654,7 +700,7 @@ const ProductionCard = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setIsDisabled(true);
         }
       }
@@ -681,7 +727,7 @@ const ProductionCard = () => {
             ...item,
             disableReceipt: item.disableReceipt || false,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setIsDisabled(true);
         }
       }
@@ -707,7 +753,7 @@ const ProductionCard = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
       }
     } catch (error) {
@@ -733,7 +779,7 @@ const ProductionCard = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
       }
     } catch (error) {
@@ -741,6 +787,7 @@ const ProductionCard = () => {
     }
   };
 
+  const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     // document.body.style.backgroundColor = "#D5ECF3";
     try {
@@ -753,27 +800,14 @@ const ProductionCard = () => {
         owner: "Owner",
         UnitNo: "",
         SelectAuto: "",
-        totalIssue: "",
-        totalReceipt: "",
+        totalQtyIssue:"",
+        totalPcsIssue:"",
+        totalQtyReceipt:"",
+        totalPcsReceipt:"",
       };
       setData([...data, newData]);
       setFormData(newData);
-      setItems([
-        {
-          id: 1,
-          Aheads: "",
-          Acodes: "",
-          Narration: "",
-          pcsIssue: "",
-          pcsReceipt: "",
-          qtyIssue: "",
-          qtyReceipt: "",
-          Types: "",
-          Psrno: "",
-          PUnitno: "",
-          Percentage: "",
-        },
-      ]);
+      setItems(normalizeItems([]));
       setIndex(data.length);
       setIsAddEnabled(false);
       setIsSubmitEnabled(true);
@@ -787,11 +821,61 @@ const ProductionCard = () => {
       setIsDisabled(false);
       setIsEditMode(true);
       setTitle("(NEW)");
+      skipItemCodeFocusRef.current = true;
       if (datePickerRef.current) {
         datePickerRef.current.setFocus();
       }
     } catch (error) {
       console.error("Error adding new entry:", error);
+    }
+  };
+    const handleExit = async () => {
+    document.body.style.backgroundColor = "white"; // Reset background color
+    setTitle("View");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/last`
+      ); // Fetch the latest data
+
+      if (response.status === 200 && response.data.data) {
+        // If data is available
+        const lastEntry = response.data.data;
+        setFormData(lastEntry.formData); // Set form data
+        const updatedItems = lastEntry.items.map((item) => ({
+          ...item,
+        }));
+        setItems(normalizeItems(updatedItems));
+        setIsDisabled(true);
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+      } else {
+        // If no data is available, initialize with default values
+        console.log("No data available");
+        const newData = {
+          date: "",
+          voucherno: 0,
+          owner: "Owner",
+          UnitNo: "",
+          SelectAuto: "",
+          totalQtyIssue:"",
+          totalPcsIssue:"",
+          totalQtyReceipt:"",
+          totalPcsReceipt:"",
+        };
+        setFormData(newData); // Set default form data
+        setItems(normalizeItems([]));
+        setIsDisabled(true); // Disable fields after loading the default data
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
     }
   };
 
@@ -843,68 +927,23 @@ const ProductionCard = () => {
       StockNameRef.current[0].focus();
     }
   };
-  const handleExit = async () => {
-    document.body.style.backgroundColor = "white"; // Reset background color
-    setTitle("View");
-    try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/last`
-      ); // Fetch the latest data
 
-      if (response.status === 200 && response.data.data) {
-        // If data is available
-        const lastEntry = response.data.data;
-        setFormData(lastEntry.formData); // Set form data
-        const updatedItems = lastEntry.items.map((item) => ({
-          ...item,
-        }));
-        setItems(updatedItems);
-        setIsDisabled(true);
-        setIndex(lastEntry.formData);
-        setIsAddEnabled(true);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-      } else {
-        // If no data is available, initialize with default values
-        console.log("No data available");
-        const newData = {
-          date: "",
-          voucherno: 0,
-          owner: "Owner",
-          UnitNo: "",
-          SelectAuto: "",
-          totalIssue: "",
-          totalReceipt: "",
-        };
-        setFormData(newData); // Set default form data
-        setItems([
-          {
-            id: 1,
-            Aheads: "",
-            Acodes: "",
-            Narration: "",
-            pcsIssue: "",
-            pcsReceipt: "",
-            qtyIssue: "",
-            qtyReceipt: "",
-            Types: "",
-            Psrno: "",
-            PUnitno: "",
-            Percentage: "",
-          },
-        ]);
-        setIsDisabled(true); // Disable fields after loading the default data
+  useEffect(() => {
+    if (isEditMode) {
+      if (skipItemCodeFocusRef.current) {
+        skipItemCodeFocusRef.current = false; // reset
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching data", error);
+  
+      setTimeout(() => {
+        const el = StockNameRef.current[0];
+        if (el && !el.disabled) {
+          el.focus();
+          el.select && el.select();
+        }
+      }, 0);
     }
-  };
+  }, [isEditMode]);
 
   const handleSaveClick = async () => {
     document.body.style.backgroundColor = "white";
@@ -918,8 +957,8 @@ const ProductionCard = () => {
         return;
       }
       // Ensure that total Issue and total Receipt are equal
-      const totalIssue = formData.totalIssue;
-      const totalReceipt = formData.totalReceipt;
+      const totalIssue = formData.totalPcsIssue || formData.totalQtyIssue;
+      const totalReceipt = formData.totalPcsReceipt || formData.totalQtyReceipt;
       if (totalIssue !== totalReceipt) {
         toast.error("Total Issue and Total Receipt must be equal.", {
           position: "top-center",
@@ -939,8 +978,10 @@ const ProductionCard = () => {
             owner: formData.owner,
             UnitNo: formData.UnitNo,
             SelectAuto: formData.SelectAuto,
-            totalIssue: formData.totalIssue,
-            totalReceipt: formData.totalReceipt,
+            totalQtyIssue: formData.totalQtyIssue,
+            totalPcsIssue: formData.totalPcsIssue,
+            totalQtyReceipt: formData.totalQtyReceipt,
+            totalPcsReceipt: formData.totalPcsReceipt,
           },
           items: nonEmptyItems.map((item) => ({
             id: item.id,
@@ -966,8 +1007,10 @@ const ProductionCard = () => {
             owner: formData.owner,
             UnitNo: formData.UnitNo,
             SelectAuto: formData.SelectAuto,
-            totalIssue: formData.totalIssue,
-            totalReceipt: formData.totalReceipt,
+            totalQtyIssue: formData.totalQtyIssue,
+            totalPcsIssue: formData.totalPcsIssue,
+            totalQtyReceipt: formData.totalQtyReceipt,
+            totalPcsReceipt: formData.totalPcsReceipt,
           },
           items: nonEmptyItems.map((item) => ({
             id: item.id,
@@ -1187,7 +1230,7 @@ const ProductionCard = () => {
         </FormControl>
         </div>
       </div>
-      <div style={{ marginTop: 5 }} className="tablediv">
+      <div style={{ marginTop: 5 }} className="TableProd">
         <Table className="custom-table">
           <thead
             style={{
@@ -1424,6 +1467,16 @@ const ProductionCard = () => {
               );
             })}
           </tbody>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+              <td colSpan={3}></td>
+              <td>{Number(formData.totalPcsIssue) === 0 ? "" : formData.totalPcsIssue}</td>
+              <td>{Number(formData.totalPcsReceipt) === 0 ? "" : formData.totalPcsReceipt}</td>
+              <td>{Number(formData.totalQtyIssue) === 0 ? "" : formData.totalQtyIssue}</td>
+              <td>{Number(formData.totalQtyReceipt) === 0 ? "" : formData.totalQtyReceipt}</td>
+              {isEditMode && <td></td>}
+            </tr>
+          </tfoot>
         </Table>
       </div>
       {showModal && (
@@ -1441,80 +1494,6 @@ const ProductionCard = () => {
         <Button className="fw-bold btn-secondary">Add Row</Button>
       </div>
       <div className="Belowcontent">
-        <div style={{ display: "flex", flexDirection: "row", marginLeft: "25%" }}>
-          <TextField
-          // id="totalreceipt"
-          // value={formData.totalIssue}
-          // label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 160}}
-          />
-          <TextField
-          // id="totalreceipt"
-          // value={formData.totalIssue}
-          // label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 300,ml:1}}
-          />
-          <TextField
-          id="totalIssue"
-          value={formData.totalIssue}
-          label="TOTAL ISSUE"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150,ml:1}}
-          />
-          <TextField
-          id="totalReceipt"
-          value={formData.totalReceipt}
-          label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150,ml:1}}
-          />
-        </div>
         <div className="Buttonsgroupz">
           <Button
             disabled={!isAddEnabled}

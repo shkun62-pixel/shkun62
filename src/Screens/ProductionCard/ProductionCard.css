@@ -25,3 +25,8 @@
   margin-left: 50px;
   margin-top: -70px;
 }
+.TableProd {
+    max-height: 470px;
+    overflow-y: auto;
+    margin: 5px;
+}

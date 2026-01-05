@@ -37,6 +37,44 @@ const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
     setUptoDate(fy.end);
   }, []);
 
+  const parseDateSafe = (value) => {
+    if (!value) return null;
+
+    // Date object
+    if (value instanceof Date) {
+      return isNaN(value) ? null : value;
+    }
+
+    // Timestamp
+    if (!isNaN(value)) {
+      const d = new Date(Number(value));
+      return isNaN(d) ? null : d;
+    }
+
+    if (typeof value !== "string") return null;
+
+    value = value.trim();
+
+    // DD/MM/YYYY or DD-MM-YYYY
+    let match = value.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      return new Date(yyyy, mm - 1, dd);
+    }
+
+    // YYYY/MM/DD or YYYY-MM-DD
+    match = value.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+    if (match) {
+      const [, yyyy, mm, dd] = match;
+      return new Date(yyyy, mm - 1, dd);
+    }
+
+    // ISO fallback
+    const d = new Date(value);
+    return isNaN(d) ? null : d;
+  };
+
+
   useEffect(() => {
     if (isOpen) fetchData();
   }, [isOpen]);
@@ -58,26 +96,35 @@ const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
       return;
     }
 
-    const from = new Date(fromDate);
-    const upto = new Date(uptoDate);
+    const from = parseDateSafe(fromDate);
+    const upto = parseDateSafe(uptoDate);
+
+    from.setHours(0, 0, 0, 0);
+    upto.setHours(23, 59, 59, 999);
+
     const groupedData = {};
 
     data.forEach((entry) => {
-      const entryDate = new Date(entry.formData.date);
+      const entryDate = parseDateSafe(entry.formData?.date);
+      if (!entryDate) return;
+
       if (entryDate >= from && entryDate <= upto) {
-        if (!groupedData[entry.formData.date]) {
-          groupedData[entry.formData.date] = { receipts: [], payments: [] };
+        const dateKey = entry.formData.date; // keep original format for grouping
+
+        if (!groupedData[dateKey]) {
+          groupedData[dateKey] = { receipts: [], payments: [] };
         }
 
         entry.items.forEach((item) => {
           if (parseFloat(item.receipt_credit) > 0) {
-            groupedData[entry.formData.date].receipts.push({
+            groupedData[dateKey].receipts.push({
               ...item,
               voucherno: entry.formData.voucherno,
             });
           }
+
           if (parseFloat(item.payment_debit) > 0) {
-            groupedData[entry.formData.date].payments.push({
+            groupedData[dateKey].payments.push({
               ...item,
               voucherno: entry.formData.voucherno,
             });
@@ -87,8 +134,47 @@ const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
     });
 
     setFilteredData(groupedData);
-    setIsPrintModalOpen(true); // Open Print Modal after filtering
+    setIsPrintModalOpen(true);
   };
+
+
+  // const handleFilter = () => {
+  //   if (!fromDate || !uptoDate) {
+  //     alert("Please select both dates.");
+  //     return;
+  //   }
+
+  //   const from = new Date(fromDate);
+  //   const upto = new Date(uptoDate);
+  //   const groupedData = {};
+
+  //   data.forEach((entry) => {
+  //     const entryDate = new Date(entry.formData.date);
+  //     if (entryDate >= from && entryDate <= upto) {
+  //       if (!groupedData[entry.formData.date]) {
+  //         groupedData[entry.formData.date] = { receipts: [], payments: [] };
+  //       }
+
+  //       entry.items.forEach((item) => {
+  //         if (parseFloat(item.receipt_credit) > 0) {
+  //           groupedData[entry.formData.date].receipts.push({
+  //             ...item,
+  //             voucherno: entry.formData.voucherno,
+  //           });
+  //         }
+  //         if (parseFloat(item.payment_debit) > 0) {
+  //           groupedData[entry.formData.date].payments.push({
+  //             ...item,
+  //             voucherno: entry.formData.voucherno,
+  //           });
+  //         }
+  //       });
+  //     }
+  //   });
+
+  //   setFilteredData(groupedData);
+  //   setIsPrintModalOpen(true); // Open Print Modal after filtering
+  // };
 
   const handleClose2 = () => {
     handleClose();

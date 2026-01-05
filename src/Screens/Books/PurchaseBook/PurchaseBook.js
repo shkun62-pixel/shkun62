@@ -232,22 +232,61 @@ const PurchaseBook = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const parseDateSafe = (value) => {
+    if (!value) return null;
+
+    if (value instanceof Date) {
+      return isNaN(value) ? null : value;
+    }
+
+    if (!isNaN(value)) {
+      const d = new Date(Number(value));
+      return isNaN(d) ? null : d;
+    }
+
+    if (typeof value !== "string") return null;
+
+    value = value.trim();
+
+    // DD/MM/YYYY or DD-MM-YYYY
+    let match = value.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      return new Date(yyyy, mm - 1, dd);
+    }
+
+    // YYYY/MM/DD or YYYY-MM-DD
+    match = value.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+    if (match) {
+      const [, yyyy, mm, dd] = match;
+      return new Date(yyyy, mm - 1, dd);
+    }
+
+    // ISO string fallback
+    const d = new Date(value);
+    return isNaN(d) ? null : d;
+  };
+  
   useEffect(() => {
     if (!fromDate || !toDate) return;
 
     const fetchEntries = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
+        const response = await fetch(
+          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+        );
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const data = await response.json();
+
         const filteredData = data.filter((entry) => {
-          const entryDate = new Date(entry.formData?.date);
+          const entryDate = parseDateSafe(entry.formData?.date);
+          if (!entryDate) return false;
+
           return entryDate >= fromDate && entryDate <= toDate;
         });
 
-        // setEntries(data);
         setEntries(filteredData);
         setFilteredEntries(filteredData);
       } catch (err) {
@@ -259,6 +298,35 @@ const PurchaseBook = () => {
 
     fetchEntries();
   }, [fromDate, toDate]);
+
+
+  // useEffect(() => {
+  //   if (!fromDate || !toDate) return;
+
+  //   const fetchEntries = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
+  //       if (!response.ok) throw new Error("Failed to fetch data");
+
+  //       const data = await response.json();
+  //       const filteredData = data.filter((entry) => {
+  //         const entryDate = new Date(entry.formData?.date);
+  //         return entryDate >= fromDate && entryDate <= toDate;
+  //       });
+
+  //       // setEntries(data);
+  //       setEntries(filteredData);
+  //       setFilteredEntries(filteredData);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchEntries();
+  // }, [fromDate, toDate]);
 
   useEffect(() => {
     const filtered = entries.filter((entry) => {

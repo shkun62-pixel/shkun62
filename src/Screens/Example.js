@@ -328,6 +328,7 @@ const Example = () => {
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const tableContainerRef = useRef(null);
   const itemCodeRefs = useRef([]);
+  const datePickerRef = useRef([]);
   const desciptionRefs = useRef([]);
   const peciesRefs = useRef([]);
   const quantityRefs = useRef([]);
@@ -441,6 +442,28 @@ const handleKeyDown = (event, index, field) => {
 };
   const handleEditClick = () => {
     setIsEditMode(true);
+    if (itemCodeRefs.current[0]) {
+      itemCodeRefs.current[0].focus();
+    }
+  };
+
+  useEffect(() => {
+    if (isEditMode) {
+      // Small timeout ensures DOM re-renders with enabled inputs
+      setTimeout(() => {
+        const el = itemCodeRefs.current[0];
+        if (el && !el.disabled) {
+          el.focus();
+          el.select && el.select();
+        }
+      }, 0);
+    }
+  }, [isEditMode]);
+
+  const handleAdd = async () => {
+    if (datePickerRef.current) {
+      datePickerRef.current.setFocus();
+    }
   };
 
   return (
@@ -637,7 +660,10 @@ const handleKeyDown = (event, index, field) => {
 
         </Table>
       </div>
-      <Button onClick={handleAddItem}>ADD</Button>
+      <input
+      ref={datePickerRef}
+      />
+      <Button onClick={handleAdd}>ADD</Button>
       <Button onClick={handleEditClick}>EDIT</Button>
       {showModal && (
       <ProductModal

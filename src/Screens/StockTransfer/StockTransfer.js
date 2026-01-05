@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "../CashVoucher/CashVoucher.css"
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -17,6 +17,19 @@ import { CompanyContext } from '../Context/CompanyContext';
 import { useContext } from "react";
 import {IconButton} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InputMask from "react-input-mask";
+
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar="_"
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
 
 const StockTransfer = () => {
   
@@ -58,7 +71,7 @@ const StockTransfer = () => {
     totalPcsReceipt:"",
 
   });
-  const MIN_ROWS = 9;
+  const MIN_ROWS = 8;
 
   const createEmptyRow = (id) => ({
     id,
@@ -287,7 +300,6 @@ const StockTransfer = () => {
     container.scrollTop =
       rowTop - containerHeight + rowHeight + 60;
   };
-
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter") {
       switch (field) {
@@ -298,7 +310,7 @@ const StockTransfer = () => {
             NarrationRef.current[index]?.focus();
           }
           break;
-          case "Narration":
+        case "Narration":
             if (pcsIssueRef.current[index]?.disabled) {
               qtyIssueRef.current[index]?.focus();
             } else {
@@ -308,9 +320,12 @@ const StockTransfer = () => {
         case "pcsIssue":
           pcsReceiptRef.current[index]?.focus();
           break;
-        case "pcsReceipt":
+        case "pcsReceipt": {
           if (qtyIssueRef.current[index]?.disabled) {
-            handleAddItem();
+            if (index === items.length - 1) {
+              // ✅ only add when row has data
+              handleAddItem();
+            }
             setTimeout(() => {
               focusAndScroll(StockNameRef, index + 1);
             }, 0);
@@ -318,13 +333,7 @@ const StockTransfer = () => {
             focusAndScroll(qtyIssueRef, index);
           }
           break;
-        // case "pcsReceipt":
-        //   if (qtyIssueRef.current[index]?.disabled) {
-        //     handleAddItem();
-        //   } else {
-        //     qtyIssueRef.current[index]?.focus();
-        //   }
-        //   break;
+        }
           case "qtyIssue":
             qtyreceiptRef.current[index]?.focus();
             break;
@@ -338,12 +347,6 @@ const StockTransfer = () => {
             focusAndScroll(StockNameRef, index + 1);
           }
           break;
-          // case "qtyReceipt":
-          //   if (index === items.length - 1) {
-          //     handleAddItem();
-          //   }
-          //   StockNameRef.current[index + 1]?.focus();
-          //   break;
         default:
           break;
       }
@@ -585,6 +588,7 @@ const handleLast = async () => {
       console.error("Error fetching last record:", error);
     }
 };
+const skipItemCodeFocusRef = useRef(false);
 
 const handleAdd = async () => {
   // document.body.style.backgroundColor = "#D5ECF3";
@@ -617,6 +621,7 @@ const handleAdd = async () => {
     setIsDisabled(false);
     setIsEditMode(true);
     setTitle('(NEW)')
+    skipItemCodeFocusRef.current = true;
     if (datePickerRef.current) {
       datePickerRef.current.setFocus();
     }
@@ -671,6 +676,24 @@ const handleEditClick = () => {
     StockNameRef.current[0].focus();
   }
 };
+
+useEffect(() => {
+  if (isEditMode) {
+    if (skipItemCodeFocusRef.current) {
+      skipItemCodeFocusRef.current = false; // reset
+      return;
+    }
+
+    setTimeout(() => {
+      const el = StockNameRef.current[0];
+      if (el && !el.disabled) {
+        el.focus();
+        el.select && el.select();
+      }
+    }, 0);
+  }
+}, [isEditMode]);
+
 
 const handleExit = async () => {
     document.body.style.backgroundColor = "white"; // Reset background color
@@ -886,6 +909,24 @@ const handleItemRateBlur = (id, field) => {
     }));
   };
 
+  const isRowFilled = (row) => {
+    return (row.Aheads || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+      // 🔒 If not in edit mode, nothing is editable
+      if (!isEditMode) return false;
+
+      // First row is editable in edit mode
+      if (rowIndex === 0) return true;
+
+      // All previous rows must be filled
+      for (let i = 0; i < rowIndex; i++) {
+        if (!isRowFilled(items[i])) {
+          return false;
+        }
+      }
+      return true;
+  };
   return (
     <div>
       <ToastContainer />
@@ -899,6 +940,16 @@ const handleItemRateBlur = (id, field) => {
         <text style={{ marginRight: 8 }}>VOUCHER DATE:</text>
         <div>
           <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            // onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            // onBlur={() => validateDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+          {/* <DatePicker
           popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
           className="cashdate"
@@ -906,7 +957,7 @@ const handleItemRateBlur = (id, field) => {
           selected={selectedDate}
           onChange={handleDateChange}
           dateFormat="dd-MM-yyyy"
-        />
+        /> */}
         <span style={{ fontWeight: "bold", marginLeft: 10 }}>
           {dayName}
         </span>
@@ -985,6 +1036,7 @@ const handleItemRateBlur = (id, field) => {
               <tr key={item.id}>
                 <td style={{ padding: 0,width:400}}>
                   <input
+                  disabled={!canEditRow(index)}
                   className="ItemCode"
                     style={{height: 40,fontSize: `${fontSize}px`,width: "100%",boxSizing: "border-box",border: "none",padding: 5,}}
                     type="text"
@@ -1000,6 +1052,7 @@ const handleItemRateBlur = (id, field) => {
                 </td>
                 <td style={{ padding: 0,width:350}}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Hsn"
                     style={{
                       height: 40,
@@ -1028,7 +1081,7 @@ const handleItemRateBlur = (id, field) => {
                       border: "none",
                       padding: 5,
                     }}
-                    readOnly
+                    disabled={!canEditRow(index)}
                     value={item.Acodes}
                     onFocus={(e) => e.target.select()}  // Select text on focus
                     onKeyDown={(e) => {  handleKeyDown(e, index, "Acodes")}}
@@ -1055,7 +1108,7 @@ const handleItemRateBlur = (id, field) => {
                     onBlur={() => handleItemRateBlur(item.id, "pcsIssue")}
                     onKeyDown={(e) => {  handleKeyDown(e, index, "pcsIssue")}}
                     ref={(el) => (pcsIssueRef.current[index] = el)}
-                    disabled={parseFloat(item.qtyIssue) > 0}
+                    disabled={!canEditRow(index) || parseFloat(item.qtyIssue) > 0}
                   />
                 </td>
                 <td style={{ padding: 0 }}>
@@ -1078,7 +1131,7 @@ const handleItemRateBlur = (id, field) => {
                     onBlur={() => handleItemRateBlur(item.id, "pcsReceipt")}
                     onKeyDown={(e) => {  handleKeyDown(e, index, "pcsReceipt")}}
                     ref={(el) => (pcsReceiptRef.current[index] = el)}
-                    disabled={parseFloat(item.qtyReceipt) > 0}
+                    disabled={!canEditRow(index) || parseFloat(item.qtyReceipt) > 0}
                   />
                 </td>
                 <td style={{ padding: 0 }}>
@@ -1101,7 +1154,7 @@ const handleItemRateBlur = (id, field) => {
                     onBlur={() => handleItemRateBlur(item.id, "qtyIssue")}
                     onKeyDown={(e) => {  handleKeyDown(e, index, "qtyIssue")}}
                     ref={(el) => (qtyIssueRef.current[index] = el)}
-                    disabled={parseFloat(item.pcsIssue) > 0}
+                    disabled={!canEditRow(index) || parseFloat(item.pcsIssue) > 0}
                   />
                 </td>
                 <td style={{padding:0}}>
@@ -1123,28 +1176,30 @@ const handleItemRateBlur = (id, field) => {
                     onBlur={() => handleItemRateBlur(item.id, "qtyReceipt")}
                     onKeyDown={(e) => {  handleKeyDown(e, index, "qtyReceipt")}}
                     ref={(el) => (qtyreceiptRef.current[index] = el)}
-                    disabled={parseFloat(item.pcsReceipt) > 0}
+                    disabled={!canEditRow(index) || parseFloat(item.pcsReceipt) > 0}
                   />
                 </td>
                 {isEditMode && (
-                <td style={{ padding: 0}}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center", // horizontally center
-                      alignItems: "center",      // vertically center
-                      height: "100%",            // takes full cell height
-                    }}
-                  >
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteItem(index)}
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
-                </td>
+                  <td style={{ padding: 0 }}>
+                    {canEditRow(index) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
+                      >
+                        <IconButton
+                          color="error"
+                          size="small"
+                          tabIndex={-1}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    )}
+                  </td>
                 )}
               </tr>
             ))}

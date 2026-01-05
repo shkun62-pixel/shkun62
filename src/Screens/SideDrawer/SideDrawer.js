@@ -584,20 +584,18 @@ export default function App() {
                                     </StyledIcon>
                                     <StyledListItemText primary="Purchase Book" />
                                 </StyledListItem>
-                                <StyledListItem button onClick={openCashBOOk}>
+                                <StyledListItem button onClick={() => handleNavigation('/Books?type=cBook')}>
                                     <StyledIcon>
                                     <MenuBookIcon />
                                     </StyledIcon>
                                     <StyledListItemText primary="Cash Book" />
                                 </StyledListItem>
-                                <CBookModal isOpen={isModalOpenCBook} handleClose={closeCashbook} onNavigate={handleModalNavigate} />
-                                <StyledListItem button onClick={openJournalBOOk}>
+                                <StyledListItem button onClick={() => handleNavigation('/Books?type=jBook')}>
                                     <StyledIcon>
                                     <MenuBookIcon />
                                     </StyledIcon>
                                     <StyledListItemText primary="Journal Book" />
                                 </StyledListItem>
-                                <JournalBook isOpen={isJBookOpen} handleClose={closeJournalbook} onNavigate={handleModalNavigate} />
                                 <StyledListItem button onClick={() => handleNavigation('/BankBook')}>
                                     <StyledIcon>
                                     <MenuBookIcon />

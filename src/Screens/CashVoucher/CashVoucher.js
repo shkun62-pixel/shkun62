@@ -561,7 +561,7 @@ const CashVoucher = () => {
       console.error("Error fetching last record:", error);
     }
   };
-
+  const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW");
     try {
@@ -594,6 +594,7 @@ const CashVoucher = () => {
       setIsDeleteEnabled(false);
       setIsDisabled(false);
       setIsEditMode(true);
+      skipItemCodeFocusRef.current = true;
       if (datePickerRef.current) {
         datePickerRef.current.setFocus();
       }
@@ -690,6 +691,23 @@ const CashVoucher = () => {
       accountNameRefs.current[0].focus();
     }
   };
+
+  useEffect(() => {
+    if (isEditMode) {
+      if (skipItemCodeFocusRef.current) {
+        skipItemCodeFocusRef.current = false; // reset
+        return;
+      }
+
+      setTimeout(() => {
+        const el = accountNameRefs.current[0];
+        if (el && !el.disabled) {
+          el.focus();
+          el.select && el.select();
+        }
+      }, 0);
+    }
+  }, [isEditMode]);
 
   const calculateTotalDiscount = () => {
     // Calculate the total discount by summing up all discount values

@@ -770,10 +770,43 @@ const Purchase = () => {
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
-  const parseDDMMYYYY = (dateStr) => {
-    if (!dateStr) return null;
-    const [dd, mm, yyyy] = dateStr.split("/");
-    return new Date(yyyy, mm - 1, dd);
+  const parseDDMMYYYY = (value) => {
+    if (!value) return null;
+
+    // Already a Date object
+    if (value instanceof Date) {
+      return isNaN(value) ? null : value;
+    }
+
+    // Timestamp (number or numeric string)
+    if (!isNaN(value)) {
+      const d = new Date(Number(value));
+      return isNaN(d) ? null : d;
+    }
+
+    if (typeof value !== "string") return null;
+
+    value = value.trim();
+
+    // DD/MM/YYYY or DD-MM-YYYY
+    let match = value.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const d = new Date(yyyy, mm - 1, dd);
+      return isNaN(d) ? null : d;
+    }
+
+    // YYYY/MM/DD or YYYY-MM-DD
+    match = value.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+    if (match) {
+      const [, yyyy, mm, dd] = match;
+      const d = new Date(yyyy, mm - 1, dd);
+      return isNaN(d) ? null : d;
+    }
+
+    // ISO or browser-parsable string
+    const d = new Date(value);
+    return isNaN(d) ? null : d;
   };
 
   const fetchData = async () => {

@@ -921,7 +921,7 @@ const BankVoucher = () => {
       console.error("Error fetching last record:", error);
     }
   };
-
+  const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW");
     try {
@@ -955,6 +955,7 @@ const BankVoucher = () => {
       setIsDeleteEnabled(false);
       setIsDisabled(false);
       setIsEditMode(true);
+      skipItemCodeFocusRef.current = true;
       if (datePickerRef.current) {
         datePickerRef.current.setFocus();
       }
@@ -1038,73 +1039,6 @@ const BankVoucher = () => {
     }
   };
 
-  const handleNumberChange = (event, index, field) => {
-    const value = event.target.value;
-    // Validate that the input is numeric
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
-    }
-    const updatedItems = [...items];
-    updatedItems[index][field] = value;
-
-    // Calculate total payment, total receipt, total discount, and total bank charges for all rows
-    let totalPayment = 0;
-    let totalReceipt = 0;
-    let totalDiscount = 0;
-    let totalBankCharges = 0;
-
-    updatedItems.forEach((item) => {
-      const payment = parseFloat(item.payment_debit) || 0;
-      const receipt = parseFloat(item.receipt_credit) || 0;
-      const discount = parseFloat(item.discount) || 0;
-      const bankCharges = parseFloat(item.bankchargers) || 0;
-      totalPayment += payment;
-      totalReceipt += receipt;
-      totalDiscount += discount;
-      totalBankCharges += bankCharges;
-    });
-    // Update total payment, total receipt, total discount, and total bank charges in formData
-    setFormData((prevState) => ({
-      ...prevState,
-      totalpayment: totalPayment.toFixed(2),
-      totalreceipt: totalReceipt.toFixed(2),
-      totaldiscount: totalDiscount.toFixed(2),
-      totalbankcharges: totalBankCharges.toFixed(2),
-    }));
-
-    if (field === "payment_debit" || field === "receipt_credit") {
-      const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
-      const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
-      const discount = parseFloat(updatedItems[index]["discount"]) || 0;
-
-      let total = payment + receipt + discount;
-      updatedItems[index]["Total"] = total.toFixed(2);
-
-      let discountedPayment = payment - discount;
-      updatedItems[index]["discounted_payment"] = updatedItems[index]
-        .disablePayment
-        ? "0.00"
-        : discountedPayment.toFixed(2);
-
-      let discountedReceipt = receipt - discount;
-      updatedItems[index]["discounted_receipt"] = updatedItems[index]
-        .disableReceipt
-        ? "0.00"
-        : discountedReceipt.toFixed(2);
-    }
-
-    // Check if the value is greater than 0 to update disable conditions
-    const isValueGreaterThanZero = parseFloat(value) > 0;
-
-    // Disable According to debit or credit
-    if (field === "payment_debit") {
-      updatedItems[index].disableReceipt = isValueGreaterThanZero;
-    } else if (field === "receipt_credit") {
-      updatedItems[index].disablePayment = isValueGreaterThanZero;
-    }
-    setItems(updatedItems);
-  };
-
   const handleEditClick = () => {
     setTitle("EDIT");
     setIsDisabled(false); // Enable fields when editing
@@ -1124,6 +1058,24 @@ const BankVoucher = () => {
       accountNameRefs.current[0].focus();
     }
   };
+
+  useEffect(() => {
+    if (isEditMode) {
+      if (skipItemCodeFocusRef.current) {
+        skipItemCodeFocusRef.current = false; // reset
+        return;
+      }
+
+      setTimeout(() => {
+        const el = accountNameRefs.current[0];
+        if (el && !el.disabled) {
+          el.focus();
+          el.select && el.select();
+        }
+      }, 0);
+    }
+  }, [isEditMode]);
+
   const handleSaveClick = async () => {
     document.body.style.backgroundColor = "white";
     setIsSaving(true);
@@ -1529,6 +1481,73 @@ const BankVoucher = () => {
       openModalForItemAcc(index);
       event.preventDefault();
     }
+  };
+
+  const handleNumberChange = (event, index, field) => {
+    const value = event.target.value;
+    // Validate that the input is numeric
+    if (!/^\d*\.?\d*$/.test(value)) {
+      return;
+    }
+    const updatedItems = [...items];
+    updatedItems[index][field] = value;
+
+    // Calculate total payment, total receipt, total discount, and total bank charges for all rows
+    let totalPayment = 0;
+    let totalReceipt = 0;
+    let totalDiscount = 0;
+    let totalBankCharges = 0;
+
+    updatedItems.forEach((item) => {
+      const payment = parseFloat(item.payment_debit) || 0;
+      const receipt = parseFloat(item.receipt_credit) || 0;
+      const discount = parseFloat(item.discount) || 0;
+      const bankCharges = parseFloat(item.bankchargers) || 0;
+      totalPayment += payment;
+      totalReceipt += receipt;
+      totalDiscount += discount;
+      totalBankCharges += bankCharges;
+    });
+    // Update total payment, total receipt, total discount, and total bank charges in formData
+    setFormData((prevState) => ({
+      ...prevState,
+      totalpayment: totalPayment.toFixed(2),
+      totalreceipt: totalReceipt.toFixed(2),
+      totaldiscount: totalDiscount.toFixed(2),
+      totalbankcharges: totalBankCharges.toFixed(2),
+    }));
+
+    if (field === "payment_debit" || field === "receipt_credit") {
+      const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
+      const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
+      const discount = parseFloat(updatedItems[index]["discount"]) || 0;
+
+      let total = payment + receipt + discount;
+      updatedItems[index]["Total"] = total.toFixed(2);
+
+      let discountedPayment = payment - discount;
+      updatedItems[index]["discounted_payment"] = updatedItems[index]
+        .disablePayment
+        ? "0.00"
+        : discountedPayment.toFixed(2);
+
+      let discountedReceipt = receipt - discount;
+      updatedItems[index]["discounted_receipt"] = updatedItems[index]
+        .disableReceipt
+        ? "0.00"
+        : discountedReceipt.toFixed(2);
+    }
+
+    // Check if the value is greater than 0 to update disable conditions
+    const isValueGreaterThanZero = parseFloat(value) > 0;
+
+    // Disable According to debit or credit
+    if (field === "payment_debit") {
+      updatedItems[index].disableReceipt = isValueGreaterThanZero;
+    } else if (field === "receipt_credit") {
+      updatedItems[index].disablePayment = isValueGreaterThanZero;
+    }
+    setItems(updatedItems);
   };
 
   const handleOpenModal = (event, index, field) => {
