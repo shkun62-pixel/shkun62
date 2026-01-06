@@ -499,6 +499,18 @@ const NewStockAcc = ({ onSave }) => {
           setData1(response.data.data);
           setIndex(index + 1);
           setFormData(nextData.formData);
+          setPurchaseAcc([
+            {
+              Pcodess: nextData.formData.Pcodess,
+              acCode: nextData.formData.acCode,
+            },
+          ]);
+          setSaleAcc([
+            {
+              Scodess: nextData.formData.Scodess,
+              AcCode: nextData.formData.AcCode,
+            },
+          ]);
           setIsDisabled(true);
         }
       }
@@ -520,6 +532,18 @@ const NewStockAcc = ({ onSave }) => {
           const prevData = response.data.data;
           setIndex(index - 1);
           setFormData(prevData.formData);
+          setPurchaseAcc([
+            {
+              Pcodess: prevData.formData.Pcodess,
+              acCode: prevData.formData.acCode,
+            },
+          ]);
+          setSaleAcc([
+            {
+              Scodess: prevData.formData.Scodess,
+              AcCode: prevData.formData.AcCode,
+            },
+          ]);
           setIsDisabled(true);
         }
       }
@@ -539,6 +563,18 @@ const NewStockAcc = ({ onSave }) => {
         setIndex(0);
         setFormData(firstData.formData);
         setData1(response.data.data);
+        setPurchaseAcc([
+            {
+              Pcodess: firstData.formData.Pcodess,
+              acCode: firstData.formData.acCode,
+            },
+          ]);
+          setSaleAcc([
+            {
+              Scodess: firstData.formData.Scodess,
+              AcCode: firstData.formData.AcCode,
+            },
+          ]);
         setIsDisabled(true);
       }
     } catch (error) {
@@ -558,6 +594,18 @@ const NewStockAcc = ({ onSave }) => {
         setIndex(lastIndex);
         setFormData(lastData.formData);
         setData1(response.data.data);
+        setPurchaseAcc([
+            {
+              Pcodess: lastData.formData.Pcodess,
+              acCode: lastData.formData.acCode,
+            },
+          ]);
+          setSaleAcc([
+            {
+              Scodess: lastData.formData.Scodess,
+              AcCode: lastData.formData.AcCode,
+            },
+          ]);
         setIsDisabled(true);
       }
     } catch (error) {
@@ -646,6 +694,18 @@ const NewStockAcc = ({ onSave }) => {
         const lastEntry = response.data.data;
         const lastIndex = response.data.length - 1;
         setFormData(lastEntry.formData); // Set form data
+        setPurchaseAcc([
+          {
+            Pcodess: lastEntry.formData.Pcodess,
+            acCode: lastEntry.formData.acCode,
+          },
+        ]);
+        setSaleAcc([
+          {
+            Scodess: lastEntry.formData.Scodess,
+            AcCode: lastEntry.formData.AcCode,
+          },
+        ]);
         setData1(response.data.data);
         setIndex(lastIndex);
         setIsAddEnabled(true);
@@ -658,14 +718,6 @@ const NewStockAcc = ({ onSave }) => {
         setIsSearchEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
-        const updatedPurAcc = lastEntry.PurchaseAcc.map((item) => ({
-          ...item,
-        }));
-        const updatedSaleAcc = lastEntry.SaleAcc.map((item) => ({
-          ...item,
-        }));
-        setPurchaseAcc(updatedPurAcc);
-        setSaleAcc(updatedSaleAcc);
         setIsDisabled(true); // Disable fields after loading the data
       } else {
         // If no data is available, initialize with default values

@@ -216,29 +216,6 @@ const TrailBalance = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (showModal && rowRefs.current[activeRowIndex]) {
-  //     const row = rowRefs.current[activeRowIndex];
-  //     const container = row.closest(`.${styles.tableHeight}`);
-
-  //     if (container && row) {
-  //       const rowTop = row.offsetTop;
-  //       const rowBottom = rowTop + row.offsetHeight;
-  //       const containerTop = container.scrollTop;
-  //       const containerBottom = containerTop + container.clientHeight;
-
-  //       // 🔹 Scroll down if row is below view
-  //       if (rowBottom > containerBottom) {
-  //         container.scrollTop = rowBottom - container.clientHeight;
-  //       }
-  //       // 🔹 Scroll up if row is above view
-  //       else if (rowTop < containerTop) {
-  //         container.scrollTop = rowTop;
-  //       }
-  //     }
-  //   }
-  // }, [activeRowIndex, showModal]);
-
   const parseDDMMYYYY = (str) => {
     if (!str) return null;
     const [dd, mm, yyyy] = str.split("/").map(Number);
@@ -573,30 +550,6 @@ useEffect(() => {
       } 
       return; // 🔹 stop further handling
     }
-
-    // 🔹 Account Statement modal navigation
-    // if (showModal && transactions.length) {
-    //   e.preventDefault();
-
-    //   if (e.key === "ArrowUp") {
-    //     setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
-    //   } else if (e.key === "ArrowDown") {
-    //     setActiveRowIndex((prev) =>
-    //       prev < transactions.length - 1 ? prev + 1 : prev
-    //     );
-    //   } else if (e.key === "PageUp") {
-    //     // Jump to first entry
-    //     setActiveRowIndex(0);
-    //   } else if (e.key === "PageDown") {
-    //     // Jump to last entry
-    //     setActiveRowIndex(transactions.length - 1);
-    //   } else if (e.key === "Escape") {
-    //     setShowModal(false);
-    //   }
-
-    //   return;
-    // }
-
 
     // 🔹 Main ledger table navigation
     if (!showModal && filteredLedgers.length) {
