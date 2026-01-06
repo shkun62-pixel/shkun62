@@ -19,7 +19,7 @@ const chunkItems = (items = [], firstChunkSize, otherChunkSize) => {
   return chunks;
 };
 
-const PrintOutStanding = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate, currentGroupName, choice }, ref) => {
+const PrintOutStanding = React.forwardRef(({ items = [], isOpen, handleClose,ledgerFrom, ledgerTo, currentDate, currentGroupName, choice, handleExport }, ref) => {
 
   const { companyName, companyAdd, companyCity } = useCompanySetup();
 
@@ -64,6 +64,13 @@ const PrintOutStanding = React.forwardRef(({ items = [], isOpen, handleClose,led
                 style={{ background: "lightcoral", color: "black", marginRight: "10px" }}
             >
                 Print
+            </Button>
+              <Button
+                variant="contained"
+                onClick={handleExport}
+                style={{ background: "lightcoral", color: "black", marginRight: "10px" }}
+            >
+                Export
             </Button>
 
             {/* Close button */}

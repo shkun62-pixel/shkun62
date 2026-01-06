@@ -1267,8 +1267,9 @@ const fetchLedgerTransactions = (ledger) => {
             ledgerTo={ledgerToDate}
             currentDate = {printDateValue}  // ✅ pass actual date
             choice = {"Creditors List"}  // ✅ pass choice
+            handleExport = {exportToExcel}
           />
-          <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}  onClick={exportToExcel}>Export </Button>
+          {/* <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}  onClick={exportToExcel}>Export </Button> */}
           <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}}>Exit</Button>
           </div>
         </div>
@@ -1592,7 +1593,7 @@ const fetchLedgerTransactions = (ledger) => {
               <div className="d-flex justify-content-between mt-2">
               <div>
                 <Button className="Buttonz"  variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "}
+                {/* <Button className="Buttonz"  variant="secondary" onClick={exportAccountStatementToExcel}>Export</Button>{" "} */}
                 <Button className="Buttonz"  variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
                 <CoA
                   isOpen={isPrintOpen}
@@ -1602,6 +1603,7 @@ const fetchLedgerTransactions = (ledger) => {
                   ledgerFrom={ledgerFromDate}
                   ledgerTo={ledgerToDate}
                   currentDate = {printDateValue}  // ✅ pass actual date
+                  handleExport = {exportAccountStatementToExcel}
                 />
                 <Button className="Buttonz"  variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
               </div>
