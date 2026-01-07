@@ -496,97 +496,148 @@ const PurchaseSumm = () => {
   useEffect(() => {
     fetchSaleSummary();
   }, [fromDate, toDate, taxType]);
-
+    useEffect(() => {
+      fetchSaleSummary();
+    }, [fromDate, toDate, taxType]);
+    
   const fetchSaleSummary = async () => {
-    const res = await axios.get(API_URL);
-    const data = res.data;
-
-    setAllVouchers(data); // ✅ store full response
-
-    const saleMap = {};
-    let totalSaleValue = 0;
-
-    const gstAccounts = {
-      cgst: { name: "", value: 0 },
-      sgst: { name: "", value: 0 },
-      igst: { name: "", value: 0 },
-    };
-
-    data.forEach((voucher) => {
-      const { formData, items } = voucher;
-
-      // 🔥 DATE FILTER APPLIED HERE
-      if (!isDateInRange(formData.date, fromDate, toDate)) return;
-
-      // 🔥 TAX TYPE FILTER
-      if (taxType !== "All" && formData.stype !== taxType) return;
-
-      // Capture GST account names
-      if (!gstAccounts.cgst.name && formData.cgst_ac)
-        gstAccounts.cgst.name = formData.cgst_ac;
-
-      if (!gstAccounts.sgst.name && formData.sgst_ac)
-        gstAccounts.sgst.name = formData.sgst_ac;
-
-      if (!gstAccounts.igst.name && formData.igst_ac)
-        gstAccounts.igst.name = formData.igst_ac;
-
-      gstAccounts.cgst.value += Number(formData.cgst || 0);
-      gstAccounts.sgst.value += Number(formData.sgst || 0);
-      gstAccounts.igst.value += Number(formData.igst || 0);
-
-      items.forEach((item) => {
-        const key = `${item.gst}_${item.Pcodess}`;
-
-        if (!saleMap[key]) {
-          saleMap[key] = {
-            account: item.Pcodess,
-            pcs: 0,
-            qty: 0,
-            value: 0,
-            cgst: 0,
-            sgst: 0,
-            igst: 0,
-          };
+    try {
+      const res = await axios.get(API_URL);
+      const data = res.data;
+  
+      setAllVouchers(data); // store full response
+  
+      const saleMap = {};
+      let totalSaleValue = 0;
+  
+      const gstAccounts = {
+        cgst: { name: "", value: 0 },
+        sgst: { name: "", value: 0 },
+        igst: { name: "", value: 0 },
+      };
+  
+      data.forEach((voucher) => {
+        const { formData, items } = voucher;
+  
+        // ✅ DATE FILTER
+        if (!isDateInRange(formData.date, fromDate, toDate)) return;
+  
+        // ✅ TAX TYPE FILTER
+        if (taxType !== "All" && formData.stype !== taxType) return;
+  
+        // Capture GST account names
+        if (!gstAccounts.cgst.name && formData.cgst_ac) gstAccounts.cgst.name = formData.cgst_ac;
+        if (!gstAccounts.sgst.name && formData.sgst_ac) gstAccounts.sgst.name = formData.sgst_ac;
+        if (!gstAccounts.igst.name && formData.igst_ac) gstAccounts.igst.name = formData.igst_ac;
+  
+        gstAccounts.cgst.value += Number(formData.cgst || 0);
+        gstAccounts.sgst.value += Number(formData.sgst || 0);
+        gstAccounts.igst.value += Number(formData.igst || 0);
+  
+        // 🔹 Process each item
+        items.forEach((item) => {
+          const key = `${item.gst}_${item.Pcodess}`;
+  
+          if (!saleMap[key]) {
+            saleMap[key] = {
+              account: item.Pcodess,
+              pcs: 0,
+              qty: 0,
+              value: 0,
+              cgst: 0,
+              sgst: 0,
+              igst: 0,
+            };
+          }
+  
+          saleMap[key].qty += Number(item.weight || 0);
+          saleMap[key].pcs += Number(item.pkgs || 0);
+          saleMap[key].value += Number(item.amount || 0);
+          saleMap[key].cgst += Number(item.ctax || 0);
+          saleMap[key].sgst += Number(item.stax || 0);
+          saleMap[key].igst += Number(item.itax || 0);
+  
+          totalSaleValue += Number(item.amount || 0);
+  
+          // 🔹 Expenses from items (Exp1 → Exp5)
+          for (let i = 1; i <= 5; i++) {
+            const expValue = Number(item[`Exp${i}`] || 0);
+            const expAccount = formData[`expense${i}_ac`];
+  
+            if (expValue > 0 && expAccount) {
+              const expKey = `EXP_${expAccount}`;
+              if (!saleMap[expKey]) {
+                saleMap[expKey] = {
+                  account: expAccount,
+                  pcs: 0,
+                  qty: 0,
+                  value: 0,
+                  cgst: 0,
+                  sgst: 0,
+                  igst: 0,
+                };
+              }
+              saleMap[expKey].value += expValue;
+              totalSaleValue += expValue;
+            }
+          }
+        });
+  
+        // 🔹 Expenses from formData (Exp6 → Exp10)
+        for (let i = 6; i <= 10; i++) {
+          const expValue = Number(formData[`Exp${i}`] || 0);
+          const expAccount = formData[`expense${i}_ac`];
+  
+          if (expValue > 0 && expAccount) {
+            const expKey = `EXP_${expAccount}`;
+            if (!saleMap[expKey]) {
+              saleMap[expKey] = {
+                account: expAccount,
+                pcs: 0,
+                qty: 0,
+                value: 0,
+                cgst: 0,
+                sgst: 0,
+                igst: 0,
+              };
+            }
+            saleMap[expKey].value += expValue;
+            totalSaleValue += expValue;
+          }
         }
-
-        saleMap[key].qty += Number(item.weight || 0);
-        saleMap[key].pcs += Number(item.pkgs || 0);
-        saleMap[key].value += Number(item.amount || 0);
-        saleMap[key].cgst += Number(item.ctax || 0);
-        saleMap[key].sgst += Number(item.stax || 0);
-        saleMap[key].igst += Number(item.itax || 0);
-
-        totalSaleValue += Number(item.amount || 0);
       });
-    });
-
-    const finalRows = [
-      ...Object.values(saleMap),
-      { account: gstAccounts.cgst.name, value: gstAccounts.cgst.value },
-      { account: gstAccounts.sgst.name, value: gstAccounts.sgst.value },
-      { account: gstAccounts.igst.name, value: gstAccounts.igst.value },
-    ];
-
-    setRows(finalRows);
-    setTotalSale(totalSaleValue);
+  
+      // Combine GST accounts and other accounts
+      const finalRows = [
+        ...Object.values(saleMap),
+        { account: gstAccounts.cgst.name, value: gstAccounts.cgst.value },
+        { account: gstAccounts.sgst.name, value: gstAccounts.sgst.value },
+        { account: gstAccounts.igst.name, value: gstAccounts.igst.value },
+      ];
+  
+      setRows(finalRows);
+      setTotalSale(totalSaleValue);
+    } catch (error) {
+      console.error("Error fetching sale summary:", error);
+    }
   };
-
+  
+  
   const getAccountEntries = () => {
     if (!selectedAccount) return [];
-
+  
     const entries = [];
-
+  
     allVouchers.forEach((voucher) => {
       const { formData, items, supplierdetails } = voucher;
       const customer = supplierdetails?.[0]?.vacode || "";
-
-      // 🔹 PURCHASE ACCOUNT ENTRIES
+  
+      // 🔹 SALE ACCOUNT ENTRIES
       items.forEach((item) => {
         if (item.Pcodess === selectedAccount) {
           entries.push({
-            _id: voucher._id, // add this
-            type: "PURCHASE",
+            _id: voucher._id,
+            type: "SALE",
             date: formData.date,
             vno: formData.vno,
             customer,
@@ -600,46 +651,85 @@ const PurchaseSumm = () => {
             total: item.vamt,
           });
         }
+  
+        // 🔹 ITEM EXPENSES (Exp1 → Exp5)
+        for (let i = 1; i <= 5; i++) {
+          const expAccount = formData[`expense${i}_ac`];
+          const expValue = Number(item[`Exp${i}`] || 0);
+  
+          if (expAccount === selectedAccount && expValue > 0) {
+            entries.push({
+              _id: voucher._id,
+              type: `EXP${i}`,
+              date: formData.date,
+              vno: formData.vno,
+              customer,
+              value: expValue,
+              total: expValue,
+            });
+          }
+        }
       });
+  
+      // 🔹 VOUCHER EXPENSES (Exp6 → Exp10)
+      for (let i = 6; i <= 10; i++) {
+        const expAccount = formData[`expense${i}_ac`];
+        const expValue = Number(formData[`Exp${i}`] || 0);
+  
+        if (expAccount === selectedAccount && expValue > 0) {
+          entries.push({
+            _id: voucher._id,
+            type: `EXP${i}`,
+            date: formData.date,
+            vno: formData.vno,
+            customer,
+            value: expValue,
+            total: expValue,
+          });
+        }
+      }
+  
       // 🔹 CGST ACCOUNT
       if (formData.cgst_ac === selectedAccount && Number(formData.cgst) > 0) {
         entries.push({
-          _id: voucher._id, // add this
+          _id: voucher._id,
           type: "CGST",
           date: formData.date,
           vno: formData.vno,
           customer,
-          value: Number(formData.cgst || 0),
-          total: Number(formData.cgst || 0),
+          value: Number(formData.cgst),
+          total: Number(formData.cgst),
         });
       }
+  
       // 🔹 SGST ACCOUNT
       if (formData.sgst_ac === selectedAccount && Number(formData.sgst) > 0) {
         entries.push({
-          _id: voucher._id, // add this
+          _id: voucher._id,
           type: "SGST",
           date: formData.date,
           vno: formData.vno,
           customer,
-          value: Number(formData.sgst || 0),
-          total: Number(formData.sgst || 0),
+          value: Number(formData.sgst),
+          total: Number(formData.sgst),
         });
       }
+  
       // 🔹 IGST ACCOUNT
       if (formData.igst_ac === selectedAccount && Number(formData.igst) > 0) {
         entries.push({
-          _id: voucher._id, // add this
+          _id: voucher._id,
           type: "IGST",
           date: formData.date,
           vno: formData.vno,
           customer,
-          value: Number(formData.igst || 0),
-          total: Number(formData.igst || 0),
+          value: Number(formData.igst),
+          total: Number(formData.igst),
         });
       }
     });
-
-    // Sort entries by date and vno so they appear in order in modal
+  
+    // 🔹 Sort by Date + Voucher No
     entries.sort((a, b) => {
       const d1 = parseAnyDate(a.date);
       const d2 = parseAnyDate(b.date);
@@ -647,8 +737,162 @@ const PurchaseSumm = () => {
       if (d1 > d2) return 1;
       return a.vno.toString().localeCompare(b.vno.toString());
     });
+  
     return entries;
   };
+
+  // const fetchSaleSummary = async () => {
+  //   const res = await axios.get(API_URL);
+  //   const data = res.data;
+
+  //   setAllVouchers(data); // ✅ store full response
+
+  //   const saleMap = {};
+  //   let totalSaleValue = 0;
+
+  //   const gstAccounts = {
+  //     cgst: { name: "", value: 0 },
+  //     sgst: { name: "", value: 0 },
+  //     igst: { name: "", value: 0 },
+  //   };
+
+  //   data.forEach((voucher) => {
+  //     const { formData, items } = voucher;
+
+  //     // 🔥 DATE FILTER APPLIED HERE
+  //     if (!isDateInRange(formData.date, fromDate, toDate)) return;
+
+  //     // 🔥 TAX TYPE FILTER
+  //     if (taxType !== "All" && formData.stype !== taxType) return;
+
+  //     // Capture GST account names
+  //     if (!gstAccounts.cgst.name && formData.cgst_ac)
+  //       gstAccounts.cgst.name = formData.cgst_ac;
+
+  //     if (!gstAccounts.sgst.name && formData.sgst_ac)
+  //       gstAccounts.sgst.name = formData.sgst_ac;
+
+  //     if (!gstAccounts.igst.name && formData.igst_ac)
+  //       gstAccounts.igst.name = formData.igst_ac;
+
+  //     gstAccounts.cgst.value += Number(formData.cgst || 0);
+  //     gstAccounts.sgst.value += Number(formData.sgst || 0);
+  //     gstAccounts.igst.value += Number(formData.igst || 0);
+
+  //     items.forEach((item) => {
+  //       const key = `${item.gst}_${item.Pcodess}`;
+
+  //       if (!saleMap[key]) {
+  //         saleMap[key] = {
+  //           account: item.Pcodess,
+  //           pcs: 0,
+  //           qty: 0,
+  //           value: 0,
+  //           cgst: 0,
+  //           sgst: 0,
+  //           igst: 0,
+  //         };
+  //       }
+
+  //       saleMap[key].qty += Number(item.weight || 0);
+  //       saleMap[key].pcs += Number(item.pkgs || 0);
+  //       saleMap[key].value += Number(item.amount || 0);
+  //       saleMap[key].cgst += Number(item.ctax || 0);
+  //       saleMap[key].sgst += Number(item.stax || 0);
+  //       saleMap[key].igst += Number(item.itax || 0);
+
+  //       totalSaleValue += Number(item.amount || 0);
+  //     });
+  //   });
+
+  //   const finalRows = [
+  //     ...Object.values(saleMap),
+  //     { account: gstAccounts.cgst.name, value: gstAccounts.cgst.value },
+  //     { account: gstAccounts.sgst.name, value: gstAccounts.sgst.value },
+  //     { account: gstAccounts.igst.name, value: gstAccounts.igst.value },
+  //   ];
+
+  //   setRows(finalRows);
+  //   setTotalSale(totalSaleValue);
+  // };
+
+  // const getAccountEntries = () => {
+  //   if (!selectedAccount) return [];
+
+  //   const entries = [];
+
+  //   allVouchers.forEach((voucher) => {
+  //     const { formData, items, supplierdetails } = voucher;
+  //     const customer = supplierdetails?.[0]?.vacode || "";
+
+  //     // 🔹 PURCHASE ACCOUNT ENTRIES
+  //     items.forEach((item) => {
+  //       if (item.Pcodess === selectedAccount) {
+  //         entries.push({
+  //           _id: voucher._id, // add this
+  //           type: "PURCHASE",
+  //           date: formData.date,
+  //           vno: formData.vno,
+  //           customer,
+  //           sdisc: item.sdisc,
+  //           qty: item.weight,
+  //           rate: item.rate,
+  //           value: item.amount,
+  //           cgst: item.ctax,
+  //           sgst: item.stax,
+  //           igst: item.itax,
+  //           total: item.vamt,
+  //         });
+  //       }
+  //     });
+  //     // 🔹 CGST ACCOUNT
+  //     if (formData.cgst_ac === selectedAccount && Number(formData.cgst) > 0) {
+  //       entries.push({
+  //         _id: voucher._id, // add this
+  //         type: "CGST",
+  //         date: formData.date,
+  //         vno: formData.vno,
+  //         customer,
+  //         value: Number(formData.cgst || 0),
+  //         total: Number(formData.cgst || 0),
+  //       });
+  //     }
+  //     // 🔹 SGST ACCOUNT
+  //     if (formData.sgst_ac === selectedAccount && Number(formData.sgst) > 0) {
+  //       entries.push({
+  //         _id: voucher._id, // add this
+  //         type: "SGST",
+  //         date: formData.date,
+  //         vno: formData.vno,
+  //         customer,
+  //         value: Number(formData.sgst || 0),
+  //         total: Number(formData.sgst || 0),
+  //       });
+  //     }
+  //     // 🔹 IGST ACCOUNT
+  //     if (formData.igst_ac === selectedAccount && Number(formData.igst) > 0) {
+  //       entries.push({
+  //         _id: voucher._id, // add this
+  //         type: "IGST",
+  //         date: formData.date,
+  //         vno: formData.vno,
+  //         customer,
+  //         value: Number(formData.igst || 0),
+  //         total: Number(formData.igst || 0),
+  //       });
+  //     }
+  //   });
+
+  //   // Sort entries by date and vno so they appear in order in modal
+  //   entries.sort((a, b) => {
+  //     const d1 = parseAnyDate(a.date);
+  //     const d2 = parseAnyDate(b.date);
+  //     if (d1 < d2) return -1;
+  //     if (d1 > d2) return 1;
+  //     return a.vno.toString().localeCompare(b.vno.toString());
+  //   });
+  //   return entries;
+  // };
 
   useEffect(() => {
     const handleKeyDown = (e) => {

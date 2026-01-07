@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Table from "react-bootstrap/Table";
+import { Button } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import styles from "../summary.module.css";
 import InputMask from "react-input-mask";
 import financialYear from "../../Shared/financialYear";
 import AccountEntriesModal from "../AccountEntriesModal";
+import PrintSummary from "../PrintSummary";
 
 const API_URL =
   "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
@@ -17,6 +19,7 @@ const SaleSumm = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [allVouchers, setAllVouchers] = useState([]);
+  const [showPrint, setShowPrint] = useState(false);
 
   // filters
   const [fromDate, setFromDate] = useState("");
@@ -200,10 +203,26 @@ const SaleSumm = () => {
     // Combine GST accounts and other accounts
     const finalRows = [
       ...Object.values(saleMap),
-      { account: gstAccounts.cgst.name, value: gstAccounts.cgst.value },
-      { account: gstAccounts.sgst.name, value: gstAccounts.sgst.value },
-      { account: gstAccounts.igst.name, value: gstAccounts.igst.value },
-    ];
+
+      gstAccounts.cgst.value > 0 && {
+        account: gstAccounts.cgst.name,
+        value: gstAccounts.cgst.value,
+        // cgst: gstAccounts.cgst.value,
+      },
+
+      gstAccounts.sgst.value > 0 && {
+        account: gstAccounts.sgst.name,
+        value: gstAccounts.sgst.value,
+        // sgst: gstAccounts.sgst.value,
+      },
+
+      gstAccounts.igst.value > 0 && {
+        account: gstAccounts.igst.name,
+        value: gstAccounts.igst.value,
+        // igst: gstAccounts.igst.value,
+      },
+    ].filter(Boolean); // 🔥 removes false entries
+
 
     setRows(finalRows);
     setTotalSale(totalSaleValue);
@@ -646,8 +665,17 @@ const getAccountEntries = () => {
 
       <Card.Footer className="fw-bold" style={{ fontSize: '20px' }}>
         Total Sale Rs. {totalSale.toFixed(2)}
+        <Button onClick={() => setShowPrint(true)}>Print</Button>
       </Card.Footer>
     </Card>
+    <PrintSummary
+      isOpen={showPrint}
+      handleClose={() => setShowPrint(false)}
+      rows={rows}
+      totalSale={totalSale}
+      fromDate={formatDate(fromDate)}
+      toDate={toDate}
+    />
     <AccountEntriesModal
       show={showModal}
       onClose={() => setShowModal(false)}

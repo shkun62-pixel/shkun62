@@ -177,6 +177,45 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 
+export const formatDateUniversal = (input) => {
+  if (!input) return "";
+
+  let date;
+
+  // ✅ If already a Date object
+  if (input instanceof Date) {
+    date = input;
+  }
+
+  // ✅ Timestamp (number or numeric string)
+  else if (!isNaN(input)) {
+    date = new Date(Number(input));
+  }
+
+  // ✅ ISO date (2025-04-01 or 2025-04-01T10:30:00)
+  else if (typeof input === "string" && input.includes("-")) {
+    date = new Date(input);
+  }
+
+  // ✅ dd/mm/yyyy or dd-mm-yyyy
+  else if (typeof input === "string") {
+    const parts = input.split(/[\/-]/);
+    if (parts.length === 3) {
+      const [dd, mm, yyyy] = parts;
+      date = new Date(yyyy, mm - 1, dd);
+    }
+  }
+
+  // ❌ Invalid date protection
+  if (!date || isNaN(date.getTime())) return "";
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
 const AccountEntriesModal = ({
   show,
   onClose,
@@ -233,6 +272,7 @@ const AccountEntriesModal = ({
   }, [activeRow, flatEntries, show]);
   
   if (!show) return null;
+  
   return (
     <Modal show={show} onHide={onClose} className="custom-modal" style={{marginTop:"10px"}}>
       <Modal.Header closeButton>
@@ -275,13 +315,7 @@ const AccountEntriesModal = ({
                     }}
                   >
                     {/* Show date, vno, customer only on first row */}
-                    <td>
-                      {i === 0
-                        ? report === "Purchase"
-                          ? e.date
-                          : formatDate(e.date)
-                        : ""}
-                    </td>
+                    <td>{formatDateUniversal(e.date)}</td>
                     <td>{i === 0 ? e.vno : ""}</td>
                     <td>{i === 0 ? e.customer : ""}</td>
 
