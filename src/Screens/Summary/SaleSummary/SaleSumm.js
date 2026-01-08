@@ -251,6 +251,7 @@ const getAccountEntries = () => {
           vno: formData.vbillno,
           customer,
           sdisc: item.sdisc,
+          pcs: item.pkgs,
           qty: item.weight,
           rate: item.rate,
           value: item.amount,
@@ -621,7 +622,7 @@ const getAccountEntries = () => {
           <thead style={{ backgroundColor: "#83bcf5ff" }}>
             <tr>
               <th className="text-center">Account Name</th>
-              <th className="text-center">Case/Pc</th>
+              <th className="text-center">Case/Pcs</th>
               <th className="text-center">Qty</th>
               <th className="text-center">Value</th>
               <th className="text-center">C.GST</th>
@@ -675,13 +676,16 @@ const getAccountEntries = () => {
       totalSale={totalSale}
       fromDate={formatDate(fromDate)}
       toDate={toDate}
+      header = {"Sale Summary Report"}
+      Total = {"Total Sale Rs"}
     />
     <AccountEntriesModal
       show={showModal}
       onClose={() => setShowModal(false)}
       accountName={selectedAccount}
       entries={getAccountEntries()}
-      formatDate={formatDate}
+      fromDate={fromDate}
+      uptoDate={toDate}
     />
     </div>
   );

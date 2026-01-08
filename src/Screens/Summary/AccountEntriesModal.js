@@ -173,6 +173,191 @@
 // export default AccountEntriesModal;
 
 
+// import React, { useState, useEffect } from "react";
+// import Modal from "react-bootstrap/Modal";
+// import Table from "react-bootstrap/Table";
+
+// export const formatDateUniversal = (input) => {
+//   if (!input) return "";
+
+//   let date;
+
+//   // ✅ If already a Date object
+//   if (input instanceof Date) {
+//     date = input;
+//   }
+
+//   // ✅ Timestamp (number or numeric string)
+//   else if (!isNaN(input)) {
+//     date = new Date(Number(input));
+//   }
+
+//   // ✅ ISO date (2025-04-01 or 2025-04-01T10:30:00)
+//   else if (typeof input === "string" && input.includes("-")) {
+//     date = new Date(input);
+//   }
+
+//   // ✅ dd/mm/yyyy or dd-mm-yyyy
+//   else if (typeof input === "string") {
+//     const parts = input.split(/[\/-]/);
+//     if (parts.length === 3) {
+//       const [dd, mm, yyyy] = parts;
+//       date = new Date(yyyy, mm - 1, dd);
+//     }
+//   }
+
+//   // ❌ Invalid date protection
+//   if (!date || isNaN(date.getTime())) return "";
+
+//   const day = String(date.getDate()).padStart(2, "0");
+//   const month = String(date.getMonth() + 1).padStart(2, "0");
+//   const year = date.getFullYear();
+
+//   return `${day}-${month}-${year}`;
+// };
+
+// const AccountEntriesModal = ({
+//   show,
+//   onClose,
+//   accountName,
+//   entries,
+//   fromDate,
+//   uptoDate
+// }) => {
+//   const [activeRow, setActiveRow] = useState(0);
+
+//   const isGSTOnly = entries.every((e) => !e.qty);
+
+//   // 🔥 GROUP BY Date + Bill No + Customer
+//   const grouped = {};
+//   entries.forEach((e) => {
+//     const key = `${e.date}_${e.vno}_${e.customer}`;
+//     if (!grouped[key]) grouped[key] = [];
+//     grouped[key].push(e);
+//   });
+
+//   // Flatten grouped entries for keyboard navigation
+//   const flatEntries = Object.values(grouped).flat();
+
+//   // Keyboard navigation
+//   useEffect(() => {
+//     const handleKeyDown = (e) => {
+//       if (!show) return;
+
+//       if (e.key === "ArrowDown") {
+//         e.preventDefault();
+//         setActiveRow((prev) =>
+//           prev < flatEntries.length - 1 ? prev + 1 : prev
+//         );
+//       }
+
+//       if (e.key === "ArrowUp") {
+//         e.preventDefault();
+//         setActiveRow((prev) => (prev > 0 ? prev - 1 : prev));
+//       }
+
+//       // if (e.key === "Enter") {
+//       //   e.preventDefault();
+//       //   const row = flatEntries[activeRow];
+//       //   if (row && row._id) {
+//       //     alert(row._id);
+//       //   } else {
+//       //     alert("No _id available for this row");
+//       //   }
+//       // }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+//     return () => window.removeEventListener("keydown", handleKeyDown);
+//   }, [activeRow, flatEntries, show]);
+  
+//   if (!show) return null;
+  
+//   return (
+//     <Modal show={show} onHide={onClose} className="custom-modal" style={{marginTop:"10px"}}>
+//       <Modal.Header closeButton>
+//         <Modal.Title>{accountName} From {fromDate} To {uptoDate}</Modal.Title>
+//       </Modal.Header>
+
+//       <Modal.Body>
+//         <Table bordered size="sm" className="custom-table">
+//           <thead style={{ textAlign: "center",backgroundColor:"skyblue" }}>
+//             <tr>
+//               <th>Date</th>
+//               <th>Bill No</th>
+//               <th>Customer</th>
+//               {!isGSTOnly && <th>Item Name</th>}
+//               {!isGSTOnly && <th>PCS</th>}
+//               {!isGSTOnly && <th>Qty</th>}
+//               {!isGSTOnly && <th>Rate</th>}
+//               <th>Value</th>
+//               {!isGSTOnly && (
+//                 <>
+//                   <th>CGST</th>
+//                   <th>SGST</th>
+//                   <th>IGST</th>
+//                 </>
+//               )}
+//               <th>Total</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {Object.values(grouped).map((group, gi) =>
+//               group.map((e, i) => {
+//                 // Calculate flat index for keyboard navigation
+//                 const flatIndex = flatEntries.indexOf(e);
+
+//                 return (
+//                   <tr
+//                     key={`${gi}-${i}`}
+//                     style={{
+//                       backgroundColor:
+//                         activeRow === flatIndex ? "#ffeeba" : "transparent"
+//                     }}
+//                   >
+//                     {/* Show date, vno, customer only on first row */}
+//                     <td>{formatDateUniversal(e.date)}</td>
+//                     <td>{i === 0 ? e.vno : ""}</td>
+//                     <td>{i === 0 ? e.customer : ""}</td>
+
+//                     {!isGSTOnly && <td>{e.sdisc || ""}</td>}
+//                      {!isGSTOnly && (
+//                       <td className="text-end">{e.pcs || ""}</td>
+//                     )}
+//                     {!isGSTOnly && (
+//                       <td className="text-end">{e.qty || ""}</td>
+//                     )}
+//                     {!isGSTOnly && (
+//                       <td className="text-end">{e.rate || ""}</td>
+//                     )}
+
+//                     {/* Always show value, CGST, SGST, IGST, total */}
+//                     <td className="text-end">{e.value || ""}</td>
+
+//                     {!isGSTOnly && (
+//                       <>
+//                         <td className="text-end">{e.cgst || ""}</td>
+//                         <td className="text-end">{e.sgst || ""}</td>
+//                         <td className="text-end">{e.igst || ""}</td>
+//                       </>
+//                     )}
+
+//                     <td className="text-end">{e.total || ""}</td>
+//                   </tr>
+//                 );
+//               })
+//             )}
+//           </tbody>
+//         </Table>
+//       </Modal.Body>
+//     </Modal>
+//   );
+// };
+
+// export default AccountEntriesModal;
+
+
+
 import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
@@ -182,23 +367,13 @@ export const formatDateUniversal = (input) => {
 
   let date;
 
-  // ✅ If already a Date object
   if (input instanceof Date) {
     date = input;
-  }
-
-  // ✅ Timestamp (number or numeric string)
-  else if (!isNaN(input)) {
+  } else if (!isNaN(input)) {
     date = new Date(Number(input));
-  }
-
-  // ✅ ISO date (2025-04-01 or 2025-04-01T10:30:00)
-  else if (typeof input === "string" && input.includes("-")) {
+  } else if (typeof input === "string" && input.includes("-")) {
     date = new Date(input);
-  }
-
-  // ✅ dd/mm/yyyy or dd-mm-yyyy
-  else if (typeof input === "string") {
+  } else if (typeof input === "string") {
     const parts = input.split(/[\/-]/);
     if (parts.length === 3) {
       const [dd, mm, yyyy] = parts;
@@ -206,7 +381,6 @@ export const formatDateUniversal = (input) => {
     }
   }
 
-  // ❌ Invalid date protection
   if (!date || isNaN(date.getTime())) return "";
 
   const day = String(date.getDate()).padStart(2, "0");
@@ -221,8 +395,8 @@ const AccountEntriesModal = ({
   onClose,
   accountName,
   entries,
-  formatDate,
-  report
+  fromDate,
+  uptoDate
 }) => {
   const [activeRow, setActiveRow] = useState(0);
 
@@ -236,10 +410,9 @@ const AccountEntriesModal = ({
     grouped[key].push(e);
   });
 
-  // Flatten grouped entries for keyboard navigation
-  const flatEntries = Object.values(grouped).flat();
+  const groupedArray = Object.values(grouped);
 
-  // Keyboard navigation
+  // 🔹 Keyboard navigation (row-wise)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!show) return;
@@ -247,7 +420,7 @@ const AccountEntriesModal = ({
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setActiveRow((prev) =>
-          prev < flatEntries.length - 1 ? prev + 1 : prev
+          prev < groupedArray.length - 1 ? prev + 1 : prev
         );
       }
 
@@ -255,38 +428,36 @@ const AccountEntriesModal = ({
         e.preventDefault();
         setActiveRow((prev) => (prev > 0 ? prev - 1 : prev));
       }
-
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const row = flatEntries[activeRow];
-        if (row && row._id) {
-          alert(row._id);
-        } else {
-          alert("No _id available for this row");
-        }
-      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeRow, flatEntries, show]);
-  
+  }, [show, groupedArray.length]);
+
   if (!show) return null;
-  
+
   return (
-    <Modal show={show} onHide={onClose} className="custom-modal" style={{marginTop:"10px"}}>
+    <Modal
+      show={show}
+      onHide={onClose}
+      className="custom-modal"
+      style={{ marginTop: "10px" }}
+    >
       <Modal.Header closeButton>
-        <Modal.Title>{accountName}</Modal.Title>
+        <Modal.Title>
+            {accountName} 
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <Table bordered size="sm" className="custom-table">
-          <thead style={{ textAlign: "center",backgroundColor:"skyblue" }}>
+          <thead style={{ textAlign: "center", backgroundColor: "skyblue" }}>
             <tr>
               <th>Date</th>
               <th>Bill No</th>
               <th>Customer</th>
               {!isGSTOnly && <th>Item Name</th>}
+              {!isGSTOnly && <th>PCS</th>}
               {!isGSTOnly && <th>Qty</th>}
               {!isGSTOnly && <th>Rate</th>}
               <th>Value</th>
@@ -300,49 +471,97 @@ const AccountEntriesModal = ({
               <th>Total</th>
             </tr>
           </thead>
+
           <tbody>
-            {Object.values(grouped).map((group, gi) =>
-              group.map((e, i) => {
-                // Calculate flat index for keyboard navigation
-                const flatIndex = flatEntries.indexOf(e);
+            {groupedArray.map((group, gi) => {
+              const base = group[0];
 
-                return (
-                  <tr
-                    key={`${gi}-${i}`}
-                    style={{
-                      backgroundColor:
-                        activeRow === flatIndex ? "#ffeeba" : "transparent"
-                    }}
-                  >
-                    {/* Show date, vno, customer only on first row */}
-                    <td>{formatDateUniversal(e.date)}</td>
-                    <td>{i === 0 ? e.vno : ""}</td>
-                    <td>{i === 0 ? e.customer : ""}</td>
+              return (
+                <tr
+                  key={gi}
+                  style={{
+                    backgroundColor:
+                      activeRow === gi ? "#ffeeba" : "transparent",
+                    verticalAlign: "top"
+                  }}
+                >
+                  <td>{formatDateUniversal(base.date)}</td>
+                  <td>{base.vno}</td>
+                  <td>{base.customer}</td>
 
-                    {!isGSTOnly && <td>{e.sdisc || ""}</td>}
-                    {!isGSTOnly && (
-                      <td className="text-end">{e.qty || ""}</td>
-                    )}
-                    {!isGSTOnly && (
-                      <td className="text-end">{e.rate || ""}</td>
-                    )}
+                  {/* ITEM NAME */}
+                  {!isGSTOnly && (
+                    <td>
+                      {group.map((i, idx) => (
+                        <div key={idx}>{i.sdisc}</div>
+                      ))}
+                    </td>
+                  )}
 
-                    {/* Always show value, CGST, SGST, IGST, total */}
-                    <td className="text-end">{e.value || ""}</td>
+                  {/* PCS */}
+                  {!isGSTOnly && (
+                    <td className="text-end">
+                      {group.map((i, idx) => (
+                        <div key={idx}>{i.pcs || ""}</div>
+                      ))}
+                    </td>
+                  )}
 
-                    {!isGSTOnly && (
-                      <>
-                        <td className="text-end">{e.cgst || ""}</td>
-                        <td className="text-end">{e.sgst || ""}</td>
-                        <td className="text-end">{e.igst || ""}</td>
-                      </>
-                    )}
+                  {/* QTY */}
+                  {!isGSTOnly && (
+                    <td className="text-end">
+                      {group.map((i, idx) => (
+                        <div key={idx}>{i.qty || ""}</div>
+                      ))}
+                    </td>
+                  )}
 
-                    <td className="text-end">{e.total || ""}</td>
-                  </tr>
-                );
-              })
-            )}
+                  {/* RATE */}
+                  {!isGSTOnly && (
+                    <td className="text-end">
+                      {group.map((i, idx) => (
+                        <div key={idx}>{i.rate || ""}</div>
+                      ))}
+                    </td>
+                  )}
+
+                  {/* VALUE */}
+                  <td className="text-end">
+                    {group.map((i, idx) => (
+                      <div key={idx}>{i.value || i.vamt || ""}</div>
+                    ))}
+                  </td>
+
+                  {/* GST */}
+                  {!isGSTOnly && (
+                    <>
+                      <td className="text-end">
+                        {group.map((i, idx) => (
+                          <div key={idx}>{i.cgst || i.ctax || ""}</div>
+                        ))}
+                      </td>
+                      <td className="text-end">
+                        {group.map((i, idx) => (
+                          <div key={idx}>{i.sgst || i.stax || ""}</div>
+                        ))}
+                      </td>
+                      <td className="text-end">
+                        {group.map((i, idx) => (
+                          <div key={idx}>{i.igst || i.itax || ""}</div>
+                        ))}
+                      </td>
+                    </>
+                  )}
+
+                  {/* TOTAL */}
+                  <td className="text-end">
+                    {group.map((i, idx) => (
+                      <div key={idx}>{i.total || i.vamt || ""}</div>
+                    ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
       </Modal.Body>

@@ -15,6 +15,7 @@ import { saveAs } from 'file-saver';
 import CoA from "./CoA";
 import InputMask from "react-input-mask";
 import financialYear from "../Shared/financialYear";
+import AnnexureWiseModal from "./AnnexureWiseModal";
 
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
@@ -326,11 +327,6 @@ const TrailBalance = () => {
 
   // Sorting
   switch (optionValues.OrderBy) {
-    case "Annexure Wise":
-    result.sort((a, b) =>
-        (a.formData.Bsgroup || "").localeCompare(b.formData.Bsgroup || "")
-    );
-    break;
     case "Account Name Wise":
     result.sort((a, b) =>
         (a.formData.ahead || "").localeCompare(b.formData.ahead || "")
@@ -1369,6 +1365,27 @@ const groupTotals = useMemo(() => {
   });
   return { debit, credit };
 }, [selectedGroupRows, groupedLedgersToPick]);
+      
+  // Annexure Wise
+  const [showAnnexureModal, setShowAnnexureModal] = useState(false);
+  const [annexureGroupedData, setAnnexureGroupedData] = useState({});
+  const buildAnnexureData = () => {
+  const grouped = {};
+
+  filteredLedgers.forEach((ledger) => {
+      const annexure = ledger.formData.Bsgroup || "Others";
+
+      if (!grouped[annexure]) grouped[annexure] = [];
+
+      grouped[annexure].push({
+      ...ledger,
+      netPcs: ledgerTotals[ledger._id]?.netPcs || 0,
+      netQty: ledgerTotals[ledger._id]?.netWeight || 0,
+      });
+  });
+
+  setAnnexureGroupedData(grouped);
+  };
 
   return (
     <div style={{ padding: "10px" }}>
@@ -1537,6 +1554,10 @@ const groupTotals = useMemo(() => {
             exportMonthWise = {exportLedgerMonthwiseFY}
             onApply={(values) => {
               setOptionValues(values);
+                if (values.OrderBy === "Annexure Wise") {
+                    buildAnnexureData();
+                    setShowAnnexureModal(true);
+                }
               // ✅ store date only if Print Current Date checkbox is true
               if (values.T3) {
                 setPrintDateValue(new Date());
@@ -1544,6 +1565,11 @@ const groupTotals = useMemo(() => {
                 setPrintDateValue(null);
               }
             }}
+          />
+          <AnnexureWiseModal
+            show={showAnnexureModal}
+            onClose={() => setShowAnnexureModal(false)}
+            data={annexureGroupedData}
           />
           <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}} onClick={handleOpen} >Print</Button>
           <PrintTrail
