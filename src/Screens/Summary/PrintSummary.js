@@ -5,60 +5,6 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 
-// 🔹 Get months between dates (April → March)
-const getMonthsBetween = (from, to) => {
-  const result = [];
-  const start = new Date(from);
-  const end = new Date(to);
-
-  start.setDate(1);
-
-  while (start <= end) {
-    result.push(
-      start.toLocaleString("en-IN", { month: "long" })
-    );
-    start.setMonth(start.getMonth() + 1);
-  }
-  return result;
-};
-
-// 🔹 Convert rows → month-wise aggregated data
-const prepareMonthWiseData = (rows, fromDate, toDate) => {
-  const months = getMonthsBetween(fromDate, toDate);
-  const map = {};
-
-  rows.forEach((r) => {
-    const date = r.date || r.vdate;
-    if (!date) return;
-
-    const month = new Date(date).toLocaleString("en-IN", {
-      month: "long",
-    });
-
-    if (!map[r.account]) {
-      map[r.account] = { particular: r.account };
-      months.forEach((m) => {
-        map[r.account][m] = {
-          value: 0,
-          cgst: 0,
-          sgst: 0,
-          igst: 0,
-          cess: 0,
-        };
-      });
-    }
-
-    if (map[r.account][month]) {
-      map[r.account][month].value += r.value || 0;
-      map[r.account][month].cgst += r.cgst || 0;
-      map[r.account][month].sgst += r.sgst || 0;
-      map[r.account][month].igst += r.igst || 0;
-    }
-  });
-
-  return Object.values(map);
-};
-
 const PrintSummary = ({
   isOpen,
   handleClose,
@@ -265,89 +211,6 @@ const PrintSummary = ({
 
     saveAs(blob, `${header}_Summary.xlsx`);
   };
-  
-  const handleExportExcelMonth = () => {
-    const months = getMonthsBetween(fromDate, toDate);
-    const data = prepareMonthWiseData(rows, fromDate, toDate);
-
-    const wsData = [];
-
-    /* ---- HEADER ---- */
-    wsData.push([companyName.toUpperCase()]);
-    wsData.push([`${formatDate(fromDate)} TO ${formatDate(toDate)}`]);
-    wsData.push(["MONTHLY SALES"]);
-    wsData.push([]);
-
-    /* ---- TABLE HEADER ---- */
-    const header1 = ["Particulars"];
-    const header2 = [""];
-
-    months.forEach((m) => {
-      header1.push(m, "", "", "", "");
-      header2.push("Value", "CGST", "SGST", "IGST", "Cess");
-    });
-
-    wsData.push(header1);
-    wsData.push(header2);
-
-    /* ---- DATA ---- */
-    data.forEach((row) => {
-      const r = [row.particular];
-      months.forEach((m) => {
-        r.push(
-          row[m].value,
-          row[m].cgst,
-          row[m].sgst,
-          row[m].igst,
-          row[m].cess
-        );
-      });
-      wsData.push(r);
-    });
-
-    /* ---- TOTAL (SUBTOTAL FORMULA) ---- */
-    const totalRow = ["TOTAL :-"];
-    months.forEach((_, i) => {
-      const baseCol = 2 + i * 5;
-      totalRow.push(
-        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol)}7:${XLSX.utils.encode_col(baseCol)}${wsData.length})` },
-        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 1)}7:${XLSX.utils.encode_col(baseCol + 1)}${wsData.length})` },
-        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 2)}7:${XLSX.utils.encode_col(baseCol + 2)}${wsData.length})` },
-        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 3)}7:${XLSX.utils.encode_col(baseCol + 3)}${wsData.length})` },
-        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 4)}7:${XLSX.utils.encode_col(baseCol + 4)}${wsData.length})` }
-      );
-    });
-
-    wsData.push(totalRow);
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    /* ---- STYLING ---- */
-    ws["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: header2.length } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: header2.length } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: header2.length } },
-    ];
-
-    Object.keys(ws).forEach((cell) => {
-      if (!cell.startsWith("!")) {
-        ws[cell].z = "0.000"; // 🔹 keep 29.200 format
-      }
-    });
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Monthly Sales");
-
-    const excelBuffer = XLSX.write(wb, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    saveAs(
-      new Blob([excelBuffer], { type: "application/octet-stream" }),
-      "Monthly_Sales.xlsx"
-    );
-  };
 
   return (
     <Modal open={isOpen} onClose={handleClose} style={{ zIndex: 100000 }}>
@@ -364,7 +227,7 @@ const PrintSummary = ({
           </Button>
           <Button
             variant="contained"
-            onClick={handleExportExcelMonth}
+            onClick={handleExportExcel}
             style={{ background: "seagreen", color: "white", marginRight: 10 }}
           >
             Export
