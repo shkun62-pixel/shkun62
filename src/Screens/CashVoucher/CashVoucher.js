@@ -1112,6 +1112,17 @@ const CashVoucher = () => {
     }
   };
 
+  const handleVoucherEnter = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      // Focus first ACCOUNTNAME input
+      if (accountNameRefs.current[0]) {
+        accountNameRefs.current[0].focus();
+      }
+    }
+  };
+
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const focusAndScroll = (refArray, rowIndex) => {
     const inputEl = refArray.current?.[rowIndex];
@@ -1413,7 +1424,7 @@ const CashVoucher = () => {
           value={formData.voucherno}
           label="VOUCHER NO."
           onFocus={(e) => e.target.select()}  // Select text on focus
-          onKeyDown={handleEnterKeyPress(voucherRef, null)}
+          onKeyDown={handleVoucherEnter}
           // onChange={handleInputChange}
           inputProps={{
             maxLength: 48,
@@ -1472,6 +1483,12 @@ const CashVoucher = () => {
                   tabIndex={-1}       // ⬅⬅ prevents tab focus
                   checked={showNarrationSuggestions}
                   onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
                 />
               </th>
               <th>PAYMENT</th>

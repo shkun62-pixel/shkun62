@@ -5,6 +5,60 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 
+// 🔹 Get months between dates (April → March)
+const getMonthsBetween = (from, to) => {
+  const result = [];
+  const start = new Date(from);
+  const end = new Date(to);
+
+  start.setDate(1);
+
+  while (start <= end) {
+    result.push(
+      start.toLocaleString("en-IN", { month: "long" })
+    );
+    start.setMonth(start.getMonth() + 1);
+  }
+  return result;
+};
+
+// 🔹 Convert rows → month-wise aggregated data
+const prepareMonthWiseData = (rows, fromDate, toDate) => {
+  const months = getMonthsBetween(fromDate, toDate);
+  const map = {};
+
+  rows.forEach((r) => {
+    const date = r.date || r.vdate;
+    if (!date) return;
+
+    const month = new Date(date).toLocaleString("en-IN", {
+      month: "long",
+    });
+
+    if (!map[r.account]) {
+      map[r.account] = { particular: r.account };
+      months.forEach((m) => {
+        map[r.account][m] = {
+          value: 0,
+          cgst: 0,
+          sgst: 0,
+          igst: 0,
+          cess: 0,
+        };
+      });
+    }
+
+    if (map[r.account][month]) {
+      map[r.account][month].value += r.value || 0;
+      map[r.account][month].cgst += r.cgst || 0;
+      map[r.account][month].sgst += r.sgst || 0;
+      map[r.account][month].igst += r.igst || 0;
+    }
+  });
+
+  return Object.values(map);
+};
+
 const PrintSummary = ({
   isOpen,
   handleClose,
@@ -49,6 +103,252 @@ const PrintSummary = ({
   const totalSgst = rows.reduce((s, r) => s + (r.sgst || 0), 0);
   const totalIgst = rows.reduce((s, r) => s + (r.igst || 0), 0);
 
+  const handleExportExcel = () => {
+    /* ================= HEADER DATA ================= */
+    const sheetData = [
+      [companyName?.toUpperCase()],
+      [companyAdd],
+      [companyCity],
+      [],
+      [header],
+      [`Period ${formatDate(fromDate)} To ${toDate}`],
+      [],
+      [
+        "A/c Name",
+        "Pcs",
+        "Weight",
+        "Value",
+        "C.Tax",
+        "S.Tax",
+        "I.Tax",
+        "Cess",
+      ],
+    ];
+
+    /* ================= DATA ROWS ================= */
+    const DATA_START_ROW = sheetData.length; // 0-based
+
+    rows.forEach((r) => {
+      sheetData.push([
+        r.account || "",
+        r.pcs ?? "",
+        r.qty ?? "",
+        r.value ?? "",
+        r.cgst ?? "",
+        r.sgst ?? "",
+        r.igst ?? "",
+        "",
+      ]);
+    });
+
+    const DATA_END_ROW = sheetData.length; // exclusive
+
+    /* ================= TOTAL ROW (SUBTOTAL) ================= */
+    sheetData.push([
+      "Total",
+      { f: `SUBTOTAL(9,B${DATA_START_ROW + 1}:B${DATA_END_ROW})` },
+      { f: `SUBTOTAL(9,C${DATA_START_ROW + 1}:C${DATA_END_ROW})` },
+      { f: `SUBTOTAL(9,D${DATA_START_ROW + 1}:D${DATA_END_ROW})` },
+      { f: `SUBTOTAL(9,E${DATA_START_ROW + 1}:E${DATA_END_ROW})` },
+      { f: `SUBTOTAL(9,F${DATA_START_ROW + 1}:F${DATA_END_ROW})` },
+      { f: `SUBTOTAL(9,G${DATA_START_ROW + 1}:G${DATA_END_ROW})` },
+      "",
+    ]);
+
+    /* ================= WORKSHEET ================= */
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    /* ================= COLUMN WIDTH ================= */
+    worksheet["!cols"] = [
+      { wch: 30 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 10 },
+    ];
+
+    /* ================= MERGE COMPANY HEADER ================= */
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: 7 } },
+      { s: { r: 5, c: 0 }, e: { r: 5, c: 7 } },
+    ];
+
+    /* ================= CENTER STYLES ================= */
+    const centerStyle = (bold = false, size = 12) => ({
+      alignment: { horizontal: "center", vertical: "center" },
+      font: { bold, sz: size },
+    });
+
+    worksheet["A1"].s = centerStyle(true, 16);
+    worksheet["A2"].s = centerStyle(false, 12);
+    worksheet["A3"].s = centerStyle(false, 12);
+    worksheet["A5"].s = centerStyle(true, 13);
+    worksheet["A6"].s = centerStyle(false, 12);
+
+    /* ================= TABLE HEADER STYLE ================= */
+    const headerRow = 7;
+    for (let c = 0; c <= 7; c++) {
+      const ref = XLSX.utils.encode_cell({ r: headerRow, c });
+      worksheet[ref].s = {
+        font: { bold: true },
+        alignment: { horizontal: "center" },
+        fill: { fgColor: { rgb: "D9D9D9" } },
+        border: {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        },
+      };
+    }
+
+    /* ================= TOTAL ROW STYLE ================= */
+    const totalRowIndex = DATA_END_ROW;
+    for (let c = 0; c <= 7; c++) {
+      const ref = XLSX.utils.encode_cell({ r: totalRowIndex, c });
+      if (worksheet[ref]) {
+        worksheet[ref].s = {
+          font: { bold: true },
+          border: {
+            top: { style: "thin" },
+            bottom: { style: "double" },
+          },
+        };
+      }
+    }
+
+    /* ================= NUMBER FORMATS ================= */
+    const THREE_DECIMAL = "0.000";
+    const TWO_DECIMAL = "0.00";
+
+    // Data rows
+    for (let r = DATA_START_ROW; r < DATA_END_ROW; r++) {
+      ["B", "C"].forEach((col) => {
+        const cell = worksheet[`${col}${r + 1}`];
+        if (cell) cell.z = THREE_DECIMAL;
+      });
+
+      ["D", "E", "F", "G"].forEach((col) => {
+        const cell = worksheet[`${col}${r + 1}`];
+        if (cell) cell.z = TWO_DECIMAL;
+      });
+    }
+
+    // Total row (SUBTOTAL)
+    ["B", "C"].forEach((col) => {
+      worksheet[`${col}${DATA_END_ROW + 1}`].z = THREE_DECIMAL;
+    });
+
+    ["D", "E", "F", "G"].forEach((col) => {
+      worksheet[`${col}${DATA_END_ROW + 1}`].z = TWO_DECIMAL;
+    });
+
+    /* ================= WORKBOOK EXPORT ================= */
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Summary");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true,
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(blob, `${header}_Summary.xlsx`);
+  };
+  
+  const handleExportExcelMonth = () => {
+    const months = getMonthsBetween(fromDate, toDate);
+    const data = prepareMonthWiseData(rows, fromDate, toDate);
+
+    const wsData = [];
+
+    /* ---- HEADER ---- */
+    wsData.push([companyName.toUpperCase()]);
+    wsData.push([`${formatDate(fromDate)} TO ${formatDate(toDate)}`]);
+    wsData.push(["MONTHLY SALES"]);
+    wsData.push([]);
+
+    /* ---- TABLE HEADER ---- */
+    const header1 = ["Particulars"];
+    const header2 = [""];
+
+    months.forEach((m) => {
+      header1.push(m, "", "", "", "");
+      header2.push("Value", "CGST", "SGST", "IGST", "Cess");
+    });
+
+    wsData.push(header1);
+    wsData.push(header2);
+
+    /* ---- DATA ---- */
+    data.forEach((row) => {
+      const r = [row.particular];
+      months.forEach((m) => {
+        r.push(
+          row[m].value,
+          row[m].cgst,
+          row[m].sgst,
+          row[m].igst,
+          row[m].cess
+        );
+      });
+      wsData.push(r);
+    });
+
+    /* ---- TOTAL (SUBTOTAL FORMULA) ---- */
+    const totalRow = ["TOTAL :-"];
+    months.forEach((_, i) => {
+      const baseCol = 2 + i * 5;
+      totalRow.push(
+        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol)}7:${XLSX.utils.encode_col(baseCol)}${wsData.length})` },
+        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 1)}7:${XLSX.utils.encode_col(baseCol + 1)}${wsData.length})` },
+        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 2)}7:${XLSX.utils.encode_col(baseCol + 2)}${wsData.length})` },
+        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 3)}7:${XLSX.utils.encode_col(baseCol + 3)}${wsData.length})` },
+        { f: `SUBTOTAL(9,${XLSX.utils.encode_col(baseCol + 4)}7:${XLSX.utils.encode_col(baseCol + 4)}${wsData.length})` }
+      );
+    });
+
+    wsData.push(totalRow);
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    /* ---- STYLING ---- */
+    ws["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: header2.length } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: header2.length } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: header2.length } },
+    ];
+
+    Object.keys(ws).forEach((cell) => {
+      if (!cell.startsWith("!")) {
+        ws[cell].z = "0.000"; // 🔹 keep 29.200 format
+      }
+    });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Monthly Sales");
+
+    const excelBuffer = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    saveAs(
+      new Blob([excelBuffer], { type: "application/octet-stream" }),
+      "Monthly_Sales.xlsx"
+    );
+  };
+
   return (
     <Modal open={isOpen} onClose={handleClose} style={{ zIndex: 100000 }}>
       <Box sx={style}>
@@ -61,6 +361,13 @@ const PrintSummary = ({
             style={{ background: "lightcoral", color: "black", marginRight: 10 }}
           >
             Print
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleExportExcelMonth}
+            style={{ background: "seagreen", color: "white", marginRight: 10 }}
+          >
+            Export
           </Button>
           <Button
             onClick={handleClose}

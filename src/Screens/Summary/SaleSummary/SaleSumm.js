@@ -664,9 +664,9 @@ const getAccountEntries = () => {
         </Table>
       </div>
 
-      <Card.Footer className="fw-bold" style={{ fontSize: '20px' }}>
+      <Card.Footer className="fw-bold" style={{ fontSize: '20px'}}>
         Total Sale Rs. {totalSale.toFixed(2)}
-        <Button onClick={() => setShowPrint(true)}>Print</Button>
+        <Button style={{letterSpacing:2, marginLeft:20}} onClick={() => setShowPrint(true)}>PRINT</Button>
       </Card.Footer>
     </Card>
     <PrintSummary
