@@ -1570,6 +1570,8 @@ const groupTotals = useMemo(() => {
             show={showAnnexureModal}
             onClose={() => setShowAnnexureModal(false)}
             data={annexureGroupedData}
+            fromDate = {formatDate(fromDate)}
+            toDate = {formatDate(toDate)}
           />
           <Button className="Buttonz" style={{backgroundColor:'#3d85c6'}} onClick={handleOpen} >Print</Button>
           <PrintTrail
