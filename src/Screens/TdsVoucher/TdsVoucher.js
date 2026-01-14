@@ -317,73 +317,38 @@ const TdsVoucher = () => {
   };
 
   const handleNumberChange = (event) => {
-  const { id, value } = event.target;
+    const { id, value } = event.target;
 
-  // Allow empty, decimal dot, or valid number pattern
-  if (!/^\d*\.?\d*$/.test(value)) return;
+    // Allow empty, decimal dot, or valid number pattern
+    if (!/^\d*\.?\d*$/.test(value)) return;
 
-  const updatedFormData = {
-    ...formData,
-    [id]: value, // Keep raw input string
+    const updatedFormData = {
+      ...formData,
+      [id]: value, // Keep raw input string
+    };
+
+    if (
+      ["tds_rate", "tds_srate", "tds_crate", "tds_hrate", "amount"].includes(id)
+    ) {
+      const amount = parseFloat(updatedFormData.amount) || 0;
+      const tds_rate = parseFloat(updatedFormData.tds_rate) || 0;
+      const tds_srate = parseFloat(updatedFormData.tds_srate) || 0;
+      const tds_crate = parseFloat(updatedFormData.tds_crate) || 0;
+      const tds_hrate = parseFloat(updatedFormData.tds_hrate) || 0;
+
+      updatedFormData.tds_amt = (tds_rate / 100) * amount;
+      updatedFormData.sur = (tds_srate / 100) * amount;
+      updatedFormData.cess = (tds_crate / 100) * amount;
+      updatedFormData.Hcess = (tds_hrate / 100) * amount;
+      updatedFormData.tds_tot =
+        updatedFormData.tds_amt +
+        updatedFormData.sur +
+        updatedFormData.cess +
+        updatedFormData.Hcess;
+    }
+
+    setFormData(updatedFormData);
   };
-
-  if (
-    ["tds_rate", "tds_srate", "tds_crate", "tds_hrate", "amount"].includes(id)
-  ) {
-    const amount = parseFloat(updatedFormData.amount) || 0;
-    const tds_rate = parseFloat(updatedFormData.tds_rate) || 0;
-    const tds_srate = parseFloat(updatedFormData.tds_srate) || 0;
-    const tds_crate = parseFloat(updatedFormData.tds_crate) || 0;
-    const tds_hrate = parseFloat(updatedFormData.tds_hrate) || 0;
-
-    updatedFormData.tds_amt = (tds_rate / 100) * amount;
-    updatedFormData.sur = (tds_srate / 100) * amount;
-    updatedFormData.cess = (tds_crate / 100) * amount;
-    updatedFormData.Hcess = (tds_hrate / 100) * amount;
-    updatedFormData.tds_tot =
-      updatedFormData.tds_amt +
-      updatedFormData.sur +
-      updatedFormData.cess +
-      updatedFormData.Hcess;
-  }
-
-  setFormData(updatedFormData);
-};
-
-  // const handleNumberChange = (event) => {
-  //   const { id, value } = event.target;
-  //   const newValue = parseFloat(value) || 0;
-  //   const updatedFormData = {
-  //     ...formData,
-  //     [id]: newValue,
-  //   };
-
-  //   if (
-  //     id === "tds_rate" ||
-  //     id === "tds_srate" ||
-  //     id === "tds_crate" ||
-  //     id === "tds_hrate" ||
-  //     id === "amount"
-  //   ) {
-  //     const amount = parseFloat(updatedFormData.amount) || 0;
-  //     const tds_rate = parseFloat(updatedFormData.tds_rate) || 0;
-  //     const tds_srate = parseFloat(updatedFormData.tds_srate) || 0;
-  //     const tds_crate = parseFloat(updatedFormData.tds_crate) || 0;
-  //     const tds_hrate = parseFloat(updatedFormData.tds_hrate) || 0;
-
-  //     updatedFormData.tds_amt = (tds_rate / 100) * amount;
-  //     updatedFormData.sur = (tds_srate / 100) * amount;
-  //     updatedFormData.cess = (tds_crate / 100) * amount;
-  //     updatedFormData.Hcess = (tds_hrate / 100) * amount;
-  //     updatedFormData.tds_tot =
-  //       updatedFormData.tds_amt +
-  //       updatedFormData.sur +
-  //       updatedFormData.cess +
-  //       updatedFormData.Hcess;
-  //   }
-
-  //   setFormData(updatedFormData);
-  // };
 
   // Modal For Customer
   
@@ -447,14 +412,6 @@ const TdsVoucher = () => {
     }
     setcreditAcc(updatedItems);
   };
-
-  // const handleProductSelectCus = (product) => {
-  //   setIsEditMode(true);
-  //   if (selectedItemIndexCus !== null) {
-  //     handleItemChangeCus(selectedItemIndexCus, "name", product.ahead);
-  //     setShowModalCus(false);
-  //   }
-  // };
 
   const handleProductSelectCus = (product) => {
     if (!product) {
@@ -1791,14 +1748,6 @@ const TdsVoucher = () => {
                 initialKey={pressedKey}
                 tenant={tenant}
               />
-                // <ProductModalCustomer
-                //   allFields={allFieldsTdsAcc}
-                //   products={productsTdsAcc}
-                //   onSelect={handleProductSelectTdsAcc}
-                //   onClose={() => setShowModalTdsAcc(false)}
-                //   onRefresh={fetchCustomers} // ✅ you passed this here
-                //   initialKey={pressedKey} // Pass the pressed key to the modal
-                // />
               )}
           </div>
           <div>
