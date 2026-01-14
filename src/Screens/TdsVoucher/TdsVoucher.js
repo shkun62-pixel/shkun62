@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
@@ -12,6 +12,7 @@ import TdsSetup from "./TdsSetup";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import TextField from "@mui/material/TextField";
+import InputMask from "react-input-mask";
 
 const TdsVoucher = () => {
   const { company } = useContext(CompanyContext);
@@ -45,28 +46,28 @@ const TdsVoucher = () => {
     vno: 0,
     vtype: "T",
     tdson: "",
-    amount: 0,
-    others: 0,
+    amount: "",
+    others: "",
     vehicle: "",
     gr: "",
     grdate: "",
-    invoiceno: 0,
+    invoiceno: "",
     invoicedate: "",
-    weight: 0,
+    weight: "",
     tdscode: "",
     rem1: "",
-    tds_rate: 0,
-    tds_amt: 0,
-    tds_srate: 0,
-    sur: 0,
-    tds_crate: 0,
-    cess: 0,
-    tds_hrate: 0,
+    tds_rate: "",
+    tds_amt: "",
+    tds_srate: "",
+    sur: "",
+    tds_crate: "",
+    cess: "",
+    tds_hrate: "",
     Hcess: 0,
     tds_tot: 0,
     tds_dep: "",
-    tds_ch: 0,
-    tds_chq: 0,
+    tds_ch: "",
+    tds_chq: "",
     Bank: "",
     post: "",
   });
@@ -96,92 +97,6 @@ const TdsVoucher = () => {
   ]);
 
   const [fontSize] = useState(17);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dayName, setDayName] = useState("");
-  const getDayName = (date) => {
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    return daysOfWeek[date.getDay()];
-  };
-  // Search functions
-  useEffect(() => {
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          // Ensure the date is valid
-          setSelectedDate(date);
-          setDayName(getDayName(date));
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If no date exists in formData, handle the "else" part
-      const today = new Date();
-      const formattedDate = today.toISOString().split("T")[0];
-      setSelectedDate(today);
-      setDayName(getDayName(today));
-      setFormData({ ...formData, date: formattedDate });
-    }
-  }, [formData.date, setFormData]);
-
-  const [grdate, setgrdate] = useState(null);
-  useEffect(() => {
-    if (formData.grdate) {
-      setgrdate(new Date(formData.grdate));
-    } else {
-      const today = new Date();
-      setgrdate(today);
-      setFormData({ ...formData, grdate: today });
-    }
-  }, [formData.grdate, setFormData]);
-
-  // INVOICE DATE
-  const [invoiceDate, setinvoiceDate] = useState(null);
-  useEffect(() => {
-    if (formData.invoicedate) {
-      setinvoiceDate(new Date(formData.invoicedate));
-    } else {
-      const today = new Date();
-      setinvoiceDate(today);
-      setFormData({ ...formData, invoicedate: today });
-    }
-  }, [formData.invoicedate, setFormData]);
-
-  // DEPOSIT DATE
-  const [depDate, setdepDate] = useState(null);
-  useEffect(() => {
-    if (formData.tds_dep) {
-      setdepDate(new Date(formData.tds_dep));
-    } else {
-      const today = new Date();
-      setdepDate(today);
-      setFormData({ ...formData, tds_dep: today });
-    }
-  }, [formData.tds_dep, setFormData]);
-
-  const handleDateChange = (date) => {
-    setgrdate(date);
-    setFormData({ ...formData, grdate: date });
-  };
-  const handleDateChange2 = (date) => {
-    setinvoiceDate(date);
-    setFormData({ ...formData, invoicedate: date });
-  };
-  const handleDateChange3 = (date) => {
-    setinvoiceDate(date);
-    setFormData({ ...formData, tds_dep: date });
-  };
   // FETCH DATA
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
@@ -199,6 +114,7 @@ const TdsVoucher = () => {
   const [isAbcmode, setIsAbcmode] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
+ 
   const fetchData = async () => {
     try {
       const response = await axios.get(
@@ -243,7 +159,7 @@ const TdsVoucher = () => {
   const initializeEmptyData = () => {
     // Default date as current date
     const emptyFormData = {
-      date: new Date().toLocaleDateString(), // Use today's date
+      date: "", // Use today's date
       date: "",
       vno: 0,
       vtype: "T",
@@ -268,8 +184,8 @@ const TdsVoucher = () => {
       Hcess: 0,
       tds_tot: 0,
       tds_dep: "",
-      tds_ch: 0,
-      tds_chq: 0,
+      tds_ch: "",
+      tds_chq: "",
       Bank: "",
       post: "",
     };
@@ -350,8 +266,46 @@ const TdsVoucher = () => {
     setFormData(updatedFormData);
   };
 
+  const inputRefs = useRef([]); // Array to hold references for input fields
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent default behavior
+      let nextIndex = index + 1;
+
+      // Find the next input that is not disabled
+      while (
+        inputRefs.current[nextIndex] &&
+        inputRefs.current[nextIndex].disabled
+      ) {
+        nextIndex += 1;
+      }
+
+      const nextInput = inputRefs.current[nextIndex];
+      if (nextInput) {
+        nextInput.focus(); // Focus the next enabled input field
+      }
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault(); // Prevent default behavior
+      let prevIndex = index - 1;
+
+      // Find the previous input that is not disabled
+      while (
+        inputRefs.current[prevIndex] &&
+        inputRefs.current[prevIndex].disabled
+      ) {
+        prevIndex -= 1;
+      }
+
+      const prevInput = inputRefs.current[prevIndex];
+      if (prevInput) {
+        prevInput.focus(); // Focus the previous enabled input field
+      }
+    }
+  };
+
   // Modal For Customer
-  
   React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchCustomers();
@@ -435,6 +389,10 @@ const TdsVoucher = () => {
     if (selectedItemIndexCus !== null) {
       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
     }
+    // Focus back on the input field after selecting the value
+    setTimeout(() => {
+      inputRefs.current[2]?.focus();
+    }, 0);
     setcreditAcc(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
@@ -461,6 +419,7 @@ const TdsVoucher = () => {
     return fields;
   }, []);
 
+  const [selectOpen, setSelectOpen] = useState(false);
   const handleTdsOn = (event) => {
     const { value } = event.target; // Get the selected value from the event
     setFormData((prevState) => ({
@@ -521,6 +480,9 @@ const TdsVoucher = () => {
       handleItemChangeAcc(selectedItemIndexAcc, "acName", nameValue);
       setShowModalAcc(false);
     }
+    setTimeout(() => {
+      inputRefs.current[5]?.focus();
+    }, 0);
     settdsRetAcc(newCustomers);
     setIsEditMode(true);
     setShowModalAcc(false);
@@ -598,6 +560,9 @@ const TdsVoucher = () => {
     if (selectedItemIndexDebit !== null) {
       handleItemChangeDebit(selectedItemIndexDebit, "ahead", nameValue);
     }
+    setTimeout(() => {
+      inputRefs.current[15]?.focus();
+    }, 0);
     setdebitAcc(newCustomers);
     setIsEditMode(true);
     setShowModalDebit(false);
@@ -646,13 +611,6 @@ const TdsVoucher = () => {
     setTdsAcc(updatedItems);
   };
 
-  // const handleProductSelectTdsAcc = (product) => {
-  //   setIsEditMode(true);
-  //   if (selectedItemIndexTdsAcc !== null) {
-  //     handleItemChangeTdsAcc(selectedItemIndexTdsAcc, "ahead", product.ahead);
-  //     setShowModalTdsAcc(false);
-  //   }
-  // };
     const handleProductSelectTdsAcc = (product) => {
     if (!product) {
       alert("No product received!");
@@ -673,6 +631,9 @@ const TdsVoucher = () => {
     if (selectedItemIndexTdsAcc !== null) {
       handleItemChangeTdsAcc(selectedItemIndexTdsAcc, "ahead", nameValue);
     }
+    setTimeout(() => {
+      inputRefs.current[17]?.focus();
+    }, 0);
     setTdsAcc(newCustomers);
     setIsEditMode(true);
     setShowModalTdsAcc(false);
@@ -874,11 +835,20 @@ const TdsVoucher = () => {
       console.error("Error fetching last record:", error);
     }
   };
+
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
   const handleAdd = async () => {
     try {
       let lastvoucherno = formData.vno ? parseInt(formData.vno) + 1 : 1;
       const newData = {
-        date: "",
+        date: getTodayDDMMYYYY(), // ✅ TODAY'S DATE
         vno: lastvoucherno,
         vtype: "T",
         tdson: "",
@@ -902,8 +872,8 @@ const TdsVoucher = () => {
         Hcess: 0,
         tds_tot: 0,
         tds_dep: "",
-        tds_ch: 0,
-        tds_chq: 0,
+        tds_ch: "",
+        tds_chq: "",
         Bank: "",
         post: "",
       };
@@ -939,6 +909,9 @@ const TdsVoucher = () => {
       setIsSubmitEnabled(true);
       setIsDisabled(false);
       setIsEditMode(true);
+      if (inputRefs.current[0]) {
+        inputRefs.current[0].focus();
+      }
     } catch (error) {
       console.error("Error adding new entry:", error);
     }
@@ -1010,8 +983,8 @@ const TdsVoucher = () => {
           Hcess: 0,
           tds_tot: 0,
           tds_dep: "",
-          tds_ch: 0,
-          tds_chq: 0,
+          tds_ch: "",
+          tds_chq: "",
           Bank: "",
           post: "",
         };
@@ -1048,6 +1021,7 @@ const TdsVoucher = () => {
   };
   const handleEditClick = () => {
     setTitle("(EDIT)");
+    setIsAddEnabled(false);
     setIsDisabled(false);
     setIsEditMode(true);
     setIsSubmitEnabled(true);
@@ -1059,6 +1033,9 @@ const TdsVoucher = () => {
     setIsSPrintEnabled(false);
     setIsDeleteEnabled(false);
     setIsAbcmode(true);
+    if (inputRefs.current[2]) {
+      inputRefs.current[2].focus();
+    }
   };
   const handleSaveClick = async () => {
     document.body.style.backgroundColor = "white";
@@ -1070,7 +1047,8 @@ const TdsVoucher = () => {
         combinedData = {
           _id: formData._id,
           formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
+            // date: selectedDate.toLocaleDateString("en-IN"),
+            date: formData.date,
             vno: formData.vno,
             vtype: formData.vtype,
             tdson: formData.tdson,
@@ -1078,9 +1056,9 @@ const TdsVoucher = () => {
             others: formData.others,
             vehicle: formData.vehicle,
             gr: formData.gr,
-            grdate: grdate.toLocaleDateString("en-IN"),
+            grdate: formData.grdate,
             invoiceno: formData.invoiceno,
-            invoicedate: invoiceDate.toLocaleDateString("en-IN"),
+            invoicedate: formData.invoicedate,
             weight: formData.weight,
             tdscode: formData.tdscode,
             rem1: formData.rem1,
@@ -1093,7 +1071,7 @@ const TdsVoucher = () => {
             tds_hrate: formData.tds_hrate,
             Hcess: formData.Hcess,
             tds_tot: formData.tds_tot,
-            tds_dep: depDate.toLocaleDateString("en-IN"),
+            tds_dep: formData.tds_dep,
             tds_ch: formData.tds_ch,
             tds_chq: formData.tds_chq,
             Bank: formData.Bank,
@@ -1120,7 +1098,8 @@ const TdsVoucher = () => {
         combinedData = {
           _id: formData._id,
           formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
+            // date: selectedDate.toLocaleDateString("en-IN"),
+            date: formData.date,
             vno: formData.vno,
             vtype: formData.vtype,
             tdson: formData.tdson,
@@ -1128,9 +1107,9 @@ const TdsVoucher = () => {
             others: formData.others,
             vehicle: formData.vehicle,
             gr: formData.gr,
-            grdate: grdate.toLocaleDateString("en-IN"),
+            grdate: formData.grdate,
             invoiceno: formData.invoiceno,
-            invoicedate: invoiceDate.toLocaleDateString("en-IN"),
+            invoicedate: formData.invoicedate,
             weight: formData.weight,
             tdscode: formData.tdscode,
             rem1: formData.rem1,
@@ -1143,7 +1122,7 @@ const TdsVoucher = () => {
             tds_hrate: formData.tds_hrate,
             Hcess: formData.Hcess,
             tds_tot: formData.tds_tot,
-            tds_dep: depDate.toLocaleDateString("en-IN"),
+            tds_dep: formData.tds_dep,
             tds_ch: formData.tds_ch,
             tds_chq: formData.tds_chq,
             Bank: formData.Bank,
@@ -1259,17 +1238,47 @@ const TdsVoucher = () => {
       </h1>
       <div className="containerTDSvoucher">
         <div className="left">
-        <text>VOUCHER DATE</text>
-        <div>
-          <DatePicker
+        <div className={`erp-input ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+          <span className="erp-label">VOUCHER DATE</span>
+
+          <InputMask
+            mask="99-99-9999"
+            value={formData.date}
             readOnly={!isEditMode || isDisabled}
-            className="datepickerVoucher"
-            id="date"
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            dateFormat="dd-MM-yyyy"
-          />
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="erp-field custom-style"
+                ref={(el) => (inputRefs.current[0] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 0)}
+              />
+            )}
+          </InputMask>
         </div>
+        {/* <div>
+          <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="datepickerVoucher"
+                ref={(el) => (inputRefs.current[0] = el)} // ✅ CORRECT
+                onKeyDown={(e) => handleKeyDown(e, 0)}
+              />
+            )}
+          </InputMask>
+        </div> */}
         <div>
         <TextField
         id="vno"
@@ -1277,6 +1286,8 @@ const TdsVoucher = () => {
         label="VOUCHER NO."
         onChange={handleNumberChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[1] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 1)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1289,7 +1300,7 @@ const TdsVoucher = () => {
         size="small"
         variant="filled"
         className="custom-bordered-input"
-        sx={{ width: 150 }}
+        sx={{ width: 225 }}
         />
         </div>
         <div>
@@ -1300,7 +1311,12 @@ const TdsVoucher = () => {
                 id="Crcode"
                 value={item.Crcode}
                 label="CREDIT A/C"
-                onKeyDown={(e) => { handleOpenModal(e, index, "Crcode")}}
+                // onKeyDown={(e) => { handleOpenModal(e, index, "Crcode")}}
+                onKeyDown={(e) => {
+                  handleOpenModal(e, index, "Crcode");
+                  handleKeyDown(e, 2);
+                }}
+                 inputRef={(el) => (inputRefs.current[2] = el)}
                 inputProps={{
                   maxLength: 48,
                   style: {
@@ -1338,6 +1354,8 @@ const TdsVoucher = () => {
                 id="city"
                 value={item.city}
                 label="CITY"
+                inputRef={(el) => (inputRefs.current[3] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 3)}
                 inputProps={{
                   maxLength: 48,
                   style: {
@@ -1378,25 +1396,51 @@ const TdsVoucher = () => {
             },
           }}
           size="small"
-          disabled={!isEditMode || isDisabled}
           variant="filled"
         >
           <InputLabel id="tdson">TDS ON</InputLabel>
-          <Select
-          className="custom-bordered-input"
-            labelId="tdson"
-            id="tdson"
-            value={formData.tdson}
-            onChange={handleTdsOn}
-            label="TDS ON"
-            displayEmpty
-            inputProps={{
-              sx: {
-                fontSize: `${fontSize}px`,
-              },
-            }}
-            MenuProps={{ disablePortal: true }}
-          >
+            <Select
+              labelId="tdson"
+              id="tdson"
+              value={formData.tdson}
+              onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleTdsOn(e);
+                  }}
+              // onChange={handleTdsOn} // 🔹 selection only
+              open={selectOpen}
+              onOpen={() => setSelectOpen(true)}
+              onClose={() => setSelectOpen(false)}
+              inputRef={(el) => (inputRefs.current[4] = el)}
+              onKeyDownCapture={(e) => {
+                if (e.key === "Enter") {
+                  if (selectOpen) {
+                    // 🔹 Menu open → let MUI select option
+                    return;
+                  }
+    
+                  // 🔹 Menu closed → move to next field
+                  e.preventDefault();
+                  e.stopPropagation();
+                  inputRefs.current[5]?.focus();
+                }
+    
+                // Optional: ArrowDown opens menu
+                if (e.key === "ArrowDown" && !selectOpen) {
+                  e.preventDefault();
+                  setSelectOpen(true);
+                }
+              }}
+               inputProps={{
+                sx: {
+                  fontSize: `${fontSize}px`,
+                  pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+                },
+              }}
+              label="TDS ON"
+              displayEmpty
+              MenuProps={{ disablePortal: true }}
+            >
             <MenuItem value=""><em></em></MenuItem>
             <MenuItem value="Interest">Interest</MenuItem>
             <MenuItem value="Freight">Freight</MenuItem>
@@ -1420,7 +1464,12 @@ const TdsVoucher = () => {
             id="Cacode"
             value={item.Cacode}
             label="TDS RET A/C"
-            onKeyDown={(e) => { handleOpenModal(e, index, "Cacode")}}
+            onKeyDown={(e) => {
+              handleOpenModal(e, index, "Cacode");
+              handleKeyDown(e, 5);
+            }}
+            inputRef={(el) => (inputRefs.current[5] = el)}
+            // onKeyDown={(e) => { handleOpenModal(e, index, "Cacode")}}
             onFocus={(e) => e.target.select()}  // Select text on focus
             inputProps={{
               maxLength: 48,
@@ -1441,6 +1490,8 @@ const TdsVoucher = () => {
             value={item.Pan}
             label="PAN NO"
             onFocus={(e) => e.target.select()}  // Select text on focus
+            inputRef={(el) => (inputRefs.current[6] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 6)}
             inputProps={{
               maxLength: 48,
               style: {
@@ -1470,10 +1521,12 @@ const TdsVoucher = () => {
         <div>
         <TextField
         id="amount"
-        value={formData.amount}
+        value={formData.amount === 0 || formData.amount == null ? "" : formData.amount}
         label="AMOUNT"
         onChange={handleNumberChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[7] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 7)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1492,10 +1545,12 @@ const TdsVoucher = () => {
         <div>
         <TextField
         id="others"
-        value={formData.others}
+        value={formData.others === 0 || formData.others == null ? "" : formData.others}
         label="OTHER EXP"
         onChange={handleNumberChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[8] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 8)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1518,6 +1573,8 @@ const TdsVoucher = () => {
         label="VEHICLE NO"
         onChange={handleInputChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[9] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 9)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1534,10 +1591,12 @@ const TdsVoucher = () => {
         />
         <TextField
         id="weight"
-        value={formData.weight}
+        value={formData.weight === 0 || formData.weight == null ? "" : formData.weight}
         label="WEIGHT"
         onChange={handleNumberChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[10] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 10)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1560,6 +1619,8 @@ const TdsVoucher = () => {
         label="GR NO"
         onChange={handleNumberChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[11] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 11)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1574,42 +1635,56 @@ const TdsVoucher = () => {
         className="custom-bordered-input"
         sx={{ width: 225 }}
         />
-        <DatePicker
-          id="grdate"
-          selected={grdate}
-          onChange={handleDateChange}
-          dateFormat="dd-MM-yyyy"
-          className="custom-datepickerTDS"
+        <div className={`erp-input ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+          <span className="erp-label">GR DATE</span>
+
+          <InputMask
+            mask="99-99-9999"
+            value={formData.grdate}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, grdate: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="erp-field custom-style"
+                ref={(el) => (inputRefs.current[12] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 12)}
+              />
+            )}
+          </InputMask>
+        </div>
+
+        {/* <InputMask
+          mask="99-99-9999"
+          placeholder="dd-mm-yyyy"
+          value={formData.grdate}
           readOnly={!isEditMode || isDisabled}
-          customInput={
-            <TextField
-              label="GR DATE"
-              variant="filled"
-              size="small"
-              className="custom-bordered-input"
-              InputProps={{
-                style: {
-                  height: "45px",
-                },
-                inputProps: {
-                  style: {
-                    height: "45px",
-                    fontSize: "17px",
-                  },
-                  readOnly: !isEditMode || isDisabled,
-                }
-              }}
-            />
+          onChange={(e) =>
+            setFormData({ ...formData, grdate: e.target.value })
           }
-        />
+        >
+          {(inputProps) => (
+            <input
+              {...inputProps}
+              className="custom-datepickerTDS"
+              ref={(el) => (inputRefs.current[12] = el)} // ✅ CORRECT
+              onKeyDown={(e) => handleKeyDown(e, 12)}
+            />
+          )}
+        </InputMask> */}
         </div>
         <div style={{display:'flex',flexDirection:'row'}}>
         <TextField
         id="invoiceno"
-        value={formData.invoiceno}
+        value={formData.invoiceno === 0 || formData.invoiceno == null ? "" : formData.invoiceno}
         label="INVOICE NO"
         onChange={handleNumberChange}
         onFocus={(e) => e.target.select()}  // Select text on focus
+        inputRef={(el) => (inputRefs.current[13] = el)}
+        onKeyDown={(e) => handleKeyDown(e, 13)}
         inputProps={{
           maxLength: 48,
           style: {
@@ -1624,38 +1699,49 @@ const TdsVoucher = () => {
         className="custom-bordered-input"
         sx={{ width: 225 }}
         />
-        <DatePicker
-          id="duedate"
-          selected={invoiceDate}
-          onChange={handleDateChange2}
-          dateFormat="dd-MM-yyyy"
-          className="custom-datepickerTDS"
+        <div className={`erp-input ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+          <span className="erp-label">INVOICE DATE</span>
+
+          <InputMask
+            mask="99-99-9999"
+            value={formData.invoicedate}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, invoicedate: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="erp-field custom-style"
+                ref={(el) => (inputRefs.current[14] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 14)}
+              />
+            )}
+          </InputMask>
+        </div>
+        {/* <InputMask
+          mask="99-99-9999"
+          placeholder="dd-mm-yyyy"
+          value={formData.invoicedate}
           readOnly={!isEditMode || isDisabled}
-          customInput={
-          <TextField
-            label="INVOICE DATE"
-            variant="filled"
-            size="small"
-            className="custom-bordered-input"
-            InputProps={{
-              style: {
-                height: "45px",
-              },
-              inputProps: {
-                style: {
-                  height: "45px",
-                  fontSize: "17px",
-                },
-                readOnly: !isEditMode || isDisabled,
-              }
-            }}
-          />
+          onChange={(e) =>
+            setFormData({ ...formData, invoicedate: e.target.value })
           }
-        />
+        >
+          {(inputProps) => (
+            <input
+              {...inputProps}
+              className="custom-datepickerTDS"
+              ref={(el) => (inputRefs.current[14] = el)} // ✅ CORRECT
+              onKeyDown={(e) => handleKeyDown(e, 14)}
+            />
+          )}
+        </InputMask> */}
         </div>
         </div>
         {/* Right Section */}
-        <div style={{display: "flex",flexDirection: "column",marginTop:17,marginLeft:30}}>
+        <div className="Right">
           <div>
             {debitAcc.map((item, index) => (
               <div key={item.Drcode}>
@@ -1670,7 +1756,12 @@ const TdsVoucher = () => {
                 id="Drcode"
                 value={item.Drcode}
                 label="DEBIT A/C"
-                onKeyDown={(e) => { handleOpenModal(e, index, "Drcode") }}
+                // onKeyDown={(e) => { handleOpenModal(e, index, "Drcode") }}
+                onKeyDown={(e) => {
+                  handleOpenModal(e, index, "Drcode");
+                  handleKeyDown(e, 15);
+                }}
+                inputRef={(el) => (inputRefs.current[15] = el)}
                 inputProps={{
                   maxLength: 48,
                   style: {
@@ -1690,6 +1781,8 @@ const TdsVoucher = () => {
                 id="City"
                 value={item.City}
                 label="CITY"
+                inputRef={(el) => (inputRefs.current[16] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 16)}
                 inputProps={{
                   maxLength: 48,
                   style: {
@@ -1717,45 +1810,52 @@ const TdsVoucher = () => {
             )}
           </div>
           <div>
-              {TdsAcc.map((item, index) => (
-                <div key={item.Cacode}>
-                <TextField
-                id="tdscode"
-                value={item.tdscode}
-                label="TDS A/C"
-                onKeyDown={(e) => { handleOpenModal(e, index, "tdscode") }}
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 18,
-                    fontSize: `${fontSize}px`,
-                    fontWeight: "bold",
-                  },
-                  readOnly: !isEditMode || isDisabled,
-                }}
-                size="small"
-                variant="filled"
-                className="custom-bordered-input"
-                sx={{ width: 450 }}
-              />
-              </div>
-              ))}
-              {showModalTdsAcc && (
-                <ProductModalCustomer
-                allFields={allFieldsTdsAcc}
-                onSelect={handleProductSelectTdsAcc}
-                onClose={handleCloseModalTdsAcc}
-                initialKey={pressedKey}
-                tenant={tenant}
-              />
-              )}
+          {TdsAcc.map((item, index) => (
+            <div key={item.Cacode}>
+            <TextField
+            id="tdscode"
+            value={item.tdscode}
+            label="TDS A/C"
+            // onKeyDown={(e) => { handleOpenModal(e, index, "tdscode") }}
+            onKeyDown={(e) => {
+              handleOpenModal(e, index, "tdscode");
+              handleKeyDown(e, 17);
+            }}
+            inputRef={(el) => (inputRefs.current[17] = el)}
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: 18,
+                fontSize: `${fontSize}px`,
+                fontWeight: "bold",
+              },
+              readOnly: !isEditMode || isDisabled,
+            }}
+            size="small"
+            variant="filled"
+            className="custom-bordered-input"
+            sx={{ width: 450 }}
+          />
+          </div>
+          ))}
+          {showModalTdsAcc && (
+            <ProductModalCustomer
+            allFields={allFieldsTdsAcc}
+            onSelect={handleProductSelectTdsAcc}
+            onClose={handleCloseModalTdsAcc}
+            initialKey={pressedKey}
+            tenant={tenant}
+          />
+          )}
           </div>
           <div>
             <TextField
               id="rem1"
               value={formData.rem1}
               label="REMARKS"
-              onKeyDown={handleInputChange}
+              onChange={handleInputChange}
+              inputRef={(el) => (inputRefs.current[18] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 18)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -1775,9 +1875,11 @@ const TdsVoucher = () => {
             <div style={{ display: "flex", flexDirection: "row" }}>
             <TextField
               id="tds_rate"
-              value={formData.tds_rate}
+              value={formData.tds_rate === 0 || formData.tds_rate == null ? "" : formData.tds_rate}
               label="T.D.S RATE"
-              onKeyDown={handleNumberChange}
+              onChange={handleNumberChange}
+              inputRef={(el) => (inputRefs.current[19] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 19)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -1794,7 +1896,7 @@ const TdsVoucher = () => {
             />
             <TextField
               id="tds_amt"
-              value={formData.tds_amt}
+              value={formData.tds_amt === 0 || formData.tds_amt == null ? "" : formData.tds_amt}
               label="T.D.S AMOUNT"
               onKeyDown={handleNumberChange}
               inputProps={{
@@ -1815,9 +1917,11 @@ const TdsVoucher = () => {
             <div style={{ display: "flex", flexDirection: "row" }}>
             <TextField
               id="tds_srate"
-              value={formData.tds_srate}
+              value={formData.tds_srate === 0 || formData.tds_srate == null ? "" : formData.tds_srate}
               label="SUR@ RATE"
-              onKeyDown={handleNumberChange}
+              onChange={handleNumberChange}
+              inputRef={(el) => (inputRefs.current[20] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 20)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -1834,7 +1938,7 @@ const TdsVoucher = () => {
             />
             <TextField
               id="sur"
-              value={formData.sur}
+              value={formData.sur === 0 || formData.sur == null ? "" : formData.sur}
               label="SUR@ AMOUNT"
               onKeyDown={handleNumberChange}
               inputProps={{
@@ -1855,9 +1959,11 @@ const TdsVoucher = () => {
             <div style={{ display: "flex", flexDirection: "row" }}>
             <TextField
               id="tds_crate"
-              value={formData.tds_crate}
+              value={formData.tds_crate === 0 || formData.tds_crate == null ? "" : formData.tds_crate}
               label="CESS RATE"
-              onKeyDown={handleNumberChange}
+              onChange={handleNumberChange}
+              inputRef={(el) => (inputRefs.current[21] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 21)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -1874,7 +1980,7 @@ const TdsVoucher = () => {
             />
             <TextField
               id="cess"
-              value={formData.cess}
+              value={formData.cess === 0 || formData.cess == null ? "" : formData.cess}
               label="CESS AMOUNT"
               onKeyDown={handleNumberChange}
               inputProps={{
@@ -1895,9 +2001,11 @@ const TdsVoucher = () => {
             <div style={{ display: "flex", flexDirection: "row" }}>
             <TextField
               id="tds_hrate"
-              value={formData.tds_hrate}
+              value={formData.tds_hrate === 0 || formData.tds_hrate == null ? "" : formData.tds_hrate}
               label="HE.CESS RATE"
-              onKeyDown={handleNumberChange}
+              onChange={handleNumberChange}
+              inputRef={(el) => (inputRefs.current[22] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 22)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -1914,7 +2022,7 @@ const TdsVoucher = () => {
             />
             <TextField
               id="Hcess"
-              value={formData.Hcess}
+              value={formData.Hcess === 0 || formData.Hcess == null ? "" : formData.Hcess}
               label="H.CESS AMOUNT"
               onKeyDown={handleNumberChange}
               inputProps={{
@@ -1935,7 +2043,7 @@ const TdsVoucher = () => {
             <div style={{ display: "flex", flexDirection: "row",marginLeft:"50%"}}>
             <TextField
               id="tds_tot"
-              value={formData.tds_tot}
+              value={formData.tds_tot === 0 || formData.tds_tot == null ? "" : formData.tds_tot}
               label="TOTAL"
               inputProps={{
                 maxLength: 48,
@@ -1953,39 +2061,52 @@ const TdsVoucher = () => {
             />
             </div>
             <div style={{display:'flex',flexDirection:'row',marginTop:20}}>
-            <DatePicker
-              id="tds_dep"
-              selected={depDate}
-              onChange={handleDateChange3}
-              dateFormat="dd-MM-yyyy"
-              className="custom-datepickerTDS"
+            <div className={`erp-input ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+              <span className="erp-label">DEPOSIT DATE</span>
+
+              <InputMask
+                mask="99-99-9999"
+                value={formData.tds_dep}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, tds_dep: e.target.value })
+                }
+              >
+                {(inputProps) => (
+                  <input
+                    {...inputProps}
+                    className="erp-field custom-style"
+                    ref={(el) => (inputRefs.current[23] = el)}
+                    onKeyDown={(e) => handleKeyDown(e, 23)}
+                  />
+                )}
+              </InputMask>
+            </div>
+            {/* <InputMask
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={formData.tds_dep}
               readOnly={!isEditMode || isDisabled}
-              customInput={
-              <TextField
-                label="DEPOSIT DATE"
-                variant="filled"
-                size="small"
-                className="custom-bordered-input"
-                InputProps={{
-                  style: {
-                    height: "45px",
-                  },
-                  inputProps: {
-                    style: {
-                      height: "45px",
-                      fontSize: "17px",
-                    },
-                    readOnly: !isEditMode || isDisabled,
-                  }
-                }}
-              />
+              onChange={(e) =>
+                setFormData({ ...formData, tds_dep: e.target.value })
               }
-            />
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="custom-datepickerTDS"
+                  ref={(el) => (inputRefs.current[23] = el)} // ✅ CORRECT
+                  onKeyDown={(e) => handleKeyDown(e, 23)}
+                />
+              )}
+            </InputMask> */}
             <TextField
               id="tds_ch"
               value={formData.tds_ch}
               label="CHALLAN NO"
-              onKeyDown={handleNumberChange}
+              onChange={handleNumberChange}
+              inputRef={(el) => (inputRefs.current[24] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 24)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -2006,7 +2127,9 @@ const TdsVoucher = () => {
               id="tds_chq"
               value={formData.tds_chq}
               label="CHEQUE NO"
-              onKeyDown={handleNumberChange}
+              onChange={handleNumberChange}
+              inputRef={(el) => (inputRefs.current[25] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 25)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -2025,7 +2148,9 @@ const TdsVoucher = () => {
               id="Bank"
               value={formData.Bank}
               label="BANK NAME"
-              onKeyDown={handleInputChange}
+              onChange={handleInputChange}
+              inputRef={(el) => (inputRefs.current[26] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 26)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -2137,6 +2262,7 @@ const TdsVoucher = () => {
         </Button>
         <div>
           <Button
+            ref={(el) => (inputRefs.current[27] = el)}
             disabled={!isSubmitEnabled}
             className="Buttonz"
             onClick={handleSaveClick}

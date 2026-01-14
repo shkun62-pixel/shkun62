@@ -39,17 +39,17 @@ import { useNavigate, useLocation } from "react-router-dom";
 const LOCAL_STORAGE_KEY = "tabledataVisibility";
 
 // ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar="_"
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
+// const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+//   <InputMask
+//     mask="99-99-9999"
+//     maskChar="_"
+//     value={value}
+//     onChange={onChange}
+//     onBlur={onBlur}
+//   >
+//     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+//   </InputMask>
+// ));
 
 const Sale = () => {
 
@@ -73,6 +73,7 @@ const Sale = () => {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [title, setTitle] = useState("(View)");
   const datePickerRef = useRef(null);
+  const voucherNoRef = useRef(null);
   const tableContainerRef = useRef(null);
   const itemCodeRefs = useRef([]);
   const desciptionRefs = useRef([]);
@@ -1178,20 +1179,26 @@ const handleViewFAVoucher = () => {
     }
   };
 
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
   const handleAdd = async () => {
     if (datePickerRef.current) {
-      datePickerRef.current.setFocus();
+      datePickerRef.current.focus();
     }
     try {
       const lastEntry = await fetchData();
       await fetchSalesSetup();
-      const today = new Date().toISOString().slice(0, 10);
       const lastvoucherno = lastEntry?.formData?.vbillno ? parseInt(lastEntry.formData.vbillno) + 1 : 1;
       const lastvno = lastEntry?.formData?.vno ? parseInt(lastEntry.formData.vno) + 1 : 1;
 
       const newData = {
         ...lastEntry?.formData,
-        date: today,
+        date: getTodayDDMMYYYY(), // ✅ TODAY'S DATE
         vbillno: lastvoucherno,
         vno: lastvno,
         vtype: "S",
@@ -1458,7 +1465,7 @@ const handleViewFAVoucher = () => {
 
       // 2) Build base form with setup codes (common to both add/edit)
       const baseForm = {
-        date: selectedDate.toLocaleDateString("en-IN"),
+        date: formData.date,
         vtype: formData.vtype,
         vbillno: formData.vbillno,
         vno: formData.vno,
@@ -1478,7 +1485,7 @@ const handleViewFAVoucher = () => {
         tcs1: formData.tcs1,
         tcs206_rate: formData.tcs206_rate,
         tcs206: formData.tcs206,
-        duedate: expiredDate.toLocaleDateString("en-IN"),
+        duedate: formData.duedate,
         pcess: formData.pcess,
         tax: formData.tax,
         sub_total: formData.sub_total,
@@ -2401,36 +2408,36 @@ if (key === "name") {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
+  // useEffect(() => {
+  //   // If formData.date has a valid date string, parse it and set selectedDate
+  //   if (formData.date) {
+  //     try {
+  //       const date = new Date(formData.date);
+  //       if (!isNaN(date.getTime())) {
+  //         setSelectedDate(date);
+  //       } else {
+  //         console.error("Invalid date value in formData.date:", formData.date);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error parsing date:", error);
+  //     }
+  //   } else {
+  //     // If there's no date, we keep selectedDate as null so the DatePicker is blank,
+  //     // but we can still have it open on today's date via openToDate
+  //     setSelectedDate(null);
+  //   }
+  // }, [formData.date]);
 
-  const [expiredDate, setexpiredDate] = useState(null);
-  useEffect(() => {
-    if (formData.duedate) {
-      setexpiredDate(new Date(formData.duedate));
-    } else {
-      const today = new Date();
-      setexpiredDate(today);
-      setFormData({ ...formData, duedate: today });
-    }
-  }, []);
+  // const [expiredDate, setexpiredDate] = useState(null);
+  // useEffect(() => {
+  //   if (formData.duedate) {
+  //     setexpiredDate(new Date(formData.duedate));
+  //   } else {
+  //     const today = new Date();
+  //     setexpiredDate(today);
+  //     setFormData({ ...formData, duedate: today });
+  //   }
+  // }, []);
 
   const handleDateChange = (date) => {
     if (date instanceof Date && !isNaN(date)) {
@@ -3053,15 +3060,8 @@ const handleKeyDownExp = (e, fieldName, index) => {
   //   return <Navigate to="/" replace />;
   // }
 
-    const handleKeyDownTab = (e) => {
-    if (e.key === 'Tab') {
-      e.preventDefault(); // prevent default Tab behavior
-      customerNameRef.current.focus(); // move focus to vaCode2 input
-    }
-  };
-
-    const handleKeyDownTab2 = (e) => {
-    if (e.key === 'Tab') {
+  const handleKeyDownTab2 = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter' ) {
       e.preventDefault(); // prevent default Tab behavior
       saveButtonRef.current.focus(); // move focus to vaCode2 input
     }
@@ -3129,7 +3129,27 @@ const handleKeyDownExp = (e, fieldName, index) => {
       {/* Top Parts */}
       <div className="sale_toppart ">
       <div className="Dated ">
-        <DatePicker
+        <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                }}
+              />
+            )}
+        </InputMask>
+        {/* <DatePicker
           ref={datePickerRef}
           selected={selectedDate || null}
           openToDate={new Date()}
@@ -3138,7 +3158,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           onChange={handleDateChange}
           onBlur={() => validateDate(selectedDate)}
           customInput={<MaskedInput />}
-        />
+        /> */}
         {/* <DatePicker
         popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
@@ -3163,13 +3183,16 @@ const handleKeyDownExp = (e, fieldName, index) => {
         /> */}
       <div  className="billdivz">
         <TextField
+          inputRef={voucherNoRef}
           className="billzNo custom-bordered-input"
           id="vbillno"
           value={formData.vbillno}
           variant="filled"
           size="small"
           label="BILL NO"
-          onKeyDown={handleKeyDownTab} // Handle Tab key here
+          onKeyDown={(e) => {
+            handleEnterKeyPress(voucherNoRef,customerNameRef )(e);
+          }}
           inputProps={{
             maxLength: 48,
             style: {
@@ -4362,8 +4385,28 @@ const handleKeyDownExp = (e, fieldName, index) => {
 
         </div>
         <div style={{display:'flex',flexDirection:"column",marginLeft:5}}>
-            <div className="duedatez">
-            <DatePicker
+          <div className="duedatez">
+            <InputMask
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={formData.duedate}
+              readOnly={!isEditMode || isDisabled}
+              onChange={(e) =>
+                setFormData({ ...formData, duedate: e.target.value })
+              }
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="DatePICKER"
+                  // ref={datePickerRef}
+                  // onKeyDown={(e) => {
+                  //   handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                  // }}
+                />
+              )}
+            </InputMask>
+            {/* <DatePicker
               id="duedate"
               value={formData.duedate}
               className="dueDatePICKER"
@@ -4387,7 +4430,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   }}
                 />
               }
-            />
+            /> */}
           </div>
           <div style={{marginTop:"26px"}}>
           <TextField
