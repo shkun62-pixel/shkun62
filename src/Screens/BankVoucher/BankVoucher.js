@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./BankVoucher.css";
-import DatePicker from "react-datepicker";
 import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,19 +21,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import useCompanySetup from "../Shared/useCompanySetup";
 import FAVoucherModal from "../Shared/FAVoucherModal";
-
-// ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar="_"
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
 
 const BankVoucher = () => {
 
@@ -206,61 +192,6 @@ const BankVoucher = () => {
   // 2) FA voucher preview
   const handleFAPreview = async () => {
     setIsFAModalOpen(true);
-  };
-
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  // Date
-  useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      setSelectedDate(date);
-      const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({ ...prev, date: formattedDate }));
-    }
-  };
-
-  // ✅ Separate function for future date check
-  const checkFutureDate = (date) => {
-    if (!date) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-
-    if (checkDate > today) {
-      toast.info("You Have Selected a Future Date.", {
-        position: "top-center",
-      });
-    }
-  };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
   };
 
   const calculateTotalBankCharges = () => {
@@ -553,9 +484,13 @@ const BankVoucher = () => {
     if (selectedItemIndexCus !== null) {
       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
       setShowModalCus(false);
+      // Focus back on the input field after selecting the value
       setTimeout(() => {
-        accountNameRefs.current[selectedItemIndexCus].focus();
-      }, 100);
+        BankRefs.current.focus()
+      }, 0);
+      // setTimeout(() => {
+      //   accountNameRefs.current[selectedItemIndexCus].focus();
+      // }, 100);
     }
     setbankdetails(newCustomers);
     setIsEditMode(true);
@@ -656,7 +591,7 @@ const BankVoucher = () => {
         // Create an empty data object with voucher number 0
         const emptyFormData = {
           voucherno: 0,
-          date: new Date().toLocaleDateString(), // Use today's date
+          date: "", // Use today's date
           vtype: "B",
           user: "Owner",
           totalpayment: "",
@@ -710,7 +645,7 @@ const BankVoucher = () => {
       // In case of error, you can also initialize empty data if needed
       const emptyFormData = {
         voucherno: 0,
-        date: new Date().toLocaleDateString(), // Use today's date
+        date: "", // Use today's date
         vtype: "B",
         user: "Owner",
         totalpayment: "",
@@ -921,16 +856,23 @@ const BankVoucher = () => {
       console.error("Error fetching last record:", error);
     }
   };
+
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
   const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW");
     try {
       const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
       let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
-      const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
       const newData = {
         vtype: "B",
-        date: today,
+        date: getTodayDDMMYYYY(),
         voucherno: lastvoucherno,
         user: "Owner",
         totalpayment: "",
@@ -957,7 +899,7 @@ const BankVoucher = () => {
       setIsEditMode(true);
       skipItemCodeFocusRef.current = true;
       if (datePickerRef.current) {
-        datePickerRef.current.setFocus();
+        datePickerRef.current.focus();
       }
     } catch (error) {
       console.error("Error adding new entry:", error);
@@ -1113,7 +1055,7 @@ const BankVoucher = () => {
         combinedData = {
           _id: formData._id,
           formData: {
-            date: selectedDate.toLocaleDateString("en-US"),
+            date: formData.date,
             vtype: formData.vtype,
             voucherno: formData.voucherno,
             user: formData.user || "",
@@ -1153,7 +1095,7 @@ const BankVoucher = () => {
         combinedData = {
           _id: formData._id,
           formData: {
-            date: selectedDate.toLocaleDateString("en-US"),
+            date: formData.date,
             vtype: formData.vtype,
             voucherno: formData.voucherno,
             user: formData.user || "",
@@ -1639,6 +1581,17 @@ const BankVoucher = () => {
     }
   };
 
+  const handleBankEnter = (e) => {
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+
+      // Focus first ACCOUNTNAME input
+      if (accountNameRefs.current[0]) {
+        accountNameRefs.current[0].focus();
+      }
+    }
+  };
+
   const isRowFilled = (row) => {
     return (row.accountname || "").trim() !== "";
   };
@@ -1672,7 +1625,27 @@ const BankVoucher = () => {
       <span className="tittle">{title}</span>
       <div className="topdetails">
         <div style={{ display: "flex", flexDirection: "row" }}>
-          <DatePicker
+          <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, VoucherRef)(e);
+                }}
+              />
+            )}
+          </InputMask>
+          {/* <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -1681,7 +1654,7 @@ const BankVoucher = () => {
             onChange={handleDateChange}
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
-          />
+          /> */}
           <div style={{ marginLeft: 5 }}>
             <TextField
               className="custom-bordered-input"
@@ -1741,7 +1714,7 @@ const BankVoucher = () => {
                   variant="filled"
                   onKeyDown={(e) => {
                     handleOpenModal(e, index, "Bankname");
-                    // handleEnterKeyPress(BankRefs, null)(e);
+                    handleBankEnter(e);
                   }}
                   inputProps={{
                     maxLength: 48,
@@ -1772,7 +1745,7 @@ const BankVoucher = () => {
                     readOnly: !isEditMode || isDisabled,
                   }}
                   sx={{ width: 150 }} // Adjust width as needed
-                   disabled     // ← ALWAYS DISABLED
+                
                 />
               </div>
             </div>

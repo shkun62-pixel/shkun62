@@ -25,6 +25,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import useCashBankSetup from "../Shared/useCashBankSetup";
+import SearchModal from "../Shared/SearchModal";
 
 // Register font
 Font.register({
@@ -98,8 +99,6 @@ const CashVoucher = () => {
     "#8FBC8F",
   ];
   const [buttonColors, setButtonColors] = useState(initialColors);
-  const [showSearchModal, setShowSearchModal] = useState(false); // State to handle modal visibility
-  const [searchResults, setSearchResults] = useState([]); // State to store search results
   const [formData, setFormData] = useState({
     vtype: "C",
     date: "",
@@ -172,96 +171,136 @@ const CashVoucher = () => {
     setCurrentDay(day);
   }, []);
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // Date
-  useEffect(() => {
-    if (formData.date) {
-      try {
-        // Expecting date in format "DD/MM/YYYY"
-        const [day, month, year] = formData.date.split("/").map(Number);
-        const date = new Date(year, month - 1, day); // month is 0-based
-
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      setSelectedDate(date);
-      const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({ ...prev, date: formattedDate }));
-    }
-  };
-  
-  // ✅ Separate function for future date check
-  const checkFutureDate = (date) => {
-    if (!date) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-
-    if (checkDate > today) {
-      toast.info("You Have Selected a Future Date.", {
-        position: "top-center",
-      });
-    }
-  };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
-
   // Search functions
-  const handleSearchClick = () => {
-    setSearchResults([]); // Clear the search results when reopening the modal
-    setShowSearchModal(true); // Open the modal
-  };
+//   const [showSearchModal, setShowSearchModal] = useState(false); // State to handle modal visibility
+//   const [searchResults, setSearchResults] = useState([]); // State to store search results
+//   const handleSearchClick = () => {
+//     setSearchResults([]); // Clear the search results when reopening the modal
+//     setShowSearchModal(true); // Open the modal
+//   };
 
-  const handleCloseSearchModal = () => {
-    setSearchResults([]); // Clear search results when the modal is closed
-    setShowSearchModal(false); // Close the modal
-  };
+//   const handleCloseSearchModal = () => {
+//     setSearchResults([]); // Clear search results when the modal is closed
+//     setShowSearchModal(false); // Close the modal
+//   };
 
-  const handleSelectSearchResult = (selectedData) => {
-    setFormData(selectedData.formData); // Update the form with the selected search data
-    setItems(selectedData.items); // Update items with the selected search result
-    setShowSearchModal(false); // Close the modal
-    setSearchResults([]); // Clear search results after selecting a result
-  };
+//   const handleSelectSearchResult = (selectedData) => {
+//     setFormData(selectedData.formData); // Update the form with the selected search data
+//     setItems(selectedData.items); // Update items with the selected search result
+//     setShowSearchModal(false); // Close the modal
+//     setSearchResults([]); // Clear search results after selecting a result
+//   };
 
-  const handleSearch = async (searchDate) => {
-    try {
-      // console.log(searchDate,"Hellloooo");
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash/search?date=${searchDate}`
-      );
+//   const formatDateToDDMMYYYY = (dateStr) => {
+//     if (!dateStr) return "";
+//     const [year, month, day] = dateStr.split("-");
+//     return `${day}-${month}-${year}`;
+//   };
 
-      if (response.status === 200) {
-        setSearchResults(response.data.data); // Assuming the data is in response.data.data
-      } else {
-        setSearchResults([]); // Clear results if no data is found
-      }
-    } catch (error) {
-      console.error("Error fetching search data", error);
-    }
-  };
+// const handleSearch = async (searchDate) => {
+//   // ✅ only search when full date is typed
+//   if (!/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+//     setSearchResults([]);
+//     return;
+//   }
+
+//   try {
+//     const response = await axios.get(
+//       `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash/search?date=${searchDate}`
+//     );
+
+//     if (response.status === 200) {
+//       setSearchResults(response.data.data || []);
+//     } else {
+//       setSearchResults([]);
+//     }
+//   } catch (error) {
+//     console.error("Error fetching search data", error);
+//     setSearchResults([]);
+//   }
+// };
+
+
+  // const handleSearch = async (searchDate) => {
+  //   try {
+  //     // console.log(searchDate,"Hellloooo");
+  //     const response = await axios.get(
+  //       `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash/search?date=${searchDate}`
+  //     );
+
+  //     if (response.status === 200) {
+  //       setSearchResults(response.data.data); // Assuming the data is in response.data.data
+  //     } else {
+  //       setSearchResults([]); // Clear results if no data is found
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching search data", error);
+  //   }
+  // };
+ 
+   const [showSearch, setShowSearch] = useState(false);
+   const [allBills, setAllBills] = useState([]);
+   const [filteredBills, setFilteredBills] = useState([]);
+ 
+   const [searchBillNo, setSearchBillNo] = useState("");
+   const [searchDate, setSearchDate] = useState("");
+ 
+   // 🔹 ISO → DD-MM-YYYY
+   const isoToDDMMYYYY = (isoDate) => {
+     const d = new Date(isoDate);
+     if (isNaN(d)) return "";
+     return `${String(d.getDate()).padStart(2, "0")}-${String(
+       d.getMonth() + 1
+     ).padStart(2, "0")}-${d.getFullYear()}`;
+   };
+ 
+   // 🔹 Fetch Bills
+   const fetchAllBills = async () => {
+     try {
+       const res = await axios.get(
+         "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash"
+       );
+       if (Array.isArray(res.data)) {
+         setAllBills(res.data);
+         setFilteredBills([]);
+       }
+     } catch (err) {
+       console.error(err);
+     }
+   };
+ 
+   // 🔹 Proceed
+   const handleProceed = () => {
+     let filtered = allBills;
+ 
+     if (searchBillNo.trim()) {
+       filtered = filtered.filter((b) =>
+         b.formData.voucherno.toString().includes(searchBillNo)
+       );
+     }
+ 
+     if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+       filtered = filtered.filter(
+         (b) => b.formData.date === searchDate
+       );
+     }
+ 
+     setFilteredBills(filtered);
+   };
+ 
+   // 🔹 Select
+   const handleSelectBill = (bill) => {
+     setFormData({
+       ...bill.formData,
+       date: bill.formData.date,
+     });
+      setItems(normalizeItems(bill.items));
+      setShowSearch(false);
+      setFilteredBills([]);
+      setSearchBillNo("");
+      setSearchDate("");
+   };
+  
   
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   // Fetch Data
@@ -561,16 +600,23 @@ const CashVoucher = () => {
       console.error("Error fetching last record:", error);
     }
   };
+
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
   const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW");
     try {
       const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
       let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
-      const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
       const newData = {
         vtype: "C",
-        date: today,
+        date: getTodayDDMMYYYY(),
         voucherno: lastvoucherno,
         cashinhand: "",
         owner: "Owner",
@@ -596,7 +642,7 @@ const CashVoucher = () => {
       setIsEditMode(true);
       skipItemCodeFocusRef.current = true;
       if (datePickerRef.current) {
-        datePickerRef.current.setFocus();
+        datePickerRef.current.focus();
       }
       // voucherRef.current.focus()
     } catch (error) {
@@ -988,7 +1034,7 @@ const CashVoucher = () => {
       let combinedData = {
         _id: formData._id,
         formData: {
-          date: selectedDate.toLocaleDateString("en-IN"),
+          date: formData.date,
           vtype: formData.vtype,
           voucherno: formData.voucherno,
           cashinhand: formData.cashinhand || "",
@@ -1097,7 +1143,7 @@ const CashVoucher = () => {
   const [fontSize, setFontSize] = useState(18);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
@@ -1202,15 +1248,6 @@ const CashVoucher = () => {
             focusAndScroll(accountNameRefs, index + 1);
           }
           break;
-
-        // case "discount":
-        //   if (index === items.length - 1) {
-        //     handleAddItem();
-        //     accountNameRefs.current[index + 1]?.focus();
-        //   } else {
-        //     accountNameRefs.current[index + 1]?.focus();
-        //   }
-        //   break;
         default:
           break;
       }
@@ -1282,15 +1319,6 @@ const CashVoucher = () => {
       }, 0);
     }
 
-// else if (event.key === "ArrowUp" && index > 0) {
-//   setTimeout(() => {
-//     if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
-//     else if (field === "narration") narrationRefs.current[index - 1]?.focus();
-//     else if (field === "payment_debit") paymentRefs.current[index - 1]?.focus();
-//     else if (field === "receipt_credit") receiptRefs.current[index - 1]?.focus();
-//     else if (field === "discount") discountRefs.current[index - 1]?.focus();
-//   }, 100);
-// } 
 // Move Down
   else if (event.key === "ArrowDown" && index < items.length - 1) {
     setTimeout(() => {
@@ -1306,16 +1334,6 @@ const CashVoucher = () => {
         focusAndScroll(discountRefs, index + 1);
     }, 0);
   }
-
-// else if (event.key === "ArrowDown" && index < items.length - 1) {
-//   setTimeout(() => {
-//     if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
-//     else if (field === "narration") narrationRefs.current[index + 1]?.focus();
-//     else if (field === "payment_debit") paymentRefs.current[index + 1]?.focus();
-//     else if (field === "receipt_credit") receiptRefs.current[index + 1]?.focus();
-//     else if (field === "discount") discountRefs.current[index + 1]?.focus();
-//   }, 100);
-// } 
     // Open Modal on Letter Input in Account Name
     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
@@ -1408,7 +1426,27 @@ const CashVoucher = () => {
       </div> */}
       <div className="Tops">
         <span>DATE</span>
-         <DatePicker
+        <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, voucherRef)(e);
+                }}
+              />
+            )}
+        </InputMask>
+         {/* <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -1417,14 +1455,18 @@ const CashVoucher = () => {
             onChange={handleDateChange}
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
-          />
+          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
+          inputRef={voucherRef}
           id="voucherno"
           value={formData.voucherno}
           label="VOUCHER NO."
           onFocus={(e) => e.target.select()}  // Select text on focus
           onKeyDown={handleVoucherEnter}
+          // onKeyDown={(e) => {
+          //   handleEnterKeyPress(voucherRef,accountNameRefs )(e);
+          // }}
           // onChange={handleInputChange}
           inputProps={{
             maxLength: 48,
@@ -1681,63 +1723,6 @@ const CashVoucher = () => {
       />
       )}
       <div className="Belowcontent">
-        {/* <div style={{display:'flex',flexDirection:'row',justifyContent:'end',marginRight:20}}>
-        <TextField
-          id="totalpayment"
-          value={formData.totalpayment}
-          label="TOTAL PAYMENT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150}}
-          />
-          <TextField
-          id="totalreceipt"
-          value={formData.totalreceipt}
-          label="TOTAL RECEIPT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150}}
-          />
-          <TextField
-          id="totaldiscount"
-          value={formData.totaldiscount}
-          label="TOTAL DISCOUNT"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150}}
-          />
-        </div> */}
-
         <PrintChoiceModal
           open={printChoiceOpen}
           onClose={() => setPrintChoiceOpen(false)}
@@ -1805,30 +1790,45 @@ const CashVoucher = () => {
           <Button
             className="Buttonz"
             style={{  backgroundColor: buttonColors[6] }}
-            onClick={handleSearchClick} // Handle search button click
+            onClick={() => {
+              fetchAllBills();
+              setShowSearch(true);
+            }}
             disabled={!isSearchEnabled}
           >
             Search
           </Button>
+           <SearchModal
+            show={showSearch}
+            onClose={() => setShowSearch(false)}
+            bills={allBills}
+            filteredBills={filteredBills}
+            searchBillNo={searchBillNo}
+            setSearchBillNo={setSearchBillNo}
+            searchDate={searchDate}
+            setSearchDate={setSearchDate}
+            onProceed={handleProceed}
+            onSelectBill={handleSelectBill}
+            isoToDDMMYYYY={isoToDDMMYYYY}
+          />
           {/* Modal for Search */}
-          <Modal
-            show={showSearchModal}
-            onHide={handleCloseSearchModal}
-            centered
-          >
+          {/* <Modal show={showSearchModal} onHide={handleCloseSearchModal} centered>
             <Modal.Header closeButton>
               <Modal.Title>Search by Date</Modal.Title>
             </Modal.Header>
+
             <Modal.Body>
-              {/* Input for Date */}
+         
               <div style={{ marginBottom: "10px" }}>
-                <input
-                  type="date"
+                <InputMask
+                  mask="99-99-9999"
+                  placeholder="DD-MM-YYYY"
                   className="form-control"
-                  onChange={(e) => handleSearch(e.target.value)} // Fetch data when the date is selected
+                  onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
-              {/* Search Results */}
+
+            
               {searchResults.length > 0 ? (
                 <Table bordered hover>
                   <thead>
@@ -1848,9 +1848,7 @@ const CashVoucher = () => {
                         style={{ cursor: "pointer" }}
                       >
                         <td>{result.formData.voucherno}</td>
-                        <td>
-                          {new Date(result.formData.date).toLocaleDateString()}
-                        </td>
+                        <td>{result.formData.date}</td>
                         <td>{result.formData.cashinhand}</td>
                         <td>{result.formData.totalpayment}</td>
                         <td>{result.formData.totalreceipt}</td>
@@ -1862,16 +1860,16 @@ const CashVoucher = () => {
                 <p>No results found</p>
               )}
             </Modal.Body>
+
             <Modal.Footer>
               <Button variant="secondary" onClick={handleCloseSearchModal}>
                 Close
               </Button>
             </Modal.Footer>
-          </Modal>
+          </Modal> */}
           <Button
             className="Buttonz"
             style={{  backgroundColor: buttonColors[7] }}
-            // onClick={() => setIsFAModalOpen(true)}
             onClick={handlePrintClick}
             disabled={!isPrintEnabled}
           >

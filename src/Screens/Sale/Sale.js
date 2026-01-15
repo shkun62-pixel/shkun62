@@ -38,19 +38,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const LOCAL_STORAGE_KEY = "tabledataVisibility";
 
-// ✅ Forward ref so DatePicker can focus the input
-// const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-//   <InputMask
-//     mask="99-99-9999"
-//     maskChar="_"
-//     value={value}
-//     onChange={onChange}
-//     onBlur={onBlur}
-//   >
-//     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-//   </InputMask>
-// ));
-
 const Sale = () => {
 
   const location = useLocation();
@@ -93,6 +80,7 @@ const Sale = () => {
   const remarksRef = useRef(null);
   const transportRef = useRef(null);
   const brokerRef = useRef(null);
+  const dueDateRef = useRef(null);
   const tcsRef = useRef([]);
   const tcsRef2 = useRef([]);
   const addLessRef = useRef(null);
@@ -729,12 +717,6 @@ const Sale = () => {
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [setupFormData, setsetupFormData] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // Search Modal states
-  const [showSearch, setShowSearch] = useState(false);
-  const [allBills, setAllBills] = useState([]);
-  const [searchBillNo, setSearchBillNo] = useState("");
-  const [filteredBills, setFilteredBills] = useState([]);
-  const [searchDate, setSearchDate] = useState(null);
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -776,6 +758,73 @@ const handleViewFAVoucher = () => {
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
+  // const formatDateToDDMMYYYY = (dateStr) => {
+  //   if (!dateStr) return "";
+
+  //   const date = new Date(dateStr);
+  //   if (isNaN(date.getTime())) return "";
+
+  //   const dd = String(date.getDate()).padStart(2, "0");
+  //   const mm = String(date.getMonth() + 1).padStart(2, "0");
+  //   const yyyy = date.getFullYear();
+
+  //   return `${dd}-${mm}-${yyyy}`;
+  // };
+
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
+
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
+
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
   const fetchData = async () => {
     try {
       let response;
@@ -788,20 +837,13 @@ const handleViewFAVoucher = () => {
           `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/last`
         );
       }
-      // const response = await axios.get(
-      //   `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/last`
-      // );
-
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
 
-        const isValidDate = (date) => !isNaN(Date.parse(date));
-
-        const updatedFormData = {
+         const updatedFormData = {
           ...lastEntry.formData,
-          date: isValidDate(lastEntry.formData.date)
-            ? lastEntry.formData.date
-            : new Date().toLocaleDateString(),
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
         };
 
         setFirstTimeCheckData("DataAvailable");
@@ -954,8 +996,30 @@ const handleViewFAVoucher = () => {
     setIsDisabled(true);
     // Add this line to set isDisabled to true initially
   }, []);
+  
+  // Modal & Search states
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [searchDate, setSearchDate] = useState(""); // DD-MM-YYYY
+  const billNoRef = useRef(null);
+  const dateRef = useRef(null);
+  const proceedRef = useRef(null);
+  useEffect(() => {
+    if (showSearch) {
+      setTimeout(() => billNoRef.current?.focus(), 100);
+    }
+  }, [showSearch]);
 
-  // Fetch all bills for search
+  const handleEnterKeyPressM = (currentRef, nextRef) => (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      nextRef.current?.focus();
+    }
+  };
+
+  // 🔹 Fetch all bills
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
@@ -963,56 +1027,54 @@ const handleViewFAVoucher = () => {
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
-        setFilteredBills(res.data);
+        setFilteredBills([]); // empty until Proceed
       }
     } catch (error) {
       console.error("Error fetching bills", error);
     }
   };
 
-  // Update filtering logic
-  useEffect(() => {
+  // 🔹 Proceed button logic
+  const handleProceed = () => {
+    // ✅ Require at least one filter
+    if (searchBillNo.trim() === "" && searchDate.trim() === "") {
+      alert("Please enter Bill No or Date to proceed.");
+      return; // stop execution
+    }
+
     let filtered = allBills;
 
-    // Filter by Bill No if entered
+    // Filter by Bill No
     if (searchBillNo.trim() !== "") {
       filtered = filtered.filter((bill) =>
-        bill.formData.vbillno
-          .toString()
-          .toLowerCase()
-          .includes(searchBillNo.toLowerCase())
+        bill.formData.vbillno.toString().includes(searchBillNo.trim())
       );
     }
 
-    const formatLocalDate = (date) => {
-      const d = new Date(date);
-      if (isNaN(d)) return null; // invalid date
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
-
-    // Filter by Date if selected
-    if (searchDate) {
-        const selected = formatLocalDate(searchDate);
-
-      if (selected) {
-        filtered = filtered.filter((bill) => {
-          const billDate = formatLocalDate(bill.formData.date);
-          return billDate === selected;
-        });
-      }
+    // Filter by Date (DD-MM-YYYY)
+    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+      filtered = filtered.filter((bill) => {
+        const billDate = formatDateToDDMMYYYY(bill.formData.date);
+        return billDate === searchDate;
+      });
     }
 
     setFilteredBills(filtered);
-  }, [searchBillNo, searchDate, allBills]);
+  };
 
+  // 🔹 Select bill
   const handleSelectBill = (bill) => {
-    setFormData(bill.formData);
+    setFormData({
+      ...bill.formData,
+      date: formatDateToDDMMYYYY(bill.formData.date),
+    });
     setcustomerDetails(bill.customerDetails);
-    setItems(bill.items);
+    setItems(normalizeItems(bill.items));
     setshipped(bill.shipped);
+    setShowSearch(false);
+    setFilteredBills([]);
+    setSearchBillNo("");
+    setSearchDate("");
   };
 
   const handleNext = async () => {
@@ -1027,8 +1089,11 @@ const handleViewFAVoucher = () => {
           const nextData = response.data.data;
           setData1(nextData);
           setIndex(index + 1);
-          setFormData(nextData.formData);
-
+          setFormData({
+            ...nextData.formData,
+            date: formatDateToDDMMYYYY(nextData.formData.date),
+            duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
+          });
           // Update items and supplier details
           const updatedItems = nextData.items.map((item) => ({
             ...item,
@@ -1068,8 +1133,11 @@ const handleViewFAVoucher = () => {
           const prevData = response.data.data;
           setData1(prevData);
           setIndex(index - 1);
-          setFormData(prevData.formData);
-
+          setFormData({
+            ...prevData.formData,
+            date: formatDateToDDMMYYYY(prevData.formData.date),
+            duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
+          });
           // Update items and supplier details
           const updatedItems = prevData.items.map((item) => ({
             ...item,
@@ -1109,8 +1177,11 @@ const handleViewFAVoucher = () => {
         const firstData = response.data.data;
         setData1(firstData);
         setIndex(0);
-        setFormData(firstData.formData);
-
+        setFormData({
+          ...firstData.formData,
+          date: formatDateToDDMMYYYY(firstData.formData.date),
+          duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
+        });
         // Update items and supplier details
         const updatedItems = firstData.items.map((item) => ({
           ...item,
@@ -1151,7 +1222,11 @@ const handleViewFAVoucher = () => {
         setData1(lastData);
         const lastIndex = response.data.length - 1;
         setIndex(lastIndex);
-        setFormData(lastData.formData);
+        setFormData({
+          ...lastData.formData,
+          date: formatDateToDDMMYYYY(lastData.formData.date),
+          duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
+        });
 
         // Update items and supplier details
         const updatedItems = lastData.items.map((item) => ({
@@ -1220,7 +1295,7 @@ const handleViewFAVoucher = () => {
         tcs1: 0,
         tcs206_rate: 0,
         tcs206: 0,
-        duedate: "",
+        duedate: getTodayDDMMYYYY(),
         pcess: 0,
         tax: 0,
         sub_total: 0,
@@ -1352,7 +1427,11 @@ const handleViewFAVoucher = () => {
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
-        setFormData(lastEntry.formData);
+        setFormData({
+          ...lastEntry.formData,
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+        });
         setData1(response.data.data);
         // setItems(lastEntry.items.map((item) => ({ ...item })));
         setItems(normalizeItems(lastEntry.items));
@@ -2406,80 +2485,6 @@ if (key === "name") {
     }));
   };
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // useEffect(() => {
-  //   // If formData.date has a valid date string, parse it and set selectedDate
-  //   if (formData.date) {
-  //     try {
-  //       const date = new Date(formData.date);
-  //       if (!isNaN(date.getTime())) {
-  //         setSelectedDate(date);
-  //       } else {
-  //         console.error("Invalid date value in formData.date:", formData.date);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing date:", error);
-  //     }
-  //   } else {
-  //     // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-  //     // but we can still have it open on today's date via openToDate
-  //     setSelectedDate(null);
-  //   }
-  // }, [formData.date]);
-
-  // const [expiredDate, setexpiredDate] = useState(null);
-  // useEffect(() => {
-  //   if (formData.duedate) {
-  //     setexpiredDate(new Date(formData.duedate));
-  //   } else {
-  //     const today = new Date();
-  //     setexpiredDate(today);
-  //     setFormData({ ...formData, duedate: today });
-  //   }
-  // }, []);
-
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      setSelectedDate(date);
-      const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({
-        ...prev,
-        date: date,
-        duedate: date,
-      }));
-    }
-  };
-
-  // ✅ Separate function to validate future or past date
-  const validateDate = (date) => {
-    if (!date) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // normalize today
-
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0); // normalize selected date
-
-    if (isEditMode && checkDate > today) {
-      toast.info("You Have Selected a Future Date.", {
-        position: "top-center",
-      });
-    } else if (isEditMode && checkDate < today) {
-      toast.info("You Have Selected a Past Date.", {
-        position: "top-center",
-      });
-    }
-  };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
-
   const HandleValueChange = (event) => {
     const { id, value } = event.target;
     setFormData((prevData) => ({
@@ -3158,28 +3163,6 @@ const handleKeyDownExp = (e, fieldName, index) => {
           onChange={handleDateChange}
           onBlur={() => validateDate(selectedDate)}
           customInput={<MaskedInput />}
-        /> */}
-        {/* <DatePicker
-        popperClassName="custom-datepicker-popper"
-          ref={datePickerRef}
-          className="DatePICKER"
-          id="date"
-          selected={selectedDate || null}
-          openToDate={new Date()}
-          onCalendarClose={handleCalendarClose}
-          dateFormat="dd-MM-yyyy"
-          onChange={handleDateChange}
-          onBlur={() => validateDate(selectedDate)} // ✅ call on blur
-          onChangeRaw={(e) => {
-            if (!e.target.value) return; // ✅ avoid undefined error
-
-            let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-            if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
-            if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
-
-            e.target.value = val; // Show formatted input
-          }}
-          readOnly={!isEditMode || isDisabled}
         /> */}
       <div  className="billdivz">
         <TextField
@@ -4314,8 +4297,8 @@ const handleKeyDownExp = (e, fieldName, index) => {
       </div>
       {/* Bottom Part */}
       <div className="Belowcontents">
-        <div className="Parent" style={{display:'flex',flexDirection:'row'}}>
-        <div style={{display:'flex',flexDirection:"column"}}>
+        <div className="Parent">
+        <div style={{display:'flex',flexDirection:"column",marginLeft:5}}>
           <TextField
             className="Remz custom-bordered-input"
               id="rem2"
@@ -4368,7 +4351,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
               label='BROKER'
               onChange={HandleValueChange}
               onKeyDown={(e) => {
-                handleKeyDowndown(e, expAfterGSTRef);
+                handleKeyDowndown(e, dueDateRef);
                 handleOpenModalBroker(e, "broker", "broker")
               }}
               inputProps={{
@@ -4386,31 +4369,34 @@ const handleKeyDownExp = (e, fieldName, index) => {
         </div>
         <div style={{display:'flex',flexDirection:"column",marginLeft:5}}>
           <div className="duedatez">
-            <InputMask
-              mask="99-99-9999"
-              placeholder="dd-mm-yyyy"
-              value={formData.duedate}
-              readOnly={!isEditMode || isDisabled}
-              onChange={(e) =>
-                setFormData({ ...formData, duedate: e.target.value })
-              }
-            >
-              {(inputProps) => (
-                <input
-                  {...inputProps}
-                  className="DatePICKER"
-                  // ref={datePickerRef}
-                  // onKeyDown={(e) => {
-                  //   handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
-                  // }}
-                />
-              )}
-            </InputMask>
+            <div className={`erp-input2 ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+              <span className="erp-label2">DUE DATE</span>
+
+              <InputMask
+                mask="99-99-9999"
+                value={formData.duedate}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, duedate: e.target.value })
+                }
+              >
+                {(inputProps) => (
+                  <input
+                    {...inputProps}
+                    ref={dueDateRef}
+                    className="erp-field2 custom-style2"
+                    onKeyDown={(e) => {
+                      handleKeyDowndown(e, expAfterGSTRef);
+                    }}
+                  />
+                )}
+              </InputMask>
+            </div>
             {/* <DatePicker
               id="duedate"
               value={formData.duedate}
               className="dueDatePICKER"
-              selected={expiredDate}
+              // selected={expiredDate}
               onChange={handleDateChange}
               readOnly={!isEditMode || isDisabled}
               dateFormat="dd-MM-yyyy"
@@ -4432,7 +4418,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
               }
             /> */}
           </div>
-          <div style={{marginTop:"26px"}}>
+          <div>
           <TextField
             className="custom-bordered-input"
             id="srv_tax"
@@ -4451,7 +4437,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
             onFocus={(e) => e.target.select()}
             size="small"
             variant="filled"
-            sx={{ width: 150 }}
+            sx={{ width: 225 }}
           />
           </div>
           <div style={{ display: "flex", flexDirection: "row",alignItems: "center" }}>
@@ -4609,7 +4595,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
 
         </div>
         </div>
-        <div className="totals" style={{display:"flex",flexDirection:"column",marginLeft:"auto",marginRight:"12px" }}>
+        <div className="totals" >
         <TextField
           className="TOTALFIELDS custom-bordered-input"
           id="tax"
@@ -4974,76 +4960,102 @@ const handleKeyDownExp = (e, fieldName, index) => {
         <Modal.Header closeButton>
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
-        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-          <Form.Control
-            type="text"
-            placeholder="Enter Bill No..."
-            value={searchBillNo}
-            onChange={(e) => setSearchBillNo(e.target.value)}
-          />
-          <DatePicker
-            selected={searchDate}
-            onChange={(date) => setSearchDate(date)}
-            placeholderText="Select Date"
-            dateFormat="dd-MM-yyyy"
-            className="form-control"
-          />
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSearchBillNo("");
-              setSearchDate(null);
-            }}
-          >
-            Clear
-          </Button>
-        </div>
-        <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>BillNo</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>City</th>
-                <th>GrandTotal</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBills.map((bill) => (
-                <tr key={bill._id}>
-                  <td>{bill.formData.vbillno}</td>
-                  <td>
-                    {new Date(bill.formData.date).toLocaleDateString("en-GB")}
-                  </td>
-                  <td>{bill.customerDetails?.[0]?.vacode}</td>
-                  <td>{bill.customerDetails?.[0]?.city}</td>
-                  <td>{bill.formData.grandtotal}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        handleSelectBill(bill);
-                        setShowSearch(false);
-                      }}
-                    >
-                      Select
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {filteredBills.length === 0 && (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
-                    No matching records
-                  </td>
-                </tr>
+          {/* Filters */}
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <Form.Control
+              ref={billNoRef}
+              type="text"
+              placeholder="Enter Bill No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+              onKeyDown={handleEnterKeyPress(billNoRef, dateRef)}
+            />
+
+            <InputMask
+              mask="99-99-9999"
+              placeholder="DD-MM-YYYY"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="form-control"
+                  ref={dateRef}
+                  onKeyDown={handleEnterKeyPress(dateRef, proceedRef)}
+                />
               )}
-            </tbody>
-          </Table>
-        </div>
+            </InputMask>
+
+            {/* <InputMask
+              mask="99-99-9999"
+              placeholder="DD-MM-YYYY"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+              className="form-control"
+            /> */}
+
+            <Button ref={proceedRef} variant="primary" onClick={handleProceed}>
+              Proceed
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchBillNo("");
+                setSearchDate("");
+                setFilteredBills([]);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+
+          {/* Results */}
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Bill No</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>City</th>
+                  <th>Grand Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredBills.map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.formData.vbillno}</td>
+                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
+                    <td>{bill.customerDetails?.[0]?.vacode}</td>
+                    <td>{bill.customerDetails?.[0]?.city}</td>
+                    <td>{bill.formData.grandtotal}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSelectBill(bill)}
+                      >
+                        Select
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
         </Modal.Body>
       </Modal>
     </div>

@@ -61,6 +61,7 @@ const JournalVoucher = () => {
   const saveButtonRef = useRef(null);
   const [title, setTitle] = useState("View");
   const datePickerRef = useRef(null);
+  const VoucherRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false); // State to handle modal visibility
   const [searchResults, setSearchResults] = useState([]); // State to store search results
@@ -152,105 +153,6 @@ const JournalVoucher = () => {
     }
   };
 
-  // Date
-  useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-  
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      setSelectedDate(date);
-      const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({ ...prev, date: formattedDate }));
-    }
-  };
-
-  // ✅ Separate function for future date check
-  const checkFutureDate = (date) => {
-    if (!date) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-
-    if (checkDate > today) {
-      toast.info("You Have Selected a Future Date.", {
-        position: "top-center",
-      });
-    }
-  };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
-  
-  const [shopName, setShopName] = useState("NARAYAN FRUIT BAR"); // Set default value here
-  const [description, setDescription] = useState(
-    "STOCKISTS IN : FRESH FRUITS ARE AVAIABLE HERE"
-  );
-  const [address, setAddress] = useState(
-    "AMLOH ROAD, OPP. FRIENDS INDS., MANDI GOBINDGARH (PB)"
-  );
-  const [GSTIN, setGSTIN] = useState("07AAAHT5580L1ZX");
-  const [PAN, setPAN] = useState("BNV5855MN6");
-
-  // Function to save data to local storage
-  const saveToLocalStorage = () => {
-    localStorage.setItem("shopName", shopName);
-    localStorage.setItem("description", description);
-    localStorage.setItem("address", address);
-    localStorage.setItem("GSTIN", GSTIN);
-    localStorage.setItem("PAN", PAN);
-  };
-
-  // Function to retrieve data from local storage
-  const getFromLocalStorage = () => {
-    const savedShopName = localStorage.getItem("shopName");
-    const savedDescription = localStorage.getItem("description");
-    const savedAddress = localStorage.getItem("address");
-    const savedGSTIN = localStorage.getItem("GSTIN");
-    const savedPAN = localStorage.getItem("PAN");
-
-    if (savedShopName) setShopName(savedShopName);
-    if (savedDescription) setDescription(savedDescription);
-    if (savedAddress) setAddress(savedAddress);
-    if (savedGSTIN) setGSTIN(savedGSTIN);
-    if (savedPAN) setPAN(savedPAN);
-  };
-
-  useEffect(() => {
-    // Retrieve data from local storage when component mounts
-    getFromLocalStorage();
-  }, []);
-
-  useEffect(() => {
-    // Save data to local storage whenever shopName, description, or address change
-    saveToLocalStorage();
-  }, [shopName, description, address, GSTIN, PAN]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
   const handleInputChange = (event) => {
     const { id, value } = event.target;
     setFormData((prevData) => ({
@@ -340,7 +242,7 @@ const JournalVoucher = () => {
                 _id: formData._id,
                 formData: {
                   vtype: formData.vtype,
-                  date: selectedDate.toLocaleDateString("en-US"),
+                  date: formData.date,
                   voucherno: formData.voucherno,
                   owner: formData.owner,
                   totaldebit: formData.totaldebit,
@@ -361,7 +263,7 @@ const JournalVoucher = () => {
                 _id: formData._id,
                 formData: {
                   vtype: formData.vtype,
-                  date: selectedDate.toLocaleDateString("en-US"),
+                  date: formData.date,
                   voucherno: formData.voucherno,
                   owner: formData.owner,
                   totaldebit: formData.totaldebit,
@@ -651,12 +553,7 @@ const JournalVoucher = () => {
         setFirstTimeCheckData("DataAvailable");
         setFormData(lastEntry.formData);
         console.log(lastEntry.formData, "Formdata");
-  
-        // Update the selectedDate state with the date from the last entry
-        if (lastEntry.formData.date) {
-          setSelectedDate(new Date(lastEntry.formData.date)); // Convert to Date object
-        }
-  
+
         // Update items with the last entry's items
         const updatedItems = lastEntry.items.map(item => ({
           ...item, // Ensure immutability
@@ -708,9 +605,6 @@ const JournalVoucher = () => {
         setItems(normalizeItems([]));
         setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
         setIndex(0); // Set index to 0 for the empty voucher
-  
-        // Set the selectedDate to today's date
-        setSelectedDate(new Date());
       }
     } catch (error) {
       console.error("Error fetching data", error);
@@ -743,9 +637,6 @@ const JournalVoucher = () => {
       setItems(normalizeItems([]));
       setData1({ formData: emptyFormData, items: emptyItems });
       setIndex(0);
-      
-      // Set the selectedDate to today's date
-      setSelectedDate(new Date());
     }
   };
   useEffect(() => {
@@ -796,9 +687,6 @@ const JournalVoucher = () => {
               setData1(response.data.data);
               setIndex(index + 1);
               setFormData(nextData.formData);
-              if (nextData.formData.date) {
-                setSelectedDate(new Date(nextData.formData.date)); // Convert to Date object
-              }
               const updatedItems = nextData.items.map(item => ({
                   ...item, 
                   disableReceipt: item.disableReceipt || false,
@@ -822,10 +710,7 @@ const JournalVoucher = () => {
                   setData1(response.data.data);
                   const prevData = response.data.data;
                   setIndex(index - 1);
-                  setFormData(prevData.formData);      
-                  if (prevData.formData.date) {
-                    setSelectedDate(new Date(prevData.formData.date)); // Convert to Date object
-                  }          
+                  setFormData(prevData.formData);            
                   const updatedItems = prevData.items.map(item => ({
                       ...item, 
                       disableReceipt: item.disableReceipt || false,
@@ -848,9 +733,6 @@ const JournalVoucher = () => {
               setIndex(0);
               setFormData(firstData.formData);
               setData1(response.data.data);
-              if (firstData.formData.date) {
-                setSelectedDate(new Date(firstData.formData.date)); // Convert to Date object
-              }
               const updatedItems = firstData.items.map(item => ({
                   ...item, 
                   disableReceipt: item.disableReceipt || false,
@@ -874,9 +756,6 @@ const JournalVoucher = () => {
             setIndex(lastIndex);
             setFormData(lastData.formData);
             setData1(response.data.data);
-            if (lastData.formData.date) {
-              setSelectedDate(new Date(lastData.formData.date)); // Convert to Date object
-            }
             const updatedItems = lastData.items.map(item => ({
                 ...item, 
                 disableReceipt: item.disableReceipt || false,
@@ -888,16 +767,23 @@ const JournalVoucher = () => {
         console.error("Error fetching last record:", error);
     }
   };
+
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
   const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW")
     try {
         const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
         let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
-        const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
         const newData = {
           vtype: "J",
-          date: today,
+          date: getTodayDDMMYYYY(),
           voucherno: lastvoucherno,
           owner: "",
           totaldebit: "",
@@ -921,7 +807,7 @@ const JournalVoucher = () => {
         setIsEditMode(true);
         skipItemCodeFocusRef.current = true;
         if (datePickerRef.current) {
-          datePickerRef.current.setFocus();
+          datePickerRef.current.focus();
         }
 
     } catch (error) {
@@ -1254,6 +1140,26 @@ const handleSearch = async (searchDate) => {
     return true;
   };
 
+  const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      } 
+    }
+  };
+
+  const handleBankEnter = (e) => {
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+
+      // Focus first ACCOUNTNAME input
+      if (accountNameRefs.current[0]) {
+        accountNameRefs.current[0].focus();
+      }
+    }
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -1263,11 +1169,6 @@ const handleSearch = async (searchDate) => {
       items={items}
       isOpen={open}
       handleClose={handleClose}
-      GSTIN={GSTIN}
-      PAN={PAN}
-      shopName={shopName}
-      description={description}
-      address={address}
     />
       </div>
       <h1 className="HeaderJOU">JOURNAL VOUCHER</h1>
@@ -1275,7 +1176,27 @@ const handleSearch = async (searchDate) => {
       
       <div className="Top">
         <text>DATE</text>
-          <DatePicker
+          <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, VoucherRef)(e);
+                }}
+              />
+            )}
+          </InputMask>
+          {/* <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -1284,13 +1205,15 @@ const handleSearch = async (searchDate) => {
             onChange={handleDateChange}
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
-          />
+          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
+          inputRef={VoucherRef}
           id="voucherno"
           value={formData.voucherno}
           label="VOUCHER NO."
           onFocus={(e) => e.target.select()}  // Select text on focus
+          onKeyDown={handleBankEnter}
           // onChange={handleInputChange}
           inputProps={{
             maxLength: 48,

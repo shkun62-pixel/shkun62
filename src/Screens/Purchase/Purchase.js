@@ -29,29 +29,16 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import { Modal, Form } from "react-bootstrap";
 import useTdsApplicable from "../Shared/useTdsApplicable";
 import { useNavigate, useLocation } from "react-router-dom";
-import PurFAVoucherModal from "./PurFAVoucherModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 
 const LOCAL_STORAGE_KEY = "TABLEdataVisibility";
-// ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar="_"
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
 
 const Purchase = () => {
   const location = useLocation();
   const purId = location.state?.purId;
   const navigate = useNavigate();
   const { applicable194Q } = useTdsApplicable();
-  const { CompanyState } = useCompanySetup();
+  const { CompanyState, unitType } = useCompanySetup();
   const [selectedInvoice, setSelectedInvoice] = useState("InvoicePDFPur");
   const invoiceComponents = {
     InvoicePDFPur,
@@ -77,6 +64,8 @@ const Purchase = () => {
   const itemCodeRefs = useRef([]);
   const tableContainerRef = useRef(null);
   const datePickerRef = useRef([]);
+  const dueDateRef = useRef([]);
+  const voucherNoRef = useRef(null);
   const desciptionRefs = useRef([]);
   const peciesRefs = useRef([]);
   const quantityRefs = useRef([]);
@@ -117,6 +106,7 @@ const Purchase = () => {
     vtype: "P",
     vno: 0,
     vbillno: 0,
+    vbdate:"",
     exfor: "",
     trpt: "",
     p_entry: "",
@@ -311,6 +301,7 @@ const Purchase = () => {
     
   const customerNameRef = useRef(null);
   const grNoRef = useRef(null);
+  const vbDateRef = useRef(null);
   const termsRef = useRef(null);
   const vehicleNoRef = useRef(null);
   const selfInvRef = useRef(null);
@@ -485,18 +476,6 @@ const Purchase = () => {
       })
     );
   }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
-
-  // Getting UnitType From the Company Setup
-  const getUnitTypeFromLocalStorage = () => {
-    const companySetup = localStorage.getItem("companySetup");
-    if (companySetup) {
-      const parsedData = JSON.parse(companySetup);
-      return parsedData?.formData?.unitType || ""; // Safely access unitType or return an empty string if not found
-    }
-    return ""; // Return an empty string if no data in localStorage
-  };
-  // Usage
-  const unitType = getUnitTypeFromLocalStorage();
 
   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
     let totalValue = 0;
@@ -744,12 +723,6 @@ const Purchase = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [shouldFocusPrint, setShouldFocusPrint] = useState(false); // 👈 New flag to track
   const [shouldFocusAdd, setShouldFocusAdd] = useState(false); // 👈 New flag to track
-  // Search Modal states
-  const [showSearch, setShowSearch] = useState(false);
-  const [allBills, setAllBills] = useState([]);
-  const [searchBillNo, setSearchBillNo] = useState("");
-  const [filteredBills, setFilteredBills] = useState([]);
-  const [searchDate, setSearchDate] = useState(null);
 
   // state
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
@@ -770,43 +743,71 @@ const Purchase = () => {
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
-  const parseDDMMYYYY = (value) => {
-    if (!value) return null;
+  // const formatDateToDDMMYYYY = (dateStr) => {
+  //   if (!dateStr) return "";
 
-    // Already a Date object
-    if (value instanceof Date) {
-      return isNaN(value) ? null : value;
-    }
+  //   const date = new Date(dateStr);
+  //   if (isNaN(date.getTime())) return "";
 
-    // Timestamp (number or numeric string)
-    if (!isNaN(value)) {
-      const d = new Date(Number(value));
-      return isNaN(d) ? null : d;
-    }
+  //   const dd = String(date.getDate()).padStart(2, "0");
+  //   const mm = String(date.getMonth() + 1).padStart(2, "0");
+  //   const yyyy = date.getFullYear();
 
-    if (typeof value !== "string") return null;
+  //   return `${dd}-${mm}-${yyyy}`;
+  // };
 
-    value = value.trim();
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
 
-    // DD/MM/YYYY or DD-MM-YYYY
-    let match = value.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
     if (match) {
       const [, dd, mm, yyyy] = match;
-      const d = new Date(yyyy, mm - 1, dd);
-      return isNaN(d) ? null : d;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
     }
 
-    // YYYY/MM/DD or YYYY-MM-DD
-    match = value.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
-    if (match) {
-      const [, yyyy, mm, dd] = match;
-      const d = new Date(yyyy, mm - 1, dd);
-      return isNaN(d) ? null : d;
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
     }
 
-    // ISO or browser-parsable string
-    const d = new Date(value);
-    return isNaN(d) ? null : d;
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
   };
 
   const fetchData = async () => {
@@ -829,27 +830,16 @@ const Purchase = () => {
 
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
-        // // Ensure date is valid
-        // const isValidDate = (date) => {
-        //   return !isNaN(Date.parse(date));
-        // };
+      
+        const updatedFormData = {
+          ...lastEntry.formData,
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(lastEntry.formData.vbdate),
+        };
 
-        // // Update form data, use current date if date is invalid or not available
-        // const updatedFormData = {
-        //   ...lastEntry.formData,
-        //   date: isValidDate(lastEntry.formData.date)
-        //     ? lastEntry.formData.date
-        //     : new Date().toLocaleDateString("en-IN"),
-        // };
-
-        // setFirstTimeCheckData("DataAvailable");
-        // setFormData(updatedFormData);
-        const apiDate = lastEntry.formData.date; // "29/12/2025"
-        const parsedDate = parseDDMMYYYY(apiDate);
-
-        setFormData(lastEntry.formData);     // keep string as-is
-        setSelectedDate(parsedDate);     // Date object for DatePicker
-        //console.log(updatedFormData, "Formdata2");
+        setFirstTimeCheckData("DataAvailable");
+        setFormData(updatedFormData);
 
         // Update items and supplier details
         const updatedItems = lastEntry.items.map((item) => ({
@@ -868,7 +858,7 @@ const Purchase = () => {
         }
 
         // Set data and index
-        setData1(lastEntry);
+        setData1({ ...lastEntry, formData: updatedFormData });
         // setData1({ ...lastEntry, formData: updatedFormData });
          setIndex(lastEntry.formData.vno);
         // setIndex(lastEntry.vno);
@@ -889,10 +879,11 @@ const Purchase = () => {
   const initializeEmptyData = () => {
     // Default date as current date
     const emptyFormData = {
-      date: new Date().toLocaleDateString(), // Use today's date
+      date: "", // Use today's date
       vtype: "P",
       vno: 0,
       vbillno: 0,
+      vbdate:"",
       exfor: "",
       trpt: "",
       p_entry: "",
@@ -1034,7 +1025,22 @@ const Purchase = () => {
     setIsDisabled(true);
   }, []);
 
-  // Fetch all bills for search
+  // Modal & Search states
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [searchDate, setSearchDate] = useState(""); // DD-MM-YYYY
+  const billNoRef = useRef(null);
+  const dateRef = useRef(null);
+  const proceedRef = useRef(null);
+  useEffect(() => {
+    if (showSearch) {
+      setTimeout(() => billNoRef.current?.focus(), 100);
+    }
+  }, [showSearch]);
+
+  // 🔹 Fetch all bills
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
@@ -1042,56 +1048,55 @@ const Purchase = () => {
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
-        setFilteredBills(res.data);
+        setFilteredBills([]); // empty until Proceed
       }
     } catch (error) {
       console.error("Error fetching bills", error);
     }
   };
 
-  // Update filtering logic
-  useEffect(() => {
+  // 🔹 Proceed button logic
+  const handleProceed = () => {
+    // ✅ Require at least one filter
+    if (searchBillNo.trim() === "" && searchDate.trim() === "") {
+      alert("Please enter Bill No or Date to proceed.");
+      return; // stop execution
+    }
+
     let filtered = allBills;
 
-    // Filter by Bill No if entered
+    // Filter by Bill No
     if (searchBillNo.trim() !== "") {
       filtered = filtered.filter((bill) =>
-        bill.formData.vno
-          .toString()
-          .toLowerCase()
-          .includes(searchBillNo.toLowerCase())
+        bill.formData.vno.toString().includes(searchBillNo.trim())
       );
     }
 
-    const formatLocalDate = (date) => {
-      const d = new Date(date);
-      if (isNaN(d)) return null; // invalid date
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
-
-    // Filter by Date if selected
-    if (searchDate) {
-        const selected = formatLocalDate(searchDate);
-
-      if (selected) {
-        filtered = filtered.filter((bill) => {
-          const billDate = formatLocalDate(bill.formData.date);
-          return billDate === selected;
-        });
-      }
+    // Filter by Date (DD-MM-YYYY)
+    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+      filtered = filtered.filter((bill) => {
+        const billDate = formatDateToDDMMYYYY(bill.formData.date);
+        return billDate === searchDate;
+      });
     }
 
     setFilteredBills(filtered);
-  }, [searchBillNo, searchDate, allBills]);
+  };
 
+  // 🔹 Select bill
   const handleSelectBill = (bill) => {
-    setFormData(bill.formData);
+    setFormData({
+      ...bill.formData,
+      date: formatDateToDDMMYYYY(bill.formData.date),
+      duedate: formatDateToDDMMYYYY(bill.formData.duedate),
+      vbdate: formatDateToDDMMYYYY(bill.formData.vbdate),
+    });
     setsupplierdetails(bill.supplierdetails);
-    setItems(bill.items);
+    setItems(normalizeItems(bill.items));
     setShowSearch(false);
+    setFilteredBills([]);
+    setSearchBillNo("");
+    setSearchDate("");
   };
 
   const handleNext = async () => {
@@ -1107,10 +1112,12 @@ const Purchase = () => {
           const nextData = response.data.data;
           setData1(nextData);
           setIndex(index + 1);
-          setFormData(nextData.formData);
-          const apiDate = nextData.formData.date; // "29/12/2025"
-          const parsedDate = parseDDMMYYYY(apiDate);
-          setSelectedDate(parsedDate);     // Date object for DatePicker
+          setFormData({
+          ...nextData.formData,
+          date: formatDateToDDMMYYYY(nextData.formData.date),
+          duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(nextData.formData.vbdate),
+          });
 
           // Update items and supplier details
           const updatedItems = nextData.items.map((item) => ({
@@ -1148,10 +1155,12 @@ const Purchase = () => {
           const prevData = response.data.data;
           setData1(prevData);
           setIndex(index - 1);
-          setFormData(prevData.formData);
-          const apiDate = prevData.formData.date; // "29/12/2025"
-          const parsedDate = parseDDMMYYYY(apiDate);
-          setSelectedDate(parsedDate);     // Date object for DatePicker
+          setFormData({
+          ...prevData.formData,
+          date: formatDateToDDMMYYYY(prevData.formData.date),
+          duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(prevData.formData.vbdate),
+          });
 
           // Update items and supplier details
           const updatedItems = prevData.items.map((item) => ({
@@ -1187,10 +1196,12 @@ const Purchase = () => {
         const firstData = response.data.data;
         setData1(firstData);
         setIndex(0);
-        setFormData(firstData.formData);
-        const apiDate = firstData.formData.date; // "29/12/2025"
-        const parsedDate = parseDDMMYYYY(apiDate);
-        setSelectedDate(parsedDate);     // Date object for DatePicker
+        setFormData({
+          ...firstData.formData,
+          date: formatDateToDDMMYYYY(firstData.formData.date),
+          duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(firstData.formData.vbdate),
+        });
 
         // Update items and supplier details
         const updatedItems = firstData.items.map((item) => ({
@@ -1227,10 +1238,12 @@ const Purchase = () => {
         setData1(lastData);
         const lastIndex = response.data.length - 1;
         setIndex(lastIndex);
-        setFormData(lastData.formData);
-        const apiDate = lastData.formData.date; // "29/12/2025"
-        const parsedDate = parseDDMMYYYY(apiDate);
-        setSelectedDate(parsedDate);     // Date object for DatePicker
+        setFormData({
+          ...lastData.formData,
+          date: formatDateToDDMMYYYY(lastData.formData.date),
+          duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(lastData.formData.vbdate),
+        });
 
         // Update items and supplier details
         const updatedItems = lastData.items.map((item) => ({
@@ -1254,17 +1267,25 @@ const Purchase = () => {
     }
   };
 
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
   const handleAdd = async () => {
     try {
      const lastEntry = await fetchData();
      const lastvoucherno = lastEntry?.formData?.vno ? parseInt(lastEntry.formData.vno) + 1 : 1;
       let lastBillno = formData.vbillno ? parseInt(formData.vbillno) + 1 : 1;
-      const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
       const newData = {
-        date: today,
+        date: getTodayDDMMYYYY(),
         vtype: "P",
         vno: lastvoucherno,
         vbillno: "",
+        vbdate: getTodayDDMMYYYY(),
         exfor: "",
         trpt: "",
         p_entry: "",
@@ -1281,7 +1302,7 @@ const Purchase = () => {
         tcs1: 0,
         tcs206_rate: 0,
         tcs206: 0,
-        duedate: "",
+        duedate: getTodayDDMMYYYY(),
         gr: "",
         tdson: "",
         pcess: 0,
@@ -1350,7 +1371,7 @@ const Purchase = () => {
       setIsEditMode(true);
       setTitle("NEW");
       if (datePickerRef.current) {
-        datePickerRef.current.setFocus();
+        datePickerRef.current.focus();
       }
     } catch (error) {
       console.error("Error adding new entry:", error);
@@ -1376,10 +1397,12 @@ const Purchase = () => {
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
-        setFormData(lastEntry.formData);
-        const apiDate = lastEntry.formData.date; // "29/12/2025"
-        const parsedDate = parseDDMMYYYY(apiDate);
-        setSelectedDate(parsedDate);     // Date object for DatePicker
+        setFormData({
+          ...lastEntry.formData,
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(lastEntry.formData.vbdate),
+        });
         setData1(response.data.data);
         setItems(normalizeItems(lastEntry.items));
         setsupplierdetails(
@@ -1405,6 +1428,7 @@ const Purchase = () => {
           vtype: "P",
           vno: 0,
           vbillno: 0,
+          vbdate:"",
           exfor: "",
           trpt: "",
           p_entry: "",
@@ -1530,13 +1554,14 @@ const Purchase = () => {
         _id: formData._id,
         formData: {
           // keep dates as locale strings; backend normalizes
-          date: selectedDate.toLocaleDateString("en-IN"),
-          duedate: expiredDate.toLocaleDateString("en-IN"),
+          date: formData.date,
+          duedate: formData.duedate,
 
           // core fields
           vtype: formData.vtype,
           vno: formData.vno,
           vbillno: formData.vbillno,
+          vbdate: formData.vbdate,
           exfor: formData.exfor,
           trpt: formData.trpt,
           p_entry: formData.p_entry,
@@ -2048,47 +2073,6 @@ const Purchase = () => {
     setIsEditMode(true);
   };
 
-  // const handleAddItem = () => {
-  //   if (isEditMode) {
-  //     const newItem = {
-  //       id: items.length + 1,
-  //       vcode: "",
-  //       sdisc: "",
-  //       Units: "",
-  //       pkgs: 0,
-  //       weight: 0,
-  //       rate: 0,
-  //       amount: 0,
-  //       disc: "",
-  //       discount: "",
-  //       gst: 0,
-  //       Pcodes01: "",
-  //       Pcodess: "",
-  //       Scodes01: "",
-  //       Scodess: "",
-  //       Exp_rate1: 0,
-  //       Exp_rate2: 0,
-  //       Exp_rate3: 0,
-  //       Exp_rate4: 0,
-  //       Exp_rate5: 0,
-  //       Exp1: 0,
-  //       Exp2: 0,
-  //       Exp3: 0,
-  //       Exp4: 0,
-  //       Exp5: 0,
-  //       exp_before: 0,
-  //       ctax: 0,
-  //       stax: 0,
-  //       itax: 0,
-  //       tariff: "",
-  //       vamt: 0,
-  //     };
-  //     setItems((prevItems) => [...prevItems, newItem]);
-  //     setTimeout(() => {
-  //       itemCodeRefs.current[items.length].focus();
-  //     }, 100);
-  //   }
-  // };
   const handleAddItem = () => {
     if (isEditMode) {
       const newItem = {
@@ -2409,88 +2393,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }));
   };
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // useEffect(() => {
-  //   if (formData.date) {
-  //     try {
-  //       let date;
-
-  //       // Check for dd/mm/yyyy
-  //       if (/^\d{2}\/\d{2}\/\d{4}$/.test(formData.date)) {
-  //         const [day, month, year] = formData.date.split("/").map(Number);
-  //         date = new Date(year, month - 1, day); // JS months are 0-based
-  //       } else {
-  //         // Otherwise try normal parsing (ISO etc.)
-  //         date = new Date(formData.date);
-  //       }
-
-  //       if (!isNaN(date.getTime())) {
-  //         setSelectedDate(date);
-  //       } else {
-  //         console.error("Invalid date value:", formData.date);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing date:", error);
-  //     }
-  //   } else {
-  //     setSelectedDate(null);
-  //   }
-  // }, [formData.date]);
-
-  const [expiredDate, setexpiredDate] = useState(null);
-
-  useEffect(() => {
-    if (formData.duedate) {
-      setexpiredDate(new Date(formData.duedate));
-    } else {
-      const today = new Date();
-      setexpiredDate(today);
-      setFormData({ ...formData, duedate: today });
-    }
-  }, []);
-
-   const handleDateChange = (date) => {
-     if (date instanceof Date && !isNaN(date)) {
-       setSelectedDate(date);
-       const formattedDate = date.toISOString().split("T")[0];
-       setFormData((prev) => ({
-         ...prev,
-         date: date,
-         duedate: date,
-       }));
-     }
-   };
- 
-   // ✅ Separate function to validate future or past date
-   const validateDate = (date) => {
-     if (!date) return;
- 
-     const today = new Date();
-     today.setHours(0, 0, 0, 0); // normalize today
- 
-     const checkDate = new Date(date);
-     checkDate.setHours(0, 0, 0, 0); // normalize selected date
- 
-     if (checkDate > today) {
-       toast.info("You Have Selected a Future Date.", {
-         position: "top-center",
-       });
-     } else if (checkDate < today) {
-       toast.info("You Have Selected a Past Date.", {
-         position: "top-center",
-       });
-     }
-   };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
-
   const capitalizeWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
@@ -2746,17 +2648,8 @@ const handleKeyDown = (event, index, field) => {
     }
   };
 
-  const advanceRef = useRef(null);
-  const twoBRef = useRef(null);
   const transportRef = useRef(null);
   const brokerRef = useRef(null);
-  const tcsRef = useRef([]);
-  const tdsRef = useRef([]);
-  const tdsRef2 = useRef([]);
-  const GrRef = useRef(null);
-  const vehicelRef = useRef(null);
-  const cess1Ref = useRef(null);
-  const cess2Ref = useRef(null);
 
   const handleKeyDowndown = (event, nextFieldRef) => {
     if (event.key === "Enter" || event.key === "Tab") {
@@ -3223,7 +3116,27 @@ const handleKeyDown = (event, index, field) => {
       </div>
       <div className="pur_toppart ">
         <div className="Dated ">
-          <DatePicker
+          <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                }}
+              />
+            )}
+          </InputMask>
+          {/* <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -3232,16 +3145,19 @@ const handleKeyDown = (event, index, field) => {
             onChange={handleDateChange}
             onBlur={() => validateDate(selectedDate)}
             customInput={<MaskedInput />}
-          />
+          /> */}
           <div className="billdivz">
             <TextField
+              inputRef={voucherNoRef}
               className="billzNo custom-bordered-input"
               id="vno"
               value={formData.vno}
               variant="filled"
               size="small"
               label="V.NO"
-              onKeyDown={handleKeyDownTab} // Handle Tab key here
+              onKeyDown={(e) => {
+                handleEnterKeyPress(voucherNoRef,customerNameRef )(e);
+              }}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -3359,7 +3275,7 @@ const handleKeyDown = (event, index, field) => {
                     value={item.vacode}
                     className="customerNAME custom-bordered-input"
                     onKeyDown={(e) => {
-                      handleEnterKeyPress(customerNameRef, grNoRef)(e);
+                      handleEnterKeyPress(customerNameRef, vBillNoRef)(e);
                       handleKeyDown(e, index, "accountname");
                       handleOpenModalBack(e, index, "accountname");
                     }}
@@ -3467,7 +3383,7 @@ const handleKeyDown = (event, index, field) => {
               size="small"
               label="BILL NO"
               onChange={handleCapitalAlpha}
-              onKeyDown={handleEnterKeyPress(vBillNoRef, grNoRef)}
+              onKeyDown={handleEnterKeyPress(vBillNoRef, vbDateRef)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -3478,13 +3394,34 @@ const handleKeyDown = (event, index, field) => {
                 readOnly: !isEditMode || isDisabled,
               }}
             />
-            <DatePicker
+            <div className={`erp-input3 ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+              <span style={{marginTop:8}} className="erp-label3">BILL DATE</span>
+              <InputMask
+                mask="99-99-9999"
+                value={formData.vbdate}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, vbdate: e.target.value })
+                }
+              >
+                {(inputProps) => (
+                  <input
+                    {...inputProps}
+                    style={{marginTop:5}}
+                    ref={vbDateRef}
+                    className="erp-field3 custom-style3"
+                    onKeyDown={handleEnterKeyPress(vbDateRef, grNoRef)}
+                  />
+                )}
+              </InputMask>
+              </div>
+            {/* <DatePicker
               className="DatePICKERP"
               id="date"
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
               dateFormat="dd-MM-yyyy"
-            />
+            /> */}
           </div>
           <div className="GRNo">
             <TextField
@@ -4375,7 +4312,7 @@ const handleKeyDown = (event, index, field) => {
                 onChange={HandleInputsChanges}
                 onKeyDown={(e) => {
                   handleOpenModalTpt(e, "broker", "broker");
-                  handleKeyDowndown(e, expAfterGSTRef);
+                  handleKeyDowndown(e, dueDateRef);
                 }}
                 inputProps={{
                   maxLength: 48,
@@ -4392,8 +4329,8 @@ const handleKeyDown = (event, index, field) => {
               />
             </div>
           </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+          {/* TDS ON */}
+          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
           >
             <div>
               <FormControl
@@ -4475,7 +4412,7 @@ const handleKeyDown = (event, index, field) => {
                 onFocus={(e) => e.target.select()}
                 size="small"
                 variant="filled"
-                sx={{ width: 200 }}
+                sx={{ width: 225 }}
               />
             <div
               style={{
@@ -4578,74 +4515,7 @@ const handleKeyDown = (event, index, field) => {
             </div> */}
           </div>
           {/* C/S/I/TDS */}
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5}}
-          >
-            <div style={{ display: "flex", flexDirection: "row",marginTop:"auto" }}>
-            <div className="duedatez">
-                <DatePicker
-                  id="duedate"
-                  value={formData.duedate}
-                  className="dueDatePICKER"
-                  selected={expiredDate}
-                  onChange={handleDateChange}
-                  readOnly={!isEditMode || isDisabled}
-                  dateFormat="dd-MM-yyyy"
-                  customInput={
-                    <TextField
-                      className="custom-bordered-input"
-                      label="DUE DATE"
-                      variant="filled"
-                      size="small"
-                      sx={{
-                        "& .MuiInputBase-root": {
-                          height: 46.5, // Adjust height here
-                        },
-                        "& .MuiInputBase-input": {
-                          padding: "20px 14px 6px", // more top padding so text sits lower
-                        }
-                      }}
-                    />
-                  }
-                />
-            </div>
-            <div style={{marginLeft:"5px"}}>
-              <TextField
-                id="cess1"
-                value={formData.cess1}
-                label="CESS1"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                  },
-                }}
-                size="small"
-                variant="filled"
-                className="custom-bordered-input"
-                sx={{ width: 165 }} // Adjust width as needed
-              />
-            </div>
-            <div style={{marginLeft:"5px"}}>
-              <TextField
-                id="cess2"
-                value={formData.cess2}
-                label="CESS2"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                  },
-                }}
-                size="small"
-                variant="filled"
-                className="custom-bordered-input"
-                sx={{ width: 165 }} // Adjust width as needed
-              />
-            </div>
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5,marginTop:"auto"}}>
             <div className="tdstax" style={{ display: "flex", flexDirection: "row" }}>
               <TextField
                 className="CTDS custom-bordered-input"
@@ -4738,9 +4608,72 @@ const handleKeyDown = (event, index, field) => {
               />
             </div>
           </div>
+          {/* Due Date */}
+          <div style={{ display: "flex", flexDirection: "column",marginLeft:"auto",marginRight:5 }}>
+            <div className="duedatez">
+              <div className={`erp-input3 ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
+                <span className="erp-label3">DUE DATE</span>
+                <InputMask
+                  mask="99-99-9999"
+                  value={formData.duedate}
+                  readOnly={!isEditMode || isDisabled}
+                  onChange={(e) =>
+                    setFormData({ ...formData, duedate: e.target.value })
+                  }
+                >
+                  {(inputProps) => (
+                    <input
+                      {...inputProps}
+                      ref={dueDateRef}
+                      className="erp-field3 custom-style3"
+                      onKeyDown={(e) => {
+                        handleKeyDowndown(e, expAfterGSTRef);
+                      }}
+                    />
+                  )}
+                </InputMask>
+              </div>
+            </div>
+            <div>
+              <TextField
+                id="cess1"
+                value={formData.cess1}
+                label="CESS1"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                  },
+                }}
+                size="small"
+                variant="filled"
+                className="custom-bordered-input"
+                sx={{ width: 165 }} // Adjust width as needed
+              />
+            </div>
+            <div>
+              <TextField
+                id="cess2"
+                value={formData.cess2}
+                label="CESS2"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                  },
+                }}
+                size="small"
+                variant="filled"
+                className="custom-bordered-input"
+                sx={{ width: 165 }} // Adjust width as needed
+              />
+            </div>
+          </div>
           {/* TOTALS */}
           <div
-            style={{ display: "flex", flexDirection: "column",marginLeft:"auto",marginRight:"12px"}}
+            style={{ display: "flex", flexDirection: "column",marginRight:"12px"}}
           >
             <div>
               <TextField
@@ -5107,80 +5040,102 @@ const handleKeyDown = (event, index, field) => {
         <Modal.Header closeButton>
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
-        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-          <Form.Control
-            type="text"
-            placeholder="Enter Bill No..."
-            value={searchBillNo}
-            onChange={(e) => setSearchBillNo(e.target.value)}
-          />
-          <DatePicker
-            selected={searchDate}
-            onChange={(date) => setSearchDate(date)}
-            placeholderText="Select Date"
-            dateFormat="dd-MM-yyyy"
-            className="form-control"
-          />
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSearchBillNo("");
-              setSearchDate(null);
-            }}
-          >
-            Clear
-          </Button>
-        </div>
-        <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-          <Table  bordered hover>
-            <thead style={{background:"lightgrey"}}> 
-              <tr>
-                <th>BillNo</th>
-                <th>Date</th>
-                <th>Supplier</th>
-                <th>City</th>
-                <th>GrandTotal</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBills.map((bill) => (
-                  <tr
-                    key={bill.vbillno}
-                    onClick={() => handleSelectBill(bill)}
-                    style={{ cursor: "pointer" }}
-                  >
-                  <td>{bill.formData.vno}</td>
-                  <td>
-                    {new Date(bill.formData.date).toLocaleDateString("en-GB")}
-                  </td>
-                  <td>{bill.supplierdetails?.[0]?.vacode}</td>
-                  <td>{bill.supplierdetails?.[0]?.city}</td>
-                  <td>{bill.formData.grandtotal}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        handleSelectBill(bill);
-                        setShowSearch(false);
-                      }}
-                    >
-                      Select
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {filteredBills.length === 0 && (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
-                    No matching records
-                  </td>
-                </tr>
+          {/* Filters */}
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <Form.Control
+              ref={billNoRef}
+              type="text"
+              placeholder="Enter Bill No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+              onKeyDown={handleEnterKeyPress(billNoRef, dateRef)}
+            />
+
+            <InputMask
+              mask="99-99-9999"
+              placeholder="DD-MM-YYYY"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="form-control"
+                  ref={dateRef}
+                  onKeyDown={handleEnterKeyPress(dateRef, proceedRef)}
+                />
               )}
-            </tbody>
-          </Table>
-        </div>
+            </InputMask>
+
+            {/* <InputMask
+              mask="99-99-9999"
+              placeholder="DD-MM-YYYY"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+              className="form-control"
+            /> */}
+
+            <Button ref={proceedRef} variant="primary" onClick={handleProceed}>
+              Proceed
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchBillNo("");
+                setSearchDate("");
+                setFilteredBills([]);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+
+          {/* Results */}
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Bill No</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>City</th>
+                  <th>Grand Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredBills.map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.formData.vno}</td>
+                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
+                    <td>{bill.supplierdetails?.[0]?.vacode}</td>
+                    <td>{bill.supplierdetails?.[0]?.city}</td>
+                    <td>{bill.formData.grandtotal}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSelectBill(bill)}
+                      >
+                        Select
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
         </Modal.Body>
       </Modal>
     </div>
