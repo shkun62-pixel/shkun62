@@ -621,563 +621,480 @@
 
 // export default Example;
 
-// import React, { useEffect, useState,useRef } from "react";
-// import { Select, MenuItem, FormControl, TextField, InputLabel } from "@mui/material";
-// import { Button } from "react-bootstrap";
-
-// const Example = () => {
-//   const [formData, setFormData] = useState({
-//     tdson: "",
-//   });
-//   const inputRefs = useRef([]); // Array to hold references for input fields
-//   const handleKeyDown = (e, index) => {
-//     if (e.key === "Enter") {
-//       e.preventDefault(); // Prevent default behavior
-//       let nextIndex = index + 1;
-
-//       // Find the next input that is not disabled
-//       while (
-//         inputRefs.current[nextIndex] &&
-//         inputRefs.current[nextIndex].disabled
-//       ) {
-//         nextIndex += 1;
-//       }
-
-//       const nextInput = inputRefs.current[nextIndex];
-//       if (nextInput) {
-//         nextInput.focus(); // Focus the next enabled input field
-//       }
-//     }
-
-//     if (e.key === "ArrowUp") {
-//       e.preventDefault(); // Prevent default behavior
-//       let prevIndex = index - 1;
-
-//       // Find the previous input that is not disabled
-//       while (
-//         inputRefs.current[prevIndex] &&
-//         inputRefs.current[prevIndex].disabled
-//       ) {
-//         prevIndex -= 1;
-//       }
-
-//       const prevInput = inputRefs.current[prevIndex];
-//       if (prevInput) {
-//         prevInput.focus(); // Focus the previous enabled input field
-//       }
-//     }
-//   };
-//   const [selectOpen, setSelectOpen] = useState(false);
-//   const handleTdsOn = (event) => {
-//     const { value } = event.target; // Get the selected value from the event
-//     setFormData((prevState) => ({
-//       ...prevState,
-//       tdson: value, // Update the ratecalculate field in FormData
-//     }));
-//   };
-//   return (
-//     <div>
-//       <FormControl
-//         className="custom-bordered-input"
-//         sx={{
-//           width: '450px',
-//           '& .MuiFilledInput-root': {
-//             height: 48, // adjust as needed (default ~56px for filled)
-//           },
-//         }}
-//         size="small"
-//         variant="filled"
-//       >
-//         <InputLabel id="tdson">TDS ON</InputLabel>
-//         <Select
-//           labelId="tdson"
-//           id="tdson"
-//           value={formData.tdson}
-//           onChange={handleTdsOn} // 🔹 selection only
-//           open={selectOpen}
-//           onOpen={() => setSelectOpen(true)}
-//           onClose={() => setSelectOpen(false)}
-//           inputRef={(el) => (inputRefs.current[0] = el)}
-//           onKeyDownCapture={(e) => {
-//             if (e.key === "Enter") {
-//               if (selectOpen) {
-//                 // 🔹 Menu open → let MUI select option
-//                 return;
-//               }
-
-//               // 🔹 Menu closed → move to next field
-//               e.preventDefault();
-//               e.stopPropagation();
-//               inputRefs.current[1]?.focus();
-//             }
-
-//             // Optional: ArrowDown opens menu
-//             if (e.key === "ArrowDown" && !selectOpen) {
-//               e.preventDefault();
-//               setSelectOpen(true);
-//             }
-//           }}
-//           label="TDS ON"
-//           displayEmpty
-//           MenuProps={{ disablePortal: true }}
-//         >
-
-//           <MenuItem value=""><em></em></MenuItem>
-//           <MenuItem value="Interest">Interest</MenuItem>
-//           <MenuItem value="Freight">Freight</MenuItem>
-//           <MenuItem value="Brokerage">Brokerage</MenuItem>
-//           <MenuItem value="Commission">Commission</MenuItem>
-//           <MenuItem value="Advertisement">Advertisement</MenuItem>
-//           <MenuItem value="Labour">Labour</MenuItem>
-//           <MenuItem value="Contract">Contract</MenuItem>
-//           <MenuItem value="Job Work">Job Work</MenuItem>
-//           <MenuItem value="Salary">Salary</MenuItem>
-//           <MenuItem value="Rent">Rent</MenuItem>
-//           <MenuItem value="Professional">Professional</MenuItem>
-//           <MenuItem value="Purchase">Purchase</MenuItem>
-//         </Select>
-//       </FormControl>
-//       <TextField
-//       id="amount"
-//       value={formData.amount}
-//       label="AMOUNT"
-//       onFocus={(e) => e.target.select()}  // Select text on focus
-//       inputRef={(el) => (inputRefs.current[1] = el)}
-//       onKeyDown={(e) => handleKeyDown(e, 1)}
-//       inputProps={{
-//         maxLength: 48,
-//         style: {
-//           height: 18,
-//           fontWeight: "bold",
-//         },
-//       }}
-//       size="small"
-//       variant="filled"
-//       className="custom-bordered-input"
-//       sx={{ width: 450 }}
-//       />
-//       <Button
-//       inputRef={(el) => (inputRefs.current[2] = el)}
-//       >SAVE</Button>
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-// import React,{useState, useEffect} from 'react'
-// import axios from 'axios';
-// import Modal from 'react-bootstrap/Modal';
-// import { Table, Button, Form } from 'react-bootstrap';
-// import DatePicker from 'react-datepicker';
-// import 'react-datepicker/dist/react-datepicker.css';
-
-// const Example = () => {
-//   const [formData, setFormData] = useState({
-//     date: "",
-//     vtype: "S",
-//     vbillno: 0,
-//     vno: 0,
-//     gr: "",
-//     exfor: "",
-//     trpt: "",
-//     stype: "",
-//     btype: "",
-//     conv: "",
-//   });
-//   // Search Modal states
-//   const [showSearch, setShowSearch] = useState(false);
-//   const [allBills, setAllBills] = useState([]);
-//   const [searchBillNo, setSearchBillNo] = useState("");
-//   const [filteredBills, setFilteredBills] = useState([]);
-//   const [searchDate, setSearchDate] = useState(null);
-  
-//   const formatDateToDDMMYYYY = (dateStr) => {
-//     if (!dateStr) return "";
-
-//     const date = new Date(dateStr);
-//     if (isNaN(date.getTime())) return "";
-
-//     const dd = String(date.getDate()).padStart(2, "0");
-//     const mm = String(date.getMonth() + 1).padStart(2, "0");
-//     const yyyy = date.getFullYear();
-
-//     return `${dd}-${mm}-${yyyy}`;
-//   };
-//   // Fetch all bills for search
-//   const fetchAllBills = async () => {
-//     try {
-//       const res = await axios.get(
-//         "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale"
-//       );
-//       if (Array.isArray(res.data)) {
-//         setAllBills(res.data);
-//         setFilteredBills(res.data);
-//       }
-//     } catch (error) {
-//       console.error("Error fetching bills", error);
-//     }
-//   };
-
-//   // Update filtering logic
-//   useEffect(() => {
-//     let filtered = allBills;
-
-//     // Filter by Bill No if entered
-//     if (searchBillNo.trim() !== "") {
-//       filtered = filtered.filter((bill) =>
-//         bill.formData.vbillno
-//           .toString()
-//           .toLowerCase()
-//           .includes(searchBillNo.toLowerCase())
-//       );
-//     }
-
-//     const formatLocalDate = (date) => {
-//       const d = new Date(date);
-//       if (isNaN(d)) return null; // invalid date
-//       const year = d.getFullYear();
-//       const month = String(d.getMonth() + 1).padStart(2, "0");
-//       const day = String(d.getDate()).padStart(2, "0");
-//       return `${year}-${month}-${day}`;
-//     };
-
-//     // Filter by Date if selected
-//     if (searchDate) {
-//         const selected = formatLocalDate(searchDate);
-
-//       if (selected) {
-//         filtered = filtered.filter((bill) => {
-//           const billDate = formatLocalDate(bill.formData.date);
-//           return billDate === selected;
-//         });
-//       }
-//     }
-
-//     setFilteredBills(filtered);
-//   }, [searchBillNo, searchDate, allBills]);
-
-//   const handleSelectBill = (bill) => {
-//     setFormData({
-//       ...bill.formData,
-//       date: formatDateToDDMMYYYY(bill.formData.date),
-//     });
-//   };
-  
-//   return (
-//     <div>
-//       <h1>{formData.date}</h1>
-//        <Button
-//         className="Buttonz"
-//         onClick={() => {
-//           fetchAllBills();
-//           setShowSearch(true);
-//         }}
-//       >
-//         Search
-//       </Button>
-//       {/* Search Modal */}
-//       <Modal show={showSearch} onHide={() => setShowSearch(false)} size="lg">
-//         <Modal.Header closeButton>
-//           <Modal.Title>Search</Modal.Title>
-//         </Modal.Header>
-//         <Modal.Body>
-//         <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-//           <Form.Control
-//             type="text"
-//             placeholder="Enter Bill No..."
-//             value={searchBillNo}
-//             onChange={(e) => setSearchBillNo(e.target.value)}
-//           />
-//           <DatePicker
-//             selected={searchDate}
-//             onChange={(date) => setSearchDate(date)}
-//             placeholderText="Select Date"
-//             dateFormat="dd-MM-yyyy"
-//             className="form-control"
-//           />
-//           <Button
-//             variant="secondary"
-//             onClick={() => {
-//               setSearchBillNo("");
-//               setSearchDate(null);
-//             }}
-//           >
-//             Clear
-//           </Button>
-//         </div>
-//         <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-//           <Table striped bordered hover>
-//             <thead>
-//               <tr>
-//                 <th>BillNo</th>
-//                 <th>Date</th>
-//                 <th>Customer</th>
-//                 <th>City</th>
-//                 <th>GrandTotal</th>
-//                 <th>Action</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {filteredBills.map((bill) => (
-//                 <tr key={bill._id}>
-//                   <td>{bill.formData.vbillno}</td>
-//                   <td>
-//                     {new Date(bill.formData.date).toLocaleDateString("en-GB")}
-//                   </td>
-//                   <td>{bill.customerDetails?.[0]?.vacode}</td>
-//                   <td>{bill.customerDetails?.[0]?.city}</td>
-//                   <td>{bill.formData.grandtotal}</td>
-//                   <td>
-//                     <Button
-//                       size="sm"
-//                       onClick={() => {
-//                         handleSelectBill(bill);
-//                         setShowSearch(false);
-//                       }}
-//                     >
-//                       Select
-//                     </Button>
-//                   </td>
-//                 </tr>
-//               ))}
-//               {filteredBills.length === 0 && (
-//                 <tr>
-//                   <td colSpan="6" style={{ textAlign: "center" }}>
-//                     No matching records
-//                   </td>
-//                 </tr>
-//               )}
-//             </tbody>
-//           </Table>
-//         </div>
-//         </Modal.Body>
-//       </Modal>
-//     </div>
-//   )
-// }
-
-// export default Example
-
-
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import Modal from "react-bootstrap/Modal";
-import { Table, Button, Form } from "react-bootstrap";
+import { Table, Modal, Button, Card } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import InputMask from "react-input-mask";
+import financialYear from "./Shared/financialYear";
+import OptionModal from "./TrailBalance/OptionModal";
+import AnnexureWiseModal from "./TrailBalance/AnnexureWiseModal";
+import "./TrailBalance/TrailBalance.css";
 
 const Example = () => {
-  const [formData, setFormData] = useState({
-    date: "",
-    vtype: "S",
-    vbillno: 0,
-    vno: 0,
-    gr: "",
-    exfor: "",
-    trpt: "",
-    stype: "",
-    btype: "",
-    conv: "",
+  const navigate = useNavigate();
+
+  /* ===================== STATE ===================== */
+  const [allLedgers, setAllLedgers] = useState([]);
+  const [filteredLedgers, setFilteredLedgers] = useState([]);
+  const [ledgerTotals, setLedgerTotals] = useState({});
+  const [checkedRows, setCheckedRows] = useState({});
+  const [transactions, setTransactions] = useState([]);
+  const [selectedLedger, setSelectedLedger] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const [ledgerFromDate, setLedgerFromDate] = useState("");
+  const [ledgerToDate, setLedgerToDate] = useState("");
+
+  const [isOptionOpen, setIsOptionOpen] = useState(false);
+  const [showAnnexureModal, setShowAnnexureModal] = useState(false);
+  const [annexureGroupedData, setAnnexureGroupedData] = useState({});
+
+  const [optionValues, setOptionValues] = useState({
+    Balance: "Active Balance",
+    OrderBy: "",
+    Annexure: "All",
+    T1: false,
+    T3: false,
+    T10: false,
   });
 
-  // Modal & Search states
-  const [showSearch, setShowSearch] = useState(false);
-  const [allBills, setAllBills] = useState([]);
-  const [filteredBills, setFilteredBills] = useState([]);
-
-  const [searchBillNo, setSearchBillNo] = useState("");
-  const [searchDate, setSearchDate] = useState(""); // DD-MM-YYYY
-
-  // 🔹 Convert ISO date → DD-MM-YYYY
-  const isoToDDMMYYYY = (isoDate) => {
-    if (!isoDate) return "";
-
-    const d = new Date(isoDate);
-    if (isNaN(d)) return "";
-
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-
-    return `${dd}-${mm}-${yyyy}`;
+  /* ===================== HELPERS ===================== */
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return `${String(d.getDate()).padStart(2, "0")}/${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}/${d.getFullYear()}`;
   };
 
-  // 🔹 Fetch all bills
-  const fetchAllBills = async () => {
+  const parseDDMMYYYY = (str) => {
+    if (!str) return null;
+    const [dd, mm, yyyy] = str.split("/").map(Number);
+    return new Date(yyyy, mm - 1, dd);
+  };
+
+  /* ===================== INIT FY ===================== */
+  useEffect(() => {
+    const fy = financialYear.getFYDates();
+    setLedgerFromDate(formatDate(fy.start));
+    setLedgerToDate(formatDate(fy.end));
+  }, []);
+
+  /* ===================== FETCH LEDGERS + TOTALS ===================== */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [ledgerRes, faRes] = await Promise.all([
+          axios.get(
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
+          ),
+          axios.get(
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
+          ),
+        ]);
+
+        const ledgersData = ledgerRes.data.data || [];
+        const faData = faRes.data.data || [];
+
+        /* ---------- TOTALS (ACODE BASED) ---------- */
+        const totalsMap = {};
+
+        faData.forEach((entry) => {
+          const from = parseDDMMYYYY(ledgerFromDate);
+          const to = parseDDMMYYYY(ledgerToDate);
+
+          entry.transactions.forEach((txn) => {
+            const txnDate = new Date(txn.date);
+            if (from && txnDate < from) return;
+            if (to && txnDate > to) return;
+
+            const acode = txn.ACODE;
+            if (!acode) return;
+
+            if (!totalsMap[acode]) {
+              totalsMap[acode] = {
+                debit: 0,
+                credit: 0,
+                netWeight: 0,
+                netPcs: 0,
+              };
+            }
+
+            if (txn.type.toLowerCase() === "debit") {
+              totalsMap[acode].debit += txn.amount;
+            } else {
+              totalsMap[acode].credit += txn.amount;
+            }
+
+            if (txn.vtype === "P") {
+              totalsMap[acode].netWeight += txn.weight || 0;
+              totalsMap[acode].netPcs += txn.pkgs || 0;
+            } else if (txn.vtype === "S") {
+              totalsMap[acode].netWeight -= txn.weight || 0;
+              totalsMap[acode].netPcs -= txn.pkgs || 0;
+            }
+          });
+        });
+
+        setLedgerTotals(totalsMap);
+
+        /* ---------- ENRICH LEDGERS ---------- */
+        const enriched = ledgersData.map((ledger) => {
+          const acode = ledger.formData.acode;
+          const t = totalsMap[acode] || {
+            debit: 0,
+            credit: 0,
+            netWeight: 0,
+            netPcs: 0,
+          };
+          const balance = t.debit - t.credit;
+          const drcr = balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL";
+
+          return {
+            ...ledger,
+            totals: { balance, drcr },
+            hasTxn: !!totalsMap[acode],
+          };
+        });
+
+        setAllLedgers(enriched);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, [ledgerFromDate, ledgerToDate]);
+
+  /* ===================== FILTER / SORT ===================== */
+  useEffect(() => {
+    let result = [...allLedgers];
+
+    switch (optionValues.Balance) {
+      case "Active Balance":
+        result = result.filter((l) => l.totals.balance !== 0);
+        break;
+      case "Nil Balance":
+        result = result.filter((l) => l.totals.balance === 0);
+        break;
+      case "Debit Balance":
+        result = result.filter((l) => l.totals.balance > 0);
+        break;
+      case "Credit Balance":
+        result = result.filter((l) => l.totals.balance < 0);
+        break;
+      default:
+        break;
+    }
+
+    if (optionValues.Annexure !== "All") {
+      result = result.filter(
+        (l) => l.formData.Bsgroup === optionValues.Annexure
+      );
+    }
+
+    if (optionValues.T1) {
+      result = result.filter((l) => checkedRows[l._id]);
+    }
+
+    setFilteredLedgers(result);
+  }, [allLedgers, optionValues, checkedRows]);
+
+  /* ===================== LOAD LEDGER TXNS ===================== */
+  const openLedgerDetails = async (ledger) => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale"
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
       );
-      if (Array.isArray(res.data)) {
-        setAllBills(res.data);
-        setFilteredBills([]); // empty until Proceed
-      }
-    } catch (error) {
-      console.error("Error fetching bills", error);
+
+      const allTxns = res.data.data || [];
+
+      const ledgerTxns = allTxns.flatMap((entry) =>
+        entry.transactions
+          .filter((txn) => txn.ACODE === ledger.formData.acode)
+          .map((txn) => ({
+            ...txn,
+            saleId: entry.saleId || null,
+            purId: entry.purchaseId || null,
+            bankId: entry.bankId || null,
+            cashId: entry.cashId || null,
+            journalId: entry.journalId || null,
+          }))
+      );
+
+      setSelectedLedger(ledger);
+      setTransactions(ledgerTxns);
+      setShowModal(true);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // 🔹 Proceed button logic
-  const handleProceed = () => {
-    // ✅ Require at least one filter
-    if (searchBillNo.trim() === "" && searchDate.trim() === "") {
-      alert("Please enter Bill No or Date to proceed.");
-      return; // stop execution
-    }
+  /* ===================== ANNEXURE ===================== */
+  const buildAnnexureData = () => {
+    const grouped = {};
 
-    let filtered = allBills;
+    filteredLedgers.forEach((ledger) => {
+      const annexure = ledger.formData.Bsgroup || "Others";
+      if (!grouped[annexure]) grouped[annexure] = [];
 
-    // Filter by Bill No
-    if (searchBillNo.trim() !== "") {
-      filtered = filtered.filter((bill) =>
-        bill.formData.vbillno.toString().includes(searchBillNo.trim())
-      );
-    }
-
-    // Filter by Date (DD-MM-YYYY)
-    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-      filtered = filtered.filter((bill) => {
-        const billDate = isoToDDMMYYYY(bill.formData.date);
-        return billDate === searchDate;
+      grouped[annexure].push({
+        ...ledger,
+        netPcs: ledgerTotals[ledger.formData.acode]?.netPcs || 0,
+        netQty: ledgerTotals[ledger.formData.acode]?.netWeight || 0,
       });
-    }
-
-    setFilteredBills(filtered);
-  };
-
-  // const handleProceed = () => {
-  //   let filtered = allBills;
-
-  //   // Filter by Bill No
-  //   if (searchBillNo.trim() !== "") {
-  //     filtered = filtered.filter((bill) =>
-  //       bill.formData.vbillno
-  //         .toString()
-  //         .includes(searchBillNo.trim())
-  //     );
-  //   }
-
-  //   // Filter by Date (DD-MM-YYYY)
-  //   if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-  //     filtered = filtered.filter((bill) => {
-  //       const billDate = isoToDDMMYYYY(bill.formData.date);
-  //       return billDate === searchDate;
-  //     });
-  //   }
-
-  //   setFilteredBills(filtered);
-  // };
-
-  // 🔹 Select bill
-  const handleSelectBill = (bill) => {
-    setFormData({
-      ...bill.formData,
-      date: isoToDDMMYYYY(bill.formData.date),
     });
-    setShowSearch(false);
+
+    setAnnexureGroupedData(grouped);
+    setShowAnnexureModal(true);
   };
 
+  /* ===================== RENDER ===================== */
   return (
-    <div>
-      <h3>Selected Date: {formData.date}</h3>
+    <div style={{ padding: "10px" }}>
+      <Card className="contMain">
+        <h3 className="headerTrail">TRIAL BALANCE</h3>
 
-      <Button
-        className="Buttonz"
-        onClick={() => {
-          fetchAllBills();
-          setShowSearch(true);
-        }}
-      >
-        Search
-      </Button>
+        <Table size="sm" hover className="custom-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>NAME</th>
+              <th>CITY</th>
+              <th>PCS</th>
+              <th>QTY</th>
+              <th>DEBIT</th>
+              <th>CREDIT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLedgers.map((ledger) => {
+              const { balance, drcr } = ledger.totals;
+              const acode = ledger.formData.acode;
 
-      {/* 🔍 Search Modal */}
-      <Modal show={showSearch} onHide={() => setShowSearch(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Search</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          {/* Filters */}
-          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-            <Form.Control
-              type="text"
-              placeholder="Enter Bill No..."
-              value={searchBillNo}
-              onChange={(e) => setSearchBillNo(e.target.value)}
-            />
-
-            <InputMask
-              mask="99-99-9999"
-              placeholder="DD-MM-YYYY"
-              value={searchDate}
-              onChange={(e) => setSearchDate(e.target.value)}
-              className="form-control"
-            />
-
-            <Button variant="primary" onClick={handleProceed}>
-              Proceed
-            </Button>
-
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSearchBillNo("");
-                setSearchDate("");
-                setFilteredBills([]);
-              }}
-            >
-              Clear
-            </Button>
-          </div>
-
-          {/* Results */}
-          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Bill No</th>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>City</th>
-                  <th>Grand Total</th>
-                  <th>Action</th>
+              return (
+                <tr
+                  key={ledger._id}
+                  onClick={() => openLedgerDetails(ledger)}
+                >
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={!!checkedRows[ledger._id]}
+                      onChange={() =>
+                        setCheckedRows((p) => ({
+                          ...p,
+                          [ledger._id]: !p[ledger._id],
+                        }))
+                      }
+                    />
+                  </td>
+                  <td title={`ACODE: ${acode}`}>
+                    {ledger.formData.ahead}
+                  </td>
+                  <td>{ledger.formData.city}</td>
+                  <td align="right">
+                    {(ledgerTotals[acode]?.netPcs || 0).toFixed(3)}
+                  </td>
+                  <td align="right">
+                    {(ledgerTotals[acode]?.netWeight || 0).toFixed(3)}
+                  </td>
+                  <td align="right" style={{ color: "darkblue" }}>
+                    {drcr === "DR" && Math.abs(balance).toFixed(2)}
+                  </td>
+                  <td align="right" style={{ color: "red" }}>
+                    {drcr === "CR" && Math.abs(balance).toFixed(2)}
+                  </td>
                 </tr>
-              </thead>
+              );
+            })}
+          </tbody>
+        </Table>
 
-              <tbody>
-                {filteredBills.map((bill) => (
-                  <tr key={bill._id}>
-                    <td>{bill.formData.vbillno}</td>
-                    <td>{isoToDDMMYYYY(bill.formData.date)}</td>
-                    <td>{bill.customerDetails?.[0]?.vacode}</td>
-                    <td>{bill.customerDetails?.[0]?.city}</td>
-                    <td>{bill.formData.grandtotal}</td>
-                    <td>
-                      <Button
-                        size="sm"
-                        onClick={() => handleSelectBill(bill)}
-                      >
-                        Select
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+        <Button onClick={() => setIsOptionOpen(true)}>Options</Button>
 
-                {filteredBills.length === 0 && (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                      No matching records
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          </div>
-        </Modal.Body>
-      </Modal>
+        <OptionModal
+          isOpen={isOptionOpen}
+          onClose={() => setIsOptionOpen(false)}
+          onApply={(values) => {
+            setOptionValues(values);
+            if (values.OrderBy === "Annexure Wise") {
+              buildAnnexureData();
+            }
+          }}
+        />
+
+        <AnnexureWiseModal
+          show={showAnnexureModal}
+          onClose={() => setShowAnnexureModal(false)}
+          data={annexureGroupedData}
+        />
+      </Card>
     </div>
   );
 };
 
 export default Example;
+
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { Table, Card } from "react-bootstrap";
+// import InputMask from "react-input-mask";
+// import financialYear from "./Shared/financialYear";
+
+// const Example = () => {
+//   const [trailData, setTrailData] = useState([]);
+//   const [ledgerFromDate, setLedgerFromDate] = useState("");
+//   const [ledgerToDate, setLedgerToDate] = useState("");
+
+//   /* ===================== DATE HELPERS ===================== */
+//   const formatDate = (date) => {
+//     if (!date) return "";
+//     const d = new Date(date);
+//     return `${String(d.getDate()).padStart(2, "0")}/${String(
+//       d.getMonth() + 1
+//     ).padStart(2, "0")}/${d.getFullYear()}`;
+//   };
+
+//   const parseDDMMYYYY = (str) => {
+//     if (!str) return null;
+//     const [dd, mm, yyyy] = str.split("/").map(Number);
+//     return new Date(yyyy, mm - 1, dd);
+//   };
+
+//   /* ===================== INIT FY ===================== */
+//   useEffect(() => {
+//     const fy = financialYear.getFYDates();
+//     setLedgerFromDate(formatDate(fy.start));
+//     setLedgerToDate(formatDate(fy.end));
+//   }, []);
+
+//   /* ===================== BUILD TRIAL BALANCE ===================== */
+//   useEffect(() => {
+//     const fetchFaFile = async () => {
+//       try {
+//         const res = await axios.get(
+//           "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
+//         );
+
+//         const faData = res.data.data || [];
+//         const from = parseDDMMYYYY(ledgerFromDate);
+//         const to = parseDDMMYYYY(ledgerToDate);
+
+//         const tbMap = {}; // 🔑 ACODE based
+
+//         faData.forEach((entry) => {
+//           entry.transactions.forEach((txn) => {
+//             const txnDate = new Date(txn.date);
+//             if (from && txnDate < from) return;
+//             if (to && txnDate > to) return;
+
+//             const acode = txn.ACODE;
+//             if (!acode) return;
+
+//             if (!tbMap[acode]) {
+//               tbMap[acode] = {
+//                 acode,
+//                 name: txn.account,
+//                 debit: 0,
+//                 credit: 0,
+//                 netPcs: 0,
+//                 netQty: 0,
+//               };
+//             }
+
+//             if (txn.type.toLowerCase() === "debit") {
+//               tbMap[acode].debit += txn.amount;
+//             } else {
+//               tbMap[acode].credit += txn.amount;
+//             }
+
+//             // PCS / QTY logic
+//             if (txn.vtype === "P") {
+//               tbMap[acode].netQty += txn.weight || 0;
+//               tbMap[acode].netPcs += txn.pkgs || 0;
+//             } else if (txn.vtype === "S") {
+//               tbMap[acode].netQty -= txn.weight || 0;
+//               tbMap[acode].netPcs -= txn.pkgs || 0;
+//             }
+//           });
+//         });
+
+//         const finalTB = Object.values(tbMap).map((l) => {
+//           const balance = l.debit - l.credit;
+//           return {
+//             ...l,
+//             balance,
+//             drcr: balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL",
+//           };
+//         });
+
+//         setTrailData(finalTB);
+//       } catch (err) {
+//         console.error(err);
+//       }
+//     };
+
+//     fetchFaFile();
+//   }, [ledgerFromDate, ledgerToDate]);
+
+//   /* ===================== RENDER ===================== */
+//   return (
+//     <div style={{ padding: "10px" }}>
+//       <Card className="contMain">
+//         <div style={{ display: "flex", gap: "20px", marginBottom: "10px" }}>
+//           <div>
+//             <b>From:</b>{" "}
+//             <InputMask
+//               mask="99/99/9999"
+//               value={ledgerFromDate}
+//               onChange={(e) => setLedgerFromDate(e.target.value)}
+//             />
+//           </div>
+//           <div>
+//             <b>To:</b>{" "}
+//             <InputMask
+//               mask="99/99/9999"
+//               value={ledgerToDate}
+//               onChange={(e) => setLedgerToDate(e.target.value)}
+//             />
+//           </div>
+//         </div>
+
+//         <h3 className="headerTrail">TRIAL BALANCE</h3>
+
+//         <Table size="sm" hover bordered>
+//           <thead>
+//             <tr>
+//               <th>ACODE</th>
+//               <th>ACCOUNT NAME</th>
+//               <th>PCS</th>
+//               <th>QTY</th>
+//               <th>DEBIT</th>
+//               <th>CREDIT</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {trailData.map((l) => (
+//               <tr key={l.acode}>
+//                 <td>{l.acode}</td>
+//                 <td>{l.name}</td>
+//                 <td align="right">{l.netPcs.toFixed(3)}</td>
+//                 <td align="right">{l.netQty.toFixed(3)}</td>
+//                 <td align="right" style={{ color: "darkblue" }}>
+//                   {l.drcr === "DR" && Math.abs(l.balance).toFixed(2)}
+//                 </td>
+//                 <td align="right" style={{ color: "red" }}>
+//                   {l.drcr === "CR" && Math.abs(l.balance).toFixed(2)}
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </Table>
+//       </Card>
+//     </div>
+//   );
+// };
+
+// export default Example;

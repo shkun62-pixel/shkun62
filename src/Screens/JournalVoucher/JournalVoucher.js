@@ -21,19 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useLocation } from "react-router-dom";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
-
-// ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar="_"
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
+import SearchModal from "../Shared/SearchModal";
 
 const JournalVoucher = () => {
   const location = useLocation();
@@ -380,7 +368,7 @@ const JournalVoucher = () => {
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3012/${tenant}/tenant/api/ledgerAccount`
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -1160,6 +1148,69 @@ const handleSearch = async (searchDate) => {
     }
   };
 
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [filteredBills, setFilteredBills] = useState([]);
+
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [searchDate, setSearchDate] = useState("");
+
+  // 🔹 ISO → DD-MM-YYYY
+  const isoToDDMMYYYY = (isoDate) => {
+    const d = new Date(isoDate);
+    if (isNaN(d)) return "";
+    return `${String(d.getDate()).padStart(2, "0")}-${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}-${d.getFullYear()}`;
+  };
+
+  // 🔹 Fetch Bills
+  const fetchAllBills = async () => {
+    try {
+      const res = await axios.get(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal"
+      );
+      if (Array.isArray(res.data)) {
+        setAllBills(res.data);
+        setFilteredBills([]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔹 Proceed
+  const handleProceed = () => {
+    let filtered = allBills;
+
+    if (searchBillNo.trim()) {
+      filtered = filtered.filter((b) =>
+        b.formData.voucherno.toString().includes(searchBillNo)
+      );
+    }
+
+    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+      filtered = filtered.filter(
+        (b) => b.formData.date === searchDate
+      );
+    }
+
+    setFilteredBills(filtered);
+  };
+
+  // 🔹 Select
+  const handleSelectBill = (bill) => {
+    setFormData({
+      ...bill.formData,
+      date: bill.formData.date,
+    });
+    setItems(normalizeItems(bill.items));
+    setShowSearch(false);
+    setFilteredBills([]);
+    setSearchBillNo("");
+    setSearchDate("");
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -1504,7 +1555,7 @@ const handleSearch = async (searchDate) => {
           >
             Last
           </Button>
-          <Button
+          {/* <Button
             className="Buttonz"
             style={{
               color: "black",
@@ -1514,53 +1565,31 @@ const handleSearch = async (searchDate) => {
             disabled={!isSearchEnabled}
           >
             Search
+          </Button> */}
+          <Button
+            className="Buttonz"
+            style={{  backgroundColor: buttonColors[6] }}
+            onClick={() => {
+              fetchAllBills();
+              setShowSearch(true);
+            }}
+            disabled={!isSearchEnabled}
+          >
+            Search
           </Button>
-           {/* Modal for Search */}
-           <Modal show={showSearchModal} onHide={handleCloseSearchModal} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Search by Date</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {/* Input for Date */}
-                    <div style={{ marginBottom: '10px' }}>
-                        <input
-                            type="date"
-                            className="form-control"
-                            onChange={(e) => handleSearch(e.target.value)} // Fetch data when the date is selected
-                        />
-                    </div>
-                    {/* Search Results */}
-                    {searchResults.length > 0 ? (
-                        <Table bordered hover>
-                            <thead>
-                                <tr>
-                                    <th>Voucher No.</th>
-                                    <th>Date</th>
-                                    <th>Total Debit</th>
-                                    <th>Total Credit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {searchResults.map((result, index) => (
-                                    <tr key={index} onClick={() => handleSelectSearchResult(result)} style={{ cursor: 'pointer' }}>
-                                        <td>{result.formData.voucherno}</td>
-                                        <td>{new Date(result.formData.date).toLocaleDateString()}</td>
-                                        <td>{result.formData.totaldebit}</td>
-                                        <td>{result.formData.totalcredit}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    ) : (
-                        <p>No results found</p>
-                    )}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseSearchModal}>
-                        Close
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <SearchModal
+            show={showSearch}
+            onClose={() => setShowSearch(false)}
+            bills={allBills}
+            filteredBills={filteredBills}
+            searchBillNo={searchBillNo}
+            setSearchBillNo={setSearchBillNo}
+            searchDate={searchDate}
+            setSearchDate={setSearchDate}
+            onProceed={handleProceed}
+            onSelectBill={handleSelectBill}
+            isoToDDMMYYYY={isoToDDMMYYYY}
+          />
           <Button
           //  onClick={handleOpen}
            onClick={handlePrintClick}

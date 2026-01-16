@@ -239,48 +239,68 @@ const TrailBalance = () => {
         const ledgersData = ledgerRes.data.data || [];
         const faData = faRes.data.data || [];
 
-         setFaDataState(faData); // ✅ store faData in state
+        /* ---------- TOTALS (ACODE BASED) ---------- */
+        const totalsMap = {};
 
-        const ledgerTotals = {};
         faData.forEach((entry) => {
-          
-        const from = parseDDMMYYYY(ledgerFromDate);
-        const to = parseDDMMYYYY(ledgerToDate);
+          const from = parseDDMMYYYY(ledgerFromDate);
+          const to = parseDDMMYYYY(ledgerToDate);
 
-        entry.transactions.forEach((txn) => {
-          const txnDate = new Date(txn.date);
+          entry.transactions.forEach((txn) => {
+            const txnDate = new Date(txn.date);
+            if (from && txnDate < from) return;
+            if (to && txnDate > to) return;
 
-          if (from && txnDate < from) return;
-          if (to && txnDate > to) return;
+            const acode = txn.ACODE;
+            if (!acode) return;
 
-          const acc = txn.account.trim();
+            if (!totalsMap[acode]) {
+              totalsMap[acode] = {
+                debit: 0,
+                credit: 0,
+                netWeight: 0,
+                netPcs: 0,
+              };
+            }
 
-          if (!ledgerTotals[acc]) {
-            ledgerTotals[acc] = { debit: 0, credit: 0 };
-          }
+            if (txn.type.toLowerCase() === "debit") {
+              totalsMap[acode].debit += txn.amount;
+            } else {
+              totalsMap[acode].credit += txn.amount;
+            }
 
-          if (txn.type.toLowerCase() === "debit") {
-            ledgerTotals[acc].debit += txn.amount;
-          } else if (txn.type.toLowerCase() === "credit") {
-            ledgerTotals[acc].credit += txn.amount;
-          }
+            if (txn.vtype === "P") {
+              totalsMap[acode].netWeight += txn.weight || 0;
+              totalsMap[acode].netPcs += txn.pkgs || 0;
+            } else if (txn.vtype === "S") {
+              totalsMap[acode].netWeight -= txn.weight || 0;
+              totalsMap[acode].netPcs -= txn.pkgs || 0;
+            }
+          });
         });
 
-        });
+        setLedgerTotals(totalsMap);
 
-        const enrichedLedgers = ledgersData.map((ledger) => {
-          const acc = ledger.formData.ahead.trim();
-          const totals = ledgerTotals[acc] || { debit: 0, credit: 0 };
-          const balance = totals.debit - totals.credit;
+        /* ---------- ENRICH LEDGERS ---------- */
+        const enriched = ledgersData.map((ledger) => {
+          const acode = ledger.formData.acode;
+          const t = totalsMap[acode] || {
+            debit: 0,
+            credit: 0,
+            netWeight: 0,
+            netPcs: 0,
+          };
+          const balance = t.debit - t.credit;
           const drcr = balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL";
+
           return {
             ...ledger,
             totals: { balance, drcr },
-            hasTxn: !!ledgerTotals[acc],
+            hasTxn: !!totalsMap[acode],
           };
         });
 
-        setAllLedgers(enrichedLedgers);
+        setAllLedgers(enriched);
       } catch (err) {
         console.error(err);
       }
@@ -288,6 +308,70 @@ const TrailBalance = () => {
 
     fetchData();
   }, [ledgerFromDate, ledgerToDate]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [ledgerRes, faRes] = await Promise.all([
+  //         axios.get(
+  //           "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
+  //         ),
+  //         axios.get(
+  //           "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
+  //         ),
+  //       ]);
+
+  //       const ledgersData = ledgerRes.data.data || [];
+  //       const faData = faRes.data.data || [];
+
+  //        setFaDataState(faData); // ✅ store faData in state
+
+  //       const ledgerTotals = {};
+  //       faData.forEach((entry) => {
+          
+  //       const from = parseDDMMYYYY(ledgerFromDate);
+  //       const to = parseDDMMYYYY(ledgerToDate);
+
+  //       entry.transactions.forEach((txn) => {
+  //         const txnDate = new Date(txn.date);
+
+  //         if (from && txnDate < from) return;
+  //         if (to && txnDate > to) return;
+
+  //         const acc = txn.account.trim();
+
+  //         if (!ledgerTotals[acc]) {
+  //           ledgerTotals[acc] = { debit: 0, credit: 0 };
+  //         }
+
+  //         if (txn.type.toLowerCase() === "debit") {
+  //           ledgerTotals[acc].debit += txn.amount;
+  //         } else if (txn.type.toLowerCase() === "credit") {
+  //           ledgerTotals[acc].credit += txn.amount;
+  //         }
+  //       });
+
+  //       });
+
+  //       const enrichedLedgers = ledgersData.map((ledger) => {
+  //         const acc = ledger.formData.ahead.trim();
+  //         const totals = ledgerTotals[acc] || { debit: 0, credit: 0 };
+  //         const balance = totals.debit - totals.credit;
+  //         const drcr = balance > 0 ? "DR" : balance < 0 ? "CR" : "NIL";
+  //         return {
+  //           ...ledger,
+  //           totals: { balance, drcr },
+  //           hasTxn: !!ledgerTotals[acc],
+  //         };
+  //       });
+
+  //       setAllLedgers(enrichedLedgers);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [ledgerFromDate, ledgerToDate]);
 
   // apply filters + sorting
   useEffect(() => {
@@ -486,7 +570,151 @@ const TrailBalance = () => {
     }
   };
 
+  // Open modal and fetch transactions
+  const openLedgerDetails = (ledger) => {
+    if (ledger.groupedLedgers) {
+      setGroupedLedgersToPick(ledger.groupedLedgers);
+      setCurrentGroupName(ledger.formData.ahead); // 🔹 store group name
+      setShowGroupModal(true);
+    } else {
+      fetchLedgerTransactions(ledger);
+    }
+  };
+
+  const loadLedgerData = (selectedLedger = null) => {
+    axios
+      .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+      .then((res) => {
+        const allTxns = res.data.data || [];
+
+        // -----------------------------------------
+        // 1️⃣ Compute Totals for All Ledgers
+        // -----------------------------------------
+        const totals = {};
+        allLedgers.forEach((ledger) => {
+          const ledgerTxns = allTxns.flatMap((entry) =>
+            entry.transactions
+          .filter((txn) => txn.ACODE === ledger.formData.acode
+            )
+          );
+
+          let netWeight = 0;
+          let netPcs = 0;
+
+          ledgerTxns.forEach((txn) => {
+            if (txn.vtype === "P") {
+              netWeight += txn.weight || 0;
+              netPcs += txn.pkgs || 0;
+            } else if (txn.vtype === "S") {
+              netWeight -= txn.weight || 0;
+              netPcs -= txn.pkgs || 0;
+            }
+          });
+
+          totals[ledger._id] = { netWeight, netPcs };
+        });
+
+        setLedgerTotals(totals);
+
+        // -----------------------------------------
+        // 2️⃣ If a ledger is selected → prepare its txns
+        // -----------------------------------------
+        if (selectedLedger) {
+          const ledgerTxns = allTxns.flatMap((entry) =>
+            entry.transactions
+              .filter(
+                (txn) =>
+                  txn.account.trim() === selectedLedger.formData.ahead.trim()
+              )
+              .map((txn) => ({
+                ...txn,
+                saleId: entry.saleId || null,
+                purId: entry.purchaseId || null,
+                bankId: entry.bankId || null,
+                cashId: entry.cashId || null,
+                journalId: entry.journalId || null,
+              }))
+          );
+
+          setSelectedLedger(selectedLedger);
+          setTransactions(ledgerTxns);
+          setShowModal(true);
+        }
+      })
+      .catch((err) => console.error(err));
+  };
+  // const loadLedgerData = (selectedLedger = null) => {
+  //   axios
+  //     .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+  //     .then((res) => {
+  //       const allTxns = res.data.data || [];
+
+  //       // -----------------------------------------
+  //       // 1️⃣ Compute Totals for All Ledgers
+  //       // -----------------------------------------
+  //       const totals = {};
+  //       allLedgers.forEach((ledger) => {
+  //         const ledgerTxns = allTxns.flatMap((entry) =>
+  //           entry.transactions.filter(
+  //             (txn) => txn.account.trim() === ledger.formData.ahead.trim()
+  //           )
+  //         );
+
+  //         let netWeight = 0;
+  //         let netPcs = 0;
+
+  //         ledgerTxns.forEach((txn) => {
+  //           if (txn.vtype === "P") {
+  //             netWeight += txn.weight || 0;
+  //             netPcs += txn.pkgs || 0;
+  //           } else if (txn.vtype === "S") {
+  //             netWeight -= txn.weight || 0;
+  //             netPcs -= txn.pkgs || 0;
+  //           }
+  //         });
+
+  //         totals[ledger._id] = { netWeight, netPcs };
+  //       });
+
+  //       setLedgerTotals(totals);
+
+  //       // -----------------------------------------
+  //       // 2️⃣ If a ledger is selected → prepare its txns
+  //       // -----------------------------------------
+  //       if (selectedLedger) {
+  //         const ledgerTxns = allTxns.flatMap((entry) =>
+  //           entry.transactions
+  //             .filter(
+  //               (txn) =>
+  //                 txn.account.trim() === selectedLedger.formData.ahead.trim()
+  //             )
+  //             .map((txn) => ({
+  //               ...txn,
+  //               saleId: entry.saleId || null,
+  //               purId: entry.purchaseId || null,
+  //               bankId: entry.bankId || null,
+  //               cashId: entry.cashId || null,
+  //               journalId: entry.journalId || null,
+  //             }))
+  //         );
+
+  //         setSelectedLedger(selectedLedger);
+  //         setTransactions(ledgerTxns);
+  //         setShowModal(true);
+  //       }
+  //     })
+  //     .catch((err) => console.error(err));
+  // };
+
   useEffect(() => {
+    loadLedgerData();
+  }, [allLedgers]);
+
+  const fetchLedgerTransactions = (ledger) => {
+    loadLedgerData(ledger);
+  };
+
+    useEffect(() => {
     const reopenModal = (e) => {
       const { rowIndex, selectedLedger } = e.detail;
       setActiveRowIndex(rowIndex || 0);
@@ -528,73 +756,73 @@ const TrailBalance = () => {
 }, [transactions, activeRowIndex, showModal]);
 
   // Handle keyboard navigation for LedgerList
-useEffect(() => {
-  const handleKeyDown = (e) => {
-    // 🔹 Mini modal navigation
-    if (showGroupModal && groupedLedgersToPick.length) {
-      e.preventDefault(); // Prevent default scrolling & background nav
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // 🔹 Mini modal navigation
+      if (showGroupModal && groupedLedgersToPick.length) {
+        e.preventDefault(); // Prevent default scrolling & background nav
 
-      if (e.key === "ArrowDown") {
-        setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
-      } else if (e.key === "ArrowUp") {
-        setActiveGroupIndex((prev) =>
-          prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
-        );
-      } else if (e.key === "Enter") {
-        const selectedLedger = groupedLedgersToPick[activeGroupIndex];
-        fetchLedgerTransactions(selectedLedger);
-      } 
-      return; // 🔹 stop further handling
-    }
-
-    // 🔹 Main ledger table navigation
-    if (!showModal && filteredLedgers.length) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-         setSelectedIndex((prev) =>
-          prev < filteredLedgers.length - 1 ? prev + 1 : prev
-        );
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-      }else if (e.key === "PageUp") {
-        // Jump to first entry
-        setSelectedIndex(0);
-      } else if (e.key === "PageDown") {
-        // Jump to last entry
-        setSelectedIndex(filteredLedgers.length - 1);
+        if (e.key === "ArrowDown") {
+          setActiveGroupIndex((prev) => (prev + 1) % groupedLedgersToPick.length);
+        } else if (e.key === "ArrowUp") {
+          setActiveGroupIndex((prev) =>
+            prev === 0 ? groupedLedgersToPick.length - 1 : prev - 1
+          );
+        } else if (e.key === "Enter") {
+          const selectedLedger = groupedLedgersToPick[activeGroupIndex];
+          fetchLedgerTransactions(selectedLedger);
+        } 
+        return; // 🔹 stop further handling
       }
-      else if (e.key === "Enter") {
-        const ledger = filteredLedgers[selectedIndex];
-        openLedgerDetails(ledger);
-        setSearchTerm(""); // Clear search on open
-      } else if (e.key === "F3") {
-        e.preventDefault();
-        setFlaggedRows((prev) => {
-          const newSet = new Set(prev);
-          if (newSet.has(selectedIndex)) {
-            newSet.delete(selectedIndex);
-          } else {
-            newSet.add(selectedIndex);
-          }
-          return newSet;
-        });
-      }
-    }
-  };
 
-  window.addEventListener("keydown", handleKeyDown);
-  return () => window.removeEventListener("keydown", handleKeyDown);
-}, [
-  showModal,
-  showGroupModal,
-  filteredLedgers,
-  selectedIndex,
-  transactions,
-  activeRowIndex,
-  groupedLedgersToPick,
-  activeGroupIndex,
-]);
+      // 🔹 Main ledger table navigation
+      if (!showModal && filteredLedgers.length) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev < filteredLedgers.length - 1 ? prev + 1 : prev
+          );
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+        }else if (e.key === "PageUp") {
+          // Jump to first entry
+          setSelectedIndex(0);
+        } else if (e.key === "PageDown") {
+          // Jump to last entry
+          setSelectedIndex(filteredLedgers.length - 1);
+        }
+        else if (e.key === "Enter") {
+          const ledger = filteredLedgers[selectedIndex];
+          openLedgerDetails(ledger);
+          setSearchTerm(""); // Clear search on open
+        } else if (e.key === "F3") {
+          e.preventDefault();
+          setFlaggedRows((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(selectedIndex)) {
+              newSet.delete(selectedIndex);
+            } else {
+              newSet.add(selectedIndex);
+            }
+            return newSet;
+          });
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    showModal,
+    showGroupModal,
+    filteredLedgers,
+    selectedIndex,
+    transactions,
+    activeRowIndex,
+    groupedLedgersToPick,
+    activeGroupIndex,
+  ]);
 
   // ✅ Auto-scroll ledger list to keep selected row fully visible
   useEffect(() => {
@@ -664,88 +892,6 @@ useEffect(() => {
       container.scrollTo({ top: newScrollTop, behavior: "smooth" });
     }
   }, [activeRowIndex, showModal, filteredTransactions]);
-
-  // Open modal and fetch transactions
-  const openLedgerDetails = (ledger) => {
-    if (ledger.groupedLedgers) {
-      setGroupedLedgersToPick(ledger.groupedLedgers);
-      setCurrentGroupName(ledger.formData.ahead); // 🔹 store group name
-      setShowGroupModal(true);
-    } else {
-      fetchLedgerTransactions(ledger);
-    }
-  };
-
-const loadLedgerData = (selectedLedger = null) => {
-  axios
-    .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
-    .then((res) => {
-      const allTxns = res.data.data || [];
-
-      // -----------------------------------------
-      // 1️⃣ Compute Totals for All Ledgers
-      // -----------------------------------------
-      const totals = {};
-      allLedgers.forEach((ledger) => {
-        const ledgerTxns = allTxns.flatMap((entry) =>
-          entry.transactions.filter(
-            (txn) => txn.account.trim() === ledger.formData.ahead.trim()
-          )
-        );
-
-        let netWeight = 0;
-        let netPcs = 0;
-
-        ledgerTxns.forEach((txn) => {
-          if (txn.vtype === "P") {
-            netWeight += txn.weight || 0;
-            netPcs += txn.pkgs || 0;
-          } else if (txn.vtype === "S") {
-            netWeight -= txn.weight || 0;
-            netPcs -= txn.pkgs || 0;
-          }
-        });
-
-        totals[ledger._id] = { netWeight, netPcs };
-      });
-
-      setLedgerTotals(totals);
-
-      // -----------------------------------------
-      // 2️⃣ If a ledger is selected → prepare its txns
-      // -----------------------------------------
-      if (selectedLedger) {
-        const ledgerTxns = allTxns.flatMap((entry) =>
-          entry.transactions
-            .filter(
-              (txn) =>
-                txn.account.trim() === selectedLedger.formData.ahead.trim()
-            )
-            .map((txn) => ({
-              ...txn,
-              saleId: entry.saleId || null,
-              purId: entry.purchaseId || null,
-              bankId: entry.bankId || null,
-              cashId: entry.cashId || null,
-              journalId: entry.journalId || null,
-            }))
-        );
-
-        setSelectedLedger(selectedLedger);
-        setTransactions(ledgerTxns);
-        setShowModal(true);
-      }
-    })
-    .catch((err) => console.error(err));
-};
-useEffect(() => {
-  loadLedgerData();
-}, [allLedgers]);
-
-const fetchLedgerTransactions = (ledger) => {
-  loadLedgerData(ledger);
-};
-
 
   const handleCheckboxChange = (id) => {
     setCheckedRows((prev) => ({

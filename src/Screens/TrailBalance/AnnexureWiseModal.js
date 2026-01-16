@@ -576,271 +576,173 @@ const AnnexureWiseModal = ({ show, onClose, data, fromDate, toDate }) => {
 
   /* ================= EXCEL EXPORT ================= */
   const handleExportExcel = () => {
-  const wb = XLSX.utils.book_new();
-  const wsData = [];
+    const wb = XLSX.utils.book_new();
+    const wsData = [];
 
-  const grandDebitCells = [];
-  const grandCreditCells = [];
+    const grandDebitCells = [];
+    const grandCreditCells = [];
 
-  /* ================= HEADER ================= */
-  wsData.push([companyName?.toUpperCase() || ""]);
-  wsData.push([companyAdd || ""]);
-  wsData.push([companyCity || ""]);
-  wsData.push([]);
-  wsData.push([`TRIAL BALANCE From ${fromDate} Upto ${toDate}`]);
-  wsData.push([]);
+    /* ================= HEADER ================= */
+    wsData.push([companyName?.toUpperCase() || ""]);
+    wsData.push([companyAdd || ""]);
+    wsData.push([companyCity || ""]);
+    wsData.push([]);
+    wsData.push([`TRIAL BALANCE From ${fromDate} Upto ${toDate}`]);
+    wsData.push([]);
 
-  /* ================= DATA ================= */
-  Object.entries(data).forEach(([annexure, ledgers]) => {
-    wsData.push([annexure]);
+    /* ================= DATA ================= */
+    Object.entries(data).forEach(([annexure, ledgers]) => {
+      wsData.push([annexure]);
 
-    /* AUTO HEADERS */
-    wsData.push(TABLE_COLUMNS.map((c) => c.header));
+      /* AUTO HEADERS */
+      wsData.push(TABLE_COLUMNS.map((c) => c.header));
 
-    const startRow = wsData.length + 1;
+      const startRow = wsData.length + 1;
 
-    ledgers.forEach((l) => {
-      wsData.push(TABLE_COLUMNS.map((c) => c.getValue(l)));
+      ledgers.forEach((l) => {
+        wsData.push(TABLE_COLUMNS.map((c) => c.getValue(l)));
+      });
+
+      const endRow = wsData.length;
+      const totalRowIndex = wsData.length + 1;
+
+      wsData.push([
+        "",
+        "",
+        "",
+        "Totals :",
+        { f: `SUBTOTAL(9,E${startRow}:E${endRow})` },
+        { f: `SUBTOTAL(9,F${startRow}:F${endRow})` },
+      ]);
+
+      grandDebitCells.push(`E${totalRowIndex}`);
+      grandCreditCells.push(`F${totalRowIndex}`);
+
+      wsData.push([]);
     });
 
-    const endRow = wsData.length;
-    const totalRowIndex = wsData.length + 1;
-
+    /* ================= GRAND TOTAL ================= */
     wsData.push([
       "",
       "",
       "",
-      "Totals :",
-      { f: `SUBTOTAL(9,E${startRow}:E${endRow})` },
-      { f: `SUBTOTAL(9,F${startRow}:F${endRow})` },
+      "Grand Total :",
+      { f: grandDebitCells.join("+") },
+      { f: grandCreditCells.join("+") },
     ]);
 
-    grandDebitCells.push(`E${totalRowIndex}`);
-    grandCreditCells.push(`F${totalRowIndex}`);
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-    wsData.push([]);
-  });
+    /* ================= MERGES ================= */
+    ws["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: 5 } },
+    ];
 
-  /* ================= GRAND TOTAL ================= */
-  wsData.push([
-    "",
-    "",
-    "",
-    "Grand Total :",
-    { f: grandDebitCells.join("+") },
-    { f: grandCreditCells.join("+") },
-  ]);
+    /* ================= COLUMN WIDTH ================= */
+    ws["!cols"] = [
+      { wch: 40 },
+      { wch: 25 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 15 },
+    ];
 
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
+    /* ================= COMPANY HEADER STYLE ================= */
+    ["A1", "A2", "A3"].forEach((cell) => {
+      if (ws[cell]) {
+        ws[cell].s = {
+          font: { bold: true, sz: 14 },
+          alignment: { horizontal: "center", vertical: "center" },
+        };
+      }
+    });
 
-  /* ================= MERGES ================= */
-  ws["!merges"] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
-    { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } },
-    { s: { r: 4, c: 0 }, e: { r: 4, c: 5 } },
-  ];
-
-  /* ================= COLUMN WIDTH ================= */
-  ws["!cols"] = [
-    { wch: 40 },
-    { wch: 25 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 15 },
-  ];
-
-  /* ================= COMPANY HEADER STYLE ================= */
-  ["A1", "A2", "A3"].forEach((cell) => {
-    if (ws[cell]) {
-      ws[cell].s = {
-        font: { bold: true, sz: 14 },
-        alignment: { horizontal: "center", vertical: "center" },
+    /* ================= TRIAL BALANCE STYLE ================= */
+    if (ws["A5"]) {
+      ws["A5"].s = {
+        font: { bold: true, sz: 13 },
+        alignment: { horizontal: "center" },
       };
     }
-  });
 
-  /* ================= TRIAL BALANCE STYLE ================= */
-  if (ws["A5"]) {
-    ws["A5"].s = {
-      font: { bold: true, sz: 13 },
-      alignment: { horizontal: "center" },
-    };
-  }
+    /* ================= TABLE HEADER STYLE ================= */
+    Object.keys(ws).forEach((cell) => {
+      if (TABLE_COLUMNS.some((c) => c.header === ws[cell]?.v)) {
+        const row = XLSX.utils.decode_cell(cell).r + 1;
 
-  /* ================= TABLE HEADER STYLE ================= */
-  Object.keys(ws).forEach((cell) => {
-    if (TABLE_COLUMNS.some((c) => c.header === ws[cell]?.v)) {
-      const row = XLSX.utils.decode_cell(cell).r + 1;
+        TABLE_COLUMNS.forEach((_, idx) => {
+          const col = XLSX.utils.encode_col(idx);
+          const c = `${col}${row}`;
+          if (ws[c]) {
+            ws[c].s = {
+              font: { bold: true },
+              fill: { fgColor: { rgb: "C1EEF7" } },
+              alignment: { horizontal: "center" },
+            };
+          }
+        });
+      }
+    });
 
-      TABLE_COLUMNS.forEach((_, idx) => {
-        const col = XLSX.utils.encode_col(idx);
-        const c = `${col}${row}`;
-        if (ws[c]) {
-          ws[c].s = {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "C1EEF7" } },
-            alignment: { horizontal: "center" },
-          };
-        }
-      });
-    }
-  });
+    /* ================= TOTAL & GRAND TOTAL STYLE ================= */
+    Object.keys(ws).forEach((cell) => {
+      if (ws[cell]?.v === "Totals :" || ws[cell]?.v === "Grand Total :") {
+        const row = XLSX.utils.decode_cell(cell).r + 1;
 
-  /* ================= TOTAL & GRAND TOTAL STYLE ================= */
-  Object.keys(ws).forEach((cell) => {
-    if (ws[cell]?.v === "Totals :" || ws[cell]?.v === "Grand Total :") {
-      const row = XLSX.utils.decode_cell(cell).r + 1;
-
-      TABLE_COLUMNS.forEach((_, idx) => {
-        const col = XLSX.utils.encode_col(idx);
-        const c = `${col}${row}`;
-        if (ws[c]) {
-          ws[c].s = {
-            font: { bold: true },
-            fill: {
-              fgColor: {
-                rgb: ws[cell]?.v === "Grand Total :" ? "B7DEE8" : "CFCECB",
+        TABLE_COLUMNS.forEach((_, idx) => {
+          const col = XLSX.utils.encode_col(idx);
+          const c = `${col}${row}`;
+          if (ws[c]) {
+            ws[c].s = {
+              font: { bold: true },
+              fill: {
+                fgColor: {
+                  rgb: ws[cell]?.v === "Grand Total :" ? "B7DEE8" : "CFCECB",
+                },
               },
-            },
-            alignment: { horizontal: "right" },
-          };
-        }
-      });
-    }
-  });
+              alignment: { horizontal: "right" },
+            };
+          }
+        });
+      }
+    });
 
-  /* ================= NUMBER FORMAT AUTO (SAFE) ================= */
-  Object.keys(ws).forEach((cell) => {
-    if (cell.startsWith("!")) return;
+    /* ================= NUMBER FORMAT AUTO (SAFE) ================= */
+    Object.keys(ws).forEach((cell) => {
+      if (cell.startsWith("!")) return;
 
-    const colIdx = XLSX.utils.decode_cell(cell).c;
-    const col = TABLE_COLUMNS[colIdx];
-    if (!col) return;
+      const colIdx = XLSX.utils.decode_cell(cell).c;
+      const col = TABLE_COLUMNS[colIdx];
+      if (!col) return;
 
-    const isNumber = typeof ws[cell].v === "number" || ws[cell].f;
+      const isNumber = typeof ws[cell].v === "number" || ws[cell].f;
 
-    if (!isNumber) return;
+      if (!isNumber) return;
 
-    ws[cell].s = {
-      ...ws[cell].s,
-      alignment: {
-        horizontal: col.align === "right" ? "right" : "left",
-      },
-      numFmt: col.decimals
-        ? `0.${"0".repeat(col.decimals)}`
-        : undefined,
-    };
-  });
+      ws[cell].s = {
+        ...ws[cell].s,
+        alignment: {
+          horizontal: col.align === "right" ? "right" : "left",
+        },
+        numFmt: col.decimals
+          ? `0.${"0".repeat(col.decimals)}`
+          : undefined,
+      };
+    });
 
-  /* ================= EXPORT ================= */
-  XLSX.utils.book_append_sheet(wb, ws, "Trial Balance");
+    /* ================= EXPORT ================= */
+    XLSX.utils.book_append_sheet(wb, ws, "Trial Balance");
 
-  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  saveAs(
-    new Blob([excelBuffer], { type: "application/octet-stream" }),
-    "Annexure_Wise_Trial_Balance.xlsx"
-  );
-};
-
-  // const handleExportExcel = () => {
-  //   const wb = XLSX.utils.book_new();
-  //   const wsData = [];
-
-  //   const grandDebitCells = [];
-  //   const grandCreditCells = [];
-
-  //   /* HEADER */
-  //   wsData.push([companyName?.toUpperCase() || ""]);
-  //   wsData.push([companyAdd || ""]);
-  //   wsData.push([companyCity || ""]);
-  //   wsData.push([]);
-  //   wsData.push([`TRIAL BALANCE From ${fromDate} Upto ${toDate}`]);
-  //   wsData.push([]);
-
-  //   Object.entries(data).forEach(([annexure, ledgers]) => {
-  //     wsData.push([annexure]);
-
-  //     /* 🔥 AUTO HEADERS */
-  //     wsData.push(TABLE_COLUMNS.map((c) => c.header));
-
-  //     const startRow = wsData.length + 1;
-
-  //     ledgers.forEach((l) => {
-  //       wsData.push(TABLE_COLUMNS.map((c) => c.getValue(l)));
-  //     });
-
-  //     const endRow = wsData.length;
-  //     const totalRowIndex = wsData.length + 1;
-
-  //     wsData.push([
-  //       "",
-  //       "",
-  //       "",
-  //       "Totals :",
-  //       { f: `SUBTOTAL(9,E${startRow}:E${endRow})` },
-  //       { f: `SUBTOTAL(9,F${startRow}:F${endRow})` },
-  //     ]);
-
-  //     grandDebitCells.push(`E${totalRowIndex}`);
-  //     grandCreditCells.push(`F${totalRowIndex}`);
-
-  //     wsData.push([]);
-  //   });
-
-  //   /* GRAND TOTAL */
-  //   wsData.push([
-  //     "",
-  //     "",
-  //     "",
-  //     "Grand Total :",
-  //     { f: grandDebitCells.join("+") },
-  //     { f: grandCreditCells.join("+") },
-  //   ]);
-
-  //   const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-  //   ws["!merges"] = [
-  //     { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
-  //     { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
-  //     { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } },
-  //     { s: { r: 4, c: 0 }, e: { r: 4, c: 5 } },
-  //   ];
-
-  //   ws["!cols"] = [
-  //     { wch: 30 },
-  //     { wch: 25 },
-  //     { wch: 12 },
-  //     { wch: 12 },
-  //     { wch: 15 },
-  //     { wch: 15 },
-  //   ];
-
-  //   /* NUMBER FORMAT AUTO */
-  //   Object.keys(ws).forEach((cell) => {
-  //     if (cell.startsWith("!")) return;
-  //     const colIdx = XLSX.utils.decode_cell(cell).c;
-  //     const col = TABLE_COLUMNS[colIdx];
-  //     if (!col) return;
-
-  //     ws[cell].s = {
-  //       ...ws[cell].s,
-  //       alignment: { horizontal: col.align === "right" ? "right" : "left" },
-  //       numFmt: col.decimals
-  //         ? `0.${"0".repeat(col.decimals)}`
-  //         : undefined,
-  //     };
-  //   });
-
-  //   XLSX.utils.book_append_sheet(wb, ws, "Trial Balance");
-
-  //   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  //   saveAs(
-  //     new Blob([excelBuffer], { type: "application/octet-stream" }),
-  //     "Annexure_Wise_Trial_Balance.xlsx"
-  //   );
-  // };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(
+      new Blob([excelBuffer], { type: "application/octet-stream" }),
+      "Annexure_Wise_Trial_Balance.xlsx"
+    );
+  };
 
   /* ================= MODAL UI ================= */
   return (
@@ -856,7 +758,7 @@ const AnnexureWiseModal = ({ show, onClose, data, fromDate, toDate }) => {
             let totalCredit = 0;
 
             return (
-              <div key={annexure} className="page-break">
+              <div key={annexure} >
               <h5 style={{fontSize:18,fontWeight:'bold', borderBottom:"3px solid black", letterSpacing:2}}>{annexure}</h5>
                 <Table className="custom-table" size="sm" style={{marginTop:5}}>
                   <thead style={{ backgroundColor: "#c1eef7" }}>

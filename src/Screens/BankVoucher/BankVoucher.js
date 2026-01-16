@@ -21,6 +21,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import useCompanySetup from "../Shared/useCompanySetup";
 import FAVoucherModal from "../Shared/FAVoucherModal";
+import SearchModal from "../Shared/SearchModal";
 
 const BankVoucher = () => {
 
@@ -1610,6 +1611,69 @@ const BankVoucher = () => {
       }
       return true;
   };
+
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [filteredBills, setFilteredBills] = useState([]);
+
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [searchDate, setSearchDate] = useState("");
+
+  // 🔹 ISO → DD-MM-YYYY
+  const isoToDDMMYYYY = (isoDate) => {
+    const d = new Date(isoDate);
+    if (isNaN(d)) return "";
+    return `${String(d.getDate()).padStart(2, "0")}-${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}-${d.getFullYear()}`;
+  };
+
+  // 🔹 Fetch Bills
+  const fetchAllBills = async () => {
+    try {
+      const res = await axios.get(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank"
+      );
+      if (Array.isArray(res.data)) {
+        setAllBills(res.data);
+        setFilteredBills([]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔹 Proceed
+  const handleProceed = () => {
+    let filtered = allBills;
+
+    if (searchBillNo.trim()) {
+      filtered = filtered.filter((b) =>
+        b.formData.voucherno.toString().includes(searchBillNo)
+      );
+    }
+
+    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+      filtered = filtered.filter(
+        (b) => b.formData.date === searchDate
+      );
+    }
+
+    setFilteredBills(filtered);
+  };
+
+  // 🔹 Select
+  const handleSelectBill = (bill) => {
+    setFormData({
+      ...bill.formData,
+      date: bill.formData.date,
+    });
+    setItems(normalizeItems(bill.items));
+    setShowSearch(false);
+    setFilteredBills([]);
+    setSearchBillNo("");
+    setSearchDate("");
+  };
   return (
     <div>
       <ToastContainer />
@@ -2131,13 +2195,37 @@ const BankVoucher = () => {
           >
             Last
           </Button>
-          <Button
+          {/* <Button
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[6] }}
             disabled={!isSearchEnabled}
           >
             Search
+          </Button> */}
+          <Button
+            className="Buttonz"
+            style={{  backgroundColor: buttonColors[6] }}
+            onClick={() => {
+              fetchAllBills();
+              setShowSearch(true);
+            }}
+            disabled={!isSearchEnabled}
+          >
+            Search
           </Button>
+            <SearchModal
+            show={showSearch}
+            onClose={() => setShowSearch(false)}
+            bills={allBills}
+            filteredBills={filteredBills}
+            searchBillNo={searchBillNo}
+            setSearchBillNo={setSearchBillNo}
+            searchDate={searchDate}
+            setSearchDate={setSearchDate}
+            onProceed={handleProceed}
+            onSelectBill={handleSelectBill}
+            isoToDDMMYYYY={isoToDDMMYYYY}
+          />
           <Button
             className="Buttonz"
             style={{ color: "black", backgroundColor: buttonColors[7] }}

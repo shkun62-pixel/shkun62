@@ -216,9 +216,11 @@ const SearchModal = ({
                   <tr key={bill._id}>
                     <td>{bill.formData.voucherno}</td>
                     <td>{bill.formData.date}</td>
-                    <td>{bill.items?.[0]?.accountname}</td>
-                    <td>{bill.formData.totalpayment}</td>
-                    <td>{bill.formData.totalreceipt}</td>
+                    <td>{bill.items?.[0]?.accountname}
+                      {bill.items?.length > 1 ? ` + ${bill.items.length - 1} more` : ""}
+                    </td>
+                    <td>{bill.formData.totalpayment || bill.formData.totaldebit }</td>
+                    <td>{bill.formData.totalreceipt || bill.formData.totalcredit}</td>
                     <td>
                       <Button size="sm" onClick={() => onSelectBill(bill)}>
                         Select
