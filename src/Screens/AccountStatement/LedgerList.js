@@ -352,7 +352,7 @@ const LedgerList = () => {
       // Flatten transactions and attach saleId from parent voucher
       const ledgerTxns = allTxns.flatMap((entry) =>
         entry.transactions
-          .filter((txn) => txn.account.trim() === ledger.formData.ahead.trim())
+         .filter((txn) => String(txn.ACODE) === String(ledger.formData.acode))
           .map((txn) => ({
             ...txn,
             saleId: entry.saleId || null, // ✅ attach saleId for Sales
@@ -748,34 +748,15 @@ const LedgerList = () => {
     setSelectedIndex(0);
   }, [searchTerm, ledgers, searchColumns]);
 
-  // useEffect(() => {
-  //   const lower = searchTerm.toLowerCase();
-  
-  //   const activeCols = Object.keys(searchColumns).filter(
-  //     (key) => searchColumns[key]
-  //   );
-  
-  //   const filtered = ledgers.filter((ledger) => {
-  //     const colsToSearch =
-  //       activeCols.length > 0 ? activeCols : ["ahead"];
-  
-  //     return colsToSearch.some((key) => {
-  //       const value = ledger.formData[key]?.toString().toLowerCase();
-  //       if (!value) return false;
-  
-  //       // ✅ No checkbox → prefix search
-  //       if (activeCols.length === 0) {
-  //         return value.startsWith(lower);
-  //       }
-  
-  //       // ✅ Checkbox selected → contains search
-  //       return value.includes(lower);
-  //     });
-  //   });
-  
-  //   setFilteredLedgers(filtered);
-  //   setSelectedIndex(0);
-  // }, [searchTerm, ledgers, searchColumns]);
+  const isValidPrefix = (value) => {
+    const lower = value.toLowerCase();
+
+    return ledgers.some(
+      (ledger) =>
+        ledger.formData.ahead &&
+        ledger.formData.ahead.toLowerCase().startsWith(lower)
+    );
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -878,13 +859,36 @@ const LedgerList = () => {
         {/* ✅ Search Input */}
         <div style={{display:'flex',flexDirection:"row"}}>
           <Form.Control
+            ref={searchRef}
+            className={styles.Search}
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => {
+              const val = e.target.value;
+
+              // ✅ allow clearing
+              if (!val) {
+                setSearchTerm("");
+                return;
+              }
+
+              // ✅ allow only if prefix matches some ledger name
+              if (isValidPrefix(val)) {
+                setSearchTerm(val);
+              }
+              // ❌ else: do nothing → typing stops
+            }}
+          />
+
+          {/* <Form.Control
           ref={searchRef}
           className={styles.Search}
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          /> */}
          <Button 
             style={{ marginLeft: "10px",marginRight: "10px", marginTop: "10px" }}
             onClick={() => setShowColumnModal(true)}

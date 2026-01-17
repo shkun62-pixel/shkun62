@@ -251,7 +251,7 @@ const TrailBalance = () => {
             if (from && txnDate < from) return;
             if (to && txnDate > to) return;
 
-            const acode = txn.ACODE;
+            const acode = String(txn.ACODE); // 🔥 FIX
             if (!acode) return;
 
             if (!totalsMap[acode]) {
@@ -283,7 +283,7 @@ const TrailBalance = () => {
 
         /* ---------- ENRICH LEDGERS ---------- */
         const enriched = ledgersData.map((ledger) => {
-          const acode = ledger.formData.acode;
+          const acode = String(ledger.formData.acode);
           const t = totalsMap[acode] || {
             debit: 0,
             credit: 0,
@@ -594,8 +594,7 @@ const TrailBalance = () => {
         allLedgers.forEach((ledger) => {
           const ledgerTxns = allTxns.flatMap((entry) =>
             entry.transactions
-          .filter((txn) => txn.ACODE === ledger.formData.acode
-            )
+          .filter((txn) => String(txn.ACODE) === String(ledger.formData.acode))
           );
 
           let netWeight = 0;
@@ -1533,6 +1532,16 @@ const groupTotals = useMemo(() => {
   setAnnexureGroupedData(grouped);
   };
 
+  const isValidPrefix = (value) => {
+    const lower = value.toLowerCase();
+
+    return allLedgers.some(
+      (ledger) =>
+        ledger.formData.ahead &&
+        ledger.formData.ahead.toLowerCase().startsWith(lower)
+    );
+  };
+
   return (
     <div style={{ padding: "10px" }}>
       <Card className="contMain">
@@ -1682,7 +1691,28 @@ const groupTotals = useMemo(() => {
 
         {/* ✅ Search Input */}
         <div style={{display:'flex',flexDirection:"row",alignItems:'center',marginTop:"auto"}}>
-          <span style={{fontSize:18,marginRight:"10px"}}>SEARCH : </span>
+          <TextField
+            inputRef={searchRef}
+            label="SEARCH"
+            variant="outlined"
+            size="small"
+            value={searchTerm}
+             onChange={(e) => {
+              const val = e.target.value;
+              // ✅ allow clearing
+              if (!val) {
+                setSearchTerm("");
+                return;
+              }
+              // ✅ allow only if prefix matches some ledger name
+              if (isValidPrefix(val)) {
+                setSearchTerm(val);
+              }
+            }}
+            className={styles.Search}
+          />
+
+          {/* <span style={{fontSize:18,marginRight:"10px"}}>SEARCH : </span>
           <Form.Control
             ref={searchRef}
             className={styles.Search}
@@ -1691,7 +1721,7 @@ const groupTotals = useMemo(() => {
             // placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          /> */}
           <div style={{marginTop:"5px",marginLeft:'auto'}}>
           <Button className="Buttonz" style={{backgroundColor:"#3d85c6"}} onClick={openOptionModal} >Options</Button>
           <OptionModal
