@@ -48,7 +48,6 @@ const StockTransfer = () => {
   const [currentDay, setCurrentDay] = useState("");
   const datePickerRef = useRef(null);
   const voucherRef = useRef(null);
-  const portalRef = useRef(null);
   const StockNameRef = useRef([]);
   const AcCodeRef = useRef([]);
   const NarrationRef = useRef([]);
@@ -135,55 +134,55 @@ const StockTransfer = () => {
     return daysOfWeek[date.getDay()];
   };
   // DateError
-  // useEffect(() => {
-  //   if (formData.date) {
-  //     try {
-  //       const date = new Date(formData.date);
-  //       if (!isNaN(date.getTime())) {
-  //         // Ensure the date is valid
-  //         setSelectedDate(date);
-  //         setDayName(getDayName(date));
-  //       } else {
-  //         console.error("Invalid date value in formData.date:", formData.date);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing date:", error);
-  //     }
-  //   } else {
-  //     // If no date exists in formData, handle the "else" part
-  //     const today = new Date();
-  //     const formattedDate = today.toISOString().split("T")[0];
-  //     setSelectedDate(today);
-  //     setDayName(getDayName(today));
-  //     setFormData({ ...formData, date: formattedDate });
-  //     // console.log("Updated formData with today's date:", formattedDate);
-  //   }
-  // }, [formData.date, setFormData]);
+  useEffect(() => {
+    if (formData.date) {
+      try {
+        const date = new Date(formData.date);
+        if (!isNaN(date.getTime())) {
+          // Ensure the date is valid
+          setSelectedDate(date);
+          setDayName(getDayName(date));
+        } else {
+          console.error("Invalid date value in formData.date:", formData.date);
+        }
+      } catch (error) {
+        console.error("Error parsing date:", error);
+      }
+    } else {
+      // If no date exists in formData, handle the "else" part
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0];
+      setSelectedDate(today);
+      setDayName(getDayName(today));
+      setFormData({ ...formData, date: formattedDate });
+      // console.log("Updated formData with today's date:", formattedDate);
+    }
+  }, [formData.date, setFormData]);
 
-  // const handleDateChange = (date) => {
-  //   const today = new Date();
-  //   const selectedDateOnly = new Date(date.setHours(0, 0, 0, 0));
-  //   const todayOnly = new Date(today.setHours(0, 0, 0, 0));
+  const handleDateChange = (date) => {
+    const today = new Date();
+    const selectedDateOnly = new Date(date.setHours(0, 0, 0, 0));
+    const todayOnly = new Date(today.setHours(0, 0, 0, 0));
 
-  //   if (selectedDateOnly < todayOnly) {
-  //     const isConfirmed = window.confirm(
-  //       "The selected date is in the past. Do you want to proceed?"
-  //     );
-  //     if (!isConfirmed) {
-  //       return;
-  //     }
-  //   } else if (selectedDateOnly > todayOnly) {
-  //     const isConfirmed = window.confirm(
-  //       "The selected date is in the future. Do you want to proceed?"
-  //     );
-  //     if (!isConfirmed) {
-  //       return;
-  //     }
-  //   }
-  //   setSelectedDate(date);
-  //   setDayName(getDayName(date));
-  //   setFormData({ ...formData, date: date });
-  // };
+    if (selectedDateOnly < todayOnly) {
+      const isConfirmed = window.confirm(
+        "The selected date is in the past. Do you want to proceed?"
+      );
+      if (!isConfirmed) {
+        return;
+      }
+    } else if (selectedDateOnly > todayOnly) {
+      const isConfirmed = window.confirm(
+        "The selected date is in the future. Do you want to proceed?"
+      );
+      if (!isConfirmed) {
+        return;
+      }
+    }
+    setSelectedDate(date);
+    setDayName(getDayName(date));
+    setFormData({ ...formData, date: date });
+  };
 
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
@@ -208,26 +207,24 @@ const StockTransfer = () => {
         if (response.status === 200 && response.data && response.data.data) {
           const lastEntry = response.data.data;
           // Ensure date is valid
-          // const isValidDate = (date) => {
-          //   return !isNaN(Date.parse(date));
-          // };
+          const isValidDate = (date) => {
+            return !isNaN(Date.parse(date));
+          };
     
-          // // Update form data, use current date if date is invalid or not available
-          // const updatedFormData = {
-          //   ...lastEntry.formData,
-          //   date: isValidDate(lastEntry.formData.date) ? lastEntry.formData.date : new Date().toLocaleDateString(),
-          // };
-          setFormData(lastEntry.formData);
-          // setFormData(updatedFormData);
+          // Update form data, use current date if date is invalid or not available
+          const updatedFormData = {
+            ...lastEntry.formData,
+            date: isValidDate(lastEntry.formData.date) ? lastEntry.formData.date : new Date().toLocaleDateString(),
+          };
+
+          setFormData(updatedFormData);
           // Update items and supplier details
           const updatedItems = lastEntry.items.map(item => ({
             ...item,
           }));
           setItems(normalizeItems(updatedItems));
           // Set data and index
-           setData1({ lastEntry });
-           return lastEntry; // ✅ Return this for use in handleAdd
-          // setData1({ ...lastEntry, formData: updatedFormData });
+          setData1({ ...lastEntry, formData: updatedFormData });
           setIndex(lastEntry.voucherno);
         } else {
           console.log("No data available");
@@ -592,101 +589,46 @@ const handleLast = async () => {
     }
 };
 const skipItemCodeFocusRef = useRef(false);
-const getTodayDDMMYYYY = () => {
-  const today = new Date();
-  const dd = String(today.getDate()).padStart(2, "0");
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const yyyy = today.getFullYear();
-  return `${dd}-${mm}-${yyyy}`;
-};
-  const handleAdd = async () => {
-    setTitle("NEW");
-    try {
-      const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
-      let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
-      const newData = {
-        date: getTodayDDMMYYYY(),
-        voucherno: lastvoucherno,
-        owner: "Owner",
-        Balance:"",
-        UOM:"",
-        totalQtyIssue:"",
-        totalPcsIssue:"",
-        totalQtyReceipt:"",
-        totalPcsReceipt:"",
-        // vtype: "C",
-        // date: getTodayDDMMYYYY(),
-        // voucherno: lastvoucherno,
-        // cashinhand: "",
-        // owner: "Owner",
-        // user: "",
-        // totalpayment: "",
-        // totalreceipt: "",
-        // totaldiscount: "",
-      };
-      setData([...data, newData]);
-      setFormData(newData);
-      setItems(normalizeItems([]));
-      setIndex(data.length);
-      setIsAddEnabled(false);
-      setIsSubmitEnabled(true);
-      setIsPreviousEnabled(false);
-      setIsNextEnabled(false);
-      setIsFirstEnabled(false);
-      setIsLastEnabled(false);
-      setIsSearchEnabled(false);
-      setIsSPrintEnabled(false);
-      setIsDeleteEnabled(false);
-      setIsDisabled(false);
-      setIsEditMode(true);
-      skipItemCodeFocusRef.current = true;
-      if (datePickerRef.current) {
-        datePickerRef.current.focus();
-      }
-      // voucherRef.current.focus()
-    } catch (error) {
-      console.error("Error adding new entry:", error);
+
+const handleAdd = async () => {
+  // document.body.style.backgroundColor = "#D5ECF3";
+  try {
+    let lastvoucherno = formData.voucherno ? parseInt(formData.voucherno) + 1 : 1;
+    const newData = {
+      date: "",
+      voucherno: lastvoucherno,
+      owner: "Owner",
+      Balance:"",
+      UOM:"",
+      totalQtyIssue:"",
+      totalPcsIssue:"",
+      totalQtyReceipt:"",
+      totalPcsReceipt:"",
+    };
+    setData([...data, newData]);
+    setFormData(newData);
+    setItems(normalizeItems([]));
+    setIndex(data.length);
+    setIsAddEnabled(false);
+    setIsSubmitEnabled(true);
+    setIsPreviousEnabled(false);
+    setIsNextEnabled(false);
+    setIsFirstEnabled(false);
+    setIsLastEnabled(false);
+    setIsSearchEnabled(false);
+    setIsSPrintEnabled(false);
+    setIsDeleteEnabled(false);
+    setIsDisabled(false);
+    setIsEditMode(true);
+    setTitle('(NEW)')
+    skipItemCodeFocusRef.current = true;
+    if (datePickerRef.current) {
+      datePickerRef.current.setFocus();
     }
-  };
-// const handleAdd = async () => {
-//   // document.body.style.backgroundColor = "#D5ECF3";
-//   try {
-//     let lastvoucherno = formData.voucherno ? parseInt(formData.voucherno) + 1 : 1;
-//     const newData = {
-//       date: getTodayDDMMYYYY(),
-//       voucherno: lastvoucherno,
-//       owner: "Owner",
-//       Balance:"",
-//       UOM:"",
-//       totalQtyIssue:"",
-//       totalPcsIssue:"",
-//       totalQtyReceipt:"",
-//       totalPcsReceipt:"",
-//     };
-//     setData([...data, newData]);
-//     setFormData(newData);
-//     setItems(normalizeItems([]));
-//     setIndex(data.length);
-//     setIsAddEnabled(false);
-//     setIsSubmitEnabled(true);
-//     setIsPreviousEnabled(false);
-//     setIsNextEnabled(false);
-//     setIsFirstEnabled(false);
-//     setIsLastEnabled(false);
-//     setIsSearchEnabled(false);
-//     setIsSPrintEnabled(false);
-//     setIsDeleteEnabled(false);
-//     setIsDisabled(false);
-//     setIsEditMode(true);
-//     setTitle('(NEW)');
-//     skipItemCodeFocusRef.current = true;
-//     if (datePickerRef.current) {
-//       datePickerRef.current.focus();
-//     }
-//   } catch (error) {
-//     console.error("Error adding new entry:", error);
-//   }
-// };
+  } catch (error) {
+    console.error("Error adding new entry:", error);
+  }
+};
 
 const handleDeleteClick = async (id) => {
     if (!id) {
@@ -821,7 +763,7 @@ const handleSaveClick = async () => {
         combinedData = {
           _id: formData._id,
           formData: {
-            date: formData.date,
+            date: selectedDate.toLocaleDateString("en-IN"),
             voucherno: formData.voucherno,
             owner: formData.owner,
             Balance: formData.Balance,
@@ -846,7 +788,7 @@ const handleSaveClick = async () => {
         combinedData = {
           _id: formData._id,
           formData: {
-            date: formData.date,
+            date: selectedDate.toLocaleDateString("en-IN"),
             voucherno: formData.voucherno,
             owner: formData.owner,
             Balance: formData.Balance,
@@ -985,26 +927,6 @@ const handleItemRateBlur = (id, field) => {
       }
       return true;
   };
-
-  const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault();
-      if (nextRef && nextRef.current) {
-        nextRef.current.focus();
-      } 
-    }
-  };
-
-  const handleVoucherEnter = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      // Focus first ACCOUNTNAME input
-      if (StockNameRef.current[0]) {
-        StockNameRef.current[0].focus();
-      }
-    }
-  };
   return (
     <div>
       <ToastContainer />
@@ -1017,27 +939,7 @@ const handleItemRateBlur = (id, field) => {
       <div className={styles.TOPcont} style={{ padding: 5 }}>
         <text style={{ marginRight: 8 }}>VOUCHER DATE:</text>
         <div>
-          <InputMask
-              mask="99-99-9999"
-              placeholder="dd-mm-yyyy"
-              value={formData.date}
-              readOnly={!isEditMode || isDisabled}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-            >
-              {(inputProps) => (
-                <input
-                  {...inputProps}
-                  className="DatePICKER"
-                  ref={datePickerRef}
-                  onKeyDown={(e) => {
-                    handleEnterKeyPress(datePickerRef, voucherRef)(e);
-                  }}
-                />
-              )}
-          </InputMask>
-          {/* <DatePicker
+          <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -1046,7 +948,7 @@ const handleItemRateBlur = (id, field) => {
             onChange={handleDateChange}
             // onBlur={() => validateDate(selectedDate)}
             customInput={<MaskedInput />}
-          /> */}
+          />
           {/* <DatePicker
           popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
@@ -1062,15 +964,12 @@ const handleItemRateBlur = (id, field) => {
         </div>
         <div style={{marginTop:2}}>
           <TextField
-          inputRef={voucherRef}
+          ref={voucherRef}
           className="custom-bordered-input"
           value={formData.voucherno}
           label="VOUCHER NO"
           size="small"
           variant="filled"
-          onKeyDown={(e) => {
-            handleEnterKeyPress(voucherRef, portalRef)(e);
-          }}
           inputProps={{
             maxLength: 48,
             style: {
@@ -1097,7 +996,6 @@ const handleItemRateBlur = (id, field) => {
         >
           <InputLabel id="supply-label">UOM</InputLabel>
           <Select
-            inputRef={portalRef}
             labelId="supply-label"
             id="UOM"
             value={formData.UOM}
