@@ -624,77 +624,176 @@ export const formatDateUniversal = (input) => {
 
   return `${day}-${month}-${year}`;
 };
+// const TABLE_COLUMNS = [
+//   {
+//     header: "Date",
+//     key: "date",
+//     render: (row) => formatDateUniversal(row.date),
+//     noTotal: true
+//   },
+//   {
+//     header: "Bill No",
+//     key: "vno",
+//     noTotal: true,
+//     decimals: 0
+//   },
+//   {
+//     header: "Customer",
+//     key: "customer",
+//     noTotal: true
+//   },
+//   {
+//     header: "Item Name",
+//     key: "sdisc",
+//     hideWhenGSTOnly: true,
+//     noTotal: true
+//   },
+//   {
+//     header: "PCS",
+//     key: "pcs",
+//     align: "right",
+//     hideWhenGSTOnly: true,
+//     decimals: 3
+//   },
+//   {
+//     header: "Qty",
+//     key: "qty",
+//     align: "right",
+//     hideWhenGSTOnly: true,
+//     decimals: 3
+//   },
+//   {
+//     header: "Rate",
+//     key: "rate",
+//     align: "right",
+//     hideWhenGSTOnly: true,
+//     decimals: 2
+//   },
+//   {
+//     header: "Value",
+//     key: "value",
+//     align: "right",
+//     fallback: "vamt",
+//     decimals: 2
+//   },
+//   {
+//     header: "CGST",
+//     key: "cgst",
+//     fallback: "ctax",
+//     align: "right",
+//     hideWhenGSTOnly: true,
+//     decimals: 2
+//   },
+//   {
+//     header: "SGST",
+//     key: "sgst",
+//     fallback: "stax",
+//     align: "right",
+//     hideWhenGSTOnly: true,
+//     decimals: 2
+//   },
+//   {
+//     header: "IGST",
+//     key: "igst",
+//     fallback: "itax",
+//     align: "right",
+//     hideWhenGSTOnly: true,
+//     decimals: 2
+//   },
+//   {
+//     header: "Total",
+//     key: "total",
+//     fallback: "vamt",
+//     align: "right",
+//     decimals: 2
+//   }
+// ];
+
+// const TABLE_COLUMNS = [
+//   {
+//     header: "Date",
+//     key: "date",
+//     render: (row) => formatDateUniversal(row.date)
+//   },
+//   {
+//     header: "Bill No",
+//     key: "vno"
+//   },
+//   {
+//     header: "Customer",
+//     key: "customer"
+//   },
+//   {
+//     header: "Item Name",
+//     key: "sdisc",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "PCS",
+//     key: "pcs",
+//     align: "right",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "Qty",
+//     key: "qty",
+//     align: "right",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "Rate",
+//     key: "rate",
+//     align: "right",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "Value",
+//     key: "value",
+//     align: "right",
+//     fallback: "vamt"
+//   },
+//   {
+//     header: "CGST",
+//     key: "cgst",
+//     fallback: "ctax",
+//     align: "right",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "SGST",
+//     key: "sgst",
+//     fallback: "stax",
+//     align: "right",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "IGST",
+//     key: "igst",
+//     fallback: "itax",
+//     align: "right",
+//     hideWhenGSTOnly: true
+//   },
+//   {
+//     header: "Total",
+//     key: "total",
+//     fallback: "vamt",
+//     align: "right"
+//   }
+// ];
 
 const TABLE_COLUMNS = [
-  {
-    header: "Date",
-    key: "date",
-    render: (row) => formatDateUniversal(row.date)
-  },
-  {
-    header: "Bill No",
-    key: "vno"
-  },
-  {
-    header: "Customer",
-    key: "customer"
-  },
-  {
-    header: "Item Name",
-    key: "sdisc",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "PCS",
-    key: "pcs",
-    align: "right",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "Qty",
-    key: "qty",
-    align: "right",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "Rate",
-    key: "rate",
-    align: "right",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "Value",
-    key: "value",
-    align: "right",
-    fallback: "vamt"
-  },
-  {
-    header: "CGST",
-    key: "cgst",
-    fallback: "ctax",
-    align: "right",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "SGST",
-    key: "sgst",
-    fallback: "stax",
-    align: "right",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "IGST",
-    key: "igst",
-    fallback: "itax",
-    align: "right",
-    hideWhenGSTOnly: true
-  },
-  {
-    header: "Total",
-    key: "total",
-    fallback: "vamt",
-    align: "right"
-  }
+  { header: "Date", key: "date", render: (row) => formatDateUniversal(row.date) },
+  { header: "Bill No", key: "vno", noTotal: true }, // ⚡ skip formatting
+  { header: "Customer", key: "customer", noTotal: true },
+  { header: "Item Name", key: "sdisc", hideWhenGSTOnly: true, noTotal: true },
+  { header: "PCS", key: "pcs", align: "right", decimals: 3 },
+  { header: "Qty", key: "qty", align: "right", decimals: 3 },
+  { header: "Rate", key: "rate", align: "right", decimals: 2 },
+  { header: "Value", key: "value", align: "right", fallback: "vamt", decimals: 2 },
+  { header: "CGST", key: "cgst", fallback: "ctax", align: "right", hideWhenGSTOnly: true, decimals: 2 },
+  { header: "SGST", key: "sgst", fallback: "stax", align: "right", hideWhenGSTOnly: true, decimals: 2 },
+  { header: "IGST", key: "igst", fallback: "itax", align: "right", hideWhenGSTOnly: true, decimals: 2 },
+  { header: "Total", key: "total", fallback: "vamt", align: "right", decimals: 2 }
 ];
 
 
@@ -851,141 +950,474 @@ const AccountEntriesModal = ({
     printWindow.print();
     printWindow.close();
   };
-
   const handleExportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const wsData = [];
+  const wb = XLSX.utils.book_new();
+  const wsData = [];
 
-    /* ================= HEADER ================= */
-    wsData.push([companyName?.toUpperCase() || ""]);
-    wsData.push([companyAdd || ""]);
-    wsData.push([companyCity || ""]);
-    wsData.push([]);
-    wsData.push([`${accountName} LEDGER`]);
-    wsData.push([]);
+  /* ================= HEADER ================= */
+  wsData.push([companyName?.toUpperCase() || ""]);
+  wsData.push([companyAdd || ""]);
+  wsData.push([companyCity || ""]);
+  wsData.push([`${accountName} Summary - Period From ${fromDate} To ${uptoDate}`]);
+  wsData.push([]);
 
-    /* ================= TABLE HEADER ================= */
-    const visibleColumns = TABLE_COLUMNS.filter(
-      (col) => !(isGSTOnly && col.hideWhenGSTOnly)
-    );
+  /* ================= TABLE HEADER ================= */
+  const visibleColumns = TABLE_COLUMNS.filter(
+    (col) => !(isGSTOnly && col.hideWhenGSTOnly)
+  );
 
-    wsData.push(visibleColumns.map((c) => c.header));
+  wsData.push(visibleColumns.map((c) => c.header));
+  const headerRowIndex = wsData.length - 1;
+  const startRow = wsData.length + 1;
 
-    const startRow = wsData.length + 1;
+  /* ================= DATA ================= */
+  groupedArray.forEach((group) => {
+    group.forEach((row) => {
+      wsData.push(
+        visibleColumns.map((c, idx) => {
+          let val = c.render ? c.render(row) : row[c.key] ?? row[c.fallback] ?? "";
 
-    /* ================= DATA ================= */
-    groupedArray.forEach((group) => {
-      group.forEach((row) => {
-        wsData.push(
-          visibleColumns.map((c) => {
-            let val = c.render
-              ? c.render(row)
-              : row[c.key] ?? row[c.fallback] ?? "";
+          // 🔹 Bill No or other text columns → keep as text
+          if (c.noTotal || idx === 1) return val;
 
-            // ensure float remains number
-            if (typeof val === "string" && val !== "" && !isNaN(val)) {
-              val = Number(val);
-            }
+          if (typeof val === "string" && val !== "" && !isNaN(val)) {
+            val = Number(val);
+          }
 
-            return val;
-          })
-        );
-      });
+          return val;
+        })
+      );
+    });
+  });
+
+  const endRow = wsData.length;
+
+  /* ================= TOTAL ROW ================= */
+  const totalRowIndex = wsData.length;
+
+  const totalRowData = visibleColumns.map((col, idx) => {
+    const colLetter = XLSX.utils.encode_col(idx);
+
+    if (idx === 0) return "TOTAL"; // First column text
+    if (col.noTotal || idx === 1) return ""; // Skip Bill No, Customer
+
+    return { f: `SUBTOTAL(9,${colLetter}${startRow}:${colLetter}${endRow})` };
+  });
+
+  wsData.push(totalRowData);
+
+  /* ================= CREATE SHEET ================= */
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  /* ================= MERGES ================= */
+  ws["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: visibleColumns.length - 1 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: visibleColumns.length - 1 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: visibleColumns.length - 1 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: visibleColumns.length - 1 } }
+  ];
+
+  /* ================= COLUMN WIDTH ================= */
+  ws["!cols"] = [
+    { wch: 12 }, // Date
+    { wch: 10 }, // Bill No
+    { wch: 40 }, // Customer
+    { wch: 20 }, // Item Name
+    { wch: 12 }, // PCS
+    { wch: 12 }, // Qty
+    { wch: 15 }, // Rate
+    { wch: 15 }, // Value
+    { wch: 15 }, // CGST
+    { wch: 15 }, // SGST
+    { wch: 15 }, // IGST
+    { wch: 15 }  // Total
+  ];
+
+  /* ================= HEADER STYLE ================= */
+  ["A1", "A2", "A3", "A4"].forEach((cell) => {
+    if (ws[cell]) {
+      ws[cell].s = {
+        font: { bold: true, sz: 16 },
+        alignment: { horizontal: "center" }
+      };
+    }
+  });
+
+  /* ================= TABLE HEADER STYLE ================= */
+  visibleColumns.forEach((_, idx) => {
+    const cell = XLSX.utils.encode_cell({ r: headerRowIndex, c: idx });
+    if (ws[cell]) {
+      ws[cell].s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: "C1EEF7" } },
+        alignment: { horizontal: "center" }
+      };
+    }
+  });
+
+  /* ================= TOTAL ROW STYLE ================= */
+  visibleColumns.forEach((_, idx) => {
+    const cell = XLSX.utils.encode_cell({
+      r: totalRowIndex,
+      c: idx
     });
 
-    const endRow = wsData.length;
-    const totalRow = wsData.length + 1;
+    if (ws[cell]) {
+      ws[cell].s = {
+        ...ws[cell].s,
+        font: { bold: true },
+        fill: { fgColor: { rgb: "FFF2CC" } },
+        alignment: { horizontal: idx === 0 || idx === 1 ? "left" : "right" } // Bill No left
+      };
+    }
+  });
 
-    /* ================= TOTAL ROW (AUTO SUBTOTAL) ================= */
-    const totalRowData = visibleColumns.map((_, idx) => {
-      const colLetter = XLSX.utils.encode_col(idx);
+  /* ================= NUMBER FORMAT ================= */
+  Object.keys(ws).forEach((cell) => {
+    if (cell.startsWith("!")) return;
 
-      // detect numeric column
-      const isNumeric = wsData
-        .slice(startRow - 1, endRow)
-        .some((r) => typeof r[idx] === "number");
+    const colIdx = XLSX.utils.decode_cell(cell).c;
+    const col = visibleColumns[colIdx];
+    if (!col) return;
 
-      if (idx === 0) return "TOTAL";
+    const isBillNo = col.key === "vno"; // 🔹 exclude Bill No
+    const isTextCol = col.noTotal || isBillNo;
 
-      return isNumeric
-        ? { f: `SUBTOTAL(9,${colLetter}${startRow}:${colLetter}${endRow})` }
-        : "";
-    });
+    if (!isTextCol && (typeof ws[cell].v === "number" || ws[cell].f)) {
+      ws[cell].s = {
+        ...ws[cell].s,
+        numFmt: col.decimals ? `#,##0.${"0".repeat(col.decimals)}` : "#,##0.00",
+        alignment: { horizontal: col.align === "right" ? "right" : "left" }
+      };
+    }
 
-    wsData.push(totalRowData);
+    // For Bill No (text) → left align
+    if (isBillNo && ws[cell]) {
+      ws[cell].s = {
+        ...ws[cell].s,
+        alignment: { horizontal: "left" }
+      };
+    }
+  });
 
-    /* ================= CREATE SHEET ================= */
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
+  /* ================= EXPORT ================= */
+  XLSX.utils.book_append_sheet(wb, ws, "Summary");
 
-    /* ================= MERGES ================= */
-    ws["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: visibleColumns.length - 1 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: visibleColumns.length - 1 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: visibleColumns.length - 1 } },
-      { s: { r: 4, c: 0 }, e: { r: 4, c: visibleColumns.length - 1 } },
-    ];
+  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  saveAs(
+    new Blob([excelBuffer], { type: "application/octet-stream" }),
+    `${accountName}_Summary.xlsx`
+  );
+};
 
-    /* ================= COLUMN WIDTH ================= */
-      ws["!cols"] = [
-        { wch: 12 },
-        { wch: 10 },
-        { wch: 40 },
-        { wch: 20 },
-        { wch: 10 },
-        { wch: 10 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15},
-        { wch: 15 },
-      ];
-    // ws["!cols"] = visibleColumns.map(() => ({ wch: 18 }));
+// const handleExportExcel = () => {
+//   const wb = XLSX.utils.book_new();
+//   const wsData = [];
 
-    /* ================= HEADER STYLE ================= */
-    ["A1", "A2", "A3", "A5"].forEach((cell) => {
-      if (ws[cell]) {
-        ws[cell].s = {
-          font: { bold: true, sz: 14 },
-          alignment: { horizontal: "center" },
-        };
-      }
-    });
+//   /* ================= HEADER ================= */
+//   wsData.push([companyName?.toUpperCase() || ""]);
+//   wsData.push([companyAdd || ""]);
+//   wsData.push([companyCity || ""]);
+//   // wsData.push([]);
+//   wsData.push([`${accountName} Summary - Period From ${fromDate} To ${uptoDate}`]);
+//   wsData.push([]);
 
-    /* ================= TABLE HEADER STYLE ================= */
-    visibleColumns.forEach((_, idx) => {
-      const cell = XLSX.utils.encode_cell({ r: 6, c: idx });
-      if (ws[cell]) {
-        ws[cell].s = {
-          font: { bold: true },
-          fill: { fgColor: { rgb: "C1EEF7" } },
-          alignment: { horizontal: "center" },
-        };
-      }
-    });
+//   /* ================= TABLE HEADER ================= */
+//   const visibleColumns = TABLE_COLUMNS.filter(
+//     (col) => !(isGSTOnly && col.hideWhenGSTOnly)
+//   );
 
-    /* ================= NUMBER FORMAT (FLOAT SAFE) ================= */
-    Object.keys(ws).forEach((cell) => {
-      if (cell.startsWith("!")) return;
+//   wsData.push(visibleColumns.map((c) => c.header));
+//   const headerRowIndex = wsData.length - 1;
+//   const startRow = wsData.length + 1;
 
-      if (typeof ws[cell].v === "number" || ws[cell].f) {
-        ws[cell].s = {
-          ...ws[cell].s,
-          numFmt: "#,##0.00",
-          alignment: { horizontal: "right" },
-        };
-      }
-    });
+//   /* ================= DATA ================= */
+//   groupedArray.forEach((group) => {
+//     group.forEach((row) => {
+//       wsData.push(
+//         visibleColumns.map((c) => {
+//           let val = c.render
+//             ? c.render(row)
+//             : row[c.key] ?? row[c.fallback] ?? "";
 
-    /* ================= EXPORT ================= */
-    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
+//           if (typeof val === "string" && val !== "" && !isNaN(val)) {
+//             val = Number(val);
+//           }
+//           return val;
+//         })
+//       );
+//     });
+//   });
 
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(
-      new Blob([excelBuffer], { type: "application/octet-stream" }),
-      `${accountName}_Ledger.xlsx`
-    );
-  };
+//   const endRow = wsData.length;
+
+//   /* ================= TOTAL ROW ================= */
+//   const totalRowIndex = wsData.length;
+
+//   const totalRowData = visibleColumns.map((col, idx) => {
+//     const colLetter = XLSX.utils.encode_col(idx);
+
+//     if (idx === 0) return "TOTAL";
+//     if (col.noTotal) return "";
+
+//     return {
+//       f: `SUBTOTAL(9,${colLetter}${startRow}:${colLetter}${endRow})`
+//     };
+//   });
+
+//   wsData.push(totalRowData);
+
+//   /* ================= CREATE SHEET ================= */
+//   const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+//   /* ================= MERGES ================= */
+//   ws["!merges"] = [
+//     { s: { r: 0, c: 0 }, e: { r: 0, c: visibleColumns.length - 1 } },
+//     { s: { r: 1, c: 0 }, e: { r: 1, c: visibleColumns.length - 1 } },
+//     { s: { r: 2, c: 0 }, e: { r: 2, c: visibleColumns.length - 1 } },
+//     { s: { r: 3, c: 0 }, e: { r: 3, c: visibleColumns.length - 1 } }
+//   ];
+
+//   /* ================= COLUMN WIDTH ================= */
+//   ws["!cols"] = [
+//     { wch: 12 },
+//     { wch: 10 },
+//     { wch: 40 },
+//     { wch: 20 },
+//     { wch: 10 },
+//     { wch: 10 },
+//     { wch: 15 },
+//     { wch: 15 },
+//     { wch: 15 },
+//     { wch: 15 },
+//     { wch: 15 },
+//     { wch: 15 }
+//   ];
+
+//   /* ================= HEADER STYLE ================= */
+//   ["A1", "A2", "A3", "A5"].forEach((cell) => {
+//     if (ws[cell]) {
+//       ws[cell].s = {
+//         font: { bold: true, sz: 16 },
+//         alignment: { horizontal: "center" }
+//       };
+//     }
+//   });
+//     ["A4"].forEach((cell) => {
+//     if (ws[cell]) {
+//       ws[cell].s = {
+//         font: { bold: true, sz: 14 },
+//         alignment: { horizontal: "center" }
+//       };
+//     }
+//   });
+
+//   /* ================= TABLE HEADER STYLE ================= */
+//   visibleColumns.forEach((_, idx) => {
+//     const cell = XLSX.utils.encode_cell({ r: headerRowIndex, c: idx });
+//     if (ws[cell]) {
+//       ws[cell].s = {
+//         font: { bold: true },
+//         fill: { fgColor: { rgb: "C1EEF7" } },
+//         alignment: { horizontal: "center" }
+//       };
+//     }
+//   });
+
+//   /* ================= TOTAL ROW STYLE ================= */
+//   visibleColumns.forEach((_, idx) => {
+//     const cell = XLSX.utils.encode_cell({
+//       r: totalRowIndex,
+//       c: idx
+//     });
+
+//     if (ws[cell]) {
+//       ws[cell].s = {
+//         ...ws[cell].s,
+//         font: { bold: true },
+//         fill: { fgColor: { rgb: "CFCECB" } },
+//         alignment: { horizontal: "right" }
+//       };
+//     }
+//   });
+
+//   /* ================= NUMBER FORMAT ================= */
+//   Object.keys(ws).forEach((cell) => {
+//     if (cell.startsWith("!")) return;
+
+//     const colIdx = XLSX.utils.decode_cell(cell).c;
+//     const col = visibleColumns[colIdx];
+//     if (!col) return;
+
+//     // skip formatting if noTotal = true
+//     if (col.noTotal) return;
+
+//     if (typeof ws[cell].v === "number" || ws[cell].f) {
+//       ws[cell].s = {
+//         ...ws[cell].s,
+//         numFmt: col.decimals ? `#,##0.${"0".repeat(col.decimals)}` : "#,##0.00",
+//         alignment: { horizontal: col.align === "right" ? "right" : "left" }
+//       };
+//     }
+//   });
+
+//   // Object.keys(ws).forEach((cell) => {
+//   //   if (cell.startsWith("!")) return;
+
+//   //   if (typeof ws[cell].v === "number" || ws[cell].f) {
+//   //     ws[cell].s = {
+//   //       ...ws[cell].s,
+//   //       numFmt: "#,##0.00",
+//   //       alignment: { horizontal: "right" }
+//   //     };
+//   //   }
+//   // });
+
+//   /* ================= EXPORT ================= */
+//   XLSX.utils.book_append_sheet(wb, ws, "Summary");
+
+//   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+//   saveAs(
+//     new Blob([excelBuffer], { type: "application/octet-stream" }),
+//     `${accountName}_Summary.xlsx`
+//   );
+// };
+
+
+  // const handleExportExcel = () => {
+  //   const wb = XLSX.utils.book_new();
+  //   const wsData = [];
+
+  //   /* ================= HEADER ================= */
+  //   wsData.push([companyName?.toUpperCase() || ""]);
+  //   wsData.push([companyAdd || ""]);
+  //   wsData.push([companyCity || ""]);
+  //   wsData.push([]);
+  //   wsData.push([`${accountName} LEDGER`]);
+  //   wsData.push([]);
+
+  //   /* ================= TABLE HEADER ================= */
+  //   const visibleColumns = TABLE_COLUMNS.filter(
+  //     (col) => !(isGSTOnly && col.hideWhenGSTOnly)
+  //   );
+
+  //   wsData.push(visibleColumns.map((c) => c.header));
+
+  //   const startRow = wsData.length + 1;
+
+  //   /* ================= DATA ================= */
+  //   groupedArray.forEach((group) => {
+  //     group.forEach((row) => {
+  //       wsData.push(
+  //         visibleColumns.map((c) => {
+  //           let val = c.render
+  //             ? c.render(row)
+  //             : row[c.key] ?? row[c.fallback] ?? "";
+
+  //           // ensure float remains number
+  //           if (typeof val === "string" && val !== "" && !isNaN(val)) {
+  //             val = Number(val);
+  //           }
+
+  //           return val;
+  //         })
+  //       );
+  //     });
+  //   });
+
+  //   const endRow = wsData.length;
+  //   const totalRow = wsData.length + 1;
+
+  //   /* ================= TOTAL ROW (AUTO SUBTOTAL) ================= */
+  //   const totalRowData = visibleColumns.map((_, idx) => {
+  //     const colLetter = XLSX.utils.encode_col(idx);
+
+  //     // detect numeric column
+  //     const isNumeric = wsData
+  //       .slice(startRow - 1, endRow)
+  //       .some((r) => typeof r[idx] === "number");
+
+  //     if (idx === 0) return "TOTAL";
+
+  //     return isNumeric
+  //       ? { f: `SUBTOTAL(9,${colLetter}${startRow}:${colLetter}${endRow})` }
+  //       : "";
+  //   });
+
+  //   wsData.push(totalRowData);
+
+  //   /* ================= CREATE SHEET ================= */
+  //   const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  //   /* ================= MERGES ================= */
+  //   ws["!merges"] = [
+  //     { s: { r: 0, c: 0 }, e: { r: 0, c: visibleColumns.length - 1 } },
+  //     { s: { r: 1, c: 0 }, e: { r: 1, c: visibleColumns.length - 1 } },
+  //     { s: { r: 2, c: 0 }, e: { r: 2, c: visibleColumns.length - 1 } },
+  //     { s: { r: 4, c: 0 }, e: { r: 4, c: visibleColumns.length - 1 } },
+  //   ];
+
+  //   /* ================= COLUMN WIDTH ================= */
+  //     ws["!cols"] = [
+  //       { wch: 12 },
+  //       { wch: 10 },
+  //       { wch: 40 },
+  //       { wch: 20 },
+  //       { wch: 10 },
+  //       { wch: 10 },
+  //       { wch: 15 },
+  //       { wch: 15 },
+  //       { wch: 15 },
+  //       { wch: 15 },
+  //       { wch: 15},
+  //       { wch: 15 },
+  //     ];
+  //   // ws["!cols"] = visibleColumns.map(() => ({ wch: 18 }));
+
+  //   /* ================= HEADER STYLE ================= */
+  //   ["A1", "A2", "A3", "A5"].forEach((cell) => {
+  //     if (ws[cell]) {
+  //       ws[cell].s = {
+  //         font: { bold: true, sz: 14 },
+  //         alignment: { horizontal: "center" },
+  //       };
+  //     }
+  //   });
+
+  //   /* ================= TABLE HEADER STYLE ================= */
+  //   visibleColumns.forEach((_, idx) => {
+  //     const cell = XLSX.utils.encode_cell({ r: 6, c: idx });
+  //     if (ws[cell]) {
+  //       ws[cell].s = {
+  //         font: { bold: true },
+  //         fill: { fgColor: { rgb: "C1EEF7" } },
+  //         alignment: { horizontal: "center" },
+  //       };
+  //     }
+  //   });
+
+  //   /* ================= NUMBER FORMAT (FLOAT SAFE) ================= */
+  //   Object.keys(ws).forEach((cell) => {
+  //     if (cell.startsWith("!")) return;
+
+  //     if (typeof ws[cell].v === "number" || ws[cell].f) {
+  //       ws[cell].s = {
+  //         ...ws[cell].s,
+  //         numFmt: "#,##0.00",
+  //         alignment: { horizontal: "right" },
+  //       };
+  //     }
+  //   });
+
+  //   /* ================= EXPORT ================= */
+  //   XLSX.utils.book_append_sheet(wb, ws, "Ledger");
+
+  //   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  //   saveAs(
+  //     new Blob([excelBuffer], { type: "application/octet-stream" }),
+  //     `${accountName}_Ledger.xlsx`
+  //   );
+  // };
 
   // ================= MODAL UI =================
   return (
