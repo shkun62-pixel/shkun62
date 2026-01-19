@@ -358,27 +358,260 @@
 
 
 
-import React, { useState, useEffect } from "react";
+// import React, { useState, useEffect } from "react";
+// import Modal from "react-bootstrap/Modal";
+// import Table from "react-bootstrap/Table";
+
+// export const formatDateUniversal = (input) => {
+//   if (!input) return "";
+
+//   let date;
+
+//   if (input instanceof Date) {
+//     date = input;
+//   } else if (!isNaN(input)) {
+//     date = new Date(Number(input));
+//   } else if (typeof input === "string" && input.includes("-")) {
+//     date = new Date(input);
+//   } else if (typeof input === "string") {
+//     const parts = input.split(/[\/-]/);
+//     if (parts.length === 3) {
+//       const [dd, mm, yyyy] = parts;
+//       date = new Date(yyyy, mm - 1, dd);
+//     }
+//   }
+
+//   if (!date || isNaN(date.getTime())) return "";
+
+//   const day = String(date.getDate()).padStart(2, "0");
+//   const month = String(date.getMonth() + 1).padStart(2, "0");
+//   const year = date.getFullYear();
+
+//   return `${day}-${month}-${year}`;
+// };
+
+// const AccountEntriesModal = ({
+//   show,
+//   onClose,
+//   accountName,
+//   entries,
+//   fromDate,
+//   uptoDate
+// }) => {
+//   const [activeRow, setActiveRow] = useState(0);
+
+//   const isGSTOnly = entries.every((e) => !e.qty);
+
+//   // 🔥 GROUP BY Date + Bill No + Customer
+//   const grouped = {};
+//   entries.forEach((e) => {
+//     const key = `${e.date}_${e.vno}_${e.customer}`;
+//     if (!grouped[key]) grouped[key] = [];
+//     grouped[key].push(e);
+//   });
+
+//   const groupedArray = Object.values(grouped);
+
+//   // 🔹 Keyboard navigation (row-wise)
+//   useEffect(() => {
+//     const handleKeyDown = (e) => {
+//       if (!show) return;
+
+//       if (e.key === "ArrowDown") {
+//         e.preventDefault();
+//         setActiveRow((prev) =>
+//           prev < groupedArray.length - 1 ? prev + 1 : prev
+//         );
+//       }
+
+//       if (e.key === "ArrowUp") {
+//         e.preventDefault();
+//         setActiveRow((prev) => (prev > 0 ? prev - 1 : prev));
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+//     return () => window.removeEventListener("keydown", handleKeyDown);
+//   }, [show, groupedArray.length]);
+
+//   if (!show) return null;
+
+//   return (
+//     <Modal
+//       show={show}
+//       onHide={onClose}
+//       className="custom-modal"
+//       style={{ marginTop: "10px" }}
+//     >
+//       <Modal.Header closeButton>
+//         <Modal.Title>
+//             {accountName} 
+//         </Modal.Title>
+//       </Modal.Header>
+
+//       <Modal.Body>
+//         <Table bordered size="sm" className="custom-table">
+//           <thead style={{ textAlign: "center", backgroundColor: "skyblue" }}>
+//             <tr>
+//               <th>Date</th>
+//               <th>Bill No</th>
+//               <th>Customer</th>
+//               {!isGSTOnly && <th>Item Name</th>}
+//               {!isGSTOnly && <th>PCS</th>}
+//               {!isGSTOnly && <th>Qty</th>}
+//               {!isGSTOnly && <th>Rate</th>}
+//               <th>Value</th>
+//               {!isGSTOnly && (
+//                 <>
+//                   <th>CGST</th>
+//                   <th>SGST</th>
+//                   <th>IGST</th>
+//                 </>
+//               )}
+//               <th>Total</th>
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {groupedArray.map((group, gi) => {
+//               const base = group[0];
+
+//               return (
+//                 <tr
+//                   key={gi}
+//                   style={{
+//                     backgroundColor:
+//                       activeRow === gi ? "#ffeeba" : "transparent",
+//                     verticalAlign: "top"
+//                   }}
+//                 >
+//                   <td>{formatDateUniversal(base.date)}</td>
+//                   <td>{base.vno}</td>
+//                   <td>{base.customer}</td>
+
+//                   {/* ITEM NAME */}
+//                   {!isGSTOnly && (
+//                     <td>
+//                       {group.map((i, idx) => (
+//                         <div key={idx}>{i.sdisc}</div>
+//                       ))}
+//                     </td>
+//                   )}
+
+//                   {/* PCS */}
+//                   {!isGSTOnly && (
+//                     <td className="text-end">
+//                       {group.map((i, idx) => (
+//                         <div key={idx}>{i.pcs || ""}</div>
+//                       ))}
+//                     </td>
+//                   )}
+
+//                   {/* QTY */}
+//                   {!isGSTOnly && (
+//                     <td className="text-end">
+//                       {group.map((i, idx) => (
+//                         <div key={idx}>{i.qty || ""}</div>
+//                       ))}
+//                     </td>
+//                   )}
+
+//                   {/* RATE */}
+//                   {!isGSTOnly && (
+//                     <td className="text-end">
+//                       {group.map((i, idx) => (
+//                         <div key={idx}>{i.rate || ""}</div>
+//                       ))}
+//                     </td>
+//                   )}
+
+//                   {/* VALUE */}
+//                   <td className="text-end">
+//                     {group.map((i, idx) => (
+//                       <div key={idx}>{i.value || i.vamt || ""}</div>
+//                     ))}
+//                   </td>
+
+//                   {/* GST */}
+//                   {!isGSTOnly && (
+//                     <>
+//                       <td className="text-end">
+//                         {group.map((i, idx) => (
+//                           <div key={idx}>{i.cgst || i.ctax || ""}</div>
+//                         ))}
+//                       </td>
+//                       <td className="text-end">
+//                         {group.map((i, idx) => (
+//                           <div key={idx}>{i.sgst || i.stax || ""}</div>
+//                         ))}
+//                       </td>
+//                       <td className="text-end">
+//                         {group.map((i, idx) => (
+//                           <div key={idx}>{i.igst || i.itax || ""}</div>
+//                         ))}
+//                       </td>
+//                     </>
+//                   )}
+
+//                   {/* TOTAL */}
+//                   <td className="text-end">
+//                     {group.map((i, idx) => (
+//                       <div key={idx}>{i.total || i.vamt || ""}</div>
+//                     ))}
+//                   </td>
+//                 </tr>
+//               );
+//             })}
+//           </tbody>
+//         </Table>
+//       </Modal.Body>
+//     </Modal>
+//   );
+// };
+
+// export default AccountEntriesModal;
+
+import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
+import useCompanySetup from "../Shared/useCompanySetup";
 
 export const formatDateUniversal = (input) => {
   if (!input) return "";
 
   let date;
 
+  // 1️⃣ Already Date object
   if (input instanceof Date) {
     date = input;
-  } else if (!isNaN(input)) {
-    date = new Date(Number(input));
-  } else if (typeof input === "string" && input.includes("-")) {
+  }
+
+  // 2️⃣ ISO date string (2026-01-17T00:00:00.000Z)
+  else if (
+    typeof input === "string" &&
+    input.includes("T") &&
+    !isNaN(Date.parse(input))
+  ) {
     date = new Date(input);
-  } else if (typeof input === "string") {
+  }
+
+  // 3️⃣ DD-MM-YYYY or DD/MM/YYYY
+  else if (typeof input === "string") {
     const parts = input.split(/[\/-]/);
+
     if (parts.length === 3) {
       const [dd, mm, yyyy] = parts;
-      date = new Date(yyyy, mm - 1, dd);
+
+      // must be numeric
+      if (!isNaN(dd) && !isNaN(mm) && !isNaN(yyyy)) {
+        date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+      }
     }
+  }
+
+  // 4️⃣ Timestamp
+  else if (!isNaN(input)) {
+    date = new Date(Number(input));
   }
 
   if (!date || isNaN(date.getTime())) return "";
@@ -398,7 +631,9 @@ const AccountEntriesModal = ({
   fromDate,
   uptoDate
 }) => {
+  const { companyName, companyAdd, companyCity } = useCompanySetup();
   const [activeRow, setActiveRow] = useState(0);
+  const printRef = useRef();
 
   const isGSTOnly = entries.every((e) => !e.qty);
 
@@ -436,135 +671,206 @@ const AccountEntriesModal = ({
 
   if (!show) return null;
 
+  // ================= PRINT FUNCTION =================
+  const handlePrint = () => {
+    const printContents = printRef.current.innerHTML;
+    const printWindow = window.open("", "", "height=900,width=1200");
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Summary</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 10px;
+            }
+
+            .company-header {
+              text-align: center;
+              margin-bottom: 10px;
+            }
+
+            .company-header h2 {
+              margin: 0;
+              font-size: 20px;
+              font-weight: bold;
+            }
+
+            .company-header p {
+              margin: 0;
+              font-size: 13px;
+            }
+
+            .report-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-weight: bold;
+            }
+
+            .report-title {
+              font-size: 12px;
+            }
+
+            .report-period {
+              font-size: 12px;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 11px;
+            }
+
+            th, td {
+              border: 1px solid #000;
+              padding: 4px;
+            }
+
+            th {
+              background: #e6f0ff;
+              text-align: center;
+            }
+
+            td {
+              vertical-align: top;
+            }
+
+            .text-end {
+              text-align: right;
+            }
+
+            tr {
+              page-break-inside: avoid;
+            }
+
+            .page-break {
+              page-break-after: always;
+            }
+          </style>
+        </head>
+        <body>
+
+        <!-- ✅ COMPANY HEADER (PRINT ONLY) -->
+        <div class="company-header">
+          <h2>${companyName?.toUpperCase() || ""}</h2>
+          <p>${companyAdd || ""}</p>
+          <p>${companyCity || ""}</p>
+        </div>
+        <div class="report-header">
+          <div class="report-title">Summary : ${accountName}</div>
+          <div class="report-period">
+            From ${fromDate} Upto ${uptoDate}
+          </div>
+        </div>
+
+        ${printContents}
+
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
+  // ================= MODAL UI =================
   return (
     <Modal
       show={show}
       onHide={onClose}
       className="custom-modal"
       style={{ marginTop: "10px" }}
+      size="xl"
     >
       <Modal.Header closeButton>
-        <Modal.Title>
-            {accountName} 
-        </Modal.Title>
+        <Modal.Title>{accountName}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <Table bordered size="sm" className="custom-table">
-          <thead style={{ textAlign: "center", backgroundColor: "skyblue" }}>
-            <tr>
-              <th>Date</th>
-              <th>Bill No</th>
-              <th>Customer</th>
-              {!isGSTOnly && <th>Item Name</th>}
-              {!isGSTOnly && <th>PCS</th>}
-              {!isGSTOnly && <th>Qty</th>}
-              {!isGSTOnly && <th>Rate</th>}
-              <th>Value</th>
-              {!isGSTOnly && (
-                <>
-                  <th>CGST</th>
-                  <th>SGST</th>
-                  <th>IGST</th>
-                </>
-              )}
-              <th>Total</th>
-            </tr>
-          </thead>
+        <div ref={printRef}>
+          <Table bordered size="sm" className="custom-table">
+            <thead style={{ textAlign: "center", backgroundColor: "skyblue" }}>
+              <tr>
+                <th>Date</th>
+                <th>Bill No</th>
+                <th>Customer</th>
+                {!isGSTOnly && <th>Item Name</th>}
+                {!isGSTOnly && <th>PCS</th>}
+                {!isGSTOnly && <th>Qty</th>}
+                {!isGSTOnly && <th>Rate</th>}
+                <th>Value</th>
+                {!isGSTOnly && (
+                  <>
+                    <th>CGST</th>
+                    <th>SGST</th>
+                    <th>IGST</th>
+                  </>
+                )}
+                <th>Total</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {groupedArray.map((group, gi) => {
-              const base = group[0];
+            <tbody>
+              {groupedArray.map((group, gi) => {
+                const base = group[0];
 
-              return (
-                <tr
-                  key={gi}
-                  style={{
-                    backgroundColor:
-                      activeRow === gi ? "#ffeeba" : "transparent",
-                    verticalAlign: "top"
-                  }}
-                >
-                  <td>{formatDateUniversal(base.date)}</td>
-                  <td>{base.vno}</td>
-                  <td>{base.customer}</td>
+                return (
+                  <tr
+                    key={gi}
+                    style={{
+                      backgroundColor:
+                        activeRow === gi ? "#ffeeba" : "transparent",
+                      verticalAlign: "top"
+                    }}
+                  >
+                    <td>{formatDateUniversal(base.date)}</td>
+                    <td>{base.vno}</td>
+                    <td>{base.customer}</td>
 
-                  {/* ITEM NAME */}
-                  {!isGSTOnly && (
-                    <td>
-                      {group.map((i, idx) => (
-                        <div key={idx}>{i.sdisc}</div>
-                      ))}
-                    </td>
-                  )}
+                    {!isGSTOnly && (
+                      <td>{group.map((i, idx) => <div key={idx}>{i.sdisc}</div>)}</td>
+                    )}
+                    {!isGSTOnly && (
+                      <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.pcs || ""}</div>)}</td>
+                    )}
+                    {!isGSTOnly && (
+                      <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.qty || ""}</div>)}</td>
+                    )}
+                    {!isGSTOnly && (
+                      <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.rate || ""}</div>)}</td>
+                    )}
 
-                  {/* PCS */}
-                  {!isGSTOnly && (
-                    <td className="text-end">
-                      {group.map((i, idx) => (
-                        <div key={idx}>{i.pcs || ""}</div>
-                      ))}
-                    </td>
-                  )}
+                    <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.value || i.vamt || ""}</div>)}</td>
 
-                  {/* QTY */}
-                  {!isGSTOnly && (
-                    <td className="text-end">
-                      {group.map((i, idx) => (
-                        <div key={idx}>{i.qty || ""}</div>
-                      ))}
-                    </td>
-                  )}
+                    {!isGSTOnly && (
+                      <>
+                        <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.cgst || i.ctax || ""}</div>)}</td>
+                        <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.sgst || i.stax || ""}</div>)}</td>
+                        <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.igst || i.itax || ""}</div>)}</td>
+                      </>
+                    )}
 
-                  {/* RATE */}
-                  {!isGSTOnly && (
-                    <td className="text-end">
-                      {group.map((i, idx) => (
-                        <div key={idx}>{i.rate || ""}</div>
-                      ))}
-                    </td>
-                  )}
-
-                  {/* VALUE */}
-                  <td className="text-end">
-                    {group.map((i, idx) => (
-                      <div key={idx}>{i.value || i.vamt || ""}</div>
-                    ))}
-                  </td>
-
-                  {/* GST */}
-                  {!isGSTOnly && (
-                    <>
-                      <td className="text-end">
-                        {group.map((i, idx) => (
-                          <div key={idx}>{i.cgst || i.ctax || ""}</div>
-                        ))}
-                      </td>
-                      <td className="text-end">
-                        {group.map((i, idx) => (
-                          <div key={idx}>{i.sgst || i.stax || ""}</div>
-                        ))}
-                      </td>
-                      <td className="text-end">
-                        {group.map((i, idx) => (
-                          <div key={idx}>{i.igst || i.itax || ""}</div>
-                        ))}
-                      </td>
-                    </>
-                  )}
-
-                  {/* TOTAL */}
-                  <td className="text-end">
-                    {group.map((i, idx) => (
-                      <div key={idx}>{i.total || i.vamt || ""}</div>
-                    ))}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
+                    <td className="text-end">{group.map((i, idx) => <div key={idx}>{i.total || i.vamt || ""}</div>)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        </div>
       </Modal.Body>
+
+      <Modal.Footer>
+        <button className="btn btn-primary" onClick={handlePrint}>
+          Print
+        </button>
+        <button className="btn btn-secondary" onClick={onClose}>
+          Close
+        </button>
+      </Modal.Footer>
     </Modal>
   );
 };

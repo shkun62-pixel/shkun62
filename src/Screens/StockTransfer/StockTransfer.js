@@ -226,6 +226,7 @@ const StockTransfer = () => {
           // Set data and index
           setData1({ ...lastEntry, formData: updatedFormData });
           setIndex(lastEntry.voucherno);
+          return lastEntry; // ✅ Return this for use in handleAdd
         } else {
           console.log("No data available");
           initializeEmptyData();
@@ -593,7 +594,9 @@ const skipItemCodeFocusRef = useRef(false);
 const handleAdd = async () => {
   // document.body.style.backgroundColor = "#D5ECF3";
   try {
-    let lastvoucherno = formData.voucherno ? parseInt(formData.voucherno) + 1 : 1;
+    // let lastvoucherno = formData.voucherno ? parseInt(formData.voucherno) + 1 : 1;
+    const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
+    let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
     const newData = {
       date: "",
       voucherno: lastvoucherno,

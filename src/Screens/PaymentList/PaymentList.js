@@ -242,33 +242,52 @@ const PaymentList = () => {
       const saleData = await saleRes.json();
 
       // ✅ Helper to parse both ISO and DD/MM/YYYY formats
-      const parseDate = (dateStr) => {
-        if (!dateStr) return null;
+      const parseDate = (dateValue) => {
+        if (!dateValue) return null;
 
-        // ISO or already valid
-        const isoDate = new Date(dateStr);
-        if (!isNaN(isoDate)) return isoDate;
-
-        // Handle DD/MM/YYYY
-        const parts = dateStr.split("/");
-        if (parts.length === 3) {
-          const [day, month, year] = parts.map((p) => parseInt(p, 10));
-          return new Date(year, month - 1, day);
+        // 1️⃣ If already Date object
+        if (dateValue instanceof Date && !isNaN(dateValue)) {
+          return dateValue;
         }
 
-        return null;
+        // 2️⃣ ISO string or YYYY-MM-DD
+        const isoDate = new Date(dateValue);
+        if (!isNaN(isoDate.getTime())) {
+          return isoDate;
+        }
+
+        // 3️⃣ DD-MM-YYYY or DD/MM/YYYY
+        if (typeof dateValue === "string") {
+          const parts = dateValue.includes("-")
+            ? dateValue.split("-")
+            : dateValue.split("/");
+
+          if (parts.length === 3) {
+            const [day, month, year] = parts.map(Number);
+
+            if (
+              day >= 1 && day <= 31 &&
+              month >= 1 && month <= 12 &&
+              year > 1900
+            ) {
+              return new Date(year, month - 1, day);
+            }
+          }
+        }
+
+        return null; // ❌ unrecognized format
       };
 
-      const filteredSales = (Array.isArray(saleData) ? saleData : []).filter(
-        (entry) => {
-          const entryDate = parseDate(entry?.formData?.date);
-          return (
-            entryDate &&
-            entryDate >= new Date(fromDate.setHours(0, 0, 0, 0)) &&
-            entryDate <= new Date(toDate.setHours(23, 59, 59, 999))
-          );
-        }
-      );
+      const startDate = new Date(fromDate);
+      startDate.setHours(0, 0, 0, 0);
+
+      const endDate = new Date(toDate);
+      endDate.setHours(23, 59, 59, 999);
+
+      const filteredSales = saleData.filter((entry) => {
+        const entryDate = parseDate(entry?.formData?.date);
+        return entryDate && entryDate >= startDate && entryDate <= endDate;
+      });
 
       // --- 2️⃣ Fetch bank vouchers ---
       const bankRes = await fetch(

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./ProductionCard.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -19,6 +19,19 @@ import { TextField } from "@mui/material";
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import {IconButton} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InputMask from "react-input-mask";
+
+const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+  <InputMask
+    mask="99-99-9999"
+    maskChar="_"
+    value={value}
+    onChange={onChange}
+    onBlur={onBlur}
+  >
+    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+  </InputMask>
+));
 
 const ProductionCard = () => {
   const { company } = useContext(CompanyContext);
@@ -184,7 +197,6 @@ const ProductionCard = () => {
       setFormData((prev) => ({
         ...prev,
         date: formattedDate,
-        duedate: formattedDate,
       }));
 
       setDayName(getDayName(date));
@@ -251,6 +263,7 @@ const ProductionCard = () => {
         // Set data and index
         setData1({ ...lastEntry, formData: updatedFormData });
         setIndex(lastEntry.voucherno);
+        return lastEntry; // ✅ Return this for use in handleAdd
       } else {
         console.log("No data available");
         initializeEmptyData();
@@ -791,11 +804,11 @@ const ProductionCard = () => {
   const handleAdd = async () => {
     // document.body.style.backgroundColor = "#D5ECF3";
     try {
-      let lastvoucherno = formData.voucherno
-        ? parseInt(formData.voucherno) + 1
-        : 1;
+      const today = new Date().toISOString().slice(0, 10);
+      const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
+      let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
       const newData = {
-        date: "",
+        date: today,
         voucherno: lastvoucherno,
         owner: "Owner",
         UnitNo: "",
@@ -1135,8 +1148,18 @@ const ProductionCard = () => {
         <span style={styles2.days}>{currentDay}</span>
       </div>
       <div className="TopCard" style={{ padding: 5 }}>
-          <span style={{fontWeight:'bold'}}>DATE</span>
-           <DatePicker
+        <span style={{fontWeight:'bold'}}>DATE</span>
+          <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate}
+            openToDate={new Date()}
+            // onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            // onBlur={() => validateDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+           {/* <DatePicker
             ref={datePickerRef}
             className="cashdate"
             id="date"
@@ -1145,7 +1168,7 @@ const ProductionCard = () => {
             onCalendarClose={handleCalendarClose}
             dateFormat="dd-MM-yyyy"
             onChange={handleDateChange}
-          />
+          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
           <TextField
           ref={voucherRef}
