@@ -42,6 +42,7 @@ import IncomeTaxReport from './Screens/IncomeTaxReports/IncomeTaxReport';
 import Books from './Screens/Books/Books';
 import SaleSumm from './Screens/Summary/SaleSummary/SaleSumm';
 import PurchaseSumm from './Screens/Summary/PurchaseSummary/PurchaseSumm';
+import Ledgers from './Screens/Ledgers/Ledgers';
 // import Dashboard from './Screens/DashBoard/Dashboard';
 import Demo from './Screens/Demo';
 
@@ -103,6 +104,7 @@ function App() {
         <Route path='/Books' element={<Books />}></Route>
         <Route path='/SaleSumm' element={<SaleSumm />}></Route>
         <Route path='/PurchaseSumm' element={<PurchaseSumm />}></Route>
+        <Route path='/Ledgers' element={<Ledgers />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>

@@ -166,6 +166,7 @@ export default function App() {
     const [isJBookOpen, setJBookOpen] = useState(false);
     const [isOutStandingOpen, setIsOutStandingOpen] = useState(false); 
     const [isSummaryOpen, setIsSummaryOpen] = useState(false); 
+    const [isLedgerOpen, setIsLedgerOpen] = useState(false); 
     const [open, setOpen] = useState(false);
 
     const handleNavigation = (path) => {
@@ -180,6 +181,7 @@ export default function App() {
             setIsBooksOpen(false);
             setIsOutStandingOpen(false);
             setIsSummaryOpen(false);
+            setIsLedgerOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -195,6 +197,7 @@ export default function App() {
             setIsBooksOpen(false);
             setIsOutStandingOpen(false);
             setIsSummaryOpen(false);
+            setIsLedgerOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -287,6 +290,7 @@ export default function App() {
         setIsBooksOpen(false);
         setIsOutStandingOpen(false);
         setIsSummaryOpen(false);
+        setIsLedgerOpen(false);
         setIsStockOpen(false);
         setIsExtraFeatureOpen(false);
         setIsDataSecurityOpen(false);
@@ -343,7 +347,7 @@ export default function App() {
                             transition={{ duration: 0.50, ease: "easeOut" }}
                             style={{
                                 position: "fixed",
-                                top: "80px",
+                                top: "100px",
                                 left: "305px",
                                 width: "250px",
                                 background: "#2f3847",
@@ -495,8 +499,8 @@ export default function App() {
                         exit={{ x: -20, opacity: 0 }}
                         transition={{ duration: 0.50, ease: "easeOut" }}
                         style={{
-                             position: "fixed",
-                            top: "208px",
+                            position: "fixed",
+                            top: "100px",
                             left: "305px",     // Aligns right of Drawer (Drawer width = 300)
                             width: "250px",
                             background: "#2f3847",
@@ -560,7 +564,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "328px",
+                                    top: "320px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "220px",
                                     background: "#2f3847",
@@ -627,7 +631,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "474px",
+                                    top: "390px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "250px",
                                     background: "#2f3847",
@@ -649,6 +653,48 @@ export default function App() {
                                         <MenuBookIcon />
                                     </StyledIcon>
                                     <StyledListItemText primary="Purchase Summary" />
+                                </StyledListItem>
+                            </List>
+                            </motion.div>
+                            )}
+                            {/* Ledgers */}
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsLedgerOpen(true)}
+                                onMouseLeave={() => setIsLedgerOpen(false)}
+                            >
+                                <StyledIcon>
+                                    <ReceiptIcon />
+                                </StyledIcon>
+                            <StyledListItemText primary="Ledgers" />
+                            </StyledListItem>
+                            {/* Ledgers – FLOATING RIGHT SUBMENU */}
+                            {isLedgerOpen && (
+                            <motion.div
+                                onMouseEnter={() => setIsLedgerOpen(true)}
+                                onMouseLeave={() => setIsLedgerOpen(false)}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                style={{
+                                    position: "fixed",
+                                    top: "440px",
+                                    left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "250px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                }}
+                            >
+                            <List>
+                               <StyledListItem button onClick={() => handleNavigation('/Ledgers?type=LedgerPrint')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Ledger Print" />
                                 </StyledListItem>
                             </List>
                             </motion.div>
@@ -675,7 +721,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "522px",
+                                    top: "465px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "220px",
                                     background: "#2f3847",
@@ -723,7 +769,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "522px",
+                                    top: "465px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "300px",
                                     background: "#2f3847",
