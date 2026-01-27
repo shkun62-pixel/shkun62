@@ -221,6 +221,12 @@ const LedgerPrint = ({ show, onHide }) => {
                 onChange={(e) => setFilter(e.target.value)}
               >
                 <option>All Accounts</option>
+                <option>General Accounts</option>
+                <option>Debtor/Creditor</option>
+                <option>Active Dr Balance</option>
+                <option>Active Cr Balance</option>
+                <option>Active Nill</option>
+                <option>Active Balance</option>
               </Form.Select>
             </Col>
           </Row>
