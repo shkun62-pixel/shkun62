@@ -713,7 +713,6 @@ const LedgerList = () => {
   
   // ✅ Handle search filtering
   useEffect(() => {
-    // ✅ If search is empty → show all ledgers
     if (!searchTerm.trim()) {
       setFilteredLedgers(ledgers);
       setSelectedIndex(0);
@@ -726,23 +725,18 @@ const LedgerList = () => {
       (key) => searchColumns[key]
     );
 
-    const filtered = ledgers.filter((ledger) => {
-      const colsToSearch =
-        activeCols.length > 0 ? activeCols : ["ahead"];
+    const colsToSearch =
+      activeCols.length > 0 ? activeCols : ["ahead"];
 
-      return colsToSearch.some((key) => {
-        const value = ledger.formData[key]?.toString().toLowerCase();
+    const filtered = ledgers.filter((ledger) =>
+      colsToSearch.some((key) => {
+        const value = ledger.formData?.[key];
         if (!value) return false;
 
-        // No checkbox → prefix search on NAME
-        if (activeCols.length === 0) {
-          return value.startsWith(lower);
-        }
-
-        // Checkbox selected → contains search
-        return value.includes(lower);
-      });
-    });
+        // ✅ FIRST LETTER / PREFIX SEARCH ONLY
+        return value.toString().toLowerCase().startsWith(lower);
+      })
+    );
 
     setFilteredLedgers(filtered);
     setSelectedIndex(0);
@@ -751,10 +745,20 @@ const LedgerList = () => {
   const isValidPrefix = (value) => {
     const lower = value.toLowerCase();
 
-    return ledgers.some(
-      (ledger) =>
-        ledger.formData.ahead &&
-        ledger.formData.ahead.toLowerCase().startsWith(lower)
+    const activeCols = Object.keys(searchColumns).filter(
+      (key) => searchColumns[key]
+    );
+
+    const colsToCheck =
+      activeCols.length > 0 ? activeCols : ["ahead"];
+
+    return ledgers.some((ledger) =>
+      colsToCheck.some((key) => {
+        const v = ledger.formData?.[key];
+        if (!v) return false;
+
+        return v.toString().toLowerCase().startsWith(lower);
+      })
     );
   };
 
@@ -867,28 +871,18 @@ const LedgerList = () => {
             onChange={(e) => {
               const val = e.target.value;
 
-              // ✅ allow clearing
               if (!val) {
                 setSearchTerm("");
                 return;
               }
 
-              // ✅ allow only if prefix matches some ledger name
+              // ✅ Restrict typing based on selected columns
               if (isValidPrefix(val)) {
                 setSearchTerm(val);
               }
-              // ❌ else: do nothing → typing stops
+              // ❌ else: typing stops (as you want)
             }}
           />
-
-          {/* <Form.Control
-          ref={searchRef}
-          className={styles.Search}
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          /> */}
          <Button 
             style={{ marginLeft: "10px",marginRight: "10px", marginTop: "10px" }}
             onClick={() => setShowColumnModal(true)}
