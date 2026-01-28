@@ -5655,28 +5655,17 @@ const Sale = () => {
     // ✅ Skip TCS Calculation if skipTCS is true
     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
-    let tcs1 = skipTCS ? parseFloat(formDataOverride.tcs1) : 0;
-    let tcs1Rate = skipTCS ? parseFloat(formDataOverride.tcs1_rate) : 0;
+    let tcs1 =  parseFloat(formDataOverride.tcs1) || 0;
+    let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
     let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
     let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
 
-    if (!skipTCS && unitType === "Trading") {
-      tcs1 = (grandTotal * 1) / 100; // 1% TCS
-      tcs1Rate = 1;
+    if (!skipTCS) {
+      tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
       grandTotal += tcs1;
     } else if (skipTCS) {
       grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
     }
-
-    // const isTcs206c1HYes = customerDetails?.some((cust) => cust.Tcs206c1H?.toLowerCase() === "yes"
-    //   ) || false;
-    // if (!skipTCS && isTcs206c1HYes) {
-    //   tcs1 = (grandTotal * 0.1) / 100; // 0.1%
-    //   tcs1Rate = 0.1;
-    //   grandTotal += tcs1;
-    // } else if (skipTCS) {
-    //   grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
-    // }
 
     // const isTDS149QYes =customerDetails?.some((cust) => cust.TDS194Q?.toLowerCase() === "yes");
     if (!skipTCS && applicable194Q === "Above 10 Crore") {
@@ -5759,7 +5748,7 @@ const Sale = () => {
 
   useEffect(() => {
     setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T21, T12]);
+  }, [items, T21, T12, formData.tcs1_rate]);
 
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
@@ -9489,9 +9478,15 @@ const handleKeyDownExp = (e, fieldName, index) => {
             <TextField
             className="TCSRATE custom-bordered-input"
               inputRef={tcsRef2}
-              id="tcs206_rate"
-              value={formData.tcs206_rate}
+              id="tcs1_rate"
+              value={formData.tcs1_rate}
               onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
+              onChange={(e) =>
+                setFormData(prev => ({
+                  ...prev,
+                  tcs1_rate: e.target.value
+                }))
+              }
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -9508,9 +9503,8 @@ const handleKeyDownExp = (e, fieldName, index) => {
 
             <TextField
             className="TCSPER custom-bordered-input"
-              id="tcs206"
-              value={formData.tcs206}
-              onChange={handleNumericValue}
+              id="tcs1"
+              value={formData.tcs1}
               label="TCS 206C@"
               inputProps={{
                 maxLength: 48,

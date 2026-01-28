@@ -600,13 +600,18 @@ useEffect(() => {
   const colsToSearch =
     activeCols.length > 0 ? activeCols : ["ahead"];
 
+  const isMultiColumn = colsToSearch.length > 1;
+
   const filtered = ledgers.filter((ledger) =>
     colsToSearch.some((key) => {
-      const value = ledger.formData?.[key];
-      if (!value) return false;
+      const v = ledger.formData?.[key];
+      if (!v) return false;
 
-      // ✅ FIRST LETTER / PREFIX SEARCH ONLY
-      return value.toString().toLowerCase().startsWith(lower);
+      const text = v.toString().toLowerCase();
+
+      return isMultiColumn
+        ? text.includes(lower)
+        : text.startsWith(lower);
     })
   );
 
@@ -625,15 +630,23 @@ const isValidPrefix = (value) => {
   const colsToCheck =
     activeCols.length > 0 ? activeCols : ["ahead"];
 
+  const isMultiColumn = colsToCheck.length > 1;
+
   return ledgers.some((ledger) =>
     colsToCheck.some((key) => {
       const v = ledger.formData?.[key];
       if (!v) return false;
 
-      return v.toString().toLowerCase().startsWith(lower);
+      const text = v.toString().toLowerCase();
+
+      // 🔥 RULE SWITCH
+      return isMultiColumn
+        ? text.includes(lower)      // 2+ columns
+        : text.startsWith(lower);   // 0 or 1 column
     })
   );
 };
+
 
 
   return (

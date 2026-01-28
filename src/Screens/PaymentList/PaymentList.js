@@ -13,6 +13,41 @@ import PaymentModal from "../Modals/PaymentModal";
 import financialYear from "../Shared/financialYear";
 
 const LOCAL_STORAGE_KEY = "PayementListTableData";
+function parseAnyDate(input) {
+  if (!input) return null;
+
+  // Already a Date object
+  if (input instanceof Date && !isNaN(input)) return input;
+
+  if (typeof input !== "string") return null;
+
+  input = input.trim();
+
+  // ISO formats (2026-01-16 or 2026-01-16T00:00:00.000Z)
+  if (/^\d{4}-\d{2}-\d{2}/.test(input)) {
+    const d = new Date(input);
+    return isNaN(d) ? null : d;
+  }
+
+  // DD/MM/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("/");
+    return new Date(`${yyyy}-${mm}-${dd}`);
+  }
+
+  // DD-MM-YYYY  ✅ YOUR MISSING CASE
+  if (/^\d{2}-\d{2}-\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("-");
+    return new Date(`${yyyy}-${mm}-${dd}`);
+  }
+
+  return null;
+}
+function formatDateDisplay(dateInput) {
+  const d = parseAnyDate(dateInput);
+  if (!d) return "";
+  return d.toLocaleDateString("en-GB"); // dd/mm/yyyy
+}
 
 const PaymentList = () => {
   
@@ -241,52 +276,21 @@ const PaymentList = () => {
       if (!saleRes.ok) throw new Error("Failed to fetch sale data");
       const saleData = await saleRes.json();
 
-      // ✅ Helper to parse both ISO and DD/MM/YYYY formats
-      const parseDate = (dateValue) => {
-        if (!dateValue) return null;
+      const startDate = parseAnyDate(fromDate);
+      const endDate = parseAnyDate(toDate);
 
-        // 1️⃣ If already Date object
-        if (dateValue instanceof Date && !isNaN(dateValue)) {
-          return dateValue;
-        }
+      if (!startDate || !endDate) return;
 
-        // 2️⃣ ISO string or YYYY-MM-DD
-        const isoDate = new Date(dateValue);
-        if (!isNaN(isoDate.getTime())) {
-          return isoDate;
-        }
-
-        // 3️⃣ DD-MM-YYYY or DD/MM/YYYY
-        if (typeof dateValue === "string") {
-          const parts = dateValue.includes("-")
-            ? dateValue.split("-")
-            : dateValue.split("/");
-
-          if (parts.length === 3) {
-            const [day, month, year] = parts.map(Number);
-
-            if (
-              day >= 1 && day <= 31 &&
-              month >= 1 && month <= 12 &&
-              year > 1900
-            ) {
-              return new Date(year, month - 1, day);
-            }
-          }
-        }
-
-        return null; // ❌ unrecognized format
-      };
-
-      const startDate = new Date(fromDate);
       startDate.setHours(0, 0, 0, 0);
-
-      const endDate = new Date(toDate);
       endDate.setHours(23, 59, 59, 999);
 
       const filteredSales = saleData.filter((entry) => {
-        const entryDate = parseDate(entry?.formData?.date);
-        return entryDate && entryDate >= startDate && entryDate <= endDate;
+        const entryDate = parseAnyDate(entry?.formData?.date);
+        return (
+          entryDate &&
+          entryDate >= startDate &&
+          entryDate <= endDate
+        );
       });
 
       // --- 2️⃣ Fetch bank vouchers ---
@@ -882,7 +886,7 @@ const PaymentList = () => {
               >
                 {sortedVisibleFields.map((field) => {
                   let value = "";
-                  if (field === "date") value = formatDate(formData.date);
+                  if (field === "date") value = formatDateDisplay(formData.date);
                   else if (field === "billno") value = formData.vno || "";
                   else if (field === "accountname") value = supplierdetails.vacode || "";
                   else if (field === "weight") value = totalItemWeight;

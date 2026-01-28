@@ -71,6 +71,42 @@ function sumSafe(arr, key) {
   return arr.reduce((s, x) => s + (Number(x?.[key] ?? 0) || 0), 0);
 }
 
+function parseAnyDate(input) {
+  if (!input) return null;
+
+  // Already a Date object
+  if (input instanceof Date && !isNaN(input)) return input;
+
+  if (typeof input !== "string") return null;
+
+  input = input.trim();
+
+  // ISO formats (2026-01-16 or 2026-01-16T00:00:00.000Z)
+  if (/^\d{4}-\d{2}-\d{2}/.test(input)) {
+    const d = new Date(input);
+    return isNaN(d) ? null : d;
+  }
+
+  // DD/MM/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("/");
+    return new Date(`${yyyy}-${mm}-${dd}`);
+  }
+
+  // DD-MM-YYYY  ✅ YOUR MISSING CASE
+  if (/^\d{2}-\d{2}-\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("-");
+    return new Date(`${yyyy}-${mm}-${dd}`);
+  }
+
+  return null;
+}
+function formatDateDisplay(dateInput) {
+  const d = parseAnyDate(dateInput);
+  if (!d) return "";
+  return d.toLocaleDateString("en-GB"); // dd/mm/yyyy
+}
+
 export default function GstWorksheet() {
 
   const navigate = useNavigate();
@@ -151,19 +187,12 @@ export default function GstWorksheet() {
   // Utility: returns whether a record (sale/purchase) passes filters:
   const recordPassesFilters = (record, isSale = true) => {
     // Date filter
-    let rawDate = record?.formData?.date || record?.formData?.duedate;
+    const rawDate = record?.formData?.date || record?.formData?.duedate;
+    const recDate = parseAnyDate(rawDate);
 
-    let recDate = null;
+    const from = parseAnyDate(fromDate);
+    const to = parseAnyDate(toDate);
 
-    // If date contains "/" → DD/MM/YYYY
-    if (rawDate && rawDate.includes("/")) {
-      recDate = parseDMY(rawDate);
-    } else {
-      // Normal ISO
-      recDate = parseISODate(rawDate);
-    }
-    const from = parseISODate(fromDate);
-    const to = parseISODate(toDate);
     if (!recDate) return false;
     if (from && recDate < from) return false;
     if (to && recDate > new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59)) return false;
@@ -1121,10 +1150,7 @@ export default function GstWorksheet() {
                 <TableRow key={idx} onDoubleClick={() => handleRowDoubleClick(en.id)}
                  >
                   <TableCell>
-                    {en.date?.includes("/") 
-                      ? parseDMY(en.date).toLocaleDateString("en-GB") 
-                      : formatDate(en.date)
-                    }
+                    {formatDateDisplay(en.date)}
                   </TableCell>
                   <TableCell>{en.vbillno || en.vno}</TableCell>
                   <TableCell>{en.item?.sdisc}</TableCell>

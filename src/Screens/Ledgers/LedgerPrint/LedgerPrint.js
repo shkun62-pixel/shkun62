@@ -441,7 +441,48 @@ const LedgerPrint = ({ show, onHide }) => {
       <Modal.Body>
         <Form>
           {/* PERIOD ROW */}
-      
+           <Row className="mb-3">
+            <Col md={3}>
+              <Form.Label>Period From</Form.Label>
+              <InputMask
+               className={styles.dateInput}
+                mask="99-99-9999"
+                value={periodFrom}
+                onChange={(e) => setPeriodFrom(e.target.value)}
+              >
+                {(p) => <Form.Control {...p} />}
+              </InputMask>
+            </Col>
+
+            <Col md={3}>
+              <Form.Label>Upto</Form.Label>
+              <InputMask
+               className={styles.dateInput}
+                mask="99-99-9999"
+                value={upto}
+                onChange={(e) => setUpto(e.target.value)}
+              >
+                {(p) => <Form.Control {...p} />}
+              </InputMask>
+            </Col>
+
+            <Col md={6}>
+              <Form.Check
+                type="radio"
+                label="Each A/c on New Page"
+                name="pagebreak"
+                checked={pageBreak === "newPage"}
+                onChange={() => setPageBreak("newPage")}
+              />
+              <Form.Check
+                type="radio"
+                label="No page break after A/c"
+                name="pagebreak"
+                checked={pageBreak === "noBreak"}
+                onChange={() => setPageBreak("noBreak")}
+              />
+            </Col>
+          </Row>
           {/* MAIN CONTENT ROW */}
           <Row>
             {/* LEFT SIDE */}
@@ -565,48 +606,6 @@ const LedgerPrint = ({ show, onHide }) => {
                 </div>
               </div>
              
-            </Col>
-          </Row>
-             <Row className="mb-3">
-            <Col md={3}>
-              <Form.Label>Period From</Form.Label>
-              <InputMask
-               className={styles.dateInput}
-                mask="99-99-9999"
-                value={periodFrom}
-                onChange={(e) => setPeriodFrom(e.target.value)}
-              >
-                {(p) => <Form.Control {...p} />}
-              </InputMask>
-            </Col>
-
-            <Col md={3}>
-              <Form.Label>Upto</Form.Label>
-              <InputMask
-               className={styles.dateInput}
-                mask="99-99-9999"
-                value={upto}
-                onChange={(e) => setUpto(e.target.value)}
-              >
-                {(p) => <Form.Control {...p} />}
-              </InputMask>
-            </Col>
-
-            <Col md={6}>
-              <Form.Check
-                type="radio"
-                label="Each A/c on New Page"
-                name="pagebreak"
-                checked={pageBreak === "newPage"}
-                onChange={() => setPageBreak("newPage")}
-              />
-              <Form.Check
-                type="radio"
-                label="No page break after A/c"
-                name="pagebreak"
-                checked={pageBreak === "noBreak"}
-                onChange={() => setPageBreak("noBreak")}
-              />
             </Col>
           </Row>
         </Form>

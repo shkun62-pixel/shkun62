@@ -718,49 +718,110 @@ const LedgerList = () => {
       setSelectedIndex(0);
       return;
     }
-
+  
     const lower = searchTerm.toLowerCase();
-
+  
     const activeCols = Object.keys(searchColumns).filter(
       (key) => searchColumns[key]
     );
-
+  
     const colsToSearch =
       activeCols.length > 0 ? activeCols : ["ahead"];
-
+  
+    const isMultiColumn = colsToSearch.length > 1;
+  
     const filtered = ledgers.filter((ledger) =>
       colsToSearch.some((key) => {
-        const value = ledger.formData?.[key];
-        if (!value) return false;
-
-        // ✅ FIRST LETTER / PREFIX SEARCH ONLY
-        return value.toString().toLowerCase().startsWith(lower);
+        const v = ledger.formData?.[key];
+        if (!v) return false;
+  
+        const text = v.toString().toLowerCase();
+  
+        return isMultiColumn
+          ? text.includes(lower)
+          : text.startsWith(lower);
       })
     );
-
+  
     setFilteredLedgers(filtered);
     setSelectedIndex(0);
   }, [searchTerm, ledgers, searchColumns]);
-
+  
   const isValidPrefix = (value) => {
     const lower = value.toLowerCase();
-
+  
     const activeCols = Object.keys(searchColumns).filter(
       (key) => searchColumns[key]
     );
-
+  
     const colsToCheck =
       activeCols.length > 0 ? activeCols : ["ahead"];
-
+  
+    const isMultiColumn = colsToCheck.length > 1;
+  
     return ledgers.some((ledger) =>
       colsToCheck.some((key) => {
         const v = ledger.formData?.[key];
         if (!v) return false;
-
-        return v.toString().toLowerCase().startsWith(lower);
+  
+        const text = v.toString().toLowerCase();
+  
+        // 🔥 RULE SWITCH
+        return isMultiColumn
+          ? text.includes(lower)      // 2+ columns
+          : text.startsWith(lower);   // 0 or 1 column
       })
     );
   };
+  // useEffect(() => {
+  //   if (!searchTerm.trim()) {
+  //     setFilteredLedgers(ledgers);
+  //     setSelectedIndex(0);
+  //     return;
+  //   }
+
+  //   const lower = searchTerm.toLowerCase();
+
+  //   const activeCols = Object.keys(searchColumns).filter(
+  //     (key) => searchColumns[key]
+  //   );
+
+  //   const colsToSearch =
+  //     activeCols.length > 0 ? activeCols : ["ahead"];
+
+  //   const filtered = ledgers.filter((ledger) =>
+  //     colsToSearch.some((key) => {
+  //       const value = ledger.formData?.[key];
+  //       if (!value) return false;
+
+  //       // ✅ FIRST LETTER / PREFIX SEARCH ONLY
+  //       return value.toString().toLowerCase().startsWith(lower);
+  //     })
+  //   );
+
+  //   setFilteredLedgers(filtered);
+  //   setSelectedIndex(0);
+  // }, [searchTerm, ledgers, searchColumns]);
+
+  // const isValidPrefix = (value) => {
+  //   const lower = value.toLowerCase();
+
+  //   const activeCols = Object.keys(searchColumns).filter(
+  //     (key) => searchColumns[key]
+  //   );
+
+  //   const colsToCheck =
+  //     activeCols.length > 0 ? activeCols : ["ahead"];
+
+  //   return ledgers.some((ledger) =>
+  //     colsToCheck.some((key) => {
+  //       const v = ledger.formData?.[key];
+  //       if (!v) return false;
+
+  //       return v.toString().toLowerCase().startsWith(lower);
+  //     })
+  //   );
+  // };
 
   return (
     <div style={{ padding: "20px" }}>

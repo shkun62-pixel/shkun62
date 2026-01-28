@@ -5,6 +5,42 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 
+function parseAnyDate(input) {
+  if (!input) return null;
+
+  // Already a Date object
+  if (input instanceof Date && !isNaN(input)) return input;
+
+  if (typeof input !== "string") return null;
+
+  input = input.trim();
+
+  // ISO formats (2026-01-16 or 2026-01-16T00:00:00.000Z)
+  if (/^\d{4}-\d{2}-\d{2}/.test(input)) {
+    const d = new Date(input);
+    return isNaN(d) ? null : d;
+  }
+
+  // DD/MM/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("/");
+    return new Date(`${yyyy}-${mm}-${dd}`);
+  }
+
+  // DD-MM-YYYY  ✅ YOUR MISSING CASE
+  if (/^\d{2}-\d{2}-\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("-");
+    return new Date(`${yyyy}-${mm}-${dd}`);
+  }
+
+  return null;
+}
+function formatDateDisplay(dateInput) {
+  const d = parseAnyDate(dateInput);
+  if (!d) return "";
+  return d.toLocaleDateString("en-GB"); // dd/mm/yyyy
+}
+
 const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate }) => {
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   const componentRef = useRef();
@@ -47,10 +83,7 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
 
     (entries || []).forEach((en) => {
       exportData.push({
-        "Date": en?.date?.includes("/")
-          ? parseDMY(en.date).toLocaleDateString("en-GB")
-          : formatDate(en.date),
-
+        "Date" : formatDateDisplay(en.date),
         "Bill No": en.vbillno || en.vno || "",
         "A/C Name": en.item?.sdisc || "",
         "Gst": (en.item?.gst || 0) + "%",
@@ -68,8 +101,8 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
     const header = Object.keys(exportData[0]);
 
     // Period
-    const periodFrom = fromDate ? formatDate(fromDate) : "--";
-    const periodTo = uptoDate ? formatDate(uptoDate) : "--";
+    const periodFrom = fromDate ? formatDateDisplay(fromDate) : "--";
+    const periodTo = uptoDate ? formatDateDisplay(uptoDate) : "--";
 
     // BUILD SHEET
     const sheetData = [
@@ -267,7 +300,7 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
             </span>
 
             <span style={{ fontSize: 25, fontWeight: "bold", marginLeft: "auto" }}>
-              From : {formatDate(fromDate)}
+              From : {formatDateDisplay(fromDate)}
             </span>
 
             <span
@@ -278,7 +311,7 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
                 marginRight: 20,
               }}
             >
-              Upto : {formatDate(uptoDate)}
+              Upto : {formatDateDisplay(uptoDate)}
             </span>
           </div>
 
@@ -315,9 +348,7 @@ const WorksheetPrint = ({ isOpen, handleClose, entries = [], fromDate, uptoDate 
                       {pageEntries.map((en, idx) => (
                         <tr key={idx}>
                           <td style={styles.tableCell}>
-                            {en?.date?.includes("/")
-                              ? parseDMY(en.date).toLocaleDateString("en-GB")
-                              : formatDate(en.date)}
+                            {formatDateDisplay(en.date)}
                           </td>
 
                           <td style={styles.tableCell}>{en.vbillno || en.vno}</td>
