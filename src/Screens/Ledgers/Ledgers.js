@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from "react";
 import LedgerPrint from "./LedgerPrint/LedgerPrint";
+import LedgerSummary from "./LedgerSummary/LedgerSummary";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -25,6 +26,9 @@ const Ledgers = () => {
     <div>
       {type === "LedgerPrint" && (
         <LedgerPrint show={openPurRep} onHide={handleClose} />
+      )}
+      {type === "LedgerSummary" && (
+        <LedgerSummary show={openPurRep} onHide={handleClose} />
       )}
 
     </div>

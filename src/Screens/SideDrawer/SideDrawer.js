@@ -696,6 +696,12 @@ export default function App() {
                                     </StyledIcon>
                                     <StyledListItemText primary="Ledger Print" />
                                 </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/Ledgers?type=LedgerSummary')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Ledger Summary" />
+                                </StyledListItem>
                             </List>
                             </motion.div>
                             )}

@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button, Table } from "react-bootstrap";
 import axios from "axios";
 import useCompanySetup from "../../Shared/useCompanySetup";
+// import * as XLSX from 'sheetjs-style';
+import * as XLSX from 'sheetjs-style';
+import { saveAs } from 'file-saver';
 
 const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
   const { companyName, companyAdd, companyCity } = useCompanySetup();
@@ -187,6 +190,150 @@ const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
     WinPrint.focus();
     WinPrint.print();
     WinPrint.close();
+  };
+
+  const handleExportExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const wsData = [];
+
+    /* ================= COMPANY HEADER ================= */
+    wsData.push([companyName?.toUpperCase() || ""]);
+    wsData.push([companyAdd || ""]);
+    wsData.push([companyCity || ""]);
+    wsData.push([
+      `Period : ${printPayload.periodFrom} To ${printPayload.upto}`,
+    ]);
+    wsData.push([]);
+
+    const headerEndRow = wsData.length;
+
+    /* ================= LEDGER DATA ================= */
+    Object.entries(groupedLedger).forEach(([account, rows]) => {
+      let balance = 0;
+      let totalDr = 0;
+      let totalCr = 0;
+      let totalWeight = 0;
+
+      wsData.push([`A/c : ${account}`]);
+      wsData.push([`PAN : ${accountPanMap[account] || "-"}`]);
+
+      const tableHeader = [
+        "Date",
+        "Type",
+        "Narration",
+        ...(printPayload.printType === "qty" ? ["Qty"] : []),
+        "Debit",
+        "Credit",
+        "Balance",
+        "Dr/Cr",
+      ];
+
+      wsData.push(tableHeader);
+
+      rows.forEach((tx) => {
+        if (tx.type === "debit") {
+          balance += tx.amount;
+          totalDr += tx.amount;
+        } else {
+          balance -= tx.amount;
+          totalCr += tx.amount;
+        }
+
+        if (printPayload.printType === "qty") {
+          totalWeight += tx.weight || 0;
+        }
+
+        wsData.push([
+          formatDate(tx.date),
+          tx.vtype,
+          `${tx.type === "debit" ? "To" : "By"} ${
+            tx.vtype === "P" ? `Bill No. ${tx.voucherNo}` : tx.account
+          }`,
+          ...(printPayload.printType === "qty"
+            ? [(tx.weight || 0).toFixed(3)]
+            : []),
+          tx.type === "debit" ? tx.amount.toFixed(2) : "",
+          tx.type === "credit" ? tx.amount.toFixed(2) : "",
+          Math.abs(balance).toFixed(2),
+          balance >= 0 ? "Dr" : "Cr",
+        ]);
+      });
+
+      wsData.push([
+        "Total",
+        "",
+        "",
+        ...(printPayload.printType === "qty"
+          ? [totalWeight.toFixed(3)]
+          : []),
+        totalDr.toFixed(2),
+        totalCr.toFixed(2),
+        Math.abs(balance).toFixed(2),
+        balance >= 0 ? "Dr" : "Cr",
+      ]);
+
+      wsData.push([]);
+    });
+
+    /* ================= CREATE SHEET ================= */
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    /* ================= MERGE COMPANY HEADER ================= */
+    ws["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } },
+    ];
+
+    /* ================= STYLES ================= */
+    const centerBold = {
+      font: { bold: true },
+      alignment: { horizontal: "center" },
+    };
+
+    ["A1", "A2", "A3", "A4"].forEach((cell) => {
+      if (ws[cell]) ws[cell].s = centerBold;
+    });
+
+    /* ---- Table Header Style ---- */
+    wsData.forEach((row, rIdx) => {
+      if (row[0] === "Date") {
+        row.forEach((_, cIdx) => {
+          const cellRef = XLSX.utils.encode_cell({ r: rIdx, c: cIdx });
+          if (ws[cellRef]) {
+            ws[cellRef].s = {
+              font: { bold: true },
+              fill: {
+                fgColor: { rgb: "D9E1F2" },
+              },
+              alignment: { horizontal: "center" },
+              border: {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" },
+              },
+            };
+          }
+        });
+      }
+    });
+
+    /* ================= COLUMN WIDTHS ================= */
+    ws["!cols"] = [
+      { wch: 12 }, // Date
+      { wch: 8 },  // Type
+      { wch: 40 }, // Narration
+      ...(printPayload.printType === "qty" ? [{ wch: 10 }] : []),
+      { wch: 14 }, // Debit
+      { wch: 14 }, // Credit
+      { wch: 14 }, // Balance
+      { wch: 8 },  // Dr/Cr
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
+    XLSX.writeFile(wb, "Ledger.xlsx");
   };
 
   return (
@@ -443,11 +590,14 @@ const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
-          Close
-        </Button>
         <Button variant="primary" onClick={handlePrint}>
           Print
+        </Button>
+        <Button variant="success" onClick={handleExportExcel}>
+          Export
+        </Button>
+        <Button variant="secondary" onClick={onHide}>
+          Close
         </Button>
       </Modal.Footer>
     </Modal>
