@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from "react";
 import LedgerPrint from "./LedgerPrint/LedgerPrint";
 import LedgerSummary from "./LedgerSummary/LedgerSummary";
-
+import MasterAccountModal from "./LedgerMaster/MasterAccountModal";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Ledgers = () => {
@@ -29,6 +29,9 @@ const Ledgers = () => {
       )}
       {type === "LedgerSummary" && (
         <LedgerSummary show={openPurRep} onHide={handleClose} />
+      )}
+      {type === "LedgerMaster" && (
+        <MasterAccountModal show={openPurRep} onHide={handleClose} />
       )}
 
     </div>

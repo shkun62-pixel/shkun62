@@ -679,7 +679,7 @@ export default function App() {
                                 transition={{ duration: 0.50, ease: "easeOut" }}
                                 style={{
                                     position: "fixed",
-                                    top: "440px",
+                                    top: "415px",
                                     left: "555px",   // Drawer(300) + First submenu(250) + 15px gap
                                     width: "250px",
                                     background: "#2f3847",
@@ -701,6 +701,12 @@ export default function App() {
                                         <MenuBookIcon />
                                     </StyledIcon>
                                     <StyledListItemText primary="Ledger Summary" />
+                                </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/Ledgers?type=LedgerMaster')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Ledger Master" />
                                 </StyledListItem>
                             </List>
                             </motion.div>
