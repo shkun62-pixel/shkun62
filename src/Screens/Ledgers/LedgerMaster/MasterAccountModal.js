@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button } from "react-bootstrap";
 import {
   Box,
-  Typography,
   Grid,
   FormControl,
   InputLabel,
@@ -13,9 +12,50 @@ import {
   Radio,
   Checkbox,
   TextField,
+  Autocomplete,
 } from "@mui/material";
+import axios from "axios";
+import PrintModal from "./PrintModal";
+import SelectionModal from "./SelectionModal";
 
-import PrintModal from "./PrintModal"; // Import your PrintModal component
+const INDIA_STATES = [
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
+];
 
 const MasterAccountModal = ({ show, onHide }) => {
   // ================= STATE VARIABLES =================
@@ -27,11 +67,14 @@ const MasterAccountModal = ({ show, onHide }) => {
   const [occasionDate, setOccasionDate] = useState("");
   const [area, setArea] = useState("");
   const [group, setGroup] = useState("");
+  const [groupList, setGroupList] = useState([]);
   const [fullAddress, setFullAddress] = useState("Yes");
   const [orderBy, setOrderBy] = useState("Account Name");
   const [format, setFormat] = useState("Excise");
   const [cancelledTinExist, setCancelledTinExist] = useState(false);
-  const [cashCustomer, setCashCustomer] = useState(false);
+
+  const [showSelectionModal, setShowSelectionModal] = useState(false);
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
 
   // Show PrintModal state
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -50,8 +93,24 @@ const MasterAccountModal = ({ show, onHide }) => {
     orderBy,
     format,
     cancelledTinExist,
-    cashCustomer,
   };
+
+  useEffect(() => {
+    if (!show) return; // load only when modal opens
+
+    const fetchGroups = async () => {
+      try {
+        const res = await axios.get(
+          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure",
+        );
+        setGroupList(res.data || []);
+      } catch (err) {
+        console.error("Failed to load group list", err);
+      }
+    };
+
+    fetchGroups();
+  }, [show]);
 
   return (
     <>
@@ -85,12 +144,14 @@ const MasterAccountModal = ({ show, onHide }) => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="State"
+                    <Autocomplete
                       size="small"
-                      fullWidth
-                      value={stateName}
-                      onChange={(e) => setStateName(e.target.value)}
+                      options={INDIA_STATES}
+                      value={stateName || null}
+                      onChange={(e, newValue) => setStateName(newValue || "")}
+                      renderInput={(params) => (
+                        <TextField {...params} label="State" fullWidth />
+                      )}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -111,8 +172,18 @@ const MasterAccountModal = ({ show, onHide }) => {
                         onChange={(e) => setMsmeStatus(e.target.value)}
                       >
                         <MenuItem value="">Select</MenuItem>
-                        <MenuItem value="Yes">Yes</MenuItem>
-                        <MenuItem value="No">No</MenuItem>
+                        <MenuItem value="Micro Enterprises">
+                          Micro Enterprises
+                        </MenuItem>
+                        <MenuItem value="Small Enterprises">
+                          Small Enterprises
+                        </MenuItem>
+                        <MenuItem value="Medium Enterprises">
+                          Medium Enterprises
+                        </MenuItem>
+                        <MenuItem value="Not Covered in MSMED">
+                          Not Covered in MSMED
+                        </MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
@@ -137,16 +208,20 @@ const MasterAccountModal = ({ show, onHide }) => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>Group</InputLabel>
-                      <Select
-                        value={group}
-                        label="Group"
-                        onChange={(e) => setGroup(e.target.value)}
-                      >
-                        <MenuItem value="">Select</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <Autocomplete
+                      size="small"
+                      options={groupList}
+                      getOptionLabel={(option) => option.formData.name || ""}
+                      value={
+                        groupList.find((g) => g.formData.name === group) || null
+                      }
+                      onChange={(e, newValue) =>
+                        setGroup(newValue ? newValue.formData.name : "")
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Group" fullWidth />
+                      )}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth size="small">
@@ -170,6 +245,8 @@ const MasterAccountModal = ({ show, onHide }) => {
                         onChange={(e) => setOrderBy(e.target.value)}
                       >
                         <MenuItem value="Account Name">Account Name</MenuItem>
+                        <MenuItem value="Account Code">Account Code</MenuItem>
+                        <MenuItem value="GST No">GST No</MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
@@ -178,7 +255,7 @@ const MasterAccountModal = ({ show, onHide }) => {
 
               {/* Right Section */}
               <Grid item xs={12} md={4}>
-                <FormControl component="fieldset" sx={{ mb: 2 }}>
+                {/* <FormControl component="fieldset" sx={{ mb: 2 }}>
                   <RadioGroup
                     value={format}
                     onChange={(e) => setFormat(e.target.value)}
@@ -199,7 +276,7 @@ const MasterAccountModal = ({ show, onHide }) => {
                       label="Label Format"
                     />
                   </RadioGroup>
-                </FormControl>
+                </FormControl> */}
 
                 <FormControlLabel
                   control={
@@ -218,12 +295,17 @@ const MasterAccountModal = ({ show, onHide }) => {
 
         <Modal.Footer>
           <Button variant="primary" onClick={() => setShowPrintModal(true)}>
-            Print
+            PRINT
           </Button>
-          <Button variant="primary">Export</Button>
-          <Button variant="secondary">Selection</Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowSelectionModal(true)}
+          >
+            SELECTION
+          </Button>
+
           <Button variant="danger" onClick={onHide}>
-            Exit
+            EXIT
           </Button>
         </Modal.Footer>
       </Modal>
@@ -233,6 +315,14 @@ const MasterAccountModal = ({ show, onHide }) => {
         show={showPrintModal}
         onHide={() => setShowPrintModal(false)}
         filters={filters}
+        selectedAccounts={selectedAccounts}
+      />
+      {/* Selection Modal */}
+      <SelectionModal
+        show={showSelectionModal}
+        onHide={() => setShowSelectionModal(false)}
+        selectedAccounts={selectedAccounts}
+        setSelectedAccounts={setSelectedAccounts}
       />
     </>
   );

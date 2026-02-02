@@ -408,15 +408,15 @@ const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
               )}
 
               <div>
-                <b>A/c :</b> {account}
+                <b>A/c : {account}</b> 
               </div>
               <div>
-                <b>PAN :</b> {accountPanMap[account] || "-"}
+                <b>PAN : {accountPanMap[account] || "-"}</b> 
               </div>
 
               {/* 🔥 ORIGINAL TABLE LOGIC REMAINS UNCHANGED */}
               <Table bordered size="sm" className="mt-2">
-                <thead>
+                <thead style={{ background: "#dedcd7" }}>
                   <tr>
                     <th>Date</th>
                     <th></th>
@@ -591,13 +591,13 @@ const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
 
       <Modal.Footer>
         <Button variant="primary" onClick={handlePrint}>
-          Print
+          PRINT
         </Button>
         <Button variant="success" onClick={handleExportExcel}>
-          Export
+          EXPORT
         </Button>
         <Button variant="secondary" onClick={onHide}>
-          Close
+          CLOSE
         </Button>
       </Modal.Footer>
     </Modal>
