@@ -41,6 +41,8 @@ import GstRegister from './Screens/GstRegister/GstRegister';
 import IncomeTaxReport from './Screens/IncomeTaxReports/IncomeTaxReport';
 import Books from './Screens/Books/Books';
 import SaleSumm from './Screens/Summary/SaleSummary/SaleSumm';
+import TaxWiseSale from './Screens/GstReports/TaxWiseSumm/TaxWiseSale';
+import TaxWisePur from './Screens/GstReports/TaxWisePur/TaxWisePur';
 import PurchaseSumm from './Screens/Summary/PurchaseSummary/PurchaseSumm';
 import Ledgers from './Screens/Ledgers/Ledgers';
 // import Dashboard from './Screens/DashBoard/Dashboard';
@@ -105,6 +107,8 @@ function App() {
         <Route path='/SaleSumm' element={<SaleSumm />}></Route>
         <Route path='/PurchaseSumm' element={<PurchaseSumm />}></Route>
         <Route path='/Ledgers' element={<Ledgers />}></Route>
+        <Route path='/TaxWiseSale' element={<TaxWiseSale />}></Route>
+        <Route path='/TaxWisePur' element={<TaxWisePur />}></Route>
         {/* <Route path='/Dashboard' element={<Dashboard />}></Route> */}
         <Route path='/Demo' element={<Demo />}></Route>
       </Routes>
