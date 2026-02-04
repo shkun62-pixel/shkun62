@@ -167,6 +167,7 @@ export default function App() {
     const [isOutStandingOpen, setIsOutStandingOpen] = useState(false); 
     const [isSummaryOpen, setIsSummaryOpen] = useState(false); 
     const [isLedgerOpen, setIsLedgerOpen] = useState(false); 
+    const [isTaxWiseOpen, setIsTaxWiseOpen] = useState(false); 
     const [open, setOpen] = useState(false);
 
     const handleNavigation = (path) => {
@@ -182,6 +183,7 @@ export default function App() {
             setIsOutStandingOpen(false);
             setIsSummaryOpen(false);
             setIsLedgerOpen(false);
+            setIsTaxWiseOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -198,6 +200,7 @@ export default function App() {
             setIsOutStandingOpen(false);
             setIsSummaryOpen(false);
             setIsLedgerOpen(false);
+            setIsTaxWiseOpen(false);
             setIsStockOpen(false);
             setIsExtraFeatureOpen(false);
             setIsDataSecurityOpen(false);
@@ -291,6 +294,7 @@ export default function App() {
         setIsOutStandingOpen(false);
         setIsSummaryOpen(false);
         setIsLedgerOpen(false);
+        setIsTaxWiseOpen(false);
         setIsStockOpen(false);
         setIsExtraFeatureOpen(false);
         setIsDataSecurityOpen(false);
@@ -832,12 +836,12 @@ export default function App() {
                         transition={{ duration: 0.50, ease: "easeOut" }}
                         style={{
                             position: "fixed",
-                            top: "0px",
+                            top: "5px",
                             left: "305px",
                             width: "300px",
                             background: "#2f3847",
                             borderRadius: "10px",
-                            padding: "10px",
+                            // padding: "10px",
                             zIndex: 30000,
                             border: "1px solid #444",
                             // boxShadow: "0px 4px 20px rgba(0,0,0,0.3)"
@@ -911,12 +915,54 @@ export default function App() {
                             </StyledIcon>
                             <StyledListItemText primary="Yearly GSTR-9" />
                         </StyledListItem>
-                        <StyledListItem button onClick={() => handleNavigation('/')}>
-                            <StyledIcon style={{}}>
-                                <DescriptionIcon />
-                            </StyledIcon>
+                          {/* TAX WISE SUMMARY */}
+                            <StyledListItem
+                                button
+                                onMouseEnter={() => setIsTaxWiseOpen(true)}
+                                onMouseLeave={() => setIsTaxWiseOpen(false)}
+                            >
+                                <StyledIcon>
+                                    <ReceiptIcon />
+                                </StyledIcon>
                             <StyledListItemText primary="Tax Wise Summary" />
-                        </StyledListItem>
+                            </StyledListItem>
+                            {/* Ledgers – FLOATING RIGHT SUBMENU */}
+                            {isTaxWiseOpen && (
+                            <motion.div
+                                onMouseEnter={() => setIsTaxWiseOpen(true)}
+                                onMouseLeave={() => setIsTaxWiseOpen(false)}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -20, opacity: 0 }}
+                                transition={{ duration: 0.50, ease: "easeOut" }}
+                                style={{
+                                    position: "fixed",
+                                    top: "500px",
+                                    left: "605px",   // Drawer(300) + First submenu(250) + 15px gap
+                                    width: "250px",
+                                    background: "#2f3847",
+                                    borderRadius: "10px",
+                                    padding: "10px",
+                                    zIndex: 30000,
+                                    border: "1px solid #444",
+                                }}
+                            >
+                            <List>
+                               <StyledListItem button onClick={() => handleNavigation('/TaxWiseSale')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Sale" />
+                                </StyledListItem>
+                                <StyledListItem button onClick={() => handleNavigation('/TaxWisePur')}>
+                                    <StyledIcon>
+                                        <MenuBookIcon />
+                                    </StyledIcon>
+                                    <StyledListItemText primary="Purchase" />
+                                </StyledListItem>
+                            </List>
+                            </motion.div>
+                            )}
                         <StyledListItem button onClick={() => handleNavigation('/')}>
                             <StyledIcon style={{}}>
                                 <DescriptionIcon />

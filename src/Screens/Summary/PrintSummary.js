@@ -307,7 +307,7 @@ const PrintSummary = ({
             <tbody>
               {rows.map((r, i) => (
                 <tr key={i} style={{ fontSize: 17 }}>
-                  <td style={td}>{r.account}</td>
+                  <td style={td}>{r.accountName}</td>
                   <td style={tdR}>{r.pcs ? r.pcs.toFixed(3) : ""}</td>
                   <td style={tdR}>{r.qty ? r.qty.toFixed(3) : ""}</td>
                   <td style={tdR}>{r.value ? r.value.toFixed(2) : ""}</td>

@@ -1752,19 +1752,19 @@ const Purchase = () => {
 
       if (response.status === 200 || response.status === 201) {
         // --- 4) UPDATE STOCK (purchase -> add) ------------------------------
-        try {
-          await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
-            items: nonEmptyItems.map(item => ({
-              vcode: item.vcode,
-              sdisc: item.sdisc,
-              weight: Number(item.weight) || 0,
-              pkgs: Number(item.pkgs) || 0,
-            }))
-          });
-        } catch (stkErr) {
-          console.error("Stock update error:", stkErr);
-          // continue; don't fail whole flow
-        }
+        // try {
+        //   await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
+        //     items: nonEmptyItems.map(item => ({
+        //       vcode: item.vcode,
+        //       sdisc: item.sdisc,
+        //       weight: Number(item.weight) || 0,
+        //       pkgs: Number(item.pkgs) || 0,
+        //     }))
+        //   });
+        // } catch (stkErr) {
+        //   console.error("Stock update error:", stkErr);
+        //   // continue; don't fail whole flow
+        // }
 
         // --- 5) POST/PUT FA ENTRIES with purchaseId ------------------------
         try {

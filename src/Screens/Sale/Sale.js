@@ -6685,20 +6685,20 @@ const ddmmyyyy = (d) => {
 
       if (saleRes?.status === 200 || saleRes?.status === 201) {
         // 4) Update Stock (SALE => subtract)
-        try {
-          await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
-            mode: "sale",
-            items: nonEmptyItems.map((item) => ({
-              vcode: item.vcode,
-              sdisc: item.sdisc,
-              weight: Number(item.weight) || 0,
-              pkgs: Number(item.pkgs) || 0,
-            })),
-          });
-        } catch (stkErr) {
-          console.error("Stock update error:", stkErr);
-          // Continue even if stock update fails
-        }
+        // try {
+        //   await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
+        //     mode: "sale",
+        //     items: nonEmptyItems.map((item) => ({
+        //       vcode: item.vcode,
+        //       sdisc: item.sdisc,
+        //       weight: Number(item.weight) || 0,
+        //       pkgs: Number(item.pkgs) || 0,
+        //     })),
+        //   });
+        // } catch (stkErr) {
+        //   console.error("Stock update error:", stkErr);
+        //   // Continue even if stock update fails
+        // }
 
         // 5) Post FA entries (with setup codes) — include saleId
         try {

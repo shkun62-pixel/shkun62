@@ -114,13 +114,14 @@ const TaxWisePur = () => {
 
         // ✅ ONLY Pcodess ACCOUNTS
         items.forEach((item) => {
-          if (!item.Pcodess) return;
+          if (!item.Pcodes01) return;
 
-          const key = item.Pcodess;
+          const key = item.Pcodes01;
 
           if (!saleMap[key]) {
             saleMap[key] = {
-              account: item.Pcodess,
+              accountCode: item.Pcodes01, // 🔒 used for logic
+              accountName: item.Pcodess, // 👁 used only for display
               pcs: 0,
               qty: 0,
               value: 0,
@@ -159,12 +160,12 @@ const TaxWisePur = () => {
 
       // 🔹 Purchase ACCOUNT ENTRIES
       items.forEach((item) => {
-        if (item.Pcodess === selectedAccount) {
+        if (item.Pcodes01 === selectedAccount) {
           entries.push({
             _id: voucher._id,
             type: "PURCHASE",
             date: formData.date,
-            vno: formData.vbillno,
+            vno: formData.vno,
             customer,
             sdisc: item.sdisc,
             pcs: item.pkgs,
@@ -210,8 +211,8 @@ const TaxWisePur = () => {
       if (e.key === "Enter") {
         e.preventDefault();
         const row = rows[activeRow];
-        if (row?.account) {
-          setSelectedAccount(row.account);
+        if (row?.accountCode) {
+          setSelectedAccount(row.accountCode); // 🔒 always stable
           setShowModal(true);
         }
       }
@@ -229,51 +230,84 @@ const TaxWisePur = () => {
     return () => window.removeEventListener("keydown", esc);
   }, [showModal]);
 
+  const MIN_ROWS = 8;
+
+  const displayRows = [...rows];
+
+  if (displayRows.length < MIN_ROWS) {
+    const emptyCount = MIN_ROWS - displayRows.length;
+
+    for (let i = 0; i < emptyCount; i++) {
+      displayRows.push({
+        account: "",
+        pcs: "",
+        qty: "",
+        value: "",
+        cgst: "",
+        sgst: "",
+        igst: "",
+        isEmpty: true, // 👈 flag
+      });
+    }
+  }
+
   return (
     <div className={styles.cardContainer}>
       <Card className={styles.cardSumm}>
-        <h1 className={styles.headerSummary}>SALE TAX SUMMARY</h1>
-        <div style={{display:'flex',flexDirection:'row',marginBottom:10,marginTop:10}}>
-            <InputMask
-              mask="99-99-9999"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-            >
-              {(props) => (
-                <TextField
+        <h1 className={styles.headerSummary}>PURCHASE TAX SUMMARY</h1>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            marginBottom: 10,
+            marginTop: 10,
+          }}
+        >
+          <InputMask
+            mask="99-99-9999"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          >
+            {(props) => (
+              <TextField
                 className="custom-bordered-input"
-                  {...props}
-                  label="FROM"
-                  size="small"
-                  variant="filled"
-                  fullWidth
-                  style={{ width:200}}
-                />
-              )}
-            </InputMask>
-            <InputMask
-              mask="99-99-9999"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-            >
-              {(props) => (
-                <TextField
+                {...props}
+                label="FROM"
+                size="small"
+                variant="filled"
+                fullWidth
+                style={{ width: 200 }}
+              />
+            )}
+          </InputMask>
+          <InputMask
+            mask="99-99-9999"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          >
+            {(props) => (
+              <TextField
                 className="custom-bordered-input"
-                  {...props}
-                  label="UPTO"
-                  size="small"
-                  variant="filled"
-                  fullWidth
-                  style={{marginLeft:20, width:200}}
-                />
-              )}
-            </InputMask>
-         
-          <div style={{width:300, marginLeft:20}}>
-            <FormControl className="custom-bordered-input" variant="filled" fullWidth size="small">
+                {...props}
+                label="UPTO"
+                size="small"
+                variant="filled"
+                fullWidth
+                style={{ marginLeft: 20, width: 200 }}
+              />
+            )}
+          </InputMask>
+
+          <div style={{ width: 300, marginLeft: 20 }}>
+            <FormControl
+              className="custom-bordered-input"
+              variant="filled"
+              fullWidth
+              size="small"
+            >
               <InputLabel>Tax Type</InputLabel>
               <Select
-              className="custom-bordered-input"
+                className="custom-bordered-input"
                 value={taxType}
                 label="Tax Type"
                 onChange={(e) => setTaxType(e.target.value)}
@@ -298,7 +332,6 @@ const TaxWisePur = () => {
               </Select>
             </FormControl>
           </div>
-      
         </div>
 
         <div className={styles.tables} style={{ padding: 0 }}>
@@ -317,22 +350,32 @@ const TaxWisePur = () => {
             </thead>
 
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={i} className={i === activeRow ? styles.activeRow : ""}>
-                  <td>{r.account}</td>
-                  <td className="text-end">{r.pcs ? r.pcs.toFixed(3) : ""}</td>
-                  <td className="text-end">{r.qty ? r.qty.toFixed(3) : ""}</td>
+              {displayRows.map((r, i) => (
+                <tr
+                  key={i}
+                  className={
+                    !r.isEmpty && i === activeRow ? styles.activeRow : ""
+                  }
+                  style={{ height: 32 }}
+                >
+                  <td>{r.accountName}</td>
                   <td className="text-end">
-                    {r.value ? r.value.toFixed(2) : ""}
+                    {r.pcs !== "" ? Number(r.pcs).toFixed(3) : ""}
                   </td>
                   <td className="text-end">
-                    {r.cgst ? r.cgst.toFixed(2) : ""}
+                    {r.qty !== "" ? Number(r.qty).toFixed(3) : ""}
                   </td>
                   <td className="text-end">
-                    {r.sgst ? r.sgst.toFixed(2) : ""}
+                    {r.value !== "" ? Number(r.value).toFixed(2) : ""}
                   </td>
                   <td className="text-end">
-                    {r.igst ? r.igst.toFixed(2) : ""}
+                    {r.cgst !== "" ? Number(r.cgst).toFixed(2) : ""}
+                  </td>
+                  <td className="text-end">
+                    {r.sgst !== "" ? Number(r.sgst).toFixed(2) : ""}
+                  </td>
+                  <td className="text-end">
+                    {r.igst !== "" ? Number(r.igst).toFixed(2) : ""}
                   </td>
                   <td></td>
                 </tr>
@@ -341,10 +384,10 @@ const TaxWisePur = () => {
           </Table>
         </div>
 
-        <Card.Footer className="fw-bold" style={{ fontSize: "20px" }}>
+        <Card.Footer className="fw-bold" style={{ fontSize: "20px",display:'flex', flexDirection:'row', justifyContent:'space-between' }}>
           Total Sale Rs. {totalSale.toFixed(2)}
           <Button
-            style={{ letterSpacing: 2, marginLeft: 20 }}
+            style={{ letterSpacing: 2 }}
             onClick={() => setShowPrint(true)}
           >
             PRINT
@@ -364,7 +407,10 @@ const TaxWisePur = () => {
       <AccountEntriesModal
         show={showModal}
         onClose={() => setShowModal(false)}
-        accountName={selectedAccount}
+        accountCode={selectedAccount}
+        accountName={
+          rows.find((r) => r.accountCode === selectedAccount)?.accountName
+        }
         entries={getAccountEntries()}
         fromDate={fromDate}
         uptoDate={toDate}
