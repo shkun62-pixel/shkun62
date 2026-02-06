@@ -3087,6 +3087,7 @@ const handleKeyDown = (event, index, field) => {
       return true;
   };
 
+  const nonEmptyItems2 = items.filter((item) => (item.sdisc || "").trim() !== "");
   return (
     <div>
       <div>
@@ -3096,7 +3097,7 @@ const handleKeyDown = (event, index, field) => {
         {SelectedInvoiceComponent && (
           <SelectedInvoiceComponent
             formData={formData}
-            items={items}
+            items={nonEmptyItems2}
             supplierdetails={supplierdetails}
             isOpen={open}
             handleClose={handleCloseInvoice}

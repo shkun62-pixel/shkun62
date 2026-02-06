@@ -8163,6 +8163,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
       return true;
     };
 
+    const nonEmptyItems2 = items.filter((item) => (item.sdisc || "").trim() !== "");
   return (
     <div>
       <ToastContainer />
@@ -8171,7 +8172,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
         {SelectedInvoiceComponent && (
           <SelectedInvoiceComponent
             formData={formData}
-            items={items}
+            items={nonEmptyItems2}
             customerDetails={customerDetails}
             shipped={shipped}
             isOpen={open}

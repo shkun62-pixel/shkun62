@@ -969,7 +969,7 @@ export default function App() {
                             </StyledIcon>
                             <StyledListItemText primary="GSTIN Wise Expenditure" />
                         </StyledListItem>
-                        <StyledListItem button onClick={() => handleNavigation('/')}>
+                        <StyledListItem button onClick={() => handleNavigation('/GstReport?type=HsnWise')}>
                             <StyledIcon style={{}}>
                                 <DescriptionIcon />
                             </StyledIcon>

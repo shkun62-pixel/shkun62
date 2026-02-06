@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 const StockReport = () => {
   const location = useLocation();
 
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "shkun_05062025_05062026";
   const [fromDate, setFromDate] = useState("");
   const [uptoDate, setUptoDate] = useState("");
 
@@ -30,7 +30,7 @@ const StockReport = () => {
   useEffect(() => {
     const fy = financialYear.getFYDates();
     setFromDate(formatDate(fy.start)); // converted
-    setUptoDate(formatDate(fy.end));     // converted
+    setUptoDate(formatDate(fy.end)); // converted
   }, []);
 
   const [items, setItems] = useState([
@@ -58,7 +58,7 @@ const StockReport = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  // Active Row 
+  // Active Row
   const tableContainerRef = useRef(null);
   const [activeRow, setActiveRow] = useState(0);
   const navigate = useNavigate();
@@ -91,21 +91,20 @@ const StockReport = () => {
     const fetchAheads = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster"
+          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster",
         );
         const list = res.data.data
           .map((item) => item.formData?.Aheads?.trim())
           .filter((v, i, arr) => v && arr.indexOf(v) === i);
-          setAheads(list);
+        setAheads(list);
 
-          const savedAhead = localStorage.getItem("stock_selectedAhead");
+        const savedAhead = localStorage.getItem("stock_selectedAhead");
 
-          if (savedAhead && list.includes(savedAhead)) {
-            setSelectedAhead(savedAhead);
-          } else if (list.length > 0) {
-            setSelectedAhead(list[0]);
-          }
-
+        if (savedAhead && list.includes(savedAhead)) {
+          setSelectedAhead(savedAhead);
+        } else if (list.length > 0) {
+          setSelectedAhead(list[0]);
+        }
       } catch (e) {
         console.error("Error loading Aheads", e);
       }
@@ -113,44 +112,50 @@ const StockReport = () => {
     fetchAheads();
   }, []);
 
-  const parseDate = (dateStr) => {
-    if (!dateStr) return null;
+  const parseDate = (value) => {
+    if (!value) return null;
 
-    // If ISO format → let JS handle it
-    if (!isNaN(Date.parse(dateStr))) {
-      return new Date(dateStr);
+    // Already a Date object
+    if (value instanceof Date) return value;
+
+    const str = String(value).trim();
+
+    // ISO or yyyy-mm-dd
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+      const d = new Date(str);
+      return isNaN(d) ? null : d;
     }
 
-    // dd/mm/yyyy OR dd-mm-yyyy
-    const parts = dateStr.includes("/")
-      ? dateStr.split("/")
-      : dateStr.split("-");
+    // dd-mm-yyyy or dd/mm/yyyy
+    const match = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+    if (match) {
+      let [, dd, mm, yyyy] = match;
 
-    if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      let year = parseInt(parts[2], 10);
+      dd = parseInt(dd, 10);
+      mm = parseInt(mm, 10) - 1;
+      yyyy = parseInt(yyyy, 10);
 
-      // handle 2-digit year
-      if (year < 100) year += 2000;
+      if (yyyy < 100) yyyy += 2000;
 
-      return new Date(year, month, day);
+      const d = new Date(yyyy, mm, dd);
+      return isNaN(d) ? null : d;
     }
 
-    return null;
+    // Last fallback
+    const fallback = new Date(str);
+    return isNaN(fallback) ? null : fallback;
   };
 
   const applyReportType = (items, reportType) => {
     if (!reportType) return items;
 
     switch (reportType) {
-
       // ----------------------------
       // RECORD WISE (ACTIVE)
       // ----------------------------
       case "record_active":
         return items.filter(
-          (item) => Number(item.purRec) !== 0 || Number(item.sale) !== 0
+          (item) => Number(item.purRec) !== 0 || Number(item.sale) !== 0,
         );
 
       // ----------------------------
@@ -168,15 +173,17 @@ const StockReport = () => {
           if (!map[i.date]) {
             map[i.date] = { ...i };
           } else {
-            map[i.date].purRec =
-              (Number(map[i.date].purRec) + Number(i.purRec)).toFixed(2);
-            map[i.date].sale =
-              (Number(map[i.date].sale) + Number(i.sale)).toFixed(2);
+            map[i.date].purRec = (
+              Number(map[i.date].purRec) + Number(i.purRec)
+            ).toFixed(2);
+            map[i.date].sale = (
+              Number(map[i.date].sale) + Number(i.sale)
+            ).toFixed(2);
             map[i.date].closing = i.closing;
           }
         });
         return Object.values(map).filter(
-          (i) => Number(i.purRec) !== 0 || Number(i.sale) !== 0
+          (i) => Number(i.purRec) !== 0 || Number(i.sale) !== 0,
         );
       }
 
@@ -189,10 +196,12 @@ const StockReport = () => {
           if (!map[i.date]) {
             map[i.date] = { ...i };
           } else {
-            map[i.date].purRec =
-              (Number(map[i.date].purRec) + Number(i.purRec)).toFixed(2);
-            map[i.date].sale =
-              (Number(map[i.date].sale) + Number(i.sale)).toFixed(2);
+            map[i.date].purRec = (
+              Number(map[i.date].purRec) + Number(i.purRec)
+            ).toFixed(2);
+            map[i.date].sale = (
+              Number(map[i.date].sale) + Number(i.sale)
+            ).toFixed(2);
             map[i.date].closing = i.closing;
           }
         });
@@ -214,10 +223,10 @@ const StockReport = () => {
               date: key,
             };
           } else {
-            map[key].purRec =
-              (Number(map[key].purRec) + Number(i.purRec)).toFixed(2);
-            map[key].sale =
-              (Number(map[key].sale) + Number(i.sale)).toFixed(2);
+            map[key].purRec = (
+              Number(map[key].purRec) + Number(i.purRec)
+            ).toFixed(2);
+            map[key].sale = (Number(map[key].sale) + Number(i.sale)).toFixed(2);
             map[key].closing = i.closing;
           }
         });
@@ -242,18 +251,18 @@ const StockReport = () => {
       try {
         const [saleRes, purchaseRes, stockMasterRes] = await Promise.all([
           axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale"
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale",
           ),
           axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase",
           ),
           axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster"
+            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster",
           ),
         ]);
 
         const matchingStock = stockMasterRes.data.data.find(
-          (item) => item.formData?.Aheads?.trim() === selectedAhead
+          (item) => item.formData?.Aheads?.trim() === selectedAhead,
         );
         const opening = parseFloat(matchingStock?.formData?.openwts || 0);
         setOpeningWeight(opening);
@@ -263,7 +272,13 @@ const StockReport = () => {
           const d = parseDate(date);
           const f = parseDate(fromDate);
           const u = parseDate(uptoDate);
+
           if (!d || !f || !u) return false;
+
+          d.setHours(0, 0, 0, 0);
+          f.setHours(0, 0, 0, 0);
+          u.setHours(23, 59, 59, 999);
+
           return d >= f && d <= u;
         };
 
@@ -272,18 +287,18 @@ const StockReport = () => {
             .filter(
               (item) =>
                 item.sdisc?.trim().toLowerCase() === normalizedAhead &&
-                isWithinDateRange(purchase.formData.date)
+                isWithinDateRange(purchase.formData.date),
             )
             .map((item) => ({
-              id: item.id,            // item number
-              docId: purchase._id,    // Mongo document ID
+              id: item.id, // item number
+              docId: purchase._id, // Mongo document ID
               type: "purchase",
               date: parseDate(purchase.formData.date),
               // date: new Date(purchase.formData.date),
               sdisc: purchase.supplierdetails?.[0]?.vacode || "",
               purRec: parseFloat(item.weight),
               sale: 0,
-            }))
+            })),
         );
 
         const sales = saleRes.data.flatMap((sale) =>
@@ -291,24 +306,24 @@ const StockReport = () => {
             .filter(
               (item) =>
                 item.sdisc?.trim().toLowerCase() === normalizedAhead &&
-                isWithinDateRange(sale.formData.date)
+                isWithinDateRange(sale.formData.date),
             )
             .map((item) => ({
-              id: item.id,          // item number
-              docId: sale._id,      // Mongo document ID
+              id: item.id, // item number
+              docId: sale._id, // Mongo document ID
               type: "sale",
               date: new Date(sale.formData.date),
               sdisc: sale.customerDetails?.[0]?.vacode || "",
               purRec: 0,
               sale: parseFloat(item.weight),
-            }))
+            })),
         );
 
         setPurchaseItems(purchases);
         setSaleItems(sales);
 
         const merged = [...purchases, ...sales].sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
+          (a, b) => new Date(a.date) - new Date(b.date),
         );
 
         let prevClosing = opening;
@@ -347,30 +362,27 @@ const StockReport = () => {
 
       if (e.key === "ArrowDown") {
         setActiveRow((prev) => Math.min(prev + 1, items.length - 1));
-      } 
-      else if (e.key === "ArrowUp") {
+      } else if (e.key === "ArrowUp") {
         setActiveRow((prev) => Math.max(prev - 1, 0));
-      }
-      else if (e.key === "Enter") {
+      } else if (e.key === "Enter") {
         const row = items[activeRow];
-        if (!row || reportType === 'Month Wise Display') return;
+        if (!row || reportType === "Month Wise Display") return;
 
         // ✅ SAVE ACTIVE ROW INDEX
         sessionStorage.setItem("stock_activeRow", activeRow);
-        
+
         // 🔥 Navigation Logic
         if (row.type === "sale") {
           navigate("/sale", {
             state: {
-              saleId: row.docId
-            }
+              saleId: row.docId,
+            },
           });
-        }
-        else if (row.type === "purchase") {
+        } else if (row.type === "purchase") {
           navigate("/purchase", {
             state: {
-              purId: row.docId
-            }
+              purId: row.docId,
+            },
           });
         }
       }
@@ -395,10 +407,7 @@ const StockReport = () => {
     const savedRow = sessionStorage.getItem("stock_activeRow");
 
     if (savedRow !== null && items.length > 0) {
-      const index = Math.min(
-        parseInt(savedRow, 10),
-        items.length - 1
-      );
+      const index = Math.min(parseInt(savedRow, 10), items.length - 1);
       setActiveRow(index);
     }
   }, [items]);
@@ -416,8 +425,8 @@ const StockReport = () => {
     if (!selectedRow) return;
 
     // Adjust for header height (if your thead is sticky)
-    const headerOffset = 40;  // Adjust if your header height is different
-    const buffer = 25;        // Extra space above/below row
+    const headerOffset = 40; // Adjust if your header height is different
+    const buffer = 25; // Extra space above/below row
 
     const rowTop = selectedRow.offsetTop;
     const rowBottom = rowTop + selectedRow.offsetHeight;
@@ -428,8 +437,7 @@ const StockReport = () => {
 
     // If row is below visible area → scroll down
     if (rowBottom > visibleBottom) {
-      const newScroll =
-        rowBottom - containerHeight + buffer * 2;
+      const newScroll = rowBottom - containerHeight + buffer * 2;
 
       container.scrollTo({
         top: newScroll,
@@ -439,8 +447,7 @@ const StockReport = () => {
 
     // If row is above visible area → scroll up
     else if (rowTop < visibleTop) {
-      const newScroll =
-        rowTop - headerOffset - buffer;
+      const newScroll = rowTop - headerOffset - buffer;
 
       container.scrollTo({
         top: newScroll,
@@ -452,66 +459,66 @@ const StockReport = () => {
   return (
     <div style={{ padding: "10px" }}>
       <Card className={styles.cardL}>
-      <h1 className={styles.header}>STOCK REPORT</h1>
-      <div className={styles.TopPart}>
-        <div className={styles.Column}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <label htmlFor="aheadSelect">A/c Name:</label>
-            <select
-              className={styles.AcName}
-              id="aheadSelect"
-              value={selectedAhead}
-              onChange={(e) => setSelectedAhead(e.target.value)}
+        <h1 className={styles.header}>STOCK REPORT</h1>
+        <div className={styles.TopPart}>
+          <div className={styles.Column}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
             >
-              <option value="">-- Select Ahead --</option>
-              {aheads.map((ahead, index) => (
-                <option key={index} value={ahead}>
-                  {ahead}
+              <label htmlFor="aheadSelect">A/c Name:</label>
+              <select
+                className={styles.AcName}
+                id="aheadSelect"
+                value={selectedAhead}
+                onChange={(e) => setSelectedAhead(e.target.value)}
+              >
+                <option value="">-- Select Ahead --</option>
+                {aheads.map((ahead, index) => (
+                  <option key={index} value={ahead}>
+                    {ahead}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 5,
+              }}
+            >
+              <text style={{ marginRight: "8px" }}>Options:</text>
+              <select
+                className={styles.options}
+                id="reportTypeSelect"
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+              >
+                <option value="record_active">Record Wise Active</option>
+                <option value="record_all">Record Wise All</option>
+                <option value="date_active">Date Wise Active</option>
+                <option value="date_all">Date Wise All</option>
+                <option value="Month Wise Display">Month Wise Display</option>
+                <option value="Record Wise with Product Details">
+                  Record Wise with Product Details
                 </option>
-              ))}
-            </select>
+              </select>
+            </div>
           </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 5,
-            }}
-          >
-            <text style={{ marginRight: "8px" }}>Options:</text>
-            <select
-              className={styles.options}
-              id="reportTypeSelect"
-              value={reportType}
-              onChange={(e) => setReportType(e.target.value)}
+          <div className={styles.Column}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
             >
-              <option value="record_active">Record Wise Active</option>
-              <option value="record_all">Record Wise All</option>
-              <option value="date_active">Date Wise Active</option>
-              <option value="date_all">Date Wise All</option>
-              <option value="Month Wise Display">Month Wise Display</option>
-              <option value="Record Wise with Product Details">
-                Record Wise with Product Details
-              </option>
-            </select>
-          </div>
-        </div>
-        <div className={styles.Column}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <text style={{ marginRight: "8px" }}>From:</text>
+              <text style={{ marginRight: "8px" }}>From:</text>
               <InputMask
                 mask="99/99/9999"
                 placeholder="dd/mm/yyyy"
@@ -519,51 +526,53 @@ const StockReport = () => {
                 onChange={(e) => setFromDate(e.target.value)}
                 className={styles.From}
               />
-            {/* <DatePicker
+              {/* <DatePicker
               selected={fromDate}
               onChange={(date) => setFromDate(date)}
               className={styles.From}
               dateFormat="dd/MM/yyyy"
             /> */}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 5,
-            }}
-          >
-            <text style={{ marginRight: "8px" }}>Upto:</text>
-            <InputMask
-              mask="99/99/9999"
-              placeholder="dd/mm/yyyy"
-              value={uptoDate}
-              onChange={(e) => setUptoDate(e.target.value)}
-              className={styles.Upto}
-            />
-            {/* <DatePicker
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 5,
+              }}
+            >
+              <text style={{ marginRight: "8px" }}>Upto:</text>
+              <InputMask
+                mask="99/99/9999"
+                placeholder="dd/mm/yyyy"
+                value={uptoDate}
+                onChange={(e) => setUptoDate(e.target.value)}
+                className={styles.Upto}
+              />
+              {/* <DatePicker
               selected={uptoDate}
               onChange={(date) => setUptoDate(date)}
               className={styles.Upto}
               dateFormat="dd/MM/yyyy"
             /> */}
+            </div>
+          </div>
+          <div style={{ marginLeft: "20px", marginTop: "auto" }}>
+            <Button className="Buttonz" onClick={handleOpen}>
+              Print
+            </Button>
+          </div>
+          <div style={{ visibility: "hidden", width: 0, height: 0 }}>
+            <StockRpPrint
+              items={items}
+              isOpen={open}
+              handleClose={handleClose}
+              selectedAhead={selectedAhead}
+              fromDate={fromDate}
+              uptoDate={uptoDate}
+            />
           </div>
         </div>
-        <div style={{marginLeft:"20px",marginTop:"auto"}}>
-          <Button className="Buttonz" onClick={handleOpen}>Print</Button>
-        </div>
-        <div style={{ visibility: "hidden", width: 0, height: 0 }}>
-          <StockRpPrint
-            items={items}
-            isOpen={open}
-            handleClose={handleClose}
-            selectedAhead={selectedAhead}
-            fromDate={fromDate}
-            uptoDate={uptoDate}
-          />
-        </div>
-      </div>
         <div ref={tableContainerRef} className={styles.TableDIV}>
           <Table className="custom-table">
             <thead
@@ -575,7 +584,9 @@ const StockReport = () => {
               }}
             >
               <tr style={{ color: "#575a5a" }}>
-                <th>{reportType === "Month Wise Display" ? "MONTH" : "DATE"}</th>
+                <th>
+                  {reportType === "Month Wise Display" ? "MONTH" : "DATE"}
+                </th>
                 <th>DESCRIPTION</th>
                 <th>OPENING</th>
                 <th>PUR/REC.</th>
@@ -585,7 +596,9 @@ const StockReport = () => {
                 <th>CLOSING</th>
               </tr>
             </thead>
-           <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+            <tbody
+              style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}
+            >
               {items.map((item, index) => (
                 <tr
                   key={item.id}
@@ -597,23 +610,53 @@ const StockReport = () => {
                   }}
                   onClick={() => setActiveRow(index)}
                 >
-                  <td className={styles.font} style={{ padding: "8px" }}>{item.date}</td>
+                  <td className={styles.font} style={{ padding: "8px" }}>
+                    {item.date}
+                  </td>
                   <td className={styles.font} style={{ padding: "8px" }}>
                     {reportType === "Month Wise Display" ? "" : item.sdisc}
                   </td>
-                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.opening}</td>
-                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.purRec}</td>
-                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.production}</td>
-                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.issue}</td>
-                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.sale}</td>
-                  <td className={styles.font} style={{ padding: "8px", textAlign: "right" }}>{item.closing}</td>
+                  <td
+                    className={styles.font}
+                    style={{ padding: "8px", textAlign: "right" }}
+                  >
+                    {item.opening}
+                  </td>
+                  <td
+                    className={styles.font}
+                    style={{ padding: "8px", textAlign: "right" }}
+                  >
+                    {item.purRec}
+                  </td>
+                  <td
+                    className={styles.font}
+                    style={{ padding: "8px", textAlign: "right" }}
+                  >
+                    {item.production}
+                  </td>
+                  <td
+                    className={styles.font}
+                    style={{ padding: "8px", textAlign: "right" }}
+                  >
+                    {item.issue}
+                  </td>
+                  <td
+                    className={styles.font}
+                    style={{ padding: "8px", textAlign: "right" }}
+                  >
+                    {item.sale}
+                  </td>
+                  <td
+                    className={styles.font}
+                    style={{ padding: "8px", textAlign: "right" }}
+                  >
+                    {item.closing}
+                  </td>
                 </tr>
               ))}
-           </tbody>
-
+            </tbody>
           </Table>
         </div>
-    
       </Card>
     </div>
   );
