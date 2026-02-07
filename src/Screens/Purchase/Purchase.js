@@ -1899,6 +1899,30 @@ const Purchase = () => {
     }
     setLoading(false);
   };
+    const [postingSetup, setPostingSetup] = useState({
+    isDefault: false,
+    rows: [],
+  });
+  useEffect(() => {
+    const fetchPostingSetup = async () => {
+      try {
+        const res = await axios.get(
+          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/sale-purchase-posting-setup",
+        );
+
+        if (res.data?.ok) {
+          setPostingSetup({
+            isDefault: res.data.item.isDefault,
+            rows: res.data.item.rows || [],
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch posting setup", error);
+      }
+    };
+
+    fetchPostingSetup();
+  }, []);
 
   const handleItemChange = (index, key, value, field) => {
     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
@@ -1935,10 +1959,33 @@ const Purchase = () => {
         updatedItems[index]["rate"] = selectedProduct.Mrps;
         updatedItems[index]["gst"] = selectedProduct.itax_rate;
         updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-        updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-        updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-        updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+         if (postingSetup?.isDefault === true) {
+          // 🔥 NEW LOGIC → API controlled
+
+          const gstRate = String(selectedProduct.itax_rate);
+
+          const matchedSetup = postingSetup.rows.find(
+            (row) => String(row.gst) === gstRate,
+          );
+
+          if (matchedSetup) {
+            updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
+            updatedItems[index]["Scodess"] = matchedSetup.Scodess;
+            updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
+            updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
+          } else {
+            // Optional safety if GST not found
+            updatedItems[index]["Scodes01"] = "";
+            updatedItems[index]["Scodess"] = "";
+            updatedItems[index]["Pcodes01"] = "";
+            updatedItems[index]["Pcodess"] = "";
+          }
+        } else {
+          updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+        }
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
       } else {

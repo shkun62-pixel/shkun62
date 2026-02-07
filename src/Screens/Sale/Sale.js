@@ -241,7 +241,7 @@
 
 //   useEffect(() => {
 //     console.log("CompanyState",CompanyState);
-    
+
 //     if (addButtonRef.current && !saleId) {
 //       addButtonRef.current.focus();
 //     }
@@ -271,21 +271,20 @@
 //     sgst: true,
 //     igst: true,
 //   };
-  
+
 //   const [tableData, settableData] = useState(() => {
 //   const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
 //   const parsed = saved ? JSON.parse(saved) : {};
-  
+
 //   // Only keep keys that exist in defaultFormData
 //   const sanitized = Object.fromEntries(
 //     Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
 //       Object.hasOwn(defaultTableFields, key)
 //     )
 //   );
-  
+
 //   return sanitized;
 // });
-
 
 //   // Save to localStorage whenever tableData changes
 //   useEffect(() => {
@@ -295,7 +294,7 @@
 //   const handleCheckboxChange = (field) => {
 //     settableData((prev) => ({ ...prev, [field]: !prev[field] }));
 //   };
-  
+
 //   const customerNameRef = useRef(null);
 //   const grNoRef = useRef(null);
 //   const termsRef = useRef(null);
@@ -464,7 +463,6 @@
 //       })
 //     );
 //   }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
-
 
 //   // Calculate Total GST
 //   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
@@ -752,7 +750,6 @@
 //   setIsFAModalOpen(true);
 // };
 
-
 //   useEffect(() => {
 //     const hasVcode = (isEditMode && items.some(item => String(item.vcode).trim() !== ""));
 //     setIsSubmitEnabled(hasVcode);
@@ -996,7 +993,7 @@
 //     setIsDisabled(true);
 //     // Add this line to set isDisabled to true initially
 //   }, []);
-  
+
 //   // Modal & Search states
 //   const [showSearch, setShowSearch] = useState(false);
 //   const [allBills, setAllBills] = useState([]);
@@ -1523,7 +1520,7 @@
 //       customerNameRef.current.focus();
 //     }
 //   };
-  
+
 //   const handleSaveClickwithSetup = async () => {
 //     document.body.style.backgroundColor = "white";
 //     let isDataSaved = false;
@@ -1774,7 +1771,7 @@
 //   const handleDataSave = async () => {
 //     handleSaveClickwithSetup();
 //   };
-  
+
 //   // 👇 This runs AFTER isPrintEnabled changes
 //   useEffect(() => {
 //     if (shouldFocusPrint && isPrintEnabled && printButtonRef.current) {
@@ -1864,7 +1861,6 @@
 //     setItems(updatedItems);
 //   };
 
-
 //   React.useEffect(() => {
 //     // Fetch products from the API when the component mounts
 //     fetchProducts();
@@ -1914,10 +1910,10 @@
 //         value = -Math.abs(numeric); // Force negative
 //       }
 //     }
-    
+
 //     const updatedItems = [...items];
 //     if (["sdisc"].includes(key)) {
-//       updatedItems[index][key] = capitalizeWords(value);  
+//       updatedItems[index][key] = capitalizeWords(value);
 //     } else {
 //       updatedItems[index][key] = value;
 //     }
@@ -2168,7 +2164,7 @@
 //       setLoadingAcc(false);
 //     }
 //   };
-  
+
 //   // Modal For CustomerDetails
 //   const [productsCus, setProductsCus] = useState([]);
 //   const [showModalCus, setShowModalCus] = useState(false);
@@ -2239,10 +2235,10 @@
 //       setShowModalCus(false);
 //       return;
 //     }
-  
+
 //     // clone the array
 //     const newCustomers = [...customerDetails];
-  
+
 //     // overwrite the one at the selected index
 //     newCustomers[selectedItemIndexCus] = {
 //       ...newCustomers[selectedItemIndexCus],
@@ -2254,7 +2250,7 @@
 //       Add1: product.add1 || '',
 //       state: product.state    || '',
 //       Tcs206c1H: product.tcs206    || '',
-//       TDS194Q: product.tds194q    || '',  
+//       TDS194Q: product.tds194q    || '',
 //     };
 
 //     const stype = determineSaleType(product.state, product.gstNo || "", CompanyState);
@@ -2281,8 +2277,7 @@
 //     setcustomerDetails(newCustomers);
 //     setIsEditMode(true);
 //     setShowModalCus(false);
-  
-  
+
 //     // restore focus
 //     setTimeout(() => {
 //       if (selectedItemIndexCus === "v_tpt") {
@@ -2362,17 +2357,17 @@
 //       setShowModalAcc(false);
 //       return;
 //     }
-  
+
 //     // Defensive: index of the row being edited
 //     // if (typeof selectedItemIndexAcc !== "number") {
 //     //   alert("No shipped row selected!");
 //     //   setShowModalAcc(false);
 //     //   return;
 //     // }
-  
+
 //     // Deep copy shipped array
 //     const updatedShipped = [...shipped];
-  
+
 //     // Update the correct object in the array
 //     updatedShipped[selectedItemIndexAcc] = {
 //       ...updatedShipped[selectedItemIndexAcc],
@@ -2399,7 +2394,7 @@
 //     setshipped(updatedShipped);       // <- update the array in state!
 //     setIsEditMode(true);
 //     setShowModalAcc(false);
-  
+
 //     // Optionally refocus
 //     setTimeout(() => {
 //       if (selectedItemIndexAcc === "broker") {
@@ -2426,7 +2421,6 @@
 
 //     return fields;
 //   }, []);
-
 
 //   const handleTaxType = (event) => {
 //     const { value } = event.target;
@@ -2557,7 +2551,6 @@
 //     let disc = parseFloat(updatedItems[index].disc) || 0;
 //     let per = ((disc / 100) * TotalAcc).toFixed(2);
 //     let Amounts = TotalAcc + others + parseFloat(per);
-
 
 //     // Ensure TotalAcc is a valid number before calling toFixed()
 //     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
@@ -2989,7 +2982,6 @@
 //   }
 // };
 
-
 //   const [isModalOpenAfter, setIsModalOpenAfter] = useState(false);
 //   const handleKeyDownAfter = (e) => {
 //     if (e.key === "ArrowDown") {
@@ -3008,7 +3000,7 @@
 //   }
 
 //   const handleDoubleClick = (event,fieldName, index) => {
-    
+
 //     if (fieldName === "exp_before" && isEditMode) {
 //       setCurrentIndex(index); // Set the current index
 //       setIsModalOpenExp(true); // Open the modal
@@ -3077,7 +3069,7 @@
 //       content: () => printRef.current,
 //       onAfterPrint: () => setOpen(false), // auto-close after print
 //     });
-  
+
 //     const handlePrintClick = () => {
 //     setOpen(true);
 //     setTimeout(() => {
@@ -3274,7 +3266,7 @@
 //               </div>
 //               </div>
 //             </div>
-          
+
 //           </div>
 //         )}
 //       </div>
@@ -3432,7 +3424,7 @@
 //                           onDoubleClick={(e) => {
 //                           handleDoubleClick(e,"shippedto", index)
 //                           }}
-//                           onFocus={(e) => e.target.select()} 
+//                           onFocus={(e) => e.target.select()}
 //                         />
 //                       </div>
 //                   </div>
@@ -3441,7 +3433,7 @@
 //                <ProductModalCustomer
 //                 allFields={allFieldsAcc}
 //                 onSelect={handleProductSelectAcc}
-//                 onClose={() => setShowModalAcc(false)} 
+//                 onClose={() => setShowModalAcc(false)}
 //                 initialKey={pressedKey}
 //                 tenant={tenant}
 //                 onRefresh={fetchCustomers}
@@ -3548,7 +3540,7 @@
 //                 displayEmpty
 //                 inputProps={{
 //                   sx: {
-//                     fontSize: `${fontSize}px`, 
+//                     fontSize: `${fontSize}px`,
 //                     pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
 //                   },
 //                 }}
@@ -3948,7 +3940,7 @@
 //                       textAlign: "right",
 //                     }}
 //                     value={Number(item.discount) === 0 ? "" : item.discount}
-//                     onChange={(e) =>  
+//                     onChange={(e) =>
 //                       handleItemChange(index, "discount", e.target.value)
 //                     }
 //                     onKeyDown={(e) => {
@@ -4569,7 +4561,7 @@
 //               },
 //             }}
 //           />
-//           <span style={{ fontSize: 20, marginTop: "10px" }}>=</span> 
+//           <span style={{ fontSize: 20, marginTop: "10px" }}>=</span>
 //           <TextField
 //             className="CTDS custom-bordered-input"
 //             value={formData.Tds2}
@@ -4839,7 +4831,7 @@
 //         </div>
 //         <div className="Buttonsgroupz">
 //           <Button
-//             ref={addButtonRef} 
+//             ref={addButtonRef}
 //             className="Buttonz"
 //             style={{ background: color }}
 //             onClick={handleAdd}
@@ -4919,16 +4911,16 @@
 //             Print
 //           </Button>
 
-//           <BillPrintMenu 
-//           isOpen={isMenuOpen} 
-//           onClose={closePrintMenu} 
-//           preview={handleOpen} 
+//           <BillPrintMenu
+//           isOpen={isMenuOpen}
+//           onClose={closePrintMenu}
+//           preview={handleOpen}
 //           formDataSale={formData}
 //           handlePrint={handlePrintClick}
 //           setSelectedCopies={setSelectedCopies}
 //           onFaView={handleViewFAVoucher}
 //           />
-          
+
 //           <Button
 //             className="delete"
 //             style={{background: color }}
@@ -5064,7 +5056,6 @@
 
 // export default Sale;
 
-
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./Sale.css";
 import DatePicker from "react-datepicker";
@@ -5094,9 +5085,9 @@ import { useEditMode } from "../../EditModeContext";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import TextField from "@mui/material/TextField";
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import {IconButton} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import BillPrintMenu from "../Modals/BillPrintMenu";
 import useCompanySetup from "../Shared/useCompanySetup";
 import { Modal, Form } from "react-bootstrap";
@@ -5120,7 +5111,6 @@ const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
 ));
 
 const Sale = () => {
-
   const location = useLocation();
   const saleId = location.state?.saleId;
   const navigate = useNavigate();
@@ -5318,20 +5308,20 @@ const Sale = () => {
   ]);
 
   useEffect(() => {
-    console.log("CompanyState",CompanyState);
-    
+    console.log("CompanyState", CompanyState);
+
     if (addButtonRef.current && !saleId) {
       addButtonRef.current.focus();
     }
   }, []);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-      const openPrintMenu = () => {
-      setIsMenuOpen(true);
+  const openPrintMenu = () => {
+    setIsMenuOpen(true);
   };
 
   const closePrintMenu = () => {
-      setIsMenuOpen(false);
+    setIsMenuOpen(false);
   };
 
   const defaultTableFields = {
@@ -5344,26 +5334,25 @@ const Sale = () => {
     amount: true,
     discount: false,
     others: true,
-    gst:false,
+    gst: false,
     cgst: true,
     sgst: true,
     igst: true,
   };
-  
-  const [tableData, settableData] = useState(() => {
-  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-  const parsed = saved ? JSON.parse(saved) : {};
-  
-  // Only keep keys that exist in defaultFormData
-  const sanitized = Object.fromEntries(
-    Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
-      Object.hasOwn(defaultTableFields, key)
-    )
-  );
-  
-  return sanitized;
-});
 
+  const [tableData, settableData] = useState(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
+    // Only keep keys that exist in defaultFormData
+    const sanitized = Object.fromEntries(
+      Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+        Object.hasOwn(defaultTableFields, key),
+      ),
+    );
+
+    return sanitized;
+  });
 
   // Save to localStorage whenever tableData changes
   useEffect(() => {
@@ -5373,7 +5362,7 @@ const Sale = () => {
   const handleCheckboxChange = (field) => {
     settableData((prev) => ({ ...prev, [field]: !prev[field] }));
   };
-  
+
   const customerNameRef = useRef(null);
   const grNoRef = useRef(null);
   const termsRef = useRef(null);
@@ -5451,7 +5440,7 @@ const Sale = () => {
   const fetchSalesSetup = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/salesetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/salesetup`,
       );
       if (!response.ok) throw new Error("Failed to fetch sales setup");
 
@@ -5528,7 +5517,23 @@ const Sale = () => {
   };
   useEffect(() => {
     fetchSalesSetup();
-  }, [T11,T21,T12,ExpRate1,ExpRate2,ExpRate3,ExpRate4,ExpRate5,ExpRate6,ExpRate7,ExpRate8,ExpRate9,ExpRate10,Defaultbutton,BillType,SupplyType
+  }, [
+    T11,
+    T21,
+    T12,
+    ExpRate1,
+    ExpRate2,
+    ExpRate3,
+    ExpRate4,
+    ExpRate5,
+    ExpRate6,
+    ExpRate7,
+    ExpRate8,
+    ExpRate9,
+    ExpRate10,
+    Defaultbutton,
+    BillType,
+    SupplyType,
   ]);
 
   useEffect(() => {
@@ -5539,10 +5544,9 @@ const Sale = () => {
         ExpRate3,
         ExpRate4,
         ExpRate5,
-      })
+      }),
     );
   }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
-
 
   // Calculate Total GST
   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
@@ -5650,12 +5654,13 @@ const Sale = () => {
     // Calculate Total Expenses
     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
     let gstTotal = cgstTotal + sgstTotal + igstTotal;
-    let grandTotal = totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
+    let grandTotal =
+      totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
     let taxable = parseFloat(formDataOverride.sub_total);
     // ✅ Skip TCS Calculation if skipTCS is true
     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
-    let tcs1 =  parseFloat(formDataOverride.tcs1) || 0;
+    let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
     let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
     let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
     let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
@@ -5794,14 +5799,16 @@ const Sale = () => {
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape" && !isEditMode && saleId) {
-        const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
+        const modalState = JSON.parse(
+          sessionStorage.getItem("trailModalState") || "{}",
+        );
 
         navigate(-1); // go back
         setTimeout(() => {
           // restore modal state after navigation
           if (modalState.keepModalOpen) {
             window.dispatchEvent(
-              new CustomEvent("reopenTrailModal", { detail: modalState })
+              new CustomEvent("reopenTrailModal", { detail: modalState }),
             );
           }
         }, 50);
@@ -5812,22 +5819,22 @@ const Sale = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isEditMode]);
 
-// state
-const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+  // state
+  const [isFAModalOpen, setIsFAModalOpen] = useState(false);
 
-// when user clicks “FA VOUCHER VIEW” inside BillPrintMenu
-const handleViewFAVoucher = () => {
-  // we need a voucher number for FA — you’re using formData.vno for FA entries
-  if (!formData?.vno) {
-    toast.info("No voucher number found.", { position: "top-center" });
-    return;
-  }
-  setIsFAModalOpen(true);
-};
-
+  // when user clicks “FA VOUCHER VIEW” inside BillPrintMenu
+  const handleViewFAVoucher = () => {
+    // we need a voucher number for FA — you’re using formData.vno for FA entries
+    if (!formData?.vno) {
+      toast.info("No voucher number found.", { position: "top-center" });
+      return;
+    }
+    setIsFAModalOpen(true);
+  };
 
   useEffect(() => {
-    const hasVcode = (isEditMode && items.some(item => String(item.vcode).trim() !== ""));
+    const hasVcode =
+      isEditMode && items.some((item) => String(item.vcode).trim() !== "");
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
@@ -5836,11 +5843,11 @@ const handleViewFAVoucher = () => {
       let response;
       if (saleId) {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`,
         );
       } else {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
         );
       }
       // const response = await axios.get(
@@ -6014,7 +6021,7 @@ const handleViewFAVoucher = () => {
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
@@ -6035,7 +6042,7 @@ const handleViewFAVoucher = () => {
         bill.formData.vbillno
           .toString()
           .toLowerCase()
-          .includes(searchBillNo.toLowerCase())
+          .includes(searchBillNo.toLowerCase()),
       );
     }
 
@@ -6050,7 +6057,7 @@ const handleViewFAVoucher = () => {
 
     // Filter by Date if selected
     if (searchDate) {
-        const selected = formatLocalDate(searchDate);
+      const selected = formatLocalDate(searchDate);
 
       if (selected) {
         filtered = filtered.filter((bill) => {
@@ -6076,7 +6083,7 @@ const handleViewFAVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next`,
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -6117,7 +6124,7 @@ const handleViewFAVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous`,
         );
         if (response.status === 200 && response.data) {
           const prevData = response.data.data;
@@ -6158,7 +6165,7 @@ const handleViewFAVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first`,
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -6199,7 +6206,7 @@ const handleViewFAVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -6242,8 +6249,12 @@ const handleViewFAVoucher = () => {
       const lastEntry = await fetchData();
       await fetchSalesSetup();
       const today = new Date().toISOString().slice(0, 10);
-      const lastvoucherno = lastEntry?.formData?.vbillno ? parseInt(lastEntry.formData.vbillno) + 1 : 1;
-      const lastvno = lastEntry?.formData?.vno ? parseInt(lastEntry.formData.vno) + 1 : 1;
+      const lastvoucherno = lastEntry?.formData?.vbillno
+        ? parseInt(lastEntry.formData.vbillno) + 1
+        : 1;
+      const lastvno = lastEntry?.formData?.vno
+        ? parseInt(lastEntry.formData.vno) + 1
+        : 1;
 
       const newData = {
         ...lastEntry?.formData,
@@ -6305,7 +6316,7 @@ const handleViewFAVoucher = () => {
           ExpRate3,
           ExpRate4,
           ExpRate5,
-        })
+        }),
       );
 
       // setItems([
@@ -6387,7 +6398,9 @@ const handleViewFAVoucher = () => {
   const handleExit = async () => {
     // Check if grandtotal is Greater Than zero
     if (formData.grandtotal > 0 && isEditMode) {
-      const confirmExit = window.confirm("Are you sure you want to Exit? Unsaved changes may be lost.");
+      const confirmExit = window.confirm(
+        "Are you sure you want to Exit? Unsaved changes may be lost.",
+      );
       if (!confirmExit) {
         return;
       }
@@ -6396,7 +6409,7 @@ const handleViewFAVoucher = () => {
     setTitle("(View)");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
       );
 
       if (response.status === 200 && response.data.data) {
@@ -6405,7 +6418,9 @@ const handleViewFAVoucher = () => {
         setData1(response.data.data);
         // setItems(lastEntry.items.map((item) => ({ ...item })));
         setItems(normalizeItems(lastEntry.items));
-        setcustomerDetails(lastEntry.customerDetails.map((item) => ({ ...item })));
+        setcustomerDetails(
+          lastEntry.customerDetails.map((item) => ({ ...item })),
+        );
         setshipped(lastEntry.shipped.map((item) => ({ ...item })));
 
         setIsDisabled(true);
@@ -6493,7 +6508,7 @@ const handleViewFAVoucher = () => {
       customerNameRef.current.focus();
     }
   };
-  
+
   const handleSaveClickwithSetup = async () => {
     document.body.style.backgroundColor = "white";
     let isDataSaved = false;
@@ -6502,26 +6517,32 @@ const handleViewFAVoucher = () => {
       // 1) Validate
       const isValid = customerDetails.every((item) => item.vacode !== "");
       if (!isValid) {
-        toast.error("Please Fill the Customer Details", { position: "top-center" });
+        toast.error("Please Fill the Customer Details", {
+          position: "top-center",
+        });
         return;
       }
 
-      const nonEmptyItems = items.filter((item) => (item.sdisc || "").trim() !== "");
+      const nonEmptyItems = items.filter(
+        (item) => (item.sdisc || "").trim() !== "",
+      );
       if (nonEmptyItems.length === 0) {
-        toast.error("Please fill in at least one Items name.", { position: "top-center" });
+        toast.error("Please fill in at least one Items name.", {
+          position: "top-center",
+        });
         return;
       }
-const ddmmyyyy = (d) => {
-  if (!d) return "";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-};
+      const ddmmyyyy = (d) => {
+        if (!d) return "";
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+      };
       // 2) Build base form with setup codes (common to both add/edit)
       const baseForm = {
-      date: isAbcmode ? selectedDate?.toISOString() : ddmmyyyy(selectedDate),
-  duedate: isAbcmode ? expiredDate?.toISOString() : ddmmyyyy(expiredDate),
+        date: isAbcmode ? selectedDate?.toISOString() : ddmmyyyy(selectedDate),
+        duedate: isAbcmode ? expiredDate?.toISOString() : ddmmyyyy(expiredDate),
         vtype: formData.vtype,
         vbillno: formData.vbillno,
         vno: formData.vno,
@@ -6596,16 +6617,26 @@ const ddmmyyyy = (d) => {
         iTds_code: setupFormData.iTds_code,
         iTds_ac: setupFormData.iTds_ac,
 
-        expense1_code: setupFormData.E1Code,  expense1_ac: setupFormData.E1name,
-        expense2_code: setupFormData.E2Code,  expense2_ac: setupFormData.E2name,
-        expense3_code: setupFormData.E3Code,  expense3_ac: setupFormData.E3name,
-        expense4_code: setupFormData.E4Code,  expense4_ac: setupFormData.E4name,
-        expense5_code: setupFormData.E5Code,  expense5_ac: setupFormData.E5name,
-        expense6_code: setupFormData.E6Code,  expense6_ac: setupFormData.E6name,
-        expense7_code: setupFormData.E7Code,  expense7_ac: setupFormData.E7name,
-        expense8_code: setupFormData.E8Code,  expense8_ac: setupFormData.E8name,
-        expense9_code: setupFormData.E9Code,  expense9_ac: setupFormData.E9name,
-        expense10_code: setupFormData.E10Code, expense10_ac: setupFormData.E10name,
+        expense1_code: setupFormData.E1Code,
+        expense1_ac: setupFormData.E1name,
+        expense2_code: setupFormData.E2Code,
+        expense2_ac: setupFormData.E2name,
+        expense3_code: setupFormData.E3Code,
+        expense3_ac: setupFormData.E3name,
+        expense4_code: setupFormData.E4Code,
+        expense4_ac: setupFormData.E4name,
+        expense5_code: setupFormData.E5Code,
+        expense5_ac: setupFormData.E5name,
+        expense6_code: setupFormData.E6Code,
+        expense6_ac: setupFormData.E6name,
+        expense7_code: setupFormData.E7Code,
+        expense7_ac: setupFormData.E7name,
+        expense8_code: setupFormData.E8Code,
+        expense8_ac: setupFormData.E8name,
+        expense9_code: setupFormData.E9Code,
+        expense9_ac: setupFormData.E9name,
+        expense10_code: setupFormData.E10Code,
+        expense10_ac: setupFormData.E10name,
       };
 
       const itemsPayload = nonEmptyItems.map((item) => ({
@@ -6671,7 +6702,11 @@ const ddmmyyyy = (d) => {
       // 3) Save Sale GST (add/edit)
       const saleGstUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
       const saleGstMethod = isAbcmode ? "put" : "post";
-      const saleRes = await axios({ method: saleGstMethod, url: saleGstUrl, data: combinedData });
+      const saleRes = await axios({
+        method: saleGstMethod,
+        url: saleGstUrl,
+        data: combinedData,
+      });
 
       // Try to extract saleId from response; fallbacks included for PUT/legacy responses
       const saleId =
@@ -6680,26 +6715,12 @@ const ddmmyyyy = (d) => {
         (isAbcmode ? data1?._id : null);
 
       if (!saleId) {
-        console.warn("saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.");
+        console.warn(
+          "saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.",
+        );
       }
 
       if (saleRes?.status === 200 || saleRes?.status === 201) {
-        // 4) Update Stock (SALE => subtract)
-        // try {
-        //   await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
-        //     mode: "sale",
-        //     items: nonEmptyItems.map((item) => ({
-        //       vcode: item.vcode,
-        //       sdisc: item.sdisc,
-        //       weight: Number(item.weight) || 0,
-        //       pkgs: Number(item.pkgs) || 0,
-        //     })),
-        //   });
-        // } catch (stkErr) {
-        //   console.error("Stock update error:", stkErr);
-        //   // Continue even if stock update fails
-        // }
-
         // 5) Post FA entries (with setup codes) — include saleId
         try {
           const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
@@ -6714,7 +6735,7 @@ const ddmmyyyy = (d) => {
           console.error("salefaFile error:", faErr);
           toast.warn(
             "Sale saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
-            { position: "top-center" }
+            { position: "top-center" },
           );
         }
 
@@ -6723,7 +6744,9 @@ const ddmmyyyy = (d) => {
       }
     } catch (error) {
       console.error("Error saving data:", error);
-      toast.error("Failed to save data. Please try again.", { position: "top-center" });
+      toast.error("Failed to save data. Please try again.", {
+        position: "top-center",
+      });
     } finally {
       setIsSubmitEnabled(false);
       if (isDataSaved) {
@@ -6751,7 +6774,7 @@ const ddmmyyyy = (d) => {
   const handleDataSave = async () => {
     handleSaveClickwithSetup();
   };
-  
+
   // 👇 This runs AFTER isPrintEnabled changes
   useEffect(() => {
     if (shouldFocusPrint && isPrintEnabled && printButtonRef.current) {
@@ -6762,7 +6785,7 @@ const ddmmyyyy = (d) => {
       addButtonRef.current.focus();
       setShouldFocusAdd(false); // Reset flag
     }
-  }, [isPrintEnabled,shouldFocusPrint,isAddEnabled,shouldFocusAdd]);
+  }, [isPrintEnabled, shouldFocusPrint, isAddEnabled, shouldFocusAdd]);
 
   const handleDeleteClick = async (id) => {
     if (!id) {
@@ -6773,7 +6796,7 @@ const ddmmyyyy = (d) => {
     }
 
     const userConfirmed = window.confirm(
-      "Are you sure you want to delete this from records?"
+      "Are you sure you want to delete this from records?",
     );
     if (!userConfirmed) return;
 
@@ -6841,7 +6864,6 @@ const ddmmyyyy = (d) => {
     setItems(updatedItems);
   };
 
-
   React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchProducts();
@@ -6851,7 +6873,7 @@ const ddmmyyyy = (d) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
       );
       if (!response.ok) throw new Error("Failed to fetch products");
       const data = await response.json();
@@ -6877,10 +6899,42 @@ const ddmmyyyy = (d) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [postingSetup, setPostingSetup] = useState({
+    isDefault: false,
+    rows: [],
+  });
+  useEffect(() => {
+    const fetchPostingSetup = async () => {
+      try {
+        const res = await axios.get(
+          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/sale-purchase-posting-setup",
+        );
+
+        if (res.data?.ok) {
+          setPostingSetup({
+            isDefault: res.data.item.isDefault,
+            rows: res.data.item.rows || [],
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch posting setup", error);
+      }
+    };
+
+    fetchPostingSetup();
+  }, []);
 
   const handleItemChange = (index, key, value, field) => {
     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-    if ((key === "pkgs" || key === "weight" || key === "tariff" || key === "rate" || key === "disc" || key === "discount") && !/^-?\d*\.?\d*$/.test(value)) {
+    if (
+      (key === "pkgs" ||
+        key === "weight" ||
+        key === "tariff" ||
+        key === "rate" ||
+        key === "disc" ||
+        key === "discount") &&
+      !/^-?\d*\.?\d*$/.test(value)
+    ) {
       return; // reject invalid input
     }
 
@@ -6891,10 +6945,10 @@ const ddmmyyyy = (d) => {
         value = -Math.abs(numeric); // Force negative
       }
     }
-    
+
     const updatedItems = [...items];
     if (["sdisc"].includes(key)) {
-      updatedItems[index][key] = capitalizeWords(value);  
+      updatedItems[index][key] = capitalizeWords(value);
     } else {
       updatedItems[index][key] = value;
     }
@@ -6905,7 +6959,7 @@ const ddmmyyyy = (d) => {
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
       const selectedProduct = products.find(
-        (product) => product.Aheads === value
+        (product) => product.Aheads === value,
       );
       if (selectedProduct) {
         updatedItems[index]["vcode"] = selectedProduct.Acodes;
@@ -6914,10 +6968,33 @@ const ddmmyyyy = (d) => {
         updatedItems[index]["rate"] = selectedProduct.Mrps;
         updatedItems[index]["gst"] = selectedProduct.itax_rate;
         updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-        updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-        updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-        updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+        if (postingSetup?.isDefault === true) {
+          // 🔥 NEW LOGIC → API controlled
+
+          const gstRate = String(selectedProduct.itax_rate);
+
+          const matchedSetup = postingSetup.rows.find(
+            (row) => String(row.gst) === gstRate,
+          );
+
+          if (matchedSetup) {
+            updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
+            updatedItems[index]["Scodess"] = matchedSetup.Scodess;
+            updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
+            updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
+          } else {
+            // Optional safety if GST not found
+            updatedItems[index]["Scodes01"] = "";
+            updatedItems[index]["Scodess"] = "";
+            updatedItems[index]["Pcodes01"] = "";
+            updatedItems[index]["Pcodess"] = "";
+          }
+        } else {
+          updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+        }
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
       } else {
@@ -6977,8 +7054,10 @@ const ddmmyyyy = (d) => {
     if (key === "discount") {
       per = manualDiscount;
     } else {
-      per = ((disc / 100) * TotalAcc);
-      updatedItems[index]["discount"] = T21 ? Math.round(per).toFixed(2) : per.toFixed(2);
+      per = (disc / 100) * TotalAcc;
+      updatedItems[index]["discount"] = T21
+        ? Math.round(per).toFixed(2)
+        : per.toFixed(2);
     }
 
     // ✅ Convert to float for reliable calculation
@@ -7076,7 +7155,7 @@ const ddmmyyyy = (d) => {
   const handleDeleteItem = (index) => {
     if (isEditMode) {
       const confirmDelete = window.confirm(
-        "Do you really want to delete this item?"
+        "Do you really want to delete this item?",
       );
       // Proceed with deletion if the user confirms
       if (confirmDelete) {
@@ -7088,10 +7167,10 @@ const ddmmyyyy = (d) => {
 
   const handleProductSelect = (product) => {
     setIsEditMode(true);
-      if (selectedItemIndex !== null) {
-        handleItemChange(selectedItemIndex, "name", product.Aheads);
-        setShowModal(false);
-      }
+    if (selectedItemIndex !== null) {
+      handleItemChange(selectedItemIndex, "name", product.Aheads);
+      setShowModal(false);
+    }
   };
 
   const handleModalDone = (product) => {
@@ -7111,8 +7190,9 @@ const ddmmyyyy = (d) => {
     }
   };
 
-const allFields = products.length ? Object.keys(products[0])
-: ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+  const allFields = products.length
+    ? Object.keys(products[0])
+    : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
 
   // Modal For Customer
   React.useEffect(() => {
@@ -7122,8 +7202,8 @@ const allFields = products.length ? Object.keys(products[0])
 
   const fetchCustomers = async () => {
     try {
-       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
+      const response = await fetch(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -7145,7 +7225,7 @@ const allFields = products.length ? Object.keys(products[0])
       setLoadingAcc(false);
     }
   };
-  
+
   // Modal For CustomerDetails
   const [productsCus, setProductsCus] = useState([]);
   const [showModalCus, setShowModalCus] = useState(false);
@@ -7167,36 +7247,36 @@ const allFields = products.length ? Object.keys(products[0])
     const updatedItems = [...customerDetails];
     updatedItems[index][key] = value;
 
-if (key === "name") {
-  const selectedProduct = productsCus.find(
-    (product) => product.ahead === value
-  );
-  if (selectedProduct) {
-    updatedItems[index] = {
-      ...updatedItems[index],
-      Vcode: selectedProduct.acode,
-      vacode: selectedProduct.ahead,
-      gstno: selectedProduct.gstNo,
-      pan: selectedProduct.pan,
-      Add1: selectedProduct.add1,
-      city: selectedProduct.city,
-      state: selectedProduct.state,
-      Tcs206c1H: selectedProduct.tcs206,
-      TDS194Q: selectedProduct.tds194q,
-    };
-    setCustgst(selectedProduct.gstNo);
+    if (key === "name") {
+      const selectedProduct = productsCus.find(
+        (product) => product.ahead === value,
+      );
+      if (selectedProduct) {
+        updatedItems[index] = {
+          ...updatedItems[index],
+          Vcode: selectedProduct.acode,
+          vacode: selectedProduct.ahead,
+          gstno: selectedProduct.gstNo,
+          pan: selectedProduct.pan,
+          Add1: selectedProduct.add1,
+          city: selectedProduct.city,
+          state: selectedProduct.state,
+          Tcs206c1H: selectedProduct.tcs206,
+          TDS194Q: selectedProduct.tds194q,
+        };
+        setCustgst(selectedProduct.gstNo);
 
-    const stype = determineSaleType(
-      selectedProduct.state,
-      selectedProduct.gstNo,
-      CompanyState
-    );
-    setFormData((prevState) => ({
-      ...prevState,
-      stype,
-    }));
-  }
-}
+        const stype = determineSaleType(
+          selectedProduct.state,
+          selectedProduct.gstNo,
+          CompanyState,
+        );
+        setFormData((prevState) => ({
+          ...prevState,
+          stype,
+        }));
+      }
+    }
 
     if (key === "state" || key === "gstno") {
       const { state, gstno } = updatedItems[index];
@@ -7216,25 +7296,29 @@ if (key === "name") {
       setShowModalCus(false);
       return;
     }
-  
+
     // clone the array
     const newCustomers = [...customerDetails];
-  
+
     // overwrite the one at the selected index
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
-      Vcode: product.acode || '',
-      vacode: product.ahead || '',
-      city:   product.city  || '',
-      gstno:  product.gstNo  || '',
-      pan:    product.pan    || '',
-      Add1: product.add1 || '',
-      state: product.state    || '',
-      Tcs206c1H: product.tcs206    || '',
-      TDS194Q: product.tds194q    || '',  
+      Vcode: product.acode || "",
+      vacode: product.ahead || "",
+      city: product.city || "",
+      gstno: product.gstNo || "",
+      pan: product.pan || "",
+      Add1: product.add1 || "",
+      state: product.state || "",
+      Tcs206c1H: product.tcs206 || "",
+      TDS194Q: product.tds194q || "",
     };
 
-    const stype = determineSaleType(product.state, product.gstNo || "", CompanyState);
+    const stype = determineSaleType(
+      product.state,
+      product.gstNo || "",
+      CompanyState,
+    );
     setFormData((prevState) => ({
       ...prevState,
       stype,
@@ -7244,7 +7328,7 @@ if (key === "name") {
     if (selectedItemIndexCus !== null) {
       setFormData((prev) => ({
         ...prev,
-        broker: product.agent || ""   // <-- change key name based on your API
+        broker: product.agent || "", // <-- change key name based on your API
       }));
       if (selectedItemIndexCus === "v_tpt") {
         setFormData((prevData) => ({
@@ -7258,8 +7342,7 @@ if (key === "name") {
     setcustomerDetails(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
-  
-  
+
     // restore focus
     setTimeout(() => {
       if (selectedItemIndexCus === "v_tpt") {
@@ -7283,13 +7366,13 @@ if (key === "name") {
   };
 
   const allFieldsCus = productsCus.reduce((fields, product) => {
-  Object.keys(product).forEach((key) => {
-    if (!fields.includes(key)) {
-      fields.push(key);
-    }
-  });
+    Object.keys(product).forEach((key) => {
+      if (!fields.includes(key)) {
+        fields.push(key);
+      }
+    });
 
-  return fields;
+    return fields;
   }, []);
 
   const handleOpenModalTpt = (event, index) => {
@@ -7312,7 +7395,7 @@ if (key === "name") {
     // If the key is 'name', find the corresponding product and set the price
     if (key === "acName") {
       const selectedProduct = productsAcc.find(
-        (product) => product.ahead === value
+        (product) => product.ahead === value,
       );
       if (selectedProduct) {
         updatedItems[index]["shippedto"] = selectedProduct.ahead;
@@ -7325,8 +7408,8 @@ if (key === "name") {
     }
     setshipped(updatedItems);
   };
-  const handleOpenModalBroker = (event, index ) => {
-    if (event.key === "ArrowDown" && isEditMode ) {
+  const handleOpenModalBroker = (event, index) => {
+    if (event.key === "ArrowDown" && isEditMode) {
       setSelectedItemIndexAcc(index);
       setShowModalAcc(true);
       event.preventDefault();
@@ -7339,17 +7422,17 @@ if (key === "name") {
       setShowModalAcc(false);
       return;
     }
-  
+
     // Defensive: index of the row being edited
     // if (typeof selectedItemIndexAcc !== "number") {
     //   alert("No shipped row selected!");
     //   setShowModalAcc(false);
     //   return;
     // }
-  
+
     // Deep copy shipped array
     const updatedShipped = [...shipped];
-  
+
     // Update the correct object in the array
     updatedShipped[selectedItemIndexAcc] = {
       ...updatedShipped[selectedItemIndexAcc],
@@ -7357,8 +7440,8 @@ if (key === "name") {
       shippingGst: product.gstNo || "",
       shippingAdd: product.add1 || "",
       shippingcity: product.city || "",
-      shippingState:product.state || "",
-      shippingPan:product.pan || "",
+      shippingState: product.state || "",
+      shippingPan: product.pan || "",
       // Add any other mappings needed
     };
 
@@ -7373,10 +7456,10 @@ if (key === "name") {
         handleItemChangeAcc(selectedItemIndexAcc, "acName", nameValue);
       }
     }
-    setshipped(updatedShipped);       // <- update the array in state!
+    setshipped(updatedShipped); // <- update the array in state!
     setIsEditMode(true);
     setShowModalAcc(false);
-  
+
     // Optionally refocus
     setTimeout(() => {
       if (selectedItemIndexAcc === "broker") {
@@ -7388,9 +7471,9 @@ if (key === "name") {
   };
 
   const openModalForItemAcc = (index) => {
-    if(isEditMode){
-    setSelectedItemIndexAcc(index);
-    setShowModalAcc(true);
+    if (isEditMode) {
+      setSelectedItemIndexAcc(index);
+      setShowModalAcc(true);
     }
   };
 
@@ -7403,7 +7486,6 @@ if (key === "name") {
 
     return fields;
   }, []);
-
 
   const handleTaxType = (event) => {
     const { value } = event.target;
@@ -7426,13 +7508,13 @@ if (key === "name") {
       allowedTypes.push(
         "Tax Free Within State",
         "Including GST",
-        "Export Sale"
+        "Export Sale",
       );
     } else {
       allowedTypes.push(
         "Tax Free Interstate",
         "Including IGST",
-        "Export Sale(IGST)"
+        "Export Sale(IGST)",
       );
     }
 
@@ -7545,14 +7627,14 @@ if (key === "name") {
   };
 
   const handleCapitalAlpha = (event) => {
-  const { id, value } = event.target;
-  // force all letters to uppercase
-  const uppercasedValue = value.toUpperCase();
-  setFormData((prevData) => ({
-    ...prevData,
-    [id]: uppercasedValue,
-  }));
-};
+    const { id, value } = event.target;
+    // force all letters to uppercase
+    const uppercasedValue = value.toUpperCase();
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: uppercasedValue,
+    }));
+  };
 
   const handleNumericValue = (event) => {
     const { id, value } = event.target;
@@ -7566,7 +7648,8 @@ if (key === "name") {
   };
 
   const handleInputChange = (index, field, value) => {
-    const numericValue = typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
+    const numericValue =
+      typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
     const updatedItems = [...items];
     updatedItems[index][field] = numericValue;
 
@@ -7592,12 +7675,21 @@ if (key === "name") {
     updatedItems[index].exp_before = totalExpenses.toFixed(2);
 
     const gst = parseFloat(updatedItems[index].gst);
-    const totalAccordingWeight = parseFloat(updatedItems[index].weight) *  parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =  parseFloat(updatedItems[index].pkgs) *  parseFloat(updatedItems[index].rate);
+    const totalAccordingWeight =
+      parseFloat(updatedItems[index].weight) *
+      parseFloat(updatedItems[index].rate);
+    const totalAccordingPkgs =
+      parseFloat(updatedItems[index].pkgs) *
+      parseFloat(updatedItems[index].rate);
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
 
-    if ( RateCal === "Default" || RateCal === "" || RateCal === null || RateCal === undefined) {
+    if (
+      RateCal === "Default" ||
+      RateCal === "" ||
+      RateCal === null ||
+      RateCal === undefined
+    ) {
       TotalAcc = totalAccordingWeight;
     } else if (RateCal === "Wt/Qty") {
       TotalAcc = totalAccordingWeight;
@@ -7608,7 +7700,6 @@ if (key === "name") {
     let disc = parseFloat(updatedItems[index].disc) || 0;
     let per = ((disc / 100) * TotalAcc).toFixed(2);
     let Amounts = TotalAcc + others + parseFloat(per);
-
 
     // Ensure TotalAcc is a valid number before calling toFixed()
     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
@@ -7800,175 +7891,173 @@ if (key === "name") {
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
-  { name: "vcode",      refArray: itemCodeRefs },
-  { name: "sdisc",      refArray: desciptionRefs },
-  { name: "tariff",     refArray: hsnCodeRefs },
-  { name: "pkgs",       refArray: peciesRefs },
-  { name: "weight",     refArray: quantityRefs },
-  { name: "rate",       refArray: priceRefs },
-  { name: "amount",     refArray: amountRefs },
-  { name: "disc",       refArray: discountRef },
-  { name: "discount",   refArray: discount2Ref },
-  { name: "exp_before", refArray: othersRefs },
-];
+    { name: "vcode", refArray: itemCodeRefs },
+    { name: "sdisc", refArray: desciptionRefs },
+    { name: "tariff", refArray: hsnCodeRefs },
+    { name: "pkgs", refArray: peciesRefs },
+    { name: "weight", refArray: quantityRefs },
+    { name: "rate", refArray: priceRefs },
+    { name: "amount", refArray: amountRefs },
+    { name: "disc", refArray: discountRef },
+    { name: "discount", refArray: discount2Ref },
+    { name: "exp_before", refArray: othersRefs },
+  ];
 
-const focusRef = (refArray, rowIndex) => {
-  const el = refArray?.current?.[rowIndex];
-  if (el) {
-    el.focus();
-    // Safely call select if available
-    setTimeout(() => el.select && el.select(), 0);
-    return true;
-  }
-  return false;
-};
-const focusScrollRow = (refArray, rowIndex) => {
-  const inputEl = refArray?.current?.[rowIndex];
-  const container = tableContainerRef.current;
-
-  if (!inputEl || !container) return;
-
-  inputEl.focus();
-  setTimeout(() => inputEl.select && inputEl.select(), 0);
-
-  const rowEl = inputEl.closest("tr");
-  if (!rowEl) return;
-
-  const rowTop = rowEl.offsetTop;
-  const rowHeight = rowEl.offsetHeight;
-  const containerHeight = container.clientHeight;
-
-  container.scrollTop =
-    rowTop - containerHeight + rowHeight + 60;
-};
-const handleKeyDown = (event, index, field) => {
-  // --------------- ENTER / TAB: move to NEXT FIELD -----------------
-  if (event.key === "Enter" || event.key === "Tab") {
-    event.preventDefault();
-
-    // Special case for vcode: your existing behaviour
-    if (field === "vcode") {
-      if ((items[index].sdisc || "").trim() === "") {
-        // Go to remarks if description is empty
-        remarksRef.current?.focus();
-      } else {
-        focusRef(desciptionRefs, index);
-      }
-      return;
+  const focusRef = (refArray, rowIndex) => {
+    const el = refArray?.current?.[rowIndex];
+    if (el) {
+      el.focus();
+      // Safely call select if available
+      setTimeout(() => el.select && el.select(), 0);
+      return true;
     }
+    return false;
+  };
+  const focusScrollRow = (refArray, rowIndex) => {
+    const inputEl = refArray?.current?.[rowIndex];
+    const container = tableContainerRef.current;
 
-    // Special case for exp_before: go to next row / add row
-    if (field === "exp_before") {
-      const isLastRow = index === items.length - 1;
+    if (!inputEl || !container) return;
 
-      // if (isLastRow) {
-      //   handleAddItem();
-      //   // Focus ItemCode of newly added row
-      //   focusRef(itemCodeRefs, index + 1);
-      // }
-      if (isLastRow) {
-        handleAddItem();
+    inputEl.focus();
+    setTimeout(() => inputEl.select && inputEl.select(), 0);
 
-        setTimeout(() => {
+    const rowEl = inputEl.closest("tr");
+    if (!rowEl) return;
+
+    const rowTop = rowEl.offsetTop;
+    const rowHeight = rowEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    container.scrollTop = rowTop - containerHeight + rowHeight + 60;
+  };
+  const handleKeyDown = (event, index, field) => {
+    // --------------- ENTER / TAB: move to NEXT FIELD -----------------
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+
+      // Special case for vcode: your existing behaviour
+      if (field === "vcode") {
+        if ((items[index].sdisc || "").trim() === "") {
+          // Go to remarks if description is empty
+          remarksRef.current?.focus();
+        } else {
+          focusRef(desciptionRefs, index);
+        }
+        return;
+      }
+
+      // Special case for exp_before: go to next row / add row
+      if (field === "exp_before") {
+        const isLastRow = index === items.length - 1;
+
+        // if (isLastRow) {
+        //   handleAddItem();
+        //   // Focus ItemCode of newly added row
+        //   focusRef(itemCodeRefs, index + 1);
+        // }
+        if (isLastRow) {
+          handleAddItem();
+
+          setTimeout(() => {
+            focusScrollRow(itemCodeRefs, index + 1);
+          }, 0);
+        } else {
           focusScrollRow(itemCodeRefs, index + 1);
-        }, 0);
+        }
+        return;
       }
-       else {
-        focusScrollRow(itemCodeRefs, index + 1);
-      }
-      return;
-    }
 
-    // Generic: find current field in fieldOrder and move to next available
-    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+      // Generic: find current field in fieldOrder and move to next available
+      const currentPos = fieldOrder.findIndex((f) => f.name === field);
 
-    if (currentPos !== -1) {
-      for (let i = currentPos + 1; i < fieldOrder.length; i++) {
-        const nextField = fieldOrder[i];
-        // Only move if that ref exists for this row (means column is visible)
-        if (focusRef(nextField.refArray, index)) {
-          return;
+      if (currentPos !== -1) {
+        for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+          const nextField = fieldOrder[i];
+          // Only move if that ref exists for this row (means column is visible)
+          if (focusRef(nextField.refArray, index)) {
+            return;
+          }
         }
       }
+
+      // If nothing else found, you can optionally jump to remarks or transport:
+      // focusRef(remarksRef, 0);  // if you make remarksRef an array or handle separately
+
+      return;
     }
 
-    // If nothing else found, you can optionally jump to remarks or transport:
-    // focusRef(remarksRef, 0);  // if you make remarksRef an array or handle separately
-
-    return;
-  }
-
-  // -------------------- ARROW RIGHT --------------------
-  else if (event.key === "ArrowRight") {
-    if (field === "vcode") {
-      focusRef(desciptionRefs, index);
-    } else if (field === "sdisc") {
-      focusRef(hsnCodeRefs, index);
-    } else if (field === "tariff") {
-      focusRef(peciesRefs, index);
-    } else if (field === "pkgs") {
-      focusRef(quantityRefs, index);
-    } else if (field === "weight") {
-      focusRef(priceRefs, index);
-    } else if (field === "rate") {
-      // If amount column exists, go there first, else to disc
-      if (!focusRef(amountRefs, index)) {
+    // -------------------- ARROW RIGHT --------------------
+    else if (event.key === "ArrowRight") {
+      if (field === "vcode") {
+        focusRef(desciptionRefs, index);
+      } else if (field === "sdisc") {
+        focusRef(hsnCodeRefs, index);
+      } else if (field === "tariff") {
+        focusRef(peciesRefs, index);
+      } else if (field === "pkgs") {
+        focusRef(quantityRefs, index);
+      } else if (field === "weight") {
+        focusRef(priceRefs, index);
+      } else if (field === "rate") {
+        // If amount column exists, go there first, else to disc
+        if (!focusRef(amountRefs, index)) {
+          focusRef(discountRef, index);
+        }
+      } else if (field === "amount") {
         focusRef(discountRef, index);
+      } else if (field === "disc") {
+        focusRef(discount2Ref, index);
+      } else if (field === "discount") {
+        focusRef(othersRefs, index);
       }
-    } else if (field === "amount") {
-      focusRef(discountRef, index);
-    } else if (field === "disc") {
-      focusRef(discount2Ref, index);
-    } else if (field === "discount") {
-      focusRef(othersRefs, index);
     }
-  }
 
-  // -------------------- ARROW LEFT --------------------
-  else if (event.key === "ArrowLeft") {
-    if (field === "exp_before") {
-      focusRef(discount2Ref, index);
-    } else if (field === "discount") {
-      focusRef(discountRef, index);
-    } else if (field === "disc") {
-      focusRef(priceRefs, index);
-    } else if (field === "amount") {
-      focusRef(priceRefs, index);
-    } else if (field === "rate") {
-      focusRef(quantityRefs, index);
-    } else if (field === "weight") {
-      focusRef(peciesRefs, index);
-    } else if (field === "pkgs") {
-      focusRef(hsnCodeRefs, index);
-    } else if (field === "tariff") {
-      focusRef(desciptionRefs, index);
-    } else if (field === "sdisc") {
-      focusRef(itemCodeRefs, index);
-    } else if (field === "vcode") {
-      focusRef(itemCodeRefs, index);
+    // -------------------- ARROW LEFT --------------------
+    else if (event.key === "ArrowLeft") {
+      if (field === "exp_before") {
+        focusRef(discount2Ref, index);
+      } else if (field === "discount") {
+        focusRef(discountRef, index);
+      } else if (field === "disc") {
+        focusRef(priceRefs, index);
+      } else if (field === "amount") {
+        focusRef(priceRefs, index);
+      } else if (field === "rate") {
+        focusRef(quantityRefs, index);
+      } else if (field === "weight") {
+        focusRef(peciesRefs, index);
+      } else if (field === "pkgs") {
+        focusRef(hsnCodeRefs, index);
+      } else if (field === "tariff") {
+        focusRef(desciptionRefs, index);
+      } else if (field === "sdisc") {
+        focusRef(itemCodeRefs, index);
+      } else if (field === "vcode") {
+        focusRef(itemCodeRefs, index);
+      }
     }
-  }
 
-  // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
-  else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-    setPressedKey(event.key);
-    openModalForItemCus(index);
-    event.preventDefault();
-  }
-};
+    // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
+    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+      setPressedKey(event.key);
+      openModalForItemCus(index);
+      event.preventDefault();
+    }
+  };
 
   const handleOpenModalBack = (event, index, field) => {
-    if (event.key === "Backspace" && field === "accountname" && isEditMode ) {
+    if (event.key === "Backspace" && field === "accountname" && isEditMode) {
       setSelectedItemIndexCus(index);
       setShowModalCus(true);
       event.preventDefault();
     }
-    if (event.key === "Backspace" && field === "shippedto" && isEditMode ) {
+    if (event.key === "Backspace" && field === "shippedto" && isEditMode) {
       setSelectedItemIndexAcc(index);
       setShowModalAcc(true);
       event.preventDefault();
     }
-    if (event.key === "Backspace" && field === "vcode" && isEditMode ) {
+    if (event.key === "Backspace" && field === "vcode" && isEditMode) {
       setSelectedItemIndex(index);
       setShowModal(true);
       event.preventDefault();
@@ -7989,7 +8078,10 @@ const handleKeyDown = (event, index, field) => {
   };
 
   const gradientOptions = [
-    { label: "Lavender", value: "linear-gradient(to right, #d4d4fcff, #b19cd9)" },
+    {
+      label: "Lavender",
+      value: "linear-gradient(to right, #d4d4fcff, #b19cd9)",
+    },
     { label: "Yellow", value: "linear-gradient(to right, #fffac2, #ffdd57)" },
     { label: "Skyblue", value: "linear-gradient(to right, #ceedf0, #7fd1e4)" },
     { label: "Green", value: "linear-gradient(to right, #9ff0c3, #45a049)" },
@@ -8032,14 +8124,13 @@ const handleKeyDown = (event, index, field) => {
   };
   const [isModalOpenExp, setIsModalOpenExp] = useState(false);
 
-const handleKeyDownExp = (e, fieldName, index) => {
-  if (e.key === "F2" && fieldName === "exp_before") {
-    e.preventDefault(); // Optional: stop default F2 behavior
-    setCurrentIndex(index);
-    setIsModalOpenExp(true);
-  }
-};
-
+  const handleKeyDownExp = (e, fieldName, index) => {
+    if (e.key === "F2" && fieldName === "exp_before") {
+      e.preventDefault(); // Optional: stop default F2 behavior
+      setCurrentIndex(index);
+      setIsModalOpenExp(true);
+    }
+  };
 
   const [isModalOpenAfter, setIsModalOpenAfter] = useState(false);
   const handleKeyDownAfter = (e) => {
@@ -8056,10 +8147,9 @@ const handleKeyDownExp = (e, fieldName, index) => {
     if (fieldName === "expafterGST" && isEditMode) {
       setIsModalOpenAfter(true);
     }
-  }
+  };
 
-  const handleDoubleClick = (event,fieldName, index) => {
-    
+  const handleDoubleClick = (event, fieldName, index) => {
     if (fieldName === "exp_before" && isEditMode) {
       setCurrentIndex(index); // Set the current index
       setIsModalOpenExp(true); // Open the modal
@@ -8116,54 +8206,56 @@ const handleKeyDownExp = (e, fieldName, index) => {
   //   return <Navigate to="/" replace />;
   // }
 
-    const handleKeyDownTab = (e) => {
-    if (e.key === 'Tab') {
+  const handleKeyDownTab = (e) => {
+    if (e.key === "Tab") {
       e.preventDefault(); // prevent default Tab behavior
       customerNameRef.current.focus(); // move focus to vaCode2 input
     }
   };
 
-    const handleKeyDownTab2 = (e) => {
-    if (e.key === 'Tab') {
+  const handleKeyDownTab2 = (e) => {
+    if (e.key === "Tab") {
       e.preventDefault(); // prevent default Tab behavior
       saveButtonRef.current.focus(); // move focus to vaCode2 input
     }
   };
 
-   const printRef = useRef();
-    const handlePrint = useReactToPrint({
-      content: () => printRef.current,
-      onAfterPrint: () => setOpen(false), // auto-close after print
-    });
-  
-    const handlePrintClick = () => {
+  const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    onAfterPrint: () => setOpen(false), // auto-close after print
+  });
+
+  const handlePrintClick = () => {
     setOpen(true);
     setTimeout(() => {
       handlePrint();
       setOpen(false); // hide right after print
     }, 300);
-    };
+  };
 
-    const isRowFilled = (row) => {
-      return (row.sdisc || "").trim() !== "";
-    };
-    const canEditRow = (rowIndex) => {
-      // 🔒 If not in edit mode, nothing is editable
-      if (!isEditMode) return false;
+  const isRowFilled = (row) => {
+    return (row.sdisc || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+    // 🔒 If not in edit mode, nothing is editable
+    if (!isEditMode) return false;
 
-      // First row is editable in edit mode
-      if (rowIndex === 0) return true;
+    // First row is editable in edit mode
+    if (rowIndex === 0) return true;
 
-      // All previous rows must be filled
-      for (let i = 0; i < rowIndex; i++) {
-        if (!isRowFilled(items[i])) {
-          return false;
-        }
+    // All previous rows must be filled
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
       }
-      return true;
-    };
+    }
+    return true;
+  };
 
-    const nonEmptyItems2 = items.filter((item) => (item.sdisc || "").trim() !== "");
+  const nonEmptyItems2 = items.filter(
+    (item) => (item.sdisc || "").trim() !== "",
+  );
   return (
     <div>
       <ToastContainer />
@@ -8182,7 +8274,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           />
         )}
       </div>
-      <div style={{display:'flex',flexDirection:'row',marginTop:-30}}>
+      <div style={{ display: "flex", flexDirection: "row", marginTop: -30 }}>
         <h1 className="headerSale">
           SALE GST{" "}
           <span className="text-black-500 font-semibold text-base sm:text-lg">
@@ -8192,18 +8284,18 @@ const handleKeyDownExp = (e, fieldName, index) => {
       </div>
       {/* Top Parts */}
       <div className="sale_toppart ">
-      <div className="Dated ">
-        <DatePicker
-          ref={datePickerRef}
-          selected={selectedDate || null}
-          openToDate={new Date()}
-          onCalendarClose={handleCalendarClose}
-          dateFormat="dd-MM-yyyy"
-          onChange={handleDateChange}
-          onBlur={() => validateDate(selectedDate)}
-          customInput={<MaskedInput />}
-        />
-        {/* <DatePicker
+        <div className="Dated ">
+          <DatePicker
+            ref={datePickerRef}
+            selected={selectedDate || null}
+            openToDate={new Date()}
+            onCalendarClose={handleCalendarClose}
+            dateFormat="dd-MM-yyyy"
+            onChange={handleDateChange}
+            onBlur={() => validateDate(selectedDate)}
+            customInput={<MaskedInput />}
+          />
+          {/* <DatePicker
         popperClassName="custom-datepicker-popper"
           ref={datePickerRef}
           className="DatePICKER"
@@ -8225,81 +8317,85 @@ const handleKeyDownExp = (e, fieldName, index) => {
           }}
           readOnly={!isEditMode || isDisabled}
         /> */}
-      <div  className="billdivz">
-        <TextField
-          className="billzNo custom-bordered-input"
-          id="vbillno"
-          value={formData.vbillno}
-          variant="filled"
-          size="small"
-          label="BILL NO"
-          onKeyDown={handleKeyDownTab} // Handle Tab key here
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: "20px",
-              fontSize: `${fontSize}px`,
-              // padding: "0 8px"
-            },
-            readOnly: !isEditMode || isDisabled
-          }}
-        />
-      </div>
-      <div className="Setup">
-        <button
-          className="Button"
-          style={{backgroundColor:"blue",color:'white',fontWeight:'bold'}}
-          onClick={openModal}
-          >
-            SETUP
-          </button>
+          <div className="billdivz">
+            <TextField
+              className="billzNo custom-bordered-input"
+              id="vbillno"
+              value={formData.vbillno}
+              variant="filled"
+              size="small"
+              label="BILL NO"
+              onKeyDown={handleKeyDownTab} // Handle Tab key here
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: "20px",
+                  fontSize: `${fontSize}px`,
+                  // padding: "0 8px"
+                },
+                readOnly: !isEditMode || isDisabled,
+              }}
+            />
+          </div>
+          <div className="Setup">
+            <button
+              className="Button"
+              style={{
+                backgroundColor: "blue",
+                color: "white",
+                fontWeight: "bold",
+              }}
+              onClick={openModal}
+            >
+              SETUP
+            </button>
 
-          {/* Settings Button */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="Setting text-xl text-blue-700"
-          >
-            <FaCog />
-          </button>
-        {/* Fullscreen Overlay Drawer */}
-        {drawerOpen && (
-          <div style={{zIndex:10000}}>
-            {/* Background Overlay */}
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
-              onClick={() => setDrawerOpen(false)}
-            ></div>
-
-            {/* Drawer Panel */}
-            <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out">
-              {/* Drawer Header */}
-              <div className="flex justify-between items-center px-4 py-3 border-b">
-                <span className="font-bold text-lg">Options</span>
-                <button
+            {/* Settings Button */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="Setting text-xl text-blue-700"
+            >
+              <FaCog />
+            </button>
+            {/* Fullscreen Overlay Drawer */}
+            {drawerOpen && (
+              <div style={{ zIndex: 10000 }}>
+                {/* Background Overlay */}
+                <div
+                  className="fixed inset-0 bg-black bg-opacity-50 z-40"
                   onClick={() => setDrawerOpen(false)}
-                  className="text-xl text-gray-600"
-                >
-                  <FaTimes />
-                </button>
-              </div>
+                ></div>
 
-              {/* Drawer Body */}
-              <div className="flex flex-col p-4 gap-3">
-                {/* Color Selector */}
-                <select
-                  className="border border-gray-400 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  value={color}
-                  onChange={handleChange}
-                >
-                  {gradientOptions.map((option, index) => (
-                    <option key={index} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                {/* Drawer Panel */}
+                <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out">
+                  {/* Drawer Header */}
+                  <div className="flex justify-between items-center px-4 py-3 border-b">
+                    <span className="font-bold text-lg">Options</span>
+                    <button
+                      onClick={() => setDrawerOpen(false)}
+                      className="text-xl text-gray-600"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
 
-                {/* Font Size Buttons */}
-                {/* <div className="flex gap-2">
+                  {/* Drawer Body */}
+                  <div className="flex flex-col p-4 gap-3">
+                    {/* Color Selector */}
+                    <select
+                      className="border border-gray-400 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      value={color}
+                      onChange={handleChange}
+                    >
+                      {gradientOptions.map((option, index) => (
+                        <option key={index} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Font Size Buttons */}
+                    {/* <div className="flex gap-2">
                   <button
                     onClick={decreaseFontSize}
                     className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
@@ -8314,30 +8410,46 @@ const handleKeyDownExp = (e, fieldName, index) => {
                     <FaPlus />
                   </button>
                 </div> */}
-              <div style={{ display: "flex", flexWrap: "wrap",flexDirection:'column'}}>
-                <span style={{fontSize:17,fontWeight:'bold'}}>SELECT TABLE FIELDS</span>
-                <div style={{marginTop:"10px",display:'flex',flexDirection:"column"}}>
-                {Object.keys(tableData).map((field) => (
-                  <label key={field} style={{ marginRight: "15px",fontSize:16 }}>
-                    <input
-                    style={{height:"15px",width:"15px"}}
-                      type="checkbox"
-                      checked={tableData[field]}
-                      onChange={() => handleCheckboxChange(field)}
-                    />
-                    &nbsp;{field.toUpperCase()}
-                  </label>
-                ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <span style={{ fontSize: 17, fontWeight: "bold" }}>
+                        SELECT TABLE FIELDS
+                      </span>
+                      <div
+                        style={{
+                          marginTop: "10px",
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        {Object.keys(tableData).map((field) => (
+                          <label
+                            key={field}
+                            style={{ marginRight: "15px", fontSize: 16 }}
+                          >
+                            <input
+                              style={{ height: "15px", width: "15px" }}
+                              type="checkbox"
+                              checked={tableData[field]}
+                              onChange={() => handleCheckboxChange(field)}
+                            />
+                            &nbsp;{field.toUpperCase()}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              </div>
-            </div>
-          
+            )}
           </div>
-        )}
-      </div>
-      </div>
-      <div className="TopFields">
+        </div>
+        <div className="TopFields">
           {customerDetails.map((item, index) => (
             <div key={item.vacode}>
               <div className="CUS">
@@ -8355,7 +8467,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                       handleOpenModalBack(e, index, "accountname");
                     }}
                     onDoubleClick={(e) => {
-                      handleDoubleClick(e,"accountname", index)
+                      handleDoubleClick(e, "accountname", index);
                     }}
                     onFocus={(e) => e.target.select()}
                     inputProps={{
@@ -8395,7 +8507,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
               <div className="GST">
                 <div>
                   <TextField
-                  //  disabled
+                    //  disabled
                     className="gstnoZ custom-bordered-input"
                     value={item.gstno}
                     variant="filled"
@@ -8411,18 +8523,14 @@ const handleKeyDownExp = (e, fieldName, index) => {
                       readOnly: !isEditMode || isDisabled,
                     }}
                     onChange={(e) =>
-                      handleItemChangeCus(
-                        index,
-                        "gstNumber",
-                        e.target.value
-                      )
+                      handleItemChangeCus(index, "gstNumber", e.target.value)
                     }
                     onFocus={(e) => e.target.select()}
                   />
                 </div>
                 <div className="pandivZ">
                   <TextField
-                  //  disabled
+                    //  disabled
                     className="PANNoZ custom-bordered-input"
                     value={item.pan}
                     variant="filled"
@@ -8447,111 +8555,111 @@ const handleKeyDownExp = (e, fieldName, index) => {
             </div>
           ))}
           {showModalCus && (
-          <ProductModalCustomer
-            allFields={allFieldsCus}
-            onSelect={handleProductSelectCus}
-            onClose={handleCloseModalCus}
-            initialKey={pressedKey}
-            tenant={tenant}
-          />
+            <ProductModalCustomer
+              allFields={allFieldsCus}
+              onSelect={handleProductSelectCus}
+              onClose={handleCloseModalCus}
+              initialKey={pressedKey}
+              tenant={tenant}
+            />
           )}
           <div className="shippedTO">
-                {shipped.map((item, index) => (
-                  <div key={item.shippedto}>
-                      <div>
-                        <TextField
-                          multiline
-                          inputRef={shippedtoRef}
-                          className="shippedtoz custom-bordered-input"
-                          id="shippedto"
-                          variant="filled"
-                          label="SHIPPED TO"
-                          size="small"
-                          value={`${item.shippedto || ''}\n${item.shippingGst || ''}\n${item.shippingcity || ''}`}
-                          InputProps={{
-                            readOnly: !isEditMode || isDisabled,
-                            style: {
-                              height: 100,
-                              fontSize: 14,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            },
-                          }}
-                          inputProps={{
-                            maxLength: 150,
-                            fontSize: 14,
-                          }}
-                          onKeyDown={(e) => {
-                            handleOpenModal(e, index, "shippedto");
-                            handleKeyDowndown(e, grNoRef);
-                            handleOpenModalBack(e, index, "shippedto");
-                          }}
-                          onDoubleClick={(e) => {
-                          handleDoubleClick(e,"shippedto", index)
-                          }}
-                          onFocus={(e) => e.target.select()} 
-                        />
-                      </div>
-                  </div>
-                ))}
-                {showModalAcc && (
-               <ProductModalCustomer
+            {shipped.map((item, index) => (
+              <div key={item.shippedto}>
+                <div>
+                  <TextField
+                    multiline
+                    inputRef={shippedtoRef}
+                    className="shippedtoz custom-bordered-input"
+                    id="shippedto"
+                    variant="filled"
+                    label="SHIPPED TO"
+                    size="small"
+                    value={`${item.shippedto || ""}\n${item.shippingGst || ""}\n${item.shippingcity || ""}`}
+                    InputProps={{
+                      readOnly: !isEditMode || isDisabled,
+                      style: {
+                        height: 100,
+                        fontSize: 14,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                    inputProps={{
+                      maxLength: 150,
+                      fontSize: 14,
+                    }}
+                    onKeyDown={(e) => {
+                      handleOpenModal(e, index, "shippedto");
+                      handleKeyDowndown(e, grNoRef);
+                      handleOpenModalBack(e, index, "shippedto");
+                    }}
+                    onDoubleClick={(e) => {
+                      handleDoubleClick(e, "shippedto", index);
+                    }}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </div>
+              </div>
+            ))}
+            {showModalAcc && (
+              <ProductModalCustomer
                 allFields={allFieldsAcc}
                 onSelect={handleProductSelectAcc}
-                onClose={() => setShowModalAcc(false)} 
+                onClose={() => setShowModalAcc(false)}
                 initialKey={pressedKey}
                 tenant={tenant}
                 onRefresh={fetchCustomers}
-                />
-                )}
+              />
+            )}
           </div>
           <div className="GRNo">
-          <TextField
-            inputRef={grNoRef}
-            className="GRNOZ custom-bordered-input"
-            id="gr"
-            label="GR NO"
-            value={formData.gr}
-            variant="filled"
-            size="small"
-            onChange={handleNumericValue}
-            onKeyDown={handleEnterKeyPress(grNoRef, termsRef)}
-            onFocus={(e) => e.target.select()}
-            inputProps={{
-              maxLength: 12,
-              style: {
-                height: "20px",
-                fontSize: `${fontSize}px`,
-                // padding: "0 8px"
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-          />
-          <div className="ExFor">
-           <TextField
-            inputRef={termsRef}
-            className="custom-bordered-input"
-            id="exfor"
-            value={formData.exfor}
-            variant="filled"
-            label="TERMS"
-            size="small"
-            onChange={HandleValueChange}
-            onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
-            onFocus={(e) => e.target.select()}
-            inputProps={{
-              maxLength: 10,
-              style: {
-                height: "20px",
-                fontSize: `${fontSize}px`,
-                // padding: "0 8px"
-              },
-              readOnly: !isEditMode || isDisabled
-            }}
-            // sx={{ width: 128}}
-          />
-          </div>
+            <TextField
+              inputRef={grNoRef}
+              className="GRNOZ custom-bordered-input"
+              id="gr"
+              label="GR NO"
+              value={formData.gr}
+              variant="filled"
+              size="small"
+              onChange={handleNumericValue}
+              onKeyDown={handleEnterKeyPress(grNoRef, termsRef)}
+              onFocus={(e) => e.target.select()}
+              inputProps={{
+                maxLength: 12,
+                style: {
+                  height: "20px",
+                  fontSize: `${fontSize}px`,
+                  // padding: "0 8px"
+                },
+                readOnly: !isEditMode || isDisabled,
+              }}
+            />
+            <div className="ExFor">
+              <TextField
+                inputRef={termsRef}
+                className="custom-bordered-input"
+                id="exfor"
+                value={formData.exfor}
+                variant="filled"
+                label="TERMS"
+                size="small"
+                onChange={HandleValueChange}
+                onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
+                onFocus={(e) => e.target.select()}
+                inputProps={{
+                  maxLength: 10,
+                  style: {
+                    height: "20px",
+                    fontSize: `${fontSize}px`,
+                    // padding: "0 8px"
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                // sx={{ width: 128}}
+              />
+            </div>
           </div>
           <div className="VehicleDiv">
             <TextField
@@ -8571,52 +8679,55 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   height: "20px",
                   fontSize: `${fontSize}px`,
                 },
-                readOnly: !isEditMode || isDisabled
+                readOnly: !isEditMode || isDisabled,
               }}
             />
             <div className="BillType">
-            <FormControl
-              className=" Billss custom-bordered-input"
-              sx={{
-                fontSize: `${fontSize}px`,
-                '& .MuiFilledInput-root': {
-                  height: 48, // adjust as needed (default ~56px for filled)
-                },
-              }}
-              size="small"
-              variant="filled"
-              // disabled={!isEditMode || isDisabled}
-            >
-              <InputLabel id="billcash-label">BILL TYPE</InputLabel>
-                <Select
-                className="custom-bordered-input"
-                labelId="billcash-label"
-                id="billcash"
-                value={formData.btype}
-                onChange={(e) => {
-                  if (!isEditMode || isDisabled) return; // prevent changing
-                    handleBillCash(e);
-                }}
-                onOpen={(e) => {
-                  if (!isEditMode || isDisabled) {
-                    e.preventDefault(); // prevent dropdown opening
-                  }
-                }}
-                label="BILL TYPE"
-                displayEmpty
-                inputProps={{
-                  sx: {
-                    fontSize: `${fontSize}px`, 
-                    pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+              <FormControl
+                className=" Billss custom-bordered-input"
+                sx={{
+                  fontSize: `${fontSize}px`,
+                  "& .MuiFilledInput-root": {
+                    height: 48, // adjust as needed (default ~56px for filled)
                   },
                 }}
-                MenuProps={{ disablePortal: true }}
+                size="small"
+                variant="filled"
+                // disabled={!isEditMode || isDisabled}
               >
-                <MenuItem value=""><em></em></MenuItem>
-                <MenuItem value="Bill">Bill</MenuItem>
-                <MenuItem value="Cash">Cash</MenuItem>
-              </Select>
-            </FormControl>
+                <InputLabel id="billcash-label">BILL TYPE</InputLabel>
+                <Select
+                  className="custom-bordered-input"
+                  labelId="billcash-label"
+                  id="billcash"
+                  value={formData.btype}
+                  onChange={(e) => {
+                    if (!isEditMode || isDisabled) return; // prevent changing
+                    handleBillCash(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  label="BILL TYPE"
+                  displayEmpty
+                  inputProps={{
+                    sx: {
+                      fontSize: `${fontSize}px`,
+                      pointerEvents:
+                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
+                    },
+                  }}
+                  MenuProps={{ disablePortal: true }}
+                >
+                  <MenuItem value="">
+                    <em></em>
+                  </MenuItem>
+                  <MenuItem value="Bill">Bill</MenuItem>
+                  <MenuItem value="Cash">Cash</MenuItem>
+                </Select>
+              </FormControl>
             </div>
           </div>
           <div className="TAXDiv">
@@ -8629,7 +8740,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 className="TAXtypez custom-bordered-input"
                 sx={{
                   fontSize: `${fontSize}px`,
-                  '& .MuiFilledInput-root': {
+                  "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
                 }}
@@ -8641,7 +8752,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   id="stype"
                   value={formData.stype}
                   onChange={(e) => {
-                  if (!isEditMode || isDisabled) return; // prevent changing
+                    if (!isEditMode || isDisabled) return; // prevent changing
                     handleTaxType(e);
                   }}
                   onOpen={(e) => {
@@ -8658,7 +8769,8 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   inputProps={{
                     sx: {
                       fontSize: `${fontSize}px`,
-                      pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+                      pointerEvents:
+                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
                   }}
                 >
@@ -8669,10 +8781,16 @@ const handleKeyDownExp = (e, fieldName, index) => {
                   <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
                   <MenuItem value="GST (URD)">GST (URD)</MenuItem>
                   <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
-                  <MenuItem value="Tax Free Within State">Tax Free Within State</MenuItem>
-                  <MenuItem value="Tax Free Interstate">Tax Free Interstate</MenuItem>
+                  <MenuItem value="Tax Free Within State">
+                    Tax Free Within State
+                  </MenuItem>
+                  <MenuItem value="Tax Free Interstate">
+                    Tax Free Interstate
+                  </MenuItem>
                   <MenuItem value="Export Sale">Export Sale</MenuItem>
-                  <MenuItem value="Export Sale(IGST)">Export Sale(IGST)</MenuItem>
+                  <MenuItem value="Export Sale(IGST)">
+                    Export Sale(IGST)
+                  </MenuItem>
                   <MenuItem value="Including GST">Including GST</MenuItem>
                   <MenuItem value="Including IGST">Including IGST</MenuItem>
                   <MenuItem value="Not Applicable">Not Applicable</MenuItem>
@@ -8680,58 +8798,67 @@ const handleKeyDownExp = (e, fieldName, index) => {
                 </Select>
               </FormControl>
             </div>
-            <div style={{marginTop:3}}>
-            <FormControl
-             className="SupplyTYPE custom-bordered-input"
-              sx={{
-                // width: '250px',
-                fontSize: `${fontSize}px`,
-                '& .MuiFilledInput-root': {
-                  height: 48, // adjust as needed (default ~56px for filled)
-                },
-              }}
-              size="small"
-              // disabled={!isEditMode || isDisabled}
-              variant="filled"
-            >
-              <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
-              <Select
-                className="SupplyTYPE"
-                labelId="supply-label"
-                id="supply"
-                value={formData.conv}
-                onChange={(e) => {
-                  if (!isEditMode || isDisabled) return; // prevent changing
-                    handleSupply(e);
-                }}
-                onOpen={(e) => {
-                  if (!isEditMode || isDisabled) {
-                    e.preventDefault(); // prevent dropdown opening
-                  }
-                }}
-                // onChange={handleSupply}
-                label="SUPPLY TYPE"
-                displayEmpty
-                inputProps={{
-                  sx: {
-                    fontSize: `${fontSize}px`,
-                    pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+            <div style={{ marginTop: 3 }}>
+              <FormControl
+                className="SupplyTYPE custom-bordered-input"
+                sx={{
+                  // width: '250px',
+                  fontSize: `${fontSize}px`,
+                  "& .MuiFilledInput-root": {
+                    height: 48, // adjust as needed (default ~56px for filled)
                   },
                 }}
-                MenuProps={{ disablePortal: true }}
+                size="small"
+                // disabled={!isEditMode || isDisabled}
+                variant="filled"
               >
-                <MenuItem value=""><em></em></MenuItem>
-                <MenuItem value="Manufacturing Sale">1. Manufacturing Sale</MenuItem>
-                <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
-              </Select>
-            </FormControl>
+                <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
+                <Select
+                  className="SupplyTYPE"
+                  labelId="supply-label"
+                  id="supply"
+                  value={formData.conv}
+                  onChange={(e) => {
+                    if (!isEditMode || isDisabled) return; // prevent changing
+                    handleSupply(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleSupply}
+                  label="SUPPLY TYPE"
+                  displayEmpty
+                  inputProps={{
+                    sx: {
+                      fontSize: `${fontSize}px`,
+                      pointerEvents:
+                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
+                    },
+                  }}
+                  MenuProps={{ disablePortal: true }}
+                >
+                  <MenuItem value="">
+                    <em></em>
+                  </MenuItem>
+                  <MenuItem value="Manufacturing Sale">
+                    1. Manufacturing Sale
+                  </MenuItem>
+                  <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
+                </Select>
+              </FormControl>
             </div>
           </div>
-      </div>
+        </div>
       </div>
       {/* Top Part Ends Here */}
       {/* Table Part */}
-      <div ref={tableContainerRef} style={{marginTop:5}} className="TableContainer">
+      <div
+        ref={tableContainerRef}
+        style={{ marginTop: 5 }}
+        className="TableContainer"
+      >
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{
@@ -8742,338 +8869,342 @@ const handleKeyDownExp = (e, fieldName, index) => {
             }}
           >
             <tr style={{ color: "#575a5a" }}>
-            {tableData.itemcode && <th>ITEMCODE</th>}
-            {tableData.sdisc && <th>DESCRIPTION</th>}
-            {tableData.hsncode && <th>HSNCODE</th>}
-            {tableData.pcs && <th>PCS</th>}
-            {tableData.qty && <th>QTY</th>}
-            {tableData.rate && <th>RATE</th>}
-            {tableData.amount && <th>AMOUNT</th>}
-            {tableData.discount && <th>DIS@</th>}
-            {tableData.discount && <th>DISCOUNT</th>}
-            {tableData.gst && <th>GST</th>}
-            {tableData.others && <th>OTHERS</th>}
-            {tableData.cgst && <th>CGST</th>}
-            {tableData.sgst && <th>SGST</th>}
-            {tableData.igst && <th>IGST</th>}
-            {isEditMode && <th className="text-center">DELETE</th>}
+              {tableData.itemcode && <th>ITEMCODE</th>}
+              {tableData.sdisc && <th>DESCRIPTION</th>}
+              {tableData.hsncode && <th>HSNCODE</th>}
+              {tableData.pcs && <th>PCS</th>}
+              {tableData.qty && <th>QTY</th>}
+              {tableData.rate && <th>RATE</th>}
+              {tableData.amount && <th>AMOUNT</th>}
+              {tableData.discount && <th>DIS@</th>}
+              {tableData.discount && <th>DISCOUNT</th>}
+              {tableData.gst && <th>GST</th>}
+              {tableData.others && <th>OTHERS</th>}
+              {tableData.cgst && <th>CGST</th>}
+              {tableData.sgst && <th>SGST</th>}
+              {tableData.igst && <th>IGST</th>}
+              {isEditMode && <th className="text-center">DELETE</th>}
             </tr>
           </thead>
           <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
             {items.map((item, index) => (
               <tr key={item.id}>
                 {tableData.itemcode && (
-                <td style={{ padding: 0, width: 30 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="ItemCode"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.vcode}
-                    readOnly
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "vcode");
-                      handleOpenModal(e, index, "vcode");
-                      handleOpenModalBack(e, index, "vcode");
-                    }}
-                    onDoubleClick={(e) => {
-                     handleDoubleClick(e,"vcode", index)
-                    }}
-                    ref={(el) => (itemCodeRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
+                  <td style={{ padding: 0, width: 30 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="ItemCode"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                      }}
+                      type="text"
+                      value={item.vcode}
+                      readOnly
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "vcode");
+                        handleOpenModal(e, index, "vcode");
+                        handleOpenModalBack(e, index, "vcode");
+                      }}
+                      onDoubleClick={(e) => {
+                        handleDoubleClick(e, "vcode", index);
+                      }}
+                      ref={(el) => (itemCodeRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
                 )}
                 {tableData.sdisc && (
-                <td style={{ padding: 0, width: 300 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="desc"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    maxLength={48}
-                    value={item.sdisc}
-                    readOnly={!isEditMode || isDisabled}
-                    onChange={(e) =>
-                      handleItemChange(index, "sdisc", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "sdisc");
-                    }}
-                    ref={(el) => (desciptionRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
+                  <td style={{ padding: 0, width: 300 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="desc"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                      }}
+                      maxLength={48}
+                      value={item.sdisc}
+                      readOnly={!isEditMode || isDisabled}
+                      onChange={(e) =>
+                        handleItemChange(index, "sdisc", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "sdisc");
+                      }}
+                      ref={(el) => (desciptionRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
                 )}
                 {tableData.hsncode && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="Hsn"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    maxLength={8}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.tariff}
-                    onChange={(e) =>
-                      handleItemChange(index, "tariff", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "tariff");
-                    }}
-                    ref={(el) => (hsnCodeRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Hsn"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      maxLength={8}
+                      readOnly={!isEditMode || isDisabled}
+                      value={item.tariff}
+                      onChange={(e) =>
+                        handleItemChange(index, "tariff", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "tariff");
+                      }}
+                      ref={(el) => (hsnCodeRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
                 {tableData.pcs && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="PCS"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.pkgs) === 0 ? "" : item.pkgs}
-                    onChange={(e) =>
-                      handleItemChange(index, "pkgs", e.target.value)
-                    }
-                    onBlur={() => handlePkgsBlur(index)} // Format value on blur
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "pkgs");
-                    }}
-                    ref={(el) => (peciesRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="PCS"
+                      style={{
+                        height: 40,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        fontSize: `${fontSize}px`,
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+                      onChange={(e) =>
+                        handleItemChange(index, "pkgs", e.target.value)
+                      }
+                      onBlur={() => handlePkgsBlur(index)} // Format value on blur
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "pkgs");
+                      }}
+                      ref={(el) => (peciesRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
                 {tableData.qty && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="QTY"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.weight) === 0 ? "" : item.weight}
-                    onChange={(e) =>
-                      handleItemChange(index, "weight", e.target.value)
-                    }
-                    onBlur={() => handleWeightBlur(index)} // Format value on blur
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "weight");
-                    }}
-                    ref={(el) => (quantityRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="QTY"
+                      style={{
+                        height: 40,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        fontSize: `${fontSize}px`,
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.weight) === 0 ? "" : item.weight}
+                      onChange={(e) =>
+                        handleItemChange(index, "weight", e.target.value)
+                      }
+                      onBlur={() => handleWeightBlur(index)} // Format value on blur
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "weight");
+                      }}
+                      ref={(el) => (quantityRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
                 {tableData.rate && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="Price"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.rate) === 0 ? "" : item.rate}
-                    onChange={(e) =>
-                      handleItemChange(index, "rate", e.target.value)
-                    }
-                    onBlur={() => handleRateBlur(index)} // Format value on blur
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "rate");
-                    }}
-                    ref={(el) => (priceRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Price"
+                      style={{
+                        height: 40,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        fontSize: `${fontSize}px`,
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.rate) === 0 ? "" : item.rate}
+                      onChange={(e) =>
+                        handleItemChange(index, "rate", e.target.value)
+                      }
+                      onBlur={() => handleRateBlur(index)} // Format value on blur
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "rate");
+                      }}
+                      ref={(el) => (priceRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
                 {tableData.amount && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="Amount"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.amount) === 0 ? "" : item.amount}
-                    onChange={(e) =>
-                      handleItemChange(index, "amount", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "amount");
-                    }}
-                    ref={(el) => (amountRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    min="0"
-                  />
-                </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Amount"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.amount) === 0 ? "" : item.amount}
+                      onChange={(e) =>
+                        handleItemChange(index, "amount", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "amount");
+                      }}
+                      ref={(el) => (amountRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      min="0"
+                    />
+                  </td>
+                )}
                 {tableData.discount && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="Disc"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    value={Number(item.disc) === 0 ? "" : item.disc}
-                    onChange={(e) =>
-                      handleItemChange(index, "disc", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "disc");
-                    }}
-                    onBlur={() => handleBlur(index, "disc")}
-                    ref={(el) => (discountRef.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    readOnly={!isEditMode || isDisabled}
-                  />
-                </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Disc"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      value={Number(item.disc) === 0 ? "" : item.disc}
+                      onChange={(e) =>
+                        handleItemChange(index, "disc", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "disc");
+                      }}
+                      onBlur={() => handleBlur(index, "disc")}
+                      ref={(el) => (discountRef.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      readOnly={!isEditMode || isDisabled}
+                    />
+                  </td>
+                )}
                 {tableData.discount && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                  id="discount"
-                    className="discount"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    value={Number(item.discount) === 0 ? "" : item.discount}
-                    onChange={(e) =>  
-                      handleItemChange(index, "discount", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "discount");
-                    }}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    ref={(el) => (discount2Ref.current[index] = el)}
-                    onBlur={() => handleBlur(index, "discount")}
-                    readOnly={!isEditMode || isDisabled}
-                  />
-                </td>
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      id="discount"
+                      className="discount"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      value={Number(item.discount) === 0 ? "" : item.discount}
+                      onChange={(e) =>
+                        handleItemChange(index, "discount", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "discount");
+                      }}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      ref={(el) => (discount2Ref.current[index] = el)}
+                      onBlur={() => handleBlur(index, "discount")}
+                      readOnly={!isEditMode || isDisabled}
+                    />
+                  </td>
                 )}
                 {tableData.gst && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="Others"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "center",
-                    }}
-                    maxLength={2}
-                    value={Number(item.gst) === 0 ? "" : item.gst +"%"}
-                    // value={item.gst +"%"}
-                    readOnly={!isEditMode || isDisabled}
-                  />
-                </td>
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Others"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "center",
+                      }}
+                      maxLength={2}
+                      value={Number(item.gst) === 0 ? "" : item.gst + "%"}
+                      // value={item.gst +"%"}
+                      readOnly={!isEditMode || isDisabled}
+                    />
+                  </td>
                 )}
                 {tableData.others && (
-                <td style={{ padding: 0 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                    className="Others"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    maxLength={48}
-                    type="text"
-                    value={Number(item.exp_before) === 0 ? "" : item.exp_before}
-                    readOnly={!isEditMode || isDisabled}
-                    onDoubleClick={(e) => handleDoubleClick(e, "exp_before", index)}
-                    // onChange={(e) => handleItemChange(index, "exp_before", e.target.value)}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "exp_before");
-                     handleKeyDownExp(e, "exp_before", index)
-                    }}
-                    onFocus={(e) => {
-                      e.target.select(); // Select the entire text when the field is focused
-                      if (WindowBefore) {
-                        setCurrentIndex(index);
-                        setIsModalOpenExp(true);
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Others"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      maxLength={48}
+                      type="text"
+                      value={
+                        Number(item.exp_before) === 0 ? "" : item.exp_before
                       }
-                    }}
-                    ref={(el) => (othersRefs.current[index] = el)}
-                  />
-                </td>
+                      readOnly={!isEditMode || isDisabled}
+                      onDoubleClick={(e) =>
+                        handleDoubleClick(e, "exp_before", index)
+                      }
+                      // onChange={(e) => handleItemChange(index, "exp_before", e.target.value)}
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "exp_before");
+                        handleKeyDownExp(e, "exp_before", index);
+                      }}
+                      onFocus={(e) => {
+                        e.target.select(); // Select the entire text when the field is focused
+                        if (WindowBefore) {
+                          setCurrentIndex(index);
+                          setIsModalOpenExp(true);
+                        }
+                      }}
+                      ref={(el) => (othersRefs.current[index] = el)}
+                    />
+                  </td>
                 )}
                 {isModalOpenExp && currentIndex !== null && (
                   <div className="Modalz">
@@ -9088,7 +9219,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                             handleInputChange(
                               currentIndex,
                               "gross",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                         />
@@ -9135,7 +9266,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
                               handleInputChange(
                                 currentIndex,
                                 field.rate,
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             onKeyDown={(e) => handleKeyDownModal(e, idx)}
@@ -9154,13 +9285,13 @@ const handleKeyDownExp = (e, fieldName, index) => {
                               handleInputChange(
                                 currentIndex,
                                 field.value,
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
                         </div>
                       ))}
-                     <Button
+                      <Button
                         ref={closeButtonRef}
                         onClick={() => {
                           const idx = currentIndex; // store before reset
@@ -9181,171 +9312,225 @@ const handleKeyDownExp = (e, fieldName, index) => {
                         }}
                       >
                         CLOSE
-                     </Button>
+                      </Button>
                     </div>
                   </div>
                 )}
                 {tableData.cgst && (
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="CTax"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      color: "black",
-                    }}
-                    maxLength={48}
-                    disabled
-                    value={Number(item.ctax) === 0 ? "" : item.ctax}
-                    onChange={(e) =>
-                      handleItemChange(index, "ctax", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "ctax");
-                    }}
-                    ref={(el) => (cgstRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
+                  <td style={{ padding: 0 }}>
+                    <input
+                      className="CTax"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        color: "black",
+                      }}
+                      maxLength={48}
+                      disabled
+                      value={Number(item.ctax) === 0 ? "" : item.ctax}
+                      onChange={(e) =>
+                        handleItemChange(index, "ctax", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "ctax");
+                      }}
+                      ref={(el) => (cgstRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
                 )}
                 {tableData.sgst && (
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="STax"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      color: "black",
-                    }}
-                    maxLength={48}
-                    disabled
-                    value={Number(item.stax) === 0 ? "" : item.stax}
-                    onChange={(e) =>
-                      handleItemChange(index, "stax", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "stax");
-                    }}
-                    ref={(el) => (sgstRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    min="0"
-                  />
-                </td>
+                  <td style={{ padding: 0 }}>
+                    <input
+                      className="STax"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        color: "black",
+                      }}
+                      maxLength={48}
+                      disabled
+                      value={Number(item.stax) === 0 ? "" : item.stax}
+                      onChange={(e) =>
+                        handleItemChange(index, "stax", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "stax");
+                      }}
+                      ref={(el) => (sgstRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      min="0"
+                    />
+                  </td>
                 )}
                 {tableData.igst && (
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="ITax"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      color: "black",
-                    }}
-                    maxLength={48}
-                    disabled
-                    value={Number(item.itax) === 0 ? "" : item.itax}
-                    onChange={(e) =>
-                      handleItemChange(index, "itax", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "itax");
-                    }}
-                    ref={(el) => (igstRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    min="0"
-                  />
-                </td>
+                  <td style={{ padding: 0 }}>
+                    <input
+                      className="ITax"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        color: "black",
+                      }}
+                      maxLength={48}
+                      disabled
+                      value={Number(item.itax) === 0 ? "" : item.itax}
+                      onChange={(e) =>
+                        handleItemChange(index, "itax", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "itax");
+                      }}
+                      ref={(el) => (igstRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      min="0"
+                    />
+                  </td>
                 )}
                 {isEditMode && (
-                    <td style={{ padding: 0 }}>
-                      {canEditRow(index) && (
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "100%",
-                          }}
-                        >
-                          <IconButton
-                            color="error"
-                            size="small"
-                            tabIndex={-1}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </div>
-                      )}
-                    </td>
-                  )}
+                  <td style={{ padding: 0 }}>
+                    {canEditRow(index) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
+                      >
+                        <IconButton color="error" size="small" tabIndex={-1}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
-          <tfoot style={{ background: color, position: "sticky", bottom: -6, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
-          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
-            {tableData.itemcode && <td></td>}
-            {tableData.sdisc && <td>TOTAL</td>}
-            {tableData.hsncode && <td></td>}
-            {tableData.pcs && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(pkgsValue)}</td>
-            )}
-            {tableData.qty && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(weightValue)}</td>
-            )}
-            {tableData.rate && <td></td>}
-            {tableData.amount && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}</td>
-            )}
-            {tableData.discount && (
-              <>
-                <td>{items.reduce((sum, item) => sum + parseFloat(item.disc || 0), 0).toFixed(2)}</td>
-                <td>{items.reduce((sum, item) => sum + parseFloat(item.discount || 0), 0).toFixed(2)}</td>
-              </>
-            )}
-            {tableData.gst && <td></td>}
-            {tableData.others && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.exp_before || 0), 0).toFixed(2)}</td>
-            )}
-            {tableData.cgst && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.ctax || 0), 0).toFixed(2)}</td>
-            )}
-            {tableData.sgst && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.stax || 0), 0).toFixed(2)}</td>
-            )}
-            {tableData.igst && (
-              <td>{items.reduce((sum, item) => sum + parseFloat(item.itax || 0), 0).toFixed(2)}</td>
-            )}
-            {isEditMode && <td></td>}
-          </tr>
+          <tfoot
+            style={{
+              background: color,
+              position: "sticky",
+              bottom: -6,
+              fontSize: `${fontSize}px`,
+              borderTop: "1px solid black",
+            }}
+          >
+            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+              {tableData.itemcode && <td></td>}
+              {tableData.sdisc && <td>TOTAL</td>}
+              {tableData.hsncode && <td></td>}
+              {tableData.pcs && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0)
+                    .toFixed(pkgsValue)}
+                </td>
+              )}
+              {tableData.qty && (
+                <td>
+                  {items
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.weight || 0),
+                      0,
+                    )
+                    .toFixed(weightValue)}
+                </td>
+              )}
+              {tableData.rate && <td></td>}
+              {tableData.amount && (
+                <td>
+                  {items
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0,
+                    )
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.discount && (
+                <>
+                  <td>
+                    {items
+                      .reduce(
+                        (sum, item) => sum + parseFloat(item.disc || 0),
+                        0,
+                      )
+                      .toFixed(2)}
+                  </td>
+                  <td>
+                    {items
+                      .reduce(
+                        (sum, item) => sum + parseFloat(item.discount || 0),
+                        0,
+                      )
+                      .toFixed(2)}
+                  </td>
+                </>
+              )}
+              {tableData.gst && <td></td>}
+              {tableData.others && (
+                <td>
+                  {items
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.exp_before || 0),
+                      0,
+                    )
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.cgst && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.ctax || 0), 0)
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.sgst && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.stax || 0), 0)
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.igst && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.itax || 0), 0)
+                    .toFixed(2)}
+                </td>
+              )}
+              {isEditMode && <td></td>}
+            </tr>
           </tfoot>
-
         </Table>
       </div>
       {showModal && (
-      <ProductModal
-        products={products}
-        allFields={allFields}
-        onSelect={handleProductSelect}
-        onClose={handleModalDone}
-        tenant={tenant}
-        initialKey={pressedKey}
-        fetchParentProducts={fetchProducts}
-      />
+        <ProductModal
+          products={products}
+          allFields={allFields}
+          onSelect={handleProductSelect}
+          onClose={handleModalDone}
+          tenant={tenant}
+          initialKey={pressedKey}
+          fetchParentProducts={fetchProducts}
+        />
       )}
 
       <div className="addbutton" style={{ marginTop: 2, marginBottom: 5 }}>
@@ -9355,46 +9540,50 @@ const handleKeyDownExp = (e, fieldName, index) => {
       </div>
       {/* Bottom Part */}
       <div className="Belowcontents">
-        <div className="Parent" style={{display:'flex',flexDirection:'row'}}>
-        <div style={{display:'flex',flexDirection:"column"}}>
-          <TextField
-            className="Remz custom-bordered-input"
+        <div
+          className="Parent"
+          style={{ display: "flex", flexDirection: "row" }}
+        >
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <TextField
+              className="Remz custom-bordered-input"
               id="rem2"
               value={formData.rem2}
               inputRef={remarksRef}
-              label='REMARKS'
+              label="REMARKS"
               onChange={HandleValueChange}
               onKeyDown={(e) => {
                 handleKeyDowndown(e, transportRef);
               }}
               inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                },
               }}
               onFocus={(e) => e.target.select()}
               size="small"
               variant="filled"
               // sx={{ width: 280 }}
             />
-              <TextField
-            className="Remz custom-bordered-input"
+            <TextField
+              className="Remz custom-bordered-input"
               id="v_tpt"
               value={formData.v_tpt}
               inputRef={transportRef}
-              label='TRANSPORT'
+              label="TRANSPORT"
               onChange={HandleValueChange}
-              onKeyDown={(e) => { handleKeyDowndown(e, brokerRef);
-              handleOpenModalTpt(e, "v_tpt", "v_tpt")
+              onKeyDown={(e) => {
+                handleKeyDowndown(e, brokerRef);
+                handleOpenModalTpt(e, "v_tpt", "v_tpt");
               }}
               inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                },
               }}
               onFocus={(e) => e.target.select()}
               size="small"
@@ -9402,484 +9591,505 @@ const handleKeyDownExp = (e, fieldName, index) => {
               // sx={{ width: 280 }}
             />
             <TextField
-            className="Remz custom-bordered-input"
+              className="Remz custom-bordered-input"
               id="broker"
               value={formData.broker}
               inputRef={brokerRef}
-              label='BROKER'
+              label="BROKER"
               onChange={HandleValueChange}
               onKeyDown={(e) => {
                 handleKeyDowndown(e, expAfterGSTRef);
-                handleOpenModalBroker(e, "broker", "broker")
+                handleOpenModalBroker(e, "broker", "broker");
               }}
               inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                },
               }}
               onFocus={(e) => e.target.select()}
               size="small"
               variant="filled"
             />
-
-        </div>
-        <div style={{display:'flex',flexDirection:"column",marginLeft:5}}>
+          </div>
+          <div
+            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+          >
             <div className="duedatez">
-            <DatePicker
-              id="duedate"
-              value={formData.duedate}
-              className="dueDatePICKER"
-              selected={expiredDate}
-              onChange={handleDateChange}
-              readOnly={!isEditMode || isDisabled}
-              dateFormat="dd-MM-yyyy"
-              customInput={
-                <TextField
-                  className="custom-bordered-input"
-                  label="DUE DATE"
-                  variant="filled"
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-root": {
-                      height: 47, // Adjust height here
-                    },
-                    "& .MuiInputBase-input": {
-                      padding: "20px 14px 6px", // more top padding so text sits lower
-                    }
-                  }}
-                />
-              }
-            />
-          </div>
-          <div>
-          <TextField
-            className="custom-bordered-input"
-            id="srv_tax"
-            value={formData.srv_tax}
-            // disabled
-            label='TDS 194-Q'
-            onChange={handleNumericValue}
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                color: 'red',
-              },
-            }}
-            onFocus={(e) => e.target.select()}
-            size="small"
-            variant="filled"
-            sx={{ width: 150 }}
-          />
-          </div>
-          <div style={{ display: "flex", flexDirection: "row",alignItems: "center" }}>
-            <TextField
-            className="TCSRATE custom-bordered-input"
-              inputRef={tcsRef2}
-              id="tcs1_rate"
-              value={formData.tcs1_rate}
-              onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
-              onChange={(e) =>
-                setFormData(prev => ({
-                  ...prev,
-                  tcs1_rate: e.target.value
-                }))
-              }
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fontSize}px`,
-                  color: 'red',
-                },
+              <DatePicker
+                id="duedate"
+                value={formData.duedate}
+                className="dueDatePICKER"
+                selected={expiredDate}
+                onChange={handleDateChange}
+                readOnly={!isEditMode || isDisabled}
+                dateFormat="dd-MM-yyyy"
+                customInput={
+                  <TextField
+                    className="custom-bordered-input"
+                    label="DUE DATE"
+                    variant="filled"
+                    size="small"
+                    sx={{
+                      "& .MuiInputBase-root": {
+                        height: 47, // Adjust height here
+                      },
+                      "& .MuiInputBase-input": {
+                        padding: "20px 14px 6px", // more top padding so text sits lower
+                      },
+                    }}
+                  />
+                }
+              />
+            </div>
+            <div>
+              <TextField
+                className="custom-bordered-input"
+                id="srv_tax"
+                value={formData.srv_tax}
+                // disabled
+                label="TDS 194-Q"
+                onChange={handleNumericValue}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: "red",
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                sx={{ width: 150 }}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
               }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              InputProps={{ readOnly: !isEditMode || isDisabled }}
-            />
+            >
+              <TextField
+                className="TCSRATE custom-bordered-input"
+                inputRef={tcsRef2}
+                id="tcs1_rate"
+                value={formData.tcs1_rate}
+                onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    tcs1_rate: e.target.value,
+                  }))
+                }
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: "red",
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+              />
 
-            <TextField
-            className="TCSPER custom-bordered-input"
-              id="tcs1"
-              value={formData.tcs1}
-              label="TCS 206C@"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fontSize}px`,
-                  color: 'red',
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 120 }}
-            />
-          </div>
-        </div>
-        <div style={{display:'flex',flexDirection:"column",marginLeft:5,marginTop:'auto'}}>
-        {formData.Tds2 && Number(formData.Tds2) > 0 && (
-          <TextField
-            className="custom-bordered-input"
-            id="tax"
-            value={"2%"}
-            label="GST. TDS"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-            }}
-            onFocus={(e) => e.target.select()}
-            size="small"
-            variant="filled"
-            sx={{ width: 120 }}
-          />
-        )}
-        <div style={{display:'flex',flexDirection:"row"}}>
-          <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.Ctds}
-            label="C.TDS"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-          <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.Stds}
-            label="S.TDS"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-           <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.iTds}
-            label="I.TDS"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-          <span style={{ fontSize: 20, marginTop: "10px" }}>=</span> 
-          <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.Tds2}
-            label="TOTAL"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-
-        </div>
-        </div>
-        <div className="totals" style={{display:"flex",flexDirection:"column",marginLeft:"auto",marginRight:"12px" }}>
-        <TextField
-          className="TOTALFIELDS custom-bordered-input"
-          id="tax"
-          value={formData.tax}
-          label="TOTAL GST"
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-            },
-          }}
-          onFocus={(e) => e.target.select()}
-          size="small"
-          variant="filled"
-          // sx={{ width: 150 }}
-        />
-        <div>
-          <TextField
-          className="TOTALFIELDS custom-bordered-input"
-          inputRef={expAfterGSTRef}
-          id="expafterGST"
-          value={formData.expafterGST}
-          label="EXP AFTER GST"
-          onKeyDown={(e) => {
-            handleKeyDowndown(e, saveButtonRef);
-            handleKeyDownAfter(e);
-          }}
-          onFocus={(e) => {
-            e.target.select();
-            if (WindowAfter) {
-              setIsModalOpenAfter(true);
-            }
-          }}
-          onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          // sx={{ width: 150 }}
-        />
-        {isModalOpenAfter && (
-          <div className="Modal">
-            <div className="Modal-content">
-              <h1 className="headingE">EXPENSE AFTER TAX</h1>
-              <div className="form-group">
-                <input
-                  type="checkbox"
-                  id="gross"
-                  checked={formData.gross}
-                  onChange={handleGross}
-                />
-                <label
-                  style={{ marginLeft: 5 }}
-                  className="label"
-                  htmlFor="Gross"
-                >
-                  GROSS
-                </label>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginTop: 10,
+              <TextField
+                className="TCSPER custom-bordered-input"
+                id="tcs1"
+                value={formData.tcs1}
+                label="TCS 206C@"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: "red",
+                  },
                 }}
-              >
-                <text>{Expense6}</text>
-                <input
-                  id="Exp_rate6"
-                  value={formData.Exp_rate6}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 26,
-                  }}
-                  onChange={handleNumberChange} // Updated to the new function name
-                />
-                <input
-                  id="Exp6"
-                  value={formData.Exp6}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 5,
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginTop: 10,
-                }}
-              >
-                <text>{Expense7}</text>
-                <input
-                  id="Exp_rate7"
-                  value={formData.Exp_rate7}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 26,
-                  }}
-                  onChange={handleNumberChange} // Updated to the new function name
-                />
-                <input
-                  id="Exp7"
-                  value={formData.Exp7}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 5,
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginTop: 10,
-                }}
-              >
-                <text>{Expense8}</text>
-                <input
-                  id="Exp_rate8"
-                  value={formData.Exp_rate8}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 26.5,
-                  }}
-                  onChange={handleNumberChange} // Updated to the new function name
-                />
-                <input
-                  id="Exp8"
-                  value={formData.Exp8}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 5,
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginTop: 10,
-                }}
-              >
-                <text>{Expense9}</text>
-                <input
-                  id="Exp_rate9"
-                  value={formData.Exp_rate9}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 18,
-                  }}
-                  onChange={handleNumberChange} // Updated to the new function name
-                />
-                <input
-                  id="Exp9"
-                  value={formData.Exp9}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 5,
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginTop: 10,
-                }}
-              >
-                <text>{Expense10}</text>
-                <input
-                  id="Exp_rate10"
-                  value={formData.Exp_rate10}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 24.5,
-                  }}
-                  onChange={handleNumberChange} // Updated to the new function name
-                />
-                <input
-                  id="Exp10"
-                  value={formData.Exp10}
-                  style={{
-                    border: "1px solid black",
-                    width: 100,
-                    marginLeft: 5,
-                  }}
-                />
-              </div>
-              <Button
-                onClick={closeModalAfter}
-                style={{
-                  borderColor: "transparent",
-                  backgroundColor: "red",
-                  marginTop: 10,
-                }}
-              >
-                CLOSE
-              </Button>
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                // sx={{ width: 120 }}
+              />
             </div>
           </div>
-        )}
-        </div>
-        <TextField
-        id="grandtotal"
-        value={formData.grandtotal}
-        label="GRAND TOTAL"
-        onKeyDown={handleKeyDownTab2} // Handle Tab key here
-        inputProps={{
-          maxLength: 48,
-          style: {
-            height: 20,
-            fontSize: `${fontSize}px`,
-            color: "red",
-            fontWeight: "bold",
-          },
-        }}
-        size="small"
-        variant="filled"
-        className="TOTALFIELDS custom-bordered-input"
-        // sx={{ width: 150 }}
-        />
-        </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginLeft: 5,
+              marginTop: "auto",
+            }}
+          >
+            {formData.Tds2 && Number(formData.Tds2) > 0 && (
+              <TextField
+                className="custom-bordered-input"
+                id="tax"
+                value={"2%"}
+                label="GST. TDS"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                sx={{ width: 120 }}
+              />
+            )}
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.Ctds}
+                label="C.TDS"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.Stds}
+                label="S.TDS"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.iTds}
+                label="I.TDS"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+              <span style={{ fontSize: 20, marginTop: "10px" }}>=</span>
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.Tds2}
+                label="TOTAL"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+            </div>
+          </div>
+          <div
+            className="totals"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginLeft: "auto",
+              marginRight: "12px",
+            }}
+          >
+            <TextField
+              className="TOTALFIELDS custom-bordered-input"
+              id="tax"
+              value={formData.tax}
+              label="TOTAL GST"
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                },
+              }}
+              onFocus={(e) => e.target.select()}
+              size="small"
+              variant="filled"
+              // sx={{ width: 150 }}
+            />
+            <div>
+              <TextField
+                className="TOTALFIELDS custom-bordered-input"
+                inputRef={expAfterGSTRef}
+                id="expafterGST"
+                value={formData.expafterGST}
+                label="EXP AFTER GST"
+                onKeyDown={(e) => {
+                  handleKeyDowndown(e, saveButtonRef);
+                  handleKeyDownAfter(e);
+                }}
+                onFocus={(e) => {
+                  e.target.select();
+                  if (WindowAfter) {
+                    setIsModalOpenAfter(true);
+                  }
+                }}
+                onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                size="small"
+                variant="filled"
+                // sx={{ width: 150 }}
+              />
+              {isModalOpenAfter && (
+                <div className="Modal">
+                  <div className="Modal-content">
+                    <h1 className="headingE">EXPENSE AFTER TAX</h1>
+                    <div className="form-group">
+                      <input
+                        type="checkbox"
+                        id="gross"
+                        checked={formData.gross}
+                        onChange={handleGross}
+                      />
+                      <label
+                        style={{ marginLeft: 5 }}
+                        className="label"
+                        htmlFor="Gross"
+                      >
+                        GROSS
+                      </label>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginTop: 10,
+                      }}
+                    >
+                      <text>{Expense6}</text>
+                      <input
+                        id="Exp_rate6"
+                        value={formData.Exp_rate6}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 26,
+                        }}
+                        onChange={handleNumberChange} // Updated to the new function name
+                      />
+                      <input
+                        id="Exp6"
+                        value={formData.Exp6}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 5,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginTop: 10,
+                      }}
+                    >
+                      <text>{Expense7}</text>
+                      <input
+                        id="Exp_rate7"
+                        value={formData.Exp_rate7}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 26,
+                        }}
+                        onChange={handleNumberChange} // Updated to the new function name
+                      />
+                      <input
+                        id="Exp7"
+                        value={formData.Exp7}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 5,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginTop: 10,
+                      }}
+                    >
+                      <text>{Expense8}</text>
+                      <input
+                        id="Exp_rate8"
+                        value={formData.Exp_rate8}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 26.5,
+                        }}
+                        onChange={handleNumberChange} // Updated to the new function name
+                      />
+                      <input
+                        id="Exp8"
+                        value={formData.Exp8}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 5,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginTop: 10,
+                      }}
+                    >
+                      <text>{Expense9}</text>
+                      <input
+                        id="Exp_rate9"
+                        value={formData.Exp_rate9}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 18,
+                        }}
+                        onChange={handleNumberChange} // Updated to the new function name
+                      />
+                      <input
+                        id="Exp9"
+                        value={formData.Exp9}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 5,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginTop: 10,
+                      }}
+                    >
+                      <text>{Expense10}</text>
+                      <input
+                        id="Exp_rate10"
+                        value={formData.Exp_rate10}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 24.5,
+                        }}
+                        onChange={handleNumberChange} // Updated to the new function name
+                      />
+                      <input
+                        id="Exp10"
+                        value={formData.Exp10}
+                        style={{
+                          border: "1px solid black",
+                          width: 100,
+                          marginLeft: 5,
+                        }}
+                      />
+                    </div>
+                    <Button
+                      onClick={closeModalAfter}
+                      style={{
+                        borderColor: "transparent",
+                        backgroundColor: "red",
+                        marginTop: 10,
+                      }}
+                    >
+                      CLOSE
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <TextField
+              id="grandtotal"
+              value={formData.grandtotal}
+              label="GRAND TOTAL"
+              onKeyDown={handleKeyDownTab2} // Handle Tab key here
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                  color: "red",
+                  fontWeight: "bold",
+                },
+              }}
+              size="small"
+              variant="filled"
+              className="TOTALFIELDS custom-bordered-input"
+              // sx={{ width: 150 }}
+            />
+          </div>
         </div>
         <div className="Buttonsgroupz">
           <Button
-            ref={addButtonRef} 
+            ref={addButtonRef}
             className="Buttonz"
             style={{ background: color }}
             onClick={handleAdd}
@@ -9906,7 +10116,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{background: color }}
+            style={{ background: color }}
             onClick={handlePrevious}
             disabled={!isPreviousEnabled}
           >
@@ -9914,7 +10124,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{background: color }}
+            style={{ background: color }}
             onClick={handleNext}
             disabled={!isNextEnabled}
           >
@@ -9922,7 +10132,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{background: color }}
+            style={{ background: color }}
             onClick={handleFirst}
             disabled={!isFirstEnabled}
           >
@@ -9930,7 +10140,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{background: color }}
+            style={{ background: color }}
             onClick={handleLast}
             disabled={!isLastEnabled}
           >
@@ -9938,7 +10148,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{background: color }}
+            style={{ background: color }}
             disabled={!isSearchEnabled}
             onClick={() => {
               fetchAllBills();
@@ -9953,25 +10163,25 @@ const handleKeyDownExp = (e, fieldName, index) => {
             // onClick={handleOpen}
             onClick={openPrintMenu}
             // onClick={handleViewFAVoucher}
-            style={{background: color }}
+            style={{ background: color }}
             disabled={!isPrintEnabled}
           >
             Print
           </Button>
 
-          <BillPrintMenu 
-          isOpen={isMenuOpen} 
-          onClose={closePrintMenu} 
-          preview={handleOpen} 
-          formDataSale={formData}
-          handlePrint={handlePrintClick}
-          setSelectedCopies={setSelectedCopies}
-          onFaView={handleViewFAVoucher}
+          <BillPrintMenu
+            isOpen={isMenuOpen}
+            onClose={closePrintMenu}
+            preview={handleOpen}
+            formDataSale={formData}
+            handlePrint={handlePrintClick}
+            setSelectedCopies={setSelectedCopies}
+            onFaView={handleViewFAVoucher}
           />
-          
+
           <Button
             className="delete"
-            style={{background: color }}
+            style={{ background: color }}
             onClick={handleDeleteClick}
             disabled={!isDeleteEnabled}
           >
@@ -9979,7 +10189,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{background: color }}
+            style={{ background: color }}
             onClick={handleExit}
           >
             Exit
@@ -9989,7 +10199,7 @@ const handleKeyDownExp = (e, fieldName, index) => {
             className="Buttonz"
             onClick={handleDataSave}
             disabled={!isSubmitEnabled}
-            style={{background: color }}
+            style={{ background: color }}
           >
             Save
           </Button>
@@ -10001,75 +10211,75 @@ const handleKeyDownExp = (e, fieldName, index) => {
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-          <Form.Control
-            type="text"
-            placeholder="Enter Bill No..."
-            value={searchBillNo}
-            onChange={(e) => setSearchBillNo(e.target.value)}
-          />
-          <DatePicker
-            selected={searchDate}
-            onChange={(date) => setSearchDate(date)}
-            placeholderText="Select Date"
-            dateFormat="dd-MM-yyyy"
-            className="form-control"
-          />
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSearchBillNo("");
-              setSearchDate(null);
-            }}
-          >
-            Clear
-          </Button>
-        </div>
-        <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>BillNo</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>City</th>
-                <th>GrandTotal</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBills.map((bill) => (
-                <tr key={bill._id}>
-                  <td>{bill.formData.vbillno}</td>
-                  <td>
-                    {new Date(bill.formData.date).toLocaleDateString("en-GB")}
-                  </td>
-                  <td>{bill.customerDetails?.[0]?.vacode}</td>
-                  <td>{bill.customerDetails?.[0]?.city}</td>
-                  <td>{bill.formData.grandtotal}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        handleSelectBill(bill);
-                        setShowSearch(false);
-                      }}
-                    >
-                      Select
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {filteredBills.length === 0 && (
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <Form.Control
+              type="text"
+              placeholder="Enter Bill No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+            />
+            <DatePicker
+              selected={searchDate}
+              onChange={(date) => setSearchDate(date)}
+              placeholderText="Select Date"
+              dateFormat="dd-MM-yyyy"
+              className="form-control"
+            />
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchBillNo("");
+                setSearchDate(null);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <Table striped bordered hover>
+              <thead>
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
-                    No matching records
-                  </td>
+                  <th>BillNo</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>City</th>
+                  <th>GrandTotal</th>
+                  <th>Action</th>
                 </tr>
-              )}
-            </tbody>
-          </Table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredBills.map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.formData.vbillno}</td>
+                    <td>
+                      {new Date(bill.formData.date).toLocaleDateString("en-GB")}
+                    </td>
+                    <td>{bill.customerDetails?.[0]?.vacode}</td>
+                    <td>{bill.customerDetails?.[0]?.city}</td>
+                    <td>{bill.formData.grandtotal}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          handleSelectBill(bill);
+                          setShowSearch(false);
+                        }}
+                      >
+                        Select
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
         </Modal.Body>
       </Modal>
     </div>
