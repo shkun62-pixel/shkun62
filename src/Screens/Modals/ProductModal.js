@@ -315,7 +315,7 @@ const ProductModal = ({
   const [searchInput, setSearchInput] = useState("");      // what user is typing now
   const [lastValidTerm, setLastValidTerm] = useState("");  // last term that had results
   const [selectedIndex, setSelectedIndex] = useState(0);
-
+  const [stockId, setStockId] = useState(null);
   const [selectedFields, setSelectedFields] = useState(() => {
     const saved = localStorage.getItem(FIELD_STORAGE_KEY);
     return saved ? JSON.parse(saved) : allFields;
@@ -600,6 +600,20 @@ const ProductModal = ({
     setSearchInput(e.target.value);
   };
 
+  const handleModify = () => {
+    if (!products[selectedIndex]) {
+      alert("Please select a row first!");
+      return;
+    }
+
+    const selectedProduct = products[selectedIndex];
+
+    // Set Ledger ID for Example modal
+    setStockId(selectedProduct._id);
+
+    // Open modal
+    setShowNewStockModal(true);
+  };
   return (
     <>
       <Modal
@@ -725,6 +739,7 @@ const ProductModal = ({
             <Button className="new" onClick={openNewStockModal}>
               New
             </Button>
+            <Button className='modify' onClick={handleModify}>Modify</Button>
             <Button
               className="closebtn"
               variant="secondary"
@@ -735,17 +750,38 @@ const ProductModal = ({
           </div>
         </div>
       </Modal>
+      {/* {showNewStockModal && (
+        <Modal
+          dialogClassName="custom-full-width-modal"
+          show
+          onHide={handleNewStockClose}
+          size="lg"
+          style={{ zIndex: 100000, marginTop: -30, height: "110vh" }}
+        >
+          <Modal.Body style={{ marginTop: 10, marginLeft: 10 }}>
+            <NewStockAccount
+              StockId={stockId}   // pass ID to Example
+              onClose={handleNewStockClose}
+              // onRefresh={onRefresh}
+            />
+          </Modal.Body>
+        </Modal>
+      )} */}
 
+      {/* For NEw */}
       {showNewStockModal && (
         <Modal
           dialogClassName="custom-full-width-modal"
           show
           onHide={handleNewStockClose}
           size="lg"
-          style={{ zIndex: 100000 }}
+          style={{ zIndex: 100000, marginTop: -25, height: "110vh"  }}
         >
           <Modal.Body>
-            <NewStockAccount onSave={handleNewStockClose} />
+            <NewStockAccount
+             StockId={stockId}   // pass ID to Example
+              onClose={handleNewStockClose}
+             onSave={handleNewStockClose} />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleNewStockClose}>

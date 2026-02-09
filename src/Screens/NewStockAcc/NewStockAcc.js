@@ -16,7 +16,7 @@ import { CompanyContext } from "../Context/CompanyContext";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import useStockAcc from "../Shared/useStockAcc";
 
-const NewStockAcc = ({ onSave }) => {
+const NewStockAcc = ({ onSave, StockId }) => {
 
   const { getUniqueValues } = useStockAcc(); // only using hook
   const { company } = useContext(CompanyContext);
@@ -383,40 +383,100 @@ const NewStockAcc = ({ onSave }) => {
   const [isAbcmode, setIsAbcmode] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
 
+  // const fetchData = async () => {
+  //   try {
+  //     let response;
+  //     if (StockId) {
+  //       response = await axios.get(
+  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/apisingle/stockmaster/${StockId}`
+  //       );
+  //     } else {
+  //       response = await axios.get(
+  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+  //       );
+  //     }
+  //     // const response = await axios.get(
+  //     //   `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+  //     // );
+  //     if (response.status === 200 && response.data.data) {
+  //       const lastEntry = response.data.data;
+  //       console.log("LASTENTRY:", lastEntry);
+
+  //       // if (onSave) onSave();   // <- THIS will notify parent to close & reload
+  //       setFormData(lastEntry.formData);
+  //       setData1(lastEntry); // Assuming this is meant to hold the full data structure
+  //       setIndex(lastEntry._id);
+  //       // Convert cesscode into an array containing one object
+  //       setPurchaseAcc([
+  //         {
+  //           Pcodess: lastEntry.formData.Pcodess,
+  //           acCode: lastEntry.formData.acCode,
+  //         },
+  //       ]);
+  //       setSaleAcc([
+  //         {
+  //           Scodess: lastEntry.formData.Scodess,
+  //           AcCode: lastEntry.formData.AcCode,
+  //         },
+  //       ]);
+  //     } else {
+  //       setDefaults(); // If no data, reset everything
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching data", error);
+  //     setDefaults(); // Reset in case of error
+  //   }
+  // };
+
   const fetchData = async () => {
-    try {
-      const response = await axios.get(
+  try {
+    let response;
+
+    if (StockId) {
+      response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/apisingle/stockmaster/${StockId}`
+      );
+    } else {
+      response = await axios.get(
         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
       );
-      if (response.status === 200 && response.data.data) {
-        const lastEntry = response.data.data;
-        console.log("LASTENTRY:", lastEntry);
-
-        // if (onSave) onSave();   // <- THIS will notify parent to close & reload
-        setFormData(lastEntry.formData);
-        setData1(lastEntry); // Assuming this is meant to hold the full data structure
-        setIndex(lastEntry._id);
-        // Convert cesscode into an array containing one object
-        setPurchaseAcc([
-          {
-            Pcodess: lastEntry.formData.Pcodess,
-            acCode: lastEntry.formData.acCode,
-          },
-        ]);
-        setSaleAcc([
-          {
-            Scodess: lastEntry.formData.Scodess,
-            AcCode: lastEntry.formData.AcCode,
-          },
-        ]);
-      } else {
-        setDefaults(); // If no data, reset everything
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
-      setDefaults(); // Reset in case of error
     }
-  };
+
+    console.log("FULL RESPONSE:", response.data);
+
+    // ✅ normalize both APIs
+    const lastEntry = StockId
+      ? response.data                // ← StockId API
+      : response.data?.data;         // ← last API
+
+    if (response.status === 200 && lastEntry) {
+      console.log("LASTENTRY:", lastEntry);
+
+      setFormData(lastEntry.formData || {});
+      setData1(lastEntry);
+      setIndex(lastEntry._id);
+
+      setPurchaseAcc([
+        {
+          Pcodess: lastEntry.formData?.Pcodess || "",
+          acCode: lastEntry.formData?.acCode || "",
+        },
+      ]);
+
+      setSaleAcc([
+        {
+          Scodess: lastEntry.formData?.Scodess || "",
+          AcCode: lastEntry.formData?.AcCode || "",
+        },
+      ]);
+    } else {
+      setDefaults();
+    }
+  } catch (error) {
+    console.error("Error fetching data", error);
+    setDefaults();
+  }
+};
 
   const setDefaults = () => {
     // Define default empty states here to avoid redundancy and mistakes
