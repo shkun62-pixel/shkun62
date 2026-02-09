@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from "react";
 import HsnDetail from "./HsnWiseReport/HsnDetail";
+import AcwiseGstRep from "./AccWiseGstReport/AcwiseGstRep";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -25,6 +26,9 @@ const GstReport = () => {
     <div>
       {type === "HsnWise" && (
         <HsnDetail show={openPurRep} onHide={handleClose} />
+      )}
+       {type === "AcwiseGstReport" && (
+        <AcwiseGstRep show={openPurRep} onHide={handleClose} />
       )}
     </div>
   );
