@@ -1001,6 +1001,13 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
         });
         return; // Prevent save operation
       }
+      const isState = formData.state.trim() !== ""; // Ensure no empty spaces
+      if (!isState) {
+        toast.error("Please Fill the State Name", {
+          position: "top-center",
+        });
+        return; // Prevent save operation
+      }
   
       const combinedData = {
         _id: formData._id,

@@ -33,6 +33,7 @@ const LedgerList = () => {
   const txnContainerRef = useRef(null);
 
   const searchRef = useRef(null);   // ✅ search input ref
+  const [searchAllFields, setSearchAllFields] = useState(false);
   const navigate = useNavigate();
   const [activeRowIndex, setActiveRowIndex] = useState(0);  // ✅ Track highlighted txn row
   const location = useLocation();
@@ -721,12 +722,13 @@ const LedgerList = () => {
   
     const lower = searchTerm.toLowerCase();
   
-    const activeCols = Object.keys(searchColumns).filter(
-      (key) => searchColumns[key]
-    );
-  
-    const colsToSearch =
-      activeCols.length > 0 ? activeCols : ["ahead"];
+   const activeCols = searchAllFields
+  ? ALL_COLUMNS.map(col => col.key)   // 🔥 ALL fields
+  : Object.keys(searchColumns).filter(key => searchColumns[key]);
+
+const colsToSearch =
+  activeCols.length > 0 ? activeCols : ["ahead"];
+
   
     const isMultiColumn = colsToSearch.length > 1;
   
@@ -749,13 +751,13 @@ const LedgerList = () => {
   
   const isValidPrefix = (value) => {
     const lower = value.toLowerCase();
-  
-    const activeCols = Object.keys(searchColumns).filter(
-      (key) => searchColumns[key]
-    );
-  
-    const colsToCheck =
-      activeCols.length > 0 ? activeCols : ["ahead"];
+  const activeCols = searchAllFields
+  ? ALL_COLUMNS.map(col => col.key)
+  : Object.keys(searchColumns).filter(key => searchColumns[key]);
+
+const colsToCheck =
+  activeCols.length > 0 ? activeCols : ["ahead"];
+
   
     const isMultiColumn = colsToCheck.length > 1;
   
@@ -773,55 +775,6 @@ const LedgerList = () => {
       })
     );
   };
-  // useEffect(() => {
-  //   if (!searchTerm.trim()) {
-  //     setFilteredLedgers(ledgers);
-  //     setSelectedIndex(0);
-  //     return;
-  //   }
-
-  //   const lower = searchTerm.toLowerCase();
-
-  //   const activeCols = Object.keys(searchColumns).filter(
-  //     (key) => searchColumns[key]
-  //   );
-
-  //   const colsToSearch =
-  //     activeCols.length > 0 ? activeCols : ["ahead"];
-
-  //   const filtered = ledgers.filter((ledger) =>
-  //     colsToSearch.some((key) => {
-  //       const value = ledger.formData?.[key];
-  //       if (!value) return false;
-
-  //       // ✅ FIRST LETTER / PREFIX SEARCH ONLY
-  //       return value.toString().toLowerCase().startsWith(lower);
-  //     })
-  //   );
-
-  //   setFilteredLedgers(filtered);
-  //   setSelectedIndex(0);
-  // }, [searchTerm, ledgers, searchColumns]);
-
-  // const isValidPrefix = (value) => {
-  //   const lower = value.toLowerCase();
-
-  //   const activeCols = Object.keys(searchColumns).filter(
-  //     (key) => searchColumns[key]
-  //   );
-
-  //   const colsToCheck =
-  //     activeCols.length > 0 ? activeCols : ["ahead"];
-
-  //   return ledgers.some((ledger) =>
-  //     colsToCheck.some((key) => {
-  //       const v = ledger.formData?.[key];
-  //       if (!v) return false;
-
-  //       return v.toString().toLowerCase().startsWith(lower);
-  //     })
-  //   );
-  // };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -922,7 +875,40 @@ const LedgerList = () => {
         </div>
 
         {/* ✅ Search Input */}
-        <div style={{display:'flex',flexDirection:"row"}}>
+        <div style={{display:'flex',flexDirection:"row",alignItems: "center"}}>
+          {/* 🔍 Search All Fields Checkbox */}
+          <div style={{ display: "flex", flexDirection:'column',marginTop:10,marginRight:20}}>
+            <span style={{ fontSize: "13px", fontWeight: 500,fontWeight:'bold' }}>
+              SMART SEARCH
+            </span>
+
+            <div
+              onClick={() => setSearchAllFields(v => !v)}
+              style={{
+                width: "100px",
+                height: "28px",
+                borderRadius: "999px",
+                background: searchAllFields ? "#0d6efd" : "#ccc",
+                position: "relative",
+                cursor: "pointer",
+                transition: "background .3s",
+              }}
+            >
+              <div
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderRadius: "50%",
+                  background: "#fff",
+                  position: "absolute",
+                  top: "3px",
+                  left: searchAllFields ? "75px" : "2px",
+                  transition: "left .3s",
+                  boxShadow: "0 2px 6px rgba(0,0,0,.3)",
+                }}
+              />
+            </div>
+          </div>
           <Form.Control
             ref={searchRef}
             className={styles.Search}
@@ -956,7 +942,6 @@ const LedgerList = () => {
           >
             Modify
           </Button>
-
         </div>
 
       </Card>

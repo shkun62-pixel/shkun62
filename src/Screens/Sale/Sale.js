@@ -6532,6 +6532,7 @@ const Sale = () => {
         });
         return;
       }
+      setIsSubmitEnabled(false);
       const ddmmyyyy = (d) => {
         if (!d) return "";
         const dd = String(d.getDate()).padStart(2, "0");
@@ -6748,7 +6749,7 @@ const Sale = () => {
         position: "top-center",
       });
     } finally {
-      setIsSubmitEnabled(false);
+      // setIsSubmitEnabled(false);
       if (isDataSaved) {
         setTitle("(View)");
         setIsAddEnabled(true);
@@ -6953,24 +6954,36 @@ const Sale = () => {
       updatedItems[index][key] = value;
     }
 
-    // const updatedItems = [...items];
-    // updatedItems[index][key] = value;
-
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
       const selectedProduct = products.find(
         (product) => product.Aheads === value,
       );
+
       if (selectedProduct) {
+        // ✅ Always update these
         updatedItems[index]["vcode"] = selectedProduct.Acodes;
         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+
+        // ✅ ABC MODE special logic
+        if (isAbcmode) {
+          const mrp = parseFloat(selectedProduct.Mrps);
+
+          if (!isNaN(mrp) && mrp > 0) {
+            updatedItems[index]["rate"] = mrp;
+          }
+
+          setItems(updatedItems);
+          return; // 🚫 stop further changes
+        }
+
+        // ⬇️ Normal mode (unchanged)
         updatedItems[index]["Units"] = selectedProduct.TradeName;
         updatedItems[index]["rate"] = selectedProduct.Mrps;
         updatedItems[index]["gst"] = selectedProduct.itax_rate;
         updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        if (postingSetup?.isDefault === true) {
-          // 🔥 NEW LOGIC → API controlled
 
+        if (postingSetup?.isDefault === true) {
           const gstRate = String(selectedProduct.itax_rate);
 
           const matchedSetup = postingSetup.rows.find(
@@ -6983,7 +6996,6 @@ const Sale = () => {
             updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
             updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
           } else {
-            // Optional safety if GST not found
             updatedItems[index]["Scodes01"] = "";
             updatedItems[index]["Scodess"] = "";
             updatedItems[index]["Pcodes01"] = "";
@@ -6995,13 +7007,12 @@ const Sale = () => {
           updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
           updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
         }
+
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-      } else {
-        updatedItems[index]["rate"] = ""; // Reset price if product not found
-        updatedItems[index]["gst"] = ""; // Reset gst if product not found
       }
     }
+
     let pkgs = parseFloat(updatedItems[index].pkgs);
     let Qtyperpkgs = updatedItems[index].Qtyperpc;
     let AL = pkgs * Qtyperpkgs;
@@ -8256,6 +8267,16 @@ const Sale = () => {
   const nonEmptyItems2 = items.filter(
     (item) => (item.sdisc || "").trim() !== "",
   );
+
+  const formatDateDDMMYYYY = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -8295,28 +8316,6 @@ const Sale = () => {
             onBlur={() => validateDate(selectedDate)}
             customInput={<MaskedInput />}
           />
-          {/* <DatePicker
-        popperClassName="custom-datepicker-popper"
-          ref={datePickerRef}
-          className="DatePICKER"
-          id="date"
-          selected={selectedDate || null}
-          openToDate={new Date()}
-          onCalendarClose={handleCalendarClose}
-          dateFormat="dd-MM-yyyy"
-          onChange={handleDateChange}
-          onBlur={() => validateDate(selectedDate)} // ✅ call on blur
-          onChangeRaw={(e) => {
-            if (!e.target.value) return; // ✅ avoid undefined error
-
-            let val = e.target.value.replace(/\D/g, ""); // Remove non-digits
-            if (val.length > 2) val = val.slice(0, 2) + "-" + val.slice(2);
-            if (val.length > 5) val = val.slice(0, 5) + "-" + val.slice(5, 9);
-
-            e.target.value = val; // Show formatted input
-          }}
-          readOnly={!isEditMode || isDisabled}
-        /> */}
           <div className="billdivz">
             <TextField
               className="billzNo custom-bordered-input"
@@ -9619,7 +9618,7 @@ const Sale = () => {
             <div className="duedatez">
               <DatePicker
                 id="duedate"
-                value={formData.duedate}
+                value={formatDateDDMMYYYY(formData.duedate)}
                 className="dueDatePICKER"
                 selected={expiredDate}
                 onChange={handleDateChange}

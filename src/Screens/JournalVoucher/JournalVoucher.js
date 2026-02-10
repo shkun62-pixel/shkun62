@@ -10,14 +10,14 @@ import { BiTrash } from "react-icons/bi";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
-import { Modal } from 'react-bootstrap'; // Import Bootstrap components
+import { Modal } from "react-bootstrap"; // Import Bootstrap components
 import InvoiceJournal from "../InvoicePDF/InvoiceJournal";
 import { useEditMode } from "../../EditModeContext";
-import { CompanyContext } from '../Context/CompanyContext';
+import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import TextField from "@mui/material/TextField";
-import {IconButton} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useLocation } from "react-router-dom";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
@@ -30,7 +30,7 @@ const JournalVoucher = () => {
 
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "shkun_05062025_05062026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -118,19 +118,20 @@ const JournalVoucher = () => {
 
   // Naration Suggestions
   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
-  const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+  const [showNarrationSuggestions, setShowNarrationSuggestions] =
+    useState(true);
   const fetchNarrations = async () => {
     try {
       const res = await fetch(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal"
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal",
       );
       const data = await res.json();
 
       // extract narrations from all items
       const narrs = data
-        .flatMap(entry => entry.items || [])
-        .map(item => item.narration)
-        .filter(n => n && n.trim() !== "");  // remove empty narrations
+        .flatMap((entry) => entry.items || [])
+        .map((item) => item.narration)
+        .filter((n) => n && n.trim() !== ""); // remove empty narrations
 
       // unique values
       const uniqueNarrs = [...new Set(narrs)];
@@ -193,125 +194,139 @@ const JournalVoucher = () => {
   };
 
   const handleSaveClick = async () => {
-    document.body.style.backgroundColor = 'white';
+    document.body.style.backgroundColor = "white";
     setIsSaving(true);
     let isDataSaved = false;
     try {
-        const filledRows = items.filter(item => item.accountname !== '');
-        if (filledRows.length === 0) {
-            toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
-            setIsSaving(false);
-            return;
-        }
-        // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
-            const isValidTransaction = filledRows.every(item => 
-                parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0
-            );
-        
-            if (!isValidTransaction) {
-                toast.error("Credit or Debit must be greater than 0.", { position: "top-center" });
-                return;
-            }
-             // Ensure that total debit and total credit are equal
-        const totalDebit = filledRows.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0);
-        const totalCredit = filledRows.reduce((sum, item) => sum + parseFloat(item.credit || 0), 0);
-
-        if (totalDebit !== totalCredit) {
-            toast.error("Total Debit and Total Credit must be equal.", { position: "top-center" });
-            setIsSaving(false);
-            return;
-        }
-        let combinedData;
-        if (isAbcmode) {
-            console.log(formData);
-            formData.totalcredit = formData.totalcredit;
-            formData.totaldebit = formData.totaldebit;
-            combinedData = {
-                _id: formData._id,
-                formData: {
-                  vtype: formData.vtype,
-                  date: formData.date,
-                  voucherno: formData.voucherno,
-                  owner: formData.owner,
-                  totaldebit: formData.totaldebit,
-                  totalcredit: formData.totalcredit,
-                },
-                items: filledRows.map(item => ({
-                  id: item.id,
-                  accountname: item.accountname,
-                  narration: item.narration,
-                  debit: item.debit,
-                  credit: item.credit,
-                  disableDebit: item.disableDebit,
-                  disableCredit: item.disableCredit,
-                }))
-            };
-        } else {
-            combinedData = {
-                _id: formData._id,
-                formData: {
-                  vtype: formData.vtype,
-                  date: formData.date,
-                  voucherno: formData.voucherno,
-                  owner: formData.owner,
-                  totaldebit: formData.totaldebit,
-                  totalcredit: formData.totalcredit,
-                },
-                items: filledRows.map(item => ({
-                  id: item.id,
-                  accountname: item.accountname,
-                  narration: item.narration,
-                  debit: item.debit,
-                  credit: item.credit,
-                  disableDebit: item.disableDebit,
-                  disableCredit: item.disableCredit,
-                }))
-            };
-        }
-        // Debugging
-        console.log('Combined Data:', combinedData);
-        const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal${isAbcmode ? `/${data1._id}` : ''}`;
-        const method = isAbcmode ? 'put' : 'post';
-        const response = await axios({
-            method,
-            url: apiEndpoint,
-            data: combinedData,
+      const filledRows = items.filter((item) => item.accountname !== "");
+      if (filledRows.length === 0) {
+        toast.error("Please fill in at least one account name before saving.", {
+          position: "top-center",
         });
-
-        if (response.status === 200 || response.status === 201) {
-            // fetchData();
-            isDataSaved = true;
-        }
-    } catch (error) {
-        console.error('Error saving data:', error);
-        toast.error("Failed to save data. Please try again.", { position: "top-center" });
-    } finally {
-        setIsSubmitEnabled(true);
         setIsSaving(false);
-        if (isDataSaved) {
-            setTitle('View');
-            setIsAddEnabled(true);
-            setIsDisabled(true);
-            setIsEditMode(false);
-            setIsEditMode2(false);
-            setIsSubmitEnabled(false);
-            setIsPreviousEnabled(true);
-            setIsNextEnabled(true);
-            setIsFirstEnabled(true);
-            setIsLastEnabled(true);
-            setIsSearchEnabled(true);
-            setIsPreviousEnabled(true);
-            setIsSPrintEnabled(true);
-            setIsDeleteEnabled(true);
-            fetchData(); // Refresh data to get updated _id and other info
-            fetchNarrations(); // Refresh narrations
-            toast.success("Data Saved Successfully!", { position: "top-center" });
-        } else {
-            setIsAddEnabled(false);
-            setIsDisabled(false);
-        }
+        return;
+      }
+      // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+      const isValidTransaction = filledRows.every(
+        (item) => parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0,
+      );
+
+      if (!isValidTransaction) {
+        toast.error("Credit or Debit must be greater than 0.", {
+          position: "top-center",
+        });
+        return;
+      }
+      // Ensure that total debit and total credit are equal
+      const totalDebit = filledRows.reduce(
+        (sum, item) => sum + parseFloat(item.debit || 0),
+        0,
+      );
+      const totalCredit = filledRows.reduce(
+        (sum, item) => sum + parseFloat(item.credit || 0),
+        0,
+      );
+
+      if (totalDebit !== totalCredit) {
+        toast.error("Total Debit and Total Credit must be equal.", {
+          position: "top-center",
+        });
+        setIsSaving(false);
+        return;
+      }
+      let combinedData;
+      if (isAbcmode) {
+        console.log(formData);
+        formData.totalcredit = formData.totalcredit;
+        formData.totaldebit = formData.totaldebit;
+        combinedData = {
+          _id: formData._id,
+          formData: {
+            vtype: formData.vtype,
+            date: formData.date,
+            voucherno: formData.voucherno,
+            owner: formData.owner,
+            totaldebit: formData.totaldebit,
+            totalcredit: formData.totalcredit,
+          },
+          items: filledRows.map((item) => ({
+            id: item.id,
+            accountname: item.accountname,
+            narration: item.narration,
+            debit: item.debit,
+            credit: item.credit,
+            disableDebit: item.disableDebit,
+            disableCredit: item.disableCredit,
+          })),
+        };
+      } else {
+        combinedData = {
+          _id: formData._id,
+          formData: {
+            vtype: formData.vtype,
+            date: formData.date,
+            voucherno: formData.voucherno,
+            owner: formData.owner,
+            totaldebit: formData.totaldebit,
+            totalcredit: formData.totalcredit,
+          },
+          items: filledRows.map((item) => ({
+            id: item.id,
+            accountname: item.accountname,
+            narration: item.narration,
+            debit: item.debit,
+            credit: item.credit,
+            disableDebit: item.disableDebit,
+            disableCredit: item.disableCredit,
+          })),
+        };
+      }
+      // Debugging
+      console.log("Combined Data:", combinedData);
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
+      const method = isAbcmode ? "put" : "post";
+      const response = await axios({
+        method,
+        url: apiEndpoint,
+        data: combinedData,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        // fetchData();
+        isDataSaved = true;
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      toast.error("Failed to save data. Please try again.", {
+        position: "top-center",
+      });
+    } finally {
+      setIsSubmitEnabled(true);
+      setIsSaving(false);
+      if (isDataSaved) {
+        setTitle("View");
+        setIsAddEnabled(true);
+        setIsDisabled(true);
+        setIsEditMode(false);
+        setIsEditMode2(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsPreviousEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        fetchData(); // Refresh data to get updated _id and other info
+        fetchNarrations(); // Refresh narrations
+        toast.success("Data Saved Successfully!", { position: "top-center" });
+      } else {
+        setIsAddEnabled(false);
+        setIsDisabled(false);
+      }
     }
-};
+  };
 
   const handleDeleteClick = async (id) => {
     if (!id) {
@@ -322,7 +337,7 @@ const JournalVoucher = () => {
     }
 
     const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?"
+      "Are you sure you want to delete this item?",
     );
     if (!userConfirmed) return;
 
@@ -358,17 +373,16 @@ const JournalVoucher = () => {
   const [loadingCus, setLoadingCus] = useState(true);
   const [errorCus, setErrorCus] = useState(null);
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchCustomers();
     fetchNarrations();
   }, []);
 
- 
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -393,7 +407,7 @@ const JournalVoucher = () => {
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
       const selectedProduct = productsCus.find(
-        (product) => product.ahead === value
+        (product) => product.ahead === value,
       );
       if (selectedProduct) {
         updatedItems[index]["accountname"] = selectedProduct.ahead;
@@ -439,14 +453,14 @@ const JournalVoucher = () => {
       setShowModalCus(false);
       return;
     }
-  
+
     // clone the array
     const newCustomers = [...items];
-  
+
     // overwrite the one at the selected index
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
-      accountname: product.ahead || '', 
+      accountname: product.ahead || "",
     };
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
@@ -459,7 +473,6 @@ const JournalVoucher = () => {
     setItems(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
-  
   };
 
   const handleCloseModalCus = () => {
@@ -504,10 +517,10 @@ const JournalVoucher = () => {
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
-  
+
   // replace your Print button onClick:
   const handlePrintClick = () => setPrintChoiceOpen(true);
-  
+
   // 1) Normal print (your existing PDF)
   const handleNormalPrint = () => {
     setPrintChoiceOpen(false);
@@ -525,16 +538,16 @@ const JournalVoucher = () => {
       let response;
       if (journalId) {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journalget/${journalId}`
+          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journalget/${journalId}`,
         );
       } else {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`
+          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`,
         );
       }
       // const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`);
       // console.log("fetch Response: ", response.data);
-  
+
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
         // Set flags and update form data
@@ -543,23 +556,27 @@ const JournalVoucher = () => {
         console.log(lastEntry.formData, "Formdata");
 
         // Update items with the last entry's items
-        const updatedItems = lastEntry.items.map(item => ({
+        const updatedItems = lastEntry.items.map((item) => ({
           ...item, // Ensure immutability
           disableCredit: item.disableCredit || false, // Handle disableReceipt flag safely
         }));
         setItems(normalizeItems(updatedItems));
-  
+
         // Calculate total debit and total credit
-        const totalDebit = updatedItems.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0).toFixed(2);
-        const totalCredit = updatedItems.reduce((sum, item) => sum + parseFloat(item.credit || 0), 0).toFixed(2);
-  
+        const totalDebit = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.debit || 0), 0)
+          .toFixed(2);
+        const totalCredit = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.credit || 0), 0)
+          .toFixed(2);
+
         // Update formData with the calculated totals
-        setFormData(prevFormData => ({
+        setFormData((prevFormData) => ({
           ...prevFormData,
           totaldebit: totalDebit,
           totalcredit: totalCredit,
         }));
-  
+
         // Set data and index
         setData1(lastEntry); // Assuming setData1 holds the current entry data
         setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
@@ -567,7 +584,7 @@ const JournalVoucher = () => {
       } else {
         setFirstTimeCheckData("DataNotAvailable");
         console.log("No data available");
-        
+
         // Create an empty data object with voucher number 0
         const emptyFormData = {
           voucherno: 0,
@@ -577,17 +594,19 @@ const JournalVoucher = () => {
           totaldebit: "0.00",
           totalcredit: "0.00",
         };
-  
-        const emptyItems = [{
-          id: 1,
-          accountname: "",
-          narration: "",
-          debit: "",
-          credit: "",
-          disableDebit: false,
-          disableCredit: false,
-        }];
-  
+
+        const emptyItems = [
+          {
+            id: 1,
+            accountname: "",
+            narration: "",
+            debit: "",
+            credit: "",
+            disableDebit: false,
+            disableCredit: false,
+          },
+        ];
+
         // Set the empty data
         setFormData(emptyFormData);
         setItems(normalizeItems([]));
@@ -596,7 +615,7 @@ const JournalVoucher = () => {
       }
     } catch (error) {
       console.error("Error fetching data", error);
-      
+
       // In case of error, initialize empty data
       const emptyFormData = {
         voucherno: 0,
@@ -606,21 +625,23 @@ const JournalVoucher = () => {
         user: "",
         totalpayment: "0.00",
         totalreceipt: "0.00",
-        totaldiscount: "0.00"
+        totaldiscount: "0.00",
       };
-      const emptyItems = [{
-        id: 1,
-        accountname: "",
-        narration: "",
-        payment_debit: 0.00,
-        receipt_credit: 0.00,
-        discount: 0.00,
-        discounted_payment: "0.00",
-        discounted_receipt: "0.00",
-        disablePayment: false,
-        disableReceipt: false
-      }];
-      
+      const emptyItems = [
+        {
+          id: 1,
+          accountname: "",
+          narration: "",
+          payment_debit: 0.0,
+          receipt_credit: 0.0,
+          discount: 0.0,
+          discounted_payment: "0.00",
+          discounted_receipt: "0.00",
+          disablePayment: false,
+          disableReceipt: false,
+        },
+      ];
+
       setFormData(emptyFormData);
       setItems(normalizeItems([]));
       setData1({ formData: emptyFormData, items: emptyItems });
@@ -634,14 +655,16 @@ const JournalVoucher = () => {
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape" && !isEditMode && journalId) {
-        const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
+        const modalState = JSON.parse(
+          sessionStorage.getItem("trailModalState") || "{}",
+        );
 
         navigate(-1); // go back
         setTimeout(() => {
           // restore modal state after navigation
           if (modalState.keepModalOpen) {
             window.dispatchEvent(
-              new CustomEvent("reopenTrailModal", { detail: modalState })
+              new CustomEvent("reopenTrailModal", { detail: modalState }),
             );
           }
         }, 50);
@@ -665,94 +688,102 @@ const JournalVoucher = () => {
   }, []);
 
   const handleNext = async () => {
-      document.body.style.backgroundColor = 'white';
-      setTitle("View");
-      try {
-        if (data1) {
-          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`);
-          if (response.status === 200 && response.data) {
-              const nextData = response.data.data;
-              setData1(response.data.data);
-              setIndex(index + 1);
-              setFormData(nextData.formData);
-              const updatedItems = nextData.items.map(item => ({
-                  ...item, 
-                  disableReceipt: item.disableReceipt || false,
-              }));
-              setItems(normalizeItems(updatedItems));
-              setIsDisabled(true);
-          }
+    document.body.style.backgroundColor = "white";
+    setTitle("View");
+    try {
+      if (data1) {
+        const response = await axios.get(
+          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`,
+        );
+        if (response.status === 200 && response.data) {
+          const nextData = response.data.data;
+          setData1(response.data.data);
+          setIndex(index + 1);
+          setFormData(nextData.formData);
+          const updatedItems = nextData.items.map((item) => ({
+            ...item,
+            disableReceipt: item.disableReceipt || false,
+          }));
+          setItems(normalizeItems(updatedItems));
+          setIsDisabled(true);
         }
-      } catch (error) {
-          console.error("Error fetching next record:", error);
       }
+    } catch (error) {
+      console.error("Error fetching next record:", error);
+    }
   };
   const handlePrevious = async () => {
-      document.body.style.backgroundColor = 'white';
-      setTitle("View");
-      try {
-          if (data1) {
-              const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/previous/${data1._id}`);
-              if (response.status === 200 && response.data) {
-                  console.log(response);
-                  setData1(response.data.data);
-                  const prevData = response.data.data;
-                  setIndex(index - 1);
-                  setFormData(prevData.formData);            
-                  const updatedItems = prevData.items.map(item => ({
-                      ...item, 
-                      disableReceipt: item.disableReceipt || false,
-                  }));
-                  setItems(normalizeItems(updatedItems));
-                  setIsDisabled(true);
-              }
-          }
-      } catch (error) {
-          console.error("Error fetching previous record:", error);
+    document.body.style.backgroundColor = "white";
+    setTitle("View");
+    try {
+      if (data1) {
+        const response = await axios.get(
+          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/previous/${data1._id}`,
+        );
+        if (response.status === 200 && response.data) {
+          console.log(response);
+          setData1(response.data.data);
+          const prevData = response.data.data;
+          setIndex(index - 1);
+          setFormData(prevData.formData);
+          const updatedItems = prevData.items.map((item) => ({
+            ...item,
+            disableReceipt: item.disableReceipt || false,
+          }));
+          setItems(normalizeItems(updatedItems));
+          setIsDisabled(true);
+        }
       }
+    } catch (error) {
+      console.error("Error fetching previous record:", error);
+    }
   };
   const handleFirst = async () => {
-      document.body.style.backgroundColor = 'white';
-      setTitle("View");
-      try {
-          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/first`);
-          if (response.status === 200 && response.data) {
-              const firstData = response.data.data;
-              setIndex(0);
-              setFormData(firstData.formData);
-              setData1(response.data.data);
-              const updatedItems = firstData.items.map(item => ({
-                  ...item, 
-                  disableReceipt: item.disableReceipt || false,
-              }));
-              setItems(normalizeItems(updatedItems));
-              setIsDisabled(true);
-          }
-      } catch (error) {
-          console.error("Error fetching first record:", error);
+    document.body.style.backgroundColor = "white";
+    setTitle("View");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/first`,
+      );
+      if (response.status === 200 && response.data) {
+        const firstData = response.data.data;
+        setIndex(0);
+        setFormData(firstData.formData);
+        setData1(response.data.data);
+        const updatedItems = firstData.items.map((item) => ({
+          ...item,
+          disableReceipt: item.disableReceipt || false,
+        }));
+        setItems(normalizeItems(updatedItems));
+        setIsDisabled(true);
       }
+    } catch (error) {
+      console.error("Error fetching first record:", error);
+    }
   };
   const handleLast = async () => {
-    document.body.style.backgroundColor = 'white';
+    document.body.style.backgroundColor = "white";
     setTitle("View");
 
     try {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`);
-        if (response.status === 200 && response.data) {
-            const lastData = response.data.data;
-            const lastIndex = response.data.length - 1;
-            setIndex(lastIndex);
-            setFormData(lastData.formData);
-            setData1(response.data.data);
-            const updatedItems = lastData.items.map(item => ({
-                ...item, 
-                disableReceipt: item.disableReceipt || false,
-            }));
-            setItems(normalizeItems(updatedItems));
-            setIsDisabled(true);
-        }
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`,
+      );
+      if (response.status === 200 && response.data) {
+        const lastData = response.data.data;
+        const lastIndex = response.data.length - 1;
+        setIndex(lastIndex);
+        setFormData(lastData.formData);
+        setData1(response.data.data);
+        const updatedItems = lastData.items.map((item) => ({
+          ...item,
+          disableReceipt: item.disableReceipt || false,
+        }));
+        setItems(normalizeItems(updatedItems));
+        setIsDisabled(true);
+      }
     } catch (error) {
-        console.error("Error fetching last record:", error);
+      console.error("Error fetching last record:", error);
     }
   };
 
@@ -765,44 +796,45 @@ const JournalVoucher = () => {
   };
   const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
-    setTitle("NEW")
+    setTitle("NEW");
     try {
-        const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
-        let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
-        const newData = {
-          vtype: "J",
-          date: getTodayDDMMYYYY(),
-          voucherno: lastvoucherno,
-          owner: "",
-          totaldebit: "",
-          totalcredit: "",
-        };
-        setData([...data, newData]);
-        setFormData(newData);
-        setItems(normalizeItems([]));
-        setIndex(data.length);
-        setIsAddEnabled(false);
-        setIsSubmitEnabled(true);
-        setIsPreviousEnabled(false);
-        setIsNextEnabled(false);
-        setIsFirstEnabled(false);
-        setIsLastEnabled(false);
-        setIsSearchEnabled(false);
-        setIsPreviousEnabled(false);
-        setIsSPrintEnabled(false);
-        setIsDeleteEnabled(false);
-        setIsDisabled(false);
-        setIsEditMode(true);
-        skipItemCodeFocusRef.current = true;
-        if (datePickerRef.current) {
-          datePickerRef.current.focus();
-        }
-
+      const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
+      let lastvoucherno = lastEntry?.formData?.voucherno
+        ? parseInt(lastEntry.formData.voucherno) + 1
+        : 1;
+      const newData = {
+        vtype: "J",
+        date: getTodayDDMMYYYY(),
+        voucherno: lastvoucherno,
+        owner: "",
+        totaldebit: "",
+        totalcredit: "",
+      };
+      setData([...data, newData]);
+      setFormData(newData);
+      setItems(normalizeItems([]));
+      setIndex(data.length);
+      setIsAddEnabled(false);
+      setIsSubmitEnabled(true);
+      setIsPreviousEnabled(false);
+      setIsNextEnabled(false);
+      setIsFirstEnabled(false);
+      setIsLastEnabled(false);
+      setIsSearchEnabled(false);
+      setIsPreviousEnabled(false);
+      setIsSPrintEnabled(false);
+      setIsDeleteEnabled(false);
+      setIsDisabled(false);
+      setIsEditMode(true);
+      skipItemCodeFocusRef.current = true;
+      if (datePickerRef.current) {
+        datePickerRef.current.focus();
+      }
     } catch (error) {
-        console.error("Error adding new entry:", error);
+      console.error("Error adding new entry:", error);
     }
   };
-    const handleEditClick = () => {
+  const handleEditClick = () => {
     setTitle("Edit");
     setIsDisabled(false);
     setIsEditMode(true);
@@ -838,63 +870,82 @@ const JournalVoucher = () => {
     }
   }, [isEditMode]);
   const handleExit = async () => {
-      document.body.style.backgroundColor = 'white'; // Reset background color
-      setIsAddEnabled(true); // Enable "Add" button
-      setTitle("View");
-      try {
-          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`); // Fetch the latest data
+    document.body.style.backgroundColor = "white"; // Reset background color
+    setIsAddEnabled(true); // Enable "Add" button
+    setTitle("View");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`,
+      ); // Fetch the latest data
 
-          if (response.status === 200 && response.data.data) {
-              // If data is available
-              const lastEntry = response.data.data;
-              setFormData(lastEntry.formData); // Set form data
+      if (response.status === 200 && response.data.data) {
+        // If data is available
+        const lastEntry = response.data.data;
+        setFormData(lastEntry.formData); // Set form data
 
-              const updatedItems = lastEntry.items.map(item => ({
-                  ...item,
-                  disableReceipt: item.disableReceipt || false,
-              }));
-              setItems(normalizeItems(updatedItems));
-              // Update totals
-              const totaldebit = updatedItems.reduce((sum, item) => sum + parseFloat(item.debit || 0), 0).toFixed(2);
-              const totalcredit = updatedItems.reduce((sum, item) => sum + parseFloat(item.credit || 0), 0).toFixed(2);
-      
-              setFormData(prevFormData => ({
-                  ...prevFormData,
-                  totaldebit: totaldebit,
-                  totalcredit: totalcredit,
-                
-              }));
-              setIsDisabled(true); // Disable fields after loading the data
-              setIndex(lastEntry.formData)
-              setIsAddEnabled(true);
-              setIsSubmitEnabled(false);
-              setIsPreviousEnabled(true);
-              setIsNextEnabled(true);
-              setIsFirstEnabled(true);
-              setIsLastEnabled(true);
-              setIsSearchEnabled(true);
-              setIsSPrintEnabled(true);
-              setIsDeleteEnabled(true);
-          } else {
-              // If no data is available, initialize with default values
-              console.log("No data available");
-              const newData = {
-                vtype: "J",
-                date: "",
-                voucherno: 0,
-                owner: "",
-                totaldebit: "",
-                totalcredit: "",
-              };
-              setFormData(newData); 
-              setItems(normalizeItems([]));
-              setIsDisabled(true); // Disable fields after loading the default data
-          }
-      } catch (error) {
-          console.error("Error fetching data", error);
+        const updatedItems = lastEntry.items.map((item) => ({
+          ...item,
+          disableReceipt: item.disableReceipt || false,
+        }));
+        setItems(normalizeItems(updatedItems));
+        // Update totals
+        const totaldebit = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.debit || 0), 0)
+          .toFixed(2);
+        const totalcredit = updatedItems
+          .reduce((sum, item) => sum + parseFloat(item.credit || 0), 0)
+          .toFixed(2);
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          totaldebit: totaldebit,
+          totalcredit: totalcredit,
+        }));
+        setIsDisabled(true); // Disable fields after loading the data
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+      } else {
+        // If no data is available, initialize with default values
+        console.log("No data available");
+        const newData = {
+          vtype: "J",
+          date: "",
+          voucherno: 0,
+          owner: "",
+          totaldebit: "",
+          totalcredit: "",
+        };
+        setFormData(newData);
+        setItems(normalizeItems([]));
+        setIsDisabled(true); // Disable fields after loading the default data
       }
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
   };
-  
+
+  const copyNarrationFromAbove = (index) => {
+    if (index === 0) return;
+
+    setItems((prev) => {
+      const updated = [...prev];
+
+      if (!updated[index].narration && updated[index - 1].narration) {
+        updated[index].narration = updated[index - 1].narration;
+      }
+
+      return updated;
+    });
+  };
+
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const tableScrollRef = useRef(null);
   const focusAndScroll = (refArray, rowIndex) => {
@@ -916,8 +967,7 @@ const JournalVoucher = () => {
     const containerHeight = container.clientHeight;
 
     // 🔥 key line — force visibility
-    container.scrollTop =
-      rowTop - containerHeight + rowHeight + 60;
+    container.scrollTop = rowTop - containerHeight + rowHeight + 60;
   };
 
   const handleKeyDown = (event, index, field) => {
@@ -927,18 +977,37 @@ const JournalVoucher = () => {
         case "accountname":
           if (items[index].accountname.trim() === "") {
             saveButtonRef.current?.focus();
-          }else{
+          } else {
             narrationRefs.current[index]?.focus();
           }
           break;
-        case "narration":
+        case "narration": {
+          // 🟡 STEP 1: If narration is empty, copy & STAY
+          if (
+            !items[index].narration &&
+            index > 0 &&
+            items[index - 1].narration
+          ) {
+            copyNarrationFromAbove(index);
+
+            // 🔥 stay in narration field
+            setTimeout(() => {
+              narrationRefs.current[index]?.focus();
+              narrationRefs.current[index]?.select();
+            }, 0);
+
+            return; // ⛔ stop further Enter handling
+          }
+
+          // 🟢 STEP 2: Normal Enter behavior (second Enter)
           if (items[index].disableDebit) {
-            // If debit is disabled, move focus to credit
             credittRefs.current[index]?.focus();
           } else {
             debitRefs.current[index]?.focus();
           }
-        break;
+          break;
+        }
+
         case "debit":
           if (!items[index].disableCredit) {
             credittRefs.current[index]?.focus();
@@ -977,118 +1046,120 @@ const JournalVoucher = () => {
       }
     }
     // Move Right (→)
-  else if (event.key === "ArrowRight") {
-    if (field === "accountname") { 
+    else if (event.key === "ArrowRight") {
+      if (field === "accountname") {
         narrationRefs.current[index]?.focus();
         setTimeout(() => narrationRefs.current[index]?.select(), 0);
-    }
-    else if (field === "narration") {
+      } else if (field === "narration") {
         if (items[index].disableDebit) {
-            // If debit is disabled, move focus to credit
-            credittRefs.current[index]?.focus();
-            setTimeout(() => credittRefs.current[index]?.select(), 0);
+          // If debit is disabled, move focus to credit
+          credittRefs.current[index]?.focus();
+          setTimeout(() => credittRefs.current[index]?.select(), 0);
         } else {
-            debitRefs.current[index]?.focus();
-            setTimeout(() => debitRefs.current[index]?.select(), 0);
+          debitRefs.current[index]?.focus();
+          setTimeout(() => debitRefs.current[index]?.select(), 0);
         }
-    }
-    else if (field === "debit") {
+      } else if (field === "debit") {
         if (!items[index].disableCredit) {
-            credittRefs.current[index]?.focus();
-            setTimeout(() => credittRefs.current[index]?.select(), 0);
+          credittRefs.current[index]?.focus();
+          setTimeout(() => credittRefs.current[index]?.select(), 0);
         }
-    } else if (field === "credit") {
+      } else if (field === "credit") {
         if (index === items.length - 1) {
-            // handleAddItem(); (If needed, uncomment this)
-            accountNameRefs.current[index + 1]?.focus();
-            setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+          // handleAddItem(); (If needed, uncomment this)
+          accountNameRefs.current[index + 1]?.focus();
+          setTimeout(() => accountNameRefs.current[index]?.select(), 0);
         } else {
-            accountNameRefs.current[index + 1]?.focus();
-            setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+          accountNameRefs.current[index + 1]?.focus();
+          setTimeout(() => accountNameRefs.current[index]?.select(), 0);
         }
+      }
     }
-  }
-  // Move Left (←)
-  else if (event.key === "ArrowLeft") {
-    if (field === "credit") { 
+    // Move Left (←)
+    else if (event.key === "ArrowLeft") {
+      if (field === "credit") {
         if (!items[index].disableDebit) {
-            debitRefs.current[index]?.focus();
-            setTimeout(() => debitRefs.current[index]?.select(), 0);
+          debitRefs.current[index]?.focus();
+          setTimeout(() => debitRefs.current[index]?.select(), 0);
         } else {
-            // If debit is disabled, move to narration
-            narrationRefs.current[index]?.focus();
-            setTimeout(() => narrationRefs.current[index]?.select(), 0);
+          // If debit is disabled, move to narration
+          narrationRefs.current[index]?.focus();
+          setTimeout(() => narrationRefs.current[index]?.select(), 0);
         }
-    }
-    else if (field === "debit") { 
+      } else if (field === "debit") {
         narrationRefs.current[index]?.focus();
         setTimeout(() => narrationRefs.current[index]?.select(), 0);
-    }
-    else if (field === "narration") { 
+      } else if (field === "narration") {
         accountNameRefs.current[index]?.focus();
         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
-    }
-  }
-  // Move Up
-  else if (event.key === "ArrowUp" && index > 0) {
-    setTimeout(() => {
-      if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
-      else if (field === "narration") narrationRefs.current[index - 1]?.focus();
-      else if (field === "debit") debitRefs.current[index - 1]?.focus();
-      else if (field === "credit") credittRefs.current[index - 1]?.focus();
-    }, 100);
-  } 
-  // Move Down
-  else if (event.key === "ArrowDown" && index < items.length - 1) {
-    setTimeout(() => {
-      if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
-      else if (field === "narration") narrationRefs.current[index + 1]?.focus();
-      else if (field === "debit") debitRefs.current[index + 1]?.focus();
-      else if (field === "credit") credittRefs.current[index + 1]?.focus();
-    }, 100);
-  } 
-      // Open Modal on Letter Input in Account Name
-      else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-          setPressedKey(event.key);
-          openModalForItemCus(index);
-          event.preventDefault();
       }
+    }
+    // Move Up
+    else if (event.key === "ArrowUp" && index > 0) {
+      setTimeout(() => {
+        if (field === "accountname")
+          accountNameRefs.current[index - 1]?.focus();
+        else if (field === "narration")
+          narrationRefs.current[index - 1]?.focus();
+        else if (field === "debit") debitRefs.current[index - 1]?.focus();
+        else if (field === "credit") credittRefs.current[index - 1]?.focus();
+      }, 100);
+    }
+    // Move Down
+    else if (event.key === "ArrowDown" && index < items.length - 1) {
+      setTimeout(() => {
+        if (field === "accountname")
+          accountNameRefs.current[index + 1]?.focus();
+        else if (field === "narration")
+          narrationRefs.current[index + 1]?.focus();
+        else if (field === "debit") debitRefs.current[index + 1]?.focus();
+        else if (field === "credit") credittRefs.current[index + 1]?.focus();
+      }, 100);
+    }
+    // Open Modal on Letter Input in Account Name
+    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+      setPressedKey(event.key);
+      openModalForItemCus(index);
+      event.preventDefault();
+    }
   };
 
   const handleSearchClick = () => {
     setSearchResults([]); // Clear the search results when reopening the modal
     setShowSearchModal(true); // Open the modal
   };
-  
+
   const handleCloseSearchModal = () => {
     setSearchResults([]); // Clear search results when the modal is closed
     setShowSearchModal(false); // Close the modal
   };
-  
+
   const handleSelectSearchResult = (selectedData) => {
     setFormData(selectedData.formData); // Update the form with the selected search data
     setItems(selectedData.items); // Update items with the selected search result
     setShowSearchModal(false); // Close the modal
     setSearchResults([]); // Clear search results after selecting a result
   };
-  
-const handleSearch = async (searchDate) => {
+
+  const handleSearch = async (searchDate) => {
     try {
-        console.log(searchDate,"Hellloooo");
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/search?date=${searchDate}`);
-        
-        if (response.status === 200) {
-            setSearchResults(response.data.data); // Assuming the data is in response.data.data
-        } else {
-            setSearchResults([]); // Clear results if no data is found
-        }
+      console.log(searchDate, "Hellloooo");
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/search?date=${searchDate}`,
+      );
+
+      if (response.status === 200) {
+        setSearchResults(response.data.data); // Assuming the data is in response.data.data
+      } else {
+        setSearchResults([]); // Clear results if no data is found
+      }
     } catch (error) {
-        console.error("Error fetching search data", error);
+      console.error("Error fetching search data", error);
     }
-};
+  };
   // Update the blur handlers so that they always format the value to 2 decimals.
   const handlePkgsBlur = (index) => {
-    const decimalPlaces = 2
+    const decimalPlaces = 2;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].debit);
     if (isNaN(value)) {
@@ -1133,7 +1204,7 @@ const handleSearch = async (searchDate) => {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
-      } 
+      }
     }
   };
 
@@ -1160,7 +1231,7 @@ const handleSearch = async (searchDate) => {
     const d = new Date(isoDate);
     if (isNaN(d)) return "";
     return `${String(d.getDate()).padStart(2, "0")}-${String(
-      d.getMonth() + 1
+      d.getMonth() + 1,
     ).padStart(2, "0")}-${d.getFullYear()}`;
   };
 
@@ -1168,7 +1239,7 @@ const handleSearch = async (searchDate) => {
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal"
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal",
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
@@ -1185,14 +1256,12 @@ const handleSearch = async (searchDate) => {
 
     if (searchBillNo.trim()) {
       filtered = filtered.filter((b) =>
-        b.formData.voucherno.toString().includes(searchBillNo)
+        b.formData.voucherno.toString().includes(searchBillNo),
       );
     }
 
     if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-      filtered = filtered.filter(
-        (b) => b.formData.date === searchDate
-      );
+      filtered = filtered.filter((b) => b.formData.date === searchDate);
     }
 
     setFilteredBills(filtered);
@@ -1215,39 +1284,37 @@ const handleSearch = async (searchDate) => {
     <div>
       <ToastContainer />
       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
-      <InvoiceJournal
-      formData={formData}
-      items={items}
-      isOpen={open}
-      handleClose={handleClose}
-    />
+        <InvoiceJournal
+          formData={formData}
+          items={items}
+          isOpen={open}
+          handleClose={handleClose}
+        />
       </div>
       <h1 className="HeaderJOU">JOURNAL VOUCHER</h1>
       <text className="tittle">{title}</text>
-      
+
       <div className="Top">
         <text>DATE</text>
-          <InputMask
-            mask="99-99-9999"
-            placeholder="dd-mm-yyyy"
-            value={formData.date}
-            readOnly={!isEditMode || isDisabled}
-            onChange={(e) =>
-              setFormData({ ...formData, date: e.target.value })
-            }
-          >
-            {(inputProps) => (
-              <input
-                {...inputProps}
-                className="DatePICKER"
-                ref={datePickerRef}
-                onKeyDown={(e) => {
-                  handleEnterKeyPress(datePickerRef, VoucherRef)(e);
-                }}
-              />
-            )}
-          </InputMask>
-          {/* <DatePicker
+        <InputMask
+          mask="99-99-9999"
+          placeholder="dd-mm-yyyy"
+          value={formData.date}
+          readOnly={!isEditMode || isDisabled}
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+        >
+          {(inputProps) => (
+            <input
+              {...inputProps}
+              className="DatePICKER"
+              ref={datePickerRef}
+              onKeyDown={(e) => {
+                handleEnterKeyPress(datePickerRef, VoucherRef)(e);
+              }}
+            />
+          )}
+        </InputMask>
+        {/* <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -1257,51 +1324,51 @@ const handleSearch = async (searchDate) => {
             onBlur={() => checkFutureDate(selectedDate)}
             customInput={<MaskedInput />}
           /> */}
-        <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
+        <div style={{ display: "flex", flexDirection: "row", marginTop: 5 }}>
           <TextField
-          inputRef={VoucherRef}
-          id="voucherno"
-          value={formData.voucherno}
-          label="VOUCHER NO."
-          onFocus={(e) => e.target.select()}  // Select text on focus
-          onKeyDown={handleBankEnter}
-          // onChange={handleInputChange}
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150 }}
+            inputRef={VoucherRef}
+            id="voucherno"
+            value={formData.voucherno}
+            label="VOUCHER NO."
+            onFocus={(e) => e.target.select()} // Select text on focus
+            onKeyDown={handleBankEnter}
+            // onChange={handleInputChange}
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: 20,
+                fontSize: `${fontSize}px`,
+                fontWeight: "bold",
+              },
+              readOnly: !isEditMode || isDisabled,
+            }}
+            size="small"
+            variant="filled"
+            className="custom-bordered-input"
+            sx={{ width: 150 }}
           />
           <TextField
-          id="owner"
-          value={formData.owner}
-          label="USER"
-          onFocus={(e) => e.target.select()}  // Select text on focus
-          // onChange={handleInputChange}
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150,marginLeft:1 }}
-           disabled     // ← ALWAYS DISABLED
+            id="owner"
+            value={formData.owner}
+            label="USER"
+            onFocus={(e) => e.target.select()} // Select text on focus
+            // onChange={handleInputChange}
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: 20,
+                fontSize: `${fontSize}px`,
+                fontWeight: "bold",
+              },
+              readOnly: !isEditMode || isDisabled,
+            }}
+            size="small"
+            variant="filled"
+            className="custom-bordered-input"
+            sx={{ width: 150, marginLeft: 1 }}
+            disabled // ← ALWAYS DISABLED
           />
-        </div>  
+        </div>
       </div>
       <div ref={tableScrollRef} className="Tablesection">
         <Table className="custom-table">
@@ -1317,12 +1384,18 @@ const handleSearch = async (searchDate) => {
               <th>ACCOUNT NAME</th>
               <th>
                 NARRATION
-                <input 
+                <input
                   type="checkbox"
-                  style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
-                  tabIndex={-1}       // ⬅⬅ prevents tab focus
+                  style={{
+                    marginLeft: 5,
+                    transform: "scale(1.2)",
+                    cursor: "pointer",
+                  }}
+                  tabIndex={-1} // ⬅⬅ prevents tab focus
                   checked={showNarrationSuggestions}
-                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                  onChange={(e) =>
+                    setShowNarrationSuggestions(e.target.checked)
+                  }
                 />
               </th>
               <th>DEBIT</th>
@@ -1341,10 +1414,10 @@ const handleSearch = async (searchDate) => {
               <tr key={`${item.accountname}-${index}`}>
                 {" "}
                 {/* Use a combination of accountname and index as key */}
-                <td style={{ padding: 0}}>
+                <td style={{ padding: 0 }}>
                   <input
-                  disabled={!canEditRow(index)}
-                  className="Account"
+                    disabled={!canEditRow(index)}
+                    className="Account"
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1360,14 +1433,16 @@ const handleSearch = async (searchDate) => {
                       handleKeyDown(e, index, "accountname");
                     }}
                     ref={(el) => (accountNameRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
                 <td style={{ padding: 0 }}>
                   <input
-                  disabled={!canEditRow(index)}
-                  className="Narration"
-                  list={showNarrationSuggestions ? "narrationList" : undefined}
+                    disabled={!canEditRow(index)}
+                    className="Narration"
+                    list={
+                      showNarrationSuggestions ? "narrationList" : undefined
+                    }
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1385,7 +1460,7 @@ const handleSearch = async (searchDate) => {
                     onKeyDown={(e) => {
                       handleKeyDown(e, index, "narration");
                     }}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onFocus={(e) => e.target.select()} // Select text on focus
                   />
                   {showNarrationSuggestions && (
                     <datalist id="narrationList">
@@ -1395,9 +1470,9 @@ const handleSearch = async (searchDate) => {
                     </datalist>
                   )}
                 </td>
-                <td style={{ padding: 0 ,width:250}}>
+                <td style={{ padding: 0, width: 250 }}>
                   <input
-                  className="Debit"
+                    className="Debit"
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1413,12 +1488,12 @@ const handleSearch = async (searchDate) => {
                     ref={(el) => (debitRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "debit")}
                     onBlur={() => handlePkgsBlur(index)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
-                <td style={{ padding: 0,width:250 }}>
+                <td style={{ padding: 0, width: 250 }}>
                   <input
-                  className="Credits"
+                    className="Credits"
                     style={{
                       height: 40,
                       fontSize: `${fontSize}px`,
@@ -1434,7 +1509,7 @@ const handleSearch = async (searchDate) => {
                     ref={(el) => (credittRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "credit")}
                     onBlur={() => handleWeightBlur(index)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
+                    onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
                 {isEditMode && (
@@ -1448,11 +1523,7 @@ const handleSearch = async (searchDate) => {
                           height: "100%",
                         }}
                       >
-                        <IconButton
-                          color="error"
-                          size="small"
-                          tabIndex={-1}
-                        >
+                        <IconButton color="error" size="small" tabIndex={-1}>
                           <DeleteIcon />
                         </IconButton>
                       </div>
@@ -1462,13 +1533,21 @@ const handleSearch = async (searchDate) => {
               </tr>
             ))}
           </tbody>
-          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
-          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
-            <td colSpan={2}></td>
-            <td>{formData.totaldebit}</td>
-            <td>{formData.totalcredit}</td>
-            {isEditMode && <td></td>}
-          </tr>
+          <tfoot
+            style={{
+              background: "skyblue",
+              position: "sticky",
+              bottom: -1,
+              fontSize: `${fontSize}px`,
+              borderTop: "1px solid black",
+            }}
+          >
+            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+              <td colSpan={2}></td>
+              <td>{formData.totaldebit}</td>
+              <td>{formData.totalcredit}</td>
+              {isEditMode && <td></td>}
+            </tr>
           </tfoot>
         </Table>
       </div>
@@ -1478,13 +1557,13 @@ const handleSearch = async (searchDate) => {
         </Button>
       </div>
       {showModalCus && (
-      <ProductModalCustomer
-        allFields={allFieldsCus}
-        onSelect={handleProductSelectCus}
-        onClose={handleCloseModalCus}
-        initialKey={pressedKey}
-        tenant={tenant}
-      />
+        <ProductModalCustomer
+          allFields={allFieldsCus}
+          onSelect={handleProductSelectCus}
+          onClose={handleCloseModalCus}
+          initialKey={pressedKey}
+          tenant={tenant}
+        />
       )}
       <div className="Belowcontent">
         <div className="Buttonsgroupz">
@@ -1568,7 +1647,7 @@ const handleSearch = async (searchDate) => {
           </Button> */}
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[6] }}
+            style={{ backgroundColor: buttonColors[6] }}
             onClick={() => {
               fetchAllBills();
               setShowSearch(true);
@@ -1577,7 +1656,7 @@ const handleSearch = async (searchDate) => {
           >
             Search
           </Button>
-            <SearchModal
+          <SearchModal
             show={showSearch}
             onClose={() => setShowSearch(false)}
             bills={allBills}
@@ -1591,8 +1670,8 @@ const handleSearch = async (searchDate) => {
             isoToDDMMYYYY={isoToDDMMYYYY}
           />
           <Button
-          //  onClick={handleOpen}
-           onClick={handlePrintClick}
+            //  onClick={handleOpen}
+            onClick={handlePrintClick}
             className="Buttonz"
             style={{
               color: "black",
@@ -1608,7 +1687,7 @@ const handleSearch = async (searchDate) => {
             onNormal={handleNormalPrint}
             onFA={handleFAPreview}
           />
-    
+
           <FAVoucherModal
             open={isFAModalOpen}
             onClose={() => setIsFAModalOpen(false)}

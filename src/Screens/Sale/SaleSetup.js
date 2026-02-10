@@ -235,6 +235,7 @@ const SaleSetup = ({ onClose }) => {
   };
 
   const handleChangeInvoice = (e) => {
+    markAsEdited();
     setFormData((prev) => ({
       ...prev,
       reportformat: e.target.value,
@@ -250,6 +251,12 @@ const SaleSetup = ({ onClose }) => {
   const [isAbcmode, setIsAbcmode] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+
+  const markAsEdited = () => {
+    setIsEditMode(true);        // unlock fields
+    setIsAbcmode(true);         // switch to update mode
+    setIsSubmitEnabled(true);   // enable SAVE
+  };
 
   // useEffect(() => {
   //   const isEmpty =
@@ -545,6 +552,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleNumericValue = (event) => {
     const { id, value } = event.target;
+    markAsEdited();
     // Allow only numeric values, including optional decimal points
     if (/^\d*\.?\d*$/.test(value) || value === "") {
       setFormData((prevData) => ({
@@ -556,6 +564,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleInputChange = (event) => {
     const { id, value } = event.target;
+    markAsEdited();
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
@@ -563,6 +572,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleInputChangeCapital = (event) => {
     const { id, value } = event.target;
+    markAsEdited();
     const uppercaseValue = value.toUpperCase(); // Convert input to uppercase
 
     // Allow only capital alphabets
@@ -576,6 +586,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleColorchange = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       color1: value, // Update the ratecalculate field in FormData
@@ -583,6 +594,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleTaxType = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       stype: value, // Update the ratecalculate field in FormData
@@ -590,6 +602,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleBillCash = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       btype: value, // Update the ratecalculate field in FormData
@@ -597,6 +610,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleSupply = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       conv: value, // Update the ratecalculate field in FormData
@@ -604,6 +618,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleSaleAcc = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       sale_ac: value, // Update the ratecalculate field in FormData
@@ -611,6 +626,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleBackDate = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       alertbackdate: value, // Update the ratecalculate field in FormData
@@ -618,6 +634,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleTcsonTax = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       Tcsontax: value, // Update the ratecalculate field in FormData
@@ -625,6 +642,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleCursor = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T5: value, // Update the ratecalculate field in FormData
@@ -632,6 +650,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleCdwindow = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T10: value, // Update the ratecalculate field in FormData
@@ -639,6 +658,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleRoundoff = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T11: value, // Update the ratecalculate field in FormData
@@ -646,6 +666,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleIndRoundoff = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T21: value,
@@ -653,6 +674,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleTround = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T12: value, // Update the ratecalculate field in FormData
@@ -660,6 +682,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleDisplayitem = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T13: value, // Update the ratecalculate field in FormData
@@ -667,6 +690,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleDefbutton = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T14: value, // Update the ratecalculate field in FormData
@@ -674,6 +698,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleLowsale = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T15: value, // Update the ratecalculate field in FormData
@@ -681,6 +706,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleTDS194 = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T16: value, // Update the ratecalculate field in FormData
@@ -688,6 +714,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleRatesec = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T17: value, // Update the ratecalculate field in FormData
@@ -695,6 +722,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleHSN = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T18: value, // Update the ratecalculate field in FormData
@@ -702,6 +730,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleNegativestk = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T19: value, // Update the ratecalculate field in FormData
@@ -709,6 +738,7 @@ const SaleSetup = ({ onClose }) => {
   };
   const handleInvoice = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T20: value, // Update the ratecalculate field in FormData
@@ -962,6 +992,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalcTds(false);
       return;
     }
+    markAsEdited();
 
     // Deep copy cesscode array
     const updatedShipped = [...cTds];
@@ -1031,6 +1062,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalsTds(false);
       return;
     }
+    markAsEdited();
 
     // Deep copy cesscode array
     const updatedShipped = [...sTds];
@@ -1100,6 +1132,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModaliTds(false);
       return;
     }
+    markAsEdited();
 
     // Deep copy cesscode array
     const updatedShipped = [...iTds];
@@ -1176,6 +1209,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalCus(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...cesscode];
@@ -1244,6 +1278,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalAcc(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...cgstcode];
@@ -1311,6 +1346,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalsgst(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...sgstcode];
@@ -1377,6 +1413,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModaligst(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...igstcode];
@@ -1443,6 +1480,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModaltcs(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...tcscode];
@@ -1510,6 +1548,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModaltcs206(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...tcs206code];
@@ -1577,6 +1616,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModaltds(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...tdscode];
@@ -1647,6 +1687,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalDis(false);
       return;
     }
+    markAsEdited();
 
     // Deep copy cesscode array
     const updatedShipped = [...discountcode];
@@ -1713,6 +1754,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE1name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E1name];
@@ -1780,6 +1822,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE2name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E2name];
@@ -1852,6 +1895,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE3name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E3name];
@@ -1924,6 +1968,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE4name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E4name];
@@ -1996,7 +2041,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE5name(false);
       return;
     }
-    
+    markAsEdited();
     // Deep copy shipped array
     const updatedShipped = [...E5name];
   
@@ -2069,6 +2114,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE6name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E6name];
@@ -2141,6 +2187,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE7name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E7name];
@@ -2213,6 +2260,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE8name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E8name];
@@ -2285,6 +2333,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE9name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E9name];
@@ -2358,6 +2407,7 @@ const SaleSetup = ({ onClose }) => {
       setShowModalE10name(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...E10name];
@@ -2491,6 +2541,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    markAsEdited();
     if (value === "") {
       setFormData({ ...formData, [name]: "" });
     } else if (value === "+") {
@@ -2502,6 +2553,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleKeyDown = (e) => {
     const { name, value } = e.target;
+    markAsEdited();
     if (e.key === "Backspace" && (value === "+Ve" || value === "-Ve")) {
       setFormData({ ...formData, [name]: "" });
     }
@@ -2509,6 +2561,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
+    markAsEdited();
     if (/^\d*\.?\d*$/.test(value)) {
       setFormData({ ...formData, [name]: value });
     }
@@ -2516,6 +2569,7 @@ const SaleSetup = ({ onClose }) => {
 
   const handleInputChange2 = (e, field) => {
     const value = e.target.value.toUpperCase();
+    markAsEdited();
     if (value === "T") {
       setFormData((prev) => ({ ...prev, [field]: true }));
     } else if (value === "F") {
@@ -2634,7 +2688,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp1}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -2649,7 +2703,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E1name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE1name(index)} >..</Button> */}
                       <TextField
@@ -2659,7 +2713,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E1"
@@ -2677,7 +2731,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E1rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -2703,7 +2757,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp2}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -2718,7 +2772,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E2name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE2name(index)} >..</Button> */}
                       <TextField
@@ -2728,7 +2782,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E2"
@@ -2746,7 +2800,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E2rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -2772,7 +2826,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp3}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -2787,7 +2841,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E3name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE3name(index)} >..</Button> */}
                       <TextField
@@ -2797,7 +2851,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E3"
@@ -2815,7 +2869,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E3rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -2841,7 +2895,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp4}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -2856,7 +2910,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E4name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE4name(index)} >..</Button> */}
                       <TextField
@@ -2866,7 +2920,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E4"
@@ -2884,7 +2938,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E4rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -2910,7 +2964,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp5}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -2925,7 +2979,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E5name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE5name(index)} >..</Button> */}
                       <TextField
@@ -2935,7 +2989,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E5"
@@ -2953,7 +3007,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E5rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -2979,7 +3033,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp6}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -2994,7 +3048,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E6name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE6name(index)} >..</Button> */}
                       <TextField
@@ -3004,7 +3058,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E6"
@@ -3022,7 +3076,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E6rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -3048,7 +3102,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp7}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -3063,7 +3117,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E7name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE7name(index)} >..</Button> */}
                       <TextField
@@ -3073,7 +3127,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E7"
@@ -3091,7 +3145,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E7rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -3117,7 +3171,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp8}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -3132,7 +3186,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E8name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE8name(index)} >..</Button> */}
                       <TextField
@@ -3142,7 +3196,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E8"
@@ -3160,7 +3214,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E8rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -3186,7 +3240,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp9}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         className="Labour"
@@ -3201,7 +3255,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E9name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE9name(index)} >..</Button> */}
                       <TextField
@@ -3211,7 +3265,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E9"
@@ -3229,7 +3283,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E9rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -3255,7 +3309,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.Exp10}
                         onChange={handleInputChange}
                         sx={textFieldStyle2}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         //label="SELECT ACCOUNT"
@@ -3270,7 +3324,7 @@ const SaleSetup = ({ onClose }) => {
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E10name")}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE10name(index)} >..</Button> */}
                       <TextField
@@ -3280,7 +3334,7 @@ const SaleSetup = ({ onClose }) => {
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                       <TextField
                         id="E10"
@@ -3298,7 +3352,7 @@ const SaleSetup = ({ onClose }) => {
                         value={formData.E10rate}
                         onChange={handleNumberChange}
                         sx={textFieldStyle4}
-                        InputProps={{ readOnly: !isEditMode || isDisabled }}
+                        //InputProps={{ readOnly: !isEditMode || isDisabled }}
                       />
                     </div>
                   </div>
@@ -3333,7 +3387,7 @@ const SaleSetup = ({ onClose }) => {
                         setcgstcode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cgstcode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalAcc && (
                       <ProductModalCustomer
@@ -3361,7 +3415,7 @@ const SaleSetup = ({ onClose }) => {
                         setsgstcode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "sgstcode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalsgst && (
                       <ProductModalCustomer
@@ -3393,7 +3447,7 @@ const SaleSetup = ({ onClose }) => {
                         setigstcode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "igstcode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaligst && (
                       <ProductModalCustomer
@@ -3421,7 +3475,7 @@ const SaleSetup = ({ onClose }) => {
                         setcesscode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cesscode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalCus && (
                       <ProductModalCustomer
@@ -3452,7 +3506,7 @@ const SaleSetup = ({ onClose }) => {
                         settdscode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "tdscode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaltds && (
                       <ProductModalCustomer
@@ -3480,7 +3534,7 @@ const SaleSetup = ({ onClose }) => {
                         settcscode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "tcscode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaltcs && (
                       <ProductModalCustomer
@@ -3512,7 +3566,7 @@ const SaleSetup = ({ onClose }) => {
                         settcs206code(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "tcs206code")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaltcs206 && (
                       <ProductModalCustomer
@@ -3589,7 +3643,7 @@ const SaleSetup = ({ onClose }) => {
                         setdiscountcode(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "discountcode")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalDis && (
                       <ProductModalCustomer
@@ -3620,7 +3674,7 @@ const SaleSetup = ({ onClose }) => {
                         setcTds(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cTds_code")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalcTds && (
                       <ProductModalCustomer
@@ -3648,7 +3702,7 @@ const SaleSetup = ({ onClose }) => {
                         setsTds(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "sTds_code")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModalsTds && (
                       <ProductModalCustomer
@@ -3676,7 +3730,7 @@ const SaleSetup = ({ onClose }) => {
                         setiTds(newCode);
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "iTds_code")}
-                      InputProps={{ readOnly: !isEditMode || isDisabled }}
+                      //InputProps={{ readOnly: !isEditMode || isDisabled }}
                     />
                     {showModaliTds && (
                       <ProductModalCustomer
@@ -4564,7 +4618,7 @@ const SaleSetup = ({ onClose }) => {
             >
               {"SAVE"}
             </Button>
-            <Button
+            {/* <Button
               // disabled={activeStep === 0}
               onClick={handleEditClick}
               variant="contained"
@@ -4572,7 +4626,7 @@ const SaleSetup = ({ onClose }) => {
               type="button"
             >
               EDIT
-            </Button>
+            </Button> */}
             <Button
               onClick={onClose}
               variant="contained"
@@ -4589,3 +4643,629 @@ const SaleSetup = ({ onClose }) => {
 };
 
 export default SaleSetup;
+
+// import React, { useState, useEffect } from "react";
+// import Button from "react-bootstrap/Button";
+// import "react-datepicker/dist/react-datepicker.css";
+// import "./SaleSetup.css";
+// import ProductModalCustomer from "../Modals/ProductModalCustomer";
+// import axios from "axios";
+// import { ToastContainer, toast } from "react-toastify";
+// import {Box,Grid,Typography,TextField,Stack,Stepper,Step,StepLabel} from "@mui/material";
+// import { CompanyContext } from "../Context/CompanyContext";
+
+// import { useContext } from "react";
+
+// const SaleSetup = ({ onClose }) => {
+//   const { company } = useContext(CompanyContext);
+//   const tenant = "shkun_05062025_05062026";
+//   const [isHighlighted, setIsHighlighted] = useState(false); // For changing color
+//   const [title, setTitle] = useState("(View)");
+//   const [formData, setFormData] = useState({
+//     Exp1: "",
+//     Exp2: "",
+//     E1add: "",
+//     E2add: "",
+//     E1: "",
+//     E2: "",
+//     E1rate: "",
+//     E2rate: "",
+//   });
+
+//   const [E1name, setE1name] = useState([{ E1Code: "", E1name: "" }]);
+//   const [E2name, setE2name] = useState([{ E2Code: "", E2name: "" }]);
+
+//   // FETCH DATA
+//   const [data, setData] = useState([]);
+//   const [data1, setData1] = useState([]);
+//   const [index, setIndex] = useState(0);
+//   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
+//   const [isEditMode, setIsEditMode] = useState(true);
+//   const [isAbcmode, setIsAbcmode] = useState(false);
+//   const [isDisabled, setIsDisabled] = useState(false);
+//   const [activeStep, setActiveStep] = useState(0);
+
+//   // const markAsEdited = () => {
+//   //   if (!isAbcmode) {
+//   //     setIsAbcmode(true);
+//   //   }
+//   // };
+//   const markAsEdited = () => {
+//     setIsEditMode(true);        // unlock fields
+//     setIsAbcmode(true);         // switch to update mode
+//     setIsSubmitEnabled(true);   // enable SAVE
+//   };
+
+
+//   const fetchData = async () => {
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/salesetup`
+//       );
+//       if (response.status === 200 && response.data.length > 0) {
+//         const lastEntry = response.data[response.data.length - 1]; // Assuming you want the last one
+//         setFormData(lastEntry.formData);
+//         setData1(lastEntry); // Assuming this is meant to hold the full data structure
+//         setIndex(lastEntry._id);
+
+//         setE1name([
+//           {
+//             E1Code: lastEntry.formData.E1Code,
+//             E1name: lastEntry.formData.E1name,
+//           },
+//         ]);
+//         setE2name([
+//           {
+//             E2Code: lastEntry.formData.E2Code,
+//             E2name: lastEntry.formData.E2name,
+//           },
+//         ]);
+//       } else {
+//         setDefaults(); // If no data, reset everything
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+//       setDefaults(); // Reset in case of error
+//     }
+//   };
+
+//   const setDefaults = () => {
+//     // Define default empty states here to avoid redundancy and mistakes
+//     const emptyData = {
+//       Exp1: "",
+//       Exp2: "",
+//       E1add: "",
+//       E2add: "",
+//       E1: "",
+//       E2: "",
+//       E1rate: 0,
+//       E2rate: 0,
+//     };
+//     setFormData(emptyData);
+//     setData1({
+//       formData: emptyData,
+//     });
+//     setIndex(0);
+//   };
+
+//   useEffect(() => {
+//     fetchData(); // Fetch data when component mounts
+//   }, []);
+
+//   const handleInputChange = (event) => {
+//     const { id, value } = event.target;
+//     markAsEdited(); // 👈 THIS LINE
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       [id]: value,
+//     }));
+//   };
+//   const handleInputChangeCapital = (event) => {
+//     const { id, value } = event.target;
+//     const uppercaseValue = value.toUpperCase(); // Convert input to uppercase
+//     markAsEdited(); // 👈 THIS LINE
+
+//     // Allow only capital alphabets
+//     if (/^[A-Z]*$/.test(uppercaseValue)) {
+//       setFormData((prevData) => ({
+//         ...prevData,
+//         [id]: uppercaseValue,
+//       }));
+//     }
+//   };
+
+//   const handleSaveClick = async () => {
+//     setTitle("(VIEW)");
+//     document.body.style.backgroundColor = "white";
+//     let isDataSaved = false;
+
+//     const prepareData = () => ({
+//       _id: formData._id,
+//       formData: {
+//         ...formData,
+//         // EXPENSES
+//         E1name: E1name.length > 0 ? E1name[0].E1name : "",
+//         E1Code: E1name.length > 0 ? E1name[0].E1Code : "",
+//         E2name: E2name.length > 0 ? E2name[0].E2name : "",
+//         E2Code: E2name.length > 0 ? E2name[0].E2Code : "",
+//       },
+//     });
+//     try {
+//       const combinedData = prepareData();
+//       console.log("Combined Data New:", combinedData);
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salesetup${
+//         isAbcmode ? `/${data1._id}` : ""
+//       }`;
+//       const method = isAbcmode ? "put" : "post";
+//       const response = await axios({
+//         method,
+//         url: apiEndpoint,
+//         data: combinedData,
+//       });
+
+//       if (response.status === 200 || response.status === 201) {
+//         fetchData();
+//         isDataSaved = true;
+//       }
+//     } catch (error) {
+//       console.error("Error saving data:", error);
+//       toast.error("Failed to save data. Please try again.", {
+//         position: "top-center",
+//       });
+//     } finally {
+//       setIsSubmitEnabled(false);
+//       setIsHighlighted(false); // Change color when button is clicked
+//       setIsDisabled(!isDataSaved);
+//       setIsEditMode(!isDataSaved);
+//       const toastMsg = "Data Saved Successfully!";
+//       toast.success(toastMsg, { position: "top-center" });
+//     }
+//   };
+
+//   const handleEditClick = () => {
+//     setIsHighlighted(true); // Change color when button is clicked
+//     setTitle("(EDIT)");
+//     setIsDisabled(false);
+//     setIsEditMode(true);
+//     setIsSubmitEnabled(true);
+//     setIsAbcmode(true);
+//   };
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+
+//   // Modal For Customer
+//   React.useEffect(() => {
+//     // Fetch products from the API when the component mounts
+//     fetchCustomers();
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductE1name(formattedData);
+//       setProductE2name(formattedData);
+//       setLoadingE1name(false);
+//       setLoadingE2name(false);
+//     } catch (error) {
+//       setErrorE1name(error.message);
+//       setLoadingE1name(false);
+//       setErrorE2name(error.message);
+//       setLoadingE2name(false);
+//     }
+//   };
+
+//   // Modal For E1name
+//   const [pressedKey, setPressedKey] = useState("");
+//    const [showModalAcc, setShowModalAcc] = useState(false);
+//   const [productE1name, setProductE1name] = useState([]);
+//   const [showModalE1name, setShowModalE1name] = useState(false);
+//   const [selectedItemIndexE1name, setSelectedItemIndexE1name] = useState(null);
+//   const [loadingE1name, setLoadingE1name] = useState(true);
+//   const [errorE1name, setErrorE1name] = useState(null);
+
+//   const handleItemChangeE1name = (index, key, value) => {
+//     const updatedItems = [...E1name];
+//     // If the key is 'ahead', find the corresponding product and set the price
+//     if (key === "ahead") {
+//       const selectedProduct = productE1name.find(
+//         (product) => product.ahead === value
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["E1Code"] = selectedProduct.acode;
+//         updatedItems[index]["E1name"] = selectedProduct.ahead;
+//       }
+//     } else if (key === "discount") {
+//     }
+//     setE1name(updatedItems);
+//   };
+
+//   const handleProductSelectE1name = (product) => {
+//     if (!product) {
+//       alert("No account selected!");
+//       setShowModalE1name(false);
+//       return;
+//     }
+//     markAsEdited(); // 👈 THIS LINE
+    
+//     // Deep copy shipped array
+//     const updatedShipped = [...E1name];
+  
+//     // Update the correct object in the array
+//     updatedShipped[selectedItemIndexE1name] = {
+//       ...updatedShipped[selectedItemIndexE1name],
+//       E1Code: product.acode || "",
+//       E1name: product.ahead || "",
+//       // Add any other mappings needed
+//     };
+
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexE1name !== null) {
+//       handleItemChangeE1name(selectedItemIndexE1name, "ahead", nameValue);
+//     }
+//     setE1name(updatedShipped);       // <- update the array in state!
+//     setIsEditMode(true);
+//     setShowModalE1name(false);
+  
+//   };
+
+//   const openModalForItemE1name = (index) => {
+//     if (isEditMode) {
+//       setSelectedItemIndexE1name(index);
+//       setShowModalE1name(true);
+//     }
+//   };
+
+//   const allFieldsE1name = productE1name.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+//     return fields;
+//   }, []);
+
+//   // Modal For E2name
+//   const [productE2name, setProductE2name] = useState([]);
+//   const [showModalE2name, setShowModalE2name] = useState(false);
+//   const [selectedItemIndexE2name, setSelectedItemIndexE2name] = useState(null);
+//   const [loadingE2name, setLoadingE2name] = useState(true);
+//   const [errorE2name, setErrorE2name] = useState(null);
+
+//   const handleItemChangeE2name = (index, key, value) => {
+//     const updatedItems = [...E2name];
+//     // If the key is 'ahead', find the corresponding product and set the price
+//     if (key === "ahead") {
+//       const selectedProduct = productE2name.find(
+//         (product) => product.ahead === value
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["E2Code"] = selectedProduct.acode;
+//         updatedItems[index]["E2name"] = selectedProduct.ahead;
+//       }
+//     } else if (key === "discount") {
+//     }
+//     setE2name(updatedItems);
+//   };
+
+//   const handleProductSelectE2name = (product) => {
+//     if (!product) {
+//       alert("No account selected!");
+//       setShowModalE2name(false);
+//       return;
+//     }
+//     markAsEdited(); // 👈 THIS LINE
+    
+//     // Deep copy shipped array
+//     const updatedShipped = [...E2name];
+  
+//     // Update the correct object in the array
+//     updatedShipped[selectedItemIndexE2name] = {
+//       ...updatedShipped[selectedItemIndexE2name],
+//       E2Code: product.acode || "",
+//       E2name: product.ahead || "",
+//       // Add any other mappings needed
+//     };
+
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexE2name !== null) {
+//       handleItemChangeE2name(selectedItemIndexE2name, "ahead", nameValue);
+//     }
+//     setE2name(updatedShipped);       // <- update the array in state!
+//     setIsEditMode(true);
+//     setShowModalE2name(false);
+  
+//   };
+
+//   const openModalForItemE2name = (index) => {
+//     if (isEditMode) {
+//       setSelectedItemIndexE2name(index);
+//       setShowModalE2name(true);
+//     }
+//   };
+
+//   const allFieldsE2name = productE2name.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+//     return fields;
+//   }, []);
+
+
+//   const handleOpenModal = (event, index, field) => {
+//     if (/^[a-zA-Z]$/.test(event.key)) {
+//      if (field === "E1name" && isEditMode) {
+//         setPressedKey(event.key);
+//         openModalForItemE1name(index);
+//         event.preventDefault();
+//       } else if (field === "E2name" && isEditMode) {
+//         setPressedKey(event.key);
+//         openModalForItemE2name(index);
+//         event.preventDefault();
+//       }
+//     }
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     markAsEdited(); // 👈 THIS LINE
+//     if (value === "") {
+//       setFormData({ ...formData, [name]: "" });
+//     } else if (value === "+") {
+//       setFormData({ ...formData, [name]: "+Ve" });
+//     } else if (value === "-") {
+//       setFormData({ ...formData, [name]: "-Ve" });
+//     }
+//   };
+
+//   const handleKeyDown = (e) => {
+//     const { name, value } = e.target;
+//     markAsEdited(); // 👈 THIS LINE
+//     if (e.key === "Backspace" && (value === "+Ve" || value === "-Ve")) {
+//       setFormData({ ...formData, [name]: "" });
+//     }
+//   };
+
+//   const handleNumberChange = (e) => {
+//     const { name, value } = e.target;
+//     markAsEdited(); // 👈 THIS LINE
+//     if (/^\d*\.?\d*$/.test(value)) {
+//       setFormData({ ...formData, [name]: value });
+//     }
+//   };
+
+//   const handleInputChange2 = (e, field) => {
+//     const value = e.target.value.toUpperCase();
+//     markAsEdited(); // 👈 THIS LINE
+//     if (value === "T") {
+//       setFormData((prev) => ({ ...prev, [field]: true }));
+//     } else if (value === "F") {
+//       setFormData((prev) => ({ ...prev, [field]: false }));
+//     } else {
+//       setFormData((prev) => ({ ...prev, [field]: "" }));
+//     }
+//   };
+
+//   // Header section with logo and title
+//   const headerSection = (
+//     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+//       <Typography
+//         variant="h4"
+//         sx={{ flexGrow: 1, textAlign: "center", fontWeight: "bold", ml: 2 }}
+//       >
+//         SALE SETUP
+//       </Typography>
+//     </Box>
+//   );
+
+//   const steps = ["Select Accounts", "Other Options", "Additional Settings"];
+
+//   // Stepper content for each step
+//   const getStepContent = (step) => {
+//     switch (step) {
+//       case 0:
+//         return (
+//           <Grid container spacing={2}>
+//             {/* Left Column - Expense Accounts */}
+//             <div
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 marginLeft: "5%",
+//               }}
+//             >
+//               <div style={{ marginLeft: "1%" }}>
+//                 {E1name.map((item, index) => (
+//                   <div key={index}>
+//                     <div style={{ display: "flex", flexDirection: "row" }}>
+//                       <TextField
+//                         id="Exp1"
+//                         value={formData.Exp1}
+//                         onChange={handleInputChange}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                       <TextField
+//                         className="Labour"
+//                         //label="SELECT ACCOUNT"
+//                         readOnly
+//                         style={{ width: 220 }}
+//                         value={item.E1Code || ""}
+//                         onChange={(e) => {
+//                           const newE1code = [...E1name];
+//                           newE1code[index].E1Code = e.target.value;
+//                           setE1name(newE1code);
+//                         }}
+//                         onKeyDown={(e) => handleOpenModal(e, index, "E1name")}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE1name(index)} >..</Button> */}
+//                       <TextField
+//                         name="E1add"
+//                         //label="+/-"
+//                         value={formData.E1add}
+//                         onChange={handleChange}
+//                         onKeyDown={handleKeyDown}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                       <TextField
+//                         id="E1"
+//                         value={formData.E1}
+//                         onChange={handleInputChangeCapital}
+//                         inputProps={{
+//                           readOnly: !isEditMode || isDisabled,
+//                           maxLength: 1,
+//                         }}
+//                       />
+//                       <TextField
+//                         name="E1rate"
+//                         //label="RATE"
+//                         value={formData.E1rate}
+//                         onChange={handleNumberChange}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                     </div>
+//                   </div>
+//                 ))}
+//                 {showModalE1name && (
+//                   <ProductModalCustomer
+//                     allFields={allFieldsE1name}
+//                     onSelect={handleProductSelectE1name}
+//                     onClose={() => setShowModalAcc(false)} 
+//                     initialKey={pressedKey}
+//                     tenant={tenant}
+//                     onRefresh={fetchCustomers}
+//                   />
+//                 )}
+//               </div>
+//               <div style={{ marginLeft: "1%" }}>
+//                 {E2name.map((item, index) => (
+//                   <div key={index}>
+//                     <div style={{ display: "flex", flexDirection: "row" }}>
+//                       <TextField
+//                         id="Exp2"
+//                         //  className="Exp1"
+//                         value={formData.Exp2}
+//                         onChange={handleInputChange}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                       <TextField
+//                         className="Labour"
+//                         //label="SELECT ACCOUNT"
+//                         readOnly
+//                         style={{ width: 220 }}
+//                         value={item.E2Code || ""}
+//                         onChange={(e) => {
+//                           const newE1code = [...E2name];
+//                           newE1code[index].E2Code = e.target.value;
+//                           setE2name(newE1code);
+//                         }}
+//                         onKeyDown={(e) => handleOpenModal(e, index, "E2name")}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                       {/* <Button style={{height:40,marginLeft:"-9.2%",marginRight:2}} onClick={() => openModalForItemE2name(index)} >..</Button> */}
+//                       <TextField
+//                         name="E2add"
+//                         //label="+/-"
+//                         value={formData.E2add}
+//                         onChange={handleChange}
+//                         onKeyDown={handleKeyDown}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                       <TextField
+//                         id="E2"
+//                         value={formData.E2}
+//                         onChange={handleInputChangeCapital}
+//                         inputProps={{
+//                           readOnly: !isEditMode || isDisabled,
+//                           maxLength: 1,
+//                         }}
+//                       />
+//                       <TextField
+//                         name="E2rate"
+//                         //label="RATE"
+//                         value={formData.E2rate}
+//                         onChange={handleNumberChange}
+//                         InputProps={{ readOnly: !isEditMode || isDisabled }}
+//                       />
+//                     </div>
+//                   </div>
+//                 ))}
+//                 {showModalE2name && (
+//                   <ProductModalCustomer
+//                     allFields={allFieldsE2name}
+//                     onSelect={handleProductSelectE2name}
+//                     onClose={() => setShowModalE2name(false)} 
+//                     initialKey={pressedKey}
+//                     tenant={tenant}
+//                     onRefresh={fetchCustomers}
+//                   />
+//                 )}
+//               </div>
+//             </div>
+//           </Grid>
+//         );    
+//       default:
+//         return "Unknown Step";
+//     }
+//   };
+
+//   return (
+//     <div className="newModalz">
+//       <div>
+//         <ToastContainer />
+//       </div>
+//       <div
+//         className="maincontainer"
+//         style={{ backgroundColor: isHighlighted ? "#f0dba4" : "white" }}
+//       >
+//         {headerSection}
+//         <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 2 }}>
+//           {steps.map((label) => (
+//             <Step key={label}>
+//               <StepLabel>{label}</StepLabel>
+//             </Step>
+//           ))}
+//         </Stepper>
+//         <form>
+//           {getStepContent(activeStep)}
+//           <Stack direction="row" spacing={2} sx={{ justifyContent: "center",marginTop:"auto" }}>
+//             <Button
+//               disabled={!isSubmitEnabled}
+//               onClick={handleSaveClick}
+//               variant="contained"
+//               style={{ backgroundColor: "#006400", color: "#fff" }}
+//               type="button"
+//             >
+//               {"SAVE"}
+//             </Button>
+//             <Button
+//               // disabled={activeStep === 0}
+//               onClick={handleEditClick}
+//               variant="contained"
+//               style={{ backgroundColor: "gray", color: "#fff" }}
+//               type="button"
+//             >
+//               EDIT
+//             </Button>
+//           </Stack>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default SaleSetup;
