@@ -973,11 +973,11 @@ const CashVoucher = () => {
     setItems(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
-  
   };
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 

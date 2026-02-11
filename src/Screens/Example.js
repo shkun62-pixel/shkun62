@@ -314,7 +314,6 @@
 
 // export default Example;
 
-
 // import React, { useEffect, useState, useRef } from "react";
 // import axios from "axios";
 // import { Table, Card, Form } from "react-bootstrap";  // ✅ Form imported
@@ -364,7 +363,7 @@
 //   const [filteredTransactions, setFilteredTransactions] = useState([]); // ✅ For filtered txns
 //   const [narrationFilter, setNarrationFilter] = useState(""); // ✅ for narration
 //   const [selectedRows, setSelectedRows] = useState({});
-//   const [selectionFilter, setSelectionFilter] = useState("All"); 
+//   const [selectionFilter, setSelectionFilter] = useState("All");
 //   const [ledgerTotals, setLedgerTotals] = useState({}); // { ledgerId: { netPcs, netWeight } }
 //   const [progressiveDebit, setProgressiveDebit] = useState(0);
 //   const [progressiveCredit, setProgressiveCredit] = useState(0);
@@ -564,11 +563,11 @@
 //   }, [visibleColumns]);
 //   const [searchColumns, setSearchColumns] = useState(() => {
 //     const saved = localStorage.getItem(SEARCH_COL_STORAGE_KEY);
-  
+
 //     if (saved) {
 //       return JSON.parse(saved);
 //     }
-  
+
 //     // default (first load only)
 //     return ALL_COLUMNS.reduce((acc, col) => {
 //       acc[col.key] = false;
@@ -581,8 +580,7 @@
 //       JSON.stringify(searchColumns)
 //     );
 //   }, [searchColumns]);
-  
-  
+
 //   // ✅ Handle search filtering
 // useEffect(() => {
 //   if (!searchTerm.trim()) {
@@ -619,7 +617,6 @@
 //   setSelectedIndex(0);
 // }, [searchTerm, ledgers, searchColumns]);
 
-
 // const isValidPrefix = (value) => {
 //   const lower = value.toLowerCase();
 
@@ -646,8 +643,6 @@
 //     })
 //   );
 // };
-
-
 
 //   return (
 //     <div style={{ padding: "20px" }}>
@@ -769,8 +764,6 @@
 //   // ❌ else: typing stops (as you want)
 // }}
 
-
-
 //           />
 //         </div>
 //       </Card>
@@ -780,333 +773,47 @@
 
 // export default Example;
 
-import React, { useState, useEffect, useRef, forwardRef } from "react";
-import "react-datepicker/dist/react-datepicker.css";
-import "react-toastify/dist/ReactToastify.css";
-import Table from "react-bootstrap/Table";
-import ProductModalCustomer from "./Modals/ProductModalCustomer";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useEditMode } from "../EditModeContext";
+import React,{useState} from "react";
+import InputMask from "react-input-mask";
 
 const Example = () => {
-
-  const tableRef = useRef(null);
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const [currentDate, setCurrentDate] = useState("");
-  const [currentDay, setCurrentDay] = useState("");
-  const addButtonRef = useRef(null);
-  const datePickerRef = useRef(null);
-  const voucherRef = useRef(null);
-  const [title, setTitle] = useState("VIEW");
-  const accountNameRefs = useRef([]);
-  const narrationRefs = useRef([]);
-  const paymentRefs = useRef([]);
-  const receiptRefs = useRef([]);
-  const discountRefs = useRef([]);
-  const saveButtonRef = useRef(null);
-  const tableScrollRef = useRef(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const MIN_ROWS = 8;
-  const createEmptyRow = (id) => ({
-    id,
-    acode:"",
-    accountname: "",
-    payment_debit: "",
-    receipt_credit: "",
+  const [formData, setFormData] = useState({
+    date: "",
+    vtype: "P",
+    vno: 0,
+    vbillno: 0,
+    vbdate: "",
   });
-
-  const normalizeItems = (items = []) => {
-    const rows = [...items];
-
-    while (rows.length < MIN_ROWS) {
-      rows.push(createEmptyRow(rows.length + 1));
-    }
-
-    return rows;
-  };
-
-  const [items, setItems] = useState(() => normalizeItems());
-  const tenant = "shkun_05062025_05062026"
-  // Fetch Data
-  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
-  const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
-
-  // Add this line to set isDisabled to true initially
-  useEffect(() => {
-    setIsDisabled(true);
-  }, []);
-
-  const handleNumberChange = (event, index, field) => {
-    const value = event.target.value;
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
-    }
-    const updatedItems = [...items];
-    updatedItems[index][field] = value;
-    const isValueGreaterThanZero = parseFloat(value) > 0;
-
-    if (field === "payment_debit") {
-      updatedItems[index].disableReceipt = isValueGreaterThanZero;
-    } else if (field === "receipt_credit") {
-      updatedItems[index].disablePayment = isValueGreaterThanZero;
-    }
-    setItems(updatedItems);
-  };
-
-  const capitalizeWords = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-  // Modal For Customer
-  const [productsCus, setProductsCus] = useState([]);
-  const [showModalCus, setShowModalCus] = useState(false);
-  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-  const [loadingCus, setLoadingCus] = useState(true);
-  const [errorCus, setErrorCus] = useState(null);
-  
-  React.useEffect(() => {
-    // Fetch products from the API when the component mounts
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
-    try {
-      const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = await response.json();
-      // Ensure to extract the formData for easier access in the rest of your app
-      const formattedData = data.map((item) => ({
-        ...item.formData,
-        _id: item._id,
-      }));
-      setProductsCus(formattedData);
-      setLoadingCus(false);
-    } catch (error) {
-      setErrorCus(error.message);
-      setLoadingCus(false);
-    }
-  };
-
-  const handleItemChangeCus = (index, key, value) => {
-    if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
-      return; // reject invalid input
-    }
-    const updatedItems = [...items];
-    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-    // If the key is 'name', find the corresponding product and set the price
-    if (key === "name") {
-      const selectedProduct = productsCus.find(
-        (product) => product.ahead === value
-      );
-      if (selectedProduct) {
-        updatedItems[index]["accountname"] = selectedProduct.ahead;
-      }
-    } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
-      const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
-      const discount = parseFloat(updatedItems[index]["discount"]) || 0;
-      const discountedPayment = payment - discount;
-      const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
-
-      let discountedReceipt = receipt - discount;
-      if (updatedItems[index].disableReceipt) {
-        discountedReceipt = 0; // Set to zero if receipt field is disabled
-      }
-
-      let discounted_payment = discountedPayment;
-      if (updatedItems[index].disablePayment) {
-        discounted_payment = 0; // Set to zero if payment field is disabled
-      }
-
-      updatedItems[index]["payment_debit"] = payment.toFixed(2);
-      updatedItems[index]["discounted_payment"] = discounted_payment.toFixed(2);
-      updatedItems[index]["receipt_credit"] = receipt.toFixed(2);
-      updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
-      updatedItems[index]["discount"] = discount;
-    }
-    setItems(updatedItems);
-  };
-
-  const handleProductSelectCus = (product) => {
-    if (!product) {
-      alert("No product received!");
-      setShowModalCus(false);
-      return;
-    }
-  
-    // clone the array
-    const newCustomers = [...items];
-  
-    // overwrite the one at the selected index
-    newCustomers[selectedItemIndexCus] = {
-      ...newCustomers[selectedItemIndexCus],
-      accountname: product.ahead || '', 
-      acode: product.acode || '', 
-    };
-    const nameValue = product.ahead || product.name || "";
-    if (selectedItemIndexCus !== null) {
-      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-      setShowModalCus(false);
-    }
-    setItems(newCustomers);
-    setIsEditMode(true);
-    setShowModalCus(false);
-  
-  };
-
-  const handleCloseModalCus = () => {
-    setShowModalCus(false);
-    setPressedKey(""); // resets for next modal open
-  };
-
-  const openModalForItemCus = (index) => {
-    if (isEditMode) {
-      setSelectedItemIndexCus(index);
-      setShowModalCus(true);
-    }
-  };
-
-  const allFieldsCus = productsCus.reduce((fields, product) => {
-    Object.keys(product).forEach((key) => {
-      if (!fields.includes(key)) {
-        fields.push(key);
-      }
-    });
-
-    return fields;
-  }, []);
-
-  const [fontSize, setFontSize] = useState(18);
-
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-
-  const handleKeyDown = (event, index, field) => {
-   if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-      setPressedKey(event.key);
-      openModalForItemCus(index);
-      event.preventDefault();
-    }
-  };
-
-  const handleOpenModalBack = (event, index, field) => {
-      if (event.key === "Backspace" && field === "accountname") {
-          setSelectedItemIndexCus(index);
-          setShowModalCus(true);
-          event.preventDefault();
-      }
-  };
-
   return (
     <div>
-      <ToastContainer />
-      <div className="TableSectionz">
-        <Table className="custom-table">
-          <thead
-            style={{
-              backgroundColor: "skyblue",
-              textAlign: "center",
-              position: "sticky",
-              top: 0,
-            }}
-          >
-            <tr style={{ color: "white" }}>
-              <th>ACCOUNTNAME</th>
-              <th>PAYMENT</th>
-              <th>RECEIPT</th>
-            </tr>
-          </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
-            {items.map((item, index) => (
-              <tr key={`${item.accountname}-${index}`}>
-                <td style={{ padding: 0 }}>
-                  <input
-                  className="Account"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.accountname}
-                    readOnly={!isEditMode || isDisabled}
-                    onChange={(e) => { // console.log(accountNameRefs.current[index].value)
-                    }}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "accountname")
-                      handleOpenModalBack(e, index, "accountname");
-                    }}
-                  
-                    ref={(el) => (accountNameRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Payment"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "payment_debit")
-                    }
-                    ref={(el) => (paymentRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Receipt"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "receipt_credit")
-                    }
-                    ref={(el) => (receiptRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-      {showModalCus && (
-      <ProductModalCustomer
-        allFields={allFieldsCus}
-        onSelect={handleProductSelectCus}
-        onClose={handleCloseModalCus}
-        initialKey={pressedKey}
-        tenant={tenant}
-      />
-      )}
+      <InputMask
+        mask="99-99-9999"
+        placeholder="dd-mm-yyyy"
+        value={formData.date}
+        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+      >
+        {(inputProps) => (
+          <input
+            {...inputProps}
+            className="DatePICKER"
+          />
+        )}
+      </InputMask>
+      <InputMask
+        mask="99-99-9999"
+        value={formData.vbdate}
+        onChange={(e) =>
+          setFormData({ ...formData, vbdate: e.target.value })
+        }
+      >
+        {(inputProps) => (
+          <input
+            {...inputProps}
+            style={{marginTop:5}}
+            className="erp-field3 custom-style3"
+          />
+        )}
+      </InputMask>
     </div>
   );
 };

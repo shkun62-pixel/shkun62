@@ -723,6 +723,16 @@ const Purchase = () => {
   const [shouldFocusPrint, setShouldFocusPrint] = useState(false); // 👈 New flag to track
   const [shouldFocusAdd, setShouldFocusAdd] = useState(false); // 👈 New flag to track
 
+    // 👇 Sync vbdate with date when not in ABC mode
+  useEffect(() => {
+    if (!isAbcmode) {
+      setFormData((prev) => ({
+        ...prev,
+        vbdate: prev.date,
+      }));
+    }
+  }, [formData.date, isAbcmode]);
+
   // state
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   
@@ -1547,6 +1557,7 @@ const Purchase = () => {
         toast.error("Please fill in at least one Items name.", { position: "top-center" });
         return;
       }
+      setIsSubmitEnabled(false);
 
       // --- 2) BUILD PAYLOAD -------------------------------------------------
       const combinedData = {
@@ -1797,7 +1808,7 @@ const Purchase = () => {
       console.error("Error saving data:", error);
       toast.error("Failed to save data. Please try again.", { position: "top-center" });
     } finally {
-      setIsSubmitEnabled(!isDataSaved);
+      // setIsSubmitEnabled(!isDataSaved);
       if (isDataSaved) {
         setTitle?.("View");
         setIsAddEnabled?.(true);
@@ -1995,7 +2006,7 @@ const Purchase = () => {
     }
     let pkgs = parseFloat(updatedItems[index].pkgs);
     let Qtyperpkgs = updatedItems[index].Qtyperpc;
-    let AL = pkgs * Qtyperpkgs;
+    let AL = pkgs * Qtyperpkgs || 0;
     let gst;
     if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
       updatedItems[index]["weight"] = AL.toFixed(weightValue);
@@ -2014,12 +2025,14 @@ const Purchase = () => {
     } else {
       gst = parseFloat(updatedItems[index].gst);
     }
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
+
+    const weight = parseFloat(updatedItems[index].weight) || 0;
+    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+    const rate = parseFloat(updatedItems[index].rate) || 0;
+
+    const totalAccordingWeight = weight * rate;
+    const totalAccordingPkgs = pkgsVal * rate;
+
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
 
@@ -2095,7 +2108,7 @@ const Purchase = () => {
       updatedItems[index]["itax"] = igst.toFixed(2);
     }
     // Calculate the percentage of the value based on the GST percentage
-    const percentage = ((totalWithGST - Amounts) / TotalAcc) * 100;
+    const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
     setItems(updatedItems);
     calculateTotalGst();
@@ -2361,6 +2374,7 @@ const Purchase = () => {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 

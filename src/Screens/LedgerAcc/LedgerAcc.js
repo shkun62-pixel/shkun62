@@ -173,22 +173,6 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     }
   }, [formData.Ecc]);
 
-//  const [existingGstList, setExistingGstList] = useState([]);
-//   useEffect(() => {
-//     axios
-//       .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount")
-//       .then((response) => {
-//         const data = response.data;
-//         const gstNumbers = data
-//           .map((entry) => entry.formData?.gstNo?.toUpperCase())
-//           .filter((gst) => gst);
-//         setExistingGstList(gstNumbers);
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching ledger account data:", error);
-//       });
-//   }, []);
-
     // Modal For CustomerDetails
     const [pressedKey, setPressedKey] = useState(" "); // State to hold the pressed key
     const [productsCus, setProductsCus] = useState([]);
@@ -213,7 +197,8 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   
     const handleCloseModalCus = () => {
       setShowModalCus(false);
-      // setPressedKey("");
+      setPressedKey("");
+      setIsEditMode(true);
     };
   
     const openModalForItemCus = (index) => {
@@ -1403,7 +1388,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     }
   }
 
-  if (e.key === "ArrowUp") {
+  if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
     e.preventDefault();
     let prevIndex = index - 1;
 

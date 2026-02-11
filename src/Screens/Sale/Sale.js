@@ -5574,7 +5574,7 @@ const Sale = () => {
 
     items.forEach((item) => {
       const value = parseFloat(item.amount || 0);
-      totalValue += value;
+      totalValue += value || 0;
       cgstTotal += parseFloat(item.ctax || 0);
       sgstTotal += parseFloat(item.stax || 0);
       igstTotal += parseFloat(item.itax || 0);
@@ -5656,7 +5656,7 @@ const Sale = () => {
     let gstTotal = cgstTotal + sgstTotal + igstTotal;
     let grandTotal =
       totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
-    let taxable = parseFloat(formDataOverride.sub_total);
+    let taxable = parseFloat(formDataOverride.sub_total) || 0;
     // ✅ Skip TCS Calculation if skipTCS is true
     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
@@ -7013,9 +7013,9 @@ const Sale = () => {
       }
     }
 
-    let pkgs = parseFloat(updatedItems[index].pkgs);
+    let pkgs = parseFloat(updatedItems[index].pkgs) || 0;
     let Qtyperpkgs = updatedItems[index].Qtyperpc;
-    let AL = pkgs * Qtyperpkgs;
+    let AL = pkgs * Qtyperpkgs || 0;
     let gst;
     if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
       updatedItems[index]["weight"] = AL.toFixed(weightValue);
@@ -7034,12 +7034,14 @@ const Sale = () => {
     } else {
       gst = parseFloat(updatedItems[index].gst);
     }
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
+
+    const weight = parseFloat(updatedItems[index].weight) || 0;
+    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+    const rate = parseFloat(updatedItems[index].rate) || 0;
+
+    const totalAccordingWeight = weight * rate;
+    const totalAccordingPkgs = pkgsVal * rate;
+
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
 
@@ -7114,7 +7116,7 @@ const Sale = () => {
       updatedItems[index]["itax"] = igst.toFixed(2);
     }
     // Calculate the percentage of the value based on the GST percentage
-    const percentage = ((totalWithGST - Amounts) / TotalAcc) * 100;
+    const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
     setItems(updatedItems);
     calculateTotalGst();
@@ -7366,6 +7368,7 @@ const Sale = () => {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 

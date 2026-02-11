@@ -80,6 +80,7 @@ const JournalVoucher = () => {
   const createEmptyRow = (id) => ({
     id,
     accountname: "",
+    acode:0,
     narration: "",
     debit: "",
     credit: "",
@@ -252,6 +253,7 @@ const JournalVoucher = () => {
           items: filledRows.map((item) => ({
             id: item.id,
             accountname: item.accountname,
+            acode: item.acode,
             narration: item.narration,
             debit: item.debit,
             credit: item.credit,
@@ -273,6 +275,7 @@ const JournalVoucher = () => {
           items: filledRows.map((item) => ({
             id: item.id,
             accountname: item.accountname,
+            acode: item.acode,
             narration: item.narration,
             debit: item.debit,
             credit: item.credit,
@@ -411,6 +414,7 @@ const JournalVoucher = () => {
       );
       if (selectedProduct) {
         updatedItems[index]["accountname"] = selectedProduct.ahead;
+        updatedItems[index]["acode"] = selectedProduct.acode;
       }
     }
     // Disable credit field if debit field is filled
@@ -429,6 +433,7 @@ const JournalVoucher = () => {
       const newItem = {
         id: items.length + 1,
         accountname: "",
+        acode:0,
         narration: "",
         debit: "",
         credit: "",
@@ -461,6 +466,7 @@ const JournalVoucher = () => {
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
       accountname: product.ahead || "",
+      acode: product.acode
     };
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
@@ -477,6 +483,7 @@ const JournalVoucher = () => {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 
@@ -631,6 +638,7 @@ const JournalVoucher = () => {
         {
           id: 1,
           accountname: "",
+          acode:0,
           narration: "",
           payment_debit: 0.0,
           receipt_credit: 0.0,

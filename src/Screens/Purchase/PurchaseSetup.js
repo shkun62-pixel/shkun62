@@ -256,6 +256,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
 
   const handleChangeInvoice = (e) => {
+    markAsEdited();
     setFormData((prev) => ({
       ...prev,
       reportformat: e.target.value,
@@ -272,20 +273,11 @@ const PurchaseSetup = ({ onClose }) => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
-  // useEffect(() => {
-  //   const isEmpty =
-  //     formData &&
-  //     Object.values(formData).every((v) =>
-  //       v === "" ||
-  //       v === null ||
-  //       v === undefined ||
-  //       v === 0 ||
-  //       v === false
-  //     );
-
-  //   setIsSubmitEnabled(isEmpty);
-  // }, [formData]);
-
+  const markAsEdited = () => {
+    setIsEditMode(true);        // unlock fields
+    setIsAbcmode(true);         // switch to update mode
+    setIsSubmitEnabled(true);   // enable SAVE
+  };
 
   const fetchData = async () => {
     try {
@@ -591,8 +583,10 @@ const PurchaseSetup = ({ onClose }) => {
   useEffect(() => {
     fetchData(); // Fetch data when component mounts
   }, []);
+
   const handleInputChange = (event) => {
     const { id, value } = event.target;
+    markAsEdited();
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
@@ -866,6 +860,7 @@ const PurchaseSetup = ({ onClose }) => {
         setShowModalcTds(false);
         return;
       }
+      markAsEdited();
 
       // Deep copy cesscode array
       const updatedShipped = [...cTds];
@@ -935,6 +930,7 @@ const PurchaseSetup = ({ onClose }) => {
         setShowModalsTds(false);
         return;
       }
+      markAsEdited();
 
       // Deep copy cesscode array
       const updatedShipped = [...sTds];
@@ -1004,6 +1000,7 @@ const PurchaseSetup = ({ onClose }) => {
         setShowModaliTds(false);
         return;
       }
+      markAsEdited();
 
       // Deep copy cesscode array
       const updatedShipped = [...iTds];
@@ -1073,6 +1070,7 @@ const PurchaseSetup = ({ onClose }) => {
         setShowModalDis(false);
         return;
       }
+      markAsEdited();
   
       // Deep copy cesscode array
       const updatedShipped = [...discountcode];
@@ -1146,6 +1144,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalCus(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...cesscode];
@@ -1221,6 +1220,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalAdcode(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...Adcode];
@@ -1294,6 +1294,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalAcc(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...cgstcode];
@@ -1368,6 +1369,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalcgst1(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...cgstcode1];
@@ -1440,6 +1442,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalcgst1(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...cgstcode2];
@@ -1513,6 +1516,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalsgst(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...sgstcode];
@@ -1586,6 +1590,7 @@ const PurchaseSetup = ({ onClose }) => {
       setShowModalsgst1(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...sgstcode1];
@@ -1647,19 +1652,13 @@ const PurchaseSetup = ({ onClose }) => {
     setsgstcode2(updatedItems);
   };
 
-  // const handleProductSelectsgst2 = (product) => {
-  //   if (selectedItemIndexsgst2 !== null) {
-  //     handleItemChangesgst2(selectedItemIndexsgst2, "ahead", product.ahead);
-  //     setShowModalsgst2(false);
-  //   }
-  // };
-
   const handleProductSelectsgst2 = (product) => {
     if (!product) {
       alert("No account selected!");
       setShowModalsgst2(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...sgstcode2];
@@ -1721,19 +1720,13 @@ const PurchaseSetup = ({ onClose }) => {
     setigstcode(updatedItems);
   };
 
-  // const handleProductSelectigst = (product) => {
-  //   if (selectedItemIndexigst !== null) {
-  //     handleItemChangeigst(selectedItemIndexigst, "ahead", product.ahead);
-  //     setShowModaligst(false);
-  //   }
-  // };
-
   const handleProductSelectigst = (product) => {
     if (!product) {
       alert("No account selected!");
       setShowModaligst(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...igstcode];
@@ -1794,18 +1787,13 @@ const PurchaseSetup = ({ onClose }) => {
     setigstcode1(updatedItems);
   };
 
-  // const handleProductSelectigst1 = (product) => {
-  //   if (selectedItemIndexigst1 !== null) {
-  //     handleItemChangeigst1(selectedItemIndexigst1, "ahead", product.ahead);
-  //     setShowModaligst1(false);
-  //   }
-  // };
   const handleProductSelectigst1 = (product) => {
     if (!product) {
       alert("No account selected!");
       setShowModaligst1(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...igstcode1];
@@ -1867,18 +1855,13 @@ const PurchaseSetup = ({ onClose }) => {
     setigstcode2(updatedItems);
   };
 
-  // const handleProductSelectigst2 = (product) => {
-  //   if (selectedItemIndexigst2 !== null) {
-  //     handleItemChangeigst2(selectedItemIndexigst2, "ahead", product.ahead);
-  //     setShowModaligst2(false);
-  //   }
-  // };
     const handleProductSelectigst2 = (product) => {
     if (!product) {
       alert("No account selected!");
       setShowModaligst2(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...igstcode2];
@@ -1940,18 +1923,13 @@ const PurchaseSetup = ({ onClose }) => {
     settcscode(updatedItems);
   };
 
-  // const handleProductSelecttcs = (product) => {
-  //   if (selectedItemIndextcs !== null) {
-  //     handleItemChangetcs(selectedItemIndextcs, "ahead", product.ahead);
-  //     setShowModaltcs(false);
-  //   }
-  // };
-      const handleProductSelecttcs = (product) => {
+    const handleProductSelecttcs = (product) => {
     if (!product) {
       alert("No account selected!");
       setShowModaltcs(false);
       return;
     }
+    markAsEdited();
     
     // Deep copy shipped array
     const updatedShipped = [...tcscode];
@@ -2019,6 +1997,7 @@ const PurchaseSetup = ({ onClose }) => {
        setShowModaltcs206(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...tcs206code];
@@ -2080,19 +2059,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE1name(updatedItems);
    };
  
-   // const handleProductSelectE1name = (product) => {
-   //   if (selectedItemIndexE1name !== null) {
-   //     handleItemChangeE1name(selectedItemIndexE1name, "ahead", product.ahead);
-   //     setShowModalE1name(false);
-   //   }
-   // };
- 
    const handleProductSelectE1name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE1name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E1name];
@@ -2154,18 +2127,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE2name(updatedItems);
    };
  
-   // const handleProductSelectE2name = (product) => {
-   //   if (selectedItemIndexE2name !== null) {
-   //     handleItemChangeE2name(selectedItemIndexE2name, "ahead", product.ahead);
-   //     setShowModalE2name(false);
-   //   }
-   // };
    const handleProductSelectE2name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE2name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E2name];
@@ -2225,19 +2193,14 @@ const PurchaseSetup = ({ onClose }) => {
      }
      setE3name(updatedItems);
    };
- 
-   // const handleProductSelectE3name = (product) => {
-   //   if (selectedItemIndexE3name !== null) {
-   //     handleItemChangeE3name(selectedItemIndexE3name, "ahead", product.ahead);
-   //     setShowModalE3name(false);
-   //   }
-   // };
+
    const handleProductSelectE3name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE3name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E3name];
@@ -2298,18 +2261,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE4name(updatedItems);
    };
  
-   // const handleProductSelectE4name = (product) => {
-   //   if (selectedItemIndexE4name !== null) {
-   //     handleItemChangeE4name(selectedItemIndexE4name, "ahead", product.ahead);
-   //     setShowModalE4name(false);
-   //   }
-   // };
-     const handleProductSelectE4name = (product) => {
+    const handleProductSelectE4name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE4name(false);
        return;
-     }
+    }
+    markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E4name];
@@ -2370,18 +2328,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE5name(updatedItems);
    };
  
-   // const handleProductSelectE5name = (product) => {
-   //   if (selectedItemIndexE5name !== null) {
-   //     handleItemChangeE5name(selectedItemIndexE5name, "ahead", product.ahead);
-   //     setShowModalE5name(false);
-   //   }
-   // };
    const handleProductSelectE5name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE5name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E5name];
@@ -2442,19 +2395,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE6name(updatedItems);
    };
  
-   // const handleProductSelectE6name = (product) => {
-   //   if (selectedItemIndexE6name !== null) {
-   //     handleItemChangeE6name(selectedItemIndexE6name, "ahead", product.ahead);
-   //     setShowModalE6name(false);
-   //   }
-   // };
- 
    const handleProductSelectE6name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE6name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E6name];
@@ -2515,18 +2462,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE7name(updatedItems);
    };
  
-   // const handleProductSelectE7name = (product) => {
-   //   if (selectedItemIndexE7name !== null) {
-   //     handleItemChangeE7name(selectedItemIndexE7name, "ahead", product.ahead);
-   //     setShowModalE7name(false);
-   //   }
-   // };
-     const handleProductSelectE7name = (product) => {
+    const handleProductSelectE7name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE7name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E7name];
@@ -2587,18 +2529,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE8name(updatedItems);
    };
  
-   // const handleProductSelectE8name = (product) => {
-   //   if (selectedItemIndexE8name !== null) {
-   //     handleItemChangeE8name(selectedItemIndexE8name, "ahead", product.ahead);
-   //     setShowModalE8name(false);
-   //   }
-   // };
      const handleProductSelectE8name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE8name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E8name];
@@ -2659,18 +2596,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE9name(updatedItems);
    };
  
-   // const handleProductSelectE9name = (product) => {
-   //   if (selectedItemIndexE9name !== null) {
-   //     handleItemChangeE9name(selectedItemIndexE9name, "ahead", product.ahead);
-   //     setShowModalE9name(false);
-   //   }
-   // };
-     const handleProductSelectE9name = (product) => {
-     if (!product) {
-       alert("No account selected!");
-       setShowModalE9name(false);
-       return;
-     }
+  const handleProductSelectE9name = (product) => {
+    if (!product) {
+      alert("No account selected!");
+      setShowModalE9name(false);
+      return;
+    }
+    markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E9name];
@@ -2732,18 +2664,13 @@ const PurchaseSetup = ({ onClose }) => {
      setE10name(updatedItems);
    };
  
-   // const handleProductSelectE10name = (product) => {
-   //   if (selectedItemIndexE10name !== null) {
-   //     handleItemChangeE10name(selectedItemIndexE10name, "ahead", product.ahead);
-   //     setShowModalE10name(false);
-   //   }
-   // };
      const handleProductSelectE10name = (product) => {
      if (!product) {
        alert("No account selected!");
        setShowModalE10name(false);
        return;
      }
+     markAsEdited();
      
      // Deep copy shipped array
      const updatedShipped = [...E10name];
@@ -2902,6 +2829,7 @@ const PurchaseSetup = ({ onClose }) => {
 
   const handleTcsonTax = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       Tcsontax: value, // Update the ratecalculate field in FormData
@@ -2910,6 +2838,7 @@ const PurchaseSetup = ({ onClose }) => {
 
   const handleTaxType = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       stype: value, // Update the ratecalculate field in FormData
@@ -2917,6 +2846,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleBillCash = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       btype: value, // Update the ratecalculate field in FormData
@@ -2924,6 +2854,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleSupply = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       conv: value, // Update the ratecalculate field in FormData
@@ -2931,6 +2862,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleRoundoff = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T11: value, // Update the ratecalculate field in FormData
@@ -2938,6 +2870,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleTround = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T12: value, // Update the ratecalculate field in FormData
@@ -2945,6 +2878,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleDisplayitem = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T13: value, // Update the ratecalculate field in FormData
@@ -2952,6 +2886,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleDefbutton = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T14: value, // Update the ratecalculate field in FormData
@@ -2959,6 +2894,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleLowsale = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T15: value, // Update the ratecalculate field in FormData
@@ -2966,6 +2902,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleTDS194 = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T16: value, // Update the ratecalculate field in FormData
@@ -2973,6 +2910,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleTDSoption = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T19: value, // Update the ratecalculate field in FormData
@@ -2980,6 +2918,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleZerovalue = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T20: value, // Update the ratecalculate field in FormData
@@ -2987,6 +2926,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleDisplayHSN = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T18: value, // Update the ratecalculate field in FormData
@@ -2994,6 +2934,7 @@ const PurchaseSetup = ({ onClose }) => {
   };
   const handleCdwindow = (event) => {
     const { value } = event.target; // Get the selected value from the event
+    markAsEdited();
     setFormData((prevState) => ({
       ...prevState,
       T10: value, // Update the ratecalculate field in FormData
@@ -3002,6 +2943,7 @@ const PurchaseSetup = ({ onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    markAsEdited();
     if (value === "") {
       setFormData({ ...formData, [name]: "" });
     } else if (value === "+") {
@@ -3013,6 +2955,7 @@ const PurchaseSetup = ({ onClose }) => {
 
   const handleKeyDown = (e) => {
     const { name, value } = e.target;
+    markAsEdited();
     if (e.key === "Backspace" && (value === "+Ve" || value === "-Ve")) {
       setFormData({ ...formData, [name]: "" });
     }
@@ -3020,6 +2963,7 @@ const PurchaseSetup = ({ onClose }) => {
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
+    markAsEdited();
     if (/^\d*\.?\d*$/.test(value)) {
       setFormData({ ...formData, [name]: value });
     }
@@ -3027,6 +2971,7 @@ const PurchaseSetup = ({ onClose }) => {
 
   const handleInputChange2 = (e, field) => {
     const value = e.target.value.toUpperCase();
+    markAsEdited();
     if (value === "T") {
       setFormData((prev) => ({ ...prev, [field]: true }));
     } else if (value === "F") {
@@ -3038,6 +2983,7 @@ const PurchaseSetup = ({ onClose }) => {
   const handleInputChangeCapital = (event) => {
     const { id, value } = event.target;
     const uppercaseValue = value.toUpperCase(); // Convert input to uppercase
+    markAsEdited();
 
     // Allow only capital alphabets
     if (/^[A-Z]*$/.test(uppercaseValue)) {
@@ -3223,7 +3169,7 @@ const PurchaseSetup = ({ onClose }) => {
                   <ProductModalCustomer
                     allFields={allFieldsE1name}
                     onSelect={handleProductSelectE1name}
-                    onClose={() => setShowModalAcc(false)} 
+                    onClose={() => setShowModalE1name(false)} 
                     initialKey={pressedKey}
                     tenant={tenant}
                     onRefresh={fetchCustomers}
@@ -5135,7 +5081,7 @@ const PurchaseSetup = ({ onClose }) => {
             >
               {"SAVE"}
             </Button>
-            <Button
+            {/* <Button
               // disabled={activeStep === 0}
               onClick={handleEditClick}
               variant="contained"
@@ -5143,7 +5089,7 @@ const PurchaseSetup = ({ onClose }) => {
               type="button"
             >
               EDIT
-            </Button>
+            </Button> */}
 
             <Button
               onClick={onClose}

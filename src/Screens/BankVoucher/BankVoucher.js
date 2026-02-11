@@ -111,6 +111,7 @@ const BankVoucher = () => {
   const createEmptyRow = (id) => ({
     id,
     accountname: "",
+    acode:0,
     pan:"",
     Add1:"",
     bsGroup:"",
@@ -320,6 +321,7 @@ const BankVoucher = () => {
       );
       if (selectedProduct) {
         updatedItems[index]["accountname"] = selectedProduct.ahead;
+        updatedItems[index]["acode"] = selectedProduct.acode;
         updatedItems[index]["destination"] = selectedProduct.city;
         updatedItems[index]["pan"] = selectedProduct.pan;
         updatedItems[index]["Add1"] = selectedProduct.add1;
@@ -363,6 +365,7 @@ const BankVoucher = () => {
     updatedShipped[selectedItemIndexAcc] = {
       ...updatedShipped[selectedItemIndexAcc],
       accountname: product.ahead || "",
+      acode: product.acode || 0,
       destination: product.city || "",
       pan: product.pan || "",
       Add1: product.add1 || "",
@@ -405,6 +408,7 @@ const BankVoucher = () => {
       const newItem = {
         id: items.length + 1,
         accountname: "",
+        acode:0,
         pan:"",
         Add1:"",
         bsGroup:"",
@@ -501,6 +505,7 @@ const BankVoucher = () => {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 
@@ -605,6 +610,7 @@ const BankVoucher = () => {
           {
             id: 1,
             accountname: "",
+            acode:0,
             pan:"",
             Add1:"",
             bsGroup:"",
@@ -659,6 +665,7 @@ const BankVoucher = () => {
         {
           id: 1,
           accountname: "",
+          acode:0,
           pan:"",
           Add1:"",
           bsGroup:"",
@@ -1069,6 +1076,7 @@ const BankVoucher = () => {
           items: filledRows.map((item) => ({
             id: item.id,
             accountname: item.accountname,
+            acode: item.acode,
             pan: item.pan,
             Add1: item.Add1,
             bsGroup: item.bsGroup,
@@ -1109,6 +1117,7 @@ const BankVoucher = () => {
           items: filledRows.map((item) => ({
             id: item.id,
             accountname: item.accountname,
+            acode: item.acode,
             pan: item.pan,
             Add1: item.Add1,
             bsGroup: item.bsGroup,

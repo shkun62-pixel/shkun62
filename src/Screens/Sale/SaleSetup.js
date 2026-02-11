@@ -258,20 +258,6 @@ const SaleSetup = ({ onClose }) => {
     setIsSubmitEnabled(true);   // enable SAVE
   };
 
-  // useEffect(() => {
-  //   const isEmpty =
-  //     formData &&
-  //     Object.values(formData).every((v) =>
-  //       v === "" ||
-  //       v === null ||
-  //       v === undefined ||
-  //       v === 0 ||
-  //       v === false
-  //     );
-
-  //   setIsSubmitEnabled(isEmpty);
-  // }, [formData]);
-
   const fetchData = async () => {
     try {
       const response = await axios.get(
@@ -2320,13 +2306,7 @@ const SaleSetup = ({ onClose }) => {
     }
     setE9name(updatedItems);
   };
-
-  // const handleProductSelectE9name = (product) => {
-  //   if (selectedItemIndexE9name !== null) {
-  //     handleItemChangeE9name(selectedItemIndexE9name, "ahead", product.ahead);
-  //     setShowModalE9name(false);
-  //   }
-  // };
+  
     const handleProductSelectE9name = (product) => {
     if (!product) {
       alert("No account selected!");
@@ -2395,12 +2375,6 @@ const SaleSetup = ({ onClose }) => {
     setE10name(updatedItems);
   };
 
-  // const handleProductSelectE10name = (product) => {
-  //   if (selectedItemIndexE10name !== null) {
-  //     handleItemChangeE10name(selectedItemIndexE10name, "ahead", product.ahead);
-  //     setShowModalE10name(false);
-  //   }
-  // };
     const handleProductSelectE10name = (product) => {
     if (!product) {
       alert("No account selected!");
@@ -2740,7 +2714,7 @@ const SaleSetup = ({ onClose }) => {
                   <ProductModalCustomer
                     allFields={allFieldsE1name}
                     onSelect={handleProductSelectE1name}
-                    onClose={() => setShowModalAcc(false)} 
+                    onClose={() => setShowModalE1name(false)} 
                     initialKey={pressedKey}
                     tenant={tenant}
                     onRefresh={fetchCustomers}

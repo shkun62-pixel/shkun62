@@ -109,6 +109,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
        handleProductSelect(product);
      }
      setShowModal(false);
+     setIsEditMode(true);
      fetchProducts();
    };
   
@@ -197,17 +198,6 @@ const NewStockAcc = ({ onSave, StockId }) => {
     setSaleAcc(updatedItems);
   };
 
-  // const handleProductSelectCus = (product) => {
-  //   if (selectedItemIndexCus !== null) {
-  //     handleItemChangeCus(selectedItemIndexCus, "name", product.ahead);
-  //     setShowModalCus(false);
-  //     setIsEditMode(true);
-  //     // Focus back on the input field after selecting the value
-  //     setTimeout(() => {
-  //       inputRefs.current[15]?.focus();
-  //     }, 0);
-  //   }
-  // };
     const handleProductSelectCus = (product) => {
     if (!product) {
       alert("No product received!");
@@ -241,6 +231,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 
@@ -1202,7 +1193,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
       }
     }
 
-    if (e.key === "ArrowUp") {
+    if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
       e.preventDefault(); // Prevent default behavior
       let prevIndex = index - 1;
 
