@@ -310,7 +310,8 @@ export default function FAVoucherModal({
                   {(fa.transactions || []).map((t) => (
                     <tr key={t._id || `${t.account}-${t.type}-${t.amount}`}>
                       <td className="desc">
-                        <div style={{ fontWeight: 700 }}>{t.account}</div>
+                        <div style={{ fontWeight: 700 }}>{t.account}
+                          <br></br>{t.ACODE}</div>
                         <div style={{ color: "#6b7280" }}>{t.narration}</div>
                         {(t.CGST || t.SGST || t.IGST) && (
                           <div style={{ marginTop: 4, color: "#64748b" }}>

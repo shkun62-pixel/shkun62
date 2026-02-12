@@ -6933,7 +6933,7 @@ const Sale = () => {
         key === "tariff" ||
         key === "rate" ||
         key === "disc" ||
-        key === "discount") &&
+        key === "discount" || key === "amount") &&
       !/^-?\d*\.?\d*$/.test(value)
     ) {
       return; // reject invalid input
@@ -6952,6 +6952,45 @@ const Sale = () => {
       updatedItems[index][key] = capitalizeWords(value);
     } else {
       updatedItems[index][key] = value;
+    }
+    if (key === "amount" && value === "") {
+      updatedItems[index]["rate"] = "";
+      updatedItems[index]["ctax"] = "";
+      updatedItems[index]["stax"] = "";
+      updatedItems[index]["itax"] = "";
+      updatedItems[index]["vamt"] = "";
+      updatedItems[index]["amount"] = "";
+      setItems(updatedItems);
+      return;
+    }
+
+    // ✅ Reverse Rate Calculation (Amount → Rate)
+    if (key === "amount") {
+
+      // ❗ If amount is empty, clear rate and stop
+      if (value === "") {
+        updatedItems[index]["rate"] = "";
+        setItems(updatedItems);
+        return;
+      }
+
+      const amount = parseFloat(value);
+      const weight = parseFloat(updatedItems[index].weight) || 0;
+      const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
+
+      let newRate = 0;
+
+      if (weight > 0) {
+        newRate = amount / weight;
+      } else if (pkgs > 0) {
+        newRate = amount / pkgs;
+      }
+
+      if (!isNaN(newRate) && isFinite(newRate)) {
+        updatedItems[index]["rate"] = T21
+          ? Math.round(newRate).toFixed(2)
+          : newRate.toFixed(2);
+      }
     }
 
     // If the key is 'name', find the corresponding product and set the price
@@ -7107,15 +7146,38 @@ const Sale = () => {
       if (key !== "discount") {
         updatedItems[index]["discount"] = Math.round(per).toFixed(2);
       }
-      updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+
+      // ❗ Only auto-calc amount if user is NOT typing in amount
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
     } else {
       if (key !== "discount") {
         updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
       }
-      updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+
+      // ❗ Only auto-calc amount if user is NOT typing in amount
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
     }
+    // if (T21) {
+    //   if (key !== "discount") {
+    //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+    //   }
+    //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+    //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+    // } else {
+    //   if (key !== "discount") {
+    //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+    //   }
+    //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+    //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+    // }
     if (T12) {
       updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
       updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
@@ -8044,7 +8106,7 @@ const Sale = () => {
       } else if (field === "discount") {
         focusRef(discountRef, index);
       } else if (field === "disc") {
-        focusRef(priceRefs, index);
+        focusRef(amountRefs, index);
       } else if (field === "amount") {
         focusRef(priceRefs, index);
       } else if (field === "rate") {
@@ -9089,6 +9151,12 @@ const Sale = () => {
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
                       value={Number(item.amount) === 0 ? "" : item.amount}
+                      onBlur={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value)) {
+                          handleItemChange(index, "amount", value.toFixed(rateValue));
+                        }
+                      }}
                       onChange={(e) =>
                         handleItemChange(index, "amount", e.target.value)
                       }

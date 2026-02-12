@@ -1937,7 +1937,7 @@ const Purchase = () => {
 
   const handleItemChange = (index, key, value, field) => {
     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-    if ((key === "pkgs" || key === "weight" || key === "tariff" || key === "rate" || key === "disc" || key === "discount") && !/^-?\d*\.?\d*$/.test(value)) {
+    if ((key === "pkgs" || key === "weight" || key === "tariff" || key === "rate" || key === "disc" || key === "discount" || key === "amount") && !/^-?\d*\.?\d*$/.test(value)) {
       return; // reject invalid input
     }
 
@@ -1955,8 +1955,45 @@ const Purchase = () => {
     } else {
       updatedItems[index][key] = value;
     }
-    // const updatedItems = [...items];
-    // updatedItems[index][key] = value;
+    if (key === "amount" && value === "") {
+      updatedItems[index]["rate"] = "";
+      updatedItems[index]["ctax"] = "";
+      updatedItems[index]["stax"] = "";
+      updatedItems[index]["itax"] = "";
+      updatedItems[index]["vamt"] = "";
+      updatedItems[index]["amount"] = "";
+      setItems(updatedItems);
+      return;
+    }
+
+    // ✅ Reverse Rate Calculation (Amount → Rate)
+    if (key === "amount") {
+
+      // ❗ If amount is empty, clear rate and stop
+      if (value === "") {
+        updatedItems[index]["rate"] = "";
+        setItems(updatedItems);
+        return;
+      }
+
+      const amount = parseFloat(value);
+      const weight = parseFloat(updatedItems[index].weight) || 0;
+      const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
+
+      let newRate = 0;
+
+      if (weight > 0) {
+        newRate = amount / weight;
+      } else if (pkgs > 0) {
+        newRate = amount / pkgs;
+      }
+
+      if (!isNaN(newRate) && isFinite(newRate)) {
+        updatedItems[index]["rate"] = T11
+          ? Math.round(newRate).toFixed(2)
+          : newRate.toFixed(2);
+      }
+    }
 
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
@@ -2004,7 +2041,7 @@ const Purchase = () => {
         updatedItems[index]["gst"] = ""; // Reset gst if product not found
       }
     }
-    
+
     let pkgs = parseFloat(updatedItems[index].pkgs);
     pkgs = isNaN(pkgs) ? 0 : pkgs;
 
@@ -2099,15 +2136,38 @@ const Purchase = () => {
       if (key !== "discount") {
         updatedItems[index]["discount"] = Math.round(per).toFixed(2);
       }
-      updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+
+      // ❗ Only auto-calc amount if user is NOT typing in amount
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
     } else {
       if (key !== "discount") {
         updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
       }
-      updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+
+      // ❗ Only auto-calc amount if user is NOT typing in amount
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
     }
+    // if (T11) {
+    //   if (key !== "discount") {
+    //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+    //   }
+    //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+    //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+    // } else {
+    //   if (key !== "discount") {
+    //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+    //   }
+    //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+    //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+    // }
     if (T12) {
       updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
       updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
@@ -3925,6 +3985,12 @@ const handleKeyDown = (event, index, field) => {
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
                     value={Number(item.amount) === 0 ? "" : item.amount}
+                    onBlur={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) {
+                        handleItemChange(index, "amount", value.toFixed(rateValue));
+                      }
+                    }}
                     onChange={(e) =>
                       handleItemChange(index, "amount", e.target.value)
                     }

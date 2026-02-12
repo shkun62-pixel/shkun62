@@ -1334,37 +1334,28 @@ const LedgerList = () => {
                       let netWeight = 0;
                       let netPcs = 0;
 
-                      filteredTransactions.forEach((txn) => {
+                    filteredTransactions.forEach((txn) => {
+                        const weight = txn.weight || 0;
+                        const pcs = txn.pkgs || 0;
+
                         if (txn.type.toLowerCase() === "debit") {
                           balance += txn.amount;
                           totalDebit += txn.amount;
+
+                          netWeight += weight; // ✅ debit positive
+                          netPcs += pcs; // ✅ debit positive
                         } else if (txn.type.toLowerCase() === "credit") {
                           balance -= txn.amount;
                           totalCredit += txn.amount;
-                        }
 
-                        // Qty calculation (raw)
-                        if (txn.vtype === "P") {
-                          netWeight += txn.weight || 0;
-                          netPcs += txn.pkgs || 0;
-                        } else if (txn.vtype === "S") {
-                          netWeight -= txn.weight || 0;
-                          netPcs -= txn.pkgs || 0;
+                          netWeight -= weight; // ✅ credit negative
+                          netPcs -= pcs; // ✅ credit negative
                         }
                       });
 
                       const drcrFinal = balance >= 0 ? "DR" : "CR";
                       const colorFinal =
                         drcrFinal === "DR" ? "darkblue" : "red";
-
-                      // 🔥 Make qty sign follow final balance
-                      if (drcrFinal === "CR") {
-                        netWeight = -Math.abs(netWeight);
-                        netPcs = -Math.abs(netPcs);
-                      } else {
-                        netWeight = Math.abs(netWeight);
-                        netPcs = Math.abs(netPcs);
-                      }
 
                       return (
                         <tfoot>
