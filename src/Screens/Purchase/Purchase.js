@@ -2004,8 +2004,13 @@ const Purchase = () => {
         updatedItems[index]["gst"] = ""; // Reset gst if product not found
       }
     }
+    
     let pkgs = parseFloat(updatedItems[index].pkgs);
-    let Qtyperpkgs = updatedItems[index].Qtyperpc;
+    pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+    let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+    Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
     let AL = pkgs * Qtyperpkgs || 0;
     let gst;
     if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
@@ -2026,7 +2031,8 @@ const Purchase = () => {
       gst = parseFloat(updatedItems[index].gst);
     }
 
-    const weight = parseFloat(updatedItems[index].weight) || 0;
+    let weight = parseFloat(updatedItems[index].weight);
+    weight = isNaN(weight) ? 0 : weight;
     const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
     const rate = parseFloat(updatedItems[index].rate) || 0;
 
@@ -2052,6 +2058,9 @@ const Purchase = () => {
       TotalAcc = totalAccordingPkgs;
       console.log("totalAccordingPkgs");
     }
+      // Ensure TotalAcc is a valid number before calling toFixed()
+    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
     let others = parseFloat(updatedItems[index].exp_before) || 0;
     let disc = parseFloat(updatedItems[index].disc) || 0;
     let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
@@ -2068,7 +2077,8 @@ const Purchase = () => {
     let Amounts = TotalAcc + per + others;
 
     // Ensure TotalAcc is a valid number before calling toFixed()
-    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+    // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
     // Check if GST number starts with "0" to "3"
     const same = custGst.substring(0, 2);
     let cgst, sgst, igst;
