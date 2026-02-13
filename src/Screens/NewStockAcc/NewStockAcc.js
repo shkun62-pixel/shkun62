@@ -15,6 +15,7 @@ import { CompanyContext } from "../Context/CompanyContext";
  import { useContext } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import useStockAcc from "../Shared/useStockAcc";
+import InputMask from "react-input-mask";
 
 const NewStockAcc = ({ onSave, StockId }) => {
 
@@ -1158,15 +1159,15 @@ const NewStockAcc = ({ onSave, StockId }) => {
   };
   const [expiredDate, setexpiredDate] = useState(null);
 
-  useEffect(() => {
-    if (formData.duedate) {
-      setexpiredDate(new Date(formData.duedate));
-    } else {
-      const today = new Date();
-      setexpiredDate(today);
-      setFormData({ ...formData, duedate: today });
-    }
-  }, [formData.duedate, setFormData]);
+  // useEffect(() => {
+  //   if (formData.duedate) {
+  //     setexpiredDate(new Date(formData.duedate));
+  //   } else {
+  //     const today = new Date();
+  //     setexpiredDate(today);
+  //     setFormData({ ...formData, duedate: today });
+  //   }
+  // }, [formData.duedate, setFormData]);
 
   const handleDateChange = (date) => {
     setexpiredDate(date);
@@ -1848,7 +1849,23 @@ const NewStockAcc = ({ onSave, StockId }) => {
               }}
               disabled
             />
-            <DatePicker
+            <InputMask
+              mask="99-99-9999"
+              placeholder=""
+              value={formData.duedate}
+              readOnly={!isEditMode || isDisabled}
+              onChange={(e) =>
+                setFormData({ ...formData, duedate: e.target.value })
+              }
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="DatePICKERstock"
+                />
+              )}
+            </InputMask>
+            {/* <DatePicker
               id="duedate"
               value={formData.duedate}
               className="DatePICKERstock"
@@ -1857,7 +1874,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
               readOnly={!isEditMode || isDisabled}
               placeholderText="DueDate"
               dateFormat="dd-MM-yyyy"
-            />
+            /> */}
           </div>
          <div style={{marginTop:3}}>
             <FormControl

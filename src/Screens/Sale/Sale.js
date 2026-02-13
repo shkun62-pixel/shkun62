@@ -5266,6 +5266,8 @@ const Sale = () => {
     Pcodess: "",
     Scodes01: "",
     Scodess: "",
+    RateCal:"",
+    Qtyperpc:0,
     Exp_rate1: expRates.ExpRate1 ?? 0,
     Exp_rate2: expRates.ExpRate2 ?? 0,
     Exp_rate3: expRates.ExpRate3 ?? 0,
@@ -5953,6 +5955,8 @@ const Sale = () => {
         disc: 0,
         discount: "",
         gst: 0,
+        RateCal:"",
+        Qtyperpc:0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -6652,6 +6656,8 @@ const Sale = () => {
         disc: item.disc,
         discount: item.discount,
         gst: item.gst,
+        RateCal: item.RateCal,
+        Qtyperpc: item.Qtyperpc,
         Pcodes01: item.Pcodes01,
         Pcodess: item.Pcodess,
         Scodes01: item.Scodes01,
@@ -6964,7 +6970,7 @@ const Sale = () => {
       return;
     }
 
-    // ✅ Reverse Rate Calculation (Amount → Rate)
+    //  ✅ Reverse Rate Calculation (Amount → Rate)
     if (key === "amount") {
 
       // ❗ If amount is empty, clear rate and stop
@@ -6974,16 +6980,16 @@ const Sale = () => {
         return;
       }
 
-      const amount = parseFloat(value);
+      const amount = parseFloat(value) || 0;
       const weight = parseFloat(updatedItems[index].weight) || 0;
       const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
 
       let newRate = 0;
 
       if (weight > 0) {
-        newRate = amount / weight;
+        newRate = amount / weight || 0;
       } else if (pkgs > 0) {
-        newRate = amount / pkgs;
+        newRate = amount / pkgs || 0;
       }
 
       if (!isNaN(newRate) && isFinite(newRate)) {
@@ -7049,6 +7055,7 @@ const Sale = () => {
 
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+        alert(selectedProduct.Rateins)
       }
     }
 
@@ -7087,6 +7094,7 @@ const Sale = () => {
 
     const totalAccordingWeight = weight * rate;
     const totalAccordingPkgs = pkgsVal * rate;
+    const totalAccordingPkgsQty = pkgsVal * Qtyperpkgs * rate;
 
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
@@ -7209,6 +7217,8 @@ const Sale = () => {
         disc: 0,
         discount: "",
         gst: 0,
+        RateCal: "",
+        Qtyperpc: 0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -8345,12 +8355,22 @@ const Sale = () => {
 
   const formatDateDDMMYYYY = (date) => {
     if (!date) return "";
+
+    // If already dd/mm/yyyy
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      return date.replaceAll("/", "-");
+    }
+
     const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+
     const day = String(d.getDate()).padStart(2, "0");
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const year = d.getFullYear();
+
     return `${day}-${month}-${year}`;
   };
+
 
   return (
     <div>

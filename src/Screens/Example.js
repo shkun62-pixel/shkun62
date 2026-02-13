@@ -856,7 +856,6 @@ if (key === "amount" && value === "") {
   return;
 }
 
-
    // ✅ Reverse Rate Calculation (Amount → Rate)
 if (key === "amount") {
 
@@ -885,7 +884,6 @@ if (key === "amount") {
       : newRate.toFixed(2);
   }
 }
-
 
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
@@ -1276,3 +1274,320 @@ if (key === "amount") {
 };
 
 export default Example;
+
+// import React, { useState } from "react";
+// import Table from "react-bootstrap/Table";
+// import ProductModalCustomer from "./Modals/ProductModalCustomer";
+
+// const Example = () => {
+//   const tenant = "shkun_05062025_05062026";
+//   const [items, setItems] = useState([
+//     {
+//       id: "",
+//       accountname: "",
+//       narration: "",
+//       debit: "",
+//       credit: "",
+//       disableDebit: false,
+//       disableCredit: false,
+//     },
+//   ]);
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+
+//   // Modal For Customer
+//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+//   const [productsCus, setProductsCus] = useState([]);
+//   const [showModalCus, setShowModalCus] = useState(false);
+//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//   const [loadingCus, setLoadingCus] = useState(true);
+//   const [errorCus, setErrorCus] = useState(null);
+//   const [suggestionRow, setSuggestionRow] = useState(null);
+//   const [suggestionText, setSuggestionText] = useState("");
+
+//   React.useEffect(() => {
+//     fetchCustomers();
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductsCus(formattedData);
+//       setLoadingCus(false);
+//     } catch (error) {
+//       setErrorCus(error.message);
+//       setLoadingCus(false);
+//     }
+//   };
+
+//   const handleItemChangeCus = (index, key, value) => {
+//     const updatedItems = [...items];
+//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+//     // If the key is 'name', find the corresponding product and set the price
+//     if (key === "name") {
+//       const selectedProduct = productsCus.find(
+//         (product) => product.ahead === value,
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["accountname"] = selectedProduct.ahead;
+//         updatedItems[index]["acode"] = selectedProduct.acode;
+//       }
+//     }
+//     // Disable credit field if debit field is filled
+//     if (key === "debit") {
+//       updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
+//     }
+
+//     // Disable debit field if credit field is filled
+//     if (key === "credit") {
+//       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+//     }
+//     if (key === "narration") {
+//       const accountName = items[index].accountname || "";
+
+//       if (
+//         accountName &&
+//         accountName.toLowerCase().startsWith(value.toLowerCase()) &&
+//         value !== ""
+//       ) {
+//         setSuggestionRow(index);
+//         setSuggestionText(accountName);
+//       } else {
+//         setSuggestionRow(null);
+//         setSuggestionText("");
+//       }
+//     }
+
+//     setItems(updatedItems);
+//   };
+
+//   const handleProductSelectCus = (product) => {
+//     if (!product) {
+//       alert("No product received!");
+//       setShowModalCus(false);
+//       return;
+//     }
+
+//     // clone the array
+//     const newCustomers = [...items];
+
+//     // overwrite the one at the selected index
+//     newCustomers[selectedItemIndexCus] = {
+//       ...newCustomers[selectedItemIndexCus],
+//       accountname: product.ahead || "",
+//       acode: product.acode,
+//     };
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexCus !== null) {
+//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//       setShowModalCus(false);
+//     }
+//     setItems(newCustomers);
+//     setShowModalCus(false);
+//   };
+
+//   const handleCloseModalCus = () => {
+//     setShowModalCus(false);
+//     setPressedKey(""); // resets for next modal open
+//   };
+
+//   const openModalForItemCus = (index) => {
+//     setSelectedItemIndexCus(index);
+//     setShowModalCus(true);
+//   };
+
+//   const allFieldsCus = productsCus.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   const handleNumberChange = (event, index, field) => {
+//     const value = event.target.value;
+
+//     // Validate that the input is numeric
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+
+//     const updatedItems = [...items];
+//     updatedItems[index][field] = value;
+
+//     // If the field is 'debit' and its value is greater than zero, disable 'credit'
+//     if (field === "debit") {
+//       updatedItems[index].disableCredit = parseFloat(value) > 0;
+//       updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
+//     }
+//     // If the field is 'credit' and its value is greater than zero, disable 'debit'
+//     else if (field === "credit") {
+//       updatedItems[index].disableDebit = parseFloat(value) > 0;
+//       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
+//     }
+//     setItems(updatedItems);
+//   };
+
+//   const handleKeyDown = (event, index, field) => {
+//     // Open Modal on Letter Input in Account Name
+//     if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+//       setPressedKey(event.key);
+//       openModalForItemCus(index);
+//       event.preventDefault();
+//     }
+//   };
+//   return (
+//     <div>
+//       <div className="Tablesection">
+//         <Table className="custom-table">
+//           <thead>
+//             <tr style={{ color: "white" }}>
+//               <th>ACCOUNT NAME</th>
+//               <th>NARRATION</th>
+//               <th>DEBIT</th>
+//               <th>CREDIT</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {items.map((item, index) => (
+//               <tr key={`${item.accountname}-${index}`}>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                     className="Account"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.accountname}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "accountname");
+//                     }}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, position: "relative" }}>
+//                   <input
+//                     className="Narration"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: "5px 8px",
+//                       fontSize: "14px",
+//                       position: "relative",
+//                       background: "transparent",
+//                     }}
+//                     value={item.narration}
+//                     onChange={(e) =>
+//                       handleItemChangeCus(index, "narration", e.target.value)
+//                     }
+//                     onKeyDown={(e) => {
+//                       if (
+//                         e.key === "Tab" &&
+//                         suggestionRow === index &&
+//                         suggestionText
+//                       ) {
+//                         e.preventDefault();
+
+//                         const updatedItems = [...items];
+//                         updatedItems[index].narration = suggestionText;
+//                         setItems(updatedItems);
+
+//                         setSuggestionRow(null);
+//                         setSuggestionText("");
+//                       }
+//                     }}
+//                   />
+
+//                   {/* 👇 Show only remaining text */}
+//                   {suggestionRow === index && suggestionText && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: 0,
+//                         left: 8,
+//                         height: "100%",
+//                         display: "flex",
+//                         alignItems: "center",
+//                         color: "#bbb",
+//                         fontSize: "14px",
+//                         pointerEvents: "none",
+//                       }}
+//                     >
+//                       <span style={{ visibility: "hidden" }}>
+//                         {item.narration}
+//                       </span>
+//                       <span>{suggestionText.slice(item.narration.length)}</span>
+//                     </div>
+//                   )}
+//                 </td>
+
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Debit"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     value={Number(item.debit) === 0 ? "" : item.debit}
+//                     onChange={(e) => handleNumberChange(e, index, "debit")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Credits"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     value={Number(item.credit) === 0 ? "" : item.credit}
+//                     onChange={(e) => handleNumberChange(e, index, "credit")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </Table>
+//         {showModalCus && (
+//           <ProductModalCustomer
+//             allFields={allFieldsCus}
+//             onSelect={handleProductSelectCus}
+//             onClose={handleCloseModalCus}
+//             initialKey={pressedKey}
+//             tenant={tenant}
+//           />
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Example;

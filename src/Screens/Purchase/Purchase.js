@@ -182,6 +182,8 @@ const Purchase = () => {
     disc: 0,
     discount: "",
     gst: 0,
+    RateCal:"",
+    Qtyperpc:0,
     Pcodes01: "",
     Pcodess: "",
     Scodes01: "",
@@ -752,19 +754,6 @@ const Purchase = () => {
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
-  // const formatDateToDDMMYYYY = (dateStr) => {
-  //   if (!dateStr) return "";
-
-  //   const date = new Date(dateStr);
-  //   if (isNaN(date.getTime())) return "";
-
-  //   const dd = String(date.getDate()).padStart(2, "0");
-  //   const mm = String(date.getMonth() + 1).padStart(2, "0");
-  //   const yyyy = date.getFullYear();
-
-  //   return `${dd}-${mm}-${yyyy}`;
-  // };
-
   const formatDateToDDMMYYYY = (dateStr) => {
     if (!dateStr) return "";
 
@@ -947,6 +936,8 @@ const Purchase = () => {
         disc: "",
         discount: "",
         gst: 0,
+        RateCal:"",
+        Qtyperpc:0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -1538,14 +1529,14 @@ const Purchase = () => {
       const customerName = supplierdetails[0]?.vacode;
       const billNo = formData.vbillno;
 
-      if (checkDuplicateBill(customerName, billNo)) {
+      if (!isAbcmode && checkDuplicateBill(customerName, billNo)) {
         toast.error(`Bill No "${billNo}" already exists for customer "${customerName}".`, { 
           position: "top-center" 
         });
         return; // 🚫 STOP SAVE
       }
       const p_entry = formData.p_entry;
-      if (checkDuplicatePEntry(p_entry)) {
+      if (!isAbcmode && checkDuplicatePEntry(p_entry)) {
         toast.error(`Self Inv No Already exists: "${p_entry}".`, { 
           position: "top-center" 
         });
@@ -1695,6 +1686,8 @@ const Purchase = () => {
           disc: item.disc,
           discount: item.discount,
           gst: item.gst,
+          RateCal: item.RateCal,
+          Qtyperpc: item.Qtyperpc,
           Pcodess: item.Pcodess,
           Pcodes01: item.Pcodes01,
           Scodess: item.Scodess,
@@ -1762,21 +1755,6 @@ const Purchase = () => {
       }
 
       if (response.status === 200 || response.status === 201) {
-        // --- 4) UPDATE STOCK (purchase -> add) ------------------------------
-        // try {
-        //   await axios.post(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stock/update`, {
-        //     items: nonEmptyItems.map(item => ({
-        //       vcode: item.vcode,
-        //       sdisc: item.sdisc,
-        //       weight: Number(item.weight) || 0,
-        //       pkgs: Number(item.pkgs) || 0,
-        //     }))
-        //   });
-        // } catch (stkErr) {
-        //   console.error("Stock update error:", stkErr);
-        //   // continue; don't fail whole flow
-        // }
-
         // --- 5) POST/PUT FA ENTRIES with purchaseId ------------------------
         try {
           const faMethod = isAbcmode ? "put" : "post";
@@ -1976,16 +1954,16 @@ const Purchase = () => {
         return;
       }
 
-      const amount = parseFloat(value);
+      const amount = parseFloat(value) || 0;
       const weight = parseFloat(updatedItems[index].weight) || 0;
       const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
 
       let newRate = 0;
 
       if (weight > 0) {
-        newRate = amount / weight;
+        newRate = amount / weight || 0 ;
       } else if (pkgs > 0) {
-        newRate = amount / pkgs;
+        newRate = amount / pkgs || 0;
       }
 
       if (!isNaN(newRate) && isFinite(newRate)) {
@@ -2216,6 +2194,8 @@ const Purchase = () => {
         disc: 0,
         discount: "",
         gst: 0,
+        RateCal:"",
+        Qtyperpc:0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -2869,7 +2849,7 @@ const handleKeyDown = (event, index, field) => {
     let cgst = 0,
       sgst = 0,
       igst = 0;
-    if (gstNumber === same) {
+    if (CompanyState == supplierdetails[0].state) {
       cgst = (Amounts * (gst / 2)) / 100;
       sgst = (Amounts * (gst / 2)) / 100;
     } else {
@@ -3004,7 +2984,7 @@ const handleKeyDown = (event, index, field) => {
         sgst = 0,
         igst = 0;
 
-      if (gstNumber === same) {
+      if (CompanyState == supplierdetails[0].state) {
         cgst = (Amounts * (gst / 2)) / 100;
         sgst = (Amounts * (gst / 2)) / 100;
       } else {

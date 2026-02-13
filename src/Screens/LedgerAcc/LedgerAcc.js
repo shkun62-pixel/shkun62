@@ -55,6 +55,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     gstNo: "",
     ahead: "",
     add1: "",
+    add2: "",
     city: "",
     state: "",
     distance:"",
@@ -313,11 +314,12 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
               // Create an empty data object with voucher number 0
               const emptyFormData = {
                   Bsgroup: "",
-                      Bscode:"",
+                  Bscode:"",
                   acode: "",
                   gstNo: "",
                   ahead: "",
                   add1: "",
+                  add2:"",
                   city: "",
                   state: "",
                   distance:"",
@@ -381,11 +383,12 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           // In case of error, you can also initialize empty data if needed
           const emptyFormData = {
               Bsgroup: "",
-                  Bscode:"",
+              Bscode:"",
               acode: "",
               gstNo: "",
               ahead: "",
               add1: "",
+              add2:"",
               city: "",
               state: "",
               distance: "",
@@ -473,24 +476,6 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       window.addEventListener("keydown", handleEsc);
       return () => window.removeEventListener("keydown", handleEsc);
     }, [isEditMode]);
-
-  // useEffect(() => {
-  //   const handleEsc = (e) => {
-  //     if (e.key === "Escape" && ledgerId && !isEditMode) {
-  //       // ✅ Go back explicitly to LedgerList with state
-  //       navigate( -1, {
-  //         state: {
-  //           rowIndex: location.state?.selectedIndex || 0,
-  //           // selectedLedger: location.state?.selectedLedger,
-  //           // keepModalOpen: true,
-  //         },
-  //       });
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleEsc);
-  //   return () => window.removeEventListener("keydown", handleEsc);
-  // }, [navigate, ledgerId, location.state]);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -627,11 +612,12 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
         }
         const newData = {
           Bsgroup: "",
-              Bscode:"",
+          Bscode:"",
           acode: lastvoucherno,
           gstNo: "",
           ahead: "",
           add1: "",
+          add2:"",
           city: "",
           state: "",
           distance: "",
@@ -1044,66 +1030,6 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     }
   };
   
-  // const handleSaveClick = async () => {
-  //   document.body.style.backgroundColor = "white";
-  //   let isDataSaved = false;
-  
-  //   try {
-  //     const isValid = formData.ahead.trim() !== "";  // Ensure no empty spaces
-  //     if (!isValid) {
-  //       toast.error("Please Fill the Account Name", {
-  //         position: "top-center",
-  //       });
-  //       return; // Prevent save operation
-  //     }
-  
-  //     const userConfirmed = window.confirm("Are you sure you want to save the data?");
-  //     if (!userConfirmed) {
-  //       return;
-  //     }
-  
-  //     const combinedData = {
-  //       _id: formData._id,
-  //       formData: { ...formData } // Simplified merging
-  //     };
-  
-  //     // Debugging
-  //     console.log("Combined Data:", combinedData);
-  
-  //     const apiEndpoint = `http://103.168.19.65:3012/auth/ledgerAccount${isAbcmode ? `/${data1._id}` : ""}`;
-  //     const method = isAbcmode ? "put" : "post";
-  
-  //     const response = await axios({
-  //       method,
-  //       url: apiEndpoint,
-  //       data: combinedData,
-  //     });
-  
-  //     if (response.status === 200 || response.status === 201) {
-  //       fetchData();
-  //       isDataSaved = true;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving data:", error);
-  //     toast.error("Failed to save data. Please try again.", {
-  //       position: "top-center",
-  //     });
-  //   } finally {
-  //     if (isDataSaved) {
-  //       setIsSubmitEnabled(false); // Disable after successful save
-  //       setIsAddEnabled(true);
-  //       setIsDisabled(true);
-  //       setIsEditMode(false);
-  //       toast.success("Data Saved Successfully!", { position: "top-center" });
-  //     } else {
-  //       // Keep the button enabled if data isn't saved
-  //       setIsSubmitEnabled(formData.ahead.trim() === ""); 
-  //       setIsAddEnabled(false);
-  //       setIsDisabled(false);
-  //     }
-  //   }
-  // };
-  
   const handleEditClick = () => {
     setTitle("EDIT");
     setIsDisabled(false); // Enable fields when editing
@@ -1183,11 +1109,12 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
             console.log("No data available");
             const newData = {
           Bsgroup: "",
-              Bscode:"",
+          Bscode:"",
           acode: "",
           gstNo: "",
           ahead: "",
           add1: "",
+          add2:"",
           city: "",
           state: "",
           distance: "",
@@ -1426,23 +1353,6 @@ const handleNumericValue = (event) => {
   }
 };
 
-    // const handleNumericValue = (event) => {
-    //   const { id, value } = event.target;
-  
-    //   // Allow only numeric values, including optional decimal points
-    //   if (/^\d*\.?\d*$/.test(value) || value === '') {
-    //   const isDuplicate = existingAcCodeList.includes(value);
-    //   if (isDuplicate) {
-    //     toast.error("Ac Code Already Exists !!", {
-    //       position: "top-center", // or "bottom-center"
-    //     });
-    //   }
-    //     setFormData((prevData) => ({
-    //       ...prevData,
-    //       [id]: value,
-    //     }));
-    //   }
-    // };
     const validateEmail = (e) => {
       const email = e.target.value.trim();
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation pattern
@@ -1545,7 +1455,7 @@ const handleAttachClick = () => {
             variant="filled"
             size="small"
             label="A/C CODE"
-            onChange={handleNumericValue}
+            // onChange={handleNumericValue}
             inputProps={{
               maxLength: 48,
               style: {
@@ -1800,6 +1710,28 @@ const handleAttachClick = () => {
             variant="filled"
             size="small"
             label="ADDRESS"
+            onChange={HandleValueChange}
+            inputRef={(el) => (inputRefs.current[2] = el)}
+            onKeyDown={(e) => handleKeyDown(e, 2)} // Handle Enter key
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: "15px",
+                fontSize: 16,
+                // padding: "0 8px"
+              },
+              readOnly: !isEditMode || isDisabled
+            }}
+            sx={{ width: 580 }}
+          />
+          </div>
+          <div  style={{marginTop:2}}>
+            <TextField
+            className="custom-bordered-input"
+            id="add2"
+            value={formData.add2}
+            variant="filled"
+            size="small"
             onChange={HandleValueChange}
             inputRef={(el) => (inputRefs.current[2] = el)}
             onKeyDown={(e) => handleKeyDown(e, 2)} // Handle Enter key
@@ -2368,7 +2300,7 @@ const handleAttachClick = () => {
           </FormControl>
           </div>
           </div>
-          <div style={{marginTop:2}}>
+          <div style={{marginTop:2,display:'flex', flexDirection:'row'}}>
             <TextField
             className="custom-bordered-input"
             id="wahead"
@@ -2388,10 +2320,8 @@ const handleAttachClick = () => {
               },
               readOnly: !isEditMode || isDisabled
             }}
-            sx={{ width: 580 }}
+            sx={{ width: "50%" }}
             />
-          </div>
-          <div style={{marginTop:2}}>
             <TextField
             className="custom-bordered-input"
             id="wadd1"
@@ -2411,7 +2341,7 @@ const handleAttachClick = () => {
               },
               readOnly: !isEditMode || isDisabled
             }}
-            sx={{ width: 580 }}
+            sx={{ width: "50%" }}
             />
           </div>
           </div>

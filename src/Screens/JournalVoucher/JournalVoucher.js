@@ -375,6 +375,8 @@ const JournalVoucher = () => {
   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
   const [loadingCus, setLoadingCus] = useState(true);
   const [errorCus, setErrorCus] = useState(null);
+  const [suggestionRow, setSuggestionRow] = useState(null);
+  const [suggestionText, setSuggestionText] = useState("");
 
   React.useEffect(() => {
     // Fetch products from the API when the component mounts
@@ -425,6 +427,21 @@ const JournalVoucher = () => {
     // Disable debit field if credit field is filled
     if (key === "credit") {
       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+    }
+     if (key === "narration") {
+      const accountName = items[index].accountname || "";
+
+      if (
+        accountName &&
+        accountName.toLowerCase().startsWith(value.toLowerCase()) &&
+        value !== ""
+      ) {
+        setSuggestionRow(index);
+        setSuggestionText(accountName);
+      } else {
+        setSuggestionRow(null);
+        setSuggestionText("");
+      }
     }
     setItems(updatedItems);
   };
@@ -1444,7 +1461,78 @@ const JournalVoucher = () => {
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
-                <td style={{ padding: 0 }}>
+                <td style={{ padding: 0, position: "relative" }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="Narration"
+                    list={
+                      showNarrationSuggestions ? "narrationList" : undefined
+                    }
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: "5px 8px",
+                      fontSize: "14px",
+                      position: "relative",
+                      background: "transparent",
+                    }}
+                    value={item.narration}
+                    ref={(el) => (narrationRefs.current[index] = el)}
+                    onChange={(e) =>
+                      handleItemChangeCus(index, "narration", e.target.value)
+                    }
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Tab" &&
+                        suggestionRow === index &&
+                        suggestionText
+                      ) {
+                        e.preventDefault();
+
+                        const updatedItems = [...items];
+                        updatedItems[index].narration = suggestionText;
+                        setItems(updatedItems);
+
+                        setSuggestionRow(null);
+                        setSuggestionText("");
+                      }
+                      handleKeyDown(e, index, "narration");
+                    }}
+                    onFocus={(e) => e.target.select()} // Select text on focus
+                  />
+                   {showNarrationSuggestions && (
+                    <datalist id="narrationList">
+                      {narrationSuggestions.map((n, i) => (
+                        <option key={i} value={n} />
+                      ))}
+                    </datalist>
+                  )}
+
+                  {/* 👇 Show only remaining text */}
+                  {suggestionRow === index && suggestionText && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 8,
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        color: "#bbb",
+                        fontSize: "14px",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <span style={{ visibility: "hidden" }}>
+                        {item.narration}
+                      </span>
+                      <span>{suggestionText.slice(item.narration.length)}</span>
+                    </div>
+                  )}
+                </td>
+                {/* <td style={{ padding: 0 }}>
                   <input
                     disabled={!canEditRow(index)}
                     className="Narration"
@@ -1477,7 +1565,7 @@ const JournalVoucher = () => {
                       ))}
                     </datalist>
                   )}
-                </td>
+                </td> */}
                 <td style={{ padding: 0, width: 250 }}>
                   <input
                     className="Debit"
