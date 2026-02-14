@@ -1099,6 +1099,25 @@ const Purchase = () => {
     setSearchDate("");
   };
 
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last-voucherno`
+      );
+
+      return {
+        lastVno: res?.data?.lastVno || 0,
+        nextVno: res?.data?.nextVno || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("(View)");
@@ -1277,9 +1296,13 @@ const Purchase = () => {
 
   const handleAdd = async () => {
     try {
-     const lastEntry = await fetchData();
-     const lastvoucherno = lastEntry?.formData?.vno ? parseInt(lastEntry.formData.vno) + 1 : 1;
-      let lastBillno = formData.vbillno ? parseInt(formData.vbillno) + 1 : 1;
+
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextVno;
+      const lastvno = voucherData.nextVno;
+      
       const newData = {
         date: getTodayDDMMYYYY(),
         vtype: "P",
@@ -1548,7 +1571,17 @@ const Purchase = () => {
         toast.error("Please fill in at least one Items name.", { position: "top-center" });
         return;
       }
-      setIsSubmitEnabled(false);
+
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      if (!isAbcmode && Number(formData.vbillno) <= Number(voucherData.lastVno)) {
+        toast.error(`Voucher No ${formData.vbillno} already used!`, {
+          position: "top-center",
+        });
+        setIsSubmitEnabled(true);
+        return;
+      }
 
       // --- 2) BUILD PAYLOAD -------------------------------------------------
       const combinedData = {
@@ -1789,6 +1822,7 @@ const Purchase = () => {
       // setIsSubmitEnabled(!isDataSaved);
       if (isDataSaved) {
         setTitle?.("View");
+        setIsSubmitEnabled(false);
         setIsAddEnabled?.(true);
         setIsDisabled?.(true);
         setIsEditMode?.(false);

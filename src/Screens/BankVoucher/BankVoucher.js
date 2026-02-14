@@ -745,6 +745,25 @@ const BankVoucher = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isEditMode]);
 
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last-voucherno`
+      );
+
+      return {
+        lastVoucherNo: res?.data?.lastVoucherNo || 0,
+        nextVoucherNo: res?.data?.nextVoucherNo || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
@@ -876,8 +895,11 @@ const BankVoucher = () => {
   const handleAdd = async () => {
     setTitle("NEW");
     try {
-      const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
-      let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextVoucherNo;
+
       const newData = {
         vtype: "B",
         date: getTodayDDMMYYYY(),
@@ -1053,13 +1075,34 @@ const BankVoucher = () => {
         return;
       }
 
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      if (!isAbcmode) {
+        // ADD mode
+        if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
+          toast.error(`Voucher No ${formData.voucherno} already used!`, {
+            position: "top-center",
+          });
+          setIsSubmitEnabled(true);
+          return;
+        }
+      } else {
+        // EDIT mode
+        if (
+          Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
+          Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
+        ) {
+          toast.error(`Voucher No ${formData.voucherno} already used!`, {
+            position: "top-center",
+          });
+          setIsSubmitEnabled(true);
+          return;
+        }
+      }
+
       let combinedData;
       if (isAbcmode) {
-        // console.log(formData);
-        // formData.totalpayment = formData.totalpayment;
-        // formData.totalreceipt = formData.totalreceipt;
-        // formData.totaldiscount = formData.totaldiscount;
-        // formData.totalbankcharges = formData.totalbankcharges;
         combinedData = {
           _id: formData._id,
           formData: {

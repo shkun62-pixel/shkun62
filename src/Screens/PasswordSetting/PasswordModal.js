@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import './NewModal.css'; // Assuming you have a modal.css file
+import '../../Screens/SideDrawer/NewModal.css'
 
 const PasswordModal = ({ onClose }) => {
     const [formData, setFormData] = useState({
@@ -102,20 +102,12 @@ const PasswordModal = ({ onClose }) => {
         setEditedUser(event.target.value);
     };
   // Update the `Ahead` field when `editedUser` changes
-  useEffect(() => {
-    setFormData((prevFormData) => ({
-        ...prevFormData,
-        Ahead: editedUser,
-    }));
-}, [editedUser]);
-
-    // const handleSaveClick = () => {
-    //     Object.entries(formData).forEach(([key, value]) => {
-    //         console.log(`${key}: ${value ? 'true' : 'false'}`);
-    //     });
-    //     const updatedUsers = users.map(user => user === selectedUser ? editedUser : user);
-    //     setUsers(updatedUsers);
-    // };
+    useEffect(() => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            Ahead: editedUser,
+        }));
+    }, [editedUser]);
 
     const handleSaveClick = () => {
         // Update users array with editedUser
@@ -317,16 +309,16 @@ const PasswordModal = ({ onClose }) => {
                                     </label>
                                 </div>
                             </div>
-                            <div className='bank' style={{ display: 'flex', flexDirection: "row" }}>
+                             <div className='journal' style={{ display: 'flex', flexDirection: "row" }}>
                                 <text className='texttop'>Bank</text>
-                                <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 50 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 30 }}>
                                     <label>
                                         Add
                                         <input
                                             style={{ marginLeft: 30 }}
                                             type="checkbox"
                                             checked={formData.B_add}
-                                            onChange={() => handleCheckboxChange('B_add')}
+                                            onChange={() => handleCheckboxChange('J_add')}
                                         />
 
                                     </label>
@@ -336,7 +328,7 @@ const PasswordModal = ({ onClose }) => {
                                             style={{ marginLeft: 8 }}
                                             type="checkbox"
                                             checked={formData.B_mod}
-                                            onChange={() => handleCheckboxChange('B_mod')}
+                                            onChange={() => handleCheckboxChange('J_mod')}
                                         />
 
                                     </label>
@@ -346,20 +338,20 @@ const PasswordModal = ({ onClose }) => {
                                             style={{ marginLeft: 12 }}
                                             type="checkbox"
                                             checked={formData.B_del}
-                                            onChange={() => handleCheckboxChange('B_del')}
+                                            onChange={() => handleCheckboxChange('J_del')}
                                         />
 
                                     </label>
                                 </div>
-                                <text className='texttop' style={{ marginLeft: 40 }}>Ledger A/c</text>
-                                <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 45 }}>
+                                <text className='texttop' style={{ marginLeft: 60 }}>Ledger A/c</text>
+                                <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 58 }}>
                                     <label>
                                         Add
                                         <input
                                             style={{ marginLeft: 30 }}
                                             type="checkbox"
                                             checked={formData.M_add}
-                                            onChange={() => handleCheckboxChange('M_add')}
+                                            onChange={() => handleCheckboxChange('T_add')}
                                         />
 
                                     </label>
@@ -369,7 +361,7 @@ const PasswordModal = ({ onClose }) => {
                                             style={{ marginLeft: 8 }}
                                             type="checkbox"
                                             checked={formData.M_mod}
-                                            onChange={() => handleCheckboxChange('M_mod')}
+                                            onChange={() => handleCheckboxChange('T_mod')}
                                         />
 
                                     </label>
@@ -379,7 +371,7 @@ const PasswordModal = ({ onClose }) => {
                                             style={{ marginLeft: 12 }}
                                             type="checkbox"
                                             checked={formData.M_del}
-                                            onChange={() => handleCheckboxChange('M_del')}
+                                            onChange={() => handleCheckboxChange('T_del')}
                                         />
 
                                     </label>

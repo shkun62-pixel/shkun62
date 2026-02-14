@@ -496,6 +496,34 @@ const CashVoucher = () => {
     setIsDisabled(true);
   }, []);
 
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+  const skipItemCodeFocusRef = useRef(false);
+
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last-voucherno`
+      );
+
+      return {
+        lastVoucherNo: res?.data?.lastVoucherNo || 0,
+        nextVoucherNo: res?.data?.nextVoucherNo || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
@@ -601,19 +629,13 @@ const CashVoucher = () => {
     }
   };
 
-  const getTodayDDMMYYYY = () => {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-    return `${dd}-${mm}-${yyyy}`;
-  };
-  const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW");
     try {
-      const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
-      let lastvoucherno = lastEntry?.formData?.voucherno ? parseInt(lastEntry.formData.voucherno) + 1 : 1;
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextVoucherNo;
       const newData = {
         vtype: "C",
         date: getTodayDDMMYYYY(),
@@ -647,6 +669,174 @@ const CashVoucher = () => {
       // voucherRef.current.focus()
     } catch (error) {
       console.error("Error adding new entry:", error);
+    }
+  };
+
+  const handleSaveClick = async () => {
+    document.body.style.backgroundColor = "white";
+
+    // Validate if at least one row is filled
+    const filledRows = items.filter((item) => item.accountname !== "");
+    if (filledRows.length === 0) {
+      toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
+      return;
+    }
+
+    // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+    const isValidTransaction = filledRows.every(
+      (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
+    );
+    if (!isValidTransaction) {
+      toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
+      return;
+    }
+
+    // ✅ NEW VALIDATION: Prevent both debit and credit in same row
+    const hasBothDebitAndCredit = filledRows.some(
+      (item) => parseFloat(item.payment_debit) > 0 && parseFloat(item.receipt_credit) > 0
+    );
+    if (hasBothDebitAndCredit) {
+      toast.error("A row cannot have both Payment Debit and Receipt Credit values at the same time.", {
+        position: "top-center",
+      });
+      return;
+    }
+    
+    const voucherData = await fetchVoucherNumbers();
+    if (!voucherData) return;
+
+    if (!isAbcmode) {
+      // ADD mode
+      if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
+        toast.error(`Voucher No ${formData.voucherno} already used!`, {
+          position: "top-center",
+        });
+        setIsSubmitEnabled(true);
+        return;
+      }
+    } else {
+      // EDIT mode
+      if (
+        Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
+        Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
+      ) {
+        toast.error(`Voucher No ${formData.voucherno} already used!`, {
+          position: "top-center",
+        });
+        setIsSubmitEnabled(true);
+        return;
+      }
+    }
+
+    // Only disable the save button AFTER validation passes
+    setIsSaving(true);
+    try {
+      let combinedData = {
+        _id: formData._id,
+        formData: {
+          date: formData.date,
+          vtype: formData.vtype,
+          voucherno: formData.voucherno,
+          cashinhand: formData.cashinhand || "",
+          owner: formData.owner,
+          user: formData.user || "",
+          totalpayment: formData.totalpayment,
+          totalreceipt: formData.totalreceipt,
+          totaldiscount: formData.totaldiscount,
+        },
+        items: filledRows.map((item) => ({
+          id: item.id,
+          acode: item.acode,
+          accountname: item.accountname,
+          narration: item.narration,
+          payment_debit: item.payment_debit,
+          receipt_credit: item.receipt_credit,
+          discount: item.discount,
+          discounted_payment: item.discounted_payment,
+          discounted_receipt: item.discounted_receipt,
+          name: item.name,
+          disableReceipt: item.disableReceipt,
+          disablePayment: item.disablePayment,
+        })),
+      };
+
+      // console.log("Combined Data:", combinedData);
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${
+        isAbcmode ? `/${data1._id}` : ""
+      }`;
+      const method = isAbcmode ? "put" : "post";
+      console.log("Method",method);
+      
+
+      const response = await axios({
+        method,
+        url: apiEndpoint,
+        data: combinedData,
+      });
+
+      console.log("API Response:", response);
+
+      if (response?.status === 200 || response?.status === 201) {
+        toast.success("Data Saved Successfully!", { position: "top-center" });
+        setIsAddEnabled(true);
+        setIsDisabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        fetchData(); // Refresh data to get updated _id and other info
+        fetchNarrations(); // Refresh narrations
+        setTitle("VIEW");
+      } else {
+        throw new Error(`Unexpected response status: ${response?.status}`);
+      }
+    } catch (error) {
+      console.error("Error saving data:", error?.response?.data || error.message);
+      toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, {
+        position: "top-center",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteClick = async (id) => {
+    if (!id) {
+      toast.error("Invalid ID. Please select an item to delete.", {
+        position: "top-center",
+      });
+      return;
+    }
+
+    const userConfirmed = window.confirm(
+      "Are you sure you want to delete this item?"
+    );
+    if (!userConfirmed) return;
+
+    setIsSaving(true);
+    try {
+      // ✅ use id, not data1._id
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/${data1._id}`;
+      const response = await axios.delete(apiEndpoint);
+
+      if (response.status === 200) {
+        toast.success("Data deleted successfully!", { position: "top-center" });
+        fetchData(); // Refresh the data after successful deletion
+      } else {
+        throw new Error(`Failed to delete data: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      toast.error(`Failed to delete data. Error: ${error.message}`, {
+        position: "top-center",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
   
@@ -997,148 +1187,6 @@ const CashVoucher = () => {
 
     return fields;
   }, []);
-
-  const handleSaveClick = async () => {
-    document.body.style.backgroundColor = "white";
-
-    // Validate if at least one row is filled
-    const filledRows = items.filter((item) => item.accountname !== "");
-    if (filledRows.length === 0) {
-      toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
-      return;
-    }
-
-    // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
-    const isValidTransaction = filledRows.every(
-      (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
-    );
-    if (!isValidTransaction) {
-      toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
-      return;
-    }
-
-    // ✅ NEW VALIDATION: Prevent both debit and credit in same row
-    const hasBothDebitAndCredit = filledRows.some(
-      (item) => parseFloat(item.payment_debit) > 0 && parseFloat(item.receipt_credit) > 0
-    );
-    if (hasBothDebitAndCredit) {
-      toast.error("A row cannot have both Payment Debit and Receipt Credit values at the same time.", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    // Only disable the save button AFTER validation passes
-    setIsSaving(true);
-    try {
-      let combinedData = {
-        _id: formData._id,
-        formData: {
-          date: formData.date,
-          vtype: formData.vtype,
-          voucherno: formData.voucherno,
-          cashinhand: formData.cashinhand || "",
-          owner: formData.owner,
-          user: formData.user || "",
-          totalpayment: formData.totalpayment,
-          totalreceipt: formData.totalreceipt,
-          totaldiscount: formData.totaldiscount,
-        },
-        items: filledRows.map((item) => ({
-          id: item.id,
-          acode: item.acode,
-          accountname: item.accountname,
-          narration: item.narration,
-          payment_debit: item.payment_debit,
-          receipt_credit: item.receipt_credit,
-          discount: item.discount,
-          discounted_payment: item.discounted_payment,
-          discounted_receipt: item.discounted_receipt,
-          name: item.name,
-          disableReceipt: item.disableReceipt,
-          disablePayment: item.disablePayment,
-        })),
-      };
-
-      // console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cash${
-        isAbcmode ? `/${data1._id}` : ""
-      }`;
-      const method = isAbcmode ? "put" : "post";
-      console.log("Method",method);
-      
-
-      const response = await axios({
-        method,
-        url: apiEndpoint,
-        data: combinedData,
-      });
-
-      console.log("API Response:", response);
-
-      if (response?.status === 200 || response?.status === 201) {
-        toast.success("Data Saved Successfully!", { position: "top-center" });
-        setIsAddEnabled(true);
-        setIsDisabled(true);
-        setIsEditMode(false);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-        fetchData(); // Refresh data to get updated _id and other info
-        fetchNarrations(); // Refresh narrations
-        setTitle("VIEW");
-      } else {
-        throw new Error(`Unexpected response status: ${response?.status}`);
-      }
-    } catch (error) {
-      console.error("Error saving data:", error?.response?.data || error.message);
-      toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, {
-        position: "top-center",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDeleteClick = async (id) => {
-    if (!id) {
-      toast.error("Invalid ID. Please select an item to delete.", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?"
-    );
-    if (!userConfirmed) return;
-
-    setIsSaving(true);
-    try {
-      // ✅ use id, not data1._id
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/${data1._id}`;
-      const response = await axios.delete(apiEndpoint);
-
-      if (response.status === 200) {
-        toast.success("Data deleted successfully!", { position: "top-center" });
-        fetchData(); // Refresh the data after successful deletion
-      } else {
-        throw new Error(`Failed to delete data: ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      toast.error(`Failed to delete data. Error: ${error.message}`, {
-        position: "top-center",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const [fontSize, setFontSize] = useState(18);
 

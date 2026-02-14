@@ -5130,6 +5130,7 @@ const Sale = () => {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [title, setTitle] = useState("(View)");
   const datePickerRef = useRef(null);
+  const voucherNoRef = useRef(null);
   const tableContainerRef = useRef(null);
   const itemCodeRefs = useRef([]);
   const desciptionRefs = useRef([]);
@@ -5840,6 +5841,60 @@ const Sale = () => {
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
+
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
+
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
   const fetchData = async () => {
     try {
       let response;
@@ -5859,13 +5914,10 @@ const Sale = () => {
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
 
-        const isValidDate = (date) => !isNaN(Date.parse(date));
-
         const updatedFormData = {
           ...lastEntry.formData,
-          date: isValidDate(lastEntry.formData.date)
-            ? lastEntry.formData.date
-            : new Date().toLocaleDateString(),
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
         };
 
         setFirstTimeCheckData("DataAvailable");
@@ -6081,6 +6133,33 @@ const Sale = () => {
     setshipped(bill.shipped);
   };
 
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`
+      );
+
+      return {
+        lastVno: res?.data?.lastVno || 0,
+        nextVno: res?.data?.nextVno || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("(View)");
@@ -6247,22 +6326,18 @@ const Sale = () => {
 
   const handleAdd = async () => {
     if (datePickerRef.current) {
-      datePickerRef.current.setFocus();
+      datePickerRef.current.focus();
     }
     try {
-      const lastEntry = await fetchData();
       await fetchSalesSetup();
-      const today = new Date().toISOString().slice(0, 10);
-      const lastvoucherno = lastEntry?.formData?.vbillno
-        ? parseInt(lastEntry.formData.vbillno) + 1
-        : 1;
-      const lastvno = lastEntry?.formData?.vno
-        ? parseInt(lastEntry.formData.vno) + 1
-        : 1;
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextVno;
+      const lastvno = voucherData.nextVno;
 
       const newData = {
-        ...lastEntry?.formData,
-        date: today,
+        date: getTodayDDMMYYYY(),
         vbillno: lastvoucherno,
         vno: lastvno,
         vtype: "S",
@@ -6284,7 +6359,7 @@ const Sale = () => {
         tcs1: 0,
         tcs206_rate: 0,
         tcs206: 0,
-        duedate: "",
+        duedate: getTodayDDMMYYYY(),
         pcess: 0,
         tax: 0,
         sub_total: 0,
@@ -6322,42 +6397,6 @@ const Sale = () => {
           ExpRate5,
         }),
       );
-
-      // setItems([
-      //   {
-      //     id: 1,
-      //     vcode: "",
-      //     sdisc: "",
-      //     Units: "",
-      //     pkgs: "0",
-      //     weight: "0",
-      //     rate: "0",
-      //     amount: "0",
-      //     disc: 0,
-      //     discount: "",
-      //     gst: 0,
-      //     Pcodes01: "",
-      //     Pcodess: "",
-      //     Scodes01: "",
-      //     Scodess: "",
-      //     Exp_rate1: ExpRate1 || 0,
-      //     Exp_rate2: ExpRate2 || 0,
-      //     Exp_rate3: ExpRate3 || 0,
-      //     Exp_rate4: ExpRate4 || 0,
-      //     Exp_rate5: ExpRate5 || 0,
-      //     Exp1: 0,
-      //     Exp2: 0,
-      //     Exp3: 0,
-      //     Exp4: 0,
-      //     Exp5: 0,
-      //     exp_before: 0,
-      //     ctax: "0.00",
-      //     stax: "0.00",
-      //     itax: "0.00",
-      //     tariff: "",
-      //     vamt: "0.00",
-      //   },
-      // ]);
       setcustomerDetails([
         {
           Vcode: "",
@@ -6381,7 +6420,6 @@ const Sale = () => {
           shippingPan: "",
         },
       ]);
-
       setIndex(data.length);
       setIsAddEnabled(false);
       setIsPreviousEnabled(false);
@@ -6399,6 +6437,7 @@ const Sale = () => {
       console.error("Error adding new entry:", error);
     }
   };
+
   const handleExit = async () => {
     // Check if grandtotal is Greater Than zero
     if (formData.grandtotal > 0 && isEditMode) {
@@ -6536,7 +6575,18 @@ const Sale = () => {
         });
         return;
       }
-      setIsSubmitEnabled(false);
+      
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      if (!isAbcmode && Number(formData.vbillno) <= Number(voucherData.lastVno)) {
+        toast.error(`Voucher No ${formData.vbillno} already used!`, {
+          position: "top-center",
+        });
+        setIsSubmitEnabled(true);
+        return;
+      }
+
       const ddmmyyyy = (d) => {
         if (!d) return "";
         const dd = String(d.getDate()).padStart(2, "0");
@@ -6546,8 +6596,8 @@ const Sale = () => {
       };
       // 2) Build base form with setup codes (common to both add/edit)
       const baseForm = {
-        date: isAbcmode ? selectedDate?.toISOString() : ddmmyyyy(selectedDate),
-        duedate: isAbcmode ? expiredDate?.toISOString() : ddmmyyyy(expiredDate),
+        date: formData.date,
+        duedate: formData.duedate,
         vtype: formData.vtype,
         vbillno: formData.vbillno,
         vno: formData.vno,
@@ -6757,6 +6807,7 @@ const Sale = () => {
     } finally {
       // setIsSubmitEnabled(false);
       if (isDataSaved) {
+        setIsSubmitEnabled(false);
         setTitle("(View)");
         setIsAddEnabled(true);
         setIsDisabled(true);
@@ -7055,7 +7106,6 @@ const Sale = () => {
 
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-        alert(selectedProduct.Rateins)
       }
     }
 
@@ -7638,80 +7688,6 @@ const Sale = () => {
       ...prevState,
       conv: value, // Update the ratecalculate field in FormData
     }));
-  };
-
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-
-  const [expiredDate, setexpiredDate] = useState(null);
-  useEffect(() => {
-    if (formData.duedate) {
-      setexpiredDate(new Date(formData.duedate));
-    } else {
-      const today = new Date();
-      setexpiredDate(today);
-      setFormData({ ...formData, duedate: today });
-    }
-  }, []);
-
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      setSelectedDate(date);
-      const formattedDate = date.toISOString().split("T")[0];
-      setFormData((prev) => ({
-        ...prev,
-        date: date,
-        duedate: date,
-      }));
-    }
-  };
-
-  // ✅ Separate function to validate future or past date
-  const validateDate = (date) => {
-    if (!date) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // normalize today
-
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0); // normalize selected date
-
-    if (isEditMode && checkDate > today) {
-      toast.info("You Have Selected a Future Date.", {
-        position: "top-center",
-      });
-    } else if (isEditMode && checkDate < today) {
-      toast.info("You Have Selected a Past Date.", {
-        position: "top-center",
-      });
-    }
-  };
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
   };
 
   const HandleValueChange = (event) => {
@@ -8303,7 +8279,7 @@ const Sale = () => {
   // }
 
   const handleKeyDownTab = (e) => {
-    if (e.key === "Tab") {
+    if (e.key === "Tab" || e.key === "Enter") {
       e.preventDefault(); // prevent default Tab behavior
       customerNameRef.current.focus(); // move focus to vaCode2 input
     }
@@ -8401,7 +8377,27 @@ const Sale = () => {
       {/* Top Parts */}
       <div className="sale_toppart ">
         <div className="Dated ">
-          <DatePicker
+          <InputMask
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={formData.date}
+              readOnly={!isEditMode || isDisabled}
+              onChange={(e) =>
+                setFormData({ ...formData, date: e.target.value })
+              }
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="DatePICKER"
+                  ref={datePickerRef}
+                  onKeyDown={(e) => {
+                    handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                  }}
+                />
+              )}
+          </InputMask>
+          {/* <DatePicker
             ref={datePickerRef}
             selected={selectedDate || null}
             openToDate={new Date()}
@@ -8410,9 +8406,10 @@ const Sale = () => {
             onChange={handleDateChange}
             onBlur={() => validateDate(selectedDate)}
             customInput={<MaskedInput />}
-          />
+          /> */}
           <div className="billdivz">
             <TextField
+            inputRef={voucherNoRef}
               className="billzNo custom-bordered-input"
               id="vbillno"
               value={formData.vbillno}
@@ -9717,7 +9714,45 @@ const Sale = () => {
             style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
           >
             <div className="duedatez">
-              <DatePicker
+              <InputMask
+                mask="99-99-9999"
+                 placeholder="dd-mm-yyyy"
+              value={formData.duedate}
+              readOnly={!isEditMode || isDisabled}
+                 onChange={(e) =>
+                setFormData({ ...formData, duedate: e.target.value })
+              }
+              >
+                {(props) => (
+                  <TextField
+                    className="custom-bordered-input"
+                    {...props}
+                    label="DUE DATE"
+                    size="small"
+                    variant="filled"
+                    fullWidth
+                    style={{ width: 225 }}
+                  />
+                )}
+              </InputMask>
+              {/* <InputMask
+              className="custom-bordered-input"
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={formData.duedate}
+              readOnly={!isEditMode || isDisabled}
+              onChange={(e) =>
+                setFormData({ ...formData, duedate: e.target.value })
+              }
+            >
+              {(inputProps) => (
+                <TextField
+                  {...inputProps}
+                  className="custom-bordered-input"
+                />
+              )}
+          </InputMask> */}
+              {/* <DatePicker
                 id="duedate"
                 value={formatDateDDMMYYYY(formData.duedate)}
                 className="dueDatePICKER"
@@ -9741,7 +9776,7 @@ const Sale = () => {
                     }}
                   />
                 }
-              />
+              /> */}
             </div>
             <div>
               <TextField
@@ -9762,7 +9797,7 @@ const Sale = () => {
                 onFocus={(e) => e.target.select()}
                 size="small"
                 variant="filled"
-                sx={{ width: 150 }}
+                sx={{ width: 225 }}
               />
             </div>
             <div

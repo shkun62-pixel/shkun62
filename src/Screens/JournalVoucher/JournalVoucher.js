@@ -194,178 +194,6 @@ const JournalVoucher = () => {
     setItems(updatedItems);
   };
 
-  const handleSaveClick = async () => {
-    document.body.style.backgroundColor = "white";
-    setIsSaving(true);
-    let isDataSaved = false;
-    try {
-      const filledRows = items.filter((item) => item.accountname !== "");
-      if (filledRows.length === 0) {
-        toast.error("Please fill in at least one account name before saving.", {
-          position: "top-center",
-        });
-        setIsSaving(false);
-        return;
-      }
-      // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
-      const isValidTransaction = filledRows.every(
-        (item) => parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0,
-      );
-
-      if (!isValidTransaction) {
-        toast.error("Credit or Debit must be greater than 0.", {
-          position: "top-center",
-        });
-        return;
-      }
-      // Ensure that total debit and total credit are equal
-      const totalDebit = filledRows.reduce(
-        (sum, item) => sum + parseFloat(item.debit || 0),
-        0,
-      );
-      const totalCredit = filledRows.reduce(
-        (sum, item) => sum + parseFloat(item.credit || 0),
-        0,
-      );
-
-      if (totalDebit !== totalCredit) {
-        toast.error("Total Debit and Total Credit must be equal.", {
-          position: "top-center",
-        });
-        setIsSaving(false);
-        return;
-      }
-      let combinedData;
-      if (isAbcmode) {
-        console.log(formData);
-        formData.totalcredit = formData.totalcredit;
-        formData.totaldebit = formData.totaldebit;
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            vtype: formData.vtype,
-            date: formData.date,
-            voucherno: formData.voucherno,
-            owner: formData.owner,
-            totaldebit: formData.totaldebit,
-            totalcredit: formData.totalcredit,
-          },
-          items: filledRows.map((item) => ({
-            id: item.id,
-            accountname: item.accountname,
-            acode: item.acode,
-            narration: item.narration,
-            debit: item.debit,
-            credit: item.credit,
-            disableDebit: item.disableDebit,
-            disableCredit: item.disableCredit,
-          })),
-        };
-      } else {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            vtype: formData.vtype,
-            date: formData.date,
-            voucherno: formData.voucherno,
-            owner: formData.owner,
-            totaldebit: formData.totaldebit,
-            totalcredit: formData.totalcredit,
-          },
-          items: filledRows.map((item) => ({
-            id: item.id,
-            accountname: item.accountname,
-            acode: item.acode,
-            narration: item.narration,
-            debit: item.debit,
-            credit: item.credit,
-            disableDebit: item.disableDebit,
-            disableCredit: item.disableCredit,
-          })),
-        };
-      }
-      // Debugging
-      console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
-      const method = isAbcmode ? "put" : "post";
-      const response = await axios({
-        method,
-        url: apiEndpoint,
-        data: combinedData,
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        // fetchData();
-        isDataSaved = true;
-      }
-    } catch (error) {
-      console.error("Error saving data:", error);
-      toast.error("Failed to save data. Please try again.", {
-        position: "top-center",
-      });
-    } finally {
-      setIsSubmitEnabled(true);
-      setIsSaving(false);
-      if (isDataSaved) {
-        setTitle("View");
-        setIsAddEnabled(true);
-        setIsDisabled(true);
-        setIsEditMode(false);
-        setIsEditMode2(false);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsPreviousEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-        fetchData(); // Refresh data to get updated _id and other info
-        fetchNarrations(); // Refresh narrations
-        toast.success("Data Saved Successfully!", { position: "top-center" });
-      } else {
-        setIsAddEnabled(false);
-        setIsDisabled(false);
-      }
-    }
-  };
-
-  const handleDeleteClick = async (id) => {
-    if (!id) {
-      toast.error("Invalid ID. Please select an item to delete.", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?",
-    );
-    if (!userConfirmed) return;
-
-    setIsSaving(true);
-    try {
-      // ✅ use id, not data1._id
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/${data1._id}`;
-      const response = await axios.delete(apiEndpoint);
-
-      if (response.status === 200) {
-        toast.success("Data deleted successfully!", { position: "top-center" });
-        fetchData(); // Refresh the data after successful deletion
-      } else {
-        throw new Error(`Failed to delete data: ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      toast.error(`Failed to delete data. Error: ${error.message}`, {
-        position: "top-center",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const capitalizeWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
@@ -712,6 +540,34 @@ const JournalVoucher = () => {
     setIsDisabled(true);
   }, []);
 
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+  const skipItemCodeFocusRef = useRef(false);
+
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last-voucherno`
+      );
+
+      return {
+        lastVoucherNo: res?.data?.lastVoucherNo || 0,
+        nextVoucherNo: res?.data?.nextVoucherNo || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
@@ -812,21 +668,13 @@ const JournalVoucher = () => {
     }
   };
 
-  const getTodayDDMMYYYY = () => {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-    return `${dd}-${mm}-${yyyy}`;
-  };
-  const skipItemCodeFocusRef = useRef(false);
   const handleAdd = async () => {
     setTitle("NEW");
     try {
-      const lastEntry = await fetchData(); // This should set up the state correctly whether data is found or not
-      let lastvoucherno = lastEntry?.formData?.voucherno
-        ? parseInt(lastEntry.formData.voucherno) + 1
-        : 1;
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextVoucherNo;
       const newData = {
         vtype: "J",
         date: getTodayDDMMYYYY(),
@@ -878,6 +726,206 @@ const JournalVoucher = () => {
       accountNameRefs.current[0].focus();
     }
   };
+
+    const handleSaveClick = async () => {
+    document.body.style.backgroundColor = "white";
+    setIsSaving(true);
+    let isDataSaved = false;
+    try {
+      const filledRows = items.filter((item) => item.accountname !== "");
+      if (filledRows.length === 0) {
+        toast.error("Please fill in at least one account name before saving.", {
+          position: "top-center",
+        });
+        setIsSaving(false);
+        return;
+      }
+      // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+      const isValidTransaction = filledRows.every(
+        (item) => parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0,
+      );
+
+      if (!isValidTransaction) {
+        toast.error("Credit or Debit must be greater than 0.", {
+          position: "top-center",
+        });
+        return;
+      }
+      // Ensure that total debit and total credit are equal
+      const totalDebit = filledRows.reduce(
+        (sum, item) => sum + parseFloat(item.debit || 0),
+        0,
+      );
+      const totalCredit = filledRows.reduce(
+        (sum, item) => sum + parseFloat(item.credit || 0),
+        0,
+      );
+
+      if (totalDebit !== totalCredit) {
+        toast.error("Total Debit and Total Credit must be equal.", {
+          position: "top-center",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+  
+      if (!isAbcmode) {
+        // ADD mode
+        if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
+          toast.error(`Voucher No ${formData.voucherno} already used!`, {
+            position: "top-center",
+          });
+          setIsSubmitEnabled(true);
+          return;
+        }
+      } else {
+        // EDIT mode
+        if (
+          Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
+          Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
+        ) {
+          toast.error(`Voucher No ${formData.voucherno} already used!`, {
+            position: "top-center",
+          });
+          setIsSubmitEnabled(true);
+          return;
+        }
+      }
+      
+      let combinedData;
+      if (isAbcmode) {
+        console.log(formData);
+        formData.totalcredit = formData.totalcredit;
+        formData.totaldebit = formData.totaldebit;
+        combinedData = {
+          _id: formData._id,
+          formData: {
+            vtype: formData.vtype,
+            date: formData.date,
+            voucherno: formData.voucherno,
+            owner: formData.owner,
+            totaldebit: formData.totaldebit,
+            totalcredit: formData.totalcredit,
+          },
+          items: filledRows.map((item) => ({
+            id: item.id,
+            accountname: item.accountname,
+            acode: item.acode,
+            narration: item.narration,
+            debit: item.debit,
+            credit: item.credit,
+            disableDebit: item.disableDebit,
+            disableCredit: item.disableCredit,
+          })),
+        };
+      } else {
+        combinedData = {
+          _id: formData._id,
+          formData: {
+            vtype: formData.vtype,
+            date: formData.date,
+            voucherno: formData.voucherno,
+            owner: formData.owner,
+            totaldebit: formData.totaldebit,
+            totalcredit: formData.totalcredit,
+          },
+          items: filledRows.map((item) => ({
+            id: item.id,
+            accountname: item.accountname,
+            acode: item.acode,
+            narration: item.narration,
+            debit: item.debit,
+            credit: item.credit,
+            disableDebit: item.disableDebit,
+            disableCredit: item.disableCredit,
+          })),
+        };
+      }
+      // Debugging
+      console.log("Combined Data:", combinedData);
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
+      const method = isAbcmode ? "put" : "post";
+      const response = await axios({
+        method,
+        url: apiEndpoint,
+        data: combinedData,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        // fetchData();
+        isDataSaved = true;
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      toast.error("Failed to save data. Please try again.", {
+        position: "top-center",
+      });
+    } finally {
+      setIsSubmitEnabled(true);
+      setIsSaving(false);
+      if (isDataSaved) {
+        setTitle("View");
+        setIsAddEnabled(true);
+        setIsDisabled(true);
+        setIsEditMode(false);
+        setIsEditMode2(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsPreviousEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        fetchData(); // Refresh data to get updated _id and other info
+        fetchNarrations(); // Refresh narrations
+        toast.success("Data Saved Successfully!", { position: "top-center" });
+      } else {
+        setIsAddEnabled(false);
+        setIsDisabled(false);
+      }
+    }
+  };
+
+  const handleDeleteClick = async (id) => {
+    if (!id) {
+      toast.error("Invalid ID. Please select an item to delete.", {
+        position: "top-center",
+      });
+      return;
+    }
+
+    const userConfirmed = window.confirm(
+      "Are you sure you want to delete this item?",
+    );
+    if (!userConfirmed) return;
+
+    setIsSaving(true);
+    try {
+      // ✅ use id, not data1._id
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/${data1._id}`;
+      const response = await axios.delete(apiEndpoint);
+
+      if (response.status === 200) {
+        toast.success("Data deleted successfully!", { position: "top-center" });
+        fetchData(); // Refresh the data after successful deletion
+      } else {
+        throw new Error(`Failed to delete data: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      toast.error(`Failed to delete data. Error: ${error.message}`, {
+        position: "top-center",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   useEffect(() => {
     if (isEditMode) {
       if (skipItemCodeFocusRef.current) {

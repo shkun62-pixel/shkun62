@@ -39,7 +39,6 @@ import WidgetsIcon from "@mui/icons-material/Widgets";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import shkunlogo from "./s.jpeg";
 import { styled } from "@mui/system";
-import PasswordModal from "./PasswordModal";
 import { useNavigate } from "react-router-dom";
 import { useEditMode } from "../../EditModeContext";
 import SaleModal from "./SaleModal ";
@@ -1541,13 +1540,14 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="Change Company" />
                 </StyledListItem>
-                <StyledListItem button onClick={openModal}>
+                <StyledListItem button  onClick={() =>
+                          handleNavigation("/PasswordSetting?type=Password")
+                        }>
                   <StyledIcon>
                     <LockIcon />
                   </StyledIcon>
                   <StyledListItemText primary="Password Setting" />
                 </StyledListItem>
-                {isModalOpen && <PasswordModal onClose={closeModal} />}
                 <StyledListItem
                   button
                   onClick={() => handleNavigation("/Setup")}
