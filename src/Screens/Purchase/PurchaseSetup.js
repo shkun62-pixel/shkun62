@@ -677,6 +677,10 @@ const PurchaseSetup = ({ onClose }) => {
       if (response.status === 200 || response.status === 201) {
         fetchData();
         isDataSaved = true;
+        toast.success("Data Saved Successfully!", {
+          position: "top-center",
+        });
+        onClose();
       }
     } catch (error) {
       console.error("Error saving data:", error);
@@ -688,8 +692,6 @@ const PurchaseSetup = ({ onClose }) => {
       setIsHighlighted(false); // Change color when button is clicked
       setIsDisabled(!isDataSaved);
       setIsEditMode(!isDataSaved);
-      const toastMsg = "Data Saved Successfully!";
-      toast.success(toastMsg, { position: "top-center" });
     }
   };
 
@@ -3129,6 +3131,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E1name];
                           newE1code[index].E1Code = e.target.value;
                           setE1name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E1name")}
@@ -3198,6 +3201,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E2name];
                           newE1code[index].E2Code = e.target.value;
                           setE2name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E2name")}
@@ -3267,6 +3271,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E3name];
                           newE1code[index].E3Code = e.target.value;
                           setE3name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E3name")}
@@ -3336,6 +3341,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E4name];
                           newE1code[index].E4Code = e.target.value;
                           setE4name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E4name")}
@@ -3405,6 +3411,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E5name];
                           newE1code[index].E5Code = e.target.value;
                           setE5name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E5name")}
@@ -3474,6 +3481,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E6name];
                           newE1code[index].E6Code = e.target.value;
                           setE6name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E6name")}
@@ -3543,6 +3551,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E7name];
                           newE1code[index].E7Code = e.target.value;
                           setE7name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E7name")}
@@ -3612,6 +3621,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E8name];
                           newE1code[index].E8Code = e.target.value;
                           setE8name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E8name")}
@@ -3681,6 +3691,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E9name];
                           newE1code[index].E9Code = e.target.value;
                           setE9name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E9name")}
@@ -3750,6 +3761,7 @@ const PurchaseSetup = ({ onClose }) => {
                           const newE1code = [...E10name];
                           newE1code[index].E10Code = e.target.value;
                           setE10name(newE1code);
+                          markAsEdited();
                         }}
                         sx={textFieldStyle3}
                         onKeyDown={(e) => handleOpenModal(e, index, "E10name")}
@@ -3830,6 +3842,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...cgstcode];
                         newCode[index].cgst_code = e.target.value;
                         setcgstcode(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cgstcode")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -3858,6 +3871,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...cgstcode1];
                         newCode[index].cgst_code1 = e.target.value;
                         setcgstcode1(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cgstcode1")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -3886,6 +3900,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...cgstcode2];
                         newCode[index].cgst_code2 = e.target.value;
                         setcgstcode2(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cgstcode2")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -3929,6 +3944,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...sgstcode];
                         newCode[index].sgst_code = e.target.value;
                         setsgstcode(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "sgstcode")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -3957,6 +3973,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...sgstcode1];
                         newCode[index].sgst_code1 = e.target.value;
                         setsgstcode1(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "sgstcode1")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -3985,6 +4002,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...sgstcode2];
                         newCode[index].sgst_code2 = e.target.value;
                         setsgstcode2(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "sgstcode2")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4028,6 +4046,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...igstcode];
                         newCode[index].igst_code = e.target.value;
                         setigstcode(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "igstcode")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4056,6 +4075,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...igstcode1];
                         newCode[index].igst_code1 = e.target.value;
                         setigstcode1(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "igstcode1")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4084,6 +4104,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...igstcode2];
                         newCode[index].igst_code2 = e.target.value;
                         setigstcode2(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "igstcode2")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4115,6 +4136,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...cTds];
                         newCode[index].cTds_code = e.target.value;
                         setcTds(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cTds_code")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4143,6 +4165,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...sTds];
                         newCode[index].sTds_code = e.target.value;
                         setsTds(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "sTds_code")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4171,6 +4194,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...iTds];
                         newCode[index].iTds_code = e.target.value;
                         setiTds(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "iTds_code")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4202,6 +4226,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...Adcode];
                         newCode[index].Adcode = e.target.value;
                         setAdcode(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "Adcode")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4230,6 +4255,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...cesscode];
                         newCode[index].cesscode = e.target.value;
                         setcesscode(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "cesscode")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4258,6 +4284,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...tcs206code];
                         newCode[index].tcs206code = e.target.value;
                         settcs206code(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "tcs206code")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4289,6 +4316,7 @@ const PurchaseSetup = ({ onClose }) => {
                         const newCode = [...tcscode];
                         newCode[index].tcs_code = e.target.value;
                         settcscode(newCode);
+                        markAsEdited();
                       }}
                       onKeyDown={(e) => handleOpenModal(e, index, "tcscode")}
                       InputProps={{ readOnly: !isEditMode || isDisabled }}
@@ -4317,6 +4345,7 @@ const PurchaseSetup = ({ onClose }) => {
                       const newCode = [...discountcode];
                       newCode[index].discount_code = e.target.value;
                       setdiscountcode(newCode);
+                      markAsEdited();
                     }}
                     onKeyDown={(e) => handleOpenModal(e, index, "discountcode")}
                     InputProps={{ readOnly: !isEditMode || isDisabled }}

@@ -775,508 +775,6 @@
 
 // import React, { useState } from "react";
 // import Table from "react-bootstrap/Table";
-
-// const Example = () => {
-//   const [T11, setT11] = useState(false);
-//   const [T12, setT12] = useState(false);
-//   const [T21, setT21] = useState(false);
-//   const [products, setProducts] = useState([]);
-//   const [items, setItems] = useState([
-//     {
-//       id: 1,
-//       vcode: "",
-//       sdisc: "",
-//       Units: "",
-//       pkgs: "0.00",
-//       weight: "0.00",
-//       rate: "0.00",
-//       amount: "0.00",
-//       disc: 0,
-//       discount: "",
-//       gst: 18,
-//       Pcodes01: "",
-//       Pcodess: "",
-//       Scodes01: "",
-//       Scodess: "",
-//       Exp_rate1: 0,
-//       Exp_rate2: 0,
-//       Exp_rate3: 0,
-//       Exp_rate4: 0,
-//       Exp_rate5: 0,
-//       Exp1: 0,
-//       Exp2: 0,
-//       Exp3: 0,
-//       Exp4: 0,
-//       Exp5: 0,
-//       exp_before: 0,
-//       RateCal: "",
-//       Qtyperpc: 0,
-//       ctax: "0.00",
-//       stax: "0.00",
-//       itax: "0.00",
-//       tariff: "",
-//       vamt: "0.00",
-//     },
-//   ]);
-
-//   const handleItemChange = (index, key, value, field) => {
-//     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-//     if (
-//       (key === "pkgs" ||
-//         key === "weight" ||
-//         key === "tariff" ||
-//         key === "rate" ||
-//         key === "disc" ||
-//         key === "discount" ||
-//         key === "amount") &&
-//       !/^-?\d*\.?\d*$/.test(value)
-//     ) {
-//       return; // reject invalid input
-//     }
-
-//     // Always force disc/discount to be negative
-//     if (key === "disc" || key === "discount") {
-//       const numeric = parseFloat(value);
-//       if (!isNaN(numeric)) {
-//         value = -Math.abs(numeric); // Force negative
-//       }
-//     }
-
-//     const updatedItems = [...items];
-//     updatedItems[index][key] = value;
-//     // 🚫 If amount is empty, clear calculation fields and stop
-// if (key === "amount" && value === "") {
-//   updatedItems[index]["rate"] = "";
-//   updatedItems[index]["ctax"] = "";
-//   updatedItems[index]["stax"] = "";
-//   updatedItems[index]["itax"] = "";
-//   updatedItems[index]["vamt"] = "";
-//   updatedItems[index]["amount"] = "";
-//   setItems(updatedItems);
-//   return;
-// }
-
-//    // ✅ Reverse Rate Calculation (Amount → Rate)
-// if (key === "amount") {
-
-//   // ❗ If amount is empty, clear rate and stop
-//   if (value === "") {
-//     updatedItems[index]["rate"] = "";
-//     setItems(updatedItems);
-//     return;
-//   }
-
-//   const amount = parseFloat(value);
-//   const weight = parseFloat(updatedItems[index].weight) || 0;
-//   const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
-
-//   let newRate = 0;
-
-//   if (weight > 0) {
-//     newRate = amount / weight;
-//   } else if (pkgs > 0) {
-//     newRate = amount / pkgs;
-//   }
-
-//   if (!isNaN(newRate) && isFinite(newRate)) {
-//     updatedItems[index]["rate"] = T21
-//       ? Math.round(newRate).toFixed(2)
-//       : newRate.toFixed(2);
-//   }
-// }
-
-//     // If the key is 'name', find the corresponding product and set the price
-//     if (key === "name") {
-//       const selectedProduct = products.find(
-//         (product) => product.Aheads === value,
-//       );
-//       if (selectedProduct) {
-//         updatedItems[index]["vcode"] = selectedProduct.Acodes;
-//         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
-//         updatedItems[index]["Units"] = selectedProduct.TradeName;
-//         updatedItems[index]["rate"] = selectedProduct.Mrps;
-//         updatedItems[index]["gst"] = selectedProduct.itax_rate;
-//         updatedItems[index]["tariff"] = selectedProduct.Hsn;
-//         updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-//         updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-//         updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-//         updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
-//         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
-//         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-//       } else {
-//         updatedItems[index]["rate"] = ""; // Reset price if product not found
-//         updatedItems[index]["gst"] = ""; // Reset gst if product not found
-//       }
-//     }
-//     let pkgs = parseFloat(updatedItems[index].pkgs);
-//     let Qtyperpkgs = updatedItems[index].Qtyperpc;
-//     let AL = pkgs * Qtyperpkgs;
-//     let gst;
-//     if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
-//       updatedItems[index]["weight"] = AL.toFixed(2);
-//     }
-//     // Calculate CGST and SGST based on the GST value
-//     gst = parseFloat(updatedItems[index].gst);
-//     const totalAccordingWeight =
-//       parseFloat(updatedItems[index].weight) *
-//       parseFloat(updatedItems[index].rate);
-//     const totalAccordingPkgs =
-//       parseFloat(updatedItems[index].pkgs) *
-//       parseFloat(updatedItems[index].rate);
-//     let RateCal = updatedItems[index].RateCal;
-//     let TotalAcc = totalAccordingWeight; // Set a default value
-
-//     // Calcuate the Amount According to RateCalculation field
-//     if (
-//       RateCal === "Default" ||
-//       RateCal === "" ||
-//       RateCal === null ||
-//       RateCal === undefined
-//     ) {
-//       TotalAcc = totalAccordingWeight;
-//     } else if (RateCal === "Wt/Qty") {
-//       TotalAcc = totalAccordingWeight;
-//       console.log("totalAccordingWeight");
-//     } else if (RateCal === "Pc/Pkgs") {
-//       TotalAcc = totalAccordingPkgs;
-//       console.log("totalAccordingPkgs");
-//     }
-//     let others = parseFloat(updatedItems[index].exp_before) || 0;
-//     let disc = parseFloat(updatedItems[index].disc) || 0;
-//     let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
-//     let per;
-//     if (key === "discount") {
-//       per = manualDiscount;
-//     } else {
-//       per = (disc / 100) * TotalAcc;
-//       updatedItems[index]["discount"] = T21
-//         ? Math.round(per).toFixed(2)
-//         : per.toFixed(2);
-//     }
-
-//     // ✅ Convert to float for reliable calculation
-//     per = parseFloat(per);
-//     let Amounts = TotalAcc + per + others;
-
-//     // Ensure TotalAcc is a valid number before calling toFixed()
-//     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-//     // Check if GST number starts with "0" to "3"
-//     let CompanyState = "punjab";
-//     let CompanyState2 = "punjab";
-//     let cgst, sgst, igst;
-//     if (CompanyState == CompanyState2) {
-//       cgst = (Amounts * (gst / 2)) / 100 || 0;
-//       sgst = (Amounts * (gst / 2)) / 100 || 0;
-//       igst = 0;
-//     } else {
-//       cgst = sgst = 0;
-//       igst = (Amounts * gst) / 100 || 0;
-//     }
-//     // Set CGST and SGST to 0 if IGST is applied, and vice versa
-
-//     // Calculate the total with GST and Others
-//     let totalWithGST = Amounts + cgst + sgst + igst;
-//     // Update CGST, SGST, Others, and total fields in the item
-//     if (T21) {
-//       if (key !== "discount") {
-//         updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-//       }
-
-//       // ❗ Only auto-calc amount if user is NOT typing in amount
-//       if (key !== "amount") {
-//         updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-//       }
-
-//       updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-//     } else {
-//       if (key !== "discount") {
-//         updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-//       }
-
-//       // ❗ Only auto-calc amount if user is NOT typing in amount
-//       if (key !== "amount") {
-//         updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-//       }
-
-//       updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-//     }
-
-//     if (T12) {
-//       updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
-//       updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
-//       updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
-//     } else {
-//       updatedItems[index]["ctax"] = cgst.toFixed(2);
-//       updatedItems[index]["stax"] = sgst.toFixed(2);
-//       updatedItems[index]["itax"] = igst.toFixed(2);
-//     }
-//     // Calculate the percentage of the value based on the GST percentage
-//     const percentage = ((totalWithGST - Amounts) / TotalAcc) * 100;
-//     updatedItems[index]["percentage"] = percentage.toFixed(2);
-//     setItems(updatedItems);
-//   };
-//   return (
-//     <div>
-//       <div style={{ marginTop: 5 }} className="tablediv">
-//         <Table className="custom-table">
-//           <thead
-//             style={{
-//               background: "skyblue",
-//               textAlign: "center",
-//               position: "sticky",
-//               top: 0,
-//             }}
-//           >
-//             <tr style={{ color: "#575a5a" }}>
-//               <th>ITEMCODE</th>
-//               <th>DESCRIPTION</th>
-//               <th>HSNCODE</th>
-//               <th>PCS</th>
-//               <th>QTY</th>
-//               <th>RATE</th>
-//               <th>AMOUNT</th>
-//               <th>DIS@</th>
-//               <th>DISCOUNT</th>
-//               <th>CGST</th>
-//               <th>SGST</th>
-//               <th>IGST</th>
-//               <th>TOTAL</th>
-//             </tr>
-//           </thead>
-//           <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
-//             {items.map((item, index) => (
-//               <tr key={item.id}>
-//                 <td style={{ padding: 0, width: 30 }}>
-//                   <input
-//                     className="ItemCode"
-//                     style={{
-//                       height: 40,
-
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     type="text"
-//                     value={item.vcode}
-//                     readOnly
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, width: 300 }}>
-//                   <input
-//                     className="desc"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     maxLength={48}
-//                     value={item.sdisc}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "sdisc", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="Hsn"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     maxLength={8}
-//                     value={item.tariff}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "tariff", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="PCS"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     maxLength={48}
-//                     value={item.pkgs} // Show raw value during input
-//                     onChange={(e) =>
-//                       handleItemChange(index, "pkgs", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="QTY"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     maxLength={48}
-//                     value={item.weight} // Show raw value during input
-//                     onChange={(e) =>
-//                       handleItemChange(index, "weight", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="Price"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     maxLength={48}
-//                     value={item.rate} // Show raw value during input
-//                     onChange={(e) =>
-//                       handleItemChange(index, "rate", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="Amount"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     maxLength={48}
-//                     value={item.amount}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "amount", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="Disc"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     value={item.disc}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "disc", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="discount"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                     }}
-//                     value={item.discount}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "discount", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="CTax"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                       color: "black",
-//                     }}
-//                     maxLength={48}
-//                     disabled
-//                     value={item.ctax}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "ctax", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="STax"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                       color: "black",
-//                     }}
-//                     maxLength={48}
-//                     disabled
-//                     value={item.stax}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "stax", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="ITax"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                       textAlign: "right",
-//                       color: "black",
-//                     }}
-//                     maxLength={48}
-//                     disabled
-//                     value={item.itax}
-//                     onChange={(e) =>
-//                       handleItemChange(index, "itax", e.target.value)
-//                     }
-//                   />
-//                 </td>
-//                 <td>{item.vamt}</td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Example;
-
-// import React, { useState } from "react";
-// import Table from "react-bootstrap/Table";
 // import ProductModalCustomer from "./Modals/ProductModalCustomer";
 
 // const Example = () => {
@@ -1592,231 +1090,977 @@
 
 // export default Example;
 
-
-import React, {useState, useRef} from 'react'
-import { TextField, FormControl, Select, MenuItem, InputLabel } from "@mui/material";
-import { toast } from 'react-toastify';
-import { useEditMode } from '../EditModeContext';
+// SALE TABLE
+import React, { useState, useEffect } from "react";
+import Table from "react-bootstrap/Table";
+import ProductModal from "./Modals/ProductModal";
+import Button from "react-bootstrap/Button";
+import axios from "axios";
 
 const Example = () => {
-
-  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
-  const [isDisabled, setIsDisabled] = useState(true); // State to track field disablement
-  const inputRefs = useRef([]); // Array to hold references for input fields
-  const [formData, setFormData] = useState({
-    distt: "",
-    state:"",
-  });
+  const tenant = "shkun_05062025_05062026";
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const LOCAL_STORAGE_KEY = "tabledataVisibility";
+  const [T11, setT11] = useState(false);
+  const [T12, setT12] = useState(false);
+  const [T21, setT21] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(null);
+  const [isModalOpenExp, setIsModalOpenExp] = useState(false);
+  
+  const [products, setProducts] = useState([]);
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      vcode: "",
+      sdisc: "",
+      Units: "",
+      pkgs: "0.00",
+      weight: "0.00",
+      rate: "0.00",
+      amount: "0.00",
+      disc: 0,
+      discount: "",
+      gst: 18,
+      Pcodes01: "",
+      Pcodess: "",
+      Scodes01: "",
+      Scodess: "",
+      Exp_rate1: 0,
+      Exp_rate2: 0,
+      Exp_rate3: 0,
+      Exp_rate4: 0,
+      Exp_rate5: 0,
+      Exp1: 0,
+      Exp2: 0,
+      Exp3: 0,
+      Exp4: 0,
+      Exp5: 0,
+      exp_before: 0,
+      RateCal: "",
+      Qtyperpc: 0,
+      ctax: "0.00",
+      stax: "0.00",
+      itax: "0.00",
+      tariff: "",
+      vamt: "0.00",
+    },
+  ]);
   const capitalizeWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
-  const HandleValueChange = (event) => {
-    const { id, value } = event.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]:  capitalizeWords(value),
-    }));
-  };
-
-  const handlechangeState = (event) => {
-    const selectedState = event.target.value;
-    const gstStateCode = formData.gstNo?.slice(0, 2); // Extract state code from GST
-    
-    // Allow "Export" to be selected manually
-    if (selectedState === "Export") {
-      setFormData((prevState) => ({
-        ...prevState,
-        state: selectedState,
-      }));
-      return;
-    }
+    React.useEffect(() => {
+      // Fetch products from the API when the component mounts
+      fetchProducts();
+    }, []);
   
-    // If GST code is empty or invalid, allow any state selection
-    if (!gstStateCode || !stateCodes[gstStateCode]) {
-      setFormData((prevState) => ({
-        ...prevState,
-        state: selectedState,
-      }));
-      return;
-    }
+    const fetchProducts = async (search = "") => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch products");
+        const data = await response.json();
+        const flattenedData = data.data.map((item) => ({
+          ...item.formData,
+          _id: item._id,
+        }));
+        setProducts(flattenedData);
+      } catch (error) {
+        setError(error.message);
+      }
+      setLoading(false);
+    };
   
-    // Prevent wrong state selection if GST code is present and valid
-    if (stateCodes[gstStateCode] !== selectedState) {
-      toast.error("State does not match GST Number!", { autoClose: 2000 });
-      return;
-    }
+    // Modal For Items
+    const [showModal, setShowModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
   
-    setFormData((prevState) => ({
-      ...prevState,
-      state: selectedState,
-    }));
-  };
+    const handleItemChange = (index, key, value, field) => {
+      // If key is "pkgs" or "weight", allow only numbers and a single decimal point
+      if (
+        (key === "pkgs" ||
+          key === "weight" ||
+          key === "tariff" ||
+          key === "rate" ||
+          key === "disc" ||
+          key === "discount" || key === "amount") &&
+        !/^-?\d*\.?\d*$/.test(value)
+      ) {
+        return; // reject invalid input
+      }
 
-  const handleKeyDown = (e, index) => {
-      if (e.key === "Enter" || e.key === "Tab") {
-        e.preventDefault();
-        let nextIndex = index + 1;
-
-        while (inputRefs.current[nextIndex] && inputRefs.current[nextIndex].disabled) {
-          nextIndex += 1;
-        }
-
-        const nextInput = inputRefs.current[nextIndex];
-        if (nextInput) {
-          nextInput.focus();
+      // Always force disc/discount to be negative
+      if (key === "disc" || key === "discount") {
+        const numeric = parseFloat(value);
+        if (!isNaN(numeric)) {
+          value = -Math.abs(numeric); // Force negative
         }
       }
 
-      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-        e.preventDefault();
-        let prevIndex = index - 1;
+      const updatedItems = [...items];
+      if (["sdisc"].includes(key)) {
+        updatedItems[index][key] = capitalizeWords(value);
+      } else {
+        updatedItems[index][key] = value;
+      }
 
-        while (inputRefs.current[prevIndex] && inputRefs.current[prevIndex].disabled) {
-          prevIndex -= 1;
-        }
+      // If the key is 'name', find the corresponding product and set the price
+      if (key === "name") {
+        const selectedProduct = products.find(
+          (product) => product.Aheads === value,
+        );
 
-        const prevInput = inputRefs.current[prevIndex];
-        if (prevInput) {
-          prevInput.focus();
+        if (selectedProduct) {
+          // ✅ Always update these
+          updatedItems[index]["vcode"] = selectedProduct.Acodes;
+          updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+
+          // ⬇️ Normal mode (unchanged)
+          updatedItems[index]["Units"] = selectedProduct.TradeName;
+          updatedItems[index]["rate"] = selectedProduct.Mrps;
+          updatedItems[index]["gst"] = selectedProduct.itax_rate;
+          updatedItems[index]["tariff"] = selectedProduct.Hsn;
+          updatedItems[index]["Scodes01"] = selectedProduct.Scodes01;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.Pcodes01;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+          updatedItems[index]["RateCal"] = selectedProduct.Rateins;
+          updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+          updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
         }
       }
+
+      let pkgs = parseFloat(updatedItems[index].pkgs);
+      pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+      let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+      Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
+
+      let AL = pkgs * Qtyperpkgs || 0;
+      let gst = parseFloat(updatedItems[index].gst) || 0;
+      if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
+        updatedItems[index]["weight"] = AL.toFixed(2);
+      }
+  
+      let weight = parseFloat(updatedItems[index].weight);
+      weight = isNaN(weight) ? 0 : weight;
+
+      const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+      const rate = parseFloat(updatedItems[index].rate) || 0;
+
+      const totalAccordingWeight = weight * rate;
+      const totalAccordingPkgs = pkgsVal * rate;
+
+      let RateCal = updatedItems[index].RateCal;
+      let TotalAcc = totalAccordingWeight; // Set a default value
+
+      // Calcuate the Amount According to RateCalculation field
+      if (
+        RateCal === "Default" ||
+        RateCal === "" ||
+        RateCal === null ||
+        RateCal === undefined
+      ) {
+        TotalAcc = totalAccordingWeight;
+      } else if (RateCal === "Wt/Qty") {
+        TotalAcc = totalAccordingWeight;
+        // console.log("totalAccordingWeight");
+      } else if (RateCal === "Pc/Pkgs") {
+        TotalAcc = totalAccordingPkgs;
+        // console.log("totalAccordingPkgs");
+      }
+      // 🔥 If user manually edits amount → recalculate rate
+      if (
+        key === "amount" &&
+        value !== "" &&
+        !isNaN(parseFloat(value)) &&
+        !value.endsWith(".")
+      ) {
+        let enteredAmount = parseFloat(value);
+        let qty = 0;
+
+        if (RateCal === "Pc/Pkgs") {
+          qty = parseFloat(updatedItems[index].pkgs) || 0;
+        } else {
+          qty = parseFloat(updatedItems[index].weight) || 0;
+        }
+
+        const currentMrp = parseFloat(updatedItems[index].curMrp);
+
+        // // ✅ STOP if MRP exists and is valid (> 0)
+        if (!isNaN(currentMrp) && currentMrp > 0) {
+          return; // ❌ Do not recalculate rate
+        }
+
+        // Otherwise recalc rate
+        if (qty > 0 && enteredAmount > 0) {
+          let newRate = enteredAmount / qty;
+
+          updatedItems[index]["rate"] = T21
+            ? Math.round(newRate).toFixed(2)
+            : newRate.toFixed(2);
+
+          TotalAcc = enteredAmount;
+        }
+      }
+
+      // Ensure TotalAcc is a valid number before calling toFixed()
+      TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+      let others = parseFloat(updatedItems[index].exp_before) || 0;
+      let disc = parseFloat(updatedItems[index].disc) || 0;
+      let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+      let per;
+      if (key === "discount") {
+        per = manualDiscount;
+      } else {
+        per = (disc / 100) * TotalAcc;
+        updatedItems[index]["discount"] = T21
+          ? Math.round(per).toFixed(2)
+          : per.toFixed(2);
+      }
+
+      // ✅ Convert to float for reliable calculation
+      per = parseFloat(per);
+      let Amounts = TotalAcc + per + others;
+
+      // Ensure TotalAcc is a valid number before calling toFixed()
+      // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+      // Check if GST number starts with "0" to "3"
+      let cgst, sgst, igst;
+      let CompanyState = "Punjab"; 
+      if (CompanyState === "Punjab") {
+        cgst = (Amounts * (gst / 2)) / 100 || 0;
+        sgst = (Amounts * (gst / 2)) / 100 || 0;
+        igst = 0;
+      } else {
+        cgst = sgst = 0;
+        igst = (Amounts * gst) / 100 || 0;
+      }
+
+      // Calculate the total with GST and Others
+      let totalWithGST = Amounts + cgst + sgst + igst;
+      // Update CGST, SGST, Others, and total fields in the item
+      if (T21) {
+        if (key !== "discount") {
+          updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+        }
+
+        if (key !== "amount") {
+          updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+        }
+
+        updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+      } else {
+        if (key !== "discount") {
+          updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+        }
+
+        if (key !== "amount") {
+          updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+        }
+
+        updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+      }
+      if (T12) {
+        updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
+        updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
+        updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
+      } else {
+        updatedItems[index]["ctax"] = cgst.toFixed(2);
+        updatedItems[index]["stax"] = sgst.toFixed(2);
+        updatedItems[index]["itax"] = igst.toFixed(2);
+      }
+      // Calculate the percentage of the value based on the GST percentage
+      const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+      updatedItems[index]["percentage"] = percentage.toFixed(2);
+      setItems(updatedItems);
+      // calculateTotalGst();
+    };
+  
+    const handleProductSelect = (product) => {
+      if (selectedItemIndex !== null) {
+        handleItemChange(selectedItemIndex, "name", product.Aheads);
+        setShowModal(false);
+      }
+    };
+  
+    const handleModalDone = (product) => {
+      if (product) {
+        // console.log(product);
+        handleProductSelect(product);
+      }
+      setShowModal(false);
+      // fetchProducts();
+    };
+  
+    const openModalForItem = (index) => {
+        setSelectedItemIndex(index);
+        setShowModal(true);
+    };
+  
+    const allFields = products.length
+      ? Object.keys(products[0])
+      : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+
+    const handleInputChange = (index, field, value) => {
+      const numericValue =
+        typeof value === "string"
+          ? value.replace(/[^0-9.-]/g, "")
+          : value;
+
+      const updatedItems = [...items];
+      updatedItems[index][field] = numericValue;
+
+      setItems(updatedItems);
+    };
+
+    const handleExpenseBlur = (index, field) => {
+      const updatedItems = [...items];
+      const item = updatedItems[index];
+
+      const vamt = parseFloat(item.amount) || 0;
+
+      const expMap = [
+        { rate: "Exp_rate1", val: "Exp1" },
+        { rate: "Exp_rate2", val: "Exp2" },
+        { rate: "Exp_rate3", val: "Exp3" },
+        { rate: "Exp_rate4", val: "Exp4" },
+        { rate: "Exp_rate5", val: "Exp5" },
+      ];
+
+      expMap.forEach(({ rate, val }) => {
+        if (field === rate && vamt > 0) {
+          const r = parseFloat(item[rate]) || 0;
+          item[val] = ((vamt * r) / 100).toFixed(2);
+        }
+
+        if (field === val && vamt > 0) {
+          const v = parseFloat(item[val]) || 0;
+          item[rate] = ((v / vamt) * 100).toFixed(2);
+        }
+      });
+
+      setItems(updatedItems);
+    };
+
+
+    useEffect(() => {
+      if (currentIndex !== null && items[currentIndex]) {
+        const updatedItems = [...items];
+        const item = { ...updatedItems[currentIndex] };
+  
+        const vamt = parseFloat(item.amount) || 0;
+        const pkgs = parseFloat(item.pkgs) || 0;
+        const weight = parseFloat(item.weight) || 0;
+        // Expense Calculations (Separate Logic for Each Expense)
+        let Exp1 = 0, Exp2 = 0,Exp3 = 0, Exp4 = 0, Exp5 = 0;
+        let CalExp1 ="V", CalExp2 = "V", CalExp3 = "V", CalExp4 = "V", CalExp5 = "V";
+        if (item.Exp_rate1) {
+          if (CalExp1 === "W" || CalExp1 === "w") {
+            Exp1 = (weight * parseFloat(item.Exp_rate1)) / 100;
+          } else if (CalExp1 === "P" || CalExp1 === "p") {
+            Exp1 = (pkgs * parseFloat(item.Exp_rate1)) / 100;
+          } else if (CalExp1 === "V" || CalExp1 === "v" || CalExp1 === "") {
+            Exp1 = (vamt * parseFloat(item.Exp_rate1)) / 100;
+          }
+          item.Exp1 = Exp1.toFixed(2);
+        } else {
+          item.Exp1 = "0.00";
+        }
+  
+        if (item.Exp_rate2) {
+          if (CalExp2 === "W" || CalExp2 === "w") {
+            Exp2 = (weight * parseFloat(item.Exp_rate2)) / 100;
+          } else if (CalExp2 === "P" || CalExp2 === "p") {
+            Exp2 = (pkgs * parseFloat(item.Exp_rate2)) / 100;
+          } else if (CalExp2 === "V" || CalExp2 === "v" || CalExp2 === "") {
+            Exp2 = (vamt * parseFloat(item.Exp_rate2)) / 100;
+          }
+          item.Exp2 = Exp2.toFixed(2);
+        } else {
+          item.Exp2 = "0.00";
+        }
+  
+        if (item.Exp_rate3) {
+          if (CalExp3 === "W" || CalExp3 === "w") {
+            Exp3 = (weight * parseFloat(item.Exp_rate3)) / 100;
+          } else if (CalExp3 === "P" || CalExp3 === "p") {
+            Exp3 = (pkgs * parseFloat(item.Exp_rate3)) / 100;
+          } else if (CalExp3 === "V" || CalExp3 === "v" || CalExp3 === "") {
+            Exp3 = (vamt * parseFloat(item.Exp_rate3)) / 100;
+          }
+          item.Exp3 = Exp3.toFixed(2);
+        } else {
+          item.Exp3 = "0.00";
+        }
+  
+        if (item.Exp_rate4) {
+          if (CalExp4 === "W" || CalExp4 === "w") {
+            Exp4 = (weight * parseFloat(item.Exp_rate4)) / 100;
+          } else if (CalExp4 === "P" || CalExp4 === "p") {
+            Exp4 = (pkgs * parseFloat(item.Exp_rate4)) / 100;
+          } else if (CalExp4 === "V" || CalExp4 === "v" || CalExp4 === "") {
+            Exp4 = (vamt * parseFloat(item.Exp_rate4)) / 100;
+          }
+          item.Exp4 = Exp4.toFixed(2);
+        } else {
+          item.Exp4 = "0.00";
+        }
+  
+        if (item.Exp_rate5) {
+          if (CalExp5 === "W" || CalExp5 === "w") {
+            Exp5 = (weight * parseFloat(item.Exp_rate5)) / 100;
+          } else if (CalExp5 === "P" || CalExp5 === "p") {
+            Exp5 = (pkgs * parseFloat(item.Exp_rate5)) / 100;
+          } else if (CalExp5 === "V" || CalExp5 === "v" || CalExp5 === "") {
+            Exp5 = (vamt * parseFloat(item.Exp_rate5)) / 100;
+          }
+          item.Exp5 = Exp5.toFixed(2);
+        } else {
+          item.Exp5 = "0.00";
+        }
+  
+        // Total Expense Before GST
+        const totalExpenses = Exp1 + Exp2 + Exp3 + Exp4 + Exp5;
+        item.exp_before = totalExpenses.toFixed(2);
+  
+        // GST & Total Calculations
+        const gst = parseFloat(item.gst) || 0;
+        const totalAccordingWeight =
+          (parseFloat(item.weight) || 0) * (parseFloat(item.rate) || 0);
+        const totalAccordingPkgs =
+          (parseFloat(item.pkgs) || 0) * (parseFloat(item.rate) || 0);
+        let RateCal = item.RateCal;
+        let TotalAcc =
+          RateCal === "Pc/Pkgs" ? totalAccordingPkgs : totalAccordingWeight;
+  
+        let disc = parseFloat(item.disc) || 0;
+        let per = ((disc / 100) * TotalAcc).toFixed(2);
+        let PerCenTage = parseFloat(per);
+        let Amounts = TotalAcc + totalExpenses + parseFloat(per);
+  
+        TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+  
+        // GST Logic Based on State
+        let cgst = 0, sgst = 0, igst = 0;
+        let CompanyState = "Punjab"; // Replace with actual state logic
+  
+        if (CompanyState === 'Punjab') {
+          cgst = (Amounts * (gst / 2)) / 100;
+          sgst = (Amounts * (gst / 2)) / 100;
+        } else {
+          igst = (Amounts * gst) / 100;
+        }
+  
+        // Final Total Calculation
+        const totalWithGST = Amounts + cgst + sgst + igst;
+        if (T12) {
+          item.ctax = Math.round(cgst).toFixed(2);
+          item.stax = Math.round(sgst).toFixed(2);
+          item.itax = Math.round(igst).toFixed(2);
+          item.discount = Math.round(PerCenTage).toFixed(2);
+          item.vamt = Math.round(totalWithGST).toFixed(2);
+        } else {
+          item.ctax = cgst.toFixed(2);
+          item.stax = sgst.toFixed(2);
+          item.itax = igst.toFixed(2);
+          item.discount = PerCenTage.toFixed(2);
+          item.vamt = totalWithGST.toFixed(2);
+        }
+        updatedItems[currentIndex] = item;
+        setItems(updatedItems);
+      }
+    }, [
+      currentIndex,
+      items[currentIndex]?.amount,
+      items[currentIndex]?.Exp_rate1,
+      items[currentIndex]?.Exp_rate2,
+      items[currentIndex]?.Exp_rate3,
+      items[currentIndex]?.Exp_rate4,
+      items[currentIndex]?.Exp_rate5,
+      items[currentIndex]?.gst,
+      items[currentIndex]?.weight,
+      items[currentIndex]?.rate,
+      items[currentIndex]?.pkgs,
+      items[currentIndex]?.RateCal,
+    ]);
+
+    const defaultTableFields = {
+      itemcode: true,
+      sdisc: true,
+      hsncode: true,
+      pcs: true,
+      qty: true,
+      rate: true,
+      amount: true,
+      discount: false,
+      others: true,
+      gst: false,
+      cgst: true,
+      sgst: true,
+      igst: true,
+    };
+  
+    const [tableData, settableData] = useState(() => {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : {};
+  
+      // Only keep keys that exist in defaultFormData
+      const sanitized = Object.fromEntries(
+        Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+          Object.hasOwn(defaultTableFields, key),
+        ),
+      );
+  
+      return sanitized;
+    });
+
+  const handleOpenModal = (event, index, field) => {
+    if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
+      setPressedKey(event.key); // Set the pressed key
+      openModalForItem(index);
+      event.preventDefault(); // Prevent any default action
+    }
   };
-    const stateCodes = {
-    "01": "Jammu & Kashmir",
-    "02": "Himachal Pradesh",
-    "03": "Punjab",
-    "04": "Chandigarh",
-    "05": "Uttarakhand",
-    "06": "Haryana",
-    "07": "Delhi",
-    "08": "Rajasthan",
-    "09": "Uttar Pradesh",
-    "10": "Bihar",
-    "11": "Sikkim",
-    "12": "Arunachal Pradesh",
-    "13": "Nagaland",
-    "14": "Manipur",
-    "15": "Mizoram",
-    "16": "Tripura",
-    "17": "Meghalaya",
-    "18": "Assam",
-    "19": "West Bengal",
-    "20": "Jharkhand",
-    "21": "Odisha",
-    "22": "Chhattisgarh",
-    "23": "Madhya Pradesh",
-    "24": "Gujarat",
-    "25": "Daman and Diu",
-    "26": "Dadra and Nagar Haveli",
-    "27": "Maharashtra",
-    "28": "Andhra Pradesh",
-    "29": "Karnataka",
-    "30": "Goa",
-    "31": "Lakshadweep",
-    "32": "Kerala",
-    "33": "Tamil Nadu",
-    "34": "Puducherry",
-    "35": "Andaman & Nicobar Islands",
-    "36": "Telangana",
-    "37": "Andhra Pradesh (New)",
-    "38": "Ladakh",
-    " " : "Export"
-  };
+
+    const handleDoubleClick = (event, fieldName, index) => {
+      if (fieldName === "exp_before") {
+        setCurrentIndex(index); // Set the current index
+        setIsModalOpenExp(true); // Open the modal
+        event.preventDefault();
+      }
+      if ( fieldName === "vcode") {
+      setSelectedItemIndex(index);
+      setShowModal(true);
+      event.preventDefault();
+    }
+    };
   return (
     <div>
-      <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
-      <div>
-        <TextField
-        className="custom-bordered-input"
-        id="distt"
-        value={formData.distt}
-        variant="filled"
-        size="small"
-        label="DISTT"
-        onChange={HandleValueChange}
-        inputRef={(el) => (inputRefs.current[6] = el)}
-        onKeyDown={(e) => handleKeyDown(e, 6)} // Handle Enter key
-        inputProps={{
-          maxLength: 48,
-          style: {
-            height: "15px",
-            fontSize: 16,
-            // padding: "0 8px"
-          },
-          readOnly: !isEditMode || isDisabled
-        }}
-        sx={{ width: 300 }}
-      />
-      </div>
-      <div>
-      <FormControl
-        className="custom-bordered-input"
-        fullWidth
-        size="small"
-        variant="filled"
-        sx={{ minWidth: 280 }}
-      >
-        <InputLabel
-          id="state-label"
-          sx={{
-            color: formData.state ? "black" : "gray",
-          }}
-        >
-          State
-        </InputLabel>
+      <div style={{ marginTop: 5 }} className="tablediv">
+         <Table className="custom-table">
+            <thead
+              style={{
+                textAlign: "center",
+                position: "sticky",
+                top: 0,
+              }}
+            >
+              <tr style={{ color: "#575a5a" }}>
+                {tableData.itemcode && <th>ITEMCODE</th>}
+                {tableData.sdisc && <th>DESCRIPTION</th>}
+                {tableData.hsncode && <th>HSNCODE</th>}
+                {tableData.pcs && <th>PCS</th>}
+                {tableData.qty && <th>QTY</th>}
+                {tableData.rate && <th>RATE</th>}
+                {tableData.amount && <th>AMOUNT</th>}
+                {tableData.discount && <th>DIS@</th>}
+                {tableData.discount && <th>DISCOUNT</th>}
+                {tableData.others && <th>OTHERS</th>}
+                {tableData.cgst && <th>CGST</th>}
+                {tableData.sgst && <th>SGST</th>}
+                {tableData.igst && <th>IGST</th>}
+                <th>VAmt</th>
+              </tr>
+            </thead>
+            <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+              {items.map((item, index) => (
+                <tr key={item.id}>
+                  {tableData.itemcode && (
+                    <td style={{ padding: 0, width: 30 }}>
+                      <input
+                        className="ItemCode"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                        }}
+                        type="text"
+                        value={item.vcode}
+                        onKeyDown={(e) => {
+                        handleOpenModal(e, index, "vcode");
+                      }}
+                        onDoubleClick={(e) => {
+                          handleDoubleClick(e, "vcode", index);
+                        }}
+                      />
+                    </td>
+                  )}
+                  {tableData.sdisc && (
+                    <td style={{ padding: 0, width: 300 }}>
+                      <input
+                        className="desc"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                        }}
+                        maxLength={48}
+                        value={item.sdisc}
+                        onChange={(e) =>
+                          handleItemChange(index, "sdisc", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.hsncode && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Hsn"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={8}
+                        value={item.tariff}
+                        onChange={(e) =>
+                          handleItemChange(index, "tariff", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.pcs && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="PCS"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+                        onChange={(e) =>
+                          handleItemChange(index, "pkgs", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.qty && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="QTY"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.weight) === 0 ? "" : item.weight}
+                        onChange={(e) =>
+                          handleItemChange(index, "weight", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.rate && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Price"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.rate) === 0 ? "" : item.rate}
+                        onChange={(e) =>
+                          handleItemChange(index, "rate", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.amount && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Amount"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.amount) === 0 ? "" : item.amount}
+                        onChange={(e) =>
+                          handleItemChange(index, "amount", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.discount && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Disc"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        value={Number(item.disc) === 0 ? "" : item.disc}
+                        onChange={(e) =>
+                          handleItemChange(index, "disc", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.discount && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        id="discount"
+                        className="discount"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        value={Number(item.discount) === 0 ? "" : item.discount}
+                        onChange={(e) =>
+                          handleItemChange(index, "discount", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.others && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Others"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        type="text"
+                        value={
+                          Number(item.exp_before) === 0 ? "" : item.exp_before
+                        }
+                        onDoubleClick={(e) =>
+                          handleDoubleClick(e, "exp_before", index)
+                        }
+                      />
+                    </td>
+                  )}
+                  {isModalOpenExp && currentIndex !== null && (
+                    <div className="Modalz">
+                      <div className="Modal-content">
+                        <h1 className="headingE">ADD/LESS BEFORE GST</h1>
+                        <div className="form-group">
+                          <input
+                            type="checkbox"
+                            id="gross"
+                            checked={items[currentIndex]?.gross || false}
+                            onChange={(e) =>
+                              handleInputChange(
+                                currentIndex,
+                                "gross",
+                                e.target.checked,
+                              )
+                            }
+                          />
+                          <label
+                            style={{ marginLeft: 5 }}
+                            className="label"
+                            htmlFor="Gross"
+                          >
+                            GROSS
+                          </label>
+                        </div>
+                        {[
+                          { label: "Labour", rate: "Exp_rate1", value: "Exp1" },
+                          { label: "Freight", rate: "Exp_rate2", value: "Exp2" },
+                          { label: "Discount", rate: "Exp_rate3", value: "Exp3" },
+                          { label: "Commm", rate: "Exp_rate4", value: "Exp4" },
+                          { label: "Dalla", rate: "Exp_rate5", value: "Exp5" },
+                        ].map((field, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "10px", // Spacing between items
+                              marginBottom: "10px", // Space between rows
+                            }}
+                          >
+                            <label style={{ width: "100px", fontWeight: "bold" }}>
+                              {field.label}
+                            </label>
 
-        <Select
-          className="custom-bordered-input"
-          labelId="state-label"
-          id="state"
-          name="state"
-          value={formData.state}
-          onChange={(e) => {
-            if (!isEditMode || isDisabled) return;
-            handlechangeState(e);
-          }}
-          onOpen={(e) => {
-            if (!isEditMode || isDisabled) {
-              e.preventDefault();
-            }
-          }}
-          inputRef={(el) => (inputRefs.current[7] = el)}
-          onKeyDown={(e) => handleKeyDown(e, 7)} // Handle Enter key
-          label="State"
-          sx={{
-            backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white",
-            pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto",
-            fontSize: 16,
-            color: formData.state ? "black" : "gray",
-            height: "42px",
-          }}
-          MenuProps={{
-            sx: {
-              zIndex: 200000,   // <<< FIX: dropdown above modal
-            },
-            PaperProps: {
-              sx: {
-                zIndex: 200000, // <<< also set for the menu paper
-              },
-            },
-          }}
-        >
-          <MenuItem value="">
-            <em>Select State</em>
-          </MenuItem>
-
-          {Object.values(stateCodes).map((state, index) => (
-            <MenuItem key={index} value={state}>
-              {state}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      </div>
+                            <input
+                              value={items[currentIndex][field.rate]}
+                              style={{
+                                border: "1px solid black",
+                                padding: "5px",
+                                width: "120px",
+                                textAlign: "right",
+                                borderRadius: "4px",
+                              }}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  currentIndex,
+                                  field.rate,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <input
+                              value={items[currentIndex][field.value]}
+                              style={{
+                                border: "1px solid black",
+                                padding: "5px",
+                                width: "120px",
+                                textAlign: "right",
+                                borderRadius: "4px",
+                              }}
+                              onBlur={() =>
+                                handleExpenseBlur(currentIndex, field.value)
+                              }
+                              onChange={(e) =>
+                                handleInputChange(
+                                  currentIndex,
+                                  field.value,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
+                        <Button
+                          onClick={() => {
+                            const idx = currentIndex; // store before reset
+                            setIsModalOpenExp(false);
+                            setCurrentIndex(null);
+                          }}
+                          style={{
+                            borderColor: "transparent",
+                            backgroundColor: "red",
+                            marginTop: 10,
+                          }}
+                        >
+                          CLOSE
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {tableData.cgst && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="CTax"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                          color: "black",
+                        }}
+                        maxLength={48}
+                        disabled
+                        value={Number(item.ctax) === 0 ? "" : item.ctax}
+                        onChange={(e) =>
+                          handleItemChange(index, "ctax", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.sgst && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="STax"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                          color: "black",
+                        }}
+                        maxLength={48}
+                        disabled
+                        value={Number(item.stax) === 0 ? "" : item.stax}
+                        onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
+                      />
+                    </td>
+                  )}
+                  {tableData.igst && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="ITax"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                          color: "black",
+                        }}
+                        maxLength={48}
+                        disabled
+                        value={Number(item.itax) === 0 ? "" : item.itax}
+                        onChange={(e) =>
+                          handleItemChange(index, "itax", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  <td>{item.vamt}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          {showModal && (
+            <ProductModal
+              products={products}
+              allFields={allFields}
+              onSelect={handleProductSelect}
+              onClose={handleModalDone}
+              tenant={tenant}
+              initialKey={pressedKey}
+              fetchParentProducts={fetchProducts}
+            />
+          )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Example
+export default Example;
+

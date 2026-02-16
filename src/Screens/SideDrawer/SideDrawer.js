@@ -1540,9 +1540,7 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="Change Company" />
                 </StyledListItem>
-                <StyledListItem button  onClick={() =>
-                          handleNavigation("/PasswordSetting?type=Password")
-                        }>
+                <StyledListItem button  onClick={() => handleNavigation("/PasswordSetting?type=Password")}>
                   <StyledIcon>
                     <LockIcon />
                   </StyledIcon>
@@ -1556,6 +1554,12 @@ export default function App() {
                     <SettingsIcon />
                   </StyledIcon>
                   <StyledListItemText primary="Setup" />
+                </StyledListItem>
+                <StyledListItem button  onClick={() => handleNavigation("/Repost?type=Reposting")}>
+                  <StyledIcon>
+                    <SyncAltIcon />
+                  </StyledIcon>
+                  <StyledListItemText primary="Reposting" />
                 </StyledListItem>
                 {/* <StyledListItem button onClick={openSale_WinModal}>
                             <StyledIcon>1

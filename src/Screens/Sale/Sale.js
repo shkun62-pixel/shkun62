@@ -5267,8 +5267,8 @@ const Sale = () => {
     Pcodess: "",
     Scodes01: "",
     Scodess: "",
-    RateCal:"",
-    Qtyperpc:0,
+    RateCal: "",
+    Qtyperpc: 0,
     Exp_rate1: expRates.ExpRate1 ?? 0,
     Exp_rate2: expRates.ExpRate2 ?? 0,
     Exp_rate3: expRates.ExpRate3 ?? 0,
@@ -5604,55 +5604,93 @@ const Sale = () => {
     const Exp1Multiplier9 = Pos9 === "-Ve" ? -1 : 1;
     const Exp1Multiplier10 = Pos10 === "-Ve" ? -1 : 1;
 
-    if (CalExp6 === "P" || CalExp6 === "p") {
-      exp6 = (totalpcs * exp6Rate) / 100 || 0;
-    } else if (CalExp6 === "W" || CalExp6 === "w") {
-      exp6 = (totalQty * exp6Rate) / 100 || 0;
-    } else if (CalExp6 === "V" || CalExp6 === "V" || CalExp6 === "") {
-      exp6 = (subTotal * exp6Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp6) {
+      exp6 = parseFloat(formDataOverride.Exp6) || 0;
+    } else {
+      if (CalExp6 === "P" || CalExp6 === "p") {
+        exp6 = (totalpcs * exp6Rate) / 100 || 0;
+      } else if (CalExp6 === "W" || CalExp6 === "w") {
+        exp6 = (totalQty * exp6Rate) / 100 || 0;
+      } else {
+        exp6 = (subTotal * exp6Rate) / 100 || 0;
+      }
     }
-    exp6 *= Exp1Multiplier6; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp6 = exp6.toFixed(2);
+    exp6 *= Exp1Multiplier6;
+    if (!formDataOverride._manual_Exp6) {
+      formDataOverride.Exp6 = exp6.toFixed(2);
+    }
+
     // EXP 7
-    if (CalExp7 === "P" || CalExp7 === "p") {
-      exp7 = (totalpcs * exp7Rate) / 100 || 0;
-    } else if (CalExp7 === "W" || CalExp7 === "w") {
-      exp7 = (totalQty * exp7Rate) / 100 || 0;
-    } else if (CalExp7 === "V" || CalExp7 === "V" || CalExp7 === "") {
-      exp7 = (subTotal * exp7Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp7) {
+      exp7 = parseFloat(formDataOverride.Exp7) || 0;
+    } else {
+      if (CalExp7 === "P" || CalExp7 === "p") {
+        exp7 = (totalpcs * exp7Rate) / 100 || 0;
+      } else if (CalExp7 === "W" || CalExp7 === "w") {
+        exp7 = (totalQty * exp7Rate) / 100 || 0;
+      } else {
+        exp7 = (subTotal * exp7Rate) / 100 || 0;
+      }
     }
-    exp7 *= Exp1Multiplier7; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp7 = exp7.toFixed(2);
+
+    exp7 *= Exp1Multiplier7;
+      if (!formDataOverride._manual_Exp7) {
+      formDataOverride.Exp7 = exp7.toFixed(2);
+    }
+
     // EXP 8
-    if (CalExp8 === "P" || CalExp8 === "p") {
-      exp8 = (totalpcs * exp8Rate) / 100 || 0;
-    } else if (CalExp8 === "W" || CalExp8 === "w") {
-      exp8 = (totalQty * exp8Rate) / 100 || 0;
-    } else if (CalExp8 === "V" || CalExp8 === "V" || CalExp8 === "") {
-      exp8 = (subTotal * exp8Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp8) {
+      exp8 = parseFloat(formDataOverride.Exp8) || 0;
+    } else {
+      if (CalExp8 === "P" || CalExp8 === "p") {
+        exp8 = (totalpcs * exp8Rate) / 100 || 0;
+      } else if (CalExp8 === "W" || CalExp8 === "w") {
+        exp8 = (totalQty * exp8Rate) / 100 || 0;
+      } else {
+        exp8 = (subTotal * exp8Rate) / 100 || 0;
+      }
     }
-    exp8 *= Exp1Multiplier8; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp8 = exp8.toFixed(2);
+
+    exp8 *= Exp1Multiplier8;
+      if (!formDataOverride._manual_Exp8) {
+      formDataOverride.Exp8 = exp8.toFixed(2);
+    }
+
     // EXP 9
-    if (CalExp9 === "P" || CalExp9 === "p") {
-      exp9 = (totalpcs * exp9Rate) / 100 || 0;
-    } else if (CalExp9 === "W" || CalExp9 === "w") {
-      exp9 = (totalQty * exp9Rate) / 100 || 0;
-    } else if (CalExp9 === "V" || CalExp9 === "V" || CalExp9 === "") {
-      exp9 = (subTotal * exp9Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp9) {
+      exp9 = parseFloat(formDataOverride.Exp9) || 0;
+    } else {
+      if (CalExp9 === "P" || CalExp9 === "p") {
+        exp9 = (totalpcs * exp9Rate) / 100 || 0;
+      } else if (CalExp9 === "W" || CalExp9 === "w") {
+        exp9 = (totalQty * exp9Rate) / 100 || 0;
+      } else {
+        exp9 = (subTotal * exp9Rate) / 100 || 0;
+      }
     }
-    exp9 *= Exp1Multiplier9; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp9 = exp9.toFixed(2);
+
+    exp9 *= Exp1Multiplier9;
+      if (!formDataOverride._manual_Exp9) {
+      formDataOverride.Exp9 = exp9.toFixed(2);
+    }
+
     // EXP 10
-    if (CalExp10 === "P" || CalExp10 === "p") {
-      exp10 = (totalpcs * exp10Rate) / 100 || 0;
-    } else if (CalExp10 === "W" || CalExp10 === "w") {
-      exp10 = (totalQty * exp10Rate) / 100 || 0;
-    } else if (CalExp10 === "V" || CalExp10 === "V" || CalExp10 === "") {
-      exp10 = (subTotal * exp10Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp10) {
+      exp10 = parseFloat(formDataOverride.Exp10) || 0;
+    } else {
+      if (CalExp10 === "P" || CalExp10 === "p") {
+        exp10 = (totalpcs * exp10Rate) / 100 || 0;
+      } else if (CalExp10 === "W" || CalExp10 === "w") {
+        exp10 = (totalQty * exp10Rate) / 100 || 0;
+      } else {
+        exp10 = (subTotal * exp10Rate) / 100 || 0;
+      }
     }
-    exp10 *= Exp1Multiplier10; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp10 = exp10.toFixed(2);
+
+    exp10 *= Exp1Multiplier10;
+      if (!formDataOverride._manual_Exp10) {
+      formDataOverride.Exp10 = exp10.toFixed(2);
+    }
 
     // Calculate Total Expenses
     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
@@ -5760,17 +5798,43 @@ const Sale = () => {
 
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
+
     const numberValue = value.replace(/[^0-9.]/g, "");
-    const validNumberValue =
-      numberValue.split(".").length > 2
-        ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
-        : numberValue;
 
     setFormData((prevState) => {
-      const newFormData = { ...prevState, [id]: validNumberValue };
-      return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+      const newFormData = {
+        ...prevState,
+        [id]: numberValue,
+      };
+
+      // If typing directly in expense field → mark it manual
+      if (["Exp6", "Exp7", "Exp8", "Exp9", "Exp10"].includes(id)) {
+        newFormData[`_manual_${id}`] = true;
+      }
+
+      // If typing in rate → disable manual mode
+      if (["Exp_rate6","Exp_rate7","Exp_rate8","Exp_rate9","Exp_rate10"].includes(id)) {
+        const expField = id.replace("Exp_rate", "Exp");
+        newFormData[`_manual_${expField}`] = false;
+      }
+
+      return calculateTotalGst(newFormData, true); // ✅ KEEP THIS
     });
   };
+
+  // const handleNumberChange = (event) => {
+  //   const { id, value } = event.target;
+  //   const numberValue = value.replace(/[^0-9.]/g, "");
+  //   const validNumberValue =
+  //     numberValue.split(".").length > 2
+  //       ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
+  //       : numberValue;
+
+  //   setFormData((prevState) => {
+  //     const newFormData = { ...prevState, [id]: validNumberValue };
+  //     return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+  //   });
+  // };
 
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
@@ -6007,8 +6071,8 @@ const Sale = () => {
         disc: 0,
         discount: "",
         gst: 0,
-        RateCal:"",
-        Qtyperpc:0,
+        RateCal: "",
+        Qtyperpc: 0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -6144,7 +6208,7 @@ const Sale = () => {
   const fetchVoucherNumbers = async () => {
     try {
       const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`,
       );
 
       return {
@@ -6575,11 +6639,14 @@ const Sale = () => {
         });
         return;
       }
-      
+
       const voucherData = await fetchVoucherNumbers();
       if (!voucherData) return;
 
-      if (!isAbcmode && Number(formData.vbillno) <= Number(voucherData.lastVno)) {
+      if (
+        !isAbcmode &&
+        Number(formData.vbillno) <= Number(voucherData.lastVno)
+      ) {
         toast.error(`Voucher No ${formData.vbillno} already used!`, {
           position: "top-center",
         });
@@ -6990,7 +7057,8 @@ const Sale = () => {
         key === "tariff" ||
         key === "rate" ||
         key === "disc" ||
-        key === "discount" || key === "amount") &&
+        key === "discount" ||
+        key === "amount") &&
       !/^-?\d*\.?\d*$/.test(value)
     ) {
       return; // reject invalid input
@@ -7009,45 +7077,6 @@ const Sale = () => {
       updatedItems[index][key] = capitalizeWords(value);
     } else {
       updatedItems[index][key] = value;
-    }
-    if (key === "amount" && value === "") {
-      updatedItems[index]["rate"] = "";
-      updatedItems[index]["ctax"] = "";
-      updatedItems[index]["stax"] = "";
-      updatedItems[index]["itax"] = "";
-      updatedItems[index]["vamt"] = "";
-      updatedItems[index]["amount"] = "";
-      setItems(updatedItems);
-      return;
-    }
-
-    //  ✅ Reverse Rate Calculation (Amount → Rate)
-    if (key === "amount") {
-
-      // ❗ If amount is empty, clear rate and stop
-      if (value === "") {
-        updatedItems[index]["rate"] = "";
-        setItems(updatedItems);
-        return;
-      }
-
-      const amount = parseFloat(value) || 0;
-      const weight = parseFloat(updatedItems[index].weight) || 0;
-      const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
-
-      let newRate = 0;
-
-      if (weight > 0) {
-        newRate = amount / weight || 0;
-      } else if (pkgs > 0) {
-        newRate = amount / pkgs || 0;
-      }
-
-      if (!isNaN(newRate) && isFinite(newRate)) {
-        updatedItems[index]["rate"] = T21
-          ? Math.round(newRate).toFixed(2)
-          : newRate.toFixed(2);
-      }
     }
 
     // If the key is 'name', find the corresponding product and set the price
@@ -7106,6 +7135,7 @@ const Sale = () => {
 
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+        updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
       }
     }
 
@@ -7114,7 +7144,6 @@ const Sale = () => {
 
     let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
     Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
-
 
     let AL = pkgs * Qtyperpkgs || 0;
     let gst;
@@ -7164,7 +7193,42 @@ const Sale = () => {
       TotalAcc = totalAccordingPkgs;
       // console.log("totalAccordingPkgs");
     }
-     // Ensure TotalAcc is a valid number before calling toFixed()
+    // 🔥 If user manually edits amount → recalculate rate
+    if (
+      key === "amount" &&
+      value !== "" &&
+      !isNaN(parseFloat(value)) &&
+      !value.endsWith(".")
+    ) {
+      let enteredAmount = parseFloat(value);
+      let qty = 0;
+
+      if (RateCal === "Pc/Pkgs") {
+        qty = parseFloat(updatedItems[index].pkgs) || 0;
+      } else {
+        qty = parseFloat(updatedItems[index].weight) || 0;
+      }
+
+      const currentMrp = parseFloat(updatedItems[index].curMrp);
+
+      // // ✅ STOP if MRP exists and is valid (> 0)
+      if (!isNaN(currentMrp) && currentMrp > 0) {
+        return; // ❌ Do not recalculate rate
+      }
+
+      // Otherwise recalc rate
+      if (qty > 0 && enteredAmount > 0) {
+        let newRate = enteredAmount / qty;
+
+        updatedItems[index]["rate"] = T21
+          ? Math.round(newRate).toFixed(2)
+          : newRate.toFixed(2);
+
+        TotalAcc = enteredAmount;
+      }
+    }
+
+    // Ensure TotalAcc is a valid number before calling toFixed()
     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
 
     let others = parseFloat(updatedItems[index].exp_before) || 0;
@@ -7205,7 +7269,6 @@ const Sale = () => {
         updatedItems[index]["discount"] = Math.round(per).toFixed(2);
       }
 
-      // ❗ Only auto-calc amount if user is NOT typing in amount
       if (key !== "amount") {
         updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
       }
@@ -7216,7 +7279,6 @@ const Sale = () => {
         updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
       }
 
-      // ❗ Only auto-calc amount if user is NOT typing in amount
       if (key !== "amount") {
         updatedItems[index]["amount"] = TotalAcc.toFixed(2);
       }
@@ -7246,7 +7308,8 @@ const Sale = () => {
       updatedItems[index]["itax"] = igst.toFixed(2);
     }
     // Calculate the percentage of the value based on the GST percentage
-    const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+    const percentage =
+      TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
     setItems(updatedItems);
     calculateTotalGst();
@@ -7719,84 +7782,124 @@ const Sale = () => {
     }
   };
 
+  // const handleInputChange = (index, field, value) => {
+  //   const numericValue =
+  //     typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
+  //   const updatedItems = [...items];
+  //   updatedItems[index][field] = numericValue;
+
+  //   // Recalculate expenses when Exp_rate1 to Exp_rate6 change
+  //   const vamt = parseFloat(updatedItems[index].amount) || 0;
+  //   const expRates = [
+  //     parseFloat(updatedItems[index].Exp_rate1) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate2) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate3) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate4) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate5) || 0,
+  //   ];
+  //   const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
+
+  //   let totalExpenses = 0;
+  //   expRates.forEach((rate, i) => {
+  //     const expense = (vamt * rate) / 100;
+  //     updatedItems[index][expFields[i]] = expense.toFixed(2);
+  //     totalExpenses += expense;
+  //   });
+
+  //   // Update the exp_before field with the total of all expenses
+  //   updatedItems[index].exp_before = totalExpenses.toFixed(2);
+
+  //   const gst = parseFloat(updatedItems[index].gst);
+  //   const totalAccordingWeight =
+  //     parseFloat(updatedItems[index].weight) *
+  //     parseFloat(updatedItems[index].rate);
+  //   const totalAccordingPkgs =
+  //     parseFloat(updatedItems[index].pkgs) *
+  //     parseFloat(updatedItems[index].rate);
+  //   let RateCal = updatedItems[index].RateCal;
+  //   let TotalAcc = totalAccordingWeight; // Set a default value
+
+  //   if (
+  //     RateCal === "Default" ||
+  //     RateCal === "" ||
+  //     RateCal === null ||
+  //     RateCal === undefined
+  //   ) {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Wt/Qty") {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Pc/Pkgs") {
+  //     TotalAcc = totalAccordingPkgs;
+  //   }
+  //   const others = parseFloat(updatedItems[index].exp_before) || 0;
+  //   let disc = parseFloat(updatedItems[index].disc) || 0;
+  //   let per = ((disc / 100) * TotalAcc).toFixed(2);
+  //   let Amounts = TotalAcc + others + parseFloat(per);
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
+  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+  //   let cgst = 0,
+  //     sgst = 0,
+  //     igst = 0;
+  //   if (CompanyState == customerDetails[0].state) {
+  //     cgst = (Amounts * (gst / 2)) / 100;
+  //     sgst = (Amounts * (gst / 2)) / 100;
+  //   } else {
+  //     igst = (Amounts * gst) / 100;
+  //   }
+
+  //   const totalWithGST = Amounts + cgst + sgst + igst;
+
+  //   // Update tax and total fields
+  //   updatedItems[index]["ctax"] = cgst.toFixed(2);
+  //   updatedItems[index]["stax"] = sgst.toFixed(2);
+  //   updatedItems[index]["itax"] = igst.toFixed(2);
+  //   updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+  //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
+
+  //   setItems(updatedItems);
+  //   calculateTotalGst(); // ✅ Recalculate the grand total
+  // };
+
   const handleInputChange = (index, field, value) => {
     const numericValue =
       typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
+
     const updatedItems = [...items];
     updatedItems[index][field] = numericValue;
 
-    // Recalculate expenses when Exp_rate1 to Exp_rate6 change
-    const vamt = parseFloat(updatedItems[index].amount) || 0;
-    const expRates = [
-      parseFloat(updatedItems[index].Exp_rate1) || 0,
-      parseFloat(updatedItems[index].Exp_rate2) || 0,
-      parseFloat(updatedItems[index].Exp_rate3) || 0,
-      parseFloat(updatedItems[index].Exp_rate4) || 0,
-      parseFloat(updatedItems[index].Exp_rate5) || 0,
-    ];
-    const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
+    setItems(updatedItems);
+  };
 
-    let totalExpenses = 0;
-    expRates.forEach((rate, i) => {
-      const expense = (vamt * rate) / 100;
-      updatedItems[index][expFields[i]] = expense.toFixed(2);
-      totalExpenses += expense;
+  const handleExpenseBlur = (index, field) => {
+    const updatedItems = [...items];
+    const item = updatedItems[index];
+
+    const vamt = parseFloat(item.amount) || 0;
+
+    const expMap = [
+      { rate: "Exp_rate1", val: "Exp1" },
+      { rate: "Exp_rate2", val: "Exp2" },
+      { rate: "Exp_rate3", val: "Exp3" },
+      { rate: "Exp_rate4", val: "Exp4" },
+      { rate: "Exp_rate5", val: "Exp5" },
+    ];
+
+    expMap.forEach(({ rate, val }) => {
+      if (field === rate && vamt > 0) {
+        const r = parseFloat(item[rate]) || 0;
+        item[val] = ((vamt * r) / 100).toFixed(2);
+      }
+
+      if (field === val && vamt > 0) {
+        const v = parseFloat(item[val]) || 0;
+        item[rate] = ((v / vamt) * 100).toFixed(2);
+      }
     });
 
-    // Update the exp_before field with the total of all expenses
-    updatedItems[index].exp_before = totalExpenses.toFixed(2);
-
-    const gst = parseFloat(updatedItems[index].gst);
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
-    let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight; // Set a default value
-
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
-    }
-    const others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let per = ((disc / 100) * TotalAcc).toFixed(2);
-    let Amounts = TotalAcc + others + parseFloat(per);
-
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-    let cgst = 0,
-      sgst = 0,
-      igst = 0;
-    if (CompanyState == customerDetails[0].state) {
-      cgst = (Amounts * (gst / 2)) / 100;
-      sgst = (Amounts * (gst / 2)) / 100;
-    } else {
-      igst = (Amounts * gst) / 100;
-    }
-
-    const totalWithGST = Amounts + cgst + sgst + igst;
-
-    // Update tax and total fields
-    updatedItems[index]["ctax"] = cgst.toFixed(2);
-    updatedItems[index]["stax"] = sgst.toFixed(2);
-    updatedItems[index]["itax"] = igst.toFixed(2);
-    updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-    updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
-
     setItems(updatedItems);
-    calculateTotalGst(); // ✅ Recalculate the grand total
   };
+
   useEffect(() => {
     if (currentIndex !== null && items[currentIndex]) {
       const updatedItems = [...items];
@@ -8212,7 +8315,7 @@ const Sale = () => {
   };
   const closeModalAfter = () => {
     setIsModalOpenAfter(false);
-    saveButtonRef.current.focus();
+    expAfterGSTRef.current.focus();
   };
 
   const handleDoubleClickAfter = (fieldName) => {
@@ -8255,10 +8358,33 @@ const Sale = () => {
   const handleKeyDownModal = (event, index) => {
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
+
       if (index < expRateRefs.current.length - 1) {
-        expRateRefs.current[index + 1].focus(); // Move to the next Exp_rate input
+        expRateRefs.current[index + 1]?.focus();
+        expRateRefs.current[index + 1]?.select();
       } else {
-        closeButtonRef.current.focus(); // Move focus to Close button when on Exp_rate5
+        closeButtonRef.current?.focus();
+      }
+    }
+  };
+
+  // EXP AFTER
+  const expAfterRefs = useRef([]);
+  const closeAfterRef = useRef(null);
+  useEffect(() => {
+    if (isModalOpenAfter && expAfterRefs.current[0]) {
+      expAfterRefs.current[0].focus();
+    }
+  }, [isModalOpenAfter]);
+  const handleKeyDownAfterw2 = (event, index) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+
+      if (index < expAfterRefs.current.length - 1) {
+        expAfterRefs.current[index + 1]?.focus();
+        expAfterRefs.current[index + 1]?.select();
+      } else {
+        closeAfterRef.current?.focus();
       }
     }
   };
@@ -8347,7 +8473,6 @@ const Sale = () => {
     return `${day}-${month}-${year}`;
   };
 
-
   return (
     <div>
       <ToastContainer />
@@ -8378,24 +8503,22 @@ const Sale = () => {
       <div className="sale_toppart ">
         <div className="Dated ">
           <InputMask
-              mask="99-99-9999"
-              placeholder="dd-mm-yyyy"
-              value={formData.date}
-              readOnly={!isEditMode || isDisabled}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-            >
-              {(inputProps) => (
-                <input
-                  {...inputProps}
-                  className="DatePICKER"
-                  ref={datePickerRef}
-                  onKeyDown={(e) => {
-                    handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
-                  }}
-                />
-              )}
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                }}
+              />
+            )}
           </InputMask>
           {/* <DatePicker
             ref={datePickerRef}
@@ -8409,7 +8532,7 @@ const Sale = () => {
           /> */}
           <div className="billdivz">
             <TextField
-            inputRef={voucherNoRef}
+              inputRef={voucherNoRef}
               className="billzNo custom-bordered-input"
               id="vbillno"
               value={formData.vbillno}
@@ -9171,7 +9294,11 @@ const Sale = () => {
                       onBlur={(e) => {
                         const value = parseFloat(e.target.value);
                         if (!isNaN(value)) {
-                          handleItemChange(index, "amount", value.toFixed(rateValue));
+                          handleItemChange(
+                            index,
+                            "amount",
+                            value.toFixed(rateValue),
+                          );
                         }
                       }}
                       onChange={(e) =>
@@ -9334,6 +9461,63 @@ const Sale = () => {
                         { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
                         { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
                         { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
+                        ].map((field, idx) => {
+                          const rateIndex = idx * 2;
+                          const valueIndex = idx * 2 + 1;
+
+                          return (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "10px" }}>
+                              
+                              <label style={{ width: "100px", fontWeight: "bold" }}>
+                                {field.label}
+                              </label>
+
+                              {/* RATE FIELD */}
+                              <input
+                                ref={(el) => (expRateRefs.current[rateIndex] = el)}
+                                value={items[currentIndex][field.rate]}
+                                style={{
+                                  border: "1px solid black",
+                                  padding: "5px",
+                                  width: "120px",
+                                  textAlign: "right",
+                                  borderRadius: "4px",
+                                }}
+                                onChange={(e) =>
+                                  handleInputChange(currentIndex, field.rate, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDownModal(e, rateIndex)}
+                              />
+
+                              {/* VALUE FIELD */}
+                              <input
+                                ref={(el) => (expRateRefs.current[valueIndex] = el)}
+                                value={items[currentIndex][field.value]}
+                                style={{
+                                  border: "1px solid black",
+                                  padding: "5px",
+                                  width: "120px",
+                                  textAlign: "right",
+                                  borderRadius: "4px",
+                                }}
+                                onBlur={() =>
+                                  handleExpenseBlur(currentIndex, field.value)
+                                }
+                                onChange={(e) =>
+                                  handleInputChange(currentIndex, field.value, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDownModal(e, valueIndex)}
+                              />
+                            </div>
+                          );
+                      })}
+
+                      {/* {[
+                        { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
+                        { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
+                        { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
+                        { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
+                        { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
                       ].map((field, idx) => (
                         <div
                           key={idx}
@@ -9378,6 +9562,9 @@ const Sale = () => {
                               textAlign: "right",
                               borderRadius: "4px",
                             }}
+                            onBlur={() =>
+                              handleExpenseBlur(currentIndex, field.value)
+                            }
                             onChange={(e) =>
                               handleInputChange(
                                 currentIndex,
@@ -9387,7 +9574,7 @@ const Sale = () => {
                             }
                           />
                         </div>
-                      ))}
+                      ))} */}
                       <Button
                         ref={closeButtonRef}
                         onClick={() => {
@@ -9716,12 +9903,12 @@ const Sale = () => {
             <div className="duedatez">
               <InputMask
                 mask="99-99-9999"
-                 placeholder="dd-mm-yyyy"
-              value={formData.duedate}
-              readOnly={!isEditMode || isDisabled}
-                 onChange={(e) =>
-                setFormData({ ...formData, duedate: e.target.value })
-              }
+                placeholder="dd-mm-yyyy"
+                value={formData.duedate}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, duedate: e.target.value })
+                }
               >
                 {(props) => (
                   <TextField
@@ -10029,6 +10216,186 @@ const Sale = () => {
                 // sx={{ width: 150 }}
               />
               {isModalOpenAfter && (
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 1000,
+                  }}
+                >
+                  <div
+                    style={{
+                      background: 'linear-gradient(to bottom, #edc5a7,#a5d8ed)',
+                      padding: "25px 30px",
+                      borderRadius: "12px",
+                      width: "450px",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      animation: "fadeIn 0.3s ease-in-out",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        textAlign: "center",
+                        marginBottom: "20px",
+                        fontWeight: "600",
+                        color: "#333",
+                        fontSize:"18px",
+                      }}
+                    >
+                      EXPENSE AFTER TAX
+                    </h2>
+
+                    {/* Expense Rows */}
+                    {[
+                    { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
+                    { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
+                    { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
+                    { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
+                    { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
+                  ].map((item, index) => {
+                    const rateIndex = index * 2;
+                    const amountIndex = index * 2 + 1;
+
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            flex: 1,
+                            fontWeight: "bold",
+                            color: "#444",
+                          }}
+                        >
+                          {item.label}
+                        </div>
+
+                        {/* RATE */}
+                        <input
+                          ref={(el) => (expAfterRefs.current[rateIndex] = el)}
+                          id={item.rate}
+                          value={formData[item.rate]}
+                          onChange={handleNumberChange}
+                          onKeyDown={(e) => handleKeyDownAfterw2(e, rateIndex)}
+                          placeholder="Rate"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            marginRight: "8px",
+                            textAlign: "right",
+                          }}
+                        />
+
+                        {/* AMOUNT */}
+                        <input
+                          ref={(el) => (expAfterRefs.current[amountIndex] = el)}
+                          id={item.amount}
+                          value={formData[item.amount]}
+                          onChange={handleNumberChange}
+                          onKeyDown={(e) => handleKeyDownAfterw2(e, amountIndex)}
+                          placeholder="Amount"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            textAlign: "right",
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+
+                    {/* {[
+                      { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
+                      { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
+                      { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
+                      { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
+                      { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
+                    ].map((item, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            flex: 1,
+                            fontWeight: "bold",
+                            color: "#444",
+                          }}
+                        >
+                          {item.label}
+                        </div>
+
+                        <input
+                          id={item.rate}
+                          value={formData[item.rate]}
+                          onChange={handleNumberChange}
+                          placeholder="Rate"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            marginRight: "8px",
+                            textAlign: "right",
+                          }}
+                        />
+
+                        <input
+                          id={item.amount}
+                          value={formData[item.amount]}
+                          onChange={handleNumberChange}
+                          placeholder="Amount"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            textAlign: "right",
+                          }}
+                        />
+                      </div>
+                    ))} */}
+
+                    {/* Close Button */}
+                    <div style={{ textAlign: "center", marginTop: "20px" }}>
+                      <Button
+                        ref={closeAfterRef}
+                        onClick={closeModalAfter}
+                        style={{
+                          backgroundColor: "#ff4d4f",
+                          border: "none",
+                          padding: "8px 20px",
+                          borderRadius: "6px",
+                          fontWeight: "500",
+                        }}
+                      >
+                        CLOSE
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* {isModalOpenAfter && (
                 <div className="Modal">
                   <div className="Modal-content">
                     <h1 className="headingE">EXPENSE AFTER TAX</h1>
@@ -10068,6 +10435,7 @@ const Sale = () => {
                       <input
                         id="Exp6"
                         value={formData.Exp6}
+                        onChange={handleNumberChange} // ✅ ADD THIS
                         style={{
                           border: "1px solid black",
                           width: 100,
@@ -10096,6 +10464,7 @@ const Sale = () => {
                       <input
                         id="Exp7"
                         value={formData.Exp7}
+                        onChange={handleNumberChange} // ✅ ADD THIS
                         style={{
                           border: "1px solid black",
                           width: 100,
@@ -10124,6 +10493,7 @@ const Sale = () => {
                       <input
                         id="Exp8"
                         value={formData.Exp8}
+                        onChange={handleNumberChange} // ✅ ADD THIS
                         style={{
                           border: "1px solid black",
                           width: 100,
@@ -10152,6 +10522,7 @@ const Sale = () => {
                       <input
                         id="Exp9"
                         value={formData.Exp9}
+                        onChange={handleNumberChange} // ✅ ADD THIS
                         style={{
                           border: "1px solid black",
                           width: 100,
@@ -10180,6 +10551,7 @@ const Sale = () => {
                       <input
                         id="Exp10"
                         value={formData.Exp10}
+                        onChange={handleNumberChange} // ✅ ADD THIS
                         style={{
                           border: "1px solid black",
                           width: 100,
@@ -10199,7 +10571,7 @@ const Sale = () => {
                     </Button>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
             <TextField
               id="grandtotal"
