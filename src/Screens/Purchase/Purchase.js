@@ -30,6 +30,7 @@ import { Modal, Form } from "react-bootstrap";
 import useTdsApplicable from "../Shared/useTdsApplicable";
 import { useNavigate, useLocation } from "react-router-dom";
 import FAVoucherModal from "../Shared/FAVoucherModal";
+import useShortcuts from "../Shared/useShortcuts";
 
 const LOCAL_STORAGE_KEY = "TABLEdataVisibility";
 
@@ -1614,8 +1615,8 @@ const Purchase = () => {
       const voucherData = await fetchVoucherNumbers();
       if (!voucherData) return;
 
-      if (!isAbcmode && Number(formData.vbillno) <= Number(voucherData.lastVno)) {
-        toast.error(`Voucher No ${formData.vbillno} already used!`, {
+      if (!isAbcmode && Number(formData.vno) <= Number(voucherData.lastVno)) {
+        toast.error(`Voucher No ${formData.vno} already used!`, {
           position: "top-center",
         });
         setIsSubmitEnabled(true);
@@ -3610,6 +3611,22 @@ const handleKeyDown = (event, index, field) => {
       }
       return true;
   };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus || showModal ||
+    isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: openPrintMenu,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
 
   const nonEmptyItems2 = items.filter((item) => (item.sdisc || "").trim() !== "");
   return (

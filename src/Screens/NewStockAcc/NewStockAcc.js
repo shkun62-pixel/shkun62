@@ -16,6 +16,7 @@ import { CompanyContext } from "../Context/CompanyContext";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import useStockAcc from "../Shared/useStockAcc";
 import InputMask from "react-input-mask";
+import useShortcuts from "../Shared/useShortcuts";
 
 const NewStockAcc = ({ onSave, StockId }) => {
 
@@ -1246,6 +1247,19 @@ const NewStockAcc = ({ onSave, StockId }) => {
       }));
     }
   };
+    // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus || showModalAcc;
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
 
   return (
     <div style={{ padding: 10 }}>

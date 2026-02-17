@@ -614,6 +614,23 @@ const ProductModal = ({
     // Open modal
     setShowNewStockModal(true);
   };
+  
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();   // 🔥 stops global shortcut
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [onClose]);
+
   return (
     <>
       <Modal
@@ -621,6 +638,8 @@ const ProductModal = ({
         onHide={onClose}
         fullscreen
         className="custom-modal"
+        keyboard={false}   // ✅ VERY IMPORTANT
+        backdrop="static"  // optional but recommended
         style={{ marginTop: 20 }}
       >
         <Modal.Header closeButton>

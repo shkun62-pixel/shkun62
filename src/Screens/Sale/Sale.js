@@ -5094,6 +5094,7 @@ import { Modal, Form } from "react-bootstrap";
 import useTdsApplicable from "../Shared/useTdsApplicable";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import { useNavigate, useLocation } from "react-router-dom";
+import useShortcuts from "../Shared/useShortcuts";
 
 const LOCAL_STORAGE_KEY = "tabledataVisibility";
 
@@ -6236,7 +6237,11 @@ const Sale = () => {
           const nextData = response.data.data;
           setData1(nextData);
           setIndex(index + 1);
-          setFormData(nextData.formData);
+          setFormData({
+          ...nextData.formData,
+          date: formatDateToDDMMYYYY(nextData.formData.date),
+          duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
+          });
 
           // Update items and supplier details
           const updatedItems = nextData.items.map((item) => ({
@@ -6277,7 +6282,11 @@ const Sale = () => {
           const prevData = response.data.data;
           setData1(prevData);
           setIndex(index - 1);
-          setFormData(prevData.formData);
+          setFormData({
+          ...prevData.formData,
+          date: formatDateToDDMMYYYY(prevData.formData.date),
+          duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
+          });
 
           // Update items and supplier details
           const updatedItems = prevData.items.map((item) => ({
@@ -6318,7 +6327,11 @@ const Sale = () => {
         const firstData = response.data.data;
         setData1(firstData);
         setIndex(0);
-        setFormData(firstData.formData);
+        setFormData({
+        ...firstData.formData,
+        date: formatDateToDDMMYYYY(firstData.formData.date),
+        duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
+        });
 
         // Update items and supplier details
         const updatedItems = firstData.items.map((item) => ({
@@ -6360,7 +6373,11 @@ const Sale = () => {
         setData1(lastData);
         const lastIndex = response.data.length - 1;
         setIndex(lastIndex);
-        setFormData(lastData.formData);
+        setFormData({
+        ...lastData.formData,
+        date: formatDateToDDMMYYYY(lastData.formData.date),
+        duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
+        });
 
         // Update items and supplier details
         const updatedItems = lastData.items.map((item) => ({
@@ -6521,7 +6538,11 @@ const Sale = () => {
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
-        setFormData(lastEntry.formData);
+        setFormData({
+        ...lastEntry.formData,
+        date: formatDateToDDMMYYYY(lastEntry.formData.date),
+        duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+        });
         setData1(response.data.data);
         // setItems(lastEntry.items.map((item) => ({ ...item })));
         setItems(normalizeItems(lastEntry.items));
@@ -8473,6 +8494,22 @@ const Sale = () => {
     return `${day}-${month}-${year}`;
   };
 
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus || showModal || showModalAcc ||
+   isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: openPrintMenu,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
+
   return (
     <div>
       <ToastContainer />
@@ -8676,7 +8713,7 @@ const Sale = () => {
                     value={item.vacode}
                     className="customerNAME custom-bordered-input"
                     onKeyDown={(e) => {
-                      handleEnterKeyPress(customerNameRef, grNoRef)(e);
+                      handleEnterKeyPress(customerNameRef, shippedtoRef)(e);
                       handleKeyDown(e, index, "accountname");
                       handleOpenModalBack(e, index, "accountname");
                     }}

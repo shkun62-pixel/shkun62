@@ -22,6 +22,7 @@ import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import useCompanySetup from "../Shared/useCompanySetup";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import SearchModal from "../Shared/SearchModal";
+import useShortcuts from "../Shared/useShortcuts";
 
 const BankVoucher = () => {
 
@@ -766,7 +767,7 @@ const BankVoucher = () => {
 
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
-    setTitle("View");
+    setTitle("VIEW");
     try {
       if (data1) {
         const response = await axios.get(
@@ -796,7 +797,7 @@ const BankVoucher = () => {
 
   const handlePrevious = async () => {
     document.body.style.backgroundColor = "white";
-    setTitle("View");
+    setTitle("VIEW");
     try {
       if (data1) {
         const response = await axios.get(
@@ -827,7 +828,7 @@ const BankVoucher = () => {
 
   const handleFirst = async () => {
     document.body.style.backgroundColor = "white";
-    setTitle("View");
+    setTitle("VIEW");
 
     try {
       const response = await axios.get(
@@ -856,7 +857,7 @@ const BankVoucher = () => {
 
   const handleLast = async () => {
     document.body.style.backgroundColor = "white";
-    setTitle("View");
+    setTitle("VIEW");
 
     try {
       const response = await axios.get(
@@ -938,7 +939,7 @@ const BankVoucher = () => {
 
   const handleExit = async () => {
     document.body.style.backgroundColor = "white"; // Reset background color
-    setTitle("View");
+    setTitle("VIEW");
     try {
       const response = await axios.get(
         "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last"
@@ -967,6 +968,7 @@ const BankVoucher = () => {
         setIsSearchEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
+        setIsEditMode(false);
         // Update totals
         const totalpayment = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
@@ -1726,6 +1728,22 @@ const BankVoucher = () => {
     setSearchBillNo("");
     setSearchDate("");
   };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus || showModalAcc
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: handlePrintClick,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
+
   return (
     <div>
       <ToastContainer />

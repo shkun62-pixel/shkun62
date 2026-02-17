@@ -918,6 +918,7 @@ const ProductModalCustomer = ({
         if (selected) onSelect(selected);
       } else if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
         onClose();
       }
     };
@@ -1075,6 +1076,8 @@ const ProductModalCustomer = ({
         onHide={onClose}
         fullscreen
         className="custom-modal"
+        keyboard={false}   // ✅ prevent bootstrap auto Esc handling
+        backdrop="static"  // optional
         style={{ marginTop: 20 }}
       >
         <Modal.Header closeButton>

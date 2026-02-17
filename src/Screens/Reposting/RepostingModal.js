@@ -9,10 +9,11 @@ import {
   Typography,
 } from "@mui/material";
 import InputMask from "react-input-mask";
+import axios from "axios";
 
 const style = {
   position: "absolute",
-  top: "50%",
+  top: "30%",
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 420,
@@ -24,6 +25,8 @@ const style = {
 };
 
 const RepostingModal = ({ open, onClose }) => {
+
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     reposting: "Sale Bills",
     from: "01-04-2025",
@@ -34,9 +37,36 @@ const RepostingModal = ({ open, onClose }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleOk = () => {
-    console.log("Submitted:", formData);
-    // onClose();
+  const handleOk = async () => {
+    try {
+      // Validate date
+      if (!formData.from || !formData.to) {
+        alert("Please enter both FROM and UPTO dates");
+        return;
+      }
+
+      setLoading(true);
+
+      const response = await axios.post(
+        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/repost/sale-fafile",
+        {
+          repostingType: formData.reposting,
+          fromDate: formData.from,
+          toDate: formData.to,
+        }
+      );
+
+      console.log("API Response:", response.data);
+
+      alert("Reposting saved successfully!");
+
+      onClose();
+    } catch (error) {
+      console.error("API Save Error:", error);
+      alert("Failed to save posting – check console for details");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,13 +90,15 @@ const RepostingModal = ({ open, onClose }) => {
           {/* Reposting Dropdown */}
           <Grid item xs={12}>
             <TextField
+              className="custom-bordered-input"
               select
               fullWidth
-              label="Reposting"
+              label="REPOSTING"
               name="reposting"
               value={formData.reposting}
               onChange={handleChange}
               size="small"
+              variant="filled"
             >
               <MenuItem value="Sale Bills">Sale Bills</MenuItem>
               <MenuItem value="Purchase Bills">Purchase Bills</MenuItem>
@@ -83,6 +115,7 @@ const RepostingModal = ({ open, onClose }) => {
           {/* Starting Date */}
           <Grid item xs={6}>
             <InputMask
+              className="custom-bordered-input"
               mask="99-99-9999"
               value={formData.from}
               onChange={handleChange}
@@ -91,10 +124,11 @@ const RepostingModal = ({ open, onClose }) => {
                 <TextField
                   {...inputProps}
                   fullWidth
-                  label="Starting Date"
+                  label="FROM"
                   name="from"
                   placeholder="DD-MM-YYYY"
                   size="small"
+                  variant="filled"
                 />
               )}
             </InputMask>
@@ -103,6 +137,7 @@ const RepostingModal = ({ open, onClose }) => {
           {/* Ending Date */}
           <Grid item xs={6}>
             <InputMask
+              className="custom-bordered-input"
               mask="99-99-9999"
               value={formData.to}
               onChange={handleChange}
@@ -111,10 +146,11 @@ const RepostingModal = ({ open, onClose }) => {
                 <TextField
                   {...inputProps}
                   fullWidth
-                  label="Ending Date"
+                  label="UPTO"
                   name="to"
                   placeholder="DD-MM-YYYY"
                   size="small"
+                  variant="filled"
                 />
               )}
             </InputMask>
@@ -137,8 +173,9 @@ const RepostingModal = ({ open, onClose }) => {
               onClick={handleOk}
               variant="contained"
               fullWidth
+              disabled={loading}
             >
-              Ok
+              {loading ? "Saving..." : "Ok"}
             </Button>
           </Grid>
 

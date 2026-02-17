@@ -26,6 +26,7 @@ import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import useCashBankSetup from "../Shared/useCashBankSetup";
 import SearchModal from "../Shared/SearchModal";
+import useShortcuts from "../Shared/useShortcuts";
 
 // Register font
 Font.register({
@@ -870,6 +871,7 @@ const CashVoucher = () => {
         setIsSearchEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
+        setIsEditMode(false);
         // Update totals
         const totalPayment = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
@@ -903,6 +905,16 @@ const CashVoucher = () => {
         setFormData(newData); // Set default form data
         setItems(normalizeItems([]));
         setIsDisabled(true); // Disable fields after loading the default data
+        setIsAddEnabled(true);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        setIsEditMode(false);
       }
     } catch (error) {
       console.error("Error fetching data", error);
@@ -1450,6 +1462,21 @@ const CashVoucher = () => {
       }
       return true;
   };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus;
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: handlePrintClick,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
 
   return (
     <div>

@@ -22,6 +22,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import SearchModal from "../Shared/SearchModal";
+import useShortcuts from "../Shared/useShortcuts";
 
 const JournalVoucher = () => {
   const location = useLocation();
@@ -985,6 +986,7 @@ const JournalVoucher = () => {
         setIsSearchEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
+        setIsEditMode(false);
       } else {
         // If no data is available, initialize with default values
         console.log("No data available");
@@ -999,6 +1001,16 @@ const JournalVoucher = () => {
         setFormData(newData);
         setItems(normalizeItems([]));
         setIsDisabled(true); // Disable fields after loading the default data
+        setIsAddEnabled(true);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        setIsEditMode(false);
       }
     } catch (error) {
       console.error("Error fetching data", error);
@@ -1352,6 +1364,21 @@ const JournalVoucher = () => {
     setSearchBillNo("");
     setSearchDate("");
   };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus;
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: handlePrintClick,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
 
   return (
     <div>
