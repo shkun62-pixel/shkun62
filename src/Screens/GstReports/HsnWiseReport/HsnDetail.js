@@ -14,6 +14,8 @@ import axios from "axios";
 import HsnResultModal from "./HsnResultModal";
 
 const HsnDetailModal = ({ show, onHide }) => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [purSale, setPurSale] = useState("Purchase");
   const [grossDetail, setGrossDetail] = useState("Gross");
   const [rewriteHSN, setRewriteHSN] = useState(false);
@@ -28,12 +30,12 @@ const HsnDetailModal = ({ show, onHide }) => {
 
     if (purSale === "Sale") {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
       );
       setHsnData(res.data);
     } else {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/Purchase",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/Purchase`,
       );
       setHsnData(res.data);
     }

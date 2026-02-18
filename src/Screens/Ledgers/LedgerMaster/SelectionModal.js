@@ -8,6 +8,8 @@ const SelectionModal = ({
   selectedAccounts,
   setSelectedAccounts,
 }) => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [accounts, setAccounts] = useState([]);
   const [searchText, setSearchText] = useState("");
   const searchInputRef = useRef(null);
@@ -24,7 +26,7 @@ const SelectionModal = ({
 
     axios
       .get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       )
       .then((res) => {
         if (res.data.ok) {

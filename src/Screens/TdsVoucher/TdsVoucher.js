@@ -17,7 +17,7 @@ import InputMask from "react-input-mask";
 const TdsVoucher = () => {
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -118,7 +118,7 @@ const TdsVoucher = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/last`
       );
       console.log("Response: ", response.data.data);
       if (response.status === 200 && response.data && response.data.data) {
@@ -689,7 +689,7 @@ const TdsVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/next/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -729,7 +729,7 @@ const TdsVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/previous/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const prevData = response.data.data;
@@ -767,7 +767,7 @@ const TdsVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -804,7 +804,7 @@ const TdsVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -922,7 +922,7 @@ const TdsVoucher = () => {
     setIsAddEnabled(true); // Enable "Add" button
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/last`
       ); // Fetch the latest data
       if (response.status === 200 && response.data.data) {
         // If data is available
@@ -1149,7 +1149,7 @@ const TdsVoucher = () => {
       // Debugging
       console.log("Combined Data:", combinedData);
 
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
@@ -1201,7 +1201,7 @@ const TdsVoucher = () => {
     );
     if (!userConfirmed) return;
     try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdsvoucher/${data1._id}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdsvoucher/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {

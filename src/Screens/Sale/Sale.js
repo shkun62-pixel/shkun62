@@ -5119,7 +5119,7 @@ const Sale = () => {
   const { CompanyState, unitType } = useCompanySetup();
   const { applicable194Q } = useTdsApplicable();
   const { company } = useContext(CompanyContext);
-  const tenant = "shkun_05062025_05062026";
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -7054,7 +7054,7 @@ const Sale = () => {
     const fetchPostingSetup = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/sale-purchase-posting-setup",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/sale-purchase-posting-setup`,
         );
 
         if (res.data?.ok) {

@@ -9,8 +9,8 @@ import financialYear from "../../Shared/financialYear";
 import * as XLSX from 'sheetjs-style';
 import AccWisePrint from "./AccWisePrint";
 
-const API_URL =
-  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale";
+const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+const API_URL = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`;
 
 export default function ProductWiseSaleSum({ show, onClose }) {
     

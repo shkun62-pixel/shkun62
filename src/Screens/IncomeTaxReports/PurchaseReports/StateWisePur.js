@@ -7,8 +7,8 @@ import useCompanySetup from "../../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
 import AccountWisePrint from "./AccountWisePrint";
 
-const API_URL =
-  "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase";
+const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+const API_URL = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`;
 
 export default function StateWisePur({ show, onClose }) {
     

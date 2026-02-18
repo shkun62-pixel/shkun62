@@ -30,7 +30,7 @@ const StyledModal = styled(Box)({
 const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
 
    const { company } = useContext(CompanyContext);
-    const tenant = company?.databaseName;
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   
     if (!tenant) {
       // you may want to guard here or show an error state,
@@ -65,7 +65,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
 
     const fetchData = async () => {
       try {
-          const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/anexure/last`);
+          const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/anexure/last`);
           if (response.status === 200 && response.data.data) {
             const lastEntry = response.data.data;
               // Set flags and update form data
@@ -168,7 +168,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
     console.log(data1._id);
     try {
       if (data1) {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/anexure/next/${data1._id}`);
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/anexure/next/${data1._id}`);
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
           setData1(response.data.data);
@@ -186,7 +186,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
     document.body.style.backgroundColor = "white";
     try {
       if (data1) {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/anexure/previous/${data1._id}`);
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/anexure/previous/${data1._id}`);
         if (response.status === 200 && response.data) {
           console.log(response);
           setData1(response.data.data);
@@ -209,7 +209,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
     setIsSubmitEnabled(false);
     setIsEditMode(false);
     try {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/anexure/last`); // Fetch the latest data
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/anexure/last`); // Fetch the latest data
         if (response.status === 200 && response.data.data) {
             // If data is available
             const lastEntry = response.data.data;
@@ -342,7 +342,7 @@ const handleSelectChange = (selectedOption) => {
   
       console.log("Combined Data:", combinedData);
   
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/anexure${isAbcmode ? `/${data1._id}` : ""}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/anexure${isAbcmode ? `/${data1._id}` : ""}`;
       const method = isAbcmode ? "put" : "post";
       const response = await axios({
         method,
@@ -386,7 +386,7 @@ const handleSelectChange = (selectedOption) => {
       );
       if (!userConfirmed) return;
       try {
-        const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/anexure/${data1._id}`;
+        const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/anexure/${data1._id}`;
         const response = await axios.delete(apiEndpoint);
   
         if (response.status === 200) {
@@ -430,7 +430,7 @@ const handleSelectChange = (selectedOption) => {
   // Fetch data from API when component mounts
   useEffect(() => {
     axios
-      .get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`)
+      .get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/anexure`)
       .then((response) => setData(response.data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);

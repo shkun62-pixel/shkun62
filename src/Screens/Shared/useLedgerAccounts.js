@@ -74,6 +74,8 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 export default function useLedgerAccounts() {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [ledgerData, setLedgerData] = useState([]);
   const [existingGstList, setExistingGstList] = useState([]);
   const [existingpanList, setexistingpanList] = useState([]);
@@ -90,7 +92,7 @@ export default function useLedgerAccounts() {
       setLoading(true);
 
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
       );
 
       if (res.data?.data) {

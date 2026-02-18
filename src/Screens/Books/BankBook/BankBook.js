@@ -11,6 +11,8 @@ import { Button, Modal, Form } from "react-bootstrap";
 import financialYear from "../../Shared/financialYear";
 
 const BankBook = () => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const rowRefs = useRef([]);
   const navigate = useNavigate();
   const { dateFrom } = useCompanySetup();
@@ -34,7 +36,7 @@ const BankBook = () => {
     const fetchAnexure = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure"
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/anexure`
         );
         setAnexureList(res.data);
       } catch (err) {
@@ -56,7 +58,7 @@ const BankBook = () => {
     const fetchData = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank"
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`
         );
         setBankData(res.data);
         setFilteredData(res.data); // default show all
@@ -74,8 +76,13 @@ const BankBook = () => {
     // Date filter
     if (startDate && endDate) {
       data = data.filter((entry) => {
-        const entryDate = new Date(entry.formData.date);
-        return entryDate >= startDate && entryDate <= endDate;
+        const entryDate = parseDateUniversal(entry.formData.date);
+        const start = parseDateUniversal(startDate);
+        const end = parseDateUniversal(endDate);
+
+        if (!entryDate || !start || !end) return false;
+
+        return entryDate >= start && entryDate <= end;
       });
     }
 
@@ -383,3 +390,40 @@ const BankBook = () => {
 };
 
 export default BankBook;
+
+export const parseDateUniversal = (input) => {
+  if (!input) return null;
+
+  if (input instanceof Date) {
+    return isNaN(input) ? null : input;
+  }
+
+  if (typeof input === "number") {
+    const date = new Date(input);
+    return isNaN(date) ? null : date;
+  }
+
+  if (typeof input !== "string") return null;
+
+  const value = input.trim();
+
+  // Try native parsing (ISO, yyyy-mm-dd)
+  const native = new Date(value);
+  if (!isNaN(native)) return native;
+
+  // dd-mm-yyyy OR dd/mm/yyyy
+  const dmy = value.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+  if (dmy) {
+    const [, day, month, year] = dmy;
+    return new Date(year, month - 1, day);
+  }
+
+  // yyyy-mm-dd OR yyyy/mm/dd
+  const ymd = value.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+  if (ymd) {
+    const [, year, month, day] = ymd;
+    return new Date(year, month - 1, day);
+  }
+
+  return null;
+};

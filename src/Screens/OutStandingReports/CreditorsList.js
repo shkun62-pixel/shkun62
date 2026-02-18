@@ -17,8 +17,9 @@ import PrintOutStanding from "./PrintOutStanding";
 import financialYear from "../Shared/financialYear";
 
 const CreditorsList = () => {
-  const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
 
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+  const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
   const [allLedgers, setAllLedgers] = useState([]); // keep full list
   // const [allLedgers, setAllLedgers] = useState([]);
   const [faDataState, setFaDataState] = useState([]); // ✅ store faData here
@@ -239,10 +240,10 @@ const CreditorsList = () => {
       try {
         const [ledgerRes, faRes] = await Promise.all([
           axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount"
+            `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
           ),
           axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile"
+            `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`
           ),
         ]);
 
@@ -607,7 +608,7 @@ useEffect(() => {
 const fetchLedgerTransactions = (ledger) => {
   setSelectedLedger(ledger);
   axios
-    .get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+    .get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`)
     .then((res) => {
       const allTxns = res.data.data || [];
 
@@ -633,7 +634,7 @@ const fetchLedgerTransactions = (ledger) => {
   // For calculating net pcs and weight
   useEffect(() => {
     // Fetch all transactions once
-    axios.get("https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile")
+    axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`)
       .then((res) => {
         const allTxns = res.data.data || [];
         

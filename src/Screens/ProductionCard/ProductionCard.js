@@ -36,7 +36,7 @@ const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
 const ProductionCard = () => {
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -236,7 +236,7 @@ const ProductionCard = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/last`
       );
 
       if (response.status === 200 && response.data && response.data.data) {
@@ -452,7 +452,7 @@ const ProductionCard = () => {
   const fetchProducts2 = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster`
       );
       const data = await response.json();
       const filteredData = data.data
@@ -702,7 +702,7 @@ const ProductionCard = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/next/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -728,7 +728,7 @@ const ProductionCard = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/previous/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           // console.log(response);
@@ -755,7 +755,7 @@ const ProductionCard = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -780,7 +780,7 @@ const ProductionCard = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -847,7 +847,7 @@ const ProductionCard = () => {
     setTitle("View");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/last`
       ); // Fetch the latest data
 
       if (response.status === 200 && response.data.data) {
@@ -904,7 +904,7 @@ const ProductionCard = () => {
     );
     if (!userConfirmed) return;
     try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard/${data1._id}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {
@@ -1043,7 +1043,7 @@ const ProductionCard = () => {
       }
       // Debugging
       console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/productioncard${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/productioncard${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
@@ -1123,7 +1123,7 @@ const ProductionCard = () => {
     const fetchAheads = async () => {
       try {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/productioncard`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/productioncard`
         );
         const allAheads = response.data.flatMap((entry) =>
           entry.items.map((item) => item.Aheads)

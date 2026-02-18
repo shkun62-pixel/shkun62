@@ -328,6 +328,7 @@ const indianStates = [
 
 const LedgerSummary = ({ show, onHide }) => {
   /* ================= STATE ================= */
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [balance, setBalance] = useState("Active Balance");
   const [orderBy, setOrderBy] = useState("Account Name Wise");
   const [annexure, setAnnexure] = useState("All");
@@ -356,7 +357,7 @@ const LedgerSummary = ({ show, onHide }) => {
       try {
         setLoadingAnnexure(true);
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
         );
 
         if (res.data?.ok && Array.isArray(res.data.data)) {

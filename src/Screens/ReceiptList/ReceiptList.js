@@ -1076,7 +1076,7 @@ const defaultColumnOrder = {
 const ReceiptList = () => {
   const navigate = useNavigate();
   const { company } = useContext(CompanyContext);
-  const tenant = "shkun_05062025_05062026";
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   // filters modal inputs
   const [formData, setFormData] = useState({

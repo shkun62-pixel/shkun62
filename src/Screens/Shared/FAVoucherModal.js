@@ -75,7 +75,7 @@ export default function FAVoucherModal({
       setError("");
       setFa(null);
       try {
-        const url = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/${cfg.apipath}/byVoucher?vtype=${encodeURIComponent(
+        const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/${cfg.apipath}/byVoucher?vtype=${encodeURIComponent(
           vtype
         )}&voucherno=${encodeURIComponent(voucherno)}&rebuild=0&save=0`;
         const res = await axios.get(url);

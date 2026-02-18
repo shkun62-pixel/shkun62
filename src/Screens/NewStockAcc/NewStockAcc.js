@@ -23,7 +23,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
   const { getUniqueValues } = useStockAcc(); // only using hook
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -381,15 +381,15 @@ const NewStockAcc = ({ onSave, StockId }) => {
   //     let response;
   //     if (StockId) {
   //       response = await axios.get(
-  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/apisingle/stockmaster/${StockId}`
+  //         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/apisingle/stockmaster/${StockId}`
   //       );
   //     } else {
   //       response = await axios.get(
-  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+  //         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`
   //       );
   //     }
   //     // const response = await axios.get(
-  //     //   `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+  //     //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`
   //     // );
   //     if (response.status === 200 && response.data.data) {
   //       const lastEntry = response.data.data;
@@ -427,11 +427,11 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
     if (StockId) {
       response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/apisingle/stockmaster/${StockId}`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/apisingle/stockmaster/${StockId}`
       );
     } else {
       response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`
       );
     }
 
@@ -538,6 +538,25 @@ const NewStockAcc = ({ onSave, StockId }) => {
     setFormData((prev) =>
        ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
   };
+
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last-code`
+      );
+
+      return {
+        lastCode: res?.data?.lastCode || 0,
+        nextCode: res?.data?.nextCode || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
  
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
@@ -545,7 +564,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/next/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -577,7 +596,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/previous/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           console.log(response);
@@ -609,7 +628,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     document.body.style.backgroundColor = "white";
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -639,7 +658,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     document.body.style.backgroundColor = "white";
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -669,8 +688,10 @@ const NewStockAcc = ({ onSave, StockId }) => {
   const handleAdd = async () => {
     // document.body.style.backgroundColor = '#D5ECF3';
     try {
-      await fetchData(); // This should set up the state correctly whether data is found or not
-      let lastvoucherno = formData.Acodes ? parseInt(formData.Acodes) + 1 : 1;
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextCode;
       const newData = {
         Acodes: lastvoucherno, // Continue from the last voucher number or start new
         Aheads: "",
@@ -740,7 +761,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     setIsSubmitEnabled(false);
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`
       ); // Fetch the latest data
       if (response.status === 200 && response.data.data) {
         // If data is available
@@ -838,15 +859,6 @@ const NewStockAcc = ({ onSave, StockId }) => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  //   const handleAlphabetOnly = (e) => {
-  //   const { id, value } = e.target;
-  //   // Allow only alphabets (A-Z, a-z) and spaces
-  //   const alphabetRegex = /^[A-Za-z\s]*$/;
-  //   if (alphabetRegex.test(value)) {
-  //     setFormData({ ...formData, [id]: value });
-  //   }
-  // };
 
   const handleKeyPress = (event, nextInputId) => {
     if (event.key === "Enter") {
@@ -1008,7 +1020,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     try {
       const combinedData = prepareData();
       console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
@@ -1102,7 +1114,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     );
     if (!userConfirmed) return;
     try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stockmaster/${data1._id}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {

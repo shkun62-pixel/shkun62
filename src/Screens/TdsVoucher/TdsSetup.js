@@ -10,7 +10,7 @@ import { useContext } from "react";
 
 const TdsSetup = ({ onClose }) => {
   const { company } = useContext(CompanyContext);
-  const tenant = company?.databaseName;
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -55,7 +55,7 @@ const TdsSetup = ({ onClose }) => {
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -679,7 +679,7 @@ const TdsSetup = ({ onClose }) => {
     try {
       const combinedData = prepareData();
       console.log("Combined Data New:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/tdssetup${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/tdssetup${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";

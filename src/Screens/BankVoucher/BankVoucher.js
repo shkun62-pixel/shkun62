@@ -32,7 +32,7 @@ const BankVoucher = () => {
   const navigate = useNavigate();
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -161,7 +161,7 @@ const BankVoucher = () => {
   const fetchNarrations = async () => {
     try {
       const res = await fetch(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`
       );
       const data = await res.json();
 
@@ -240,7 +240,7 @@ const BankVoucher = () => {
   const fetchCashBankSetup = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cashbanksetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cashbanksetup`
       );
       if (!response.ok) throw new Error("Failed to fetch sales setup");
 
@@ -534,15 +534,15 @@ const BankVoucher = () => {
       let response;
       if (bankId) {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bankget/${bankId}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bankget/${bankId}`
         );
       } else {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
         );
       }
       // const response = await axios.get(
-      //   `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last`
+      //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
       // );
       // console.log("Response: ", response.data);
 
@@ -771,7 +771,7 @@ const BankVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/next/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -801,7 +801,7 @@ const BankVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/previous/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           // console.log(response);
@@ -832,7 +832,7 @@ const BankVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant//bank/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant//bank/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -861,7 +861,7 @@ const BankVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -942,7 +942,7 @@ const BankVoucher = () => {
     setTitle("VIEW");
     try {
       const response = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank/last"
+        "https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last"
       ); // Fetch the latest data
       if (response.status === 200 && response.data.data) {
         // If data is available
@@ -1189,7 +1189,7 @@ const BankVoucher = () => {
       }
       // Debugging
       // console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/bank${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
@@ -1686,7 +1686,7 @@ const BankVoucher = () => {
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/bank"
+        "https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank"
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
@@ -2209,7 +2209,7 @@ const BankVoucher = () => {
         <FAVoucherModal
           open={isFAModalOpen}
           onClose={() => setIsFAModalOpen(false)}
-          tenant="shkun_05062025_05062026"
+          tenant= {tenant}
           voucherno={formData?.voucherno}
           vtype="B"
         />

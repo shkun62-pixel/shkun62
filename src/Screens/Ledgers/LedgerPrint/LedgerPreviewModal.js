@@ -7,6 +7,8 @@ import * as XLSX from 'sheetjs-style';
 import { saveAs } from 'file-saver';
 
 const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   const contentRef = useRef();
 
@@ -37,7 +39,7 @@ const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
   useEffect(() => {
     const fetchLedgerMaster = async () => {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       );
 
       const groupMap = {};
@@ -112,7 +114,7 @@ const LedgerPreviewModal = ({ show, onHide, printPayload }) => {
 
     const fetchLedger = async () => {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`,
       );
 
       const ledgerMap = {};

@@ -35,7 +35,7 @@ const StockTransfer = () => {
   
   const { company } = useContext(CompanyContext);
     // const tenant = company?.databaseName;
-    const tenant = "shkun_05062025_05062026"
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
     if (!tenant) {
       // you may want to guard here or show an error state,
@@ -202,7 +202,7 @@ const StockTransfer = () => {
 
   const fetchData = async () => {
       try {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/last`);
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/last`);
     
         if (response.status === 200 && response.data && response.data.data) {
           const lastEntry = response.data.data;
@@ -492,7 +492,7 @@ const StockTransfer = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/next/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -518,7 +518,7 @@ const handlePrevious = async () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/previous/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           // console.log(response);
@@ -545,7 +545,7 @@ const handleFirst = async () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -570,7 +570,7 @@ const handleLast = async () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -643,7 +643,7 @@ const handleDeleteClick = async (id) => {
     const userConfirmed = window.confirm("Are you sure you want to delete this item?");
     if (!userConfirmed) return;
     try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/${data1._id}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {
@@ -703,7 +703,7 @@ const handleExit = async () => {
     setTitle("View");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer/last`
       ); // Fetch the latest data
 
       if (response.status === 200 && response.data.data) {
@@ -815,7 +815,7 @@ const handleSaveClick = async () => {
       }
       // Debugging
       console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/stocktransfer${isAbcmode ? `/${data1._id}` : ""}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stocktransfer${isAbcmode ? `/${data1._id}` : ""}`;
       const method = isAbcmode ? "put" : "post";
       const response = await axios({
         method,

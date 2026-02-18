@@ -51,7 +51,7 @@ const Purchase = () => {
 
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-    const tenant = "shkun_05062025_05062026"
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -382,7 +382,7 @@ const Purchase = () => {
   const fetchPurSetup = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchasesetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchasesetup`
       );
       if (!response.ok) throw new Error("Failed to fetch sales setup");
 
@@ -856,15 +856,15 @@ const Purchase = () => {
         console.log(purId);
         
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegstget/${purId}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstget/${purId}`
         );
       } else {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
         );
       }
       // const response = await axios.get(
-      //   `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
+      //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
       // );
 
       if (response.status === 200 && response.data && response.data.data) {
@@ -1085,7 +1085,7 @@ const Purchase = () => {
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
@@ -1166,7 +1166,7 @@ const Purchase = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}/next`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/${data1._id}/next`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -1209,7 +1209,7 @@ const Purchase = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}/previous`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/${data1._id}/previous`
         );
         if (response.status === 200 && response.data) {
           const prevData = response.data.data;
@@ -1250,7 +1250,7 @@ const Purchase = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -1291,7 +1291,7 @@ const Purchase = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -1456,7 +1456,7 @@ const Purchase = () => {
     setTitle("(View)");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
       );
 
       if (response.status === 200 && response.data.data) {
@@ -1971,7 +1971,7 @@ const Purchase = () => {
     const fetchPostingSetup = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/sale-purchase-posting-setup",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/sale-purchase-posting-setup`,
         );
 
         if (res.data?.ok) {
@@ -2590,7 +2590,7 @@ const Purchase = () => {
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -2859,7 +2859,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       const fetchPurchase = async () => {
         try {
           const res = await fetch(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+            `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
           );
           const data = await res.json();
           setPurchaseData(data);

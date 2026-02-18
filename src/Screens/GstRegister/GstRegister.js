@@ -6,6 +6,8 @@ import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 export default function GstRegister() {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [fromDate, setFromDate] = useState("2025-04-01");
   const [toDate, setToDate] = useState("2026-03-30");
   const [sale, setSale] = useState([]);
@@ -23,18 +25,37 @@ export default function GstRegister() {
   const navigate = useNavigate();
 
   // ---- Helpers ----
-  const parseDate = (d) => {
-    if (!d) return null;
-    if (/\d{4}-\d{2}-\d{2}T/.test(d) || /\d{4}-\d{2}-\d{2}/.test(d)) {
-      const dt = new Date(d);
-      if (!isNaN(dt)) return dt;
+  const parseDate = (input) => {
+    if (!input) return null;
+
+    // Already Date
+    if (input instanceof Date) {
+      return isNaN(input) ? null : input;
     }
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
-      const [dd, mm, yyyy] = d.split("/");
-      return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+
+    if (typeof input !== "string") return null;
+
+    const value = input.trim();
+
+    // 1️⃣ Try native (ISO / yyyy-mm-dd)
+    const native = new Date(value);
+    if (!isNaN(native)) return native;
+
+    // 2️⃣ dd-mm-yyyy OR dd/mm/yyyy
+    const dmy = value.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+    if (dmy) {
+      const [, day, month, year] = dmy;
+      return new Date(year, month - 1, day);
     }
-    const dt2 = new Date(d);
-    return isNaN(dt2) ? null : dt2;
+
+    // 3️⃣ yyyy-mm-dd OR yyyy/mm/dd
+    const ymd = value.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+    if (ymd) {
+      const [, year, month, day] = ymd;
+      return new Date(year, month - 1, day);
+    }
+
+    return null;
   };
 
   const fmt = (v) => {
@@ -53,7 +74,7 @@ export default function GstRegister() {
   const fetchSale = async () => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/sale"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`
       );
       setSale(res.data || []);
     } catch (err) {
@@ -65,7 +86,7 @@ export default function GstRegister() {
   const fetchPurchase = async () => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
       );
       setPurchase(res.data || []);
     } catch (err) {
@@ -80,8 +101,12 @@ export default function GstRegister() {
 
   const buildRegister = () => {
     const prevFYEnd = new Date("2025-03-31T23:59:59.999Z");
-    const periodStart = new Date(fromDate + "T00:00:00");
-    const periodEnd = new Date(toDate + "T23:59:59");
+    const periodStart = parseDate(fromDate);
+    const periodEnd = parseDate(toDate);
+
+    if (periodStart) periodStart.setHours(0, 0, 0, 0);
+    if (periodEnd) periodEnd.setHours(23, 59, 59, 999);
+
 
     const sumGSTFromArr = (arr, isPurchase) =>
       arr.reduce(

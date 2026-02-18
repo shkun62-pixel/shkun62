@@ -10,6 +10,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 
 
 const ProductionReport = ({ isOpen, handleClose, reportType, selectedAhead, transactionType }) => {
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026";
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
 
@@ -22,7 +23,7 @@ const ProductionReport = ({ isOpen, handleClose, reportType, selectedAhead, tran
 
     const fetchProductionData = async () => {
         try {
-            const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ProductionCard`);
+            const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ProductionCard`);
             setData(response.data);
             filterData(response.data);
         } catch (error) {

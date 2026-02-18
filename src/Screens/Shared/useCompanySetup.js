@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 
 export default function useCompanySetup() {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [companyName, setCompanyName] = useState(null);
   const [CompanyState, setCompanyState] = useState(null);
   const [companyAdd, setCompanyAdd] = useState(null);
@@ -24,7 +26,7 @@ export default function useCompanySetup() {
     const fetchCompanySetup = async () => {
       try {
         const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/company`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/company`
         );
         if (!response.ok) throw new Error("Failed to fetch sales setup");
 

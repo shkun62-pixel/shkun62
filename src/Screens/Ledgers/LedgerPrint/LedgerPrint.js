@@ -321,6 +321,7 @@ import {
 
 const LedgerPrint = ({ show, onHide }) => {
   /* ===================== STATE ===================== */
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [showPreview, setShowPreview] = useState(false);
   const [printPayload, setPrintPayload] = useState(null);
 
@@ -366,7 +367,7 @@ const LedgerPrint = ({ show, onHide }) => {
     const fetchLedgerAccounts = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
         );
 
         const data = res.data?.data || [];

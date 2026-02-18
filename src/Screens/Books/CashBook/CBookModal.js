@@ -15,7 +15,7 @@ const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
 
   const {dateFrom} = useCompanySetup();
   const { company } = useContext(CompanyContext);
-  const tenant = company?.databaseName;
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -82,7 +82,7 @@ const CBookModal = ({ isOpen, handleClose, onNavigate }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cash`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`
       );
       setData(response.data);
     } catch (error) {

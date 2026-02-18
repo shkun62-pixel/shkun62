@@ -31,7 +31,7 @@ const JournalVoucher = () => {
 
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026";
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -125,7 +125,7 @@ const JournalVoucher = () => {
   const fetchNarrations = async () => {
     try {
       const res = await fetch(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`,
       );
       const data = await res.json();
 
@@ -216,7 +216,7 @@ const JournalVoucher = () => {
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -391,14 +391,14 @@ const JournalVoucher = () => {
       let response;
       if (journalId) {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journalget/${journalId}`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journalget/${journalId}`,
         );
       } else {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
         );
       }
-      // const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`);
+      // const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`);
       // console.log("fetch Response: ", response.data);
 
       if (response.status === 200 && response.data.data) {
@@ -575,7 +575,7 @@ const JournalVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/next/${data1._id}`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/next/${data1._id}`,
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -600,7 +600,7 @@ const JournalVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/previous/${data1._id}`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/previous/${data1._id}`,
         );
         if (response.status === 200 && response.data) {
           console.log(response);
@@ -625,7 +625,7 @@ const JournalVoucher = () => {
     setTitle("View");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/first`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/first`,
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -649,7 +649,7 @@ const JournalVoucher = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -847,7 +847,7 @@ const JournalVoucher = () => {
       }
       // Debugging
       console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
       const method = isAbcmode ? "put" : "post";
       const response = await axios({
         method,
@@ -949,7 +949,7 @@ const JournalVoucher = () => {
     setTitle("View");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/last`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
       ); // Fetch the latest data
 
       if (response.status === 200 && response.data.data) {
@@ -1230,7 +1230,7 @@ const JournalVoucher = () => {
     try {
       console.log(searchDate, "Hellloooo");
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/journal/search?date=${searchDate}`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/search?date=${searchDate}`,
       );
 
       if (response.status === 200) {
@@ -1324,7 +1324,7 @@ const JournalVoucher = () => {
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`,
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
@@ -1862,7 +1862,7 @@ const JournalVoucher = () => {
           <FAVoucherModal
             open={isFAModalOpen}
             onClose={() => setIsFAModalOpen(false)}
-            tenant="shkun_05062025_05062026"
+            tenant={tenant}
             voucherno={formData?.voucherno}
             vtype="J"
           />

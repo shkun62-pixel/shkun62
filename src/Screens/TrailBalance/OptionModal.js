@@ -34,7 +34,7 @@ const Header = styled("div")({
 
 const OptionModal = ({ isOpen, onClose, onApply, exportMonthWise }) => {
   const { company } = useContext(CompanyContext);
-  const tenant = company?.databaseName;
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -63,7 +63,7 @@ const OptionModal = ({ isOpen, onClose, onApply, exportMonthWise }) => {
     // Fetch data from API
     axios
       .get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/anexure`
       )
       .then((response) => {
         // Extract only formData.name from the response

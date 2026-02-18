@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function useStockAcc() {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [stockData, setstockData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,7 +12,7 @@ export default function useStockAcc() {
   useEffect(() => {
     axios
       .get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster`
       )
       .then((res) => {
         if (res.data?.data) {

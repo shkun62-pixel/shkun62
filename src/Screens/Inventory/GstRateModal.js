@@ -422,7 +422,7 @@ export default function GstRateModal({ open, onClose }) {
   // ✅ Tenant + Base API (same as you used in modal)
   // const TENANT = "shkun_05062025_05062026";
   const { company } = useContext(CompanyContext);
-  const TENANT = "shkun_05062025_05062026";
+  const TENANT = "03AAYFG4472A1ZG_01042025_31032026";
   const BASE_URL = useMemo(
     () => `https://www.shkunweb.com/shkunlive/${TENANT}/tenant`,
     [TENANT]
@@ -787,7 +787,7 @@ export default function GstRateModal({ open, onClose }) {
             onSelect={handleAccountSelect}
             onClose={() => setShowAccountModal(false)}
             initialKey={pressedKey}
-            tenant={"shkun_05062025_05062026"}
+            tenant={TENANT}
           />
         )}
 

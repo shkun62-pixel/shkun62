@@ -59,6 +59,7 @@ const INDIA_STATES = [
 
 const MasterAccountModal = ({ show, onHide }) => {
   // ================= STATE VARIABLES =================
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const [cityName, setCityName] = useState("");
   const [address1, setAddress1] = useState("");
   const [stateName, setStateName] = useState("");
@@ -101,7 +102,7 @@ const MasterAccountModal = ({ show, onHide }) => {
     const fetchGroups = async () => {
       try {
         const res = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/anexure`,
         );
         setGroupList(res.data || []);
       } catch (err) {

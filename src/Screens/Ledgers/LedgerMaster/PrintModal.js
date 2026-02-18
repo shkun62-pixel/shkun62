@@ -5,6 +5,8 @@ import useCompanySetup from "../../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
 
 const PrintModal = ({ show, onHide, filters, selectedAccounts }) => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ const PrintModal = ({ show, onHide, filters, selectedAccounts }) => {
 
     axios
       .get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       )
       .then((res) => {
         if (res.data.ok) {

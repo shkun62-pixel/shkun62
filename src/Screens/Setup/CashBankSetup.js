@@ -23,7 +23,7 @@ import { useContext } from "react";
 const CashBankSetup = ({ onClose }) => {
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -117,24 +117,10 @@ const CashBankSetup = ({ onClose }) => {
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [activeStep, setActiveStep] = useState(0);
 
-  // useEffect(() => {
-  //   const isEmpty =
-  //     formData &&
-  //     Object.values(formData).every((v) =>
-  //       v === "" ||
-  //       v === null ||
-  //       v === undefined ||
-  //       v === 0 ||
-  //       v === false
-  //     );
-
-  //   setIsSubmitEnabled(isEmpty);
-  // }, [formData]);
-  
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cashbanksetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cashbanksetup`
       );
       if (response.status === 200 && response.data.length > 0) {
         const lastEntry = response.data[response.data.length - 1]; // Assuming you want the last one
@@ -1061,7 +1047,7 @@ const CashBankSetup = ({ onClose }) => {
     try {
       const combinedData = prepareData();
       console.log("Combined Data New:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/cashbanksetup${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cashbanksetup${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";

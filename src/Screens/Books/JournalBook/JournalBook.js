@@ -14,7 +14,7 @@ import financialYear from "../../Shared/financialYear";
 const JournalBook = ({ isOpen, handleClose, onNavigate }) => {
 
   const { company } = useContext(CompanyContext);
-    const tenant = company?.databaseName;
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   
     if (!tenant) {
       // you may want to guard here or show an error state,
@@ -42,7 +42,7 @@ const JournalBook = ({ isOpen, handleClose, onNavigate }) => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/journal`);
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`);
       setData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -55,12 +55,14 @@ const JournalBook = ({ isOpen, handleClose, onNavigate }) => {
       return;
     }
 
-    const from = new Date(fromDate);
-    const upto = new Date(uptoDate);
+    const from = parseDateUniversal(fromDate);
+    const upto = parseDateUniversal(uptoDate);
     const groupedData = {};
 
     data.forEach((entry) => {
-      const entryDate = new Date(entry.formData.date);
+      const entryDate = parseDateUniversal(entry.formData?.date);
+      if (!entryDate) return;
+
       if (entryDate >= from && entryDate <= upto) {
         if (!groupedData[entry.formData.date]) {
           groupedData[entry.formData.date] = { receipts: [], payments: [] };
@@ -84,8 +86,46 @@ const JournalBook = ({ isOpen, handleClose, onNavigate }) => {
     });
 
     setFilteredData(groupedData);
-    setIsPrintModalOpen(true); // Open Print Modal after filtering
+    setIsPrintModalOpen(true);
   };
+
+  // const handleFilter = () => {
+  //   if (!fromDate || !uptoDate) {
+  //     alert("Please select both dates.");
+  //     return;
+  //   }
+
+  //   const from = new Date(fromDate);
+  //   const upto = new Date(uptoDate);
+  //   const groupedData = {};
+
+  //   data.forEach((entry) => {
+  //     const entryDate = new Date(entry.formData.date);
+  //     if (entryDate >= from && entryDate <= upto) {
+  //       if (!groupedData[entry.formData.date]) {
+  //         groupedData[entry.formData.date] = { receipts: [], payments: [] };
+  //       }
+
+  //       entry.items.forEach((item) => {
+  //         if (parseFloat(item.debit) > 0) {
+  //           groupedData[entry.formData.date].receipts.push({
+  //             ...item,
+  //             voucherno: entry.formData.voucherno,
+  //           });
+  //         }
+  //         if (parseFloat(item.credit) > 0) {
+  //           groupedData[entry.formData.date].payments.push({
+  //             ...item,
+  //             voucherno: entry.formData.voucherno,
+  //           });
+  //         }
+  //       });
+  //     }
+  //   });
+
+  //   setFilteredData(groupedData);
+  //   setIsPrintModalOpen(true); // Open Print Modal after filtering
+  // };
 
   const handleClose2 = () => {
     handleClose();
@@ -184,3 +224,43 @@ const JournalBook = ({ isOpen, handleClose, onNavigate }) => {
 };
 
 export default JournalBook;
+
+export const parseDateUniversal = (input) => {
+  if (!input) return null;
+
+  // If already a Date object
+  if (input instanceof Date) {
+    return isNaN(input) ? null : input;
+  }
+
+  // If timestamp
+  if (typeof input === "number") {
+    const date = new Date(input);
+    return isNaN(date) ? null : date;
+  }
+
+  if (typeof input !== "string") return null;
+
+  const value = input.trim();
+
+  // Try native parsing first (handles ISO and yyyy-mm-dd)
+  const nativeParsed = new Date(value);
+  if (!isNaN(nativeParsed)) return nativeParsed;
+
+  // Handle dd-mm-yyyy or dd/mm/yyyy
+  const dmyMatch = value.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+  if (dmyMatch) {
+    const [, day, month, year] = dmyMatch;
+    return new Date(year, month - 1, day);
+  }
+
+  // Handle yyyy-mm-dd or yyyy/mm/dd
+  const ymdMatch = value.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+  if (ymdMatch) {
+    const [, year, month, day] = ymdMatch;
+    return new Date(year, month - 1, day);
+  }
+
+  return null; // If nothing matches
+};
+

@@ -261,6 +261,8 @@ import useCompanySetup from "../../Shared/useCompanySetup";
 import * as XLSX from "sheetjs-style";
 
 const LedgerSummaryResult = ({ show, onHide, filters }) => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   const contentRef = useRef(null);
   const [rows, setRows] = useState([]);
@@ -280,12 +282,12 @@ const LedgerSummaryResult = ({ show, onHide, filters }) => {
 
         // 1️⃣ Fetch transactions
         const txRes = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`,
         );
 
         // 2️⃣ Fetch account details
         const accountRes = await axios.get(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
         );
 
         let transactions =

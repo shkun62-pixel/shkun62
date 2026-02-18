@@ -15,6 +15,8 @@ import financialYear from "../Shared/financialYear";
 const SEARCH_COL_STORAGE_KEY = "ledger_search_columns";
 
 const LedgerList = () => {
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
 
   // Filter Ledgers
@@ -207,7 +209,7 @@ const LedgerList = () => {
   useEffect(() => {
     axios
       .get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       )
       .then((res) => {
         const data = res.data.data || [];
@@ -350,7 +352,7 @@ const LedgerList = () => {
     setSelectedLedger(ledger);
     axios
       .get(
-        "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile",
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`,
       )
       .then((res) => {
         const allTxns = res.data.data || [];

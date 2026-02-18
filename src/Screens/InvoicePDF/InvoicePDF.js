@@ -357,7 +357,7 @@ const InvoicePDF = React.forwardRef(
                       >
                         <text
                           style={{
-                            fontSize: 60,
+                            fontSize: 40,
                             fontWeight: "600",
                             fontFamily: "serif",
                             color: "darkblue",
@@ -1251,8 +1251,7 @@ const InvoicePDF = React.forwardRef(
                         flexDirection: "row",
                         borderLeft: "1px solid black",
                         borderRight: "1px solid black",
-                        borderBottom: "1px solid black",
-                        height: 180,
+                        // height: 180,
                       }}
                     >
                       <div
@@ -1286,42 +1285,45 @@ const InvoicePDF = React.forwardRef(
                         <a style={{ marginLeft: 10, fontSize: 18 }}>
                           Subjected to FATEHGARH SAHIB Jurisdiction Only.
                         </a>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            marginTop: 5,
-                          }}
-                        >
-                          <text style={{ fontSize: 22, marginLeft: 15 }}>
-                            E.& O.E
-                          </text>
-                          <text style={{ fontSize: 22, marginLeft: "42%" }}>
-                            Checked/Prepared by
-                          </text>
-                        </div>
                       </div>
                       <div
                         style={{
                           display: "flex",
                           flexDirection: "column",
                           marginTop: 30,
-                          marginLeft: 40,
                         }}
                       >
-                        <text style={{ fontSize: 20 }}>
+                        <text >
                           FOR {companyName}
                         </text>
-                        <text
-                          style={{
-                            fontSize: 22,
-                            marginTop: "33%",
-                            marginLeft: 20,
-                          }}
-                        >
-                          Authorised Signature
-                        </text>
                       </div>
+                    </div>
+                    <div
+                      style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    borderLeft: "1px solid black",
+                    borderRight: "1px solid black",
+                    borderBottom: "1px solid black",
+                    padding: 5,
+                      }}
+                    >
+                      <text style={{ fontSize: 22 }}>
+                        E.& O.E
+                      </text>
+                      <text style={{ fontSize: 22 }}>
+                        Checked/Prepared by
+                      </text>
+                      <text
+                      style={{
+                        fontSize: 22,
+                        // marginTop: "33%",
+                        marginLeft: 20,
+                      }}
+                    >
+                      Authorised Signature
+                    </text>
                     </div>
                     <div style={{ fontSize: "12px" }}>
                       <text>

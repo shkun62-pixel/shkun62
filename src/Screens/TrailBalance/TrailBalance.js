@@ -54,7 +54,7 @@ const formatDate = (date) => {
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
   const { company } = useContext(CompanyContext);
-  const tenant = "shkun_05062025_05062026";
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const navigate = useNavigate();
 
   // Main TB rows (already merged by ACODE on backend)
@@ -1039,7 +1039,7 @@ const TrailBalance = () => {
             </div>
           </div>
 
-          <h3 className="headerTrail">TRAIL BALANCE</h3>
+          <h3 className="headerTrail">TRIAL BALANCE</h3>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", flexDirection: "row" }}>
@@ -1923,10 +1923,10 @@ export default TrailBalance;
 //       try {
 //         const [ledgerRes, faRes] = await Promise.all([
 //           axios.get(
-//             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount",
+//             "https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount",
 //           ),
 //           axios.get(
-//             "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile",
+//             "https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile",
 //           ),
 //         ]);
 
@@ -2215,7 +2215,7 @@ export default TrailBalance;
 //   const loadLedgerData = (selectedLedger = null) => {
 //     axios
 //       .get(
-//         "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/aa/fafile",
+//         "https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile",
 //       )
 //       .then((res) => {
 //         const allTxns = res.data.data || [];

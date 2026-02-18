@@ -35,7 +35,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   const { getUniqueValues, existingGstList, existingpanList, existingTdsList, existingAdharList, existingAccList, existingAcCodeList, ledgerData, fetchLedgerAccounts } = useLedgerAccounts(); // only using hook
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -124,7 +124,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     const fetchCashBankSetup = async () => {
       try {
         const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/cashbanksetup`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cashbanksetup`
         );
         if (!response.ok) throw new Error("Failed to fetch sales setup");
   
@@ -293,18 +293,18 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           let response;
           if (ledgerId) {
             response = await axios.get(
-              `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount1/${ledgerId}`
+              `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount1/${ledgerId}`
             );
           }else if (ledgerId2) {
             response = await axios.get(
-              `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount1/${ledgerId2}`
+              `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount1/${ledgerId2}`
             );
           } else {
             response = await axios.get(
-              `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`
+              `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/last`
             );
           }
-          // const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`);
+          // const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/last`);
           if (response.status === 200 && response.data.data || response.data) {
             const lastEntry = response.data.data || response.data || null;
               // Set flags and update form data
@@ -544,7 +544,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/next/${data1._id}`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -564,7 +564,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     document.body.style.backgroundColor = "white";
     try {
       if (data1) {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/previous/${data1._id}`);
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/previous/${data1._id}`);
         if (response.status === 200 && response.data) {
           console.log(response);
           setData1(response.data.data);
@@ -584,7 +584,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     document.body.style.backgroundColor = "white";
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -602,7 +602,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   const handleLast = async () => {
     document.body.style.backgroundColor = "white";
     try {
-      const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`);
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/last`);
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
         const lastIndex = response.data.length - 1;
@@ -1002,7 +1002,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   
       console.log("Combined Data:", combinedData);
   
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount${isAbcmode ? `/${data1._id}` : ""}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount${isAbcmode ? `/${data1._id}` : ""}`;
       const method = isAbcmode ? "put" : "post";
   
       const response = await axios({
@@ -1079,7 +1079,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     );
     if (!userConfirmed) return;
     try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/${data1._id}`;
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {
@@ -1101,7 +1101,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     setIsAddEnabled(true); // Enable "Add" button
     setIsSubmitEnabled(false);
     try {
-      const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`); // Fetch the latest data
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/last`); // Fetch the latest data
       if (response.status === 200 && response.data.data) {
         // If data is available
         const lastEntry = response.data.data;

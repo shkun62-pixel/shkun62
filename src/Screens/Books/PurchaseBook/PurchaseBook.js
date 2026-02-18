@@ -18,7 +18,7 @@ const PurchaseBook = () => {
   const navigate = useNavigate();
   const {dateFrom} = useCompanySetup();
   const { company } = useContext(CompanyContext);
-  const tenant = company?.databaseName;
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
     if (!tenant) {
       // you may want to guard here or show an error state,
@@ -274,7 +274,7 @@ const PurchaseBook = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
         );
         if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -306,7 +306,7 @@ const PurchaseBook = () => {
   //   const fetchEntries = async () => {
   //     setLoading(true);
   //     try {
-  //       const response = await fetch(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase`);
+  //       const response = await fetch(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`);
   //       if (!response.ok) throw new Error("Failed to fetch data");
 
   //       const data = await response.json();
@@ -895,7 +895,7 @@ const PurchaseBook = () => {
               >
                 {sortedVisibleFields.map((field) => {
                   let value = "";
-                  if (field === "date") value = formatDate(formData.date);
+                  if (field === "date") value = formatDate(formData.date) || formData.date || "Invalid Date";
                   else if (field === "billno") value = formData.vno || "";
                   else if (field === "accountname") value = supplierdetails.vacode || "";
                   else if (field === "weight") value = totalItemWeight;
