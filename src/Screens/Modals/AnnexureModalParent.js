@@ -364,8 +364,8 @@ const handleSelectChange = (selectedOption) => {
       if (isDataSaved) {
         setIsSubmitEnabled(false); // Disable after successful save
         setIsAddEnabled(true);
-        setIsPreviousEnabled(false);
-        setIsNextEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
         setIsDisabled(true);
         setIsEditMode(false);
         toast.success("Data Saved Successfully!", { position: "top-center" });

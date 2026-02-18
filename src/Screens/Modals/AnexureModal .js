@@ -57,6 +57,7 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit }) => {
       onSelect({
         name: filteredData[index].formData.name,
         code: filteredData[index].formData.code,
+        group: filteredData[index].formData.group
       });
 
       handleClose();

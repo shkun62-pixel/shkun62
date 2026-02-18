@@ -246,18 +246,22 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     };
 
   const handleSelectBsgroup = (selectedItem) => {
-      setFormData((prevData) => ({
-    ...prevData,
-    Bsgroup: selectedItem.name,
-    Bscode: selectedItem.code,
-  }));
-  
-    // Ensure modal closes first, then focus on GSTNO field
+    setFormData((prevData) => ({
+      ...prevData,
+      Bsgroup: selectedItem.name,
+      Bscode: selectedItem.code,
+      group: selectedItem.group,
+    }));
+
     setTimeout(() => {
-      if (inputRefs.current[0]) {
-        inputRefs.current[0].focus(); 
+      if (selectedItem.group !== "Balance Sheet") {
+        // Focus A/C NAME
+        inputRefs.current[1]?.focus();
+      } else {
+        // Focus GST NO
+        inputRefs.current[0]?.focus();
       }
-    }, 200); // Delay to allow modal transition to complete
+    }, 200);
   };
 
   // Api Response
@@ -514,6 +518,25 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     }
   };
 
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/last-acode`
+      );
+
+      return {
+        lastAcode: res?.data?.lastAcode || 0,
+        nextAcode: res?.data?.nextAcode || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     // console.log(data1._id);
@@ -597,96 +620,87 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     setShowModal(true);
     setTitle("NEW");
     try {
-        await fetchData();
-        let lastvoucherno = 0;
-        console.log(data);
-        if (formData.acode === '') {
-            lastvoucherno = 1;
-        } else {
-            const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`);
-            if (response.status === 200 && response.data) {
-                // console.log(response.data.data,"helloooooosss");
-                lastvoucherno = parseInt(response.data.data.formData.acode) + 1;
-                // console.log("LastVoucher::",lastvoucherno);
-            }
-        }
-        const newData = {
-          Bsgroup: "",
-          Bscode:"",
-          acode: lastvoucherno,
-          gstNo: "",
-          ahead: "",
-          add1: "",
-          add2:"",
-          city: "",
-          state: "",
-          distance: "",
-          pinCode: "",
-          distt: "",
-          opening_dr: "",
-          opening_cr: "",
-          msmed: "",
-          phone: "",
-          email: "",
-          area: "",
-          agent: "",
-          group: "",
-          pan: "",
-          tcs206: "",
-          tds194q: "",
-          tdsno: "",
-          wahead: "",
-          wadd1: "",
-          wadd2: "",
-          Rc: "",
-          Ecc: "",
-          erange: "",
-          collc: "",
-          srvno: "",
-          cperson: "",
-          irate: "",
-          tds_rate: "",
-          tcs_rate: "",
-          sur_rate: "",
-          weight: "",
-          bank_ac: "",
-          narration: "",
-          subname: "",
-          subaddress: "",
-          subcity: "",
-          subgstNo: "",
-          payLimit:0,
-          payDuedays:0,
-          graceDays:0,
-          sortingindex:"",
-          qtyBsheet:"",
-          discount:0,
-          Terms:"",
-          tradingAc:"",
-          prefixPurInvoice:"",
-          status:"",
-          ward:"",
-          areacode:"",
-          aoType:"",
-          rangecode:"",
-          aoNo:"",
-        };
-        setData([...data, newData]);
-        setFormData(newData);
-        setIndex(data.length);
-        setIsAddEnabled(false);
-        setIsSubmitEnabled(true);
-        setIsPreviousEnabled(false);
-        setIsNextEnabled(false);
-        setIsFirstEnabled(false);
-        setIsLastEnabled(false);
-        setIsSearchEnabled(false);
-        setIsSPrintEnabled(false);
-        setIsDeleteEnabled(false);
-        setIsFetchEnabled(true);
-        setIsSubMasterEnabled(true);
-        setIsDisabled(false);
-        setIsEditMode(true);
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextAcode;
+      const newData = {
+        Bsgroup: "",
+        Bscode:"",
+        acode: lastvoucherno,
+        gstNo: "",
+        ahead: "",
+        add1: "",
+        add2:"",
+        city: "",
+        state: "",
+        distance: "",
+        pinCode: "",
+        distt: "",
+        opening_dr: "",
+        opening_cr: "",
+        msmed: "",
+        phone: "",
+        email: "",
+        area: "",
+        agent: "",
+        group: "",
+        pan: "",
+        tcs206: "",
+        tds194q: "",
+        tdsno: "",
+        wahead: "",
+        wadd1: "",
+        wadd2: "",
+        Rc: "",
+        Ecc: "",
+        erange: "",
+        collc: "",
+        srvno: "",
+        cperson: "",
+        irate: "",
+        tds_rate: "",
+        tcs_rate: "",
+        sur_rate: "",
+        weight: "",
+        bank_ac: "",
+        narration: "",
+        subname: "",
+        subaddress: "",
+        subcity: "",
+        subgstNo: "",
+        payLimit:0,
+        payDuedays:0,
+        graceDays:0,
+        sortingindex:"",
+        qtyBsheet:"",
+        discount:0,
+        Terms:"",
+        tradingAc:"",
+        prefixPurInvoice:"",
+        status:"",
+        ward:"",
+        areacode:"",
+        aoType:"",
+        rangecode:"",
+        aoNo:"",
+      };
+      setData([...data, newData]);
+      setFormData(newData);
+      setIndex(data.length);
+      setIsAddEnabled(false);
+      setIsSubmitEnabled(true);
+      setIsPreviousEnabled(false);
+      setIsNextEnabled(false);
+      setIsFirstEnabled(false);
+      setIsLastEnabled(false);
+      setIsSearchEnabled(false);
+      setIsSPrintEnabled(false);
+      setIsDeleteEnabled(false);
+      setIsFetchEnabled(true);
+      setIsSubMasterEnabled(true);
+      setIsDisabled(false);
+      setIsEditMode(true);
     } catch (error) {
         console.error("Error adding new entry:", error);
     }
@@ -1296,7 +1310,6 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   };
     // Handle Enter key to move focus to the next enabled input
     const handleKeyDown = (e, index) => {
-      // If toast is open, prevent focus movement
       if (toastOpen && (e.key === "Tab" || e.key === "Enter")) {
         e.preventDefault();
         return;
@@ -1304,32 +1317,77 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
 
       if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
+
+        // 🔥 Special case:
+        // If group is Balance sheet AND current field is A/C NAME (index 1)
+        if (formData.group !== "Balance Sheet" && index === 1) {
+          inputRefs.current[29]?.focus(); // Jump directly to irate
+          return;
+        }
+
         let nextIndex = index + 1;
 
-        while (inputRefs.current[nextIndex] && inputRefs.current[nextIndex].disabled) {
+        while (
+          inputRefs.current[nextIndex] &&
+          inputRefs.current[nextIndex].disabled
+        ) {
           nextIndex += 1;
         }
 
-        const nextInput = inputRefs.current[nextIndex];
-        if (nextInput) {
-          nextInput.focus();
-        }
+        inputRefs.current[nextIndex]?.focus();
       }
 
       if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         e.preventDefault();
+
         let prevIndex = index - 1;
 
-        while (inputRefs.current[prevIndex] && inputRefs.current[prevIndex].disabled) {
+        while (
+          inputRefs.current[prevIndex] &&
+          inputRefs.current[prevIndex].disabled
+        ) {
           prevIndex -= 1;
         }
 
-        const prevInput = inputRefs.current[prevIndex];
-        if (prevInput) {
-          prevInput.focus();
-        }
+        inputRefs.current[prevIndex]?.focus();
       }
     };
+
+    // const handleKeyDown = (e, index) => {
+    //   // If toast is open, prevent focus movement
+    //   if (toastOpen && (e.key === "Tab" || e.key === "Enter")) {
+    //     e.preventDefault();
+    //     return;
+    //   }
+
+    //   if (e.key === "Enter" || e.key === "Tab") {
+    //     e.preventDefault();
+    //     let nextIndex = index + 1;
+
+    //     while (inputRefs.current[nextIndex] && inputRefs.current[nextIndex].disabled) {
+    //       nextIndex += 1;
+    //     }
+
+    //     const nextInput = inputRefs.current[nextIndex];
+    //     if (nextInput) {
+    //       nextInput.focus();
+    //     }
+    //   }
+
+    //   if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+    //     e.preventDefault();
+    //     let prevIndex = index - 1;
+
+    //     while (inputRefs.current[prevIndex] && inputRefs.current[prevIndex].disabled) {
+    //       prevIndex -= 1;
+    //     }
+
+    //     const prevInput = inputRefs.current[prevIndex];
+    //     if (prevInput) {
+    //       prevInput.focus();
+    //     }
+    //   }
+    // };
     const handleNumericValue = (event) => {
       const { id, value } = event.target;
 
