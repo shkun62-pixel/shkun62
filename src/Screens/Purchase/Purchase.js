@@ -84,6 +84,7 @@ const Purchase = () => {
   const expAfterGSTRef = useRef(null);
   const printButtonRef = useRef(null);
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   // const handleClose = () => setOpen(false);
@@ -3711,50 +3712,136 @@ const handleKeyDown = (event, index, field) => {
             />
           </div>
           <div className="Setup">
-            <button
-              className="Button"
-              style={{backgroundColor:"blue",color:'white',fontWeight:'bold'}}
-              onClick={openModal}
+              <button
+                className="Button"
+                style={{ backgroundColor: "blue", color: "white", fontWeight: "bold" }}
+                onClick={openModal}
               >
                 SETUP
               </button>
 
               {/* Settings Button */}
               <button
-                onClick={() => setDrawerOpen(true)}
+                type="button"
+                onClick={() => setSettingsOpen(true)}
                 className="Setting text-xl text-blue-700"
+                style={{
+                  cursor: "pointer",
+                  border: "none",
+                  background: "transparent",
+                  padding: 6,
+                  borderRadius: 10,
+                }}
+                title="Settings"
               >
                 <FaCog />
               </button>
-            {/* Fullscreen Overlay Drawer */}
-            {drawerOpen && (
-              <div style={{zIndex:10000}}>
-                {/* Background Overlay */}
-                <div
-                  className="fixed inset-0 bg-black bg-opacity-50 z-40"
-                  onClick={() => setDrawerOpen(false)}
-                ></div>
 
-                {/* Drawer Panel */}
-                <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out">
-                  {/* Drawer Header */}
-                  <div className="flex justify-between items-center px-4 py-3 border-b">
-                    <span className="font-bold text-lg">Options</span>
-                    <button
-                      onClick={() => setDrawerOpen(false)}
-                      className="text-xl text-gray-600"
-                    >
-                      <FaTimes />
-                    </button>
+              {/* Premium Settings Modal */}
+              <Modal
+                show={settingsOpen}
+                onHide={() => setSettingsOpen(false)}
+                centered
+                size="lg"
+                backdrop="static"
+                keyboard={true}
+                dialogClassName="p-0"
+                style={{ maxHeight: "100vh", overflowY: "hidden", marginTop:-10 }}
+              >
+                {/* Premium Header */}
+                <div
+                  style={{
+                    padding: "14px 18px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderBottom: "1px solid rgba(0,0,0,0.08)",
+                    background:
+                      "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.10), rgba(255,255,255,0.85))",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
+                      Options
+                    </div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      Customize table fields & theme
+                    </div>
                   </div>
 
-                  {/* Drawer Body */}
-                  <div className="flex flex-col p-4 gap-3">
-                    {/* Color Selector */}
+                  <button
+                    onClick={() => setSettingsOpen(false)}
+                    style={{
+                      height: 38,
+                      width: 38,
+                      borderRadius: 12,
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      background: "rgba(255,255,255,0.8)",
+                      display: "grid",
+                      placeItems: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Close"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+
+                {/* Body */}
+                <Modal.Body style={{ padding: 18, background: "rgba(249,250,251,0.85)" }}>
+                  {/* Theme Card */}
+                  <div
+                    style={{
+                      borderRadius: 16,
+                      padding: 14,
+                      background: "rgba(255,255,255,0.9)",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                          COLOR / GRADIENT
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                          Choose header theme
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          height: 34,
+                          width: 34,
+                          borderRadius: 12,
+                          background: color,
+                          border: "1px solid rgba(255,255,255,0.7)",
+                          boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
+                        }}
+                        title="Preview"
+                      />
+                    </div>
+
                     <select
-                      className="border border-gray-400 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       value={color}
                       onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: 12,
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        background: "white",
+                        fontSize: 13,
+                        outline: "none",
+                      }}
                     >
                       {gradientOptions.map((option, index) => (
                         <option key={index} value={option.value}>
@@ -3762,44 +3849,144 @@ const handleKeyDown = (event, index, field) => {
                         </option>
                       ))}
                     </select>
+                  </div>
 
-                    {/* Font Size Buttons */}
-                    {/* <div className="flex gap-2">
-                      <button
-                        onClick={decreaseFontSize}
-                        className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
-                      >
-                        <FaMinus />
-                      </button>
+                  {/* Fields Card */}
+                  <div
+                    style={{
+                      borderRadius: 16,
+                      padding: 14,
+                      background: "rgba(255,255,255,0.9)",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                          SELECT TABLE FIELDS
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                          Toggle column visibility
+                        </div>
+                      </div>
 
-                      <button
-                        onClick={increaseFontSize}
-                        className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          padding: "6px 10px",
+                          borderRadius: 10,
+                          background: "rgba(17,24,39,0.06)",
+                          color: "#374151",
+                        }}
                       >
-                        <FaPlus />
-                      </button>
-                    </div> */}
-                  <div style={{ display: "flex", flexWrap: "wrap",flexDirection:'column'}}>
-                    <span style={{fontSize:17,fontWeight:'bold'}}>SELECT TABLE FIELDS</span>
-                    <div style={{marginTop:"10px",display:'flex',flexDirection:"column"}}>
-                    {Object.keys(tableData).map((field) => (
-                      <label key={field} style={{ marginRight: "15px",fontSize:16 }}>
-                        <input
-                        style={{height:"15px",width:"15px"}}
-                          type="checkbox"
-                          checked={tableData[field]}
-                          onChange={() => handleCheckboxChange(field)}
-                        />
-                        &nbsp;{field.toUpperCase()}
-                      </label>
-                    ))}
+                        {Object.values(tableData).filter(Boolean).length}/
+                        {Object.keys(tableData).length}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        maxHeight: "52vh",
+                        overflowY: "auto",
+                        paddingRight: 6,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      {Object.keys(tableData).map((field) => {
+                        const checked = tableData[field];
+                        return (
+                          <div
+                            key={field}
+                            onClick={() => handleCheckboxChange(field)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: 10,
+                              padding: "10px 12px",
+                              borderRadius: 14,
+                              cursor: "pointer",
+                              border: checked
+                                ? "1px solid rgba(59,130,246,0.35)"
+                                : "1px solid rgba(0,0,0,0.10)",
+                              background: checked
+                                ? "linear-gradient(180deg, rgba(59,130,246,0.10), rgba(255,255,255,0.85))"
+                                : "rgba(255,255,255,0.8)",
+                              boxShadow: checked
+                                ? "0 12px 26px rgba(37,99,235,0.10)"
+                                : "0 10px 18px rgba(0,0,0,0.05)",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => handleCheckboxChange(field)}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ height: 16, width: 16 }}
+                              />
+                              <div>
+                                <div style={{ fontSize: 13, fontWeight: 800, color: "#111827" }}>
+                                  {field.toUpperCase()}
+                                </div>
+                                <div style={{ fontSize: 12, color: "#6B7280" }}>
+                                  Show / hide column
+                                </div>
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 800,
+                                padding: "5px 9px",
+                                borderRadius: 10,
+                                background: checked ? "#2563EB" : "rgba(17,24,39,0.06)",
+                                color: checked ? "white" : "#4B5563",
+                              }}
+                            >
+                              {checked ? "ON" : "OFF"}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                  </div>
-                </div>
-              
-              </div>
-            )}
+                </Modal.Body>
+
+                {/* Footer */}
+                {/* <Modal.Footer
+                  style={{
+                    borderTop: "1px solid rgba(0,0,0,0.08)",
+                    background: "rgba(255,255,255,0.9)",
+                  }}
+                >
+                  <button
+                    onClick={() => setSettingsOpen(false)}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(0,0,0,0.10)",
+                      background: "rgba(17,24,39,0.06)",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Close
+                  </button>
+                </Modal.Footer> */}
+              </Modal>
           </div>
           {isModalOpen && <PurchaseSetup onClose={closeModal} />}
         </div>
