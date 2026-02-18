@@ -21,6 +21,7 @@ import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import useLedgerAccounts from "../Shared/useLedgerAccounts";
 import { useNavigate, useLocation } from "react-router-dom";
+import useShortcuts from "../Shared/useShortcuts";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
@@ -261,7 +262,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
         // Focus GST NO
         inputRefs.current[0]?.focus();
       }
-    }, 200);
+    }, 300);
   };
 
   // Api Response
@@ -1100,96 +1101,112 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     setIsAddEnabled(true); // Enable "Add" button
     setIsSubmitEnabled(false);
     try {
-        const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`); // Fetch the latest data
-        if (response.status === 200 && response.data.data) {
-            // If data is available
-            const lastEntry = response.data.data;
-            const lastIndex = response.data.length - 1;
-            setFormData(lastEntry.formData); // Set form data
-            setData1(response.data.data);
-            setIndex(lastIndex);
-            setIsDisabled(true); // Disable fields after loading the data
-            setIsAddEnabled(true);
-            setIsEditMode(false);
-            setIsSubmitEnabled(false);
-            setIsPreviousEnabled(true);
-            setIsNextEnabled(true);
-            setIsFirstEnabled(true);
-            setIsLastEnabled(true);
-            setIsSearchEnabled(true);
-            setIsSPrintEnabled(true);
-            setIsDeleteEnabled(true);
-          } else {
-            // If no data is available, initialize with default values
-            console.log("No data available");
-            const newData = {
-          Bsgroup: "",
-          Bscode:"",
-          acode: "",
-          gstNo: "",
-          ahead: "",
-          add1: "",
-          add2:"",
-          city: "",
-          state: "",
-          distance: "",
-          pinCode: "",
-          distt: "",
-          opening_dr: "",
-          opening_cr: "",
-          msmed: "",
-          phone: "",
-          email: "",
-          area: "",
-          agent: "",
-          group: "",
-          pan: "",
-          tcs206: "",
-          tds194q: "",
-          tdsno: "",
-          wahead: "",
-          wadd1: "",
-          wadd2: "",
-          Rc: "",
-          Ecc: "",
-          erange: "",
-          collc: "",
-          srvno: "",
-          cperson: "",
-          irate: "",
-          tds_rate: "",
-          tcs_rate: "",
-          sur_rate: "",
-          weight: "",
-          bank_ac: "",
-          narration: "",
-          subname: "",
-          subaddress: "",
-          subcity: "",
-          subgstNo: "",
-          payLimit:0,
-          payDuedays:0,
-          graceDays:0,
-          sortingindex:"",
-          qtyBsheet:"",
-          discount:0,
-          Terms:"",
-          tradingAc:"",
-          prefixPurInvoice:"",
-          status:"",
-          ward:"",
-          areacode:"",
-          aoType:"",
-          rangecode:"",
-          aoNo:"",
-            };
-            setFormData(newData); // Set default form data
-            setIsDisabled(true); // Disable fields after loading the default data
-        }
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/ledgerAccount/last`); // Fetch the latest data
+      if (response.status === 200 && response.data.data) {
+        // If data is available
+        const lastEntry = response.data.data;
+        const lastIndex = response.data.length - 1;
+        setFormData(lastEntry.formData); // Set form data
+        setData1(response.data.data);
+        setIndex(lastIndex);
+        setIsDisabled(true); // Disable fields after loading the data
+        setIsAddEnabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+        setIsFetchEnabled(false);
+        setIsSubMasterEnabled(false);
+      } else {
+        // If no data is available, initialize with default values
+        console.log("No data available");
+        const newData = {
+        Bsgroup: "",
+        Bscode:"",
+        acode: "",
+        gstNo: "",
+        ahead: "",
+        add1: "",
+        add2:"",
+        city: "",
+        state: "",
+        distance: "",
+        pinCode: "",
+        distt: "",
+        opening_dr: "",
+        opening_cr: "",
+        msmed: "",
+        phone: "",
+        email: "",
+        area: "",
+        agent: "",
+        group: "",
+        pan: "",
+        tcs206: "",
+        tds194q: "",
+        tdsno: "",
+        wahead: "",
+        wadd1: "",
+        wadd2: "",
+        Rc: "",
+        Ecc: "",
+        erange: "",
+        collc: "",
+        srvno: "",
+        cperson: "",
+        irate: "",
+        tds_rate: "",
+        tcs_rate: "",
+        sur_rate: "",
+        weight: "",
+        bank_ac: "",
+        narration: "",
+        subname: "",
+        subaddress: "",
+        subcity: "",
+        subgstNo: "",
+        payLimit:0,
+        payDuedays:0,
+        graceDays:0,
+        sortingindex:"",
+        qtyBsheet:"",
+        discount:0,
+        Terms:"",
+        tradingAc:"",
+        prefixPurInvoice:"",
+        status:"",
+        ward:"",
+        areacode:"",
+        aoType:"",
+        rangecode:"",
+        aoNo:"",
+        };
+        setFormData(newData); // Set default form data
+        setIsDisabled(true); // Disable fields after loading the default data
+      }
     } catch (error) {
         console.error("Error fetching data", error);
     }
   };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus 
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
  
   // FILEPICKER
   const { openFilePicker, filesContent, loading } = useFilePicker({
@@ -1353,41 +1370,6 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       }
     };
 
-    // const handleKeyDown = (e, index) => {
-    //   // If toast is open, prevent focus movement
-    //   if (toastOpen && (e.key === "Tab" || e.key === "Enter")) {
-    //     e.preventDefault();
-    //     return;
-    //   }
-
-    //   if (e.key === "Enter" || e.key === "Tab") {
-    //     e.preventDefault();
-    //     let nextIndex = index + 1;
-
-    //     while (inputRefs.current[nextIndex] && inputRefs.current[nextIndex].disabled) {
-    //       nextIndex += 1;
-    //     }
-
-    //     const nextInput = inputRefs.current[nextIndex];
-    //     if (nextInput) {
-    //       nextInput.focus();
-    //     }
-    //   }
-
-    //   if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-    //     e.preventDefault();
-    //     let prevIndex = index - 1;
-
-    //     while (inputRefs.current[prevIndex] && inputRefs.current[prevIndex].disabled) {
-    //       prevIndex -= 1;
-    //     }
-
-    //     const prevInput = inputRefs.current[prevIndex];
-    //     if (prevInput) {
-    //       prevInput.focus();
-    //     }
-    //   }
-    // };
     const handleNumericValue = (event) => {
       const { id, value } = event.target;
 
@@ -1480,9 +1462,9 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       }
     };
 
-const handleAttachClick = () => {
-  fileInputRef.current.click(); // manually trigger file input
-};
+  const handleAttachClick = () => {
+    fileInputRef.current.click(); // manually trigger file input
+  };
 
   return (
     <div>

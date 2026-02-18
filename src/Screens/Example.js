@@ -2070,8 +2070,10 @@ import useLedgerAccounts from './Shared/useLedgerAccounts';
 import { toast } from 'react-toastify';
 import AnexureModal from './Modals/AnexureModal ';
 import { Button } from 'react-bootstrap';
+import { useEditMode } from '../EditModeContext';
 
 const Example = () => {
+  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
   const [showModal, setShowModal] = useState(false);
   const { getUniqueValues, existingGstList, existingpanList, existingTdsList, existingAdharList, existingAccList, existingAcCodeList, ledgerData, fetchLedgerAccounts } = useLedgerAccounts(); // only using hook
   const inputRefs = useRef([]); // Array to hold references for input fields
