@@ -1028,7 +1028,7 @@ export default function App() {
               }}
             >
               <List>
-                <StyledListItem button onClick={() => handleNavigation("/")}>
+                <StyledListItem button onClick={() => handleNavigation("/GstReport?type=MonthlyForm")}>
                   <StyledIcon style={{}}>
                     <DescriptionIcon />
                   </StyledIcon>

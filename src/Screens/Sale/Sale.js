@@ -6879,10 +6879,6 @@ const Sale = () => {
           });
         } catch (faErr) {
           console.error("salefaFile error:", faErr);
-          toast.warn(
-            "Sale saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
-            { position: "top-center" },
-          );
         }
 
         fetchData();

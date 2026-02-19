@@ -1,23 +1,11 @@
-// TrailBalance.jsx  ✅ FULL UPDATED (FAFile -> backend TrialBalance API) ✅
-// IMPORTANT:
-// 1) This file assumes your new API is:
-//    GET https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/reports/trialbalance?from=dd/mm/yyyy&to=dd/mm/yyyy&balance=Active
-// 2) It REMOVES all frontend FAFile merging/duality logic.
-// 3) It keeps your SAME UX: table, keyboard nav, flags(F3), checkbox selection sums, group modal (T10),
-//    account statement modal with filters + progressive sums, print + excel exports.
-// 4) It now loads transactions for a ledger by ACODE from a NEW API:
-//    GET https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/reports/accountstatement?acode=xxxx&from=dd/mm/yyyy&to=dd/mm/yyyy
-//    ✅ I included this call. If you don’t have it yet, I added fallback to old /aa/fafile (slow but works).
-//
-// If your existing backend doesn’t have accountstatement API yet, it will still work via fallback.
-// ------------------------------------------------------------
-
 import React, { useEffect, useState, useRef, useMemo, useContext } from "react";
 import axios from "axios";
 import { Table, Modal, Button, Card, Form } from "react-bootstrap";
 import styles from "../AccountStatement/LedgerList.module.css";
 import TextField from "@mui/material/TextField";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import useCompanySetup from "../Shared/useCompanySetup";
@@ -32,8 +20,16 @@ import financialYear from "../Shared/financialYear";
 import AnnexureWiseModal from "./AnnexureWiseModal";
 import { CompanyContext } from "../Context/CompanyContext";
 
-const money2 = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const num3 = (n) => Number(n || 0).toFixed(3);
+const money2 = (n) =>
+  Number(n || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  
+const num3 = (n) => {
+  const v = Number(n || 0);
+  return v ? v.toFixed(3) : "";
+};
 
 const parseDDMMYYYY = (str) => {
   if (!str) return null;
@@ -41,7 +37,6 @@ const parseDDMMYYYY = (str) => {
   if (!dd || !mm || !yyyy) return null;
   return new Date(yyyy, mm - 1, dd, 0, 0, 0, 0);
 };
-
 const formatDate = (date) => {
   if (!date) return "";
   const d = new Date(date);
@@ -50,43 +45,30 @@ const formatDate = (date) => {
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 };
-
 const TrailBalance = () => {
   const { dateFrom, companyName, companyAdd, companyCity } = useCompanySetup();
   const { company } = useContext(CompanyContext);
   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
   const navigate = useNavigate();
-
-  // Main TB rows (already merged by ACODE on backend)
   const [allRows, setAllRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
-
-  // Search + selection
   const [searchTerm, setSearchTerm] = useState("");
   const searchRef = useRef(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  // checkboxes
   const [checkedRows, setCheckedRows] = useState({});
-
-  // flags (F3)
   const [flaggedRows, setFlaggedRows] = useState(() => {
     const saved = localStorage.getItem("flaggedRowsTrail");
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
+  const location = useLocation();
+  const restoringRef = useRef(false);
   useEffect(() => {
     localStorage.setItem("flaggedRowsTrail", JSON.stringify([...flaggedRows]));
   }, [flaggedRows]);
-
-  // Dates
   const [ledgerFromDate, setLedgerFromDate] = useState(null); // dd/mm/yyyy string
   const [ledgerToDate, setLedgerToDate] = useState(null); // dd/mm/yyyy string
-
-  // Modal date filters (Date objects)
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-
-  // Options
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [optionValues, setOptionValues] = useState({
     Balance: "Active Balance",
@@ -96,27 +78,18 @@ const TrailBalance = () => {
     T3: false,
     T10: false,
   });
-
   const [printDateValue, setPrintDateValue] = useState(null);
-
-  // Printing TB
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  // Group modal
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [groupedRowsToPick, setGroupedRowsToPick] = useState([]);
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
   const [currentGroupName, setCurrentGroupName] = useState("");
   const [selectedGroupRows, setSelectedGroupRows] = useState(new Set());
-
-  // Account statement modal
   const [showModal, setShowModal] = useState(false);
   const [selectedLedger, setSelectedLedger] = useState(null); // will store TB row
   const [transactions, setTransactions] = useState([]);
-
-  // Txn filters
   const [vtypeFilters, setVtypeFilters] = useState({
     cash: true,
     journal: true,
@@ -130,29 +103,17 @@ const TrailBalance = () => {
   const [narrationFilter, setNarrationFilter] = useState("");
   const [selectedRows, setSelectedRows] = useState({});
   const [selectionFilter, setSelectionFilter] = useState("All");
-
-  // Row focus indexes
   const [activeRowIndex, setActiveRowIndex] = useState(0);
-
-  // progressive sums
   const [progressiveDebit, setProgressiveDebit] = useState(0);
   const [progressiveCredit, setProgressiveCredit] = useState(0);
-
-  // Print COA
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-
-  // Annexure modal
   const [showAnnexureModal, setShowAnnexureModal] = useState(false);
   const [annexureGroupedData, setAnnexureGroupedData] = useState({});
-
-  // Refs for scrolling
   const tableRef = useRef(null);
   const tableContainerRef = useRef(null);
   const txnContainerRef = useRef(null);
   const groupRowRefs = useRef([]);
-
-  // ========= Init FY dates =========
   useEffect(() => {
     const fy = financialYear.getFYDates();
     setLedgerFromDate(formatDate(fy.start));
@@ -160,54 +121,43 @@ const TrailBalance = () => {
     setFromDate(fy.start);
     setToDate(fy.end);
   }, []);
-
-  // Auto focus search
   useEffect(() => {
     searchRef.current?.focus();
   }, []);
-
-  // ========= Helpers =========
   const openOptionModal = () => setIsOptionOpen(true);
   const closeOptionModal = () => setIsOptionOpen(false);
-
   const handleCheckboxChange = (key) => {
     setCheckedRows((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
   const handleVtypeChange = (e) => {
     const { name, checked } = e.target;
     setVtypeFilters((prev) => ({ ...prev, [name]: checked }));
   };
-
   const handleRowCheckboxChange = (txnId) => {
     setSelectedRows((prev) => ({ ...prev, [txnId]: !prev[txnId] }));
   };
-
-  // Prefix validation for search (ahead prefix)
   const isValidPrefix = (value) => {
     const lower = String(value || "").toLowerCase();
-    return allRows.some((r) => String(r.ahead || "").toLowerCase().startsWith(lower));
+    return allRows.some((r) =>
+      String(r.ahead || "")
+        .toLowerCase()
+        .startsWith(lower),
+    );
   };
-
-  // ========= FETCH TRIAL BALANCE (single API) =========
   useEffect(() => {
     if (!tenant || !ledgerFromDate || !ledgerToDate) return;
-
     const fetchTB = async () => {
       try {
-        // Map your OptionModal Balance values -> API values
         const balanceMap = {
           "Active Balance": "Active",
           "Nil Balance": "Nil",
           "Debit Balance": "Debit",
           "Credit Balance": "Credit",
           "All Accounts": "All",
-          "Transacted Account": "All",      // backend already only has transacted (FAFile)
-          "Non Transacted Account": "All",  // not possible from FAFile-only
+          "Transacted Account": "All", // backend already only has transacted (FAFile)
+          "Non Transacted Account": "All", // not possible from FAFile-only
         };
-
         const apiBalance = balanceMap[optionValues.Balance] || "All";
-
         const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/reports/trialbalance`;
         const res = await axios.get(url, {
           params: {
@@ -216,7 +166,6 @@ const TrailBalance = () => {
             balance: apiBalance,
           },
         });
-
         const rows = res.data?.rows || [];
         setAllRows(rows);
       } catch (err) {
@@ -224,25 +173,18 @@ const TrailBalance = () => {
         setAllRows([]);
       }
     };
-
     fetchTB();
   }, [tenant, ledgerFromDate, ledgerToDate, optionValues.Balance]);
-
-  // ========= APPLY FILTERS/SORT/SEARCH/GROUP (frontend) =========
   useEffect(() => {
     let result = [...allRows];
-
-    // Annexure filter
     if (optionValues.Annexure && optionValues.Annexure !== "All") {
-      result = result.filter((r) => String(r.bsgroup || "") === String(optionValues.Annexure));
+      result = result.filter(
+        (r) => String(r.bsgroup || "") === String(optionValues.Annexure),
+      );
     }
-
-    // Selected accounts only (T1)
     if (optionValues.T1) {
       result = result.filter((r) => !!checkedRows[r.acode]);
     }
-
-    // Search
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
       result = result.filter((r) => {
@@ -260,45 +202,43 @@ const TrailBalance = () => {
         );
       });
     }
-
-    // Sorting
     switch (optionValues.OrderBy) {
       case "Account Name Wise":
-        result.sort((a, b) => String(a.ahead || "").localeCompare(String(b.ahead || "")));
+        result.sort((a, b) =>
+          String(a.ahead || "").localeCompare(String(b.ahead || "")),
+        );
         break;
-
       case "City Wise + Name Wise":
         result.sort((a, b) => {
-          const cityComp = String(a.city || "").localeCompare(String(b.city || ""));
+          const cityComp = String(a.city || "").localeCompare(
+            String(b.city || ""),
+          );
           if (cityComp !== 0) return cityComp;
           return String(a.ahead || "").localeCompare(String(b.ahead || ""));
         });
         break;
-
       case "Prefix Annexure Wise":
         result.sort((a, b) =>
-          String(a.bsgroup || "").charAt(0).localeCompare(String(b.bsgroup || "").charAt(0))
+          String(a.bsgroup || "")
+            .charAt(0)
+            .localeCompare(String(b.bsgroup || "").charAt(0)),
         );
         break;
-
       default:
         break;
     }
-
-    // Group by BsGroup (T10)
     if (optionValues.T10) {
       const grouped = {};
       result.forEach((r) => {
         const group = r.bsgroup || "Others";
-        if (!grouped[group]) grouped[group] = { balance: 0, debit: 0, credit: 0, rows: [] };
-
+        if (!grouped[group])
+          grouped[group] = { balance: 0, debit: 0, credit: 0, rows: [] };
         const bal = Number(r.balance || 0);
         grouped[group].balance += bal;
         if (bal > 0) grouped[group].debit += Math.abs(bal);
         if (bal < 0) grouped[group].credit += Math.abs(bal);
         grouped[group].rows.push(r);
       });
-
       result = Object.entries(grouped).map(([group, data]) => {
         const drcr = data.balance >= 0 ? "DR" : data.balance < 0 ? "CR" : "NIL";
         return {
@@ -318,43 +258,36 @@ const TrailBalance = () => {
         };
       });
     }
-
     setFilteredRows(result);
   }, [allRows, optionValues, checkedRows, searchTerm]);
-
-  // Reset selection index when changes
   useEffect(() => setSelectedIndex(0), [allRows, optionValues, searchTerm]);
-
-  // ========= Auto-scroll main list =========
   useEffect(() => {
     const container = tableContainerRef.current;
     if (!container) return;
-
     const rows = container.querySelectorAll("tbody tr");
     if (!rows.length) return;
-
     const idx = Math.max(0, Math.min(selectedIndex, rows.length - 1));
     const selectedRow = rows[idx];
     if (!selectedRow) return;
-
     const headerOffset = 40;
     const buffer = 25;
-
     const rowTop = selectedRow.offsetTop;
     const rowBottom = rowTop + selectedRow.offsetHeight;
     const containerHeight = container.clientHeight;
-
     const visibleTop = container.scrollTop + headerOffset + buffer;
     const visibleBottom = container.scrollTop + containerHeight - buffer;
-
     if (rowBottom > visibleBottom) {
-      container.scrollTo({ top: rowBottom - containerHeight + buffer * 2, behavior: "smooth" });
+      container.scrollTo({
+        top: rowBottom - containerHeight + buffer * 2,
+        behavior: "smooth",
+      });
     } else if (rowTop < visibleTop) {
-      container.scrollTo({ top: rowTop - headerOffset - buffer, behavior: "smooth" });
+      container.scrollTo({
+        top: rowTop - headerOffset - buffer,
+        behavior: "smooth",
+      });
     }
   }, [selectedIndex, filteredRows]);
-
-  // ========= Build annexure data (for AnnexureWiseModal) =========
   const buildAnnexureData = () => {
     const grouped = {};
     filteredRows.forEach((r) => {
@@ -374,12 +307,8 @@ const TrailBalance = () => {
     });
     setAnnexureGroupedData(grouped);
   };
-
-  // ========= Open ledger details =========
   const openLedgerDetails = (row) => {
     if (!row) return;
-
-    // If grouped row: open group modal first
     if (row.groupedRows) {
       setGroupedRowsToPick(row.groupedRows);
       setCurrentGroupName(row.ahead || "");
@@ -388,20 +317,13 @@ const TrailBalance = () => {
       setShowGroupModal(true);
       return;
     }
-
-    // Normal ledger: open account statement
     fetchLedgerTransactions(row);
   };
-
-  // ========= Fetch ledger transactions (fast API if exists, else fallback to /aa/fafile) =========
   const fetchLedgerTransactions = async (row) => {
     if (!tenant) return;
-
     const acode = String(row?.acode || "").trim();
     if (!acode) return;
-
     try {
-      // TRY: new account statement API (recommended)
       const url = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/reports/accountstatement`;
       const res = await axios.get(url, {
         params: {
@@ -410,7 +332,6 @@ const TrailBalance = () => {
           to: ledgerToDate,
         },
       });
-
       const txns = res.data?.transactions || res.data?.data || [];
       setSelectedLedger(row);
       setTransactions(txns);
@@ -419,16 +340,14 @@ const TrailBalance = () => {
       setShowModal(true);
       return;
     } catch (e) {
-      // fallback: old fafile full scan (slow but works)
       try {
         const faRes = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`,
         );
         const faData = faRes.data?.data || [];
         const fromD = parseDDMMYYYY(ledgerFromDate);
         const toD = parseDDMMYYYY(ledgerToDate);
         if (toD) toD.setHours(23, 59, 59, 999);
-
         const ledgerTxns = faData.flatMap((entry) =>
           (entry.transactions || [])
             .filter((txn) => String(txn.ACODE || "").trim() === acode)
@@ -445,9 +364,8 @@ const TrailBalance = () => {
               bankId: entry.bankId || null,
               cashId: entry.cashId || null,
               journalId: entry.journalId || null,
-            }))
+            })),
         );
-
         setSelectedLedger(row);
         setTransactions(ledgerTxns);
         setActiveRowIndex(0);
@@ -458,18 +376,14 @@ const TrailBalance = () => {
       }
     }
   };
-
-  // ========= Navigate by vtype =========
   const handleTransactionSelect = (txn) => {
     if (!txn) return;
-
     const modalState = {
       rowIndex: activeRowIndex,
       selectedLedger,
       keepModalOpen: true,
     };
     sessionStorage.setItem("trailModalState", JSON.stringify(modalState));
-
     switch (txn.vtype) {
       case "S":
         navigate("/Sale", { state: { saleId: txn.saleId } });
@@ -490,26 +404,47 @@ const TrailBalance = () => {
         console.log("Unknown vtype:", txn.vtype);
     }
   };
+  useEffect(() => {
+    const saved = sessionStorage.getItem("trailModalState");
+    if (!saved) return;
 
-  // ========= Filter transactions (modal) =========
+    const state = JSON.parse(saved);
+
+    // only restore if we came back from voucher and asked to keep modal open
+    if (!state?.keepModalOpen || !state?.selectedLedger) return;
+
+    // prevent repeated re-open loop
+    if (restoringRef.current) return;
+    restoringRef.current = true;
+
+    (async () => {
+      // This will reopen modal because fetchLedgerTransactions() already does setShowModal(true)
+      await fetchLedgerTransactions(state.selectedLedger);
+
+      // restore the highlighted row inside account statement table
+      setTimeout(() => {
+        setActiveRowIndex(state.rowIndex ?? 0);
+        restoringRef.current = false;
+      }, 0);
+    })();
+  }, [location.key]); // runs whenever you come back to this page (history back / escape)
+
   useEffect(() => {
     let data = [...transactions];
-
     if (filterType !== "All") {
-      data = data.filter((txn) => String(txn.type).toLowerCase() === filterType.toLowerCase());
-    }
-
-    if (narrationFilter.trim() !== "") {
-      data = data.filter((txn) =>
-        String(txn.narration || "").toLowerCase().includes(narrationFilter.toLowerCase())
+      data = data.filter(
+        (txn) => String(txn.type).toLowerCase() === filterType.toLowerCase(),
       );
     }
-
-    // Date range
+    if (narrationFilter.trim() !== "") {
+      data = data.filter((txn) =>
+        String(txn.narration || "")
+          .toLowerCase()
+          .includes(narrationFilter.toLowerCase()),
+      );
+    }
     if (fromDate) data = data.filter((txn) => new Date(txn.date) >= fromDate);
     if (toDate) data = data.filter((txn) => new Date(txn.date) <= toDate);
-
-    // vtypes
     const selectedVtypes = [];
     if (vtypeFilters.cash) selectedVtypes.push("C");
     if (vtypeFilters.journal) selectedVtypes.push("J");
@@ -517,15 +452,13 @@ const TrailBalance = () => {
     if (vtypeFilters.sale) selectedVtypes.push("S");
     if (vtypeFilters.purchase) selectedVtypes.push("P");
     if (vtypeFilters.tds) selectedVtypes.push("TDS");
-
     if (selectedVtypes.length > 0) {
       data = data.filter((txn) => selectedVtypes.includes(txn.vtype));
     }
-
-    // selected/unselected
-    if (selectionFilter === "Selected") data = data.filter((txn) => selectedRows[txn._id]);
-    else if (selectionFilter === "Unselected") data = data.filter((txn) => !selectedRows[txn._id]);
-
+    if (selectionFilter === "Selected")
+      data = data.filter((txn) => selectedRows[txn._id]);
+    else if (selectionFilter === "Unselected")
+      data = data.filter((txn) => !selectedRows[txn._id]);
     setFilteredTransactions(data);
   }, [
     filterType,
@@ -537,100 +470,108 @@ const TrailBalance = () => {
     selectedRows,
     transactions,
   ]);
-
-  // ========= Progressive sums =========
   useEffect(() => {
     if (!filteredTransactions.length || activeRowIndex < 0) {
       setProgressiveDebit(0);
       setProgressiveCredit(0);
       return;
     }
-
     let debit = 0;
     let credit = 0;
-
     filteredTransactions.slice(0, activeRowIndex + 1).forEach((txn) => {
-      if (String(txn.type).toLowerCase() === "debit") debit += Number(txn.amount) || 0;
-      else if (String(txn.type).toLowerCase() === "credit") credit += Number(txn.amount) || 0;
+      if (String(txn.type).toLowerCase() === "debit")
+        debit += Number(txn.amount) || 0;
+      else if (String(txn.type).toLowerCase() === "credit")
+        credit += Number(txn.amount) || 0;
     });
-
     setProgressiveDebit(debit);
     setProgressiveCredit(credit);
   }, [activeRowIndex, filteredTransactions]);
-
-  // ========= Auto-scroll modal txns =========
   useEffect(() => {
     if (!showModal || !txnContainerRef.current) return;
-
     const container = txnContainerRef.current;
     const rows = container.querySelectorAll("tbody tr");
     if (!rows.length) return;
-
     const idx = Math.max(0, Math.min(activeRowIndex, rows.length - 1));
     const selectedRow = rows[idx];
     if (!selectedRow) return;
-
     const headerOffset = 40;
     const buffer = 18;
-
     const rowTop = selectedRow.offsetTop;
     const rowBottom = rowTop + selectedRow.offsetHeight;
     const containerHeight = container.clientHeight;
-
     const visibleTop = container.scrollTop + headerOffset + buffer;
     const visibleBottom = container.scrollTop + containerHeight - buffer;
-
     if (rowBottom > visibleBottom) {
-      container.scrollTo({ top: rowBottom - containerHeight + buffer * 2, behavior: "smooth" });
+      container.scrollTo({
+        top: rowBottom - containerHeight + buffer * 2,
+        behavior: "smooth",
+      });
     } else if (rowTop < visibleTop) {
-      container.scrollTo({ top: rowTop - headerOffset - buffer, behavior: "smooth" });
+      container.scrollTo({
+        top: rowTop - headerOffset - buffer,
+        behavior: "smooth",
+      });
     }
   }, [activeRowIndex, showModal, filteredTransactions]);
-
-  // ========= Keyboard navigation (modal) =========
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!showModal || !filteredTransactions.length) return;
-
-      if (e.key === "ArrowUp") setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      if (e.key === "ArrowUp")
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : prev));
       else if (e.key === "ArrowDown")
-        setActiveRowIndex((prev) => (prev < filteredTransactions.length - 1 ? prev + 1 : prev));
+        setActiveRowIndex((prev) =>
+          prev < filteredTransactions.length - 1 ? prev + 1 : prev,
+        );
       else if (e.key === "PageUp") setActiveRowIndex(0);
-      else if (e.key === "PageDown") setActiveRowIndex(filteredTransactions.length - 1);
-      else if (e.key === "Enter") handleTransactionSelect(filteredTransactions[activeRowIndex]);
+      else if (e.key === "PageDown")
+        setActiveRowIndex(filteredTransactions.length - 1);
+      else if (e.key === "Enter")
+        handleTransactionSelect(filteredTransactions[activeRowIndex]);
       else if (e.key === "Escape") setShowModal(false);
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showModal, filteredTransactions, activeRowIndex]);
-
-  // ========= Keyboard navigation (main + group modal) =========
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Group modal
       if (showGroupModal && groupedRowsToPick.length) {
         e.preventDefault();
-        if (e.key === "ArrowDown") setActiveGroupIndex((prev) => (prev + 1) % groupedRowsToPick.length);
+        if (e.key === "ArrowDown")
+          setActiveGroupIndex((prev) => (prev + 1) % groupedRowsToPick.length);
         else if (e.key === "ArrowUp")
-          setActiveGroupIndex((prev) => (prev === 0 ? groupedRowsToPick.length - 1 : prev - 1));
-        else if (e.key === "Enter") fetchLedgerTransactions(groupedRowsToPick[activeGroupIndex]);
+          setActiveGroupIndex((prev) =>
+            prev === 0 ? groupedRowsToPick.length - 1 : prev - 1,
+          );
+        else if (e.key === "Enter")
+          fetchLedgerTransactions(groupedRowsToPick[activeGroupIndex]);
         else if (e.key === "Escape") setShowGroupModal(false);
         return;
       }
-
-      // Main list
       if (!showModal && filteredRows.length) {
         if (e.key === "ArrowDown") {
           e.preventDefault();
-          setSelectedIndex((prev) => (prev < filteredRows.length - 1 ? prev + 1 : prev));
+          setSelectedIndex((prev) =>
+            prev < filteredRows.length - 1 ? prev + 1 : prev,
+          );
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
           setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
         } else if (e.key === "PageUp") setSelectedIndex(0);
-        else if (e.key === "PageDown") setSelectedIndex(filteredRows.length - 1);
+        else if (e.key === "PageDown")
+          setSelectedIndex(filteredRows.length - 1);
         else if (e.key === "Enter") {
           const row = filteredRows[selectedIndex];
+
+          // ✅ save current TB selected row so we can restore after closing account statement
+          sessionStorage.setItem(
+            "trailTbSelectedIndex",
+            JSON.stringify({
+              index: selectedIndex,
+              acode: row?.acode || "",
+            }),
+          );
+
           openLedgerDetails(row);
           setSearchTerm("");
         } else if (e.key === "F3") {
@@ -644,16 +585,19 @@ const TrailBalance = () => {
         }
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showModal, filteredRows, selectedIndex, showGroupModal, groupedRowsToPick, activeGroupIndex]);
-
-  // ========= Selected debit/credit sums (checked rows) =========
+  }, [
+    showModal,
+    filteredRows,
+    selectedIndex,
+    showGroupModal,
+    groupedRowsToPick,
+    activeGroupIndex,
+  ]);
   const { selectedDebit, selectedCredit } = useMemo(() => {
     let debitSum = 0;
     let creditSum = 0;
-
     filteredRows.forEach((r) => {
       if (checkedRows[r.acode]) {
         const bal = Number(r.balance || 0);
@@ -661,11 +605,8 @@ const TrailBalance = () => {
         if (r.drcr === "CR") creditSum += Math.abs(bal);
       }
     });
-
     return { selectedDebit: debitSum, selectedCredit: creditSum };
   }, [checkedRows, filteredRows]);
-
-  // ========= Group totals (group modal selected rows) =========
   const groupTotals = useMemo(() => {
     let debit = 0;
     let credit = 0;
@@ -678,8 +619,6 @@ const TrailBalance = () => {
     });
     return { debit, credit };
   }, [selectedGroupRows, groupedRowsToPick]);
-
-  // ========= Export: Trial Balance =========
   const exportToExcel = () => {
     const data = filteredRows.map((r) => ({
       Name: r.ahead || "",
@@ -691,13 +630,10 @@ const TrailBalance = () => {
       "A/c Code": r.acode || "",
       "Group Name": r.bsgroup || "",
     }));
-
     if (!data.length) return;
-
     const header = Object.keys(data[0]);
     const periodFrom = ledgerFromDate || "--";
     const periodTo = ledgerToDate || "--";
-
     const sheetData = [
       [companyName || "Company Name"],
       [companyAdd || "Company Address"],
@@ -707,8 +643,6 @@ const TrailBalance = () => {
       header,
       ...data.map((row) => header.map((h) => row[h])),
     ];
-
-    // Totals row with SUBTOTAL
     const numericFields = ["Debit", "Credit", "Pcs", "Qty"];
     const totals = {};
     header.forEach((h, index) => {
@@ -717,13 +651,13 @@ const TrailBalance = () => {
         const colLetter = XLSX.utils.encode_col(index);
         const firstRow = 6;
         const lastRow = 6 + data.length;
-        totals[h] = { f: `SUBTOTAL(9,${colLetter}${firstRow}:${colLetter}${lastRow})` };
+        totals[h] = {
+          f: `SUBTOTAL(9,${colLetter}${firstRow}:${colLetter}${lastRow})`,
+        };
       } else totals[h] = "";
     });
     sheetData.push(header.map((h) => totals[h]));
-
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-
     worksheet["!cols"] = [
       { wch: 40 },
       { wch: 20 },
@@ -734,8 +668,6 @@ const TrailBalance = () => {
       { wch: 15 },
       { wch: 30 },
     ];
-
-    // Header style
     header.forEach((_, colIdx) => {
       const cellAddr = XLSX.utils.encode_cell({ r: 5, c: colIdx });
       if (worksheet[cellAddr]) {
@@ -746,91 +678,101 @@ const TrailBalance = () => {
         };
       }
     });
-
-    // Title style
     ["A1", "A2", "A3", "A4"].forEach((cell, idx) => {
       if (worksheet[cell]) {
         worksheet[cell].s = {
-          font: { bold: true, sz: idx === 0 ? 16 : 12, color: { rgb: "000000" } },
+          font: {
+            bold: true,
+            sz: idx === 0 ? 16 : 12,
+            color: { rgb: "000000" },
+          },
           alignment: { horizontal: "center" },
         };
       }
     });
-
     worksheet["!merges"] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
       { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
       { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
       { s: { r: 3, c: 0 }, e: { r: 3, c: header.length - 1 } },
     ];
-
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Trial Balance");
-
-    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
+    const buffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true,
+    });
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, "TrialBalance.xlsx");
   };
-
-  // ========= Export: Month-wise FY (Apr→Mar) =========
-  // NOTE: Now monthwise should come from backend ideally.
-  // For now, we compute using transactions fallback (slow), so you get "working".
   const exportLedgerMonthwiseFY = async () => {
     if (!tenant || !filteredRows.length) return;
-
-    // We need FA transactions by date. If you create backend monthwise API, replace this entire function.
     try {
-      const faRes = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`);
+      const faRes = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/aa/fafile`,
+      );
       const faData = faRes.data?.data || [];
-
       const from = parseDDMMYYYY(ledgerFromDate);
       const to = parseDDMMYYYY(ledgerToDate);
       if (to) to.setHours(23, 59, 59, 999);
-
-      const monthNames = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+      const monthNames = [
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+      ];
       const getFYMonthIndex = (date) => (date.getMonth() + 9) % 12;
-
       const acodeMonthTotals = {};
-
       faData.forEach((entry) => {
         (entry.transactions || []).forEach((txn) => {
           const txnDate = new Date(txn.date);
           if (from && txnDate < from) return;
           if (to && txnDate > to) return;
-
           const acode = String(txn.ACODE || "").trim();
           if (!acode) return;
-
           const monthIndex = getFYMonthIndex(txnDate);
           const monthKey = monthNames[monthIndex];
-
           if (!acodeMonthTotals[acode]) acodeMonthTotals[acode] = {};
-          if (!acodeMonthTotals[acode][monthKey]) acodeMonthTotals[acode][monthKey] = 0;
-
+          if (!acodeMonthTotals[acode][monthKey])
+            acodeMonthTotals[acode][monthKey] = 0;
           const amount = Number(txn.amount) || 0;
-          const signed = String(txn.type).toLowerCase() === "debit" ? amount : -amount;
+          const signed =
+            String(txn.type).toLowerCase() === "debit" ? amount : -amount;
           acodeMonthTotals[acode][monthKey] += signed;
         });
       });
-
       const data = filteredRows.map((r) => {
         const row = {
           "Account Name": r.ahead || "",
           Destination: r.city || "",
         };
-
-        monthNames.forEach((m) => (row[m] = acodeMonthTotals[r.acode]?.[m] || 0));
-        row["Total"] = monthNames.reduce((sum, m) => sum + (Number(row[m]) || 0), 0);
+        monthNames.forEach(
+          (m) => (row[m] = acodeMonthTotals[r.acode]?.[m] || 0),
+        );
+        row["Total"] = monthNames.reduce(
+          (sum, m) => sum + (Number(row[m]) || 0),
+          0,
+        );
         return row;
       });
-
       const totalRow = { "Account Name": "TOTAL", Destination: "" };
       monthNames.forEach((m) => {
         totalRow[m] = data.reduce((sum, rr) => sum + (Number(rr[m]) || 0), 0);
       });
-      totalRow["Total"] = data.reduce((sum, rr) => sum + (Number(rr["Total"]) || 0), 0);
+      totalRow["Total"] = data.reduce(
+        (sum, rr) => sum + (Number(rr["Total"]) || 0),
+        0,
+      );
       data.push(totalRow);
-
       const header = ["Account Name", "Destination", ...monthNames, "Total"];
       const sheetData = [
         [companyName || "Company Name"],
@@ -841,9 +783,7 @@ const TrailBalance = () => {
         header,
         ...data.map((row) => header.map((h) => row[h])),
       ];
-
       const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-
       ["A1", "A2", "A3", "A4"].forEach((cellAddr, idx) => {
         if (worksheet[cellAddr]) {
           worksheet[cellAddr].s = {
@@ -852,20 +792,17 @@ const TrailBalance = () => {
           };
         }
       });
-
       worksheet["!cols"] = header.map((h) => {
         if (h === "Account Name") return { wch: 40 };
         if (h === "Destination") return { wch: 25 };
         return { wch: Math.max(h.length + 5, 12) };
       });
-
       worksheet["!merges"] = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } },
         { s: { r: 1, c: 0 }, e: { r: 1, c: header.length - 1 } },
         { s: { r: 2, c: 0 }, e: { r: 2, c: header.length - 1 } },
         { s: { r: 3, c: 0 }, e: { r: 3, c: header.length - 1 } },
       ];
-
       header.forEach((_, colIdx) => {
         const addr = XLSX.utils.encode_cell({ r: 5, c: colIdx });
         if (worksheet[addr]) {
@@ -876,7 +813,6 @@ const TrailBalance = () => {
           };
         }
       });
-
       const firstDataRow = 6;
       const lastDataRow = data.length + 5;
       [...monthNames, "Total"].forEach((m) => {
@@ -893,18 +829,19 @@ const TrailBalance = () => {
           }
         }
       });
-
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger_FY_Apr_Mar");
-      const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
+      const buffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+        cellStyles: true,
+      });
       const blob = new Blob([buffer], { type: "application/octet-stream" });
       saveAs(blob, "Ledger_FY_Apr_Mar.xlsx");
     } catch (err) {
       console.error("Monthwise export error:", err);
     }
   };
-
-  // ========= Export: Group Modal =========
   const exportGroupToExcel = () => {
     const data = groupedRowsToPick.map((r) => ({
       Name: r.ahead || "",
@@ -915,11 +852,9 @@ const TrailBalance = () => {
       Credit: r.drcr === "CR" ? Math.abs(r.balance) : 0,
     }));
     if (!data.length) return;
-
     const header = Object.keys(data[0]);
     const periodFrom = ledgerFromDate || "--";
     const periodTo = ledgerToDate || "--";
-
     const sheetData = [
       [companyName || "Company Name"],
       [companyAdd || "Company Address"],
@@ -930,9 +865,7 @@ const TrailBalance = () => {
       header,
       ...data.map((row) => header.map((h) => row[h])),
     ];
-
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-
     worksheet["!cols"] = [
       { wch: 40 },
       { wch: 20 },
@@ -941,26 +874,24 @@ const TrailBalance = () => {
       { wch: 15 },
       { wch: 15 },
     ];
-
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Group Ledger");
-    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
+    const buffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true,
+    });
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, `${currentGroupName}_Ledger.xlsx`);
   };
-
-  // ========= Export: Account Statement =========
   const exportAccountStatementToExcel = () => {
     if (!filteredTransactions.length) return;
-
     let running = 0;
     const data = filteredTransactions.map((txn) => {
       const amt = Number(txn.amount) || 0;
       if (String(txn.type).toLowerCase() === "debit") running += amt;
       else running -= amt;
-
       const drcr = running >= 0 ? "DR" : "CR";
-
       return {
         Date: new Date(txn.date).toLocaleDateString("en-GB"),
         Type: txn.vtype,
@@ -968,16 +899,15 @@ const TrailBalance = () => {
         Pcs: num3(txn.pkgs),
         Qty: num3(txn.weight),
         Debit: String(txn.type).toLowerCase() === "debit" ? amt.toFixed(2) : "",
-        Credit: String(txn.type).toLowerCase() === "credit" ? amt.toFixed(2) : "",
+        Credit:
+          String(txn.type).toLowerCase() === "credit" ? amt.toFixed(2) : "",
         Balance: Math.abs(running).toFixed(2),
         "DR/CR": drcr,
       };
     });
-
     const header = Object.keys(data[0]);
     const periodFrom = ledgerFromDate || "--";
     const periodTo = ledgerToDate || "--";
-
     const sheetData = [
       [companyName || "Company Name"],
       [companyAdd || "Company Address"],
@@ -988,7 +918,6 @@ const TrailBalance = () => {
       header,
       ...data.map((row) => header.map((h) => row[h])),
     ];
-
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
     worksheet["!cols"] = [
       { wch: 12 },
@@ -1001,24 +930,40 @@ const TrailBalance = () => {
       { wch: 15 },
       { wch: 8 },
     ];
-
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Account Statement");
-
-    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array", cellStyles: true });
+    const buffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true,
+    });
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, `${selectedLedger?.ahead || "Account"}_COA.xlsx`);
   };
-
-  // ========= UI =========
   return (
     <div style={{ padding: "10px" }}>
       <Card className="contMain">
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: "10px",
+          }}
+        >
           {/* Date Filters */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
             <div style={{ display: "flex", flexDirection: "row" }}>
-              <span className="textform"><b>From:</b></span>
+              <span className="textform">
+                <b>From:</b>
+              </span>
               <InputMask
                 mask="99/99/9999"
                 placeholder="dd/mm/yyyy"
@@ -1028,7 +973,9 @@ const TrailBalance = () => {
               />
             </div>
             <div style={{ display: "flex", flexDirection: "row" }}>
-              <span className="textform"><b>To:</b></span>
+              <span className="textform">
+                <b>To:</b>
+              </span>
               <InputMask
                 mask="99/99/9999"
                 placeholder="dd/mm/yyyy"
@@ -1038,12 +985,12 @@ const TrailBalance = () => {
               />
             </div>
           </div>
-
           <h3 className="headerTrail">TRIAL BALANCE</h3>
-
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", flexDirection: "row" }}>
-              <span style={{ fontSize: 20 }} className="textform">Selected Debit:</span>
+              <span style={{ fontSize: 20 }} className="textform">
+                Selected Debit:
+              </span>
               <input
                 style={{ marginLeft: 15, color: "darkblue" }}
                 className="value"
@@ -1051,8 +998,12 @@ const TrailBalance = () => {
                 readOnly
               />
             </div>
-            <div style={{ display: "flex", flexDirection: "row", marginTop: 10 }}>
-              <span style={{ fontSize: 20 }} className="textform">Selected Credit:</span>
+            <div
+              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
+            >
+              <span style={{ fontSize: 20 }} className="textform">
+                Selected Credit:
+              </span>
               <input
                 style={{ marginLeft: 7, color: "red" }}
                 className="value"
@@ -1062,10 +1013,17 @@ const TrailBalance = () => {
             </div>
           </div>
         </div>
-
         <div className="TableT" ref={tableContainerRef}>
           <Table size="sm" className="custom-table" hover ref={tableRef}>
-            <thead style={{ position: "sticky", top: 1, background: "skyblue", fontSize: 17, textAlign: "center" }}>
+            <thead
+              style={{
+                position: "sticky",
+                top: 1,
+                background: "skyblue",
+                fontSize: 17,
+                textAlign: "center",
+              }}
+            >
               <tr>
                 <th></th>
                 <th>NAME</th>
@@ -1076,7 +1034,6 @@ const TrailBalance = () => {
                 <th>CREDIT</th>
               </tr>
             </thead>
-
             <tbody>
               {filteredRows.map((r, index) => (
                 <tr
@@ -1085,61 +1042,111 @@ const TrailBalance = () => {
                     backgroundColor: flaggedRows.has(index)
                       ? "red"
                       : index === selectedIndex
-                      ? "rgb(187, 186, 186)"
-                      : "transparent",
+                        ? "rgb(187, 186, 186)"
+                        : "transparent",
                     cursor: "pointer",
                     fontSize: 16,
                   }}
+                  // onClick={() => {
+                  //   setSelectedIndex(index);
+                  //   openLedgerDetails(r);
+                  // }}
                   onClick={() => {
                     setSelectedIndex(index);
+
+                    sessionStorage.setItem(
+                      "trailTbSelectedIndex",
+                      JSON.stringify({
+                        index,
+                        acode: r?.acode || "",
+                      }),
+                    );
+
                     openLedgerDetails(r);
                   }}
                 >
-                  <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                  <td
+                    style={{ textAlign: "center" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
-                      style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        cursor: "pointer",
+                      }}
                       type="checkbox"
                       checked={!!checkedRows[r.acode]}
                       onChange={() => handleCheckboxChange(r.acode)}
                     />
                   </td>
-
                   <td>{r.ahead}</td>
                   <td>{r.city}</td>
-
                   <td style={{ textAlign: "right" }}>{num3(r.netPcs)}</td>
                   <td style={{ textAlign: "right" }}>{num3(r.netQty)}</td>
-
-                  <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
+                  <td
+                    style={{
+                      textAlign: "right",
+                      color: "darkblue",
+                      fontWeight: "bold",
+                    }}
+                  >
                     {r.drcr === "DR" ? money2(Math.abs(r.balance)) : ""}
                   </td>
-                  <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
+                  <td
+                    style={{
+                      textAlign: "right",
+                      color: "red",
+                      fontWeight: "bold",
+                    }}
+                  >
                     {r.drcr === "CR" ? money2(Math.abs(r.balance)) : ""}
                   </td>
                 </tr>
               ))}
             </tbody>
-
-            <tfoot style={{ backgroundColor: "skyblue", position: "sticky", bottom: 0 }}>
+            <tfoot
+              style={{
+                backgroundColor: "skyblue",
+                position: "sticky",
+                bottom: 0,
+              }}
+            >
               <tr style={{ fontWeight: "bold", fontSize: 20 }}>
-                <td colSpan={5} style={{ textAlign: "right" }}>TOTAL:</td>
+                <td colSpan={5} style={{ textAlign: "right" }}>
+                  TOTAL:
+                </td>
                 <td style={{ textAlign: "right", color: "darkblue" }}>
                   {money2(
-                    filteredRows.reduce((sum, r) => sum + (r.drcr === "DR" ? Math.abs(r.balance) : 0), 0)
+                    filteredRows.reduce(
+                      (sum, r) =>
+                        sum + (r.drcr === "DR" ? Math.abs(r.balance) : 0),
+                      0,
+                    ),
                   )}
                 </td>
                 <td style={{ textAlign: "right", color: "red" }}>
                   {money2(
-                    filteredRows.reduce((sum, r) => sum + (r.drcr === "CR" ? Math.abs(r.balance) : 0), 0)
+                    filteredRows.reduce(
+                      (sum, r) =>
+                        sum + (r.drcr === "CR" ? Math.abs(r.balance) : 0),
+                      0,
+                    ),
                   )}
                 </td>
               </tr>
             </tfoot>
           </Table>
         </div>
-
         {/* Search + buttons */}
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", marginTop: "auto" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: "auto",
+          }}
+        >
           <TextField
             inputRef={searchRef}
             label="SEARCH"
@@ -1153,29 +1160,28 @@ const TrailBalance = () => {
             }}
             className={styles.Search}
           />
-
           <div style={{ marginTop: "5px", marginLeft: "auto" }}>
-            <Button className="Buttonz" style={{ backgroundColor: "#3d85c6" }} onClick={openOptionModal}>
+            <Button
+              className="Buttonz"
+              style={{ backgroundColor: "#3d85c6" }}
+              onClick={openOptionModal}
+            >
               Options
             </Button>
-
             <OptionModal
               isOpen={isOptionOpen}
               onClose={closeOptionModal}
               exportMonthWise={exportLedgerMonthwiseFY}
               onApply={(values) => {
                 setOptionValues(values);
-
                 if (values.OrderBy === "Annexure Wise") {
                   buildAnnexureData();
                   setShowAnnexureModal(true);
                 }
-
                 if (values.T3) setPrintDateValue(new Date());
                 else setPrintDateValue(null);
               }}
             />
-
             <AnnexureWiseModal
               show={showAnnexureModal}
               onClose={() => setShowAnnexureModal(false)}
@@ -1183,11 +1189,13 @@ const TrailBalance = () => {
               fromDate={formatDate(fromDate)}
               toDate={formatDate(toDate)}
             />
-
-            <Button className="Buttonz" style={{ backgroundColor: "#3d85c6" }} onClick={handleOpen}>
+            <Button
+              className="Buttonz"
+              style={{ backgroundColor: "#3d85c6" }}
+              onClick={handleOpen}
+            >
               Print
             </Button>
-
             <PrintTrail
               items={filteredRows.map((r) => ({
                 name: r.ahead || "",
@@ -1204,7 +1212,6 @@ const TrailBalance = () => {
               currentDate={printDateValue}
               handleExport={exportToExcel}
             />
-
             <Button
               className="Buttonz"
               style={{ backgroundColor: "#3d85c6" }}
@@ -1215,9 +1222,8 @@ const TrailBalance = () => {
           </div>
         </div>
       </Card>
-
       {/* ACCOUNT STATEMENT MODAL */}
-      <Modal
+      {/* <Modal
         show={showModal}
         onHide={() => {
           setShowModal(false);
@@ -1226,32 +1232,84 @@ const TrailBalance = () => {
         className="custom-modal"
         style={{ marginTop: 20 }}
         centered
+      > */}
+      <Modal
+        show={showModal}
+        // onHide={() => {
+        //   sessionStorage.removeItem("trailModalState"); // ✅ clear saved restore state
+        //   setShowModal(false);
+        //   setActiveRowIndex(0);
+        // }}
+        onHide={() => {
+          sessionStorage.removeItem("trailModalState"); // ✅ clear voucher-restore state
+          setShowModal(false);
+          setActiveRowIndex(0);
+
+          // ✅ restore TrialBalance selected row (the row you opened modal from)
+          const saved = sessionStorage.getItem("trailTbSelectedIndex");
+          if (saved) {
+            const s = JSON.parse(saved);
+
+            // Prefer restoring by acode (best), fallback to index
+            if (s?.acode) {
+              const i = filteredRows.findIndex(
+                (x) => String(x.acode) === String(s.acode),
+              );
+              if (i >= 0) setSelectedIndex(i);
+              else if (typeof s.index === "number") setSelectedIndex(s.index);
+            } else if (typeof s.index === "number") {
+              setSelectedIndex(s.index);
+            }
+          }
+        }}
+        className="custom-modal"
+        style={{ marginTop: 20 }}
+        centered
       >
         <Modal.Header closeButton>
           <Modal.Title>ACCOUNT STATEMENT</Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           {selectedLedger && (
             <div>
-              <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
                 <p>
-                  <span style={{ fontSize: 17 }}><b>Code:</b> {selectedLedger?.acode}<br /></span>
-                  <span style={{ fontSize: 17 }}><b>GST No:</b> {selectedLedger?.gstNo}<br /></span>
-                  <span style={{ fontSize: 17 }}><b>Phone:</b> {selectedLedger?.phone}<br /></span>
+                  <span style={{ fontSize: 17 }}>
+                    <b>Code:</b> {selectedLedger?.acode}
+                    <br />
+                  </span>
+                  <span style={{ fontSize: 17 }}>
+                    <b>GST No:</b> {selectedLedger?.gstNo}
+                    <br />
+                  </span>
+                  <span style={{ fontSize: 17 }}>
+                    <b>Phone:</b> {selectedLedger?.phone}
+                    <br />
+                  </span>
                 </p>
-
-                <div style={{ display: "flex", flexDirection: "column", textAlign: "center" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    textAlign: "center",
+                  }}
+                >
                   <b style={{ fontSize: 20 }}>{selectedLedger?.ahead || ""}</b>
                   <b style={{ fontSize: 20 }}>{selectedLedger?.city || ""}</b>
-
                   {filteredTransactions.length > 0 && (
                     <div style={{ fontSize: "20px" }}>
                       {(() => {
                         let balance = 0;
                         filteredTransactions.forEach((txn) => {
                           const amt = Number(txn.amount) || 0;
-                          if (String(txn.type).toLowerCase() === "debit") balance += amt;
+                          if (String(txn.type).toLowerCase() === "debit")
+                            balance += amt;
                           else balance -= amt;
                         });
                         const drcr = balance >= 0 ? "DR" : "CR";
@@ -1265,10 +1323,23 @@ const TrailBalance = () => {
                     </div>
                   )}
                 </div>
-
-                <div style={{ display: "flex", flexDirection: "column", textAlign: "center" }}>
-                  <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                    <b style={{ fontSize: 16, marginRight: "14px" }}>Progressive DR</b>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <b style={{ fontSize: 16, marginRight: "14px" }}>
+                      Progressive DR
+                    </b>
                     <TextField
                       className="custom-bordered-input"
                       size="small"
@@ -1276,9 +1347,16 @@ const TrailBalance = () => {
                       inputProps={{ style: { height: "10px", width: "206px" } }}
                     />
                   </div>
-
-                  <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                    <b style={{ fontSize: 16, marginRight: "14px" }}>Progressive CR</b>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <b style={{ fontSize: 16, marginRight: "14px" }}>
+                      Progressive CR
+                    </b>
                     <TextField
                       className="custom-bordered-input"
                       size="small"
@@ -1286,8 +1364,14 @@ const TrailBalance = () => {
                       inputProps={{ style: { height: "10px", width: "206px" } }}
                     />
                   </div>
-
-                  <div style={{ display: "flex", flexDirection: "row", alignItems: "center", marginTop: 5 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 5,
+                    }}
+                  >
                     <b style={{ fontSize: 16, marginRight: "77px" }}>Period</b>
                     <TextField
                       className="custom-bordered-input"
@@ -1304,10 +1388,18 @@ const TrailBalance = () => {
                   </div>
                 </div>
               </div>
-
               <div className={styles.tableHeight} ref={txnContainerRef}>
                 <Table size="sm" className="custom-table">
-                  <thead style={{ position: "sticky", top: -1, background: "skyblue", fontSize: 17, textAlign: "center", zIndex: 2 }}>
+                  <thead
+                    style={{
+                      position: "sticky",
+                      top: -1,
+                      background: "skyblue",
+                      fontSize: 17,
+                      textAlign: "center",
+                      zIndex: 2,
+                    }}
+                  >
                     <tr>
                       <th>
                         <input
@@ -1315,10 +1407,17 @@ const TrailBalance = () => {
                           onChange={(e) => {
                             const checked = e.target.checked;
                             const ns = {};
-                            filteredTransactions.forEach((txn) => (ns[txn._id] = checked));
+                            filteredTransactions.forEach(
+                              (txn) => (ns[txn._id] = checked),
+                            );
                             setSelectedRows(ns);
                           }}
-                          checked={filteredTransactions.length > 0 && filteredTransactions.every((txn) => selectedRows[txn._id])}
+                          checked={
+                            filteredTransactions.length > 0 &&
+                            filteredTransactions.every(
+                              (txn) => selectedRows[txn._id],
+                            )
+                          }
                         />
                       </th>
                       <th>Date</th>
@@ -1332,26 +1431,27 @@ const TrailBalance = () => {
                       <th>DR/CR</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {filteredTransactions.length > 0 ? (
                       (() => {
                         let running = 0;
                         return filteredTransactions.map((txn, index) => {
                           const amt = Number(txn.amount) || 0;
-                          if (String(txn.type).toLowerCase() === "debit") running += amt;
+                          if (String(txn.type).toLowerCase() === "debit")
+                            running += amt;
                           else running -= amt;
-
                           const drcr = running >= 0 ? "DR" : "CR";
                           const color = drcr === "DR" ? "darkblue" : "red";
-
                           return (
                             <tr
                               key={txn._id || index}
                               style={{
                                 fontWeight: "bold",
                                 fontSize: 16,
-                                backgroundColor: index === activeRowIndex ? "rgb(187, 186, 186)" : "transparent",
+                                backgroundColor:
+                                  index === activeRowIndex
+                                    ? "rgb(187, 186, 186)"
+                                    : "transparent",
                                 cursor: "pointer",
                               }}
                               onClick={() => {
@@ -1359,110 +1459,211 @@ const TrailBalance = () => {
                                 handleTransactionSelect(txn);
                               }}
                             >
-                              <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                              <td
+                                style={{ textAlign: "center" }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <input
                                   type="checkbox"
                                   checked={!!selectedRows[txn._id]}
-                                  onChange={() => handleRowCheckboxChange(txn._id)}
-                                  style={{ transform: "scale(1.3)", cursor: "pointer" }}
+                                  onChange={() =>
+                                    handleRowCheckboxChange(txn._id)
+                                  }
+                                  style={{
+                                    transform: "scale(1.3)",
+                                    cursor: "pointer",
+                                  }}
                                 />
                               </td>
-                              <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
-                              <td style={{ textAlign: "center" }}>{txn.vtype}</td>
+                              <td>
+                                {new Date(txn.date).toLocaleDateString("en-GB")}
+                              </td>
+                              <td style={{ textAlign: "center" }}>
+                                {txn.vtype}
+                              </td>
                               <td>{txn.narration}</td>
-                              <td style={{ textAlign: "right" }}>{num3(txn.pkgs)}</td>
-                              <td style={{ textAlign: "right" }}>{num3(txn.weight)}</td>
-                              <td style={{ textAlign: "right", color: "darkblue" }}>
-                                {String(txn.type).toLowerCase() === "debit" ? amt.toFixed(2) : ""}
+                              <td style={{ textAlign: "right" }}>
+                                {num3(txn.pkgs)}
+                              </td>
+                              <td style={{ textAlign: "right" }}>
+                                {num3(txn.weight)}
+                              </td>
+                              <td
+                                style={{
+                                  textAlign: "right",
+                                  color: "darkblue",
+                                }}
+                              >
+                                {String(txn.type).toLowerCase() === "debit"
+                                  ? amt.toFixed(2)
+                                  : ""}
                               </td>
                               <td style={{ textAlign: "right", color: "red" }}>
-                                {String(txn.type).toLowerCase() === "credit" ? amt.toFixed(2) : ""}
+                                {String(txn.type).toLowerCase() === "credit"
+                                  ? amt.toFixed(2)
+                                  : ""}
                               </td>
-                              <td style={{ textAlign: "right", color }}>{Math.abs(running).toFixed(2)}</td>
-                              <td style={{ textAlign: "center", fontWeight: "bold", color }}>{drcr}</td>
+                              <td style={{ textAlign: "right", color }}>
+                                {Math.abs(running).toFixed(2)}
+                              </td>
+                              <td
+                                style={{
+                                  textAlign: "center",
+                                  fontWeight: "bold",
+                                  color,
+                                }}
+                              >
+                                {drcr}
+                              </td>
                             </tr>
                           );
                         });
                       })()
                     ) : (
                       <tr>
-                        <td colSpan={10} className="text-center">No transactions found</td>
+                        <td colSpan={10} className="text-center">
+                          No transactions found
+                        </td>
                       </tr>
                     )}
                   </tbody>
-
-                  {filteredTransactions.length > 0 && (() => {
-                    let totalDebit = 0, totalCredit = 0, running = 0, netWeight = 0, netPcs = 0;
-
-                    filteredTransactions.forEach((txn) => {
-                      const amt = Number(txn.amount) || 0;
-                      if (String(txn.type).toLowerCase() === "debit") {
-                        running += amt;
-                        totalDebit += amt;
-                      } else {
-                        running -= amt;
-                        totalCredit += amt;
-                      }
-
-                      if (txn.vtype === "P") {
-                        netWeight += Number(txn.weight) || 0;
-                        netPcs += Number(txn.pkgs) || 0;
-                      } else if (txn.vtype === "S") {
-                        netWeight -= Number(txn.weight) || 0;
-                        netPcs -= Number(txn.pkgs) || 0;
-                      }
-                    });
-
-                    const drcrFinal = running >= 0 ? "DR" : "CR";
-                    const colorFinal = drcrFinal === "DR" ? "darkblue" : "red";
-
-                    return (
-                      <tfoot>
-                        <tr style={{ position: "sticky", bottom: -1, background: "skyblue", fontWeight: "bold", fontSize: 16 }}>
-                          <td colSpan={4} style={{ textAlign: "center" }}>Totals</td>
-                          <td style={{ textAlign: "right" }}>{netPcs.toFixed(3)}</td>
-                          <td style={{ textAlign: "right" }}>{netWeight.toFixed(3)}</td>
-                          <td style={{ textAlign: "right", color: "darkblue" }}>{totalDebit.toFixed(2)}</td>
-                          <td style={{ textAlign: "right", color: "red" }}>{totalCredit.toFixed(2)}</td>
-                          <td style={{ textAlign: "right", color: colorFinal }}>{Math.abs(running).toFixed(2)}</td>
-                          <td style={{ textAlign: "center", color: colorFinal }}>{drcrFinal}</td>
-                        </tr>
-                      </tfoot>
-                    );
-                  })()}
+                  {filteredTransactions.length > 0 &&
+                    (() => {
+                      let totalDebit = 0,
+                        totalCredit = 0,
+                        running = 0,
+                        netWeight = 0,
+                        netPcs = 0;
+                      filteredTransactions.forEach((txn) => {
+                        const amt = Number(txn.amount) || 0;
+                        if (String(txn.type).toLowerCase() === "debit") {
+                          running += amt;
+                          totalDebit += amt;
+                        } else {
+                          running -= amt;
+                          totalCredit += amt;
+                        }
+                        if (txn.vtype === "P") {
+                          netWeight += Number(txn.weight) || 0;
+                          netPcs += Number(txn.pkgs) || 0;
+                        } else if (txn.vtype === "S") {
+                          netWeight -= Number(txn.weight) || 0;
+                          netPcs -= Number(txn.pkgs) || 0;
+                        }
+                      });
+                      const drcrFinal = running >= 0 ? "DR" : "CR";
+                      const colorFinal =
+                        drcrFinal === "DR" ? "darkblue" : "red";
+                      return (
+                        <tfoot>
+                          <tr
+                            style={{
+                              position: "sticky",
+                              bottom: -1,
+                              background: "skyblue",
+                              fontWeight: "bold",
+                              fontSize: 16,
+                            }}
+                          >
+                            <td colSpan={4} style={{ textAlign: "center" }}>
+                              Totals
+                            </td>
+                            <td style={{ textAlign: "right" }}>
+                              {netPcs.toFixed(3)}
+                            </td>
+                            <td style={{ textAlign: "right" }}>
+                              {netWeight.toFixed(3)}
+                            </td>
+                            <td
+                              style={{ textAlign: "right", color: "darkblue" }}
+                            >
+                              {totalDebit.toFixed(2)}
+                            </td>
+                            <td style={{ textAlign: "right", color: "red" }}>
+                              {totalCredit.toFixed(2)}
+                            </td>
+                            <td
+                              style={{ textAlign: "right", color: colorFinal }}
+                            >
+                              {Math.abs(running).toFixed(2)}
+                            </td>
+                            <td
+                              style={{ textAlign: "center", color: colorFinal }}
+                            >
+                              {drcrFinal}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      );
+                    })()}
                 </Table>
               </div>
-
               <div className="d-flex justify-content-between mt-2">
                 <div>
-                  <Button className="Buttonz" variant="secondary" onClick={() => setShowOptions(true)}>Options</Button>{" "}
-                  <Button className="Buttonz" variant="secondary" onClick={() => setIsPrintOpen(true)}>Print</Button>{" "}
+                  <Button
+                    className="Buttonz"
+                    variant="secondary"
+                    onClick={() => setShowOptions(true)}
+                  >
+                    Options
+                  </Button>{" "}
+                  <Button
+                    className="Buttonz"
+                    variant="secondary"
+                    onClick={() => setIsPrintOpen(true)}
+                  >
+                    Print
+                  </Button>{" "}
                   <CoA
                     isOpen={isPrintOpen}
                     handleClose={() => setIsPrintOpen(false)}
                     filteredTransactions={filteredTransactions}
-                    selectedLedger={{ formData: { ahead: selectedLedger?.ahead, acode: selectedLedger?.acode } }}
+                    selectedLedger={{
+                      formData: {
+                        ahead: selectedLedger?.ahead,
+                        acode: selectedLedger?.acode,
+                      },
+                    }}
                     ledgerFrom={ledgerFromDate}
                     ledgerTo={ledgerToDate}
                     currentDate={printDateValue}
                     handleExport={exportAccountStatementToExcel}
                   />
-                  <Button className="Buttonz" variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "}
+                  {/* <Button className="Buttonz" variant="secondary" onClick={() => setShowModal(false)}>Exit</Button>{" "} */}
+                  <Button
+                    className="Buttonz"
+                    variant="secondary"
+                    onClick={() => {
+                      sessionStorage.removeItem("trailModalState"); // ✅ clear saved restore state
+                      setShowModal(false);
+                    }}
+                  >
+                    Exit
+                  </Button>
                 </div>
               </div>
             </div>
           )}
         </Modal.Body>
       </Modal>
-
       {/* Options Modal for transactions */}
-      <Modal style={{ zIndex: 100000 }} show={showOptions} onHide={() => setShowOptions(false)} centered>
+      <Modal
+        style={{ zIndex: 100000 }}
+        show={showOptions}
+        onHide={() => setShowOptions(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Filter Transactions</Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
-          <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
             <div style={{ display: "flex", flexDirection: "column" }}>
               <Form.Group>
                 <Form.Label>From Date</Form.Label>
@@ -1472,15 +1673,16 @@ const TrailBalance = () => {
                   onChangeRaw={(e) => {
                     if (!e?.target?.value) return;
                     let val = e.target.value.replace(/\D/g, "");
-                    if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                    if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+                    if (val.length > 2)
+                      val = val.slice(0, 2) + "/" + val.slice(2);
+                    if (val.length > 5)
+                      val = val.slice(0, 5) + "/" + val.slice(5, 9);
                     e.target.value = val;
                   }}
                   dateFormat="dd/MM/yyyy"
                   className={styles.from}
                 />
               </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Upto Date</Form.Label>
                 <DatePicker
@@ -1489,15 +1691,16 @@ const TrailBalance = () => {
                   onChangeRaw={(e) => {
                     if (!e?.target?.value) return;
                     let val = e.target.value.replace(/\D/g, "");
-                    if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
-                    if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5, 9);
+                    if (val.length > 2)
+                      val = val.slice(0, 2) + "/" + val.slice(2);
+                    if (val.length > 5)
+                      val = val.slice(0, 5) + "/" + val.slice(5, 9);
                     e.target.value = val;
                   }}
                   dateFormat="dd/MM/yyyy"
                   className={styles.to}
                 />
               </Form.Group>
-
               <Form.Group>
                 <Form.Label>Select Type</Form.Label>
                 <Form.Select
@@ -1510,7 +1713,6 @@ const TrailBalance = () => {
                   <option value="Credit">Credit</option>
                 </Form.Select>
               </Form.Group>
-
               <div style={{ display: "flex", flexDirection: "row" }}>
                 <Form.Label style={{ marginTop: 5 }}>Narration</Form.Label>
                 <input
@@ -1520,7 +1722,6 @@ const TrailBalance = () => {
                   onChange={(e) => setNarrationFilter(e.target.value)}
                 />
               </div>
-
               <Form.Group>
                 <Form.Label>Filter</Form.Label>
                 <Form.Select
@@ -1534,26 +1735,75 @@ const TrailBalance = () => {
                 </Form.Select>
               </Form.Group>
             </div>
-
-            <div style={{ display: "flex", flexDirection: "column", marginLeft: "50px" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginLeft: "50px",
+              }}
+            >
               <b style={{ fontSize: 18, marginBottom: "10px" }}>Vouchers</b>
-              <Form.Check type="checkbox" label="Cash" name="cash" checked={vtypeFilters.cash} onChange={handleVtypeChange} style={{ transform: "scale(1.2)" }} />
-              <Form.Check type="checkbox" label="Journal" name="journal" checked={vtypeFilters.journal} onChange={handleVtypeChange} style={{ transform: "scale(1.2)" }} />
-              <Form.Check type="checkbox" label="Bank" name="bank" checked={vtypeFilters.bank} onChange={handleVtypeChange} style={{ transform: "scale(1.2)" }} />
-              <Form.Check type="checkbox" label="Sale" name="sale" checked={vtypeFilters.sale} onChange={handleVtypeChange} style={{ transform: "scale(1.2)" }} />
-              <Form.Check type="checkbox" label="Purchase" name="purchase" checked={vtypeFilters.purchase} onChange={handleVtypeChange} style={{ transform: "scale(1.2)" }} />
-              <Form.Check type="checkbox" label="TDS" name="tds" checked={vtypeFilters.tds} onChange={handleVtypeChange} style={{ transform: "scale(1.2)" }} />
+              <Form.Check
+                type="checkbox"
+                label="Cash"
+                name="cash"
+                checked={vtypeFilters.cash}
+                onChange={handleVtypeChange}
+                style={{ transform: "scale(1.2)" }}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Journal"
+                name="journal"
+                checked={vtypeFilters.journal}
+                onChange={handleVtypeChange}
+                style={{ transform: "scale(1.2)" }}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Bank"
+                name="bank"
+                checked={vtypeFilters.bank}
+                onChange={handleVtypeChange}
+                style={{ transform: "scale(1.2)" }}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Sale"
+                name="sale"
+                checked={vtypeFilters.sale}
+                onChange={handleVtypeChange}
+                style={{ transform: "scale(1.2)" }}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Purchase"
+                name="purchase"
+                checked={vtypeFilters.purchase}
+                onChange={handleVtypeChange}
+                style={{ transform: "scale(1.2)" }}
+              />
+              <Form.Check
+                type="checkbox"
+                label="TDS"
+                name="tds"
+                checked={vtypeFilters.tds}
+                onChange={handleVtypeChange}
+                style={{ transform: "scale(1.2)" }}
+              />
             </div>
           </div>
         </Modal.Body>
-
         <Modal.Footer>
-          <Button className="Buttonz" variant="secondary" onClick={() => setShowOptions(false)}>
+          <Button
+            className="Buttonz"
+            variant="secondary"
+            onClick={() => setShowOptions(false)}
+          >
             Close
           </Button>
         </Modal.Footer>
       </Modal>
-
       {/* BsGroup Listing (Group Modal) */}
       <Modal
         show={showGroupModal}
@@ -1568,42 +1818,93 @@ const TrailBalance = () => {
             <span style={{ color: "darkblue" }}>{currentGroupName}</span>
           </Modal.Title>
         </Modal.Header>
-
         <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
-          <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}>
-            <div style={{ display: "flex", flexDirection: "column", marginTop: 5 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginBottom: 10,
+            }}
+          >
+            <div
+              style={{ display: "flex", flexDirection: "column", marginTop: 5 }}
+            >
               <div style={{ display: "flex", flexDirection: "row" }}>
                 <b style={{ fontSize: 16, marginRight: "10px" }}>Period From</b>
-                <TextField className="custom-bordered-input" size="small" value={formatDate(fromDate)} inputProps={{ style: { height: "10px", width: "120px" } }} />
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={formatDate(fromDate)}
+                  inputProps={{ style: { height: "10px", width: "120px" } }}
+                />
               </div>
-              <div style={{ display: "flex", flexDirection: "row", marginTop: 5 }}>
+              <div
+                style={{ display: "flex", flexDirection: "row", marginTop: 5 }}
+              >
                 <b style={{ fontSize: 16, marginRight: "61px" }}>UpTo</b>
-                <TextField className="custom-bordered-input" size="small" value={formatDate(toDate)} inputProps={{ style: { height: "10px", width: "120px" } }} />
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={formatDate(toDate)}
+                  inputProps={{ style: { height: "10px", width: "120px" } }}
+                />
               </div>
             </div>
-
-            <div style={{ display: "flex", flexDirection: "column", marginTop: 5 }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", marginTop: 5 }}
+            >
               <div style={{ display: "flex", flexDirection: "row" }}>
-                <b style={{ fontSize: 16, marginRight: "16px" }}>Selected Debit</b>
-                <TextField className="custom-bordered-input" size="small" value={money2(groupTotals.debit)} inputProps={{ style: { height: "10px", width: "150px" } }} />
+                <b style={{ fontSize: 16, marginRight: "16px" }}>
+                  Selected Debit
+                </b>
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={money2(groupTotals.debit)}
+                  inputProps={{ style: { height: "10px", width: "150px" } }}
+                />
               </div>
-              <div style={{ display: "flex", flexDirection: "row", marginTop: 5 }}>
-                <b style={{ fontSize: 16, marginRight: "10px" }}>Selected Credit</b>
-                <TextField className="custom-bordered-input" size="small" value={money2(groupTotals.credit)} inputProps={{ style: { height: "10px", width: "150px" } }} />
+              <div
+                style={{ display: "flex", flexDirection: "row", marginTop: 5 }}
+              >
+                <b style={{ fontSize: 16, marginRight: "10px" }}>
+                  Selected Credit
+                </b>
+                <TextField
+                  className="custom-bordered-input"
+                  size="small"
+                  value={money2(groupTotals.credit)}
+                  inputProps={{ style: { height: "10px", width: "150px" } }}
+                />
               </div>
             </div>
           </div>
-
           <div className={styles.tableHeight}>
             <Table size="sm" className="custom-table">
-              <thead style={{ position: "sticky", top: 0, background: "skyblue", fontSize: 17, textAlign: "center", zIndex: 2 }}>
+              <thead
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  background: "skyblue",
+                  fontSize: 17,
+                  textAlign: "center",
+                  zIndex: 2,
+                }}
+              >
                 <tr>
                   <th>
                     <input
                       type="checkbox"
-                      checked={selectedGroupRows.size === groupedRowsToPick.length && groupedRowsToPick.length > 0}
+                      checked={
+                        selectedGroupRows.size === groupedRowsToPick.length &&
+                        groupedRowsToPick.length > 0
+                      }
                       onChange={(e) => {
-                        if (e.target.checked) setSelectedGroupRows(new Set(groupedRowsToPick.map((_, i) => i)));
+                        if (e.target.checked)
+                          setSelectedGroupRows(
+                            new Set(groupedRowsToPick.map((_, i) => i)),
+                          );
                         else setSelectedGroupRows(new Set());
                       }}
                       style={{ transform: "scale(1.2)", cursor: "pointer" }}
@@ -1617,7 +1918,6 @@ const TrailBalance = () => {
                   <th>CREDIT</th>
                 </tr>
               </thead>
-
               <tbody>
                 {groupedRowsToPick.map((r, index) => (
                   <tr
@@ -1625,12 +1925,18 @@ const TrailBalance = () => {
                     ref={(el) => (groupRowRefs.current[index] = el)}
                     style={{
                       cursor: "pointer",
-                      backgroundColor: index === activeGroupIndex ? "rgb(187,186,186)" : "transparent",
+                      backgroundColor:
+                        index === activeGroupIndex
+                          ? "rgb(187,186,186)"
+                          : "transparent",
                     }}
                     onMouseEnter={() => setActiveGroupIndex(index)}
                     onClick={() => fetchLedgerTransactions(r)}
                   >
-                    <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                    <td
+                      style={{ textAlign: "center" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <input
                         type="checkbox"
                         checked={selectedGroupRows.has(index)}
@@ -1645,16 +1951,26 @@ const TrailBalance = () => {
                         style={{ transform: "scale(1.2)", cursor: "pointer" }}
                       />
                     </td>
-
                     <td>{r.ahead}</td>
                     <td>{r.city}</td>
                     <td style={{ textAlign: "right" }}>{num3(r.netQty)}</td>
                     <td style={{ textAlign: "right" }}>{num3(r.netPcs)}</td>
-
-                    <td style={{ textAlign: "right", color: "darkblue", fontWeight: "bold" }}>
+                    <td
+                      style={{
+                        textAlign: "right",
+                        color: "darkblue",
+                        fontWeight: "bold",
+                      }}
+                    >
                       {r.drcr === "DR" ? money2(Math.abs(r.balance)) : ""}
                     </td>
-                    <td style={{ textAlign: "right", color: "red", fontWeight: "bold" }}>
+                    <td
+                      style={{
+                        textAlign: "right",
+                        color: "red",
+                        fontWeight: "bold",
+                      }}
+                    >
                       {r.drcr === "CR" ? money2(Math.abs(r.balance)) : ""}
                     </td>
                   </tr>
@@ -1662,10 +1978,14 @@ const TrailBalance = () => {
               </tbody>
             </Table>
           </div>
-
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <Button className="Buttonz" style={{ marginRight: "10px" }} onClick={handleOpen}>Print</Button>
-
+            <Button
+              className="Buttonz"
+              style={{ marginRight: "10px" }}
+              onClick={handleOpen}
+            >
+              Print
+            </Button>
             <PrintTrail
               items={groupedRowsToPick.map((r) => ({
                 name: r.ahead || "",
@@ -1683,15 +2003,19 @@ const TrailBalance = () => {
               currentGroupName={currentGroupName}
               handleExport={exportGroupToExcel}
             />
-
-            <Button className="Buttonz" variant="secondary" onClick={() => setShowGroupModal(false)}>Close</Button>
+            <Button
+              className="Buttonz"
+              variant="secondary"
+              onClick={() => setShowGroupModal(false)}
+            >
+              Close
+            </Button>
           </div>
         </Modal.Body>
       </Modal>
     </div>
   );
 };
-
 export default TrailBalance;
 
 // import React, { useEffect, useState, useRef, useMemo } from "react";

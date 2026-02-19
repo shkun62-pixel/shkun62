@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from "react";
 import HsnDetail from "./HsnWiseReport/HsnDetail";
 import AcwiseGstRep from "./AccWiseGstReport/AcwiseGstRep";
+import MonthlyFormModal from "./MonthlyForms/MonthlyFormModal";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -27,8 +28,11 @@ const GstReport = () => {
       {type === "HsnWise" && (
         <HsnDetail show={openPurRep} onHide={handleClose} />
       )}
-       {type === "AcwiseGstReport" && (
+      {type === "AcwiseGstReport" && (
         <AcwiseGstRep show={openPurRep} onHide={handleClose} />
+      )}
+        {type === "MonthlyForm" && (
+        <MonthlyFormModal open={openPurRep} onClose={handleClose} />
       )}
     </div>
   );

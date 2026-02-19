@@ -27,6 +27,7 @@
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "excel4node": "^1.8.2",
+    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.4.7",
     "html-to-pdf-js": "^0.9.3",

@@ -2064,404 +2064,672 @@
 
 // export default Example;
 
-import React, {useRef, useState} from 'react'
-import { TextField, Autocomplete } from '@mui/material';
-import useLedgerAccounts from './Shared/useLedgerAccounts';
-import { toast } from 'react-toastify';
-import AnexureModal from './Modals/AnexureModal ';
-import { Button } from 'react-bootstrap';
-import { useEditMode } from '../EditModeContext';
+// import React, {useRef, useState} from 'react'
+// import { TextField, Autocomplete } from '@mui/material';
+// import useLedgerAccounts from './Shared/useLedgerAccounts';
+// import { toast } from 'react-toastify';
+// import AnexureModal from './Modals/AnexureModal ';
+// import { Button } from 'react-bootstrap';
+// import { useEditMode } from '../EditModeContext';
+
+// const Example = () => {
+//   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+//   const [showModal, setShowModal] = useState(false);
+//   const { getUniqueValues, existingGstList, existingpanList, existingTdsList, existingAdharList, existingAccList, existingAcCodeList, ledgerData, fetchLedgerAccounts } = useLedgerAccounts(); // only using hook
+//   const inputRefs = useRef([]); // Array to hold references for input fields
+//   const [formData, setFormData] = useState({
+//     Bsgroup: "",
+//     Bscode:"",
+//     group:"",
+//     acode: "",
+//     gstNo: "",
+//     ahead: "",
+//     add1: "",
+//     add2: "",
+//     irate: "",
+//     tds_rate: "",
+//     tcs_rate: "",
+//     sur_rate: "",
+//     weight: "",
+//   });
+//   const [toastOpen, setToastOpen] = useState(false); // Track if toast is open
+//   const [initialLoadDone, setInitialLoadDone] = useState(false);
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+//   // GST Validation
+//   const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+//   const [isGstValid, setIsGstValid] = useState(true);
+
+//   const stateCodes = {
+//     "01": "Jammu & Kashmir",
+//     "02": "Himachal Pradesh",
+//     "03": "Punjab",
+//     "04": "Chandigarh",
+//     "05": "Uttarakhand",
+//     "06": "Haryana",
+//     "07": "Delhi",
+//     "08": "Rajasthan",
+//     "09": "Uttar Pradesh",
+//     "10": "Bihar",
+//     "11": "Sikkim",
+//     "12": "Arunachal Pradesh",
+//     "13": "Nagaland",
+//     "14": "Manipur",
+//     "15": "Mizoram",
+//     "16": "Tripura",
+//     "17": "Meghalaya",
+//     "18": "Assam",
+//     "19": "West Bengal",
+//     "20": "Jharkhand",
+//     "21": "Odisha",
+//     "22": "Chhattisgarh",
+//     "23": "Madhya Pradesh",
+//     "24": "Gujarat",
+//     "25": "Daman and Diu",
+//     "26": "Dadra and Nagar Haveli",
+//     "27": "Maharashtra",
+//     "28": "Andhra Pradesh",
+//     "29": "Karnataka",
+//     "30": "Goa",
+//     "31": "Lakshadweep",
+//     "32": "Kerala",
+//     "33": "Tamil Nadu",
+//     "34": "Puducherry",
+//     "35": "Andaman & Nicobar Islands",
+//     "36": "Telangana",
+//     "37": "Andhra Pradesh (New)",
+//     "38": "Ladakh",
+//     " " : "Export"
+//   };
+
+//   // Restrict invalid key presses
+//   const handleKeyPress = (e) => {
+//     const { value } = e.target;
+//     const char = e.key.toUpperCase();
+//     const pos = value.length;
+
+//     const validPattern = [
+//       /^[0-9]$/,            // 1st & 2nd: Digits
+//       /^[0-9]$/,
+//       /^[A-Z]$/,            // 3rd to 7th: Alphabets
+//       /^[A-Z]$/,
+//       /^[A-Z]$/,
+//       /^[A-Z]$/,
+//       /^[A-Z]$/,
+//       /^[0-9]$/,            // 8th to 11th: Digits
+//       /^[0-9]$/,
+//       /^[0-9]$/,
+//       /^[0-9]$/,
+//       /^[A-Z]$/,            // 12th: Alphabet
+//       /^[1-9A-Z]$/,         // 13th: Alphanumeric (1-9, A-Z)
+//       /^Z$/,                // 14th: Always 'Z'
+//       /^[0-9A-Z]$/          // 15th: Alphanumeric (0-9, A-Z)
+//     ];
+
+//     if (pos < 15 && !validPattern[pos].test(char)) {
+//       e.preventDefault(); // Block invalid characters
+//     }
+//   };
+
+//   const handleChangeGst = (e) => {
+//     let value = e.target.value.toUpperCase(); // Force uppercase
+//     if (value.length > 15) return; // Restrict length
+
+//     const isValid = GST_REGEX.test(value);  
+//     const isDuplicate = existingGstList.includes(value);
+//     setIsGstValid(isValid);
+
+//     let updatedState = "";
+//     let extractedPan = "";
+
+//     if (value.length >= 2) {
+//       const stateCode = value.slice(0, 2);
+//       updatedState = stateCodes[stateCode] || "";
+//     }
+
+//     // Extract PAN when GST is valid
+//     if (value.length === 15 && isValid) {
+//       extractedPan = value.substring(2, 12); // PAN is from 3rd to 12th character
+//     }
+
+//     setFormData((prev) => ({
+//       ...prev,
+//       gstNo: value,
+//       state: updatedState,
+//       pan: extractedPan,
+//     }));
+
+//     // Show toast only if value is fully entered (15 chars)
+//     if (value.length === 15) {
+//       if (isDuplicate) {
+//         toast.error("GST No Already Exists !!", {
+//           position: "top-center", // or "bottom-center"
+//         });
+//       }
+//     }
+
+//   };
+
+//   const HandleValueChange = (event) => {
+//     const { id, value } = event.target;
+//     const isDuplicate = existingpanList.includes(value);
+//     if (isDuplicate) {
+//       toast.error("PAN No Already Exists !!", {
+//         position: "top-center", // or "bottom-center"
+//       });
+//     }
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       [id]:  capitalizeWords(value),
+//     }));
+//   };
+//   const handleValueChange = (field) => (event, newValue, reason) => {
+//     // Skip during initial API set
+//     if (!initialLoadDone) {
+//       return setFormData((prev) => ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
+//     }
+
+//     // Only check duplicates for ahead field & when user actually sets a value
+//     if (field === "ahead" && newValue && reason !== "clear" && reason !== "reset") {
+//       const existingAheadList = ledgerData
+//         .map((item) => item.ahead?.toLowerCase())
+//         .filter(Boolean);
+
+//       if (existingAheadList.includes(newValue.toLowerCase())) {
+//         toast.error(`"${newValue}" already exists!`, {
+//           position: "top-center",
+//           autoClose: 2000,
+//         });
+//       }
+//     }
+
+//     setFormData((prev) => ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
+//   };
+//   // Handle Enter key to move focus to the next enabled input
+//  const handleKeyDown = (e, index) => {
+//   if (toastOpen && (e.key === "Tab" || e.key === "Enter")) {
+//     e.preventDefault();
+//     return;
+//   }
+
+//   if (e.key === "Enter" || e.key === "Tab") {
+//     e.preventDefault();
+
+//     // 🔥 Special case:
+//     // If group is Balance sheet AND current field is A/C NAME (index 1)
+//     if (formData.group !== "Balance Sheet" && index === 1) {
+//       inputRefs.current[29]?.focus(); // Jump directly to irate
+//       return;
+//     }
+
+//     let nextIndex = index + 1;
+
+//     while (
+//       inputRefs.current[nextIndex] &&
+//       inputRefs.current[nextIndex].disabled
+//     ) {
+//       nextIndex += 1;
+//     }
+
+//     inputRefs.current[nextIndex]?.focus();
+//   }
+
+//   if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+//     e.preventDefault();
+
+//     let prevIndex = index - 1;
+
+//     while (
+//       inputRefs.current[prevIndex] &&
+//       inputRefs.current[prevIndex].disabled
+//     ) {
+//       prevIndex -= 1;
+//     }
+
+//     inputRefs.current[prevIndex]?.focus();
+//   }
+// };
+
+//   const handleAdd = async () => {
+//     setShowModal(true);
+//   };
+//   const handleSelectBsgroup = (selectedItem) => {
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       Bsgroup: selectedItem.name,
+//       Bscode: selectedItem.code,
+//       group: selectedItem.group,
+//     }));
+
+//     setTimeout(() => {
+//       if (selectedItem.group !=="Balance Sheet") {
+//         // Focus A/C NAME
+//         inputRefs.current[1]?.focus();
+//       } else {
+//         // Focus GST NO
+//         inputRefs.current[0]?.focus();
+//       }
+//     }, 200);
+//   };
+
+//   return (
+//     <div>
+//       <h1>{formData.Bsgroup}</h1>
+//       <h1>{formData.Bscode}</h1>
+//       <h1>{formData.group}</h1>
+//       <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
+//         <TextField
+//         className="custom-bordered-input"
+//         label="GST No"
+//         variant="filled"
+//         size="small"
+//         value={formData.gstNo}
+//         onChange={handleChangeGst}
+//         error={!isGstValid}
+//         helperText={!isGstValid ? "Invalid GST No" : ""}
+//         inputRef={(el) => (inputRefs.current[0] = el)}
+//         onKeyDown={(e) => handleKeyDown(e, 0)}
+//         onKeyPress={handleKeyPress}
+//         inputProps={{
+//           style: {
+//             height: "15px",
+//             fontSize: 16,
+//           },
+//         }}
+//         sx={{ width: 370 }}
+//       />
+//       </div>
+//       <div style={{marginTop:2}}>
+//       <Autocomplete
+//       freeSolo
+//       disableClearable
+//       options={ getUniqueValues("ahead")}
+//       value={formData.ahead}
+//       onInputChange={handleValueChange("ahead")}
+//       renderInput={(params) => (
+//         <TextField
+//           {...params}
+//           className="custom-bordered-input"
+//           id="ahead"
+//           variant="filled"
+//           size="small"
+//           label="A/C NAME"
+//           inputRef={(el) => (inputRefs.current[1] = el)}
+//           onKeyDown={(e) => handleKeyDown(e, 1)}
+//           inputProps={{
+//             ...params.inputProps,
+//             maxLength: 48,
+//             style: {
+//               height: "15px",
+//               fontSize: 16,
+//             },
+//           }}
+//           sx={{ width: 580 }}
+//         />
+//       )}
+//       />
+//       </div>
+//       <div  style={{marginTop:2}}>
+//         <TextField
+//         className="custom-bordered-input"
+//         id="add1"
+//         value={formData.add1}
+//         variant="filled"
+//         size="small"
+//         label="ADDRESS"
+//         onChange={HandleValueChange}
+//         inputRef={(el) => (inputRefs.current[2] = el)}
+//         onKeyDown={(e) => handleKeyDown(e, 2)} // Handle Enter key
+//         inputProps={{
+//           maxLength: 48,
+//           style: {
+//             height: "15px",
+//             fontSize: 16,
+//           },
+//         }}
+//         sx={{ width: 580 }}
+//       />
+//       </div>
+//       <div style={{marginTop:2}}>
+//                   <TextField
+//                   className="custom-bordered-input"
+//                   id="irate"
+//                   value={formData.irate}
+//                   variant="filled"
+//                   size="small"
+//                   label="INTT/DEPC.RATE"
+//                   inputRef={(el) => (inputRefs.current[29] = el)}
+//                   onKeyDown={(e) => handleKeyDown(e, 29)} // Handle Enter key
+//                   inputProps={{
+//                     maxLength: 6,
+//                     style: {
+//                       height: "15px",
+//                       fontSize: 16,
+//                     },
+//                   }}
+//                   sx={{ width: 500 }}
+//                   />
+//       </div>
+//       <div style={{marginTop:2}}>
+//       <TextField
+//       className="custom-bordered-input"
+//       id="tds_rate"
+//       value={formData.tds_rate}
+//       variant="filled"
+//       size="small"
+//       label="TDS RATE"
+//       inputRef={(el) => (inputRefs.current[30] = el)}
+//       onKeyDown={(e) => handleKeyDown(e, 30)} // Handle Enter key
+//       inputProps={{
+//         maxLength: 6,
+//         style: {
+//           height: "15px",
+//           fontSize: 16,
+//           // padding: "0 8px"
+//         },
+//       }}
+//       sx={{ width: 500 }}
+//       />
+//       </div>
+//       <div style={{marginTop:2}}>
+//       <TextField
+//       className="custom-bordered-input"
+//       id="tcs_rate"
+//       value={formData.tcs_rate}
+//       variant="filled"
+//       size="small"
+//       label="TCS RATE"
+//       inputRef={(el) => (inputRefs.current[31] = el)}
+//       onKeyDown={(e) => handleKeyDown(e, 31)} // Handle Enter key
+//       inputProps={{
+//         maxLength: 6,
+//         style: {
+//           height: "15px",
+//           fontSize: 16,
+//           // padding: "0 8px"
+//         },
+//       }}
+//       sx={{ width: 500 }}
+//       />
+//       </div>
+//       <Button onClick={handleAdd}>Add</Button>
+//       <AnexureModal
+//         show={showModal}
+//         handleClose={() => setShowModal(false)}
+//         onSelect={handleSelectBsgroup} // Pass callback function
+//       />
+//     </div>
+//   )
+// }
+
+// export default Example
+
+
+// import React, { useState } from "react";
+// import axios from "axios";
+// import ExcelJS from "exceljs";
+// import { saveAs } from "file-saver";
+// import { Button, Spinner } from "react-bootstrap";
+
+// const Example = () => {
+//   const [loading, setLoading] = useState(false);
+
+//   const exportGSTR1 = async () => {
+//     try {
+//       setLoading(true);
+
+//       // 1️⃣ Fetch API
+//       const response = await axios.get(
+//         "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+//       );
+
+//       const salesData = response.data;
+
+//       // 2️⃣ Load Template
+//       const templateResponse = await fetch("/GSTR-1.xlsx");
+
+//       if (!templateResponse.ok) {
+//         throw new Error("Template not found");
+//       }
+
+//       const buffer = await templateResponse.arrayBuffer();
+
+//       const workbook = new ExcelJS.Workbook();
+
+//       await workbook.xlsx.load(buffer, {
+//         ignoreNodes: [
+//           "dataValidations",
+//           "sheetProtection",
+//           "conditionalFormatting"
+//         ]
+//       });
+
+//       // 🔥 Remove named ranges
+//       workbook.definedNames.model = [];
+
+//       const sheet = workbook.getWorksheet("b2b,sez,de");
+
+//       let startRow = 5;
+
+//       salesData.forEach((sale, index) => {
+//         const row = sheet.getRow(startRow + index);
+
+//         const customer = sale.customerDetails?.[0] || {};
+//         const item = sale.items?.[0] || {};
+//         const form = sale.formData || {};
+
+//         row.getCell(1).value = customer.gstno || "";
+//         row.getCell(2).value = customer.vacode || "";
+//         row.getCell(3).value = form.vbillno || "";
+//         row.getCell(4).value = form.date ? new Date(form.date) : "";
+//         row.getCell(5).value = Number(form.grandtotal || 0);
+//         row.getCell(6).value = `03-${customer.state || ""}`;
+//         row.getCell(7).value = "N";
+//         row.getCell(8).value = item.gst || 0;
+//         row.getCell(9).value = "Regular B2B";
+//         row.getCell(10).value = "";
+//         row.getCell(11).value = item.gst || 0;
+//         row.getCell(12).value = Number(form.sub_total || 0);
+//         row.getCell(13).value = Number(form.pcess || 0);
+
+//         row.commit();
+//       });
+
+//       const fileBuffer = await workbook.xlsx.writeBuffer();
+
+//       saveAs(
+//         new Blob([fileBuffer], {
+//           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+//         }),
+//         "GSTR1_Final.xlsx"
+//       );
+
+//     } catch (error) {
+//       alert("Export Failed");
+//       console.error(error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <Button
+//         onClick={exportGSTR1}
+//         disabled={loading}
+//         style={{ margin: 20 }}
+//       >
+//         {loading ? (
+//           <>
+//             <Spinner
+//               animation="border"
+//               size="sm"
+//               style={{ marginRight: 8 }}
+//             />
+//             Exporting...
+//           </>
+//         ) : (
+//           "Export GSTR-1"
+//         )}
+//       </Button>
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+import React, { useState } from "react";
+import axios from "axios";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { Button, Spinner, Form, Row, Col } from "react-bootstrap";
+import InputMask from "react-input-mask";
 
 const Example = () => {
-  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
-  const [showModal, setShowModal] = useState(false);
-  const { getUniqueValues, existingGstList, existingpanList, existingTdsList, existingAdharList, existingAccList, existingAcCodeList, ledgerData, fetchLedgerAccounts } = useLedgerAccounts(); // only using hook
-  const inputRefs = useRef([]); // Array to hold references for input fields
-  const [formData, setFormData] = useState({
-    Bsgroup: "",
-    Bscode:"",
-    group:"",
-    acode: "",
-    gstNo: "",
-    ahead: "",
-    add1: "",
-    add2: "",
-    irate: "",
-    tds_rate: "",
-    tcs_rate: "",
-    sur_rate: "",
-    weight: "",
-  });
-  const [toastOpen, setToastOpen] = useState(false); // Track if toast is open
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
-  const capitalizeWords = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-  // GST Validation
-  const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-  const [isGstValid, setIsGstValid] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
-  const stateCodes = {
-    "01": "Jammu & Kashmir",
-    "02": "Himachal Pradesh",
-    "03": "Punjab",
-    "04": "Chandigarh",
-    "05": "Uttarakhand",
-    "06": "Haryana",
-    "07": "Delhi",
-    "08": "Rajasthan",
-    "09": "Uttar Pradesh",
-    "10": "Bihar",
-    "11": "Sikkim",
-    "12": "Arunachal Pradesh",
-    "13": "Nagaland",
-    "14": "Manipur",
-    "15": "Mizoram",
-    "16": "Tripura",
-    "17": "Meghalaya",
-    "18": "Assam",
-    "19": "West Bengal",
-    "20": "Jharkhand",
-    "21": "Odisha",
-    "22": "Chhattisgarh",
-    "23": "Madhya Pradesh",
-    "24": "Gujarat",
-    "25": "Daman and Diu",
-    "26": "Dadra and Nagar Haveli",
-    "27": "Maharashtra",
-    "28": "Andhra Pradesh",
-    "29": "Karnataka",
-    "30": "Goa",
-    "31": "Lakshadweep",
-    "32": "Kerala",
-    "33": "Tamil Nadu",
-    "34": "Puducherry",
-    "35": "Andaman & Nicobar Islands",
-    "36": "Telangana",
-    "37": "Andhra Pradesh (New)",
-    "38": "Ladakh",
-    " " : "Export"
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const [day, month, year] = dateStr.split("/");
+    return new Date(`${year}-${month}-${day}`);
   };
 
-  // Restrict invalid key presses
-  const handleKeyPress = (e) => {
-    const { value } = e.target;
-    const char = e.key.toUpperCase();
-    const pos = value.length;
-
-    const validPattern = [
-      /^[0-9]$/,            // 1st & 2nd: Digits
-      /^[0-9]$/,
-      /^[A-Z]$/,            // 3rd to 7th: Alphabets
-      /^[A-Z]$/,
-      /^[A-Z]$/,
-      /^[A-Z]$/,
-      /^[A-Z]$/,
-      /^[0-9]$/,            // 8th to 11th: Digits
-      /^[0-9]$/,
-      /^[0-9]$/,
-      /^[0-9]$/,
-      /^[A-Z]$/,            // 12th: Alphabet
-      /^[1-9A-Z]$/,         // 13th: Alphanumeric (1-9, A-Z)
-      /^Z$/,                // 14th: Always 'Z'
-      /^[0-9A-Z]$/          // 15th: Alphanumeric (0-9, A-Z)
-    ];
-
-    if (pos < 15 && !validPattern[pos].test(char)) {
-      e.preventDefault(); // Block invalid characters
-    }
-  };
-
-  const handleChangeGst = (e) => {
-    let value = e.target.value.toUpperCase(); // Force uppercase
-    if (value.length > 15) return; // Restrict length
-
-    const isValid = GST_REGEX.test(value);  
-    const isDuplicate = existingGstList.includes(value);
-    setIsGstValid(isValid);
-
-    let updatedState = "";
-    let extractedPan = "";
-
-    if (value.length >= 2) {
-      const stateCode = value.slice(0, 2);
-      updatedState = stateCodes[stateCode] || "";
-    }
-
-    // Extract PAN when GST is valid
-    if (value.length === 15 && isValid) {
-      extractedPan = value.substring(2, 12); // PAN is from 3rd to 12th character
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      gstNo: value,
-      state: updatedState,
-      pan: extractedPan,
-    }));
-
-    // Show toast only if value is fully entered (15 chars)
-    if (value.length === 15) {
-      if (isDuplicate) {
-        toast.error("GST No Already Exists !!", {
-          position: "top-center", // or "bottom-center"
-        });
+  const exportGSTR1 = async () => {
+    try {
+      if (!fromDate || !toDate) {
+        alert("Please select From and To date");
+        return;
       }
-    }
 
-  };
+      const from = parseDate(fromDate);
+      const to = parseDate(toDate);
 
-  const HandleValueChange = (event) => {
-    const { id, value } = event.target;
-    const isDuplicate = existingpanList.includes(value);
-    if (isDuplicate) {
-      toast.error("PAN No Already Exists !!", {
-        position: "top-center", // or "bottom-center"
+      setLoading(true);
+
+      // 1️⃣ Fetch API
+      const response = await axios.get(
+        "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+      );
+
+      const salesData = response.data;
+
+      // 2️⃣ Filter Data Between Dates
+      const filteredData = salesData.filter((sale) => {
+        const saleDate = new Date(sale.formData?.date);
+        return saleDate >= from && saleDate <= to;
       });
+
+      // 3️⃣ Load Template
+      const templateResponse = await fetch("/GSTR-1.xlsx");
+      const buffer = await templateResponse.arrayBuffer();
+
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer, {
+        ignoreNodes: [
+          "dataValidations",
+          "sheetProtection",
+          "conditionalFormatting"
+        ]
+      });
+
+      workbook.definedNames.model = [];
+
+      const sheet = workbook.getWorksheet("b2b,sez,de");
+
+      let startRow = 5;
+
+      filteredData.forEach((sale, index) => {
+        const row = sheet.getRow(startRow + index);
+
+        const customer = sale.customerDetails?.[0] || {};
+        const item = sale.items?.[0] || {};
+        const form = sale.formData || {};
+
+        row.getCell(1).value = customer.gstno || "";
+        row.getCell(2).value = customer.vacode || "";
+        row.getCell(3).value = form.vbillno || "";
+        row.getCell(4).value = form.date ? new Date(form.date) : "";
+        row.getCell(5).value = Number(form.grandtotal || 0);
+        row.getCell(6).value = `03-${customer.state || ""}`;
+        row.getCell(7).value = "N";
+        row.getCell(8).value = item.gst || 0;
+        row.getCell(9).value = "Regular B2B";
+        row.getCell(10).value = "";
+        row.getCell(11).value = item.gst || 0;
+        row.getCell(12).value = Number(form.sub_total || 0);
+        row.getCell(13).value = Number(form.pcess || 0);
+
+        row.commit();
+      });
+
+      const fileBuffer = await workbook.xlsx.writeBuffer();
+
+      saveAs(
+        new Blob([fileBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }),
+        "GSTR1_Filtered.xlsx"
+      );
+
+    } catch (error) {
+      alert("Export Failed");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]:  capitalizeWords(value),
-    }));
-  };
-  const handleValueChange = (field) => (event, newValue, reason) => {
-    // Skip during initial API set
-    if (!initialLoadDone) {
-      return setFormData((prev) => ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
-    }
-
-    // Only check duplicates for ahead field & when user actually sets a value
-    if (field === "ahead" && newValue && reason !== "clear" && reason !== "reset") {
-      const existingAheadList = ledgerData
-        .map((item) => item.ahead?.toLowerCase())
-        .filter(Boolean);
-
-      if (existingAheadList.includes(newValue.toLowerCase())) {
-        toast.error(`"${newValue}" already exists!`, {
-          position: "top-center",
-          autoClose: 2000,
-        });
-      }
-    }
-
-    setFormData((prev) => ({ ...prev, [field]: capitalizeWords(newValue) || "" }));
-  };
-  // Handle Enter key to move focus to the next enabled input
- const handleKeyDown = (e, index) => {
-  if (toastOpen && (e.key === "Tab" || e.key === "Enter")) {
-    e.preventDefault();
-    return;
-  }
-
-  if (e.key === "Enter" || e.key === "Tab") {
-    e.preventDefault();
-
-    // 🔥 Special case:
-    // If group is Balance sheet AND current field is A/C NAME (index 1)
-    if (formData.group !== "Balance Sheet" && index === 1) {
-      inputRefs.current[29]?.focus(); // Jump directly to irate
-      return;
-    }
-
-    let nextIndex = index + 1;
-
-    while (
-      inputRefs.current[nextIndex] &&
-      inputRefs.current[nextIndex].disabled
-    ) {
-      nextIndex += 1;
-    }
-
-    inputRefs.current[nextIndex]?.focus();
-  }
-
-  if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-    e.preventDefault();
-
-    let prevIndex = index - 1;
-
-    while (
-      inputRefs.current[prevIndex] &&
-      inputRefs.current[prevIndex].disabled
-    ) {
-      prevIndex -= 1;
-    }
-
-    inputRefs.current[prevIndex]?.focus();
-  }
-};
-
-  const handleAdd = async () => {
-    setShowModal(true);
-  };
-  const handleSelectBsgroup = (selectedItem) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      Bsgroup: selectedItem.name,
-      Bscode: selectedItem.code,
-      group: selectedItem.group,
-    }));
-
-    setTimeout(() => {
-      if (selectedItem.group !=="Balance Sheet") {
-        // Focus A/C NAME
-        inputRefs.current[1]?.focus();
-      } else {
-        // Focus GST NO
-        inputRefs.current[0]?.focus();
-      }
-    }, 200);
   };
 
   return (
-    <div>
-      <h1>{formData.Bsgroup}</h1>
-      <h1>{formData.Bscode}</h1>
-      <h1>{formData.group}</h1>
-      <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
-        <TextField
-        className="custom-bordered-input"
-        label="GST No"
-        variant="filled"
-        size="small"
-        value={formData.gstNo}
-        onChange={handleChangeGst}
-        error={!isGstValid}
-        helperText={!isGstValid ? "Invalid GST No" : ""}
-        inputRef={(el) => (inputRefs.current[0] = el)}
-        onKeyDown={(e) => handleKeyDown(e, 0)}
-        onKeyPress={handleKeyPress}
-        inputProps={{
-          style: {
-            height: "15px",
-            fontSize: 16,
-          },
-        }}
-        sx={{ width: 370 }}
-      />
-      </div>
-      <div style={{marginTop:2}}>
-      <Autocomplete
-      freeSolo
-      disableClearable
-      options={ getUniqueValues("ahead")}
-      value={formData.ahead}
-      onInputChange={handleValueChange("ahead")}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          className="custom-bordered-input"
-          id="ahead"
-          variant="filled"
-          size="small"
-          label="A/C NAME"
-          inputRef={(el) => (inputRefs.current[1] = el)}
-          onKeyDown={(e) => handleKeyDown(e, 1)}
-          inputProps={{
-            ...params.inputProps,
-            maxLength: 48,
-            style: {
-              height: "15px",
-              fontSize: 16,
-            },
-          }}
-          sx={{ width: 580 }}
-        />
-      )}
-      />
-      </div>
-      <div  style={{marginTop:2}}>
-        <TextField
-        className="custom-bordered-input"
-        id="add1"
-        value={formData.add1}
-        variant="filled"
-        size="small"
-        label="ADDRESS"
-        onChange={HandleValueChange}
-        inputRef={(el) => (inputRefs.current[2] = el)}
-        onKeyDown={(e) => handleKeyDown(e, 2)} // Handle Enter key
-        inputProps={{
-          maxLength: 48,
-          style: {
-            height: "15px",
-            fontSize: 16,
-          },
-        }}
-        sx={{ width: 580 }}
-      />
-      </div>
-      <div style={{marginTop:2}}>
-                  <TextField
-                  className="custom-bordered-input"
-                  id="irate"
-                  value={formData.irate}
-                  variant="filled"
-                  size="small"
-                  label="INTT/DEPC.RATE"
-                  inputRef={(el) => (inputRefs.current[29] = el)}
-                  onKeyDown={(e) => handleKeyDown(e, 29)} // Handle Enter key
-                  inputProps={{
-                    maxLength: 6,
-                    style: {
-                      height: "15px",
-                      fontSize: 16,
-                    },
-                  }}
-                  sx={{ width: 500 }}
-                  />
-      </div>
-      <div style={{marginTop:2}}>
-      <TextField
-      className="custom-bordered-input"
-      id="tds_rate"
-      value={formData.tds_rate}
-      variant="filled"
-      size="small"
-      label="TDS RATE"
-      inputRef={(el) => (inputRefs.current[30] = el)}
-      onKeyDown={(e) => handleKeyDown(e, 30)} // Handle Enter key
-      inputProps={{
-        maxLength: 6,
-        style: {
-          height: "15px",
-          fontSize: 16,
-          // padding: "0 8px"
-        },
-      }}
-      sx={{ width: 500 }}
-      />
-      </div>
-      <div style={{marginTop:2}}>
-      <TextField
-      className="custom-bordered-input"
-      id="tcs_rate"
-      value={formData.tcs_rate}
-      variant="filled"
-      size="small"
-      label="TCS RATE"
-      inputRef={(el) => (inputRefs.current[31] = el)}
-      onKeyDown={(e) => handleKeyDown(e, 31)} // Handle Enter key
-      inputProps={{
-        maxLength: 6,
-        style: {
-          height: "15px",
-          fontSize: 16,
-          // padding: "0 8px"
-        },
-      }}
-      sx={{ width: 500 }}
-      />
-      </div>
-      <Button onClick={handleAdd}>Add</Button>
-      <AnexureModal
-        show={showModal}
-        handleClose={() => setShowModal(false)}
-        onSelect={handleSelectBsgroup} // Pass callback function
-      />
+    <div style={{ padding: 20 }}>
+      <Row className="mb-3">
+        <Col md={3}>
+          <Form.Label>From Date</Form.Label>
+          <InputMask
+            mask="99/99/9999"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          >
+            {(inputProps) => (
+              <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
+            )}
+          </InputMask>
+        </Col>
+
+        <Col md={3}>
+          <Form.Label>To Date</Form.Label>
+          <InputMask
+            mask="99/99/9999"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          >
+            {(inputProps) => (
+              <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
+            )}
+          </InputMask>
+        </Col>
+
+        <Col md={3} className="d-flex align-items-end">
+          <Button onClick={exportGSTR1} disabled={loading}>
+            {loading ? (
+              <>
+                <Spinner
+                  animation="border"
+                  size="sm"
+                  style={{ marginRight: 8 }}
+                />
+                Exporting...
+              </>
+            ) : (
+              "Export GSTR-1"
+            )}
+          </Button>
+        </Col>
+      </Row>
     </div>
-  )
-}
+  );
+};
 
-export default Example
-
+export default Example;
