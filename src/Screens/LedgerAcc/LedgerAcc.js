@@ -1100,6 +1100,11 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
     setTitle("VIEW");
     setIsAddEnabled(true); // Enable "Add" button
     setIsSubmitEnabled(false);
+    
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
     try {
       const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/ledgerAccount/last`); // Fetch the latest data
       if (response.status === 200 && response.data.data) {

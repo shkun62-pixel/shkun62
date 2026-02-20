@@ -17,6 +17,7 @@ import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import useStockAcc from "../Shared/useStockAcc";
 import InputMask from "react-input-mask";
 import useShortcuts from "../Shared/useShortcuts";
+import { useNavigate } from "react-router-dom";
 
 const NewStockAcc = ({ onSave, StockId }) => {
 
@@ -24,6 +25,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
   const tenant = "03AAYFG4472A1ZG_01042025_31032026"
+  const navigate = useNavigate();
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -756,9 +758,15 @@ const NewStockAcc = ({ onSave, StockId }) => {
   };
 
   const handleExit = async () => {
+
     document.body.style.backgroundColor = "white"; // Reset background color
     setIsAddEnabled(true); // Enable "Add" button
     setIsSubmitEnabled(false);
+
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
     try {
       const response = await axios.get(
         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`

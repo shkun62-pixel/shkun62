@@ -773,1296 +773,986 @@
 
 // export default Example;
 
-// import React, { useState } from "react";
-// import Table from "react-bootstrap/Table";
-// import ProductModalCustomer from "./Modals/ProductModalCustomer";
-
-// const Example = () => {
-//   const tenant = "shkun_05062025_05062026";
-//   const [items, setItems] = useState([
-//     {
-//       id: "",
-//       accountname: "",
-//       narration: "",
-//       debit: "",
-//       credit: "",
-//       disableDebit: false,
-//       disableCredit: false,
-//     },
-//   ]);
-
-//   const capitalizeWords = (str) => {
-//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
-//   };
-
-//   // Modal For Customer
-//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-//   const [productsCus, setProductsCus] = useState([]);
-//   const [showModalCus, setShowModalCus] = useState(false);
-//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-//   const [loadingCus, setLoadingCus] = useState(true);
-//   const [errorCus, setErrorCus] = useState(null);
-//   const [suggestionRow, setSuggestionRow] = useState(null);
-//   const [suggestionText, setSuggestionText] = useState("");
-
-//   React.useEffect(() => {
-//     fetchCustomers();
-//   }, []);
-
-//   const fetchCustomers = async () => {
-//     try {
-//       const response = await fetch(
-//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
-//       );
-//       if (!response.ok) {
-//         throw new Error("Failed to fetch products");
-//       }
-//       const data = await response.json();
-//       // Ensure to extract the formData for easier access in the rest of your app
-//       const formattedData = data.map((item) => ({
-//         ...item.formData,
-//         _id: item._id,
-//       }));
-//       setProductsCus(formattedData);
-//       setLoadingCus(false);
-//     } catch (error) {
-//       setErrorCus(error.message);
-//       setLoadingCus(false);
-//     }
-//   };
-
-//   const handleItemChangeCus = (index, key, value) => {
-//     const updatedItems = [...items];
-//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-//     // If the key is 'name', find the corresponding product and set the price
-//     if (key === "name") {
-//       const selectedProduct = productsCus.find(
-//         (product) => product.ahead === value,
-//       );
-//       if (selectedProduct) {
-//         updatedItems[index]["accountname"] = selectedProduct.ahead;
-//         updatedItems[index]["acode"] = selectedProduct.acode;
-//       }
-//     }
-//     // Disable credit field if debit field is filled
-//     if (key === "debit") {
-//       updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
-//     }
-
-//     // Disable debit field if credit field is filled
-//     if (key === "credit") {
-//       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
-//     }
-//     if (key === "narration") {
-//       const accountName = items[index].accountname || "";
-
-//       if (
-//         accountName &&
-//         accountName.toLowerCase().startsWith(value.toLowerCase()) &&
-//         value !== ""
-//       ) {
-//         setSuggestionRow(index);
-//         setSuggestionText(accountName);
-//       } else {
-//         setSuggestionRow(null);
-//         setSuggestionText("");
-//       }
-//     }
-
-//     setItems(updatedItems);
-//   };
-
-//   const handleProductSelectCus = (product) => {
-//     if (!product) {
-//       alert("No product received!");
-//       setShowModalCus(false);
-//       return;
-//     }
-
-//     // clone the array
-//     const newCustomers = [...items];
-
-//     // overwrite the one at the selected index
-//     newCustomers[selectedItemIndexCus] = {
-//       ...newCustomers[selectedItemIndexCus],
-//       accountname: product.ahead || "",
-//       acode: product.acode,
-//     };
-//     const nameValue = product.ahead || product.name || "";
-//     if (selectedItemIndexCus !== null) {
-//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-//       setShowModalCus(false);
-//     }
-//     setItems(newCustomers);
-//     setShowModalCus(false);
-//   };
-
-//   const handleCloseModalCus = () => {
-//     setShowModalCus(false);
-//     setPressedKey(""); // resets for next modal open
-//   };
-
-//   const openModalForItemCus = (index) => {
-//     setSelectedItemIndexCus(index);
-//     setShowModalCus(true);
-//   };
-
-//   const allFieldsCus = productsCus.reduce((fields, product) => {
-//     Object.keys(product).forEach((key) => {
-//       if (!fields.includes(key)) {
-//         fields.push(key);
-//       }
-//     });
-
-//     return fields;
-//   }, []);
-
-//   const handleNumberChange = (event, index, field) => {
-//     const value = event.target.value;
-
-//     // Validate that the input is numeric
-//     if (!/^\d*\.?\d*$/.test(value)) {
-//       return;
-//     }
-
-//     const updatedItems = [...items];
-//     updatedItems[index][field] = value;
-
-//     // If the field is 'debit' and its value is greater than zero, disable 'credit'
-//     if (field === "debit") {
-//       updatedItems[index].disableCredit = parseFloat(value) > 0;
-//       updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
-//     }
-//     // If the field is 'credit' and its value is greater than zero, disable 'debit'
-//     else if (field === "credit") {
-//       updatedItems[index].disableDebit = parseFloat(value) > 0;
-//       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
-//     }
-//     setItems(updatedItems);
-//   };
-
-//   const handleKeyDown = (event, index, field) => {
-//     // Open Modal on Letter Input in Account Name
-//     if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-//       setPressedKey(event.key);
-//       openModalForItemCus(index);
-//       event.preventDefault();
-//     }
-//   };
-//   return (
-//     <div>
-//       <div className="Tablesection">
-//         <Table className="custom-table">
-//           <thead>
-//             <tr style={{ color: "white" }}>
-//               <th>ACCOUNT NAME</th>
-//               <th>NARRATION</th>
-//               <th>DEBIT</th>
-//               <th>CREDIT</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {items.map((item, index) => (
-//               <tr key={`${item.accountname}-${index}`}>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="Account"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     type="text"
-//                     value={item.accountname}
-//                     onKeyDown={(e) => {
-//                       handleKeyDown(e, index, "accountname");
-//                     }}
-//                     onFocus={(e) => e.target.select()} // Select text on focus
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, position: "relative" }}>
-//                   <input
-//                     className="Narration"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: "5px 8px",
-//                       fontSize: "14px",
-//                       position: "relative",
-//                       background: "transparent",
-//                     }}
-//                     value={item.narration}
-//                     onChange={(e) =>
-//                       handleItemChangeCus(index, "narration", e.target.value)
-//                     }
-//                     onKeyDown={(e) => {
-//                       if (
-//                         e.key === "Tab" &&
-//                         suggestionRow === index &&
-//                         suggestionText
-//                       ) {
-//                         e.preventDefault();
-
-//                         const updatedItems = [...items];
-//                         updatedItems[index].narration = suggestionText;
-//                         setItems(updatedItems);
-
-//                         setSuggestionRow(null);
-//                         setSuggestionText("");
-//                       }
-//                     }}
-//                   />
-
-//                   {/* 👇 Show only remaining text */}
-//                   {suggestionRow === index && suggestionText && (
-//                     <div
-//                       style={{
-//                         position: "absolute",
-//                         top: 0,
-//                         left: 8,
-//                         height: "100%",
-//                         display: "flex",
-//                         alignItems: "center",
-//                         color: "#bbb",
-//                         fontSize: "14px",
-//                         pointerEvents: "none",
-//                       }}
-//                     >
-//                       <span style={{ visibility: "hidden" }}>
-//                         {item.narration}
-//                       </span>
-//                       <span>{suggestionText.slice(item.narration.length)}</span>
-//                     </div>
-//                   )}
-//                 </td>
-
-//                 <td style={{ padding: 0, width: 250 }}>
-//                   <input
-//                     className="Debit"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       paddingRight: 10,
-//                     }}
-//                     value={Number(item.debit) === 0 ? "" : item.debit}
-//                     onChange={(e) => handleNumberChange(e, index, "debit")}
-//                     onFocus={(e) => e.target.select()} // Select text on focus
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, width: 250 }}>
-//                   <input
-//                     className="Credits"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       paddingRight: 10,
-//                     }}
-//                     value={Number(item.credit) === 0 ? "" : item.credit}
-//                     onChange={(e) => handleNumberChange(e, index, "credit")}
-//                     onFocus={(e) => e.target.select()} // Select text on focus
-//                   />
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
-//         {showModalCus && (
-//           <ProductModalCustomer
-//             allFields={allFieldsCus}
-//             onSelect={handleProductSelectCus}
-//             onClose={handleCloseModalCus}
-//             initialKey={pressedKey}
-//             tenant={tenant}
-//           />
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Example;
-
 // SALE TABLE
-// import React, { useState, useEffect } from "react";
-// import Table from "react-bootstrap/Table";
-// import ProductModal from "./Modals/ProductModal";
-// import Button from "react-bootstrap/Button";
-// import axios from "axios";
+import React, { useState, useEffect } from "react";
+import Table from "react-bootstrap/Table";
+import ProductModal from "./Modals/ProductModal";
+import Button from "react-bootstrap/Button";
+import axios from "axios";
 
-// const Example = () => {
-//   const tenant = "shkun_05062025_05062026";
-//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-//   const LOCAL_STORAGE_KEY = "tabledataVisibility";
-//   const [T11, setT11] = useState(false);
-//   const [T12, setT12] = useState(false);
-//   const [T21, setT21] = useState(false);
-//   const [currentIndex, setCurrentIndex] = useState(null);
-//   const [isModalOpenExp, setIsModalOpenExp] = useState(false);
+const Example = () => {
+  const tenant = "shkun_05062025_05062026";
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const LOCAL_STORAGE_KEY = "tabledataVisibility";
+  const [T11, setT11] = useState(false);
+  const [T12, setT12] = useState(false);
+  const [T21, setT21] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(null);
+  const [isModalOpenExp, setIsModalOpenExp] = useState(false);
   
-//   const [products, setProducts] = useState([]);
-//   const [items, setItems] = useState([
-//     {
-//       id: 1,
-//       vcode: "",
-//       sdisc: "",
-//       Units: "",
-//       pkgs: "0.00",
-//       weight: "0.00",
-//       rate: "0.00",
-//       amount: "0.00",
-//       disc: 0,
-//       discount: "",
-//       gst: 18,
-//       Pcodes01: "",
-//       Pcodess: "",
-//       Scodes01: "",
-//       Scodess: "",
-//       Exp_rate1: 0,
-//       Exp_rate2: 0,
-//       Exp_rate3: 0,
-//       Exp_rate4: 0,
-//       Exp_rate5: 0,
-//       Exp1: 0,
-//       Exp2: 0,
-//       Exp3: 0,
-//       Exp4: 0,
-//       Exp5: 0,
-//       exp_before: 0,
-//       RateCal: "",
-//       Qtyperpc: 0,
-//       ctax: "0.00",
-//       stax: "0.00",
-//       itax: "0.00",
-//       tariff: "",
-//       vamt: "0.00",
-//     },
-//   ]);
-//   const capitalizeWords = (str) => {
-//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
-//   };
-//     React.useEffect(() => {
-//       // Fetch products from the API when the component mounts
-//       fetchProducts();
-//     }, []);
+  const [products, setProducts] = useState([]);
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      vcode: "",
+      sdisc: "",
+      Units: "",
+      pkgs: "0.00",
+      weight: "0.00",
+      rate: "0.00",
+      amount: "0.00",
+      disc: 0,
+      discount: "",
+      gst: 18,
+      Pcodes01: "",
+      Pcodess: "",
+      Scodes01: "",
+      Scodess: "",
+      Exp_rate1: 0,
+      Exp_rate2: 0,
+      Exp_rate3: 0,
+      Exp_rate4: 0,
+      Exp_rate5: 0,
+      Exp1: 0,
+      Exp2: 0,
+      Exp3: 0,
+      Exp4: 0,
+      Exp5: 0,
+      exp_before: 0,
+      RateCal: "",
+      Qtyperpc: 0,
+      ctax: "0.00",
+      stax: "0.00",
+      itax: "0.00",
+      tariff: "",
+      vamt: "0.00",
+    },
+  ]);
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+    React.useEffect(() => {
+      // Fetch products from the API when the component mounts
+      fetchProducts();
+    }, []);
   
-//     const fetchProducts = async (search = "") => {
-//       setLoading(true);
-//       try {
-//         const response = await fetch(
-//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
-//         );
-//         if (!response.ok) throw new Error("Failed to fetch products");
-//         const data = await response.json();
-//         const flattenedData = data.data.map((item) => ({
-//           ...item.formData,
-//           _id: item._id,
-//         }));
-//         setProducts(flattenedData);
-//       } catch (error) {
-//         setError(error.message);
-//       }
-//       setLoading(false);
-//     };
+    const fetchProducts = async (search = "") => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch products");
+        const data = await response.json();
+        const flattenedData = data.data.map((item) => ({
+          ...item.formData,
+          _id: item._id,
+        }));
+        setProducts(flattenedData);
+      } catch (error) {
+        setError(error.message);
+      }
+      setLoading(false);
+    };
   
-//     // Modal For Items
-//     const [showModal, setShowModal] = useState(false);
-//     const [selectedProduct, setSelectedProduct] = useState(null);
-//     const [selectedItemIndex, setSelectedItemIndex] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState(null);
+    // Modal For Items
+    const [showModal, setShowModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
   
-//     const handleItemChange = (index, key, value, field) => {
-//       // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-//       if (
-//         (key === "pkgs" ||
-//           key === "weight" ||
-//           key === "tariff" ||
-//           key === "rate" ||
-//           key === "disc" ||
-//           key === "discount" || key === "amount") &&
-//         !/^-?\d*\.?\d*$/.test(value)
-//       ) {
-//         return; // reject invalid input
-//       }
+    const handleItemChange = (index, key, value, field) => {
+      // If key is "pkgs" or "weight", allow only numbers and a single decimal point
+      if (
+        (key === "pkgs" ||
+          key === "weight" ||
+          key === "tariff" ||
+          key === "rate" ||
+          key === "disc" ||
+          key === "discount" || key === "amount") &&
+        !/^-?\d*\.?\d*$/.test(value)
+      ) {
+        return; // reject invalid input
+      }
 
-//       // Always force disc/discount to be negative
-//       if (key === "disc" || key === "discount") {
-//         const numeric = parseFloat(value);
-//         if (!isNaN(numeric)) {
-//           value = -Math.abs(numeric); // Force negative
-//         }
-//       }
+      // Always force disc/discount to be negative
+      if (key === "disc" || key === "discount") {
+        const numeric = parseFloat(value);
+        if (!isNaN(numeric)) {
+          value = -Math.abs(numeric); // Force negative
+        }
+      }
 
-//       const updatedItems = [...items];
-//       if (["sdisc"].includes(key)) {
-//         updatedItems[index][key] = capitalizeWords(value);
-//       } else {
-//         updatedItems[index][key] = value;
-//       }
+      const updatedItems = [...items];
+      if (["sdisc"].includes(key)) {
+        updatedItems[index][key] = capitalizeWords(value);
+      } else {
+        updatedItems[index][key] = value;
+      }
 
-//       // If the key is 'name', find the corresponding product and set the price
-//       if (key === "name") {
-//         const selectedProduct = products.find(
-//           (product) => product.Aheads === value,
-//         );
+      // If the key is 'name', find the corresponding product and set the price
+      if (key === "name") {
+        const selectedProduct = products.find(
+          (product) => product.Aheads === value,
+        );
 
-//         if (selectedProduct) {
-//           // ✅ Always update these
-//           updatedItems[index]["vcode"] = selectedProduct.Acodes;
-//           updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+        if (selectedProduct) {
+          // ✅ Always update these
+          updatedItems[index]["vcode"] = selectedProduct.Acodes;
+          updatedItems[index]["sdisc"] = selectedProduct.Aheads;
 
-//           // ⬇️ Normal mode (unchanged)
-//           updatedItems[index]["Units"] = selectedProduct.TradeName;
-//           updatedItems[index]["rate"] = selectedProduct.Mrps;
-//           updatedItems[index]["gst"] = selectedProduct.itax_rate;
-//           updatedItems[index]["tariff"] = selectedProduct.Hsn;
-//           updatedItems[index]["Scodes01"] = selectedProduct.Scodes01;
-//           updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-//           updatedItems[index]["Pcodes01"] = selectedProduct.Pcodes01;
-//           updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
-//           updatedItems[index]["RateCal"] = selectedProduct.Rateins;
-//           updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-//           updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
-//         }
-//       }
+          // ⬇️ Normal mode (unchanged)
+          updatedItems[index]["Units"] = selectedProduct.TradeName;
+          updatedItems[index]["rate"] = selectedProduct.Mrps;
+          updatedItems[index]["gst"] = selectedProduct.itax_rate;
+          updatedItems[index]["tariff"] = selectedProduct.Hsn;
+          updatedItems[index]["Scodes01"] = selectedProduct.Scodes01;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.Pcodes01;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+          updatedItems[index]["RateCal"] = selectedProduct.Rateins;
+          updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+          updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
+        }
+      }
 
-//       let pkgs = parseFloat(updatedItems[index].pkgs);
-//       pkgs = isNaN(pkgs) ? 0 : pkgs;
+      let pkgs = parseFloat(updatedItems[index].pkgs);
+      pkgs = isNaN(pkgs) ? 0 : pkgs;
 
-//       let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
-//       Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+      let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+      Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
 
 
-//       let AL = pkgs * Qtyperpkgs || 0;
-//       let gst = parseFloat(updatedItems[index].gst) || 0;
-//       if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
-//         updatedItems[index]["weight"] = AL.toFixed(2);
-//       }
+      let AL = pkgs * Qtyperpkgs || 0;
+      let gst = parseFloat(updatedItems[index].gst) || 0;
+      if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
+        updatedItems[index]["weight"] = AL.toFixed(2);
+      }
   
-//       let weight = parseFloat(updatedItems[index].weight);
-//       weight = isNaN(weight) ? 0 : weight;
+      let weight = parseFloat(updatedItems[index].weight);
+      weight = isNaN(weight) ? 0 : weight;
 
-//       const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
-//       const rate = parseFloat(updatedItems[index].rate) || 0;
+      const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+      const rate = parseFloat(updatedItems[index].rate) || 0;
 
-//       const totalAccordingWeight = weight * rate;
-//       const totalAccordingPkgs = pkgsVal * rate;
+      const totalAccordingWeight = weight * rate;
+      const totalAccordingPkgs = pkgsVal * rate;
 
-//       let RateCal = updatedItems[index].RateCal;
-//       let TotalAcc = totalAccordingWeight; // Set a default value
+      let RateCal = updatedItems[index].RateCal;
+      let TotalAcc = totalAccordingWeight; // Set a default value
 
-//       // Calcuate the Amount According to RateCalculation field
-//       if (
-//         RateCal === "Default" ||
-//         RateCal === "" ||
-//         RateCal === null ||
-//         RateCal === undefined
-//       ) {
-//         TotalAcc = totalAccordingWeight;
-//       } else if (RateCal === "Wt/Qty") {
-//         TotalAcc = totalAccordingWeight;
-//         // console.log("totalAccordingWeight");
-//       } else if (RateCal === "Pc/Pkgs") {
-//         TotalAcc = totalAccordingPkgs;
-//         // console.log("totalAccordingPkgs");
-//       }
-//       // 🔥 If user manually edits amount → recalculate rate
-//       if (
-//         key === "amount" &&
-//         value !== "" &&
-//         !isNaN(parseFloat(value)) &&
-//         !value.endsWith(".")
-//       ) {
-//         let enteredAmount = parseFloat(value);
-//         let qty = 0;
+      // Calcuate the Amount According to RateCalculation field
+      if (
+        RateCal === "Default" ||
+        RateCal === "" ||
+        RateCal === null ||
+        RateCal === undefined
+      ) {
+        TotalAcc = totalAccordingWeight;
+      } else if (RateCal === "Wt/Qty") {
+        TotalAcc = totalAccordingWeight;
+        // console.log("totalAccordingWeight");
+      } else if (RateCal === "Pc/Pkgs") {
+        TotalAcc = totalAccordingPkgs;
+        // console.log("totalAccordingPkgs");
+      }
+      // 🔥 If user manually edits amount → recalculate rate
+      if (
+        key === "amount" &&
+        value !== "" &&
+        !isNaN(parseFloat(value)) &&
+        !value.endsWith(".")
+      ) {
+        let enteredAmount = parseFloat(value);
+        let qty = 0;
 
-//         if (RateCal === "Pc/Pkgs") {
-//           qty = parseFloat(updatedItems[index].pkgs) || 0;
-//         } else {
-//           qty = parseFloat(updatedItems[index].weight) || 0;
-//         }
+        if (RateCal === "Pc/Pkgs") {
+          qty = parseFloat(updatedItems[index].pkgs) || 0;
+        } else {
+          qty = parseFloat(updatedItems[index].weight) || 0;
+        }
 
-//         const currentMrp = parseFloat(updatedItems[index].curMrp);
+        const currentMrp = parseFloat(updatedItems[index].curMrp);
 
-//         // // ✅ STOP if MRP exists and is valid (> 0)
-//         if (!isNaN(currentMrp) && currentMrp > 0) {
-//           return; // ❌ Do not recalculate rate
-//         }
+        // // ✅ STOP if MRP exists and is valid (> 0)
+        if (!isNaN(currentMrp) && currentMrp > 0) {
+          return; // ❌ Do not recalculate rate
+        }
 
-//         // Otherwise recalc rate
-//         if (qty > 0 && enteredAmount > 0) {
-//           let newRate = enteredAmount / qty;
+        // Otherwise recalc rate
+        if (qty > 0 && enteredAmount > 0) {
+          let newRate = enteredAmount / qty;
 
-//           updatedItems[index]["rate"] = T21
-//             ? Math.round(newRate).toFixed(2)
-//             : newRate.toFixed(2);
+          updatedItems[index]["rate"] = T21
+            ? Math.round(newRate).toFixed(2)
+            : newRate.toFixed(2);
 
-//           TotalAcc = enteredAmount;
-//         }
-//       }
+          TotalAcc = enteredAmount;
+        }
+      }
 
-//       // Ensure TotalAcc is a valid number before calling toFixed()
-//       TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+      // Ensure TotalAcc is a valid number before calling toFixed()
+      TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
 
-//       let others = parseFloat(updatedItems[index].exp_before) || 0;
-//       let disc = parseFloat(updatedItems[index].disc) || 0;
-//       let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
-//       let per;
-//       if (key === "discount") {
-//         per = manualDiscount;
-//       } else {
-//         per = (disc / 100) * TotalAcc;
-//         updatedItems[index]["discount"] = T21
-//           ? Math.round(per).toFixed(2)
-//           : per.toFixed(2);
-//       }
+      let others = parseFloat(updatedItems[index].exp_before) || 0;
+      let disc = parseFloat(updatedItems[index].disc) || 0;
+      let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+      let per;
+      if (key === "discount") {
+        per = manualDiscount;
+      } else {
+        per = (disc / 100) * TotalAcc;
+        updatedItems[index]["discount"] = T21
+          ? Math.round(per).toFixed(2)
+          : per.toFixed(2);
+      }
 
-//       // ✅ Convert to float for reliable calculation
-//       per = parseFloat(per);
-//       let Amounts = TotalAcc + per + others;
+      // ✅ Convert to float for reliable calculation
+      per = parseFloat(per);
+      let Amounts = TotalAcc + per + others;
 
-//       // Ensure TotalAcc is a valid number before calling toFixed()
-//       // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-//       // Check if GST number starts with "0" to "3"
-//       let cgst, sgst, igst;
-//       let CompanyState = "Punjab"; 
-//       if (CompanyState === "Punjab") {
-//         cgst = (Amounts * (gst / 2)) / 100 || 0;
-//         sgst = (Amounts * (gst / 2)) / 100 || 0;
-//         igst = 0;
-//       } else {
-//         cgst = sgst = 0;
-//         igst = (Amounts * gst) / 100 || 0;
-//       }
+      // Ensure TotalAcc is a valid number before calling toFixed()
+      // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+      // Check if GST number starts with "0" to "3"
+      let cgst, sgst, igst;
+      let CompanyState = "Punjab"; 
+      if (CompanyState === "Punjab") {
+        cgst = (Amounts * (gst / 2)) / 100 || 0;
+        sgst = (Amounts * (gst / 2)) / 100 || 0;
+        igst = 0;
+      } else {
+        cgst = sgst = 0;
+        igst = (Amounts * gst) / 100 || 0;
+      }
 
-//       // Calculate the total with GST and Others
-//       let totalWithGST = Amounts + cgst + sgst + igst;
-//       // Update CGST, SGST, Others, and total fields in the item
-//       if (T21) {
-//         if (key !== "discount") {
-//           updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-//         }
+      // Calculate the total with GST and Others
+      let totalWithGST = Amounts + cgst + sgst + igst;
+      // Update CGST, SGST, Others, and total fields in the item
+      if (T21) {
+        if (key !== "discount") {
+          updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+        }
 
-//         if (key !== "amount") {
-//           updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-//         }
+        if (key !== "amount") {
+          updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+        }
 
-//         updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-//       } else {
-//         if (key !== "discount") {
-//           updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-//         }
+        updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+      } else {
+        if (key !== "discount") {
+          updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+        }
 
-//         if (key !== "amount") {
-//           updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-//         }
+        if (key !== "amount") {
+          updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+        }
 
-//         updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-//       }
-//       if (T12) {
-//         updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
-//         updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
-//         updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
-//       } else {
-//         updatedItems[index]["ctax"] = cgst.toFixed(2);
-//         updatedItems[index]["stax"] = sgst.toFixed(2);
-//         updatedItems[index]["itax"] = igst.toFixed(2);
-//       }
-//       // Calculate the percentage of the value based on the GST percentage
-//       const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
-//       updatedItems[index]["percentage"] = percentage.toFixed(2);
-//       setItems(updatedItems);
-//       // calculateTotalGst();
-//     };
+        updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+      }
+      if (T12) {
+        updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
+        updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
+        updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
+      } else {
+        updatedItems[index]["ctax"] = cgst.toFixed(2);
+        updatedItems[index]["stax"] = sgst.toFixed(2);
+        updatedItems[index]["itax"] = igst.toFixed(2);
+      }
+      // Calculate the percentage of the value based on the GST percentage
+      const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+      updatedItems[index]["percentage"] = percentage.toFixed(2);
+      setItems(updatedItems);
+      // calculateTotalGst();
+    };
   
-//     const handleProductSelect = (product) => {
-//       if (selectedItemIndex !== null) {
-//         handleItemChange(selectedItemIndex, "name", product.Aheads);
-//         setShowModal(false);
-//       }
-//     };
+    const handleProductSelect = (product) => {
+      if (selectedItemIndex !== null) {
+        handleItemChange(selectedItemIndex, "name", product.Aheads);
+        setShowModal(false);
+      }
+    };
   
-//     const handleModalDone = (product) => {
-//       if (product) {
-//         // console.log(product);
-//         handleProductSelect(product);
-//       }
-//       setShowModal(false);
-//       // fetchProducts();
-//     };
+    const handleModalDone = (product) => {
+      if (product) {
+        // console.log(product);
+        handleProductSelect(product);
+      }
+      setShowModal(false);
+      // fetchProducts();
+    };
   
-//     const openModalForItem = (index) => {
-//         setSelectedItemIndex(index);
-//         setShowModal(true);
-//     };
+    const openModalForItem = (index) => {
+        setSelectedItemIndex(index);
+        setShowModal(true);
+    };
   
-//     const allFields = products.length
-//       ? Object.keys(products[0])
-//       : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+    const allFields = products.length
+      ? Object.keys(products[0])
+      : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
 
-//     const handleInputChange = (index, field, value) => {
-//       const numericValue =
-//         typeof value === "string"
-//           ? value.replace(/[^0-9.-]/g, "")
-//           : value;
+    const handleInputChange = (index, field, value) => {
+      const numericValue =
+        typeof value === "string"
+          ? value.replace(/[^0-9.-]/g, "")
+          : value;
 
-//       const updatedItems = [...items];
-//       updatedItems[index][field] = numericValue;
+      const updatedItems = [...items];
+      updatedItems[index][field] = numericValue;
 
-//       setItems(updatedItems);
-//     };
+      setItems(updatedItems);
+    };
 
-//     const handleExpenseBlur = (index, field) => {
-//       const updatedItems = [...items];
-//       const item = updatedItems[index];
+    const handleExpenseBlur = (index, field) => {
+      const updatedItems = [...items];
+      const item = updatedItems[index];
 
-//       const vamt = parseFloat(item.amount) || 0;
+      const vamt = parseFloat(item.amount) || 0;
 
-//       const expMap = [
-//         { rate: "Exp_rate1", val: "Exp1" },
-//         { rate: "Exp_rate2", val: "Exp2" },
-//         { rate: "Exp_rate3", val: "Exp3" },
-//         { rate: "Exp_rate4", val: "Exp4" },
-//         { rate: "Exp_rate5", val: "Exp5" },
-//       ];
+      const expMap = [
+        { rate: "Exp_rate1", val: "Exp1" },
+        { rate: "Exp_rate2", val: "Exp2" },
+        { rate: "Exp_rate3", val: "Exp3" },
+        { rate: "Exp_rate4", val: "Exp4" },
+        { rate: "Exp_rate5", val: "Exp5" },
+      ];
 
-//       expMap.forEach(({ rate, val }) => {
-//         if (field === rate && vamt > 0) {
-//           const r = parseFloat(item[rate]) || 0;
-//           item[val] = ((vamt * r) / 100).toFixed(2);
-//         }
+      expMap.forEach(({ rate, val }) => {
+        // If user changed RATE → calculate VALUE
+        if (field === rate && vamt > 0) {
+          const r = parseFloat(item[rate]) || 0;
+          item[val] = ((vamt * r) / 100).toFixed(2);
+        }
 
-//         if (field === val && vamt > 0) {
-//           const v = parseFloat(item[val]) || 0;
-//           item[rate] = ((v / vamt) * 100).toFixed(2);
-//         }
-//       });
+        // If user changed VALUE → calculate RATE
+        if (field === val && vamt > 0) {
+          const v = parseFloat(item[val]) || 0;
 
-//       setItems(updatedItems);
-//     };
+          // 🔥 DO NOT re-round value again later
+          item[val] = v.toFixed(2);
+
+          // keep higher precision internally
+          item[rate] = ((v / vamt) * 100).toFixed(4);
+        }
+      });
+
+      setItems(updatedItems);
+    };
 
 
-//     useEffect(() => {
-//       if (currentIndex !== null && items[currentIndex]) {
-//         const updatedItems = [...items];
-//         const item = { ...updatedItems[currentIndex] };
+    useEffect(() => {
+      if (currentIndex !== null && items[currentIndex]) {
+        const updatedItems = [...items];
+        const item = { ...updatedItems[currentIndex] };
   
-//         const vamt = parseFloat(item.amount) || 0;
-//         const pkgs = parseFloat(item.pkgs) || 0;
-//         const weight = parseFloat(item.weight) || 0;
-//         // Expense Calculations (Separate Logic for Each Expense)
-//         let Exp1 = 0, Exp2 = 0,Exp3 = 0, Exp4 = 0, Exp5 = 0;
-//         let CalExp1 ="V", CalExp2 = "V", CalExp3 = "V", CalExp4 = "V", CalExp5 = "V";
-//         if (item.Exp_rate1) {
-//           if (CalExp1 === "W" || CalExp1 === "w") {
-//             Exp1 = (weight * parseFloat(item.Exp_rate1)) / 100;
-//           } else if (CalExp1 === "P" || CalExp1 === "p") {
-//             Exp1 = (pkgs * parseFloat(item.Exp_rate1)) / 100;
-//           } else if (CalExp1 === "V" || CalExp1 === "v" || CalExp1 === "") {
-//             Exp1 = (vamt * parseFloat(item.Exp_rate1)) / 100;
-//           }
-//           item.Exp1 = Exp1.toFixed(2);
-//         } else {
-//           item.Exp1 = "0.00";
-//         }
+        const vamt = parseFloat(item.amount) || 0;
+        const pkgs = parseFloat(item.pkgs) || 0;
+        const weight = parseFloat(item.weight) || 0;
+        // Expense Calculations (Separate Logic for Each Expense)
+        let Exp1 = 0, Exp2 = 0,Exp3 = 0, Exp4 = 0, Exp5 = 0;
+        let CalExp1 ="V", CalExp2 = "V", CalExp3 = "V", CalExp4 = "V", CalExp5 = "V";
+        if (item.Exp_rate1) {
+          if (CalExp1 === "W" || CalExp1 === "w") {
+            Exp1 = (weight * parseFloat(item.Exp_rate1)) / 100;
+          } else if (CalExp1 === "P" || CalExp1 === "p") {
+            Exp1 = (pkgs * parseFloat(item.Exp_rate1)) / 100;
+          } else if (CalExp1 === "V" || CalExp1 === "v" || CalExp1 === "") {
+            Exp1 = (vamt * parseFloat(item.Exp_rate1)) / 100;
+          }
+          item.Exp1 = Exp1.toFixed(2);
+        } else {
+          item.Exp1 = "0.00";
+        }
   
-//         if (item.Exp_rate2) {
-//           if (CalExp2 === "W" || CalExp2 === "w") {
-//             Exp2 = (weight * parseFloat(item.Exp_rate2)) / 100;
-//           } else if (CalExp2 === "P" || CalExp2 === "p") {
-//             Exp2 = (pkgs * parseFloat(item.Exp_rate2)) / 100;
-//           } else if (CalExp2 === "V" || CalExp2 === "v" || CalExp2 === "") {
-//             Exp2 = (vamt * parseFloat(item.Exp_rate2)) / 100;
-//           }
-//           item.Exp2 = Exp2.toFixed(2);
-//         } else {
-//           item.Exp2 = "0.00";
-//         }
+        if (item.Exp_rate2) {
+          if (CalExp2 === "W" || CalExp2 === "w") {
+            Exp2 = (weight * parseFloat(item.Exp_rate2)) / 100;
+          } else if (CalExp2 === "P" || CalExp2 === "p") {
+            Exp2 = (pkgs * parseFloat(item.Exp_rate2)) / 100;
+          } else if (CalExp2 === "V" || CalExp2 === "v" || CalExp2 === "") {
+            Exp2 = (vamt * parseFloat(item.Exp_rate2)) / 100;
+          }
+          item.Exp2 = Exp2.toFixed(2);
+        } else {
+          item.Exp2 = "0.00";
+        }
   
-//         if (item.Exp_rate3) {
-//           if (CalExp3 === "W" || CalExp3 === "w") {
-//             Exp3 = (weight * parseFloat(item.Exp_rate3)) / 100;
-//           } else if (CalExp3 === "P" || CalExp3 === "p") {
-//             Exp3 = (pkgs * parseFloat(item.Exp_rate3)) / 100;
-//           } else if (CalExp3 === "V" || CalExp3 === "v" || CalExp3 === "") {
-//             Exp3 = (vamt * parseFloat(item.Exp_rate3)) / 100;
-//           }
-//           item.Exp3 = Exp3.toFixed(2);
-//         } else {
-//           item.Exp3 = "0.00";
-//         }
+        if (item.Exp_rate3) {
+          if (CalExp3 === "W" || CalExp3 === "w") {
+            Exp3 = (weight * parseFloat(item.Exp_rate3)) / 100;
+          } else if (CalExp3 === "P" || CalExp3 === "p") {
+            Exp3 = (pkgs * parseFloat(item.Exp_rate3)) / 100;
+          } else if (CalExp3 === "V" || CalExp3 === "v" || CalExp3 === "") {
+            Exp3 = (vamt * parseFloat(item.Exp_rate3)) / 100;
+          }
+          item.Exp3 = Exp3.toFixed(2);
+        } else {
+          item.Exp3 = "0.00";
+        }
   
-//         if (item.Exp_rate4) {
-//           if (CalExp4 === "W" || CalExp4 === "w") {
-//             Exp4 = (weight * parseFloat(item.Exp_rate4)) / 100;
-//           } else if (CalExp4 === "P" || CalExp4 === "p") {
-//             Exp4 = (pkgs * parseFloat(item.Exp_rate4)) / 100;
-//           } else if (CalExp4 === "V" || CalExp4 === "v" || CalExp4 === "") {
-//             Exp4 = (vamt * parseFloat(item.Exp_rate4)) / 100;
-//           }
-//           item.Exp4 = Exp4.toFixed(2);
-//         } else {
-//           item.Exp4 = "0.00";
-//         }
+        if (item.Exp_rate4) {
+          if (CalExp4 === "W" || CalExp4 === "w") {
+            Exp4 = (weight * parseFloat(item.Exp_rate4)) / 100;
+          } else if (CalExp4 === "P" || CalExp4 === "p") {
+            Exp4 = (pkgs * parseFloat(item.Exp_rate4)) / 100;
+          } else if (CalExp4 === "V" || CalExp4 === "v" || CalExp4 === "") {
+            Exp4 = (vamt * parseFloat(item.Exp_rate4)) / 100;
+          }
+          item.Exp4 = Exp4.toFixed(2);
+        } else {
+          item.Exp4 = "0.00";
+        }
   
-//         if (item.Exp_rate5) {
-//           if (CalExp5 === "W" || CalExp5 === "w") {
-//             Exp5 = (weight * parseFloat(item.Exp_rate5)) / 100;
-//           } else if (CalExp5 === "P" || CalExp5 === "p") {
-//             Exp5 = (pkgs * parseFloat(item.Exp_rate5)) / 100;
-//           } else if (CalExp5 === "V" || CalExp5 === "v" || CalExp5 === "") {
-//             Exp5 = (vamt * parseFloat(item.Exp_rate5)) / 100;
-//           }
-//           item.Exp5 = Exp5.toFixed(2);
-//         } else {
-//           item.Exp5 = "0.00";
-//         }
+        if (item.Exp_rate5) {
+          if (CalExp5 === "W" || CalExp5 === "w") {
+            Exp5 = (weight * parseFloat(item.Exp_rate5)) / 100;
+          } else if (CalExp5 === "P" || CalExp5 === "p") {
+            Exp5 = (pkgs * parseFloat(item.Exp_rate5)) / 100;
+          } else if (CalExp5 === "V" || CalExp5 === "v" || CalExp5 === "") {
+            Exp5 = (vamt * parseFloat(item.Exp_rate5)) / 100;
+          }
+          item.Exp5 = Exp5.toFixed(2);
+        } else {
+          item.Exp5 = "0.00";
+        }
   
-//         // Total Expense Before GST
-//         const totalExpenses = Exp1 + Exp2 + Exp3 + Exp4 + Exp5;
-//         item.exp_before = totalExpenses.toFixed(2);
+        // Total Expense Before GST
+        const totalExpenses = Exp1 + Exp2 + Exp3 + Exp4 + Exp5;
+        item.exp_before = totalExpenses.toFixed(2);
   
-//         // GST & Total Calculations
-//         const gst = parseFloat(item.gst) || 0;
-//         const totalAccordingWeight =
-//           (parseFloat(item.weight) || 0) * (parseFloat(item.rate) || 0);
-//         const totalAccordingPkgs =
-//           (parseFloat(item.pkgs) || 0) * (parseFloat(item.rate) || 0);
-//         let RateCal = item.RateCal;
-//         let TotalAcc =
-//           RateCal === "Pc/Pkgs" ? totalAccordingPkgs : totalAccordingWeight;
+        // GST & Total Calculations
+        const gst = parseFloat(item.gst) || 0;
+        const totalAccordingWeight =
+          (parseFloat(item.weight) || 0) * (parseFloat(item.rate) || 0);
+        const totalAccordingPkgs =
+          (parseFloat(item.pkgs) || 0) * (parseFloat(item.rate) || 0);
+        let RateCal = item.RateCal;
+        let TotalAcc =
+          RateCal === "Pc/Pkgs" ? totalAccordingPkgs : totalAccordingWeight;
   
-//         let disc = parseFloat(item.disc) || 0;
-//         let per = ((disc / 100) * TotalAcc).toFixed(2);
-//         let PerCenTage = parseFloat(per);
-//         let Amounts = TotalAcc + totalExpenses + parseFloat(per);
+        let disc = parseFloat(item.disc) || 0;
+        let per = ((disc / 100) * TotalAcc).toFixed(2);
+        let PerCenTage = parseFloat(per);
+        let Amounts = TotalAcc + totalExpenses + parseFloat(per);
   
-//         TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+        TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
   
-//         // GST Logic Based on State
-//         let cgst = 0, sgst = 0, igst = 0;
-//         let CompanyState = "Punjab"; // Replace with actual state logic
+        // GST Logic Based on State
+        let cgst = 0, sgst = 0, igst = 0;
+        let CompanyState = "Punjab"; // Replace with actual state logic
   
-//         if (CompanyState === 'Punjab') {
-//           cgst = (Amounts * (gst / 2)) / 100;
-//           sgst = (Amounts * (gst / 2)) / 100;
-//         } else {
-//           igst = (Amounts * gst) / 100;
-//         }
+        if (CompanyState === 'Punjab') {
+          cgst = (Amounts * (gst / 2)) / 100;
+          sgst = (Amounts * (gst / 2)) / 100;
+        } else {
+          igst = (Amounts * gst) / 100;
+        }
   
-//         // Final Total Calculation
-//         const totalWithGST = Amounts + cgst + sgst + igst;
-//         if (T12) {
-//           item.ctax = Math.round(cgst).toFixed(2);
-//           item.stax = Math.round(sgst).toFixed(2);
-//           item.itax = Math.round(igst).toFixed(2);
-//           item.discount = Math.round(PerCenTage).toFixed(2);
-//           item.vamt = Math.round(totalWithGST).toFixed(2);
-//         } else {
-//           item.ctax = cgst.toFixed(2);
-//           item.stax = sgst.toFixed(2);
-//           item.itax = igst.toFixed(2);
-//           item.discount = PerCenTage.toFixed(2);
-//           item.vamt = totalWithGST.toFixed(2);
-//         }
-//         updatedItems[currentIndex] = item;
-//         setItems(updatedItems);
-//       }
-//     }, [
-//       currentIndex,
-//       items[currentIndex]?.amount,
-//       items[currentIndex]?.Exp_rate1,
-//       items[currentIndex]?.Exp_rate2,
-//       items[currentIndex]?.Exp_rate3,
-//       items[currentIndex]?.Exp_rate4,
-//       items[currentIndex]?.Exp_rate5,
-//       items[currentIndex]?.gst,
-//       items[currentIndex]?.weight,
-//       items[currentIndex]?.rate,
-//       items[currentIndex]?.pkgs,
-//       items[currentIndex]?.RateCal,
-//     ]);
+        // Final Total Calculation
+        const totalWithGST = Amounts + cgst + sgst + igst;
+        if (T12) {
+          item.ctax = Math.round(cgst).toFixed(2);
+          item.stax = Math.round(sgst).toFixed(2);
+          item.itax = Math.round(igst).toFixed(2);
+          item.discount = Math.round(PerCenTage).toFixed(2);
+          item.vamt = Math.round(totalWithGST).toFixed(2);
+        } else {
+          item.ctax = cgst.toFixed(2);
+          item.stax = sgst.toFixed(2);
+          item.itax = igst.toFixed(2);
+          item.discount = PerCenTage.toFixed(2);
+          item.vamt = totalWithGST.toFixed(2);
+        }
+        updatedItems[currentIndex] = item;
+        setItems(updatedItems);
+      }
+    }, [
+      currentIndex,
+      items[currentIndex]?.amount,
+      items[currentIndex]?.Exp_rate1,
+      items[currentIndex]?.Exp_rate2,
+      items[currentIndex]?.Exp_rate3,
+      items[currentIndex]?.Exp_rate4,
+      items[currentIndex]?.Exp_rate5,
+      items[currentIndex]?.gst,
+      items[currentIndex]?.weight,
+      items[currentIndex]?.rate,
+      items[currentIndex]?.pkgs,
+      items[currentIndex]?.RateCal,
+    ]);
 
-//     const defaultTableFields = {
-//       itemcode: true,
-//       sdisc: true,
-//       hsncode: true,
-//       pcs: true,
-//       qty: true,
-//       rate: true,
-//       amount: true,
-//       discount: false,
-//       others: true,
-//       gst: false,
-//       cgst: true,
-//       sgst: true,
-//       igst: true,
-//     };
+    const defaultTableFields = {
+      itemcode: true,
+      sdisc: true,
+      hsncode: true,
+      pcs: true,
+      qty: true,
+      rate: true,
+      amount: true,
+      discount: false,
+      others: true,
+      gst: false,
+      cgst: true,
+      sgst: true,
+      igst: true,
+    };
   
-//     const [tableData, settableData] = useState(() => {
-//       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-//       const parsed = saved ? JSON.parse(saved) : {};
+    const [tableData, settableData] = useState(() => {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : {};
   
-//       // Only keep keys that exist in defaultFormData
-//       const sanitized = Object.fromEntries(
-//         Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
-//           Object.hasOwn(defaultTableFields, key),
-//         ),
-//       );
+      // Only keep keys that exist in defaultFormData
+      const sanitized = Object.fromEntries(
+        Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+          Object.hasOwn(defaultTableFields, key),
+        ),
+      );
   
-//       return sanitized;
-//     });
+      return sanitized;
+    });
 
-//   const handleOpenModal = (event, index, field) => {
-//     if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
-//       setPressedKey(event.key); // Set the pressed key
-//       openModalForItem(index);
-//       event.preventDefault(); // Prevent any default action
-//     }
-//   };
+  const handleOpenModal = (event, index, field) => {
+    if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
+      setPressedKey(event.key); // Set the pressed key
+      openModalForItem(index);
+      event.preventDefault(); // Prevent any default action
+    }
+  };
 
-//     const handleDoubleClick = (event, fieldName, index) => {
-//       if (fieldName === "exp_before") {
-//         setCurrentIndex(index); // Set the current index
-//         setIsModalOpenExp(true); // Open the modal
-//         event.preventDefault();
-//       }
-//       if ( fieldName === "vcode") {
-//       setSelectedItemIndex(index);
-//       setShowModal(true);
-//       event.preventDefault();
-//     }
-//     };
-//   return (
-//     <div>
-//       <div style={{ marginTop: 5 }} className="tablediv">
-//          <Table className="custom-table">
-//             <thead
-//               style={{
-//                 textAlign: "center",
-//                 position: "sticky",
-//                 top: 0,
-//               }}
-//             >
-//               <tr style={{ color: "#575a5a" }}>
-//                 {tableData.itemcode && <th>ITEMCODE</th>}
-//                 {tableData.sdisc && <th>DESCRIPTION</th>}
-//                 {tableData.hsncode && <th>HSNCODE</th>}
-//                 {tableData.pcs && <th>PCS</th>}
-//                 {tableData.qty && <th>QTY</th>}
-//                 {tableData.rate && <th>RATE</th>}
-//                 {tableData.amount && <th>AMOUNT</th>}
-//                 {tableData.discount && <th>DIS@</th>}
-//                 {tableData.discount && <th>DISCOUNT</th>}
-//                 {tableData.others && <th>OTHERS</th>}
-//                 {tableData.cgst && <th>CGST</th>}
-//                 {tableData.sgst && <th>SGST</th>}
-//                 {tableData.igst && <th>IGST</th>}
-//                 <th>VAmt</th>
-//               </tr>
-//             </thead>
-//             <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
-//               {items.map((item, index) => (
-//                 <tr key={item.id}>
-//                   {tableData.itemcode && (
-//                     <td style={{ padding: 0, width: 30 }}>
-//                       <input
-//                         className="ItemCode"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                         }}
-//                         type="text"
-//                         value={item.vcode}
-//                         onKeyDown={(e) => {
-//                         handleOpenModal(e, index, "vcode");
-//                       }}
-//                         onDoubleClick={(e) => {
-//                           handleDoubleClick(e, "vcode", index);
-//                         }}
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.sdisc && (
-//                     <td style={{ padding: 0, width: 300 }}>
-//                       <input
-//                         className="desc"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                         }}
-//                         maxLength={48}
-//                         value={item.sdisc}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "sdisc", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.hsncode && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="Hsn"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         maxLength={8}
-//                         value={item.tariff}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "tariff", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.pcs && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="PCS"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         maxLength={48}
-//                         value={Number(item.pkgs) === 0 ? "" : item.pkgs}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "pkgs", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.qty && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="QTY"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         maxLength={48}
-//                         value={Number(item.weight) === 0 ? "" : item.weight}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "weight", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.rate && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="Price"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         maxLength={48}
-//                         value={Number(item.rate) === 0 ? "" : item.rate}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "rate", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.amount && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="Amount"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         maxLength={48}
-//                         value={Number(item.amount) === 0 ? "" : item.amount}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "amount", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.discount && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="Disc"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         value={Number(item.disc) === 0 ? "" : item.disc}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "disc", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.discount && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         id="discount"
-//                         className="discount"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         value={Number(item.discount) === 0 ? "" : item.discount}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "discount", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.others && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="Others"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                         }}
-//                         maxLength={48}
-//                         type="text"
-//                         value={
-//                           Number(item.exp_before) === 0 ? "" : item.exp_before
-//                         }
-//                         onDoubleClick={(e) =>
-//                           handleDoubleClick(e, "exp_before", index)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {isModalOpenExp && currentIndex !== null && (
-//                     <div className="Modalz">
-//                       <div className="Modal-content">
-//                         <h1 className="headingE">ADD/LESS BEFORE GST</h1>
-//                         <div className="form-group">
-//                           <input
-//                             type="checkbox"
-//                             id="gross"
-//                             checked={items[currentIndex]?.gross || false}
-//                             onChange={(e) =>
-//                               handleInputChange(
-//                                 currentIndex,
-//                                 "gross",
-//                                 e.target.checked,
-//                               )
-//                             }
-//                           />
-//                           <label
-//                             style={{ marginLeft: 5 }}
-//                             className="label"
-//                             htmlFor="Gross"
-//                           >
-//                             GROSS
-//                           </label>
-//                         </div>
-//                         {[
-//                           { label: "Labour", rate: "Exp_rate1", value: "Exp1" },
-//                           { label: "Freight", rate: "Exp_rate2", value: "Exp2" },
-//                           { label: "Discount", rate: "Exp_rate3", value: "Exp3" },
-//                           { label: "Commm", rate: "Exp_rate4", value: "Exp4" },
-//                           { label: "Dalla", rate: "Exp_rate5", value: "Exp5" },
-//                         ].map((field, idx) => (
-//                           <div
-//                             key={idx}
-//                             style={{
-//                               display: "flex",
-//                               alignItems: "center",
-//                               justifyContent: "space-between",
-//                               gap: "10px", // Spacing between items
-//                               marginBottom: "10px", // Space between rows
-//                             }}
-//                           >
-//                             <label style={{ width: "100px", fontWeight: "bold" }}>
-//                               {field.label}
-//                             </label>
+    const handleDoubleClick = (event, fieldName, index) => {
+      if (fieldName === "exp_before") {
+        setCurrentIndex(index); // Set the current index
+        setIsModalOpenExp(true); // Open the modal
+        event.preventDefault();
+      }
+      if ( fieldName === "vcode") {
+      setSelectedItemIndex(index);
+      setShowModal(true);
+      event.preventDefault();
+    }
+    };
+  return (
+    <div>
+      <div style={{ marginTop: 5 }} className="tablediv">
+         <Table className="custom-table">
+            <thead
+              style={{
+                textAlign: "center",
+                position: "sticky",
+                top: 0,
+              }}
+            >
+              <tr style={{ color: "#575a5a" }}>
+                {tableData.itemcode && <th>ITEMCODE</th>}
+                {tableData.sdisc && <th>DESCRIPTION</th>}
+                {tableData.hsncode && <th>HSNCODE</th>}
+                {tableData.pcs && <th>PCS</th>}
+                {tableData.qty && <th>QTY</th>}
+                {tableData.rate && <th>RATE</th>}
+                {tableData.amount && <th>AMOUNT</th>}
+                {tableData.discount && <th>DIS@</th>}
+                {tableData.discount && <th>DISCOUNT</th>}
+                {tableData.others && <th>OTHERS</th>}
+                {tableData.cgst && <th>CGST</th>}
+                {tableData.sgst && <th>SGST</th>}
+                {tableData.igst && <th>IGST</th>}
+                <th>VAmt</th>
+              </tr>
+            </thead>
+            <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+              {items.map((item, index) => (
+                <tr key={item.id}>
+                  {tableData.itemcode && (
+                    <td style={{ padding: 0, width: 30 }}>
+                      <input
+                        className="ItemCode"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                        }}
+                        type="text"
+                        value={item.vcode}
+                        onKeyDown={(e) => {
+                        handleOpenModal(e, index, "vcode");
+                      }}
+                        onDoubleClick={(e) => {
+                          handleDoubleClick(e, "vcode", index);
+                        }}
+                      />
+                    </td>
+                  )}
+                  {tableData.sdisc && (
+                    <td style={{ padding: 0, width: 300 }}>
+                      <input
+                        className="desc"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                        }}
+                        maxLength={48}
+                        value={item.sdisc}
+                        onChange={(e) =>
+                          handleItemChange(index, "sdisc", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.hsncode && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Hsn"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={8}
+                        value={item.tariff}
+                        onChange={(e) =>
+                          handleItemChange(index, "tariff", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.pcs && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="PCS"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+                        onChange={(e) =>
+                          handleItemChange(index, "pkgs", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.qty && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="QTY"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.weight) === 0 ? "" : item.weight}
+                        onChange={(e) =>
+                          handleItemChange(index, "weight", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.rate && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Price"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.rate) === 0 ? "" : item.rate}
+                        onChange={(e) =>
+                          handleItemChange(index, "rate", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.amount && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Amount"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        value={Number(item.amount) === 0 ? "" : item.amount}
+                        onChange={(e) =>
+                          handleItemChange(index, "amount", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.discount && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Disc"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        value={Number(item.disc) === 0 ? "" : item.disc}
+                        onChange={(e) =>
+                          handleItemChange(index, "disc", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.discount && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        id="discount"
+                        className="discount"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        value={Number(item.discount) === 0 ? "" : item.discount}
+                        onChange={(e) =>
+                          handleItemChange(index, "discount", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.others && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="Others"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                        }}
+                        maxLength={48}
+                        type="text"
+                        value={
+                          Number(item.exp_before) === 0 ? "" : item.exp_before
+                        }
+                        onDoubleClick={(e) =>
+                          handleDoubleClick(e, "exp_before", index)
+                        }
+                      />
+                    </td>
+                  )}
+                  {isModalOpenExp && currentIndex !== null && (
+                    <div className="Modalz">
+                      <div className="Modal-content">
+                        <h1 className="headingE">ADD/LESS BEFORE GST</h1>
+                        <div className="form-group">
+                          <input
+                            type="checkbox"
+                            id="gross"
+                            checked={items[currentIndex]?.gross || false}
+                            onChange={(e) =>
+                              handleInputChange(
+                                currentIndex,
+                                "gross",
+                                e.target.checked,
+                              )
+                            }
+                          />
+                          <label
+                            style={{ marginLeft: 5 }}
+                            className="label"
+                            htmlFor="Gross"
+                          >
+                            GROSS
+                          </label>
+                        </div>
+                        {[
+                          { label: "Labour", rate: "Exp_rate1", value: "Exp1" },
+                          { label: "Freight", rate: "Exp_rate2", value: "Exp2" },
+                          { label: "Discount", rate: "Exp_rate3", value: "Exp3" },
+                          { label: "Commm", rate: "Exp_rate4", value: "Exp4" },
+                          { label: "Dalla", rate: "Exp_rate5", value: "Exp5" },
+                        ].map((field, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "10px", // Spacing between items
+                              marginBottom: "10px", // Space between rows
+                            }}
+                          >
+                            <label style={{ width: "100px", fontWeight: "bold" }}>
+                              {field.label}
+                            </label>
 
-//                             <input
-//                               value={items[currentIndex][field.rate]}
-//                               style={{
-//                                 border: "1px solid black",
-//                                 padding: "5px",
-//                                 width: "120px",
-//                                 textAlign: "right",
-//                                 borderRadius: "4px",
-//                               }}
-//                               onChange={(e) =>
-//                                 handleInputChange(
-//                                   currentIndex,
-//                                   field.rate,
-//                                   e.target.value,
-//                                 )
-//                               }
-//                             />
-//                             <input
-//                               value={items[currentIndex][field.value]}
-//                               style={{
-//                                 border: "1px solid black",
-//                                 padding: "5px",
-//                                 width: "120px",
-//                                 textAlign: "right",
-//                                 borderRadius: "4px",
-//                               }}
-//                               onBlur={() =>
-//                                 handleExpenseBlur(currentIndex, field.value)
-//                               }
-//                               onChange={(e) =>
-//                                 handleInputChange(
-//                                   currentIndex,
-//                                   field.value,
-//                                   e.target.value,
-//                                 )
-//                               }
-//                             />
-//                           </div>
-//                         ))}
-//                         <Button
-//                           onClick={() => {
-//                             const idx = currentIndex; // store before reset
-//                             setIsModalOpenExp(false);
-//                             setCurrentIndex(null);
-//                           }}
-//                           style={{
-//                             borderColor: "transparent",
-//                             backgroundColor: "red",
-//                             marginTop: 10,
-//                           }}
-//                         >
-//                           CLOSE
-//                         </Button>
-//                       </div>
-//                     </div>
-//                   )}
-//                   {tableData.cgst && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="CTax"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                           color: "black",
-//                         }}
-//                         maxLength={48}
-//                         disabled
-//                         value={Number(item.ctax) === 0 ? "" : item.ctax}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "ctax", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.sgst && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="STax"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                           color: "black",
-//                         }}
-//                         maxLength={48}
-//                         disabled
-//                         value={Number(item.stax) === 0 ? "" : item.stax}
-//                         onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
-//                       />
-//                     </td>
-//                   )}
-//                   {tableData.igst && (
-//                     <td style={{ padding: 0 }}>
-//                       <input
-//                         className="ITax"
-//                         style={{
-//                           height: 40,
-//                           width: "100%",
-//                           boxSizing: "border-box",
-//                           border: "none",
-//                           padding: 5,
-//                           textAlign: "right",
-//                           color: "black",
-//                         }}
-//                         maxLength={48}
-//                         disabled
-//                         value={Number(item.itax) === 0 ? "" : item.itax}
-//                         onChange={(e) =>
-//                           handleItemChange(index, "itax", e.target.value)
-//                         }
-//                       />
-//                     </td>
-//                   )}
-//                   <td>{item.vamt}</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </Table>
-//           {showModal && (
-//             <ProductModal
-//               products={products}
-//               allFields={allFields}
-//               onSelect={handleProductSelect}
-//               onClose={handleModalDone}
-//               tenant={tenant}
-//               initialKey={pressedKey}
-//               fetchParentProducts={fetchProducts}
-//             />
-//           )}
-//       </div>
-//     </div>
-//   );
-// };
+                            <input
+                              value={items[currentIndex][field.rate]}
+                              style={{
+                                border: "1px solid black",
+                                padding: "5px",
+                                width: "120px",
+                                textAlign: "right",
+                                borderRadius: "4px",
+                              }}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  currentIndex,
+                                  field.rate,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <input
+                              value={items[currentIndex][field.value]}
+                              style={{
+                                border: "1px solid black",
+                                padding: "5px",
+                                width: "120px",
+                                textAlign: "right",
+                                borderRadius: "4px",
+                              }}
+                              onBlur={() =>
+                                handleExpenseBlur(currentIndex, field.value)
+                              }
+                              onChange={(e) =>
+                                handleInputChange(
+                                  currentIndex,
+                                  field.value,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
+                        <Button
+                          onClick={() => {
+                            const idx = currentIndex; // store before reset
+                            setIsModalOpenExp(false);
+                            setCurrentIndex(null);
+                          }}
+                          style={{
+                            borderColor: "transparent",
+                            backgroundColor: "red",
+                            marginTop: 10,
+                          }}
+                        >
+                          CLOSE
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {tableData.cgst && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="CTax"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                          color: "black",
+                        }}
+                        maxLength={48}
+                        disabled
+                        value={Number(item.ctax) === 0 ? "" : item.ctax}
+                        onChange={(e) =>
+                          handleItemChange(index, "ctax", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  {tableData.sgst && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="STax"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                          color: "black",
+                        }}
+                        maxLength={48}
+                        disabled
+                        value={Number(item.stax) === 0 ? "" : item.stax}
+                        onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
+                      />
+                    </td>
+                  )}
+                  {tableData.igst && (
+                    <td style={{ padding: 0 }}>
+                      <input
+                        className="ITax"
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          boxSizing: "border-box",
+                          border: "none",
+                          padding: 5,
+                          textAlign: "right",
+                          color: "black",
+                        }}
+                        maxLength={48}
+                        disabled
+                        value={Number(item.itax) === 0 ? "" : item.itax}
+                        onChange={(e) =>
+                          handleItemChange(index, "itax", e.target.value)
+                        }
+                      />
+                    </td>
+                  )}
+                  <td>{item.vamt}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          {showModal && (
+            <ProductModal
+              products={products}
+              allFields={allFields}
+              onSelect={handleProductSelect}
+              onClose={handleModalDone}
+              tenant={tenant}
+              initialKey={pressedKey}
+              fetchParentProducts={fetchProducts}
+            />
+          )}
+      </div>
+    </div>
+  );
+};
 
-// export default Example;
+export default Example;
 
 // import React, {useRef, useState} from 'react'
 // import { TextField, Autocomplete } from '@mui/material';
@@ -2579,157 +2269,501 @@
 
 // export default Example;
 
-import React, { useState } from "react";
-import axios from "axios";
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
-import { Button, Spinner, Form, Row, Col } from "react-bootstrap";
-import InputMask from "react-input-mask";
+// import React, { useState } from "react";
+// import axios from "axios";
+// import ExcelJS from "exceljs";
+// import { saveAs } from "file-saver";
+// import { Button, Spinner, Form, Row, Col } from "react-bootstrap";
+// import InputMask from "react-input-mask";
 
-const Example = () => {
-  const [loading, setLoading] = useState(false);
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+// const Example = () => {
+//   const [loading, setLoading] = useState(false);
+//   const [fromDate, setFromDate] = useState("");
+//   const [toDate, setToDate] = useState("");
 
-  const parseDate = (dateStr) => {
-    if (!dateStr) return null;
-    const [day, month, year] = dateStr.split("/");
-    return new Date(`${year}-${month}-${day}`);
-  };
+//   const parseDate = (dateStr) => {
+//     if (!dateStr) return null;
+//     const [day, month, year] = dateStr.split("/");
+//     return new Date(`${year}-${month}-${day}`);
+//   };
 
-  const exportGSTR1 = async () => {
-    try {
-      if (!fromDate || !toDate) {
-        alert("Please select From and To date");
-        return;
-      }
+//   const exportGSTR1 = async () => {
+//     try {
+//       if (!fromDate || !toDate) {
+//         alert("Please select From and To date");
+//         return;
+//       }
 
-      const from = parseDate(fromDate);
-      const to = parseDate(toDate);
+//       const from = parseDate(fromDate);
+//       const to = parseDate(toDate);
 
-      setLoading(true);
+//       setLoading(true);
 
-      // 1️⃣ Fetch API
-      const response = await axios.get(
-        "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
-      );
+//       // 1️⃣ Fetch API
+//       const response = await axios.get(
+//         "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+//       );
 
-      const salesData = response.data;
+//       const salesData = response.data;
 
-      // 2️⃣ Filter Data Between Dates
-      const filteredData = salesData.filter((sale) => {
-        const saleDate = new Date(sale.formData?.date);
-        return saleDate >= from && saleDate <= to;
-      });
+//       // 2️⃣ Filter Data Between Dates
+//       const filteredData = salesData.filter((sale) => {
+//         const saleDate = new Date(sale.formData?.date);
+//         return saleDate >= from && saleDate <= to;
+//       });
 
-      // 3️⃣ Load Template
-      const templateResponse = await fetch("/GSTR-1.xlsx");
-      const buffer = await templateResponse.arrayBuffer();
+//       // 3️⃣ Load Template
+//       const templateResponse = await fetch("/GSTR-1.xlsx");
+//       const buffer = await templateResponse.arrayBuffer();
 
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer, {
-        ignoreNodes: [
-          "dataValidations",
-          "sheetProtection",
-          "conditionalFormatting"
-        ]
-      });
+//       const workbook = new ExcelJS.Workbook();
+//       await workbook.xlsx.load(buffer, {
+//         ignoreNodes: [
+//           "dataValidations",
+//           "sheetProtection",
+//           "conditionalFormatting"
+//         ]
+//       });
 
-      workbook.definedNames.model = [];
+//       workbook.definedNames.model = [];
 
-      const sheet = workbook.getWorksheet("b2b,sez,de");
+//       const sheet = workbook.getWorksheet("b2b,sez,de");
 
-      let startRow = 5;
+//       let startRow = 5;
 
-      filteredData.forEach((sale, index) => {
-        const row = sheet.getRow(startRow + index);
+//       filteredData.forEach((sale, index) => {
+//         const row = sheet.getRow(startRow + index);
 
-        const customer = sale.customerDetails?.[0] || {};
-        const item = sale.items?.[0] || {};
-        const form = sale.formData || {};
+//         const customer = sale.customerDetails?.[0] || {};
+//         const item = sale.items?.[0] || {};
+//         const form = sale.formData || {};
 
-        row.getCell(1).value = customer.gstno || "";
-        row.getCell(2).value = customer.vacode || "";
-        row.getCell(3).value = form.vbillno || "";
-        row.getCell(4).value = form.date ? new Date(form.date) : "";
-        row.getCell(5).value = Number(form.grandtotal || 0);
-        row.getCell(6).value = `03-${customer.state || ""}`;
-        row.getCell(7).value = "N";
-        row.getCell(8).value = item.gst || 0;
-        row.getCell(9).value = "Regular B2B";
-        row.getCell(10).value = "";
-        row.getCell(11).value = item.gst || 0;
-        row.getCell(12).value = Number(form.sub_total || 0);
-        row.getCell(13).value = Number(form.pcess || 0);
+//         row.getCell(1).value = customer.gstno || "";
+//         row.getCell(2).value = customer.vacode || "";
+//         row.getCell(3).value = form.vbillno || "";
+//         row.getCell(4).value = form.date ? new Date(form.date) : "";
+//         row.getCell(5).value = Number(form.grandtotal || 0);
+//         row.getCell(6).value = `03-${customer.state || ""}`;
+//         row.getCell(7).value = "N";
+//         row.getCell(8).value = item.gst || 0;
+//         row.getCell(9).value = "Regular B2B";
+//         row.getCell(10).value = "";
+//         row.getCell(11).value = item.gst || 0;
+//         row.getCell(12).value = Number(form.sub_total || 0);
+//         row.getCell(13).value = Number(form.pcess || 0);
 
-        row.commit();
-      });
+//         row.commit();
+//       });
 
-      const fileBuffer = await workbook.xlsx.writeBuffer();
+//       const fileBuffer = await workbook.xlsx.writeBuffer();
 
-      saveAs(
-        new Blob([fileBuffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        }),
-        "GSTR1_Filtered.xlsx"
-      );
+//       saveAs(
+//         new Blob([fileBuffer], {
+//           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+//         }),
+//         "GSTR1_Filtered.xlsx"
+//       );
 
-    } catch (error) {
-      alert("Export Failed");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+//     } catch (error) {
+//       alert("Export Failed");
+//       console.error(error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  return (
-    <div style={{ padding: 20 }}>
-      <Row className="mb-3">
-        <Col md={3}>
-          <Form.Label>From Date</Form.Label>
-          <InputMask
-            mask="99/99/9999"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-          >
-            {(inputProps) => (
-              <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
-            )}
-          </InputMask>
-        </Col>
+//   return (
+//     <div style={{ padding: 20 }}>
+//       <Row className="mb-3">
+//         <Col md={3}>
+//           <Form.Label>From Date</Form.Label>
+//           <InputMask
+//             mask="99/99/9999"
+//             value={fromDate}
+//             onChange={(e) => setFromDate(e.target.value)}
+//           >
+//             {(inputProps) => (
+//               <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
+//             )}
+//           </InputMask>
+//         </Col>
 
-        <Col md={3}>
-          <Form.Label>To Date</Form.Label>
-          <InputMask
-            mask="99/99/9999"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-          >
-            {(inputProps) => (
-              <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
-            )}
-          </InputMask>
-        </Col>
+//         <Col md={3}>
+//           <Form.Label>To Date</Form.Label>
+//           <InputMask
+//             mask="99/99/9999"
+//             value={toDate}
+//             onChange={(e) => setToDate(e.target.value)}
+//           >
+//             {(inputProps) => (
+//               <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
+//             )}
+//           </InputMask>
+//         </Col>
 
-        <Col md={3} className="d-flex align-items-end">
-          <Button onClick={exportGSTR1} disabled={loading}>
-            {loading ? (
-              <>
-                <Spinner
-                  animation="border"
-                  size="sm"
-                  style={{ marginRight: 8 }}
-                />
-                Exporting...
-              </>
-            ) : (
-              "Export GSTR-1"
-            )}
-          </Button>
-        </Col>
-      </Row>
-    </div>
-  );
-};
+//         <Col md={3} className="d-flex align-items-end">
+//           <Button onClick={exportGSTR1} disabled={loading}>
+//             {loading ? (
+//               <>
+//                 <Spinner
+//                   animation="border"
+//                   size="sm"
+//                   style={{ marginRight: 8 }}
+//                 />
+//                 Exporting...
+//               </>
+//             ) : (
+//               "Export GSTR-1"
+//             )}
+//           </Button>
+//         </Col>
+//       </Row>
+//     </div>
+//   );
+// };
 
-export default Example;
+// export default Example;
+
+// import React, { useState } from "react";
+// import Table from "react-bootstrap/Table";
+// import ProductModalCustomer from "./Modals/ProductModalCustomer";
+// import { Button } from "react-bootstrap";
+
+// const Example = () => {
+//   const tenant = "shkun_05062025_05062026";
+//   const [items, setItems] = useState([
+//     {
+//       id: "",
+//       accountname: "",
+//       narration: "",
+//       debit: "",
+//       credit: "",
+//       disableDebit: false,
+//       disableCredit: false,
+//     },
+//   ]);
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+
+//   // Modal For Customer
+//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+//   const [productsCus, setProductsCus] = useState([]);
+//   const [showModalCus, setShowModalCus] = useState(false);
+//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//   const [loadingCus, setLoadingCus] = useState(true);
+//   const [errorCus, setErrorCus] = useState(null);
+//   const [suggestionRow, setSuggestionRow] = useState(null);
+//   const [suggestionText, setSuggestionText] = useState("");
+
+//   React.useEffect(() => {
+//     fetchCustomers();
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductsCus(formattedData);
+//       setLoadingCus(false);
+//     } catch (error) {
+//       setErrorCus(error.message);
+//       setLoadingCus(false);
+//     }
+//   };
+
+//   const handleItemChangeCus = (index, key, value) => {
+//     const updatedItems = [...items];
+//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+//     // If the key is 'name', find the corresponding product and set the price
+//     if (key === "name") {
+//       const selectedProduct = productsCus.find(
+//         (product) => product.ahead === value,
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["accountname"] = selectedProduct.ahead;
+//         updatedItems[index]["acode"] = selectedProduct.acode;
+//       }
+//     }
+//     // Disable credit field if debit field is filled
+//     if (key === "debit") {
+//       updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
+//     }
+
+//     // Disable debit field if credit field is filled
+//     if (key === "credit") {
+//       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+//     }
+
+//     if (key === "narration") {
+//       const inputValue = value.trim().toLowerCase();
+
+//       if (inputValue !== "") {
+//         // Find first matching accountname from ALL rows
+//         const matchedItem = items.find(
+//           (row) =>
+//             row.accountname &&
+//             row.accountname.toLowerCase().startsWith(inputValue)
+//         );
+
+//         if (matchedItem) {
+//           setSuggestionRow(index);
+//           setSuggestionText(matchedItem.accountname);
+//         } else {
+//           setSuggestionRow(null);
+//           setSuggestionText("");
+//         }
+//       } else {
+//         setSuggestionRow(null);
+//         setSuggestionText("");
+//       }
+//     }
+
+//     setItems(updatedItems);
+//   };
+
+//   const handleProductSelectCus = (product) => {
+//     if (!product) {
+//       alert("No product received!");
+//       setShowModalCus(false);
+//       return;
+//     }
+
+//     // clone the array
+//     const newCustomers = [...items];
+
+//     // overwrite the one at the selected index
+//     newCustomers[selectedItemIndexCus] = {
+//       ...newCustomers[selectedItemIndexCus],
+//       accountname: product.ahead || "",
+//       acode: product.acode,
+//     };
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexCus !== null) {
+//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//       setShowModalCus(false);
+//     }
+//     setItems(newCustomers);
+//     setShowModalCus(false);
+//   };
+
+//   const handleCloseModalCus = () => {
+//     setShowModalCus(false);
+//     setPressedKey(""); // resets for next modal open
+//   };
+
+//   const openModalForItemCus = (index) => {
+//     setSelectedItemIndexCus(index);
+//     setShowModalCus(true);
+//   };
+
+//   const allFieldsCus = productsCus.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   const handleNumberChange = (event, index, field) => {
+//     const value = event.target.value;
+
+//     // Validate that the input is numeric
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+
+//     const updatedItems = [...items];
+//     updatedItems[index][field] = value;
+
+//     // If the field is 'debit' and its value is greater than zero, disable 'credit'
+//     if (field === "debit") {
+//       updatedItems[index].disableCredit = parseFloat(value) > 0;
+//       updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
+//     }
+//     // If the field is 'credit' and its value is greater than zero, disable 'debit'
+//     else if (field === "credit") {
+//       updatedItems[index].disableDebit = parseFloat(value) > 0;
+//       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
+//     }
+//     setItems(updatedItems);
+//   };
+
+//   const handleKeyDown = (event, index, field) => {
+//     // Open Modal on Letter Input in Account Name
+//     if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+//       setPressedKey(event.key);
+//       openModalForItemCus(index);
+//       event.preventDefault();
+//     }
+//   };
+
+//   const handleAddItem = () => {
+//     const newItem = {
+//       id: items.length + 1,
+//       accountname: "",
+//       acode:0,
+//       narration: "",
+//       debit: "",
+//       credit: "",
+//       disableDebit: false,
+//       disableCredit: false,
+//     };
+//     setItems([...items, newItem]);
+//   };
+//   return (
+//     <div>
+//       <div className="Tablesection">
+//         <Table className="custom-table">
+//           <thead>
+//             <tr style={{ color: "white" }}>
+//               <th>ACCOUNT NAME</th>
+//               <th>NARRATION</th>
+//               <th>DEBIT</th>
+//               <th>CREDIT</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {items.map((item, index) => (
+//               <tr key={`${item.accountname}-${index}`}>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                     className="Account"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.accountname}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "accountname");
+//                     }}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, position: "relative" }}>
+//                   <input
+//                     className="Narration"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: "5px 8px",
+//                       fontSize: "14px",
+//                       position: "relative",
+//                       background: "transparent",
+//                     }}
+//                     value={item.narration}
+//                     onChange={(e) =>
+//                       handleItemChangeCus(index, "narration", e.target.value)
+//                     }
+//                     onKeyDown={(e) => {
+//                       if (
+//                         e.key === "Tab" &&
+//                         suggestionRow === index &&
+//                         suggestionText
+//                       ) {
+//                         e.preventDefault();
+
+//                         const updatedItems = [...items];
+//                         updatedItems[index].narration = suggestionText;
+//                         setItems(updatedItems);
+
+//                         setSuggestionRow(null);
+//                         setSuggestionText("");
+//                       }
+//                     }}
+//                   />
+
+//                   {/* 👇 Show only remaining text */}
+//                   {suggestionRow === index && suggestionText && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: 0,
+//                         left: 8,
+//                         height: "100%",
+//                         display: "flex",
+//                         alignItems: "center",
+//                         color: "#bbb",
+//                         fontSize: "14px",
+//                         pointerEvents: "none",
+//                       }}
+//                     >
+//                       <span style={{ visibility: "hidden" }}>
+//                         {item.narration}
+//                       </span>
+//                       <span>{suggestionText.slice(item.narration.length)}</span>
+//                     </div>
+//                   )}
+//                 </td>
+
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Debit"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     value={Number(item.debit) === 0 ? "" : item.debit}
+//                     onChange={(e) => handleNumberChange(e, index, "debit")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Credits"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     value={Number(item.credit) === 0 ? "" : item.credit}
+//                     onChange={(e) => handleNumberChange(e, index, "credit")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </Table>
+//         {showModalCus && (
+//           <ProductModalCustomer
+//             allFields={allFieldsCus}
+//             onSelect={handleProductSelectCus}
+//             onClose={handleCloseModalCus}
+//             initialKey={pressedKey}
+//             tenant={tenant}
+//           />
+//         )}
+//       </div>
+//       <Button onClick={handleAddItem} style={{ margin: 20 }}>
+//         Add Item
+//       </Button> 
+//     </div>
+//   );
+// };
+
+// export default Example;

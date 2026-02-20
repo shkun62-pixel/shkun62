@@ -9,7 +9,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -405,7 +405,7 @@ export default function App() {
                   />
                   <StyledListItem button onClick={openCashModal}>
                     <StyledIcon>
-                      <AttachMoneyIcon />
+                      <CurrencyRupeeIcon />
                     </StyledIcon>
                     <StyledListItemText primary="Cash Voucher" />
                   </StyledListItem>

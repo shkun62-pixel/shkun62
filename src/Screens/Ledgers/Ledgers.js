@@ -19,7 +19,7 @@ const Ledgers = () => {
 
   const handleClose = () => {
     setopenPurRep(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

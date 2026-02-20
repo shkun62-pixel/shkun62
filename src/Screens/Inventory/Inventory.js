@@ -17,7 +17,7 @@ const Inventory = () => {
 
   const handleClose = () => {
     setopenPurRep(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

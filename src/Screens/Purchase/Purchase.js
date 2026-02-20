@@ -1452,6 +1452,11 @@ const Purchase = () => {
         return;
       }
     }
+    
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
 
     setTitle("(View)");
     try {
@@ -3247,19 +3252,27 @@ const handleKeyDown = (event, index, field) => {
     ];
 
     expMap.forEach(({ rate, val }) => {
+      // If user changed RATE → calculate VALUE
       if (field === rate && vamt > 0) {
         const r = parseFloat(item[rate]) || 0;
         item[val] = ((vamt * r) / 100).toFixed(2);
       }
 
+      // If user changed VALUE → calculate RATE
       if (field === val && vamt > 0) {
         const v = parseFloat(item[val]) || 0;
+
+        // 🔥 DO NOT re-round value again later
+        item[val] = v.toFixed(2);
+
+        // keep higher precision internally
         item[rate] = ((v / vamt) * 100).toFixed(2);
       }
     });
 
     setItems(updatedItems);
   };
+
   useEffect(() => {
     if (currentIndex !== null && items[currentIndex]) {
       const updatedItems = [...items];

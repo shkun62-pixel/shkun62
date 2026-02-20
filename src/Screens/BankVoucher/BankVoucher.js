@@ -940,9 +940,14 @@ const BankVoucher = () => {
   const handleExit = async () => {
     document.body.style.backgroundColor = "white"; // Reset background color
     setTitle("VIEW");
+
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
     try {
       const response = await axios.get(
-        "https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last"
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
       ); // Fetch the latest data
       if (response.status === 200 && response.data.data) {
         // If data is available

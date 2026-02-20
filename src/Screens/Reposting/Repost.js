@@ -55,7 +55,7 @@ const Repost = () => {
 
   const handleClose = () => {
     setopenPurRep(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

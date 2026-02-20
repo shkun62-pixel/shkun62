@@ -69,7 +69,7 @@ const IncomeTaxReport = () => {
 
   const handleClose = () => {
     setopenPurRep(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

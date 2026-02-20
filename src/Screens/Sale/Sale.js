@@ -6530,6 +6530,11 @@ const Sale = () => {
         return;
       }
     }
+    
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
 
     setTitle("(View)");
     try {
@@ -7191,7 +7196,6 @@ const Sale = () => {
 
     const totalAccordingWeight = weight * rate;
     const totalAccordingPkgs = pkgsVal * rate;
-    const totalAccordingPkgsQty = pkgsVal * Qtyperpkgs * rate;
 
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
@@ -7211,13 +7215,11 @@ const Sale = () => {
       TotalAcc = totalAccordingPkgs;
       // console.log("totalAccordingPkgs");
     }
+    const currentMrp = parseFloat(updatedItems[index].curMrp) || 0;
     // 🔥 If user manually edits amount → recalculate rate
-    if (
-      key === "amount" &&
-      value !== "" &&
-      !isNaN(parseFloat(value)) &&
-      !value.endsWith(".")
-    ) {
+    if (!isNaN(currentMrp) && currentMrp > 0 && key === "amount" && 
+      value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
+
       let enteredAmount = parseFloat(value);
       let qty = 0;
 
@@ -7226,8 +7228,6 @@ const Sale = () => {
       } else {
         qty = parseFloat(updatedItems[index].weight) || 0;
       }
-
-      const currentMrp = parseFloat(updatedItems[index].curMrp);
 
       // // ✅ STOP if MRP exists and is valid (> 0)
       if (!isNaN(currentMrp) && currentMrp > 0) {
@@ -7889,6 +7889,34 @@ const Sale = () => {
     setItems(updatedItems);
   };
 
+  // const handleExpenseBlur = (index, field) => {
+  //   const updatedItems = [...items];
+  //   const item = updatedItems[index];
+
+  //   const vamt = parseFloat(item.amount) || 0;
+
+  //   const expMap = [
+  //     { rate: "Exp_rate1", val: "Exp1" },
+  //     { rate: "Exp_rate2", val: "Exp2" },
+  //     { rate: "Exp_rate3", val: "Exp3" },
+  //     { rate: "Exp_rate4", val: "Exp4" },
+  //     { rate: "Exp_rate5", val: "Exp5" },
+  //   ];
+
+  //   expMap.forEach(({ rate, val }) => {
+  //     if (field === rate && vamt > 0) {
+  //       const r = parseFloat(item[rate]) || 0;
+  //       item[val] = ((vamt * r) / 100).toFixed(2);
+  //     }
+
+  //     if (field === val && vamt > 0) {
+  //       const v = parseFloat(item[val]) || 0;
+  //       item[rate] = ((v / vamt) * 100).toFixed(2);
+  //     }
+  //   });
+
+  //   setItems(updatedItems);
+  // };
   const handleExpenseBlur = (index, field) => {
     const updatedItems = [...items];
     const item = updatedItems[index];
@@ -7904,13 +7932,20 @@ const Sale = () => {
     ];
 
     expMap.forEach(({ rate, val }) => {
+      // If user changed RATE → calculate VALUE
       if (field === rate && vamt > 0) {
         const r = parseFloat(item[rate]) || 0;
         item[val] = ((vamt * r) / 100).toFixed(2);
       }
 
+      // If user changed VALUE → calculate RATE
       if (field === val && vamt > 0) {
         const v = parseFloat(item[val]) || 0;
+
+        // 🔥 DO NOT re-round value again later
+        item[val] = v.toFixed(2);
+
+        // keep higher precision internally
         item[rate] = ((v / vamt) * 100).toFixed(2);
       }
     });

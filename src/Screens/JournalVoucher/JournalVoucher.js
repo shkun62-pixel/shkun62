@@ -68,7 +68,7 @@ const JournalVoucher = () => {
     "#8FBC8F",
   ];
   const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
-  const [fontSize, setFontSize] = useState(17);
+  const [fontSize, setFontSize] = useState(19);
   const [formData, setFormData] = useState({
     vtype: "J",
     date: "",
@@ -257,16 +257,24 @@ const JournalVoucher = () => {
     if (key === "credit") {
       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
     }
-     if (key === "narration") {
-      const accountName = items[index].accountname || "";
+    if (key === "narration") {
+      const inputValue = value.trim().toLowerCase();
 
-      if (
-        accountName &&
-        accountName.toLowerCase().startsWith(value.toLowerCase()) &&
-        value !== ""
-      ) {
-        setSuggestionRow(index);
-        setSuggestionText(accountName);
+      if (inputValue !== "") {
+        // Find first matching accountname from ALL rows
+        const matchedItem = items.find(
+          (row) =>
+            row.accountname &&
+            row.accountname.toLowerCase().startsWith(inputValue)
+        );
+
+        if (matchedItem) {
+          setSuggestionRow(index);
+          setSuggestionText(matchedItem.accountname);
+        } else {
+          setSuggestionRow(null);
+          setSuggestionText("");
+        }
       } else {
         setSuggestionRow(null);
         setSuggestionText("");
@@ -943,10 +951,16 @@ const JournalVoucher = () => {
       }, 0);
     }
   }, [isEditMode]);
+  
   const handleExit = async () => {
     document.body.style.backgroundColor = "white"; // Reset background color
     setIsAddEnabled(true); // Enable "Add" button
     setTitle("View");
+
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
     try {
       const response = await axios.get(
         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
@@ -1547,9 +1561,9 @@ const JournalVoucher = () => {
                       height: 40,
                       width: "100%",
                       boxSizing: "border-box",
+                       fontSize: `${fontSize}px`,
                       border: "none",
                       padding: "5px 8px",
-                      fontSize: "14px",
                       position: "relative",
                       background: "transparent",
                     }}

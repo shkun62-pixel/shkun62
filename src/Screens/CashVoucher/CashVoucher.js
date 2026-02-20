@@ -842,8 +842,15 @@ const CashVoucher = () => {
   };
   
   const handleExit = async () => {
+
     document.body.style.backgroundColor = "white"; // Reset background color
     setTitle("View");
+
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    } 
+    
     try {
       const response = await axios.get(
         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`

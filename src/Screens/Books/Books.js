@@ -57,7 +57,7 @@ const Books = () => {
 
   const handleClose = () => {
     setOpenPurRep(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (
