@@ -7889,34 +7889,6 @@ const Sale = () => {
     setItems(updatedItems);
   };
 
-  // const handleExpenseBlur = (index, field) => {
-  //   const updatedItems = [...items];
-  //   const item = updatedItems[index];
-
-  //   const vamt = parseFloat(item.amount) || 0;
-
-  //   const expMap = [
-  //     { rate: "Exp_rate1", val: "Exp1" },
-  //     { rate: "Exp_rate2", val: "Exp2" },
-  //     { rate: "Exp_rate3", val: "Exp3" },
-  //     { rate: "Exp_rate4", val: "Exp4" },
-  //     { rate: "Exp_rate5", val: "Exp5" },
-  //   ];
-
-  //   expMap.forEach(({ rate, val }) => {
-  //     if (field === rate && vamt > 0) {
-  //       const r = parseFloat(item[rate]) || 0;
-  //       item[val] = ((vamt * r) / 100).toFixed(2);
-  //     }
-
-  //     if (field === val && vamt > 0) {
-  //       const v = parseFloat(item[val]) || 0;
-  //       item[rate] = ((v / vamt) * 100).toFixed(2);
-  //     }
-  //   });
-
-  //   setItems(updatedItems);
-  // };
   const handleExpenseBlur = (index, field) => {
     const updatedItems = [...items];
     const item = updatedItems[index];
@@ -7924,29 +7896,28 @@ const Sale = () => {
     const vamt = parseFloat(item.amount) || 0;
 
     const expMap = [
-      { rate: "Exp_rate1", val: "Exp1" },
-      { rate: "Exp_rate2", val: "Exp2" },
-      { rate: "Exp_rate3", val: "Exp3" },
-      { rate: "Exp_rate4", val: "Exp4" },
-      { rate: "Exp_rate5", val: "Exp5" },
+      { rate: "Exp_rate1", val: "Exp1", flag: "isManual1" },
+      { rate: "Exp_rate2", val: "Exp2", flag: "isManual2" },
+      { rate: "Exp_rate3", val: "Exp3", flag: "isManual3" },
+      { rate: "Exp_rate4", val: "Exp4", flag: "isManual4" },
+      { rate: "Exp_rate5", val: "Exp5", flag: "isManual5" },
     ];
 
-    expMap.forEach(({ rate, val }) => {
-      // If user changed RATE → calculate VALUE
+    expMap.forEach(({ rate, val, flag }) => {
+      // RATE → VALUE
       if (field === rate && vamt > 0) {
         const r = parseFloat(item[rate]) || 0;
         item[val] = ((vamt * r) / 100).toFixed(2);
+        item[flag] = false; // calculated
       }
 
-      // If user changed VALUE → calculate RATE
+      // VALUE → RATE
       if (field === val && vamt > 0) {
         const v = parseFloat(item[val]) || 0;
 
-        // 🔥 DO NOT re-round value again later
-        item[val] = v.toFixed(2);
-
-        // keep higher precision internally
-        item[rate] = ((v / vamt) * 100).toFixed(2);
+        item[val] = v.toFixed(2); // fix value to 2 decimals
+        item[rate] = ((v / vamt) * 100).toFixed(2); // 🔥 keep full precision
+        item[flag] = true; // manually entered
       }
     });
 
@@ -7961,87 +7932,98 @@ const Sale = () => {
       const vamt = parseFloat(item.amount) || 0;
       const pkgs = parseFloat(item.pkgs) || 0;
       const weight = parseFloat(item.weight) || 0;
-      // Expense Calculations (Separate Logic for Each Expense)
+      // Expense Calculations
       let Exp1 = 0,
         Exp2 = 0,
         Exp3 = 0,
         Exp4 = 0,
         Exp5 = 0;
+
       const Exp1Multiplier = Pos === "-Ve" ? -1 : 1;
-      const Exp1Multiplier2 = Pos2 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier3 = Pos3 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier4 = Pos4 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier5 = Pos5 === "-Ve" ? -1 : 1;
-      if (item.Exp_rate1) {
-        if (CalExp1 === "W" || CalExp1 === "w") {
+      const Exp2Multiplier = Pos2 === "-Ve" ? -1 : 1;
+      const Exp3Multiplier = Pos3 === "-Ve" ? -1 : 1;
+      const Exp4Multiplier = Pos4 === "-Ve" ? -1 : 1;
+      const Exp5Multiplier = Pos5 === "-Ve" ? -1 : 1;
+
+      // ======================= EXP 1 =======================
+      if (!item.isManual1 && item.Exp_rate1) {
+        if (CalExp1?.toLowerCase() === "w") {
           Exp1 = (weight * parseFloat(item.Exp_rate1)) / 100;
-        } else if (CalExp1 === "P" || CalExp1 === "p") {
+        } else if (CalExp1?.toLowerCase() === "p") {
           Exp1 = (pkgs * parseFloat(item.Exp_rate1)) / 100;
-        } else if (CalExp1 === "V" || CalExp1 === "v" || CalExp1 === "") {
+        } else {
           Exp1 = (vamt * parseFloat(item.Exp_rate1)) / 100;
         }
-        Exp1 *= Exp1Multiplier; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp1 *= Exp1Multiplier;
         item.Exp1 = Exp1.toFixed(2);
       } else {
-        item.Exp1 = "0.00";
+        Exp1 = parseFloat(item.Exp1) || 0;
       }
 
-      if (item.Exp_rate2) {
-        if (CalExp2 === "W" || CalExp2 === "w") {
+      // ======================= EXP 2 =======================
+      if (!item.isManual2 && item.Exp_rate2) {
+        if (CalExp2?.toLowerCase() === "w") {
           Exp2 = (weight * parseFloat(item.Exp_rate2)) / 100;
-        } else if (CalExp2 === "P" || CalExp2 === "p") {
+        } else if (CalExp2?.toLowerCase() === "p") {
           Exp2 = (pkgs * parseFloat(item.Exp_rate2)) / 100;
-        } else if (CalExp2 === "V" || CalExp2 === "v" || CalExp2 === "") {
+        } else {
           Exp2 = (vamt * parseFloat(item.Exp_rate2)) / 100;
         }
-        Exp2 *= Exp1Multiplier2; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp2 *= Exp2Multiplier;
         item.Exp2 = Exp2.toFixed(2);
       } else {
-        item.Exp2 = "0.00";
+        Exp2 = parseFloat(item.Exp2) || 0;
       }
 
-      if (item.Exp_rate3) {
-        if (CalExp3 === "W" || CalExp3 === "w") {
+      // ======================= EXP 3 =======================
+      if (!item.isManual3 && item.Exp_rate3) {
+        if (CalExp3?.toLowerCase() === "w") {
           Exp3 = (weight * parseFloat(item.Exp_rate3)) / 100;
-        } else if (CalExp3 === "P" || CalExp3 === "p") {
+        } else if (CalExp3?.toLowerCase() === "p") {
           Exp3 = (pkgs * parseFloat(item.Exp_rate3)) / 100;
-        } else if (CalExp3 === "V" || CalExp3 === "v" || CalExp3 === "") {
+        } else {
           Exp3 = (vamt * parseFloat(item.Exp_rate3)) / 100;
         }
-        Exp3 *= Exp1Multiplier3; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp3 *= Exp3Multiplier;
         item.Exp3 = Exp3.toFixed(2);
       } else {
-        item.Exp3 = "0.00";
+        Exp3 = parseFloat(item.Exp3) || 0;
       }
 
-      if (item.Exp_rate4) {
-        if (CalExp4 === "W" || CalExp4 === "w") {
+      // ======================= EXP 4 =======================
+      if (!item.isManual4 && item.Exp_rate4) {
+        if (CalExp4?.toLowerCase() === "w") {
           Exp4 = (weight * parseFloat(item.Exp_rate4)) / 100;
-        } else if (CalExp4 === "P" || CalExp4 === "p") {
+        } else if (CalExp4?.toLowerCase() === "p") {
           Exp4 = (pkgs * parseFloat(item.Exp_rate4)) / 100;
-        } else if (CalExp4 === "V" || CalExp4 === "v" || CalExp4 === "") {
+        } else {
           Exp4 = (vamt * parseFloat(item.Exp_rate4)) / 100;
         }
-        Exp4 *= Exp1Multiplier4; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp4 *= Exp4Multiplier;
         item.Exp4 = Exp4.toFixed(2);
       } else {
-        item.Exp4 = "0.00";
+        Exp4 = parseFloat(item.Exp4) || 0;
       }
 
-      if (item.Exp_rate5) {
-        if (CalExp5 === "W" || CalExp5 === "w") {
+      // ======================= EXP 5 =======================
+      if (!item.isManual5 && item.Exp_rate5) {
+        if (CalExp5?.toLowerCase() === "w") {
           Exp5 = (weight * parseFloat(item.Exp_rate5)) / 100;
-        } else if (CalExp5 === "P" || CalExp5 === "p") {
+        } else if (CalExp5?.toLowerCase() === "p") {
           Exp5 = (pkgs * parseFloat(item.Exp_rate5)) / 100;
-        } else if (CalExp5 === "V" || CalExp5 === "v" || CalExp5 === "") {
+        } else {
           Exp5 = (vamt * parseFloat(item.Exp_rate5)) / 100;
         }
-        Exp5 *= Exp1Multiplier5; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp5 *= Exp5Multiplier;
         item.Exp5 = Exp5.toFixed(2);
       } else {
-        item.Exp5 = "0.00";
+        Exp5 = parseFloat(item.Exp5) || 0;
       }
-
       // Total Expense Before GST
       const totalExpenses = Exp1 + Exp2 + Exp3 + Exp4 + Exp5;
       item.exp_before = totalExpenses.toFixed(2);
