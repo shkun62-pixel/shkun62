@@ -427,12 +427,14 @@ export default function MonthlyFormModal({ open, onClose }) {
         // ===== Calculate ITC =====
         let itcIGST = 0,
           itcCGST = 0,
-          itcSGST = 0;
+          itcSGST = 0,
+          itcCess = 0;
 
         purchaseFiltered.forEach((purchase) => {
           itcIGST += Number(purchase.formData?.igst || 0);
           itcCGST += Number(purchase.formData?.cgst || 0);
           itcSGST += Number(purchase.formData?.sgst || 0);
+          itcCess += Number(purchase.formData?.pcess || 0);
         });
 
         const templateResponse = await fetch("excel/gstr3b.xlsx");
@@ -460,14 +462,90 @@ export default function MonthlyFormModal({ open, onClose }) {
             cell.value = char;
           });
         }
-
         // 3.1(a)
         sheet.getCell("D14").value = taxable;
         sheet.getCell("G14").value = igst;
         sheet.getCell("J14").value = cgst;
         sheet.getCell("M14").value = sgst;
+        // Eligible ITC
+        sheet.getCell("D44").value = itcIGST;
+        sheet.getCell("H44").value = itcCGST;
+        sheet.getCell("L44").value = itcSGST;
+        sheet.getCell("P44").value = itcCess;
+        // Payment of Tax
+        sheet.getCell("F71").value = igst;
+        sheet.getCell("F72").value = itcIGST- igst;
+        sheet.getCell("H72").value = itcCGST;
 
-     
+        // Sale Sheet
+        const saleSheet = workbook.getWorksheet("Sale");
+        let startRow = 3; // your data starts from row 3
+
+        salesFiltered.forEach((sale, index) => {
+
+          const row = saleSheet.getRow(startRow + index);
+
+          const customer = sale.customerDetails?.[0] || {};
+          const form = sale.formData || {};
+
+          row.getCell(1).value = customer.vacode || "";          // Account Name
+          row.getCell(2).value = customer.gstno || "";           // GST No
+          row.getCell(3).value = form.vno || "";                 // Bill No
+          row.getCell(4).value = form.date ? new Date(form.date) : "";  // Date
+          row.getCell(5).value = Number(form.sub_total || 0);    // Taxable Value
+
+          const gstRate = sale.items?.[0]?.gst || 0;
+          row.getCell(6).value = gstRate;                        // GST Rate
+
+          row.getCell(7).value = Number(form.cgst || 0);         // CGST
+          row.getCell(8).value = Number(form.sgst || 0);         // SGST
+          row.getCell(9).value = Number(form.igst || 0);         // IGST
+          row.getCell(10).value = Number(form.cess1 || 0);       // Cess
+
+          row.getCell(11).value = "Sheet2-D14";                  // Link column
+
+          row.commit();
+        });
+
+        // Purchase Sheet
+        const purchaseSheet = workbook.getWorksheet("Purchase");
+        let purchaseStartRow = 3; // your data starts from row 3
+
+        purchaseFiltered.forEach((purchase, index) => {
+
+          const row = purchaseSheet.getRow(purchaseStartRow + index);
+
+          const supplier = purchase.supplierdetails?.[0] || {};
+          const form = purchase.formData || {};
+          const item = purchase.items?.[0] || {};
+
+          row.getCell(1).value = supplier.vacode || "";              // Account Name
+          row.getCell(2).value = supplier.gstno || "";               // GST No
+          row.getCell(3).value = form.vno || "";                     // Bill No
+
+          // Input Date (Bill Date)
+          if (form.date) {
+            const [d, m, y] = form.date.split("-");
+            row.getCell(4).value = new Date(`${y}-${m}-${d}`);
+          }
+
+          row.getCell(5).value = Number(form.sub_total || 0);        // Taxable Value
+          row.getCell(6).value = item.gst || 0;                      // GST Rate
+          row.getCell(7).value = Number(form.cgst || 0);             // CGST
+          row.getCell(8).value = Number(form.sgst || 0);             // SGST
+          row.getCell(9).value = Number(form.igst || 0);             // IGST
+          row.getCell(10).value = Number(form.cess1 || 0);           // Cess
+
+          row.getCell(11).value = "Sheet2-D44";                      // ITC mapping
+
+          // Voucher Date (optional if different)
+          if (form.vbdate) {
+            const [d2, m2, y2] = form.vbdate.split("-");
+            row.getCell(12).value = new Date(`${y2}-${m2}-${d2}`);
+          }
+
+          row.commit();
+        });
 
         const fileBuffer = await workbook.xlsx.writeBuffer();
 

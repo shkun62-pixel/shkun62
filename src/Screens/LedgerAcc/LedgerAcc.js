@@ -1012,7 +1012,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       });
   
       if (response.status === 200 || response.status === 201) {
-        // fetchData();
+        fetchData();
         isDataSaved = true;
         await fetchLedgerAccounts(); // 🔥 refresh options immediately
         // ---------->>>>
@@ -1359,7 +1359,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
         inputRefs.current[nextIndex]?.focus();
       }
 
-      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      if (e.key === "ArrowUp") {
         e.preventDefault();
 
         let prevIndex = index - 1;

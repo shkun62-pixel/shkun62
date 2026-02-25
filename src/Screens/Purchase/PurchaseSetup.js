@@ -26,7 +26,7 @@ import { useContext } from "react";
 const PurchaseSetup = ({ onClose }) => {
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-    const tenant = "shkun_05062025_05062026"
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -282,7 +282,7 @@ const PurchaseSetup = ({ onClose }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchasesetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchasesetup`
       );
       if (response.status === 200 && response.data.length > 0) {
         const lastEntry = response.data[response.data.length - 1]; // Assuming you want the last one
@@ -665,7 +665,7 @@ const PurchaseSetup = ({ onClose }) => {
     try {
       const combinedData = prepareData();
       console.log("Combined Data New:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasesetup${
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasesetup${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
