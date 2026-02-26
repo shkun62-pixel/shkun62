@@ -46,7 +46,6 @@ import PurchaseModal from "./PurchaseModal";
 import CashModal from "./CashModal";
 import BankModal from "./BankModal";
 import TdsModal from "./TdsModal";
-import SaleWin from "./SaleWin";
 import AnnexureModalParent from "../Modals/AnnexureModalParent";
 import BalanceSheet from "../BalanceSheet/BalanceSheet";
 import CBookModal from "../Books/CashBook/CBookModal";
@@ -1561,13 +1560,6 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="Reposting" />
                 </StyledListItem>
-                {/* <StyledListItem button onClick={openSale_WinModal}>
-                            <StyledIcon>1
-                                <SettingsIcon />
-                            </StyledIcon>
-                            <StyledListItemText primary="SALE WIN" />
-                        </StyledListItem>
-                        <SaleWin isOpen={isSale_winOpen} onClose={closeSale_WinModal} /> */}
               </List>
             </motion.div>
           )}

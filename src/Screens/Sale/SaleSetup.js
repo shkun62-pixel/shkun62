@@ -13,6 +13,7 @@ import InvoiceSale3 from "../InvoicePDF/InvoiceSale3";
 import InvoiceKaryana from "../InvoicePDF/InvoiceKaryana";
 import InvoiceG4 from "../InvoicePDF/InvoiceG4";
 import InvoiceSlip from "../InvoicePDF/InvoiceSlip";
+import SaleWin from "./SaleWin";
 import {
   Box,
   Grid,
@@ -239,6 +240,16 @@ const SaleSetup = ({ onClose }) => {
       ...prev,
       reportformat: e.target.value,
     }));
+  };
+
+  const [openSaleWin, setOpenSaleWin] = useState(false);
+
+  const handleOpen = () => {
+    setOpenSaleWin(true);
+  };
+
+  const handleClose = () => {
+    setOpenSaleWin(false);
   };
 
   // FETCH DATA
@@ -4631,6 +4642,19 @@ const SaleSetup = ({ onClose }) => {
             >
               {"CLOSE"}
             </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ backgroundColor: "#1d92f1", color: "#fff" }}
+              onClick={handleOpen}
+            >
+              SALE SERIES
+            </Button>
+
+            <SaleWin
+              isOpen={openSaleWin}
+              onClose={handleClose}
+            />
           </Stack>
         </form>
       </div>

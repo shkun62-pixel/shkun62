@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "../Sale/Sale.css";
 import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ProductModal from "../Modals/ProductModal";
@@ -10,7 +12,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaPlus, FaMinus, FaCog, FaTimes } from "react-icons/fa";
-import SaleSetup from "../Sale/SaleSetup";
+import SaleSetup from "../../Screens/Sale/SaleSetup";
 import InvoicePDF from "../InvoicePDF/InvoicePDF";
 import InvoicepdfSale1 from "../InvoicePDF/InvoicepdfSale1";
 import InvoiceSaleChallan from "../InvoicePDF/InvoiceSaleChallan";
@@ -21,20 +23,32 @@ import InvoiceG4 from "../InvoicePDF/InvoiceG4";
 import InvoiceSlip from "../InvoicePDF/InvoiceSlip";
 import { useReactToPrint } from "react-to-print";
 import { useEditMode } from "../../EditModeContext";
+// import { CompanyContext } from "../../context/CompanyContext";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import TextField from "@mui/material/TextField";
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import {IconButton} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import BillPrintMenu from "../Modals/BillPrintMenu";
 import useCompanySetup from "../Shared/useCompanySetup";
+import { Modal, Form } from "react-bootstrap";
+import useTdsApplicable from "../Shared/useTdsApplicable";
+import FAVoucherModal from "../Shared/FAVoucherModal";
+import { useNavigate, useLocation } from "react-router-dom";
+import useShortcuts from "../Shared/useShortcuts";
+
+const LOCAL_STORAGE_KEY = "tabledataVisibility";
 
 const DebitNote = () => {
+  const location = useLocation();
+  const saleId = location.state?.saleId;
+  const navigate = useNavigate();
+
   const { CompanyState, unitType } = useCompanySetup();
+  const { applicable194Q } = useTdsApplicable();
   const { company } = useContext(CompanyContext);
-  // const tenant = company?.databaseName;
-  const tenant = "shkun_05062025_05062026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -46,6 +60,8 @@ const DebitNote = () => {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [title, setTitle] = useState("(View)");
   const datePickerRef = useRef(null);
+  const voucherNoRef = useRef(null);
+  const tableContainerRef = useRef(null);
   const itemCodeRefs = useRef([]);
   const desciptionRefs = useRef([]);
   const peciesRefs = useRef([]);
@@ -53,6 +69,7 @@ const DebitNote = () => {
   const priceRefs = useRef([]);
   const amountRefs = useRef([]);
   const discountRef = useRef([]);
+  const discount2Ref = useRef([]);
   const othersRefs = useRef([]);
   const cgstRefs = useRef([]);
   const sgstRefs = useRef([]);
@@ -105,7 +122,7 @@ const DebitNote = () => {
     vtype: "S",
     vbillno: 0,
     vno: 0,
-    gr: "",
+    bno: "",
     exfor: "",
     trpt: "",
     stype: "",
@@ -162,43 +179,56 @@ const DebitNote = () => {
       TDS194Q: "",
     },
   ]);
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      vcode: "",
-      sdisc: "",
-      Units: "",
-      pkgs: "0.00",
-      weight: "0.00",
-      rate: "0.00",
-      amount: "0.00",
-      disc: 0,
-      discount: "",
-      gst: 0,
-      Pcodes01: "",
-      Pcodess: "",
-      Scodes01: "",
-      Scodess: "",
-      Exp_rate1: 0,
-      Exp_rate2: 0,
-      Exp_rate3: 0,
-      Exp_rate4: 0,
-      Exp_rate5: 0,
-      Exp1: 0,
-      Exp2: 0,
-      Exp3: 0,
-      Exp4: 0,
-      Exp5: 0,
-      exp_before: 0,
-      RateCal: "",
-      Qtyperpc: 0,
-      ctax: "0.00",
-      stax: "0.00",
-      itax: "0.00",
-      tariff: "",
-      vamt: "0.00",
-    },
-  ]);
+  const MIN_ROWS = 5;
+
+  const createEmptyRow = (id, expRates = {}) => ({
+    id,
+    vcode: "",
+    sdisc: "",
+    Units: "",
+    pkgs: "0",
+    weight: "0",
+    rate: "0",
+    amount: "0",
+    disc: 0,
+    discount: "",
+    gst: 0,
+    Pcodes01: "",
+    Pcodess: "",
+    Scodes01: "",
+    Scodess: "",
+    RateCal: "",
+    Qtyperpc: 0,
+    Exp_rate1: expRates.ExpRate1 ?? 0,
+    Exp_rate2: expRates.ExpRate2 ?? 0,
+    Exp_rate3: expRates.ExpRate3 ?? 0,
+    Exp_rate4: expRates.ExpRate4 ?? 0,
+    Exp_rate5: expRates.ExpRate5 ?? 0,
+    Exp1: 0,
+    Exp2: 0,
+    Exp3: 0,
+    Exp4: 0,
+    Exp5: 0,
+    exp_before: 0,
+    ctax: "0.00",
+    stax: "0.00",
+    itax: "0.00",
+    tariff: "",
+    vamt: "0.00",
+  });
+
+  const normalizeItems = (items = [], expRates = {}) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1, expRates));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+
   const [shipped, setshipped] = useState([
     {
       shippedto: "",
@@ -211,20 +241,61 @@ const DebitNote = () => {
   ]);
 
   useEffect(() => {
-    if (addButtonRef.current) {
+    console.log("CompanyState", CompanyState);
+
+    if (addButtonRef.current && !saleId) {
       addButtonRef.current.focus();
     }
   }, []);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-      const openPrintMenu = () => {
-      setIsMenuOpen(true);
+  const openPrintMenu = () => {
+    setIsMenuOpen(true);
   };
 
   const closePrintMenu = () => {
-      setIsMenuOpen(false);
+    setIsMenuOpen(false);
   };
-  
+
+  const defaultTableFields = {
+    itemcode: true,
+    sdisc: true,
+    hsncode: true,
+    pcs: true,
+    qty: true,
+    rate: true,
+    amount: true,
+    discount: false,
+    others: true,
+    gst: false,
+    cgst: true,
+    sgst: true,
+    igst: true,
+  };
+
+  const [tableData, settableData] = useState(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
+    // Only keep keys that exist in defaultFormData
+    const sanitized = Object.fromEntries(
+      Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+        Object.hasOwn(defaultTableFields, key),
+      ),
+    );
+
+    return sanitized;
+  });
+
+  // Save to localStorage whenever tableData changes
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tableData));
+  }, [tableData]);
+
+  const handleCheckboxChange = (field) => {
+    settableData((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
   const customerNameRef = useRef(null);
   const grNoRef = useRef(null);
   const termsRef = useRef(null);
@@ -232,7 +303,7 @@ const DebitNote = () => {
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
@@ -302,7 +373,7 @@ const DebitNote = () => {
   const fetchSalesSetup = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/salesetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/salesetup`,
       );
       if (!response.ok) throw new Error("Failed to fetch sales setup");
 
@@ -379,8 +450,36 @@ const DebitNote = () => {
   };
   useEffect(() => {
     fetchSalesSetup();
-  }, [T11,T21,T12,ExpRate1,ExpRate2,ExpRate3,ExpRate4,ExpRate5,ExpRate6,ExpRate7,ExpRate8,ExpRate9,ExpRate10,Defaultbutton,BillType,SupplyType
+  }, [
+    T11,
+    T21,
+    T12,
+    ExpRate1,
+    ExpRate2,
+    ExpRate3,
+    ExpRate4,
+    ExpRate5,
+    ExpRate6,
+    ExpRate7,
+    ExpRate8,
+    ExpRate9,
+    ExpRate10,
+    Defaultbutton,
+    BillType,
+    SupplyType,
   ]);
+
+  useEffect(() => {
+    setItems((prev) =>
+      normalizeItems(prev, {
+        ExpRate1,
+        ExpRate2,
+        ExpRate3,
+        ExpRate4,
+        ExpRate5,
+      }),
+    );
+  }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
 
   // Calculate Total GST
   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
@@ -408,7 +507,7 @@ const DebitNote = () => {
 
     items.forEach((item) => {
       const value = parseFloat(item.amount || 0);
-      totalValue += value;
+      totalValue += value || 0;
       cgstTotal += parseFloat(item.ctax || 0);
       sgstTotal += parseFloat(item.stax || 0);
       igstTotal += parseFloat(item.itax || 0);
@@ -435,95 +534,119 @@ const DebitNote = () => {
     const Exp1Multiplier9 = Pos9 === "-Ve" ? -1 : 1;
     const Exp1Multiplier10 = Pos10 === "-Ve" ? -1 : 1;
 
-    if (CalExp6 === "P" || CalExp6 === "p") {
-      exp6 = (totalpcs * exp6Rate) / 100 || 0;
-    } else if (CalExp6 === "W" || CalExp6 === "w") {
-      exp6 = (totalQty * exp6Rate) / 100 || 0;
-    } else if (CalExp6 === "V" || CalExp6 === "V" || CalExp6 === "") {
-      exp6 = (subTotal * exp6Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp6) {
+      exp6 = parseFloat(formDataOverride.Exp6) || 0;
+    } else {
+      if (CalExp6 === "P" || CalExp6 === "p") {
+        exp6 = (totalpcs * exp6Rate) / 100 || 0;
+      } else if (CalExp6 === "W" || CalExp6 === "w") {
+        exp6 = (totalQty * exp6Rate) / 100 || 0;
+      } else {
+        exp6 = (subTotal * exp6Rate) / 100 || 0;
+      }
     }
-    exp6 *= Exp1Multiplier6; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp6 = exp6.toFixed(2);
+    exp6 *= Exp1Multiplier6;
+    if (!formDataOverride._manual_Exp6) {
+      formDataOverride.Exp6 = exp6.toFixed(2);
+    }
+
     // EXP 7
-    if (CalExp7 === "P" || CalExp7 === "p") {
-      exp7 = (totalpcs * exp7Rate) / 100 || 0;
-    } else if (CalExp7 === "W" || CalExp7 === "w") {
-      exp7 = (totalQty * exp7Rate) / 100 || 0;
-    } else if (CalExp7 === "V" || CalExp7 === "V" || CalExp7 === "") {
-      exp7 = (subTotal * exp7Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp7) {
+      exp7 = parseFloat(formDataOverride.Exp7) || 0;
+    } else {
+      if (CalExp7 === "P" || CalExp7 === "p") {
+        exp7 = (totalpcs * exp7Rate) / 100 || 0;
+      } else if (CalExp7 === "W" || CalExp7 === "w") {
+        exp7 = (totalQty * exp7Rate) / 100 || 0;
+      } else {
+        exp7 = (subTotal * exp7Rate) / 100 || 0;
+      }
     }
-    exp7 *= Exp1Multiplier7; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp7 = exp7.toFixed(2);
+
+    exp7 *= Exp1Multiplier7;
+      if (!formDataOverride._manual_Exp7) {
+      formDataOverride.Exp7 = exp7.toFixed(2);
+    }
+
     // EXP 8
-    if (CalExp8 === "P" || CalExp8 === "p") {
-      exp8 = (totalpcs * exp8Rate) / 100 || 0;
-    } else if (CalExp8 === "W" || CalExp8 === "w") {
-      exp8 = (totalQty * exp8Rate) / 100 || 0;
-    } else if (CalExp8 === "V" || CalExp8 === "V" || CalExp8 === "") {
-      exp8 = (subTotal * exp8Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp8) {
+      exp8 = parseFloat(formDataOverride.Exp8) || 0;
+    } else {
+      if (CalExp8 === "P" || CalExp8 === "p") {
+        exp8 = (totalpcs * exp8Rate) / 100 || 0;
+      } else if (CalExp8 === "W" || CalExp8 === "w") {
+        exp8 = (totalQty * exp8Rate) / 100 || 0;
+      } else {
+        exp8 = (subTotal * exp8Rate) / 100 || 0;
+      }
     }
-    exp8 *= Exp1Multiplier8; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp8 = exp8.toFixed(2);
+
+    exp8 *= Exp1Multiplier8;
+      if (!formDataOverride._manual_Exp8) {
+      formDataOverride.Exp8 = exp8.toFixed(2);
+    }
+
     // EXP 9
-    if (CalExp9 === "P" || CalExp9 === "p") {
-      exp9 = (totalpcs * exp9Rate) / 100 || 0;
-    } else if (CalExp9 === "W" || CalExp9 === "w") {
-      exp9 = (totalQty * exp9Rate) / 100 || 0;
-    } else if (CalExp9 === "V" || CalExp9 === "V" || CalExp9 === "") {
-      exp9 = (subTotal * exp9Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp9) {
+      exp9 = parseFloat(formDataOverride.Exp9) || 0;
+    } else {
+      if (CalExp9 === "P" || CalExp9 === "p") {
+        exp9 = (totalpcs * exp9Rate) / 100 || 0;
+      } else if (CalExp9 === "W" || CalExp9 === "w") {
+        exp9 = (totalQty * exp9Rate) / 100 || 0;
+      } else {
+        exp9 = (subTotal * exp9Rate) / 100 || 0;
+      }
     }
-    exp9 *= Exp1Multiplier9; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp9 = exp9.toFixed(2);
+
+    exp9 *= Exp1Multiplier9;
+      if (!formDataOverride._manual_Exp9) {
+      formDataOverride.Exp9 = exp9.toFixed(2);
+    }
+
     // EXP 10
-    if (CalExp10 === "P" || CalExp10 === "p") {
-      exp10 = (totalpcs * exp10Rate) / 100 || 0;
-    } else if (CalExp10 === "W" || CalExp10 === "w") {
-      exp10 = (totalQty * exp10Rate) / 100 || 0;
-    } else if (CalExp10 === "V" || CalExp10 === "V" || CalExp10 === "") {
-      exp10 = (subTotal * exp10Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp10) {
+      exp10 = parseFloat(formDataOverride.Exp10) || 0;
+    } else {
+      if (CalExp10 === "P" || CalExp10 === "p") {
+        exp10 = (totalpcs * exp10Rate) / 100 || 0;
+      } else if (CalExp10 === "W" || CalExp10 === "w") {
+        exp10 = (totalQty * exp10Rate) / 100 || 0;
+      } else {
+        exp10 = (subTotal * exp10Rate) / 100 || 0;
+      }
     }
-    exp10 *= Exp1Multiplier10; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp10 = exp10.toFixed(2);
+
+    exp10 *= Exp1Multiplier10;
+      if (!formDataOverride._manual_Exp10) {
+      formDataOverride.Exp10 = exp10.toFixed(2);
+    }
 
     // Calculate Total Expenses
     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
     let gstTotal = cgstTotal + sgstTotal + igstTotal;
     let grandTotal =
-      totalValue + gstTotal + totalOthers + totalExpenses - totalDis;
+      totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
+    let taxable = parseFloat(formDataOverride.sub_total) || 0;
     // ✅ Skip TCS Calculation if skipTCS is true
     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
-    let tcs1 = skipTCS ? parseFloat(formDataOverride.tcs1) : 0;
-    let tcs1Rate = skipTCS ? parseFloat(formDataOverride.tcs1_rate) : 0;
+    let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
+    let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
     let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
     let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
 
-    if (!skipTCS && unitType === "Trading") {
-      tcs206 = (grandTotal * 1) / 100; // 1% TCS
-      tcs206Rate = 1;
-      grandTotal += tcs206;
-    } else if (skipTCS) {
-      grandTotal += parseFloat(tcs206); // Add existing TCS to grand total
-    }
-
-    const isTcs206c1HYes =
-      customerDetails?.some(
-        (cust) => cust.Tcs206c1H?.toLowerCase() === "yes"
-      ) || false;
-    if (!skipTCS && isTcs206c1HYes) {
-      tcs1 = (grandTotal * 0.1) / 100; // 0.1%
-      tcs1Rate = 0.1;
+    if (!skipTCS) {
+      tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
       grandTotal += tcs1;
     } else if (skipTCS) {
       grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
     }
 
-    const isTDS149QYes =
-      customerDetails?.some((cust) => cust.TDS194Q?.toLowerCase() === "yes") ||
-      false;
-    if (!skipTCS && isTDS149QYes) {
-      srv_tax = (grandTotal * 2) / 100; // 2%
-      srvRate = 2;
+    // const isTDS149QYes =customerDetails?.some((cust) => cust.TDS194Q?.toLowerCase() === "yes");
+    if (!skipTCS && applicable194Q === "Above 10 Crore") {
+      srv_tax = (taxable * 0.1) / 100;
+      srvRate = 0.1;
       // grandTotal += srv_tax;
     }
 
@@ -601,22 +724,49 @@ const DebitNote = () => {
 
   useEffect(() => {
     setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T21, T12]);
+  }, [items, T21, T12, formData.tcs1_rate]);
 
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
+
     const numberValue = value.replace(/[^0-9.]/g, "");
-    const validNumberValue =
-      numberValue.split(".").length > 2
-        ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
-        : numberValue;
 
     setFormData((prevState) => {
-      const newFormData = { ...prevState, [id]: validNumberValue };
-      return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+      const newFormData = {
+        ...prevState,
+        [id]: numberValue,
+      };
+
+      // If typing directly in expense field → mark it manual
+      if (["Exp6", "Exp7", "Exp8", "Exp9", "Exp10"].includes(id)) {
+        newFormData[`_manual_${id}`] = true;
+      }
+
+      // If typing in rate → disable manual mode
+      if (["Exp_rate6","Exp_rate7","Exp_rate8","Exp_rate9","Exp_rate10"].includes(id)) {
+        const expField = id.replace("Exp_rate", "Exp");
+        newFormData[`_manual_${expField}`] = false;
+      }
+
+      return calculateTotalGst(newFormData, true); // ✅ KEEP THIS
     });
   };
 
+  // const handleNumberChange = (event) => {
+  //   const { id, value } = event.target;
+  //   const numberValue = value.replace(/[^0-9.]/g, "");
+  //   const validNumberValue =
+  //     numberValue.split(".").length > 2
+  //       ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
+  //       : numberValue;
+
+  //   setFormData((prevState) => {
+  //     const newFormData = { ...prevState, [id]: validNumberValue };
+  //     return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+  //   });
+  // };
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
   const [index, setIndex] = useState(0);
@@ -637,56 +787,161 @@ const DebitNote = () => {
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [setupFormData, setsetupFormData] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Search Modal states
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchDate, setSearchDate] = useState(null);
 
   useEffect(() => {
-    const hasVcode = (isEditMode && items.some(item => String(item.vcode).trim() !== ""));
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && !isEditMode && saleId) {
+        const modalState = JSON.parse(
+          sessionStorage.getItem("trailModalState") || "{}",
+        );
+
+        navigate(-1); // go back
+        setTimeout(() => {
+          // restore modal state after navigation
+          if (modalState.keepModalOpen) {
+            window.dispatchEvent(
+              new CustomEvent("reopenTrailModal", { detail: modalState }),
+            );
+          }
+        }, 50);
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isEditMode]);
+
+  // state
+  const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+
+  // when user clicks “FA VOUCHER VIEW” inside BillPrintMenu
+  const handleViewFAVoucher = () => {
+    // we need a voucher number for FA — you’re using formData.vno for FA entries
+    if (!formData?.vno) {
+      toast.info("No voucher number found.", { position: "top-center" });
+      return;
+    }
+    setIsFAModalOpen(true);
+  };
+
+  useEffect(() => {
+    const hasVcode =
+      isEditMode && items.some((item) => String(item.vcode).trim() !== "");
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
-  const fetchData = async () => {
-  try {
-    const response = await axios.get(
-      `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/last`
-    );
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
 
-    if (response.status === 200 && response.data && response.data.data) {
-      const lastEntry = response.data.data;
-
-      const isValidDate = (date) => !isNaN(Date.parse(date));
-
-      const updatedFormData = {
-        ...lastEntry.formData,
-        date: isValidDate(lastEntry.formData.date)
-          ? lastEntry.formData.date
-          : new Date().toLocaleDateString(),
-      };
-
-      setFirstTimeCheckData("DataAvailable");
-      setFormData(updatedFormData);
-
-      setItems([...lastEntry.items]);
-      setcustomerDetails([...lastEntry.customerDetails]);
-      setshipped([...lastEntry.shipped]);
-
-      if (lastEntry.customerDetails.length > 0) {
-        setCustgst(lastEntry.customerDetails[0].gstno);
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
       }
+    }
 
-      setData1({ ...lastEntry, formData: updatedFormData });
-      setIndex(lastEntry.formData?.vbillno || 0);
+    let date;
 
-      return lastEntry; // ✅ Return this for use in handleAdd
-    } else {
-      setFirstTimeCheckData("DataNotAvailable");
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const fetchData = async () => {
+    try {
+      let response;
+      if (saleId) {
+        response = await axios.get(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`,
+        );
+      } else {
+        response = await axios.get(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+        );
+      }
+      // const response = await axios.get(
+      //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
+      // );
+
+      if (response.status === 200 && response.data && response.data.data) {
+        const lastEntry = response.data.data;
+
+        const updatedFormData = {
+          ...lastEntry.formData,
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+        };
+
+        setFirstTimeCheckData("DataAvailable");
+        setFormData(updatedFormData);
+
+        // setItems([...lastEntry.items]);
+        setItems(normalizeItems(lastEntry.items));
+        setcustomerDetails([...lastEntry.customerDetails]);
+        setshipped([...lastEntry.shipped]);
+
+        if (lastEntry.customerDetails.length > 0) {
+          setCustgst(lastEntry.customerDetails[0].gstno);
+        }
+
+        setData1({ ...lastEntry, formData: updatedFormData });
+        setIndex(lastEntry.formData?.vbillno || 0);
+
+        return lastEntry; // ✅ Return this for use in handleAdd
+      } else {
+        setFirstTimeCheckData("DataNotAvailable");
+        initializeEmptyData();
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
       initializeEmptyData();
       return null;
     }
-  } catch (error) {
-    console.error("Error fetching data", error);
-    initializeEmptyData();
-    return null;
-  }
-};
+  };
 
   // Function to initialize empty data
   const initializeEmptyData = () => {
@@ -696,7 +951,7 @@ const DebitNote = () => {
       vtype: "S",
       vbillno: 0,
       vno: 0,
-      gr: "",
+      bno: "",
       exfor: "",
       trpt: "",
       stype: "",
@@ -747,6 +1002,8 @@ const DebitNote = () => {
         disc: 0,
         discount: "",
         gst: 0,
+        RateCal: "",
+        Qtyperpc: 0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -793,7 +1050,7 @@ const DebitNote = () => {
     ];
     // Set the empty data
     setFormData(emptyFormData);
-    setItems(emptyItems);
+    setItems(normalizeItems([]));
     setcustomerDetails(emptycustomer);
     setshipped(emptyshipped);
     setData1({
@@ -811,19 +1068,110 @@ const DebitNote = () => {
     // Add this line to set isDisabled to true initially
   }, []);
 
+  // Fetch all bills for search
+  const fetchAllBills = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
+      );
+      if (Array.isArray(res.data)) {
+        setAllBills(res.data);
+        setFilteredBills(res.data);
+      }
+    } catch (error) {
+      console.error("Error fetching bills", error);
+    }
+  };
+
+  // Update filtering logic
+  useEffect(() => {
+    let filtered = allBills;
+
+    // Filter by Bill No if entered
+    if (searchBillNo.trim() !== "") {
+      filtered = filtered.filter((bill) =>
+        bill.formData.vbillno
+          .toString()
+          .toLowerCase()
+          .includes(searchBillNo.toLowerCase()),
+      );
+    }
+
+    const formatLocalDate = (date) => {
+      const d = new Date(date);
+      if (isNaN(d)) return null; // invalid date
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    // Filter by Date if selected
+    if (searchDate) {
+      const selected = formatLocalDate(searchDate);
+
+      if (selected) {
+        filtered = filtered.filter((bill) => {
+          const billDate = formatLocalDate(bill.formData.date);
+          return billDate === selected;
+        });
+      }
+    }
+
+    setFilteredBills(filtered);
+  }, [searchBillNo, searchDate, allBills]);
+
+  const handleSelectBill = (bill) => {
+    setFormData(bill.formData);
+    setcustomerDetails(bill.customerDetails);
+    setItems(bill.items);
+    setshipped(bill.shipped);
+  };
+
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`,
+      );
+
+      return {
+        lastVno: res?.data?.lastVno || 0,
+        nextVno: res?.data?.nextVno || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("(View)");
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/${data1._id}/next`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next`,
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
           setData1(nextData);
           setIndex(index + 1);
-          setFormData(nextData.formData);
+          setFormData({
+          ...nextData.formData,
+          date: formatDateToDDMMYYYY(nextData.formData.date),
+          duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
+          });
 
           // Update items and supplier details
           const updatedItems = nextData.items.map((item) => ({
@@ -835,7 +1183,8 @@ const DebitNote = () => {
           const updatedshipped = nextData.shipped.map((item) => ({
             ...item,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
+          // setItems(updatedItems);
           setcustomerDetails(updatedCustomer);
           setshipped(updatedshipped);
 
@@ -857,13 +1206,17 @@ const DebitNote = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/${data1._id}/previous`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous`,
         );
         if (response.status === 200 && response.data) {
           const prevData = response.data.data;
           setData1(prevData);
           setIndex(index - 1);
-          setFormData(prevData.formData);
+          setFormData({
+          ...prevData.formData,
+          date: formatDateToDDMMYYYY(prevData.formData.date),
+          duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
+          });
 
           // Update items and supplier details
           const updatedItems = prevData.items.map((item) => ({
@@ -875,7 +1228,8 @@ const DebitNote = () => {
           const updatedshipped = prevData.shipped.map((item) => ({
             ...item,
           }));
-          setItems(updatedItems);
+          // setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setcustomerDetails(updatedCustomer);
           setshipped(updatedshipped);
 
@@ -897,13 +1251,17 @@ const DebitNote = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first`,
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
         setData1(firstData);
         setIndex(0);
-        setFormData(firstData.formData);
+        setFormData({
+        ...firstData.formData,
+        date: formatDateToDDMMYYYY(firstData.formData.date),
+        duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
+        });
 
         // Update items and supplier details
         const updatedItems = firstData.items.map((item) => ({
@@ -915,7 +1273,8 @@ const DebitNote = () => {
         const updatedshipped = firstData.shipped.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        // setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setcustomerDetails(updatedCustomer);
         setshipped(updatedshipped);
 
@@ -937,14 +1296,18 @@ const DebitNote = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
         setData1(lastData);
         const lastIndex = response.data.length - 1;
         setIndex(lastIndex);
-        setFormData(lastData.formData);
+        setFormData({
+        ...lastData.formData,
+        date: formatDateToDDMMYYYY(lastData.formData.date),
+        duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
+        });
 
         // Update items and supplier details
         const updatedItems = lastData.items.map((item) => ({
@@ -956,7 +1319,8 @@ const DebitNote = () => {
         const updatedshipped = lastData.shipped.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        // setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setcustomerDetails(updatedCustomer);
         setshipped(updatedshipped);
         // Set custGst from the supplier details
@@ -972,118 +1336,222 @@ const DebitNote = () => {
   };
 
   const handleAdd = async () => {
-  if (datePickerRef.current) {
-    datePickerRef.current.setFocus();
-  }
-  try {
-    const lastEntry = await fetchData();
-    await fetchSalesSetup();
-    const today = new Date().toISOString().slice(0, 10);
-    const lastvoucherno = lastEntry?.formData?.vbillno ? parseInt(lastEntry.formData.vbillno) + 1 : 1;
-    const lastvno = lastEntry?.formData?.vno ? parseInt(lastEntry.formData.vno) + 1 : 1;
+    if (datePickerRef.current) {
+      datePickerRef.current.focus();
+    }
+    try {
+      await fetchSalesSetup();
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
 
-    const newData = {
-      ...lastEntry?.formData,
-      date: today,
-      vbillno: lastvoucherno,
-      vno: lastvno,
-      gr: "",
-      exfor: "",
-      trpt: "",
-      stype: "",
-      rem1: "",
-      rem2: "",
-      v_tpt: "",
-      broker: "",
-      duedate: "",
-      tax: 0,
-      sub_total: 0,
-      cgst: 0,
-      sgst: 0,
-      igst: 0,
-      expafterGST: 0,
-      ExpRoundoff: 0,
-      grandtotal: 0,
-    };
+      const lastvoucherno = voucherData.nextVno;
+      const lastvno = voucherData.nextVno;
 
-    setData([...data, newData]);
-    setFormData(newData);
-    setItems([
-      {
-        id: 1,
-        vcode: "",
-        sdisc: "",
-        Units: "",
-        pkgs: "0",
-        weight: "0",
-        rate: "0",
-        amount: "0",
-        disc: 0,
-        discount: "",
-        gst: 0,
-        Pcodes01: "",
-        Pcodess: "",
-        Scodes01: "",
-        Scodess: "",
-        Exp_rate1: ExpRate1 || 0,
-        Exp_rate2: ExpRate2 || 0,
-        Exp_rate3: ExpRate3 || 0,
-        Exp_rate4: ExpRate4 || 0,
-        Exp_rate5: ExpRate5 || 0,
-        Exp1: 0,
-        Exp2: 0,
-        Exp3: 0,
-        Exp4: 0,
-        Exp5: 0,
+      const newData = {
+        date: getTodayDDMMYYYY(),
+        vbillno: lastvoucherno,
+        vno: lastvno,
+        vtype: "S",
+        bno: "",
+        exfor: "",
+        trpt: "",
+        stype: "",
+        btype: BillType,
+        conv: "",
+        rem1: "",
+        rem2: "",
+        v_tpt: "",
+        broker: "",
+        gross: false,
+        tcsper: 0,
+        srv_rate: 0,
+        srv_tax: 0,
+        tcs1_rate: 0,
+        tcs1: 0,
+        tcs206_rate: 0,
+        tcs206: 0,
+        duedate: getTodayDDMMYYYY(),
+        pcess: 0,
+        tax: 0,
+        sub_total: 0,
         exp_before: 0,
-        ctax: "0.00",
-        stax: "0.00",
-        itax: "0.00",
-        tariff: "",
-        vamt: "0.00",
-      },
-    ]);
-    setcustomerDetails([
-      {
-        Vcode: "",
-        vacode: "",
-        gstno: "",
-        pan: "",
-        Add1: "",
-        city: "",
-        state: "",
-        Tcs206c1H: "",
-        TDS194Q: "",
-      },
-    ]);
-    setshipped([
-      {
-        shippedto: "",
-        shippingAdd: "",
-        shippingcity: "",
-        shippingState: "",
-        shippingGst: "",
-        shippingPan: "",
-      },
-    ]);
+        Exp_rate6: 0,
+        Exp_rate7: 0,
+        Exp_rate8: 0,
+        Exp_rate9: 0,
+        Exp_rate10: 0,
+        Exp6: 0,
+        Exp7: 0,
+        Exp8: 0,
+        Exp9: 0,
+        Exp10: 0,
+        Tds2: "",
+        Ctds: "",
+        Stds: "",
+        iTds: "",
+        cgst: 0,
+        sgst: 0,
+        igst: 0,
+        expafterGST: 0,
+        ExpRoundoff: 0,
+        grandtotal: 0,
+      };
+      setData([...data, newData]);
+      setFormData(newData);
+      // setItems(normalizeItems([]));
+      setItems(
+        normalizeItems([], {
+          ExpRate1,
+          ExpRate2,
+          ExpRate3,
+          ExpRate4,
+          ExpRate5,
+        }),
+      );
+      setcustomerDetails([
+        {
+          Vcode: "",
+          vacode: "",
+          gstno: "",
+          pan: "",
+          Add1: "",
+          city: "",
+          state: "",
+          Tcs206c1H: "",
+          TDS194Q: "",
+        },
+      ]);
+      setshipped([
+        {
+          shippedto: "",
+          shippingAdd: "",
+          shippingcity: "",
+          shippingState: "",
+          shippingGst: "",
+          shippingPan: "",
+        },
+      ]);
+      setIndex(data.length);
+      setIsAddEnabled(false);
+      setIsPreviousEnabled(false);
+      setIsNextEnabled(false);
+      setIsFirstEnabled(false);
+      setIsLastEnabled(false);
+      setIsSearchEnabled(false);
+      setIsSPrintEnabled(false);
+      setIsDeleteEnabled(false);
+      setIsDisabled(false);
+      setIsEditMode(true);
+      setIsAbcmode(false);
+      setTitle("NEW");
+    } catch (error) {
+      console.error("Error adding new entry:", error);
+    }
+  };
 
-    setIndex(data.length);
-    setIsAddEnabled(false);
-    setIsPreviousEnabled(false);
-    setIsNextEnabled(false);
-    setIsFirstEnabled(false);
-    setIsLastEnabled(false);
-    setIsSearchEnabled(false);
-    setIsSPrintEnabled(false);
-    setIsDeleteEnabled(false);
-    setIsDisabled(false);
-    setIsEditMode(true);
-    setIsAbcmode(false);
-    setTitle("NEW");
-  } catch (error) {
-    console.error("Error adding new entry:", error);
-  }
-};
+  const handleExit = async () => {
+    // Check if grandtotal is Greater Than zero
+    if (formData.grandtotal > 0 && isEditMode) {
+      const confirmExit = window.confirm(
+        "Are you sure you want to Exit? Unsaved changes may be lost.",
+      );
+      if (!confirmExit) {
+        return;
+      }
+    }
+    
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
+
+    setTitle("(View)");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+      );
+
+      if (response.status === 200 && response.data.data) {
+        const lastEntry = response.data.data;
+        setFormData({
+        ...lastEntry.formData,
+        date: formatDateToDDMMYYYY(lastEntry.formData.date),
+        duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+        });
+        setData1(response.data.data);
+        // setItems(lastEntry.items.map((item) => ({ ...item })));
+        setItems(normalizeItems(lastEntry.items));
+        setcustomerDetails(
+          lastEntry.customerDetails.map((item) => ({ ...item })),
+        );
+        setshipped(lastEntry.shipped.map((item) => ({ ...item })));
+
+        setIsDisabled(true);
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+      } else {
+        console.log("No data available");
+        const newData = {
+          date: "",
+          vtype: "S",
+          vbillno: 0,
+          vno: 0,
+          bno: "",
+          exfor: "",
+          trpt: "",
+          stype: "",
+          btype: "",
+          conv: "",
+          rem1: "",
+          rem2: "",
+          v_tpt: "",
+          broker: "",
+          srv_rate: 0,
+          srv_tax: 0,
+          tcs1_rate: 0,
+          tcs1: 0,
+          tcs206_rate: 0,
+          tcs206: 0,
+          duedate: "",
+          pcess: 0,
+          tax: 0,
+          sub_total: 0,
+          exp_before: 0,
+          cgst: 0,
+          sgst: 0,
+          igst: 0,
+          expafterGST: 0,
+          grandtotal: 0,
+        };
+        setFormData(newData);
+        setItems(normalizeItems([]));
+        setcustomerDetails([
+          {
+            vacode: "",
+            gstno: "",
+            pan: "",
+            Add1: "",
+            city: "",
+            state: "",
+            Tcs206c1H: "",
+            TDS194Q: "",
+          },
+        ]);
+        setIsDisabled(true);
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
+  };
 
   const handleEditClick = () => {
     setTitle("(Edit)");
@@ -1103,247 +1571,250 @@ const DebitNote = () => {
       customerNameRef.current.focus();
     }
   };
-  
-  const handleSaveClick = async () => {
+
+  const handleSaveClickwithSetup = async () => {
     document.body.style.backgroundColor = "white";
     let isDataSaved = false;
+
     try {
+      // 1) Validate
       const isValid = customerDetails.every((item) => item.vacode !== "");
       if (!isValid) {
         toast.error("Please Fill the Customer Details", {
           position: "top-center",
         });
-        return; // Prevent save operation
+        return;
       }
-      const nonEmptyItems = items.filter((item) => item.sdisc.trim() !== "");
+
+      const nonEmptyItems = items.filter(
+        (item) => (item.sdisc || "").trim() !== "",
+      );
       if (nonEmptyItems.length === 0) {
         toast.error("Please fill in at least one Items name.", {
           position: "top-center",
         });
         return;
       }
-      let combinedData;
-      if (isAbcmode) {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
-            vtype: formData.vtype,
-            vbillno: formData.vbillno,
-            vno: formData.vno,
-            gr: formData.gr,
-            exfor: formData.exfor,
-            trpt: formData.trpt,
-            stype: formData.stype,
-            btype: formData.btype,
-            conv: formData.conv,
-            rem1: formData.rem1,
-            rem2: formData.rem2,
-            v_tpt: formData.v_tpt,
-            broker: formData.broker,
-            srv_rate: formData.srv_rate,
-            srv_tax: formData.srv_tax,
-            tcs1_rate: formData.tcs1_rate,
-            tcs1: formData.tcs1,
-            tcs206_rate: formData.tcs206_rate,
-            tcs206: formData.tcs206,
-            duedate: expiredDate.toLocaleDateString("en-IN"),
-            pcess: formData.pcess,
-            tax: formData.tax,
-            sub_total: formData.sub_total,
-            exp_before: formData.exp_before,
-            Exp_rate6: formData.Exp_rate6,
-            Exp_rate7: formData.Exp_rate7,
-            Exp_rate8: formData.Exp_rate8,
-            Exp_rate9: formData.Exp_rate9,
-            Exp_rate10: formData.Exp_rate10,
-            Exp6: formData.Exp6,
-            Exp7: formData.Exp7,
-            Exp8: formData.Exp8,
-            Exp9: formData.Exp9,
-            Exp10: formData.Exp10,
-            Tds2: formData.Tds2,
-            Ctds: formData.Ctds,
-            Stds: formData.Stds,
-            iTds: formData.iTds,
-            cgst: formData.cgst,
-            sgst: formData.sgst,
-            igst: formData.igst,
-            expafterGST: formData.expafterGST,
-            ExpRoundoff: formData.ExpRoundoff,
-            grandtotal: formData.grandtotal,
-          },
-          items: nonEmptyItems.map((item) => ({
-            id: item.id,
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            Units: item.Units,
-            pkgs: item.pkgs,
-            weight: item.weight,
-            rate: item.rate,
-            amount: item.amount,
-            disc: item.disc,
-            discount: item.discount,
-            gst: item.gst,
-            Pcodes01: item.Pcodes01,
-            Pcodess: item.Pcodess,
-            Scodes01: item.Scodes01,
-            Scodess: item.Scodess,
-            exp_before: item.exp_before,
-            Exp_rate1: item.Exp_rate1,
-            Exp_rate2: item.Exp_rate2,
-            Exp_rate3: item.Exp_rate3,
-            Exp_rate4: item.Exp_rate4,
-            Exp_rate5: item.Exp_rate5,
-            Exp1: item.Exp1,
-            Exp2: item.Exp2,
-            Exp3: item.Exp3,
-            Exp4: item.Exp4,
-            Exp5: item.Exp5,
-            Exp6: item.Exp6,
-            ctax: item.ctax,
-            stax: item.stax,
-            itax: item.itax,
-            tariff: item.tariff,
-            vamt: item.vamt,
-          })),
-          customerDetails: customerDetails.map((item) => ({
-            Vcode: item.Vcode,
-            vacode: item.vacode,
-            gstno: item.gstno,
-            pan: item.pan,
-            Add1: item.Add1,
-            city: item.city,
-            state: item.state,
-            Tcs206c1H: item.Tcs206c1H,
-            TDS194Q: item.TDS194Q,
-          })),
-          shipped: shipped.map((item) => ({
-            shippedto: item.shippedto,
-            shippingAdd: item.shippingAdd,
-            shippingcity: item.shippingcity,
-            shippingState: item.shippingState,
-            shippingGst: item.shippingGst,
-            shippingPan: item.shippingPan,
-          })),
-        };
-      } else {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
-            vtype: formData.vtype,
-            vbillno: formData.vbillno,
-            vno: formData.vno,
-            gr: formData.gr,
-            exfor: formData.exfor,
-            trpt: formData.trpt,
-            stype: formData.stype,
-            btype: formData.btype,
-            conv: formData.conv,
-            rem1: formData.rem1,
-            rem2: formData.rem2,
-            v_tpt: formData.v_tpt,
-            broker: formData.broker,
-            srv_rate: formData.srv_rate,
-            srv_tax: formData.srv_tax,
-            tcs1_rate: formData.tcs1_rate,
-            tcs1: formData.tcs1,
-            tcs206_rate: formData.tcs206_rate,
-            tcs206: formData.tcs206,
-            duedate: expiredDate.toLocaleDateString("en-IN"),
-            pcess: formData.pcess,
-            tax: formData.tax,
-            sub_total: formData.sub_total,
-            exp_before: formData.exp_before,
-            Exp_rate6: formData.Exp_rate6,
-            Exp_rate7: formData.Exp_rate7,
-            Exp_rate8: formData.Exp_rate8,
-            Exp_rate9: formData.Exp_rate9,
-            Exp_rate10: formData.Exp_rate10,
-            Exp6: formData.Exp6,
-            Exp7: formData.Exp7,
-            Exp8: formData.Exp8,
-            Exp9: formData.Exp9,
-            Exp10: formData.Exp10,
-            Tds2: formData.Tds2,
-            Ctds: formData.Ctds,
-            Stds: formData.Stds,
-            iTds: formData.iTds,
-            cgst: formData.cgst,
-            sgst: formData.sgst,
-            igst: formData.igst,
-            expafterGST: formData.expafterGST,
-            ExpRoundoff: formData.ExpRoundoff,
-            grandtotal: formData.grandtotal,
-          },
-          items: nonEmptyItems.map((item) => ({
-            id: item.id,
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            Units: item.Units,
-            pkgs: item.pkgs,
-            weight: item.weight,
-            rate: item.rate,
-            amount: item.amount,
-            disc: item.disc,
-            discount: item.discount,
-            gst: item.gst,
-            Pcodes01: item.Pcodes01,
-            Pcodess: item.Pcodess,
-            Scodes01: item.Scodes01,
-            Scodess: item.Scodess,
-            exp_before: item.exp_before,
-            Exp_rate1: item.Exp_rate1,
-            Exp_rate2: item.Exp_rate2,
-            Exp_rate3: item.Exp_rate3,
-            Exp_rate4: item.Exp_rate4,
-            Exp_rate5: item.Exp_rate5,
-            Exp1: item.Exp1,
-            Exp2: item.Exp2,
-            Exp3: item.Exp3,
-            Exp4: item.Exp4,
-            Exp5: item.Exp5,
-            Exp6: item.Exp6,
-            ctax: item.ctax,
-            stax: item.stax,
-            itax: item.itax,
-            tariff: item.tariff,
-            vamt: item.vamt,
-          })),
-          customerDetails: customerDetails.map((item) => ({
-            Vcode: item.Vcode,
-            vacode: item.vacode,
-            gstno: item.gstno,
-            pan: item.pan,
-            Add1: item.Add1,
-            city: item.city,
-            state: item.state,
-            Tcs206c1H: item.Tcs206c1H,
-            TDS194Q: item.TDS194Q,
-          })),
-          shipped: shipped.map((item) => ({
-            shippedto: item.shippedto,
-            shippingAdd: item.shippingAdd,
-            shippingcity: item.shippingcity,
-            shippingState: item.shippingState,
-            shippingGst: item.shippingGst,
-            shippingPan: item.shippingPan,
-          })),
-        };
+
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      if (
+        !isAbcmode &&
+        Number(formData.vbillno) <= Number(voucherData.lastVno)
+      ) {
+        toast.error(`Voucher No ${formData.vbillno} already used!`, {
+          position: "top-center",
+        });
+        setIsSubmitEnabled(true);
+        return;
       }
-      // Debugging
-      // console.log("Combined Data SALE:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst${
-        isAbcmode ? `/${data1._id}` : ""
-      }`;
-      const method = isAbcmode ? "put" : "post";
-      const response = await axios({
-        method,
-        url: apiEndpoint,
+
+      const ddmmyyyy = (d) => {
+        if (!d) return "";
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+      };
+      // 2) Build base form with setup codes (common to both add/edit)
+      const baseForm = {
+        date: formData.date,
+        duedate: formData.duedate,
+        vtype: formData.vtype,
+        vbillno: formData.vbillno,
+        vno: formData.vno,
+        bno: formData.bno,
+        exfor: formData.exfor,
+        trpt: formData.trpt,
+        stype: formData.stype,
+        btype: formData.btype,
+        conv: formData.conv,
+        rem1: formData.rem1,
+        rem2: formData.rem2,
+        v_tpt: formData.v_tpt,
+        broker: formData.broker,
+        srv_rate: formData.srv_rate,
+        srv_tax: formData.srv_tax,
+        tcs1_rate: formData.tcs1_rate,
+        tcs1: formData.tcs1,
+        tcs206_rate: formData.tcs206_rate,
+        tcs206: formData.tcs206,
+        // duedate: expiredDate.toLocaleDateString("en-IN"),
+        pcess: formData.pcess,
+        tax: formData.tax,
+        sub_total: formData.sub_total,
+        exp_before: formData.exp_before,
+        Exp_rate6: formData.Exp_rate6,
+        Exp_rate7: formData.Exp_rate7,
+        Exp_rate8: formData.Exp_rate8,
+        Exp_rate9: formData.Exp_rate9,
+        Exp_rate10: formData.Exp_rate10,
+        Exp6: formData.Exp6,
+        Exp7: formData.Exp7,
+        Exp8: formData.Exp8,
+        Exp9: formData.Exp9,
+        Exp10: formData.Exp10,
+        Tds2: formData.Tds2,
+        Ctds: formData.Ctds,
+        Stds: formData.Stds,
+        iTds: formData.iTds,
+        cgst: formData.cgst,
+        sgst: formData.sgst,
+        igst: formData.igst,
+        expafterGST: formData.expafterGST,
+        grandtotal: formData.grandtotal,
+
+        // setupFormData mapping
+        cgst_ac: setupFormData.cgst_ac,
+        cgst_code: setupFormData.cgst_code,
+        sgst_ac: setupFormData.sgst_ac,
+        sgst_code: setupFormData.sgst_code,
+        igst_ac: setupFormData.igst_ac,
+        igst_code: setupFormData.igst_code,
+
+        cesscode: setupFormData.cesscode,
+        cessAc: setupFormData.cessAc,
+
+        tds_code: setupFormData.tds_code,
+        tds_ac: setupFormData.tds_ac,
+
+        tcs_code: setupFormData.tcs_code,
+        tcs_ac: setupFormData.tcs_ac,
+        tcs206_code: setupFormData.tcs206_code,
+        tcs206_ac: setupFormData.tcs206_ac,
+
+        discount_code: setupFormData.discount_code,
+        discount_ac: setupFormData.discount_ac, // NOTE: account name
+
+        // TDS ACCOUNTS
+        cTds_code: setupFormData.cTds_code,
+        cTds_ac: setupFormData.cTds_ac,
+        sTds_code: setupFormData.sTds_code,
+        sTds_ac: setupFormData.sTds_ac,
+        iTds_code: setupFormData.iTds_code,
+        iTds_ac: setupFormData.iTds_ac,
+
+        expense1_code: setupFormData.E1Code,
+        expense1_ac: setupFormData.E1name,
+        expense2_code: setupFormData.E2Code,
+        expense2_ac: setupFormData.E2name,
+        expense3_code: setupFormData.E3Code,
+        expense3_ac: setupFormData.E3name,
+        expense4_code: setupFormData.E4Code,
+        expense4_ac: setupFormData.E4name,
+        expense5_code: setupFormData.E5Code,
+        expense5_ac: setupFormData.E5name,
+        expense6_code: setupFormData.E6Code,
+        expense6_ac: setupFormData.E6name,
+        expense7_code: setupFormData.E7Code,
+        expense7_ac: setupFormData.E7name,
+        expense8_code: setupFormData.E8Code,
+        expense8_ac: setupFormData.E8name,
+        expense9_code: setupFormData.E9Code,
+        expense9_ac: setupFormData.E9name,
+        expense10_code: setupFormData.E10Code,
+        expense10_ac: setupFormData.E10name,
+      };
+
+      const itemsPayload = nonEmptyItems.map((item) => ({
+        id: item.id,
+        vcode: item.vcode,
+        sdisc: item.sdisc,
+        Units: item.Units,
+        pkgs: item.pkgs,
+        weight: item.weight,
+        rate: item.rate,
+        amount: item.amount,
+        disc: item.disc,
+        discount: item.discount,
+        gst: item.gst,
+        RateCal: item.RateCal,
+        Qtyperpc: item.Qtyperpc,
+        Pcodes01: item.Pcodes01,
+        Pcodess: item.Pcodess,
+        Scodes01: item.Scodes01,
+        Scodess: item.Scodess,
+        exp_before: item.exp_before,
+        Exp_rate1: item.Exp_rate1,
+        Exp_rate2: item.Exp_rate2,
+        Exp_rate3: item.Exp_rate3,
+        Exp_rate4: item.Exp_rate4,
+        Exp_rate5: item.Exp_rate5,
+        Exp1: item.Exp1,
+        Exp2: item.Exp2,
+        Exp3: item.Exp3,
+        Exp4: item.Exp4,
+        Exp5: item.Exp5,
+        Exp6: item.Exp6,
+        ctax: item.ctax,
+        stax: item.stax,
+        itax: item.itax,
+        tariff: item.tariff,
+        vamt: item.vamt,
+      }));
+
+      const combinedData = {
+        _id: formData._id,
+        formData: baseForm,
+        items: itemsPayload,
+        customerDetails: customerDetails.map((item) => ({
+          Vcode: item.Vcode,
+          vacode: item.vacode,
+          gstno: item.gstno,
+          pan: item.pan,
+          Add1: item.Add1,
+          city: item.city,
+          state: item.state,
+          Tcs206c1H: item.Tcs206c1H,
+          TDS194Q: item.TDS194Q,
+        })),
+        shipped: shipped.map((item) => ({
+          shippedto: item.shippedto,
+          shippingAdd: item.shippingAdd,
+          shippingcity: item.shippingcity,
+          shippingState: item.shippingState,
+          shippingGst: item.shippingGst,
+          shippingPan: item.shippingPan,
+        })),
+      };
+
+      // 3) Save Sale GST (add/edit)
+      const saleGstUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
+      const saleGstMethod = isAbcmode ? "put" : "post";
+      const saleRes = await axios({
+        method: saleGstMethod,
+        url: saleGstUrl,
         data: combinedData,
       });
-      if (response) {
+
+      // Try to extract saleId from response; fallbacks included for PUT/legacy responses
+      const saleId =
+        saleRes?.data?.saleId ||
+        saleRes?.data?._id ||
+        (isAbcmode ? data1?._id : null);
+
+      if (!saleId) {
+        console.warn(
+          "saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.",
+        );
+      }
+
+      if (saleRes?.status === 200 || saleRes?.status === 201) {
+        // 5) Post FA entries (with setup codes) — include saleId
+        try {
+          const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
+          const faBody = saleId ? { ...combinedData, saleId } : combinedData;
+
+          await axios({
+            method: isAbcmode ? "put" : "post",
+            url: faUrl,
+            data: faBody,
+          });
+        } catch (faErr) {
+          console.error("salefaFile error:", faErr);
+        }
+
         fetchData();
         isDataSaved = true;
       }
@@ -1353,8 +1824,9 @@ const DebitNote = () => {
         position: "top-center",
       });
     } finally {
-      setIsSubmitEnabled(false);
+      // setIsSubmitEnabled(false);
       if (isDataSaved) {
+        setIsSubmitEnabled(false);
         setTitle("(View)");
         setIsAddEnabled(true);
         setIsDisabled(true);
@@ -1364,15 +1836,11 @@ const DebitNote = () => {
         setIsFirstEnabled(true);
         setIsLastEnabled(true);
         setIsSPrintEnabled(true);
-        setIsNextEnabled(true);
         setIsSearchEnabled(true);
         setIsDeleteEnabled(true);
         toast.success("Data Saved Successfully!", { position: "top-center" });
-        if (Defaultbutton === "Print") {
-          setShouldFocusPrint(true); // 👈 Signal that we should focus after enable
-        } else if (Defaultbutton === "Add") {
-          setShouldFocusAdd(true)
-        }
+        if (Defaultbutton === "Print") setShouldFocusPrint(true);
+        else if (Defaultbutton === "Add") setShouldFocusAdd(true);
       } else {
         setIsAddEnabled(true);
         setIsDisabled(false);
@@ -1380,334 +1848,8 @@ const DebitNote = () => {
     }
   };
 
-  const handleSaveClickwithSetup = async () => {
-    document.body.style.backgroundColor = "white";
-    let isDataSaved = false;
-    try {
-      let combinedData;
-      if (isAbcmode) {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
-            vtype: formData.vtype,
-            vbillno: formData.vbillno,
-            vno: formData.vno,
-            gr: formData.gr,
-            exfor: formData.exfor,
-            trpt: formData.trpt,
-            stype: formData.stype,
-            btype: formData.btype,
-            conv: formData.conv,
-            rem1: formData.rem1,
-            rem2: formData.rem2,
-            v_tpt: formData.v_tpt,
-            broker: formData.broker,
-            srv_rate: formData.srv_rate,
-            srv_tax: formData.srv_tax,
-            tcs1_rate: formData.tcs1_rate,
-            tcs1: formData.tcs1,
-            tcs206_rate: formData.tcs206_rate,
-            tcs206: formData.tcs206,
-            duedate: expiredDate.toLocaleDateString("en-IN"),
-            pcess: formData.pcess,
-            tax: formData.tax,
-            sub_total: formData.sub_total,
-            exp_before: formData.exp_before,
-            Exp_rate6: formData.Exp_rate6,
-            Exp_rate7: formData.Exp_rate7,
-            Exp_rate8: formData.Exp_rate8,
-            Exp_rate9: formData.Exp_rate9,
-            Exp_rate10: formData.Exp_rate10,
-            Exp6: formData.Exp6,
-            Exp7: formData.Exp7,
-            Exp8: formData.Exp8,
-            Exp9: formData.Exp9,
-            Exp10: formData.Exp10,
-            Tds2: formData.Tds2,
-            Ctds: formData.Ctds,
-            Stds: formData.Stds,
-            iTds: formData.iTds,
-            cgst: formData.cgst,
-            sgst: formData.sgst,
-            igst: formData.igst,
-            expafterGST: formData.expafterGST,
-            grandtotal: formData.grandtotal,
-            // CGST, SGST, and IGST fields come from setupFormData
-            cgst_ac: setupFormData.cgst_ac,
-            cgst_code: setupFormData.cgst_code,
-            sgst_ac: setupFormData.sgst_ac,
-            sgst_code: setupFormData.sgst_code,
-            igst_ac: setupFormData.igst_ac,
-            igst_code: setupFormData.igst_code,
-
-            expense1_code: setupFormData.E1Code,
-            expense1_ac: setupFormData.E1name,
-
-            expense2_code: setupFormData.E2Code,
-            expense2_ac: setupFormData.E2name,
-
-            expense3_code: setupFormData.E3Code,
-            expense3_ac: setupFormData.E3name,
-
-            expense4_code: setupFormData.E4Code,
-            expense4_ac: setupFormData.E4name,
-
-            expense5_code: setupFormData.E5Code,
-            expense5_ac: setupFormData.E5name,
-
-            expense6_code: setupFormData.E6Code,
-            expense6_ac: setupFormData.E6name,
-
-            expense7_code: setupFormData.E7Code,
-            expense7_ac: setupFormData.E7name,
-
-            expense8_code: setupFormData.E8Code,
-            expense8_ac: setupFormData.E8name,
-
-            expense9_code: setupFormData.E9Code,
-            expense9_ac: setupFormData.E9name,
-
-            expense10_code: setupFormData.E10Code,
-            expense10_ac: setupFormData.E10name,
-          },
-          items: items.map((item) => ({
-            id: item.id,
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            Units: item.Units,
-            pkgs: item.pkgs,
-            weight: item.weight,
-            rate: item.rate,
-            amount: item.amount,
-            disc: item.disc,
-            discount: item.discount,
-            gst: item.gst,
-            Pcodes01: item.Pcodes01,
-            Pcodess: item.Pcodess,
-            Scodes01: item.Scodes01,
-            Scodess: item.Scodess,
-            exp_before: item.exp_before,
-            Exp_rate1: item.Exp_rate1,
-            Exp_rate2: item.Exp_rate2,
-            Exp_rate3: item.Exp_rate3,
-            Exp_rate4: item.Exp_rate4,
-            Exp_rate5: item.Exp_rate5,
-            Exp1: item.Exp1,
-            Exp2: item.Exp2,
-            Exp3: item.Exp3,
-            Exp4: item.Exp4,
-            Exp5: item.Exp5,
-            Exp6: item.Exp6,
-            ctax: item.ctax,
-            stax: item.stax,
-            itax: item.itax,
-            tariff: item.tariff,
-            vamt: item.vamt,
-          })),
-          customerDetails: customerDetails.map((item) => ({
-            Vcode: item.Vcode,
-            vacode: item.vacode,
-            gstno: item.gstno,
-            pan: item.pan,
-            Add1: item.Add1,
-            city: item.city,
-            state: item.state,
-            Tcs206c1H: item.Tcs206c1H,
-            TDS194Q: item.TDS194Q,
-          })),
-          shipped: shipped.map((item) => ({
-            shippedto: item.shippedto,
-            shippingAdd: item.shippingAdd,
-            shippingcity: item.shippingcity,
-            shippingState: item.shippingState,
-            shippingGst: item.shippingGst,
-            shippingPan: item.shippingPan,
-          })),
-        };
-      } else {
-        combinedData = {
-          _id: formData._id,
-          formData: {
-            date: selectedDate.toLocaleDateString("en-IN"),
-            vtype: formData.vtype,
-            vbillno: formData.vbillno,
-            vno: formData.vno,
-            gr: formData.gr,
-            exfor: formData.exfor,
-            trpt: formData.trpt,
-            stype: formData.stype,
-            btype: formData.btype,
-            conv: formData.conv,
-            rem1: formData.rem1,
-            rem2: formData.rem2,
-            v_tpt: formData.v_tpt,
-            broker: formData.broker,
-            srv_rate: formData.srv_rate,
-            srv_tax: formData.srv_tax,
-            tcs1_rate: formData.tcs1_rate,
-            tcs1: formData.tcs1,
-            tcs206_rate: formData.tcs206_rate,
-            tcs206: formData.tcs206,
-            duedate: expiredDate.toLocaleDateString("en-IN"),
-            pcess: formData.pcess,
-            tax: formData.tax,
-            sub_total: formData.sub_total,
-            exp_before: formData.exp_before,
-            Exp_rate6: formData.Exp_rate6,
-            Exp_rate7: formData.Exp_rate7,
-            Exp_rate8: formData.Exp_rate8,
-            Exp_rate9: formData.Exp_rate9,
-            Exp_rate10: formData.Exp_rate10,
-            Exp6: formData.Exp6,
-            Exp7: formData.Exp7,
-            Exp8: formData.Exp8,
-            Exp9: formData.Exp9,
-            Exp10: formData.Exp10,
-            Tds2: formData.Tds2,
-            Ctds: formData.Ctds,
-            Stds: formData.Stds,
-            iTds: formData.iTds,
-            cgst: formData.cgst,
-            sgst: formData.sgst,
-            igst: formData.igst,
-            expafterGST: formData.expafterGST,
-            grandtotal: formData.grandtotal,
-            // CGST, SGST, and IGST fields come from setupFormData
-            cgst_ac: setupFormData.cgst_ac,
-            cgst_code: setupFormData.cgst_code,
-            sgst_ac: setupFormData.sgst_ac,
-            sgst_code: setupFormData.sgst_code,
-            igst_ac: setupFormData.igst_ac,
-            igst_code: setupFormData.igst_code,
-            expense1_code: setupFormData.E1Code,
-            expense1_ac: setupFormData.E1name,
-
-            expense2_code: setupFormData.E2Code,
-            expense2_ac: setupFormData.E2name,
-
-            expense3_code: setupFormData.E3Code,
-            expense3_ac: setupFormData.E3name,
-
-            expense4_code: setupFormData.E4Code,
-            expense4_ac: setupFormData.E4name,
-
-            expense5_code: setupFormData.E5Code,
-            expense5_ac: setupFormData.E5name,
-
-            expense6_code: setupFormData.E6Code,
-            expense6_ac: setupFormData.E6name,
-
-            expense7_code: setupFormData.E7Code,
-            expense7_ac: setupFormData.E7name,
-
-            expense8_code: setupFormData.E8Code,
-            expense8_ac: setupFormData.E8name,
-
-            expense9_code: setupFormData.E9Code,
-            expense9_ac: setupFormData.E9name,
-
-            expense10_code: setupFormData.E10Code,
-            expense10_ac: setupFormData.E10name,
-          },
-          items: items.map((item) => ({
-            id: item.id,
-            vcode: item.vcode,
-            sdisc: item.sdisc,
-            Units: item.Units,
-            pkgs: item.pkgs,
-            weight: item.weight,
-            rate: item.rate,
-            amount: item.amount,
-            disc: item.disc,
-            discount: item.discount,
-            gst: item.gst,
-            Pcodes01: item.Pcodes01,
-            Pcodess: item.Pcodess,
-            Scodes01: item.Scodes01,
-            Scodess: item.Scodess,
-            exp_before: item.exp_before,
-            Exp_rate1: item.Exp_rate1,
-            Exp_rate2: item.Exp_rate2,
-            Exp_rate3: item.Exp_rate3,
-            Exp_rate4: item.Exp_rate4,
-            Exp_rate5: item.Exp_rate5,
-            Exp1: item.Exp1,
-            Exp2: item.Exp2,
-            Exp3: item.Exp3,
-            Exp4: item.Exp4,
-            Exp5: item.Exp5,
-            Exp6: item.Exp6,
-            ctax: item.ctax,
-            stax: item.stax,
-            itax: item.itax,
-            tariff: item.tariff,
-            vamt: item.vamt,
-          })),
-          customerDetails: customerDetails.map((item) => ({
-            Vcode: item.Vcode,
-            vacode: item.vacode,
-            gstno: item.gstno,
-            pan: item.pan,
-            Add1: item.Add1,
-            city: item.city,
-            state: item.state,
-            Tcs206c1H: item.Tcs206c1H,
-            TDS194Q: item.TDS194Q,
-          })),
-          shipped: shipped.map((item) => ({
-            shippedto: item.shippedto,
-            shippingAdd: item.shippingAdd,
-            shippingcity: item.shippingcity,
-            shippingState: item.shippingState,
-            shippingGst: item.shippingGst,
-            shippingPan: item.shippingPan,
-          })),
-        };
-      }
-      // Debugging
-      // console.log("Combined Data sale Setup:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salefaFile${
-        isAbcmode ? `/${data1._id}` : ""
-      }`;
-      const method = isAbcmode ? "put" : "post";
-      const response = await axios({
-        method,
-        url: apiEndpoint,
-        data: combinedData,
-      });
-      if (response) {
-        fetchData();
-        isDataSaved = true;
-      }
-    } catch (error) {
-      console.error("Error saving data:", error);
-    } finally {
-      setIsSubmitEnabled(false);
-      if (isDataSaved) {
-        setTitle("(View)");
-        setIsAddEnabled(true);
-        setIsDisabled(true);
-        setIsEditMode(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsNextEnabled(true);
-        setIsSearchEnabled(true);
-        setIsDeleteEnabled(true);
-        // toast.success("Data Saved Successfully!", { position: "top-center" });
-        if (Defaultbutton === "Print") {
-          setShouldFocusPrint(true); // 👈 Signal that we should focus after enable
-        } else if (Defaultbutton === "Add") {
-          setShouldFocusAdd(true)
-        }
-      } else {
-        setIsAddEnabled(true);
-        setIsDisabled(false);
-      }
-    }
+  const handleDataSave = async () => {
+    handleSaveClickwithSetup();
   };
 
   // 👇 This runs AFTER isPrintEnabled changes
@@ -1720,72 +1862,44 @@ const DebitNote = () => {
       addButtonRef.current.focus();
       setShouldFocusAdd(false); // Reset flag
     }
-  }, [isPrintEnabled,shouldFocusPrint,isAddEnabled,shouldFocusAdd]);
+  }, [isPrintEnabled, shouldFocusPrint, isAddEnabled, shouldFocusAdd]);
 
-  const handleDataSave = async () => {
-    handleSaveClick();
-    handleSaveClickwithSetup();
-  };
   const handleDeleteClick = async (id) => {
-  if (!id) {
-    toast.error("Invalid ID. Please select an item to delete.", {
-      position: "top-center",
-    });
-    return;
-  }
-
-  const userConfirmed = window.confirm(
-    "Are you sure you want to delete this from records?"
-  );
-  if (!userConfirmed) return;
-
-  try {
-    // first API (salegst)
-    const salegstEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/${data1._id}`;
-    // second API (salefaFile)
-    const salefaFileEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salefaFile/${data1._id}`;
-
-    // fire both delete requests in parallel
-    const [salegstResponse, salefaFileResponse] = await Promise.allSettled([
-      axios.delete(salegstEndpoint),
-      axios.delete(salefaFileEndpoint),
-    ]);
-
-    let deletedFromSalegst = false;
-    let deletedFromSalefaFile = false;
-
-    if (
-      salegstResponse.status === "fulfilled" &&
-      salegstResponse.value.status === 200
-    ) {
-      deletedFromSalegst = true;
-    }
-
-    if (
-      salefaFileResponse.status === "fulfilled" &&
-      salefaFileResponse.value.status === 200
-    ) {
-      deletedFromSalefaFile = true;
-    }
-
-    if (deletedFromSalegst || deletedFromSalefaFile) {
-      toast.success("Data deleted successfully from relevant records.", {
+    if (!id) {
+      toast.error("Invalid ID. Please select an item to delete.", {
         position: "top-center",
       });
-      fetchData();
-    } else {
-      toast.error("Deletion failed from both records.", {
+      return;
+    }
+
+    const userConfirmed = window.confirm(
+      "Are you sure you want to delete this from records?",
+    );
+    if (!userConfirmed) return;
+
+    try {
+      // Only one API – backend will delete SaleGst + FAFile (via saleId)
+      const salegstEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}`;
+
+      const response = await axios.delete(salegstEndpoint);
+
+      if (response.status === 200) {
+        toast.success("Data deleted successfully from records.", {
+          position: "top-center",
+        });
+        fetchData(); // refresh grid
+      } else {
+        toast.error("Deletion failed.", {
+          position: "top-center",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      toast.error(`Failed to delete data. Error: ${error.message}`, {
         position: "top-center",
       });
     }
-  } catch (error) {
-    console.error("Error deleting data:", error);
-    toast.error(`Failed to delete data. Error: ${error.message}`, {
-      position: "top-center",
-    });
-  }
-};
-
+  };
   // Update the blur handlers so that they always format the value to 2 decimals.
   const handlePkgsBlur = (index) => {
     const decimalPlaces = pkgsValue;
@@ -1816,6 +1930,17 @@ const DebitNote = () => {
     setItems(updatedItems);
   };
 
+  const handleBlur = (index, field) => {
+    const decimalPlaces = 2;
+    const updatedItems = [...items];
+    let value = parseFloat(updatedItems[index][field]);
+    if (isNaN(value)) {
+      value = 0;
+    }
+    updatedItems[index][field] = value.toFixed(decimalPlaces);
+    setItems(updatedItems);
+  };
+
   React.useEffect(() => {
     // Fetch products from the API when the component mounts
     fetchProducts();
@@ -1825,7 +1950,7 @@ const DebitNote = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
       );
       if (!response.ok) throw new Error("Failed to fetch products");
       const data = await response.json();
@@ -1840,6 +1965,10 @@ const DebitNote = () => {
     setLoading(false);
   };
 
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   // Modal For Items
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -1847,6 +1976,30 @@ const DebitNote = () => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [postingSetup, setPostingSetup] = useState({
+    isDefault: false,
+    rows: [],
+  });
+  useEffect(() => {
+    const fetchPostingSetup = async () => {
+      try {
+        const res = await axios.get(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/sale-purchase-posting-setup`,
+        );
+
+        if (res.data?.ok) {
+          setPostingSetup({
+            isDefault: res.data.item.isDefault,
+            rows: res.data.item.rows || [],
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch posting setup", error);
+      }
+    };
+
+    fetchPostingSetup();
+  }, []);
 
   const handleItemChange = (index, key, value, field) => {
     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
@@ -1855,40 +2008,96 @@ const DebitNote = () => {
         key === "weight" ||
         key === "tariff" ||
         key === "rate" ||
-        key === "disc") &&
-      !/^\d*\.?\d*$/.test(value)
+        key === "disc" ||
+        key === "discount" ||
+        key === "amount") &&
+      !/^-?\d*\.?\d*$/.test(value)
     ) {
       return; // reject invalid input
     }
+
+    // Always force disc/discount to be negative
+    if (key === "disc" || key === "discount") {
+      const numeric = parseFloat(value);
+      if (!isNaN(numeric)) {
+        value = -Math.abs(numeric); // Force negative
+      }
+    }
+
     const updatedItems = [...items];
-    updatedItems[index][key] = value;
+    if (["sdisc"].includes(key)) {
+      updatedItems[index][key] = capitalizeWords(value);
+    } else {
+      updatedItems[index][key] = value;
+    }
 
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
       const selectedProduct = products.find(
-        (product) => product.Aheads === value
+        (product) => product.Aheads === value,
       );
+
       if (selectedProduct) {
+        // ✅ Always update these
         updatedItems[index]["vcode"] = selectedProduct.Acodes;
         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+
+        // ✅ ABC MODE special logic
+        if (isAbcmode) {
+          const mrp = parseFloat(selectedProduct.Mrps);
+
+          if (!isNaN(mrp) && mrp > 0) {
+            updatedItems[index]["rate"] = mrp;
+          }
+
+          setItems(updatedItems);
+          return; // 🚫 stop further changes
+        }
+
+        // ⬇️ Normal mode (unchanged)
         updatedItems[index]["Units"] = selectedProduct.TradeName;
         updatedItems[index]["rate"] = selectedProduct.Mrps;
         updatedItems[index]["gst"] = selectedProduct.itax_rate;
         updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-        updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-        updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-        updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+
+        if (postingSetup?.isDefault === true) {
+          const gstRate = String(selectedProduct.itax_rate);
+
+          const matchedSetup = postingSetup.rows.find(
+            (row) => String(row.gst) === gstRate,
+          );
+
+          if (matchedSetup) {
+            updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
+            updatedItems[index]["Scodess"] = matchedSetup.Scodess;
+            updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
+            updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
+          } else {
+            updatedItems[index]["Scodes01"] = "";
+            updatedItems[index]["Scodess"] = "";
+            updatedItems[index]["Pcodes01"] = "";
+            updatedItems[index]["Pcodess"] = "";
+          }
+        } else {
+          updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+        }
+
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-      } else {
-        updatedItems[index]["rate"] = ""; // Reset price if product not found
-        updatedItems[index]["gst"] = ""; // Reset gst if product not found
+        updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
       }
     }
+
     let pkgs = parseFloat(updatedItems[index].pkgs);
-    let Qtyperpkgs = updatedItems[index].Qtyperpc;
-    let AL = pkgs * Qtyperpkgs;
+    pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+    let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+    Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
+    let AL = pkgs * Qtyperpkgs || 0;
     let gst;
     if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
       updatedItems[index]["weight"] = AL.toFixed(weightValue);
@@ -1907,12 +2116,16 @@ const DebitNote = () => {
     } else {
       gst = parseFloat(updatedItems[index].gst);
     }
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
+
+    let weight = parseFloat(updatedItems[index].weight);
+    weight = isNaN(weight) ? 0 : weight;
+
+    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+    const rate = parseFloat(updatedItems[index].rate) || 0;
+
+    const totalAccordingWeight = weight * rate;
+    const totalAccordingPkgs = pkgsVal * rate;
+
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
 
@@ -1926,18 +2139,64 @@ const DebitNote = () => {
       TotalAcc = totalAccordingWeight;
     } else if (RateCal === "Wt/Qty") {
       TotalAcc = totalAccordingWeight;
-      console.log("totalAccordingWeight");
+      // console.log("totalAccordingWeight");
     } else if (RateCal === "Pc/Pkgs") {
       TotalAcc = totalAccordingPkgs;
-      console.log("totalAccordingPkgs");
+      // console.log("totalAccordingPkgs");
     }
-    let others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let per = ((disc / 100) * TotalAcc).toFixed(2);
-    let Amounts = TotalAcc - per + others;
+    const currentMrp = parseFloat(updatedItems[index].curMrp) || 0;
+    // 🔥 If user manually edits amount → recalculate rate
+    if (!isNaN(currentMrp) && currentMrp > 0 && key === "amount" && 
+      value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
+
+      let enteredAmount = parseFloat(value);
+      let qty = 0;
+
+      if (RateCal === "Pc/Pkgs") {
+        qty = parseFloat(updatedItems[index].pkgs) || 0;
+      } else {
+        qty = parseFloat(updatedItems[index].weight) || 0;
+      }
+
+      // // ✅ STOP if MRP exists and is valid (> 0)
+      if (!isNaN(currentMrp) && currentMrp > 0) {
+        return; // ❌ Do not recalculate rate
+      }
+
+      // Otherwise recalc rate
+      if (qty > 0 && enteredAmount > 0) {
+        let newRate = enteredAmount / qty;
+
+        updatedItems[index]["rate"] = T21
+          ? Math.round(newRate).toFixed(2)
+          : newRate.toFixed(2);
+
+        TotalAcc = enteredAmount;
+      }
+    }
 
     // Ensure TotalAcc is a valid number before calling toFixed()
     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+    let others = parseFloat(updatedItems[index].exp_before) || 0;
+    let disc = parseFloat(updatedItems[index].disc) || 0;
+    let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+    let per;
+    if (key === "discount") {
+      per = manualDiscount;
+    } else {
+      per = (disc / 100) * TotalAcc;
+      updatedItems[index]["discount"] = T21
+        ? Math.round(per).toFixed(2)
+        : per.toFixed(2);
+    }
+
+    // ✅ Convert to float for reliable calculation
+    per = parseFloat(per);
+    let Amounts = TotalAcc + per + others;
+
+    // Ensure TotalAcc is a valid number before calling toFixed()
+    // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
     // Check if GST number starts with "0" to "3"
     let cgst, sgst, igst;
     if (CompanyState == customerDetails[0].state) {
@@ -1948,27 +2207,44 @@ const DebitNote = () => {
       cgst = sgst = 0;
       igst = (Amounts * gst) / 100 || 0;
     }
-    // Set CGST and SGST to 0 if IGST is applied, and vice versa
-    if (igst > 0) {
-      cgst = 0;
-      sgst = 0;
-    } else {
-      igst = 0;
-    }
+
     // Calculate the total with GST and Others
-    // let rate = parseFloat(updatedItems[index].rate) || 0;
     let totalWithGST = Amounts + cgst + sgst + igst;
-    // totalWithGST += others;
     // Update CGST, SGST, Others, and total fields in the item
     if (T21) {
-      updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-      updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      if (key !== "discount") {
+        updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+      }
+
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
     } else {
-      updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-      updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      if (key !== "discount") {
+        updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+      }
+
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
     }
+    // if (T21) {
+    //   if (key !== "discount") {
+    //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+    //   }
+    //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+    //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+    // } else {
+    //   if (key !== "discount") {
+    //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+    //   }
+    //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+    //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+    // }
     if (T12) {
       updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
       updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
@@ -1979,7 +2255,8 @@ const DebitNote = () => {
       updatedItems[index]["itax"] = igst.toFixed(2);
     }
     // Calculate the percentage of the value based on the GST percentage
-    const percentage = ((totalWithGST - Amounts) / TotalAcc) * 100;
+    const percentage =
+      TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
     setItems(updatedItems);
     calculateTotalGst();
@@ -2000,6 +2277,8 @@ const DebitNote = () => {
         disc: 0,
         discount: "",
         gst: 0,
+        RateCal: "",
+        Qtyperpc: 0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -2031,7 +2310,7 @@ const DebitNote = () => {
   const handleDeleteItem = (index) => {
     if (isEditMode) {
       const confirmDelete = window.confirm(
-        "Do you really want to delete this item?"
+        "Do you really want to delete this item?",
       );
       // Proceed with deletion if the user confirms
       if (confirmDelete) {
@@ -2043,15 +2322,15 @@ const DebitNote = () => {
 
   const handleProductSelect = (product) => {
     setIsEditMode(true);
-      if (selectedItemIndex !== null) {
-        handleItemChange(selectedItemIndex, "name", product.Aheads);
-        setShowModal(false);
-      }
+    if (selectedItemIndex !== null) {
+      handleItemChange(selectedItemIndex, "name", product.Aheads);
+      setShowModal(false);
+    }
   };
 
   const handleModalDone = (product) => {
     if (product) {
-      console.log(product);
+      // console.log(product);
       handleProductSelect(product);
     }
     setShowModal(false);
@@ -2066,8 +2345,9 @@ const DebitNote = () => {
     }
   };
 
-const allFields = products.length ? Object.keys(products[0])
-: ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+  const allFields = products.length
+    ? Object.keys(products[0])
+    : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
 
   // Modal For Customer
   React.useEffect(() => {
@@ -2078,7 +2358,7 @@ const allFields = products.length ? Object.keys(products[0])
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -2100,7 +2380,7 @@ const allFields = products.length ? Object.keys(products[0])
       setLoadingAcc(false);
     }
   };
-  
+
   // Modal For CustomerDetails
   const [productsCus, setProductsCus] = useState([]);
   const [showModalCus, setShowModalCus] = useState(false);
@@ -2122,36 +2402,36 @@ const allFields = products.length ? Object.keys(products[0])
     const updatedItems = [...customerDetails];
     updatedItems[index][key] = value;
 
-if (key === "name") {
-  const selectedProduct = productsCus.find(
-    (product) => product.ahead === value
-  );
-  if (selectedProduct) {
-    updatedItems[index] = {
-      ...updatedItems[index],
-      Vcode: selectedProduct.acode,
-      vacode: selectedProduct.ahead,
-      gstno: selectedProduct.gstNo,
-      pan: selectedProduct.pan,
-      Add1: selectedProduct.add1,
-      city: selectedProduct.city,
-      state: selectedProduct.state,
-      Tcs206c1H: selectedProduct.tcs206,
-      TDS194Q: selectedProduct.tds194q,
-    };
-    setCustgst(selectedProduct.gstNo);
+    if (key === "name") {
+      const selectedProduct = productsCus.find(
+        (product) => product.ahead === value,
+      );
+      if (selectedProduct) {
+        updatedItems[index] = {
+          ...updatedItems[index],
+          Vcode: selectedProduct.acode,
+          vacode: selectedProduct.ahead,
+          gstno: selectedProduct.gstNo,
+          pan: selectedProduct.pan,
+          Add1: selectedProduct.add1,
+          city: selectedProduct.city,
+          state: selectedProduct.state,
+          Tcs206c1H: selectedProduct.tcs206,
+          TDS194Q: selectedProduct.tds194q,
+        };
+        setCustgst(selectedProduct.gstNo);
 
-    const stype = determineSaleType(
-      selectedProduct.state,
-      selectedProduct.gstNo,
-      CompanyState
-    );
-    setFormData((prevState) => ({
-      ...prevState,
-      stype,
-    }));
-  }
-}
+        const stype = determineSaleType(
+          selectedProduct.state,
+          selectedProduct.gstNo,
+          CompanyState,
+        );
+        setFormData((prevState) => ({
+          ...prevState,
+          stype,
+        }));
+      }
+    }
 
     if (key === "state" || key === "gstno") {
       const { state, gstno } = updatedItems[index];
@@ -2171,26 +2451,29 @@ if (key === "name") {
       setShowModalCus(false);
       return;
     }
-  
+
     // clone the array
     const newCustomers = [...customerDetails];
-  
+
     // overwrite the one at the selected index
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
-      Vcode: product.acode || '',
-      vacode: product.ahead || '',
-      city:   product.city  || '',
-      gstno:  product.gstNo  || '',
-      pan:    product.pan    || '',
-      Add1: product.Add1 || '',
-      state: product.state    || '',
-      Tcs206c1H: product.Tcs206c1H    || '',
-      TDS194Q: product.TDS194Q    || '',
-      
+      Vcode: product.acode || "",
+      vacode: product.ahead || "",
+      city: product.city || "",
+      gstno: product.gstNo || "",
+      pan: product.pan || "",
+      Add1: product.add1 || "",
+      state: product.state || "",
+      Tcs206c1H: product.tcs206 || "",
+      TDS194Q: product.tds194q || "",
     };
 
-    const stype = determineSaleType(product.state, product.gstNo || "", CompanyState);
+    const stype = determineSaleType(
+      product.state,
+      product.gstNo || "",
+      CompanyState,
+    );
     setFormData((prevState) => ({
       ...prevState,
       stype,
@@ -2198,6 +2481,10 @@ if (key === "name") {
 
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
+      setFormData((prev) => ({
+        ...prev,
+        broker: product.agent || "", // <-- change key name based on your API
+      }));
       if (selectedItemIndexCus === "v_tpt") {
         setFormData((prevData) => ({
           ...prevData,
@@ -2210,8 +2497,7 @@ if (key === "name") {
     setcustomerDetails(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
-  
-  
+
     // restore focus
     setTimeout(() => {
       if (selectedItemIndexCus === "v_tpt") {
@@ -2224,6 +2510,7 @@ if (key === "name") {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 
@@ -2235,17 +2522,17 @@ if (key === "name") {
   };
 
   const allFieldsCus = productsCus.reduce((fields, product) => {
-  Object.keys(product).forEach((key) => {
-    if (!fields.includes(key)) {
-      fields.push(key);
-    }
-  });
+    Object.keys(product).forEach((key) => {
+      if (!fields.includes(key)) {
+        fields.push(key);
+      }
+    });
 
-  return fields;
+    return fields;
   }, []);
 
-  const handleOpenModalTpt = (event, index, field) => {
-    if (event.key === "ArrowDown") {
+  const handleOpenModalTpt = (event, index) => {
+    if (event.key === "ArrowDown" && isEditMode) {
       setSelectedItemIndexCus(index);
       setShowModalCus(true);
       event.preventDefault();
@@ -2264,7 +2551,7 @@ if (key === "name") {
     // If the key is 'name', find the corresponding product and set the price
     if (key === "acName") {
       const selectedProduct = productsAcc.find(
-        (product) => product.ahead === value
+        (product) => product.ahead === value,
       );
       if (selectedProduct) {
         updatedItems[index]["shippedto"] = selectedProduct.ahead;
@@ -2277,8 +2564,8 @@ if (key === "name") {
     }
     setshipped(updatedItems);
   };
-  const handleOpenModalBroker = (event, index, field) => {
-    if (event.key === "ArrowDown") {
+  const handleOpenModalBroker = (event, index) => {
+    if (event.key === "ArrowDown" && isEditMode) {
       setSelectedItemIndexAcc(index);
       setShowModalAcc(true);
       event.preventDefault();
@@ -2291,17 +2578,17 @@ if (key === "name") {
       setShowModalAcc(false);
       return;
     }
-  
+
     // Defensive: index of the row being edited
     // if (typeof selectedItemIndexAcc !== "number") {
     //   alert("No shipped row selected!");
     //   setShowModalAcc(false);
     //   return;
     // }
-  
+
     // Deep copy shipped array
     const updatedShipped = [...shipped];
-  
+
     // Update the correct object in the array
     updatedShipped[selectedItemIndexAcc] = {
       ...updatedShipped[selectedItemIndexAcc],
@@ -2309,8 +2596,8 @@ if (key === "name") {
       shippingGst: product.gstNo || "",
       shippingAdd: product.add1 || "",
       shippingcity: product.city || "",
-      shippingState:product.state || "",
-      shippingPan:product.pan || "",
+      shippingState: product.state || "",
+      shippingPan: product.pan || "",
       // Add any other mappings needed
     };
 
@@ -2325,10 +2612,10 @@ if (key === "name") {
         handleItemChangeAcc(selectedItemIndexAcc, "acName", nameValue);
       }
     }
-    setshipped(updatedShipped);       // <- update the array in state!
+    setshipped(updatedShipped); // <- update the array in state!
     setIsEditMode(true);
     setShowModalAcc(false);
-  
+
     // Optionally refocus
     setTimeout(() => {
       if (selectedItemIndexAcc === "broker") {
@@ -2340,8 +2627,10 @@ if (key === "name") {
   };
 
   const openModalForItemAcc = (index) => {
-    setSelectedItemIndexAcc(index);
-    setShowModalAcc(true);
+    if (isEditMode) {
+      setSelectedItemIndexAcc(index);
+      setShowModalAcc(true);
+    }
   };
 
   const allFieldsAcc = productsAcc.reduce((fields, product) => {
@@ -2353,7 +2642,6 @@ if (key === "name") {
 
     return fields;
   }, []);
-
 
   const handleTaxType = (event) => {
     const { value } = event.target;
@@ -2376,13 +2664,13 @@ if (key === "name") {
       allowedTypes.push(
         "Tax Free Within State",
         "Including GST",
-        "Export Sale"
+        "Export Sale",
       );
     } else {
       allowedTypes.push(
         "Tax Free Interstate",
         "Including IGST",
-        "Export Sale(IGST)"
+        "Export Sale(IGST)",
       );
     }
 
@@ -2412,96 +2700,23 @@ if (key === "name") {
     }));
   };
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-
-  const [expiredDate, setexpiredDate] = useState(null);
-  useEffect(() => {
-    if (formData.duedate) {
-      setexpiredDate(new Date(formData.duedate));
-    } else {
-      const today = new Date();
-      setexpiredDate(today);
-      setFormData({ ...formData, duedate: today });
-    }
-  }, []);
-
-const handleDateChange = (date) => {
-  if (date instanceof Date && !isNaN(date)) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set today's date to midnight
-
-    const selectedDate = new Date(date);
-    selectedDate.setHours(0, 0, 0, 0); // Normalize selected date to midnight too
-
-    // ⚠️ Show toast if future date
-    if (selectedDate > today) {
-      toast.info("You have selected a future date.", { position: "top-center" });
-    }
-
-    // ⚠️ Show toast if back date and alertbackdate === "Yes"
-    if (alertbackdate === "Yes" && selectedDate < today) {
-      toast.info("You have selected a back date.", { position: "top-center" });
-    }
-
-    // ✅ Always allow selecting the date
-    setSelectedDate(date);
-
-    const formattedDate = date.toISOString().split("T")[0];
-    setFormData((prev) => ({
-      ...prev,
-      date: date,
-      duedate: date,
-    }));
-  } else {
-    console.error("Invalid date value");
-  }
-};
-
-
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
   const HandleValueChange = (event) => {
     const { id, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]: capitalizeWords(value),
     }));
   };
 
   const handleCapitalAlpha = (event) => {
-  const { id, value } = event.target;
-  // force all letters to uppercase
-  const uppercasedValue = value.toUpperCase();
-  setFormData((prevData) => ({
-    ...prevData,
-    [id]: uppercasedValue,
-  }));
-};
+    const { id, value } = event.target;
+    // force all letters to uppercase
+    const uppercasedValue = value.toUpperCase();
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: uppercasedValue,
+    }));
+  };
 
   const handleNumericValue = (event) => {
     const { id, value } = event.target;
@@ -2514,84 +2729,130 @@ const handleDateChange = (date) => {
     }
   };
 
+  // const handleInputChange = (index, field, value) => {
+  //   const numericValue =
+  //     typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
+  //   const updatedItems = [...items];
+  //   updatedItems[index][field] = numericValue;
+
+  //   // Recalculate expenses when Exp_rate1 to Exp_rate6 change
+  //   const vamt = parseFloat(updatedItems[index].amount) || 0;
+  //   const expRates = [
+  //     parseFloat(updatedItems[index].Exp_rate1) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate2) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate3) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate4) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate5) || 0,
+  //   ];
+  //   const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
+
+  //   let totalExpenses = 0;
+  //   expRates.forEach((rate, i) => {
+  //     const expense = (vamt * rate) / 100;
+  //     updatedItems[index][expFields[i]] = expense.toFixed(2);
+  //     totalExpenses += expense;
+  //   });
+
+  //   // Update the exp_before field with the total of all expenses
+  //   updatedItems[index].exp_before = totalExpenses.toFixed(2);
+
+  //   const gst = parseFloat(updatedItems[index].gst);
+  //   const totalAccordingWeight =
+  //     parseFloat(updatedItems[index].weight) *
+  //     parseFloat(updatedItems[index].rate);
+  //   const totalAccordingPkgs =
+  //     parseFloat(updatedItems[index].pkgs) *
+  //     parseFloat(updatedItems[index].rate);
+  //   let RateCal = updatedItems[index].RateCal;
+  //   let TotalAcc = totalAccordingWeight; // Set a default value
+
+  //   if (
+  //     RateCal === "Default" ||
+  //     RateCal === "" ||
+  //     RateCal === null ||
+  //     RateCal === undefined
+  //   ) {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Wt/Qty") {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Pc/Pkgs") {
+  //     TotalAcc = totalAccordingPkgs;
+  //   }
+  //   const others = parseFloat(updatedItems[index].exp_before) || 0;
+  //   let disc = parseFloat(updatedItems[index].disc) || 0;
+  //   let per = ((disc / 100) * TotalAcc).toFixed(2);
+  //   let Amounts = TotalAcc + others + parseFloat(per);
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
+  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+  //   let cgst = 0,
+  //     sgst = 0,
+  //     igst = 0;
+  //   if (CompanyState == customerDetails[0].state) {
+  //     cgst = (Amounts * (gst / 2)) / 100;
+  //     sgst = (Amounts * (gst / 2)) / 100;
+  //   } else {
+  //     igst = (Amounts * gst) / 100;
+  //   }
+
+  //   const totalWithGST = Amounts + cgst + sgst + igst;
+
+  //   // Update tax and total fields
+  //   updatedItems[index]["ctax"] = cgst.toFixed(2);
+  //   updatedItems[index]["stax"] = sgst.toFixed(2);
+  //   updatedItems[index]["itax"] = igst.toFixed(2);
+  //   updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+  //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
+
+  //   setItems(updatedItems);
+  //   calculateTotalGst(); // ✅ Recalculate the grand total
+  // };
+
   const handleInputChange = (index, field, value) => {
     const numericValue =
       typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
+
     const updatedItems = [...items];
     updatedItems[index][field] = numericValue;
 
-    // Recalculate expenses when Exp_rate1 to Exp_rate6 change
-    const vamt = parseFloat(updatedItems[index].amount) || 0;
-    const expRates = [
-      parseFloat(updatedItems[index].Exp_rate1) || 0,
-      parseFloat(updatedItems[index].Exp_rate2) || 0,
-      parseFloat(updatedItems[index].Exp_rate3) || 0,
-      parseFloat(updatedItems[index].Exp_rate4) || 0,
-      parseFloat(updatedItems[index].Exp_rate5) || 0,
-    ];
-    const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
+    setItems(updatedItems);
+  };
 
-    let totalExpenses = 0;
-    expRates.forEach((rate, i) => {
-      const expense = (vamt * rate) / 100;
-      updatedItems[index][expFields[i]] = expense.toFixed(2);
-      totalExpenses += expense;
+  const handleExpenseBlur = (index, field) => {
+    const updatedItems = [...items];
+    const item = updatedItems[index];
+
+    const vamt = parseFloat(item.amount) || 0;
+
+    const expMap = [
+      { rate: "Exp_rate1", val: "Exp1", flag: "isManual1" },
+      { rate: "Exp_rate2", val: "Exp2", flag: "isManual2" },
+      { rate: "Exp_rate3", val: "Exp3", flag: "isManual3" },
+      { rate: "Exp_rate4", val: "Exp4", flag: "isManual4" },
+      { rate: "Exp_rate5", val: "Exp5", flag: "isManual5" },
+    ];
+
+    expMap.forEach(({ rate, val, flag }) => {
+      // RATE → VALUE
+      if (field === rate && vamt > 0) {
+        const r = parseFloat(item[rate]) || 0;
+        item[val] = ((vamt * r) / 100).toFixed(2);
+        item[flag] = false; // calculated
+      }
+
+      // VALUE → RATE
+      if (field === val && vamt > 0) {
+        const v = parseFloat(item[val]) || 0;
+
+        item[val] = v.toFixed(2); // fix value to 2 decimals
+        item[rate] = ((v / vamt) * 100).toFixed(2); // 🔥 keep full precision
+        item[flag] = true; // manually entered
+      }
     });
 
-    // Update the exp_before field with the total of all expenses
-    updatedItems[index].exp_before = totalExpenses.toFixed(2);
-
-    const gst = parseFloat(updatedItems[index].gst);
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
-    let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight; // Set a default value
-
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
-    }
-    const others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let per = ((disc / 100) * TotalAcc).toFixed(2);
-    let Amounts = TotalAcc + others - per;
-    console.log("DISCInput:", disc);
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-    let cgst = 0,
-      sgst = 0,
-      igst = 0;
-    if (CompanyState == customerDetails[0].state) {
-      cgst = (Amounts * (gst / 2)) / 100;
-      sgst = (Amounts * (gst / 2)) / 100;
-    } else {
-      igst = (Amounts * gst) / 100;
-    }
-
-    const totalWithGST = Amounts + cgst + sgst + igst;
-
-    // Update tax and total fields
-    updatedItems[index]["ctax"] = cgst.toFixed(2);
-    updatedItems[index]["stax"] = sgst.toFixed(2);
-    updatedItems[index]["itax"] = igst.toFixed(2);
-    updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-    updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
-
     setItems(updatedItems);
-    calculateTotalGst(); // ✅ Recalculate the grand total
   };
+
   useEffect(() => {
     if (currentIndex !== null && items[currentIndex]) {
       const updatedItems = [...items];
@@ -2600,87 +2861,98 @@ const handleDateChange = (date) => {
       const vamt = parseFloat(item.amount) || 0;
       const pkgs = parseFloat(item.pkgs) || 0;
       const weight = parseFloat(item.weight) || 0;
-      // Expense Calculations (Separate Logic for Each Expense)
+      // Expense Calculations
       let Exp1 = 0,
         Exp2 = 0,
         Exp3 = 0,
         Exp4 = 0,
         Exp5 = 0;
+
       const Exp1Multiplier = Pos === "-Ve" ? -1 : 1;
-      const Exp1Multiplier2 = Pos2 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier3 = Pos3 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier4 = Pos4 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier5 = Pos5 === "-Ve" ? -1 : 1;
-      if (item.Exp_rate1) {
-        if (CalExp1 === "W" || CalExp1 === "w") {
+      const Exp2Multiplier = Pos2 === "-Ve" ? -1 : 1;
+      const Exp3Multiplier = Pos3 === "-Ve" ? -1 : 1;
+      const Exp4Multiplier = Pos4 === "-Ve" ? -1 : 1;
+      const Exp5Multiplier = Pos5 === "-Ve" ? -1 : 1;
+
+      // ======================= EXP 1 =======================
+      if (!item.isManual1 && item.Exp_rate1) {
+        if (CalExp1?.toLowerCase() === "w") {
           Exp1 = (weight * parseFloat(item.Exp_rate1)) / 100;
-        } else if (CalExp1 === "P" || CalExp1 === "p") {
+        } else if (CalExp1?.toLowerCase() === "p") {
           Exp1 = (pkgs * parseFloat(item.Exp_rate1)) / 100;
-        } else if (CalExp1 === "V" || CalExp1 === "v" || CalExp1 === "") {
+        } else {
           Exp1 = (vamt * parseFloat(item.Exp_rate1)) / 100;
         }
-        Exp1 *= Exp1Multiplier; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp1 *= Exp1Multiplier;
         item.Exp1 = Exp1.toFixed(2);
       } else {
-        item.Exp1 = "0.00";
+        Exp1 = parseFloat(item.Exp1) || 0;
       }
 
-      if (item.Exp_rate2) {
-        if (CalExp2 === "W" || CalExp2 === "w") {
+      // ======================= EXP 2 =======================
+      if (!item.isManual2 && item.Exp_rate2) {
+        if (CalExp2?.toLowerCase() === "w") {
           Exp2 = (weight * parseFloat(item.Exp_rate2)) / 100;
-        } else if (CalExp2 === "P" || CalExp2 === "p") {
+        } else if (CalExp2?.toLowerCase() === "p") {
           Exp2 = (pkgs * parseFloat(item.Exp_rate2)) / 100;
-        } else if (CalExp2 === "V" || CalExp2 === "v" || CalExp2 === "") {
+        } else {
           Exp2 = (vamt * parseFloat(item.Exp_rate2)) / 100;
         }
-        Exp2 *= Exp1Multiplier2; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp2 *= Exp2Multiplier;
         item.Exp2 = Exp2.toFixed(2);
       } else {
-        item.Exp2 = "0.00";
+        Exp2 = parseFloat(item.Exp2) || 0;
       }
 
-      if (item.Exp_rate3) {
-        if (CalExp3 === "W" || CalExp3 === "w") {
+      // ======================= EXP 3 =======================
+      if (!item.isManual3 && item.Exp_rate3) {
+        if (CalExp3?.toLowerCase() === "w") {
           Exp3 = (weight * parseFloat(item.Exp_rate3)) / 100;
-        } else if (CalExp3 === "P" || CalExp3 === "p") {
+        } else if (CalExp3?.toLowerCase() === "p") {
           Exp3 = (pkgs * parseFloat(item.Exp_rate3)) / 100;
-        } else if (CalExp3 === "V" || CalExp3 === "v" || CalExp3 === "") {
+        } else {
           Exp3 = (vamt * parseFloat(item.Exp_rate3)) / 100;
         }
-        Exp3 *= Exp1Multiplier3; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp3 *= Exp3Multiplier;
         item.Exp3 = Exp3.toFixed(2);
       } else {
-        item.Exp3 = "0.00";
+        Exp3 = parseFloat(item.Exp3) || 0;
       }
 
-      if (item.Exp_rate4) {
-        if (CalExp4 === "W" || CalExp4 === "w") {
+      // ======================= EXP 4 =======================
+      if (!item.isManual4 && item.Exp_rate4) {
+        if (CalExp4?.toLowerCase() === "w") {
           Exp4 = (weight * parseFloat(item.Exp_rate4)) / 100;
-        } else if (CalExp4 === "P" || CalExp4 === "p") {
+        } else if (CalExp4?.toLowerCase() === "p") {
           Exp4 = (pkgs * parseFloat(item.Exp_rate4)) / 100;
-        } else if (CalExp4 === "V" || CalExp4 === "v" || CalExp4 === "") {
+        } else {
           Exp4 = (vamt * parseFloat(item.Exp_rate4)) / 100;
         }
-        Exp4 *= Exp1Multiplier4; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp4 *= Exp4Multiplier;
         item.Exp4 = Exp4.toFixed(2);
       } else {
-        item.Exp4 = "0.00";
+        Exp4 = parseFloat(item.Exp4) || 0;
       }
 
-      if (item.Exp_rate5) {
-        if (CalExp5 === "W" || CalExp5 === "w") {
+      // ======================= EXP 5 =======================
+      if (!item.isManual5 && item.Exp_rate5) {
+        if (CalExp5?.toLowerCase() === "w") {
           Exp5 = (weight * parseFloat(item.Exp_rate5)) / 100;
-        } else if (CalExp5 === "P" || CalExp5 === "p") {
+        } else if (CalExp5?.toLowerCase() === "p") {
           Exp5 = (pkgs * parseFloat(item.Exp_rate5)) / 100;
-        } else if (CalExp5 === "V" || CalExp5 === "v" || CalExp5 === "") {
+        } else {
           Exp5 = (vamt * parseFloat(item.Exp_rate5)) / 100;
         }
-        Exp5 *= Exp1Multiplier5; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp5 *= Exp5Multiplier;
         item.Exp5 = Exp5.toFixed(2);
       } else {
-        item.Exp5 = "0.00";
+        Exp5 = parseFloat(item.Exp5) || 0;
       }
-
       // Total Expense Before GST
       const totalExpenses = Exp1 + Exp2 + Exp3 + Exp4 + Exp5;
       item.exp_before = totalExpenses.toFixed(2);
@@ -2698,7 +2970,7 @@ const handleDateChange = (date) => {
       let disc = parseFloat(item.disc) || 0;
       let per = ((disc / 100) * TotalAcc).toFixed(2);
       let PerCenTage = parseFloat(per);
-      let Amounts = TotalAcc + totalExpenses - per;
+      let Amounts = TotalAcc + totalExpenses + parseFloat(per);
 
       TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
 
@@ -2729,11 +3001,6 @@ const handleDateChange = (date) => {
         item.discount = PerCenTage.toFixed(2);
         item.vamt = totalWithGST.toFixed(2);
       }
-      // item.ctax = cgst.toFixed(2);
-      // item.stax = sgst.toFixed(2);
-      // item.itax = igst.toFixed(2);
-      // item.vamt = totalWithGST.toFixed(2);
-
       updatedItems[currentIndex] = item;
       setItems(updatedItems);
       calculateTotalGst();
@@ -2762,97 +3029,155 @@ const handleDateChange = (date) => {
     setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter") {
-      switch (field) {
-        case "vcode":
-          if (items[index].sdisc.trim() === "") {
-            remarksRef.current.focus();
-          } else {
-            desciptionRefs.current[index]?.focus();
-          }
-          break;
-        case "sdisc":
-          hsnCodeRefs.current[index]?.focus();
-          break;
-        case "tariff":
-          peciesRefs.current[index]?.focus();
-          break;
-        case "pkgs":
-          quantityRefs.current[index]?.focus();
-          break;
-        case "weight":
-          priceRefs.current[index]?.focus();
-          break;
-        case "rate":
-          discountRef.current[index]?.focus();
-          break;
-        case "disc":
-          othersRefs.current[index]?.focus();
-          break;
-        case "exp_before":
-          if (index === items.length - 1) {
-            handleAddItem();
-            itemCodeRefs.current[index + 1]?.focus();
-          } else {
-            itemCodeRefs.current[index + 1]?.focus();
-          }
-          break;
-        default:
-          break;
-      }
+  const fieldOrder = [
+    { name: "vcode", refArray: itemCodeRefs },
+    { name: "sdisc", refArray: desciptionRefs },
+    { name: "tariff", refArray: hsnCodeRefs },
+    { name: "pkgs", refArray: peciesRefs },
+    { name: "weight", refArray: quantityRefs },
+    { name: "rate", refArray: priceRefs },
+    { name: "amount", refArray: amountRefs },
+    { name: "disc", refArray: discountRef },
+    { name: "discount", refArray: discount2Ref },
+    { name: "exp_before", refArray: othersRefs },
+  ];
+
+  const focusRef = (refArray, rowIndex) => {
+    const el = refArray?.current?.[rowIndex];
+    if (el) {
+      el.focus();
+      // Safely call select if available
+      setTimeout(() => el.select && el.select(), 0);
+      return true;
     }
-    // Move Right (→)
+    return false;
+  };
+  const focusScrollRow = (refArray, rowIndex) => {
+    const inputEl = refArray?.current?.[rowIndex];
+    const container = tableContainerRef.current;
+
+    if (!inputEl || !container) return;
+
+    inputEl.focus();
+    setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+    const rowEl = inputEl.closest("tr");
+    if (!rowEl) return;
+
+    const rowTop = rowEl.offsetTop;
+    const rowHeight = rowEl.offsetHeight;
+    const containerHeight = container.clientHeight;
+
+    container.scrollTop = rowTop - containerHeight + rowHeight + 60;
+  };
+  const handleKeyDown = (event, index, field) => {
+    // --------------- ENTER / TAB: move to NEXT FIELD -----------------
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+
+      // Special case for vcode: your existing behaviour
+      if (field === "vcode") {
+        if ((items[index].sdisc || "").trim() === "") {
+          // Go to remarks if description is empty
+          remarksRef.current?.focus();
+        } else {
+          focusRef(desciptionRefs, index);
+        }
+        return;
+      }
+
+      // Special case for exp_before: go to next row / add row
+      if (field === "exp_before") {
+        const isLastRow = index === items.length - 1;
+
+        // if (isLastRow) {
+        //   handleAddItem();
+        //   // Focus ItemCode of newly added row
+        //   focusRef(itemCodeRefs, index + 1);
+        // }
+        if (isLastRow) {
+          handleAddItem();
+
+          setTimeout(() => {
+            focusScrollRow(itemCodeRefs, index + 1);
+          }, 0);
+        } else {
+          focusScrollRow(itemCodeRefs, index + 1);
+        }
+        return;
+      }
+
+      // Generic: find current field in fieldOrder and move to next available
+      const currentPos = fieldOrder.findIndex((f) => f.name === field);
+
+      if (currentPos !== -1) {
+        for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+          const nextField = fieldOrder[i];
+          // Only move if that ref exists for this row (means column is visible)
+          if (focusRef(nextField.refArray, index)) {
+            return;
+          }
+        }
+      }
+
+      // If nothing else found, you can optionally jump to remarks or transport:
+      // focusRef(remarksRef, 0);  // if you make remarksRef an array or handle separately
+
+      return;
+    }
+
+    // -------------------- ARROW RIGHT --------------------
     else if (event.key === "ArrowRight") {
       if (field === "vcode") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
+        focusRef(desciptionRefs, index);
       } else if (field === "sdisc") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
+        focusRef(hsnCodeRefs, index);
       } else if (field === "tariff") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
+        focusRef(peciesRefs, index);
       } else if (field === "pkgs") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
+        focusRef(quantityRefs, index);
       } else if (field === "weight") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
+        focusRef(priceRefs, index);
       } else if (field === "rate") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
+        // If amount column exists, go there first, else to disc
+        if (!focusRef(amountRefs, index)) {
+          focusRef(discountRef, index);
+        }
+      } else if (field === "amount") {
+        focusRef(discountRef, index);
       } else if (field === "disc") {
-        othersRefs.current[index]?.focus();
-        setTimeout(() => othersRefs.current[index]?.select(), 0);
+        focusRef(discount2Ref, index);
+      } else if (field === "discount") {
+        focusRef(othersRefs, index);
       }
     }
-    // Move Left (←)
+
+    // -------------------- ARROW LEFT --------------------
     else if (event.key === "ArrowLeft") {
       if (field === "exp_before") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
+        focusRef(discount2Ref, index);
+      } else if (field === "discount") {
+        focusRef(discountRef, index);
       } else if (field === "disc") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
+        focusRef(amountRefs, index);
+      } else if (field === "amount") {
+        focusRef(priceRefs, index);
       } else if (field === "rate") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
+        focusRef(quantityRefs, index);
       } else if (field === "weight") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
+        focusRef(peciesRefs, index);
       } else if (field === "pkgs") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
+        focusRef(hsnCodeRefs, index);
       } else if (field === "tariff") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
+        focusRef(desciptionRefs, index);
       } else if (field === "sdisc") {
-        itemCodeRefs.current[index]?.focus();
-        setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
-      } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
+        focusRef(itemCodeRefs, index);
+      } else if (field === "vcode") {
+        focusRef(itemCodeRefs, index);
+      }
     }
-    // Open Modal on Letter Input in Account Name
+
+    // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
       openModalForItemCus(index);
@@ -2861,17 +3186,17 @@ const handleDateChange = (date) => {
   };
 
   const handleOpenModalBack = (event, index, field) => {
-    if (event.key === "Backspace" && field === "accountname") {
+    if (event.key === "Backspace" && field === "accountname" && isEditMode) {
       setSelectedItemIndexCus(index);
       setShowModalCus(true);
       event.preventDefault();
     }
-    if (event.key === "Backspace" && field === "shippedto") {
+    if (event.key === "Backspace" && field === "shippedto" && isEditMode) {
       setSelectedItemIndexAcc(index);
       setShowModalAcc(true);
       event.preventDefault();
     }
-    if (event.key === "Backspace" && field === "vcode") {
+    if (event.key === "Backspace" && field === "vcode" && isEditMode) {
       setSelectedItemIndex(index);
       setShowModal(true);
       event.preventDefault();
@@ -2891,256 +3216,11 @@ const handleDateChange = (date) => {
     }
   };
 
-  const handleExit = async () => {
-  // Check if grandtotal is Greater Than zero
-  if (formData.grandtotal > 0 && isEditMode) {
-    const confirmExit = window.confirm("Are you sure you want to Exit? Unsaved changes may be lost.");
-    if (!confirmExit) {
-      return;
-    }
-  }
-
-  setTitle("(View)");
-  try {
-    const response = await axios.get(
-      `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/last`
-    );
-
-    if (response.status === 200 && response.data.data) {
-      const lastEntry = response.data.data;
-      setFormData(lastEntry.formData);
-      setData1(response.data.data);
-      setItems(lastEntry.items.map((item) => ({ ...item })));
-      setcustomerDetails(lastEntry.customerDetails.map((item) => ({ ...item })));
-      setshipped(lastEntry.shipped.map((item) => ({ ...item })));
-
-      setIsDisabled(true);
-      setIndex(lastEntry.formData);
-      setIsAddEnabled(true);
-      setIsEditMode(false);
-      setIsSubmitEnabled(false);
-      setIsPreviousEnabled(true);
-      setIsNextEnabled(true);
-      setIsFirstEnabled(true);
-      setIsLastEnabled(true);
-      setIsSearchEnabled(true);
-      setIsSPrintEnabled(true);
-      setIsDeleteEnabled(true);
-    } else {
-      console.log("No data available");
-      const newData = {
-        date: "",
-        vtype: "S",
-        vbillno: 0,
-        vno: 0,
-        gr: "",
-        exfor: "",
-        trpt: "",
-        stype: "",
-        btype: "",
-        conv: "",
-        rem1: "",
-        rem2: "",
-        v_tpt: "",
-        broker: "",
-        srv_rate: 0,
-        srv_tax: 0,
-        tcs1_rate: 0,
-        tcs1: 0,
-        tcs206_rate: 0,
-        tcs206: 0,
-        duedate: "",
-        pcess: 0,
-        tax: 0,
-        sub_total: 0,
-        exp_before: 0,
-        cgst: 0,
-        sgst: 0,
-        igst: 0,
-        expafterGST: 0,
-        grandtotal: 0,
-      };
-      setFormData(newData);
-      setItems([
-        {
-          id: 1,
-          vcode: "",
-          sdisc: "",
-          Units: "",
-          pkgs: "",
-          weight: "",
-          rate: 0,
-          amount: 0,
-          disc: "",
-          discount: "",
-          gst: 0,
-          Pcodes01: "",
-          Pcodess: "",
-          Scodes01: "",
-          Scodess: "",
-          Exp_rate1: 0,
-          Exp_rate2: 0,
-          Exp_rate3: 0,
-          Exp_rate4: 0,
-          Exp_rate5: 0,
-          Exp1: 0,
-          Exp2: 0,
-          Exp3: 0,
-          Exp4: 0,
-          Exp5: 0,
-          exp_before: 0,
-          ctax: 0,
-          stax: 0,
-          itax: 0,
-          tariff: "",
-          vamt: 0,
-        },
-      ]);
-      setcustomerDetails([
-        {
-          vacode: "",
-          gstno: "",
-          pan: "",
-          Add1: "",
-          city: "",
-          state: "",
-          Tcs206c1H: "",
-          TDS194Q: "",
-        },
-      ]);
-      setIsDisabled(true);
-    }
-  } catch (error) {
-    console.error("Error fetching data", error);
-  }
-};
-
-  // const handleExit = async () => {
-  //   setTitle("(View)");
-  //   try {
-  //     const response = await axios.get(
-  //       `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/salegst/last`
-  //     ); // Fetch the latest data
-  //     if (response.status === 200 && response.data.data) {
-  //       // If data is available
-  //       const lastEntry = response.data.data;
-  //       setFormData(lastEntry.formData); // Set form data
-  //       setData1(response.data.data);
-  //       const updateditems = lastEntry.items.map((item) => ({
-  //         ...item,
-  //       }));
-  //       const updateditems2 = lastEntry.customerDetails.map((item) => ({
-  //         ...item,
-  //       }));
-  //       const updateditems3 = lastEntry.shipped.map((item) => ({
-  //         ...item,
-  //       }));
-  //       setItems(updateditems);
-  //       setcustomerDetails(updateditems2);
-  //       setshipped(updateditems3);
-  //       setIsDisabled(true);
-  //       setIndex(lastEntry.formData);
-  //       setIsAddEnabled(true);
-  //       setIsEditMode(false);
-  //       setIsSubmitEnabled(false);
-  //       setIsPreviousEnabled(true);
-  //       setIsNextEnabled(true);
-  //       setIsFirstEnabled(true);
-  //       setIsLastEnabled(true);
-  //       setIsSearchEnabled(true);
-  //       setIsSPrintEnabled(true);
-  //       setIsDeleteEnabled(true);
-  //     } else {
-  //       // If no data is available, initialize with default values
-  //       console.log("No data available");
-  //       const newData = {
-  //         date: "",
-  //         vtype: "S",
-  //         vbillno: 0,
-  //         vno: 0,
-  //         gr: "",
-  //         exfor: "",
-  //         trpt: "",
-  //         stype: "",
-  //         btype: "",
-  //         conv: "",
-  //         rem1: "",
-  //         rem2: "",
-  //         v_tpt: "",
-  //         broker: "",
-  //         srv_rate: 0,
-  //         srv_tax: 0,
-  //         tcs1_rate: 0,
-  //         tcs1: 0,
-  //         tcs206_rate: 0,
-  //         tcs206: 0,
-  //         duedate: "",
-  //         pcess: 0,
-  //         tax: 0,
-  //         sub_total: 0,
-  //         exp_before: 0,
-  //         cgst: 0,
-  //         sgst: 0,
-  //         igst: 0,
-  //         expafterGST: 0,
-  //         grandtotal: 0,
-  //       };
-  //       setFormData(newData); // Set default form data
-  //       setItems([
-  //         {
-  //           id: 1,
-  //           vcode: "",
-  //           sdisc: "",
-  //           Units: "",
-  //           pkgs: "",
-  //           weight: "",
-  //           rate: 0,
-  //           amount: 0,
-  //           disc: "",
-  //           discount: "",
-  //           gst: 0,
-  //           Pcodes01: "",
-  //           Pcodess: "",
-  //           Scodes01: "",
-  //           Scodess: "",
-  //           Exp_rate1: 0,
-  //           Exp_rate2: 0,
-  //           Exp_rate3: 0,
-  //           Exp_rate4: 0,
-  //           Exp_rate5: 0,
-  //           Exp1: 0,
-  //           Exp2: 0,
-  //           Exp3: 0,
-  //           Exp4: 0,
-  //           Exp5: 0,
-  //           exp_before: 0,
-  //           ctax: 0,
-  //           stax: 0,
-  //           itax: 0,
-  //           tariff: "",
-  //           vamt: 0,
-  //         },
-  //       ]);
-  //       setcustomerDetails([
-  //         {
-  //           vacode: "",
-  //           gstno: "",
-  //           pan: "",
-  //           Add1: "",
-  //           city: "",
-  //           state: "",
-  //           Tcs206c1H: "",
-  //           TDS194Q: "",
-  //         },
-  //       ]);
-  //       setIsDisabled(true); // Disable fields after loading the default data
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching data", error);
-  //   }
-  // };
   const gradientOptions = [
-    { label: "Lavender", value: "linear-gradient(to right, #e6e6fa, #b19cd9)" },
+    {
+      label: "Lavender",
+      value: "linear-gradient(to right, #d4d4fcff, #b19cd9)",
+    },
     { label: "Yellow", value: "linear-gradient(to right, #fffac2, #ffdd57)" },
     { label: "Skyblue", value: "linear-gradient(to right, #ceedf0, #7fd1e4)" },
     { label: "Green", value: "linear-gradient(to right, #9ff0c3, #45a049)" },
@@ -3159,7 +3239,7 @@ const handleDateChange = (date) => {
     setColor(event.target.value);
   };
   const handleKeyDowndown = (event, nextFieldRef) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault(); // Prevent form submission
       if (nextFieldRef.current) {
         nextFieldRef.current.focus();
@@ -3175,7 +3255,7 @@ const handleDateChange = (date) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => {
-    console.log("Modal opened");
+    // console.log("Modal opened");
     setIsModalOpen(true);
   };
   const closeModal = () => {
@@ -3184,9 +3264,10 @@ const handleDateChange = (date) => {
   const [isModalOpenExp, setIsModalOpenExp] = useState(false);
 
   const handleKeyDownExp = (e, fieldName, index) => {
-    if (e.key === "F7" && fieldName === "exp_before" && isEditMode) {
-      setCurrentIndex(index); // Set the current index
-      setIsModalOpenExp(true); // Open the modal
+    if (e.key === "F2" && fieldName === "exp_before") {
+      e.preventDefault(); // Optional: stop default F2 behavior
+      setCurrentIndex(index);
+      setIsModalOpenExp(true);
     }
   };
 
@@ -3198,17 +3279,20 @@ const handleDateChange = (date) => {
   };
   const closeModalAfter = () => {
     setIsModalOpenAfter(false);
-    saveButtonRef.current.focus();
+    expAfterGSTRef.current.focus();
   };
 
-  const handleDoubleClickAfter = (event,fieldName, index) => {
+  const handleDoubleClickAfter = (fieldName) => {
     if (fieldName === "expafterGST" && isEditMode) {
       setIsModalOpenAfter(true);
-      // Open another modal if needed
     }
+  };
+
+  const handleDoubleClick = (event, fieldName, index) => {
     if (fieldName === "exp_before" && isEditMode) {
       setCurrentIndex(index); // Set the current index
       setIsModalOpenExp(true); // Open the modal
+      event.preventDefault();
     }
     if (isEditMode && fieldName === "accountname") {
       setSelectedItemIndexCus(index);
@@ -3236,12 +3320,35 @@ const handleDateChange = (date) => {
   }, [isModalOpenExp]);
 
   const handleKeyDownModal = (event, index) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
+
       if (index < expRateRefs.current.length - 1) {
-        expRateRefs.current[index + 1].focus(); // Move to the next Exp_rate input
+        expRateRefs.current[index + 1]?.focus();
+        expRateRefs.current[index + 1]?.select();
       } else {
-        closeButtonRef.current.focus(); // Move focus to Close button when on Exp_rate5
+        closeButtonRef.current?.focus();
+      }
+    }
+  };
+
+  // EXP AFTER
+  const expAfterRefs = useRef([]);
+  const closeAfterRef = useRef(null);
+  useEffect(() => {
+    if (isModalOpenAfter && expAfterRefs.current[0]) {
+      expAfterRefs.current[0].focus();
+    }
+  }, [isModalOpenAfter]);
+  const handleKeyDownAfterw2 = (event, index) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+
+      if (index < expAfterRefs.current.length - 1) {
+        expAfterRefs.current[index + 1]?.focus();
+        expAfterRefs.current[index + 1]?.select();
+      } else {
+        closeAfterRef.current?.focus();
       }
     }
   };
@@ -3261,33 +3368,90 @@ const handleDateChange = (date) => {
   //   return <Navigate to="/" replace />;
   // }
 
-    const handleKeyDownTab = (e) => {
-    if (e.key === 'Tab') {
+  const handleKeyDownTab = (e) => {
+    if (e.key === "Tab" || e.key === "Enter") {
       e.preventDefault(); // prevent default Tab behavior
       customerNameRef.current.focus(); // move focus to vaCode2 input
     }
   };
 
-    const handleKeyDownTab2 = (e) => {
-    if (e.key === 'Tab') {
+  const handleKeyDownTab2 = (e) => {
+    if (e.key === "Tab") {
       e.preventDefault(); // prevent default Tab behavior
       saveButtonRef.current.focus(); // move focus to vaCode2 input
     }
   };
 
-   const printRef = useRef();
-    const handlePrint = useReactToPrint({
-      content: () => printRef.current,
-      onAfterPrint: () => setOpen(false), // auto-close after print
-    });
-  
-    const handlePrintClick = () => {
+  const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    onAfterPrint: () => setOpen(false), // auto-close after print
+  });
+
+  const handlePrintClick = () => {
     setOpen(true);
     setTimeout(() => {
       handlePrint();
       setOpen(false); // hide right after print
     }, 300);
-    };
+  };
+
+  const isRowFilled = (row) => {
+    return (row.sdisc || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+    // 🔒 If not in edit mode, nothing is editable
+    if (!isEditMode) return false;
+
+    // First row is editable in edit mode
+    if (rowIndex === 0) return true;
+
+    // All previous rows must be filled
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const nonEmptyItems2 = items.filter(
+    (item) => (item.sdisc || "").trim() !== "",
+  );
+
+  const formatDateDDMMYYYY = (date) => {
+    if (!date) return "";
+
+    // If already dd/mm/yyyy
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      return date.replaceAll("/", "-");
+    }
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus || showModal || showModalAcc ||
+   isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: openPrintMenu,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
 
   return (
     <div>
@@ -3297,7 +3461,7 @@ const handleDateChange = (date) => {
         {SelectedInvoiceComponent && (
           <SelectedInvoiceComponent
             formData={formData}
-            items={items}
+            items={nonEmptyItems2}
             customerDetails={customerDetails}
             shipped={shipped}
             isOpen={open}
@@ -3307,7 +3471,7 @@ const handleDateChange = (date) => {
           />
         )}
       </div>
-      <div style={{display:'flex',flexDirection:'row',marginTop:-30}}>
+      <div style={{ display: "flex", flexDirection: "row", marginTop: -30 }}>
         <h1 className="headerSale">
           DEBIT NOTE{" "}
           <span className="text-black-500 font-semibold text-base sm:text-lg">
@@ -3317,128 +3481,297 @@ const handleDateChange = (date) => {
       </div>
       {/* Top Parts */}
       <div className="sale_toppart ">
-      <div className="Dated ">
-        {/* <DatePicker
-        ref={datePickerRef}
-        selected={selectedDate}
-        openToDate={new Date()}
-        onChange={handleDateChange}
-        onCalendarClose={handleCalendarClose}
-        dateFormat="dd-MM-yyyy"
-        customInput={<TextField  ref={datePickerRef} className="custom-bordered-input" label="DATE" variant="filled" size="small" sx={{width:130}} />}
-        // placement="bottom-start" // <-- use this, not popperPlacement
-      /> */}
-        <DatePicker
-        popperClassName="custom-datepicker-popper"
-          ref={datePickerRef}
-          className="DatePICKER"
-          id="date"
-          // If selectedDate is null, nothing is "selected" in the calendar
-          selected={selectedDate || null}
-          // This ensures that if there's no selected date,
-          // the calendar will open focused on today's date:
-          openToDate={new Date()}
-          onCalendarClose={handleCalendarClose}
-          dateFormat="dd-MM-yyyy"
-          onChange={handleDateChange}
-          readOnly={!isEditMode || isDisabled}
-        />
-      <div  className="billdivz">
-        <TextField
-          className="billzNo custom-bordered-input"
-          id="vbillno"
-          value={formData.vbillno}
-          variant="filled"
-          size="small"
-          label="BILL NO"
-          onKeyDown={handleKeyDownTab} // Handle Tab key here
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: "20px",
-              fontSize: `${fontSize}px`,
-              // padding: "0 8px"
-            },
-            readOnly: !isEditMode || isDisabled
-          }}
-        />
-      </div>
-      <div className="Setup">
-        <button
-        style={{height:45}}
-            onClick={openModal}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-1 rounded shadow text-sm sm:text-base"
+        <div className="Dated ">
+          <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
+            readOnly={!isEditMode || isDisabled}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
           >
-            SETUP
-          </button>
-
-          {/* Settings Button */}
-          {/* <button
-            onClick={() => setDrawerOpen(true)}
-            className="Setting text-xl text-blue-700"
-          >
-            <FaCog />
-          </button> */}
-        {/* Fullscreen Overlay Drawer */}
-        {drawerOpen && (
-          <>
-            {/* Background Overlay */}
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
-              onClick={() => setDrawerOpen(false)}
-            ></div>
-
-            {/* Drawer Panel */}
-            <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out">
-              {/* Drawer Header */}
-              <div className="flex justify-between items-center px-4 py-3 border-b">
-                <span className="font-bold text-lg">Options</span>
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                }}
+              />
+            )}
+          </InputMask>
+          <div className="billdivz">
+            <TextField
+              inputRef={voucherNoRef}
+              className="billzNo custom-bordered-input"
+              id="vbillno"
+              value={formData.vbillno}
+              variant="filled"
+              size="small"
+              label="BILL NO"
+              onKeyDown={handleKeyDownTab} // Handle Tab key here
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: "20px",
+                  fontSize: `${fontSize}px`,
+                  // padding: "0 8px"
+                },
+                readOnly: !isEditMode || isDisabled,
+              }}
+            />
+          </div>
+          <div className="Setup">
+            <button
+              className="Button"
+              style={{
+                backgroundColor: "blue",
+                color: "white",
+                fontWeight: "bold",
+              }}
+              onClick={openModal}
+            >
+              SETUP
+            </button>
+            {/* Settings Button */}
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              className="Setting text-xl text-blue-700"
+              style={{
+                cursor: "pointer",
+                border: "none",
+                background: "transparent",
+                padding: 6,
+                borderRadius: 10,
+              }}
+              title="Settings"
+            >
+              <FaCog />
+            </button>
+            {/* Fullscreen Overlay Drawer */}
+            <Modal
+              show={settingsOpen}
+              onHide={() => setSettingsOpen(false)}
+              centered
+              size="lg"
+              backdrop="static"
+              keyboard={true}
+              dialogClassName="p-0"
+              style={{ maxHeight: "100vh", overflowY: "hidden", marginTop:-10 }}
+            >
+              {/* Premium Header */}
+              <div
+                style={{
+                  padding: "14px 18px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderBottom: "1px solid rgba(0,0,0,0.08)",
+                  background:
+                    "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.10), rgba(255,255,255,0.85))",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
+                    Options
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                    Customize table fields & theme
+                  </div>
+                </div>
                 <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="text-xl text-gray-600"
+                  onClick={() => setSettingsOpen(false)}
+                  style={{
+                    height: 38,
+                    width: 38,
+                    borderRadius: 12,
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    background: "rgba(255,255,255,0.8)",
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "pointer",
+                  }}
+                  title="Close"
                 >
                   <FaTimes />
                 </button>
               </div>
-
-              {/* Drawer Body */}
-              <div className="flex flex-col p-4 gap-3">
-                {/* Color Selector */}
-                <select
-                  className="border border-gray-400 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  value={color}
-                  onChange={handleChange}
+              {/* Body */}
+              <Modal.Body style={{ padding: 18, background: "rgba(249,250,251,0.85)" }}>
+                {/* Theme Card */}
+                <div
+                  style={{
+                    borderRadius: 16,
+                    padding: 14,
+                    background: "rgba(255,255,255,0.9)",
+                    border: "1px solid rgba(0,0,0,0.06)",
+                    boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                    marginBottom: 14,
+                  }}
                 >
-                  {gradientOptions.map((option, index) => (
-                    <option key={index} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Font Size Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={decreaseFontSize}
-                    className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 10,
+                    }}
                   >
-                    <FaMinus />
-                  </button>
-
-                  <button
-                    onClick={increaseFontSize}
-                    className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                        COLOR / GRADIENT
+                      </div>
+                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        Choose header theme
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        height: 34,
+                        width: 34,
+                        borderRadius: 12,
+                        background: color,
+                        border: "1px solid rgba(255,255,255,0.7)",
+                        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
+                      }}
+                      title="Preview"
+                    />
+                  </div>
+                  <select
+                    value={color}
+                    onChange={handleChange}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      background: "white",
+                      fontSize: 13,
+                      outline: "none",
+                    }}
                   >
-                    <FaPlus />
-                  </button>
+                    {gradientOptions.map((option, index) => (
+                      <option key={index} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      </div>
-      <div className="TopFields">
+                {/* Fields Card */}
+                <div
+                  style={{
+                    borderRadius: 16,
+                    padding: 14,
+                    background: "rgba(255,255,255,0.9)",
+                    border: "1px solid rgba(0,0,0,0.06)",
+                    boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 10,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                        SELECT TABLE FIELDS
+                      </div>
+                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        Toggle column visibility
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        padding: "6px 10px",
+                        borderRadius: 10,
+                        background: "rgba(17,24,39,0.06)",
+                        color: "#374151",
+                      }}
+                    >
+                      {Object.values(tableData).filter(Boolean).length}/
+                      {Object.keys(tableData).length}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      maxHeight: "52vh",
+                      overflowY: "auto",
+                      paddingRight: 6,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    {Object.keys(tableData).map((field) => {
+                      const checked = tableData[field];
+                      return (
+                        <div
+                          key={field}
+                          onClick={() => handleCheckboxChange(field)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 10,
+                            padding: "10px 12px",
+                            borderRadius: 14,
+                            cursor: "pointer",
+                            border: checked
+                              ? "1px solid rgba(59,130,246,0.35)"
+                              : "1px solid rgba(0,0,0,0.10)",
+                            background: checked
+                              ? "linear-gradient(180deg, rgba(59,130,246,0.10), rgba(255,255,255,0.85))"
+                              : "rgba(255,255,255,0.8)",
+                            boxShadow: checked
+                              ? "0 12px 26px rgba(37,99,235,0.10)"
+                              : "0 10px 18px rgba(0,0,0,0.05)",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => handleCheckboxChange(field)}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ height: 16, width: 16 }}
+                            />
+                            <div>
+                              <div style={{ fontSize: 13, fontWeight: 800, color: "#111827" }}>
+                                {field.toUpperCase()}
+                              </div>
+                              <div style={{ fontSize: 12, color: "#6B7280" }}>
+                                Show / hide column
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 800,
+                              padding: "5px 9px",
+                              borderRadius: 10,
+                              background: checked ? "#2563EB" : "rgba(17,24,39,0.06)",
+                              color: checked ? "white" : "#4B5563",
+                            }}
+                          >
+                            {checked ? "ON" : "OFF"}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Modal.Body>
+            </Modal>
+          </div>
+        </div>
+        <div className="TopFields">
           {customerDetails.map((item, index) => (
             <div key={item.vacode}>
               <div className="CUS">
@@ -3451,12 +3784,12 @@ const handleDateChange = (date) => {
                     value={item.vacode}
                     className="customerNAME custom-bordered-input"
                     onKeyDown={(e) => {
-                      handleEnterKeyPress(customerNameRef, grNoRef)(e);
+                      handleEnterKeyPress(customerNameRef, shippedtoRef)(e);
                       handleKeyDown(e, index, "accountname");
                       handleOpenModalBack(e, index, "accountname");
                     }}
                     onDoubleClick={(e) => {
-                      handleDoubleClickAfter(e,"accountname", index)
+                      handleDoubleClick(e, "accountname", index);
                     }}
                     onFocus={(e) => e.target.select()}
                     inputProps={{
@@ -3471,6 +3804,7 @@ const handleDateChange = (date) => {
                 </div>
                 <div className="citydivZ">
                   <TextField
+                    //  disabled
                     className="cityName custom-bordered-input"
                     value={item.city}
                     variant="filled"
@@ -3495,6 +3829,7 @@ const handleDateChange = (date) => {
               <div className="GST">
                 <div>
                   <TextField
+                    //  disabled
                     className="gstnoZ custom-bordered-input"
                     value={item.gstno}
                     variant="filled"
@@ -3510,17 +3845,14 @@ const handleDateChange = (date) => {
                       readOnly: !isEditMode || isDisabled,
                     }}
                     onChange={(e) =>
-                      handleItemChangeCus(
-                        index,
-                        "gstNumber",
-                        e.target.value
-                      )
+                      handleItemChangeCus(index, "gstNumber", e.target.value)
                     }
                     onFocus={(e) => e.target.select()}
                   />
                 </div>
                 <div className="pandivZ">
                   <TextField
+                    //  disabled
                     className="PANNoZ custom-bordered-input"
                     value={item.pan}
                     variant="filled"
@@ -3545,111 +3877,132 @@ const handleDateChange = (date) => {
             </div>
           ))}
           {showModalCus && (
-          <ProductModalCustomer
-            allFields={allFieldsCus}
-            onSelect={handleProductSelectCus}
-            onClose={handleCloseModalCus}
-            initialKey={pressedKey}
-            tenant={tenant}
-          />
+            <ProductModalCustomer
+              allFields={allFieldsCus}
+              onSelect={handleProductSelectCus}
+              onClose={handleCloseModalCus}
+              initialKey={pressedKey}
+              tenant={tenant}
+            />
           )}
           <div className="shippedTO">
-                {shipped.map((item, index) => (
-                  <div key={item.shippedto}>
-                      <div>
-                        <TextField
-                          multiline
-                          inputRef={shippedtoRef}
-                          className="shippedtoz custom-bordered-input"
-                          id="shippedto"
-                          variant="filled"
-                          label="SHIPPED TO"
-                          size="small"
-                          value={`${item.shippedto || ''}\n${item.shippingGst || ''}\n${item.shippingcity || ''}`}
-                          InputProps={{
-                            readOnly: !isEditMode || isDisabled,
-                            style: {
-                              height: 100,
-                              fontSize: 14,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            },
-                          }}
-                          inputProps={{
-                            maxLength: 150,
-                            fontSize: 14,
-                          }}
-                          onKeyDown={(e) => {
-                            handleOpenModal(e, index, "shippedto");
-                            handleKeyDowndown(e, grNoRef);
-                            handleOpenModalBack(e, index, "shippedto");
-                          }}
-                          onDoubleClick={(e) => {
-                          handleDoubleClickAfter(e,"shippedto", index)
-                          }}
-                          onFocus={(e) => e.target.select()} 
-                        />
-                      </div>
-                  </div>
-                ))}
-                {showModalAcc && (
-               <ProductModalCustomer
+            {shipped.map((item, index) => (
+              <div key={item.shippedto}>
+                <div>
+                  <TextField
+                    multiline
+                    inputRef={shippedtoRef}
+                    className="shippedtoz custom-bordered-input"
+                    id="shippedto"
+                    variant="filled"
+                    label="SHIPPED TO"
+                    size="small"
+                    value={`${item.shippedto || ""}\n${item.shippingGst || ""}\n${item.shippingcity || ""}`}
+                    InputProps={{
+                      readOnly: !isEditMode || isDisabled,
+                      style: {
+                        height: 100,
+                        fontSize: 14,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                    inputProps={{
+                      maxLength: 150,
+                      fontSize: 14,
+                    }}
+                    onKeyDown={(e) => {
+                      handleOpenModal(e, index, "shippedto");
+                      handleKeyDowndown(e, grNoRef);
+                      handleOpenModalBack(e, index, "shippedto");
+                    }}
+                    onDoubleClick={(e) => {
+                      handleDoubleClick(e, "shippedto", index);
+                    }}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </div>
+              </div>
+            ))}
+            {showModalAcc && (
+              <ProductModalCustomer
                 allFields={allFieldsAcc}
                 onSelect={handleProductSelectAcc}
-                onClose={() => setShowModalAcc(false)} 
+                onClose={() => setShowModalAcc(false)}
                 initialKey={pressedKey}
                 tenant={tenant}
                 onRefresh={fetchCustomers}
-                />
-                )}
+              />
+            )}
           </div>
           <div className="GRNo">
-          <TextField
-            inputRef={grNoRef}
-            className="GRNOZ custom-bordered-input"
-            id="gr"
-            label="GR NO"
-            value={formData.gr}
-            variant="filled"
-            size="small"
-            onChange={handleNumericValue}
-            onKeyDown={handleEnterKeyPress(grNoRef, termsRef)}
-            onFocus={(e) => e.target.select()}
-            inputProps={{
-              maxLength: 12,
-              style: {
-                height: "20px",
-                fontSize: `${fontSize}px`,
-                // padding: "0 8px"
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-          />
-          <div className="ExFor">
-           <TextField
-            inputRef={termsRef}
-            className="custom-bordered-input"
-            id="exfor"
-            value={formData.exfor}
-            variant="filled"
-            label="TERMS"
-            size="small"
-            onChange={HandleValueChange}
-            onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
-            onFocus={(e) => e.target.select()}
-            inputProps={{
-              maxLength: 10,
-              style: {
-                height: "20px",
-                fontSize: `${fontSize}px`,
-                // padding: "0 8px"
-              },
-              readOnly: !isEditMode || isDisabled
-            }}
-            // sx={{ width: 128}}
-          />
-          </div>
+            <TextField
+              inputRef={grNoRef}
+              className="GRNOZ custom-bordered-input"
+              id="bno"
+              label="B.NO"
+              value={formData.bno}
+              variant="filled"
+              size="small"
+              onChange={HandleValueChange}
+              onKeyDown={handleEnterKeyPress(grNoRef, termsRef)}
+              onFocus={(e) => e.target.select()}
+              inputProps={{
+                maxLength: 12,
+                style: {
+                  height: "20px",
+                  fontSize: `${fontSize}px`,
+                  // padding: "0 8px"
+                },
+                readOnly: !isEditMode || isDisabled,
+              }}
+            />
+            <div className="ExFor">
+              <InputMask
+                mask="99-99-9999"
+                value={formData.exfor}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, exfor: e.target.value })
+                }
+              >
+                {(props) => (
+                  <TextField
+                    inputRef={termsRef}
+                    className="custom-bordered-input"
+                    {...props}
+                    label="B.DATE"
+                    size="small"
+                    variant="filled"
+                    fullWidth
+                    onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
+                  />
+                )}
+              </InputMask>
+              {/* <TextField
+                inputRef={termsRef}
+                className="custom-bordered-input"
+                id="exfor"
+                value={formData.exfor}
+                variant="filled"
+                label="TERMS"
+                size="small"
+                onChange={HandleValueChange}
+                onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
+                onFocus={(e) => e.target.select()}
+                inputProps={{
+                  maxLength: 10,
+                  style: {
+                    height: "20px",
+                    fontSize: `${fontSize}px`,
+                    // padding: "0 8px"
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                // sx={{ width: 128}}
+              /> */}
+            </div>
           </div>
           <div className="VehicleDiv">
             <TextField
@@ -3669,43 +4022,55 @@ const handleDateChange = (date) => {
                   height: "20px",
                   fontSize: `${fontSize}px`,
                 },
-                readOnly: !isEditMode || isDisabled
+                readOnly: !isEditMode || isDisabled,
               }}
             />
             <div className="BillType">
-            <FormControl
-              className=" Billss custom-bordered-input"
-              sx={{
-                fontSize: `${fontSize}px`,
-                '& .MuiFilledInput-root': {
-                  height: 48, // adjust as needed (default ~56px for filled)
-                },
-              }}
-              size="small"
-              variant="filled"
-              disabled={!isEditMode || isDisabled}
-            >
-              <InputLabel id="billcash-label">BILL TYPE</InputLabel>
-              <Select
-              className="custom-bordered-input"
-                labelId="billcash-label"
-                id="billcash"
-                value={formData.btype}
-                onChange={handleBillCash}
-                label="BILL TYPE"
-                displayEmpty
-                inputProps={{
-                  sx: {
-                    fontSize: `${fontSize}px`, 
+              <FormControl
+                className=" Billss custom-bordered-input"
+                sx={{
+                  fontSize: `${fontSize}px`,
+                  "& .MuiFilledInput-root": {
+                    height: 48, // adjust as needed (default ~56px for filled)
                   },
                 }}
-                MenuProps={{ disablePortal: true }}
+                size="small"
+                variant="filled"
+                // disabled={!isEditMode || isDisabled}
               >
-                <MenuItem value=""><em></em></MenuItem>
-                <MenuItem value="Bill">Bill</MenuItem>
-                <MenuItem value="Cash">Cash</MenuItem>
-              </Select>
-            </FormControl>
+                <InputLabel id="billcash-label">BILL TYPE</InputLabel>
+                <Select
+                  className="custom-bordered-input"
+                  labelId="billcash-label"
+                  id="billcash"
+                  value={formData.btype}
+                  onChange={(e) => {
+                    if (!isEditMode || isDisabled) return; // prevent changing
+                    handleBillCash(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  label="BILL TYPE"
+                  displayEmpty
+                  inputProps={{
+                    sx: {
+                      fontSize: `${fontSize}px`,
+                      pointerEvents:
+                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
+                    },
+                  }}
+                  MenuProps={{ disablePortal: true }}
+                >
+                  <MenuItem value="">
+                    <em></em>
+                  </MenuItem>
+                  <MenuItem value="Bill">Bill</MenuItem>
+                  <MenuItem value="Cash">Cash</MenuItem>
+                </Select>
+              </FormControl>
             </div>
           </div>
           <div className="TAXDiv">
@@ -3714,22 +4079,31 @@ const handleDateChange = (date) => {
                 fullWidth
                 size="small"
                 variant="filled"
-                disabled={!isEditMode || isDisabled}
+                // disabled={!isEditMode || isDisabled}
                 className="TAXtypez custom-bordered-input"
                 sx={{
                   fontSize: `${fontSize}px`,
-                  '& .MuiFilledInput-root': {
+                  "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
                 }}
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
-                className="TAXtypez"
+                  className="TAXtypez"
                   labelId="taxtype-label"
                   id="stype"
                   value={formData.stype}
-                  onChange={handleTaxType}
+                  onChange={(e) => {
+                    if (!isEditMode || isDisabled) return; // prevent changing
+                    handleTaxType(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleTaxType}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -3738,6 +4112,8 @@ const handleDateChange = (date) => {
                   inputProps={{
                     sx: {
                       fontSize: `${fontSize}px`,
+                      pointerEvents:
+                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
                   }}
                 >
@@ -3748,10 +4124,16 @@ const handleDateChange = (date) => {
                   <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
                   <MenuItem value="GST (URD)">GST (URD)</MenuItem>
                   <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
-                  <MenuItem value="Tax Free Within State">Tax Free Within State</MenuItem>
-                  <MenuItem value="Tax Free Interstate">Tax Free Interstate</MenuItem>
+                  <MenuItem value="Tax Free Within State">
+                    Tax Free Within State
+                  </MenuItem>
+                  <MenuItem value="Tax Free Interstate">
+                    Tax Free Interstate
+                  </MenuItem>
                   <MenuItem value="Export Sale">Export Sale</MenuItem>
-                  <MenuItem value="Export Sale(IGST)">Export Sale(IGST)</MenuItem>
+                  <MenuItem value="Export Sale(IGST)">
+                    Export Sale(IGST)
+                  </MenuItem>
                   <MenuItem value="Including GST">Including GST</MenuItem>
                   <MenuItem value="Including IGST">Including IGST</MenuItem>
                   <MenuItem value="Not Applicable">Not Applicable</MenuItem>
@@ -3759,48 +4141,77 @@ const handleDateChange = (date) => {
                 </Select>
               </FormControl>
             </div>
-            <div style={{marginTop:3}}>
-            <FormControl
-             className="SupplyTYPE custom-bordered-input"
-              sx={{
-                // width: '250px',
-                fontSize: `${fontSize}px`,
-                '& .MuiFilledInput-root': {
-                  height: 48, // adjust as needed (default ~56px for filled)
-                },
-              }}
-              size="small"
-              disabled={!isEditMode || isDisabled}
-              variant="filled"
-            >
-              <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
-              <Select
-              className="SupplyTYPE"
-                labelId="supply-label"
-                id="supply"
-                value={formData.conv}
-                onChange={handleSupply}
-                label="SUPPLY TYPE"
-                displayEmpty
-                inputProps={{
-                  sx: {
-                    fontSize: `${fontSize}px`,
+            <div style={{ marginTop: 3 }}>
+              <FormControl
+                className="SupplyTYPE custom-bordered-input"
+                sx={{
+                  // width: '250px',
+                  fontSize: `${fontSize}px`,
+                  "& .MuiFilledInput-root": {
+                    height: 48, // adjust as needed (default ~56px for filled)
                   },
                 }}
-                MenuProps={{ disablePortal: true }}
+                size="small"
+                // disabled={!isEditMode || isDisabled}
+                variant="filled"
               >
-                <MenuItem value=""><em></em></MenuItem>
-                <MenuItem value="Manufacturing Sale">1. Manufacturing Sale</MenuItem>
-                <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
-              </Select>
-            </FormControl>
+                <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
+                <Select
+                  className="SupplyTYPE"
+                  labelId="supply-label"
+                  id="supply"
+                  value={formData.conv}
+                  onChange={(e) => {
+                    if (!isEditMode || isDisabled) return; // prevent changing
+                    handleSupply(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleSupply}
+                  label="SUPPLY TYPE"
+                  displayEmpty
+                  inputProps={{
+                    sx: {
+                      fontSize: `${fontSize}px`,
+                      pointerEvents:
+                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
+                    },
+                  }}
+                  MenuProps={{ disablePortal: true }}
+                >
+                  <MenuItem value="">
+                    <em></em>
+                  </MenuItem>
+                  <MenuItem value="Rate Difference">
+                    Rate Difference
+                  </MenuItem>
+                  <MenuItem value="Weight Difference">
+                    Weight Difference
+                  </MenuItem>
+                  <MenuItem value="Other Purpose">
+                    Other Purpose
+                  </MenuItem>
+                  <MenuItem value="Manufacturing Sale">
+                    1. Manufacturing Sale
+                  </MenuItem>
+                  <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
+                  <MenuItem value="No Effect GSTR-7">3. No Effect GSTR-7</MenuItem>
+                </Select>
+              </FormControl>
             </div>
           </div>
-      </div>
+        </div>
       </div>
       {/* Top Part Ends Here */}
       {/* Table Part */}
-      <div style={{marginTop:5}} className="tablediv">
+      <div
+        ref={tableContainerRef}
+        style={{ marginTop: 5 }}
+        className="TableContainer"
+      >
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{
@@ -3811,294 +4222,353 @@ const handleDateChange = (date) => {
             }}
           >
             <tr style={{ color: "#575a5a" }}>
-              <th>ITEMCODE</th>
-              <th>DESCRIPTION</th>
-              <th>HSNCODE</th>
-              <th>PCS</th>
-              <th>QTY</th>
-              <th>RATE</th>
-              <th>AMOUNT</th>
-              <th>DIS@</th>
-              <th>DISCOUNT</th>
-              {/* <th>GST</th> */}
-              <th>OTHERS</th>
-              <th>CGST</th>
-              <th>SGST</th>
-              <th>IGST</th>
-              {/* <th>TOTAL</th> */}
+              {tableData.itemcode && <th>ITEMCODE</th>}
+              {tableData.sdisc && <th>DESCRIPTION</th>}
+              {tableData.hsncode && <th>HSNCODE</th>}
+              {tableData.pcs && <th>PCS</th>}
+              {tableData.qty && <th>QTY</th>}
+              {tableData.rate && <th>RATE</th>}
+              {tableData.amount && <th>AMOUNT</th>}
+              {tableData.discount && <th>DIS@</th>}
+              {tableData.discount && <th>DISCOUNT</th>}
+              {tableData.gst && <th>GST</th>}
+              {tableData.others && <th>OTHERS</th>}
+              {tableData.cgst && <th>CGST</th>}
+              {tableData.sgst && <th>SGST</th>}
+              {tableData.igst && <th>IGST</th>}
               {isEditMode && <th className="text-center">DELETE</th>}
             </tr>
           </thead>
           <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
             {items.map((item, index) => (
               <tr key={item.id}>
-                <td style={{ padding: 0, width: 30 }}>
-                  <input
-                    className="ItemCode"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.vcode}
-                    readOnly
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "vcode");
-                      handleOpenModal(e, index, "vcode");
-                      handleOpenModalBack(e, index, "vcode");
-                    }}
-                    onDoubleClick={(e) => {
-                     handleDoubleClickAfter(e,"vcode", index)
-                    }}
-                    ref={(el) => (itemCodeRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, width: 300 }}>
-                  <input
-                    className="desc"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    maxLength={48}
-                    value={item.sdisc}
-                    readOnly={!isEditMode || isDisabled}
-                    onChange={(e) =>
-                      handleItemChange(index, "sdisc", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "sdisc");
-                    }}
-                    ref={(el) => (desciptionRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Hsn"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    maxLength={8}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.tariff}
-                    onChange={(e) =>
-                      handleItemChange(index, "tariff", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "tariff");
-                    }}
-                    ref={(el) => (hsnCodeRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="PCS"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.pkgs} // Show raw value during input
-                    onChange={(e) =>
-                      handleItemChange(index, "pkgs", e.target.value)
-                    }
-                    onBlur={() => handlePkgsBlur(index)} // Format value on blur
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "pkgs");
-                    }}
-                    ref={(el) => (peciesRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="QTY"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.weight} // Show raw value during input
-                    onChange={(e) =>
-                      handleItemChange(index, "weight", e.target.value)
-                    }
-                    onBlur={() => handleWeightBlur(index)} // Format value on blur
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "weight");
-                    }}
-                    ref={(el) => (quantityRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Price"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      fontSize: `${fontSize}px`,
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.rate} // Show raw value during input
-                    onChange={(e) =>
-                      handleItemChange(index, "rate", e.target.value)
-                    }
-                    onBlur={() => handleRateBlur(index)} // Format value on blur
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "rate");
-                    }}
-                    ref={(el) => (priceRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Amount"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    maxLength={48}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.amount}
-                    onChange={(e) =>
-                      handleItemChange(index, "amount", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "amount");
-                    }}
-                    ref={(el) => (amountRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    min="0"
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Disc"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    value={item.disc}
-                    onChange={(e) =>
-                      handleItemChange(index, "disc", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "disc");
-                    }}
-                    ref={(el) => (discountRef.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="discount"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    value={item.discount}
-                    onChange={(e) =>
-                      handleItemChange(index, "discount", e.target.value)
-                    }
-                  />
-                </td>
-                {/* <td>
-                <input
-                  style={{ width: 56, height: 30, fontSize: `${fontSize}px` }}
-                  className="inputfields"
-                  readOnly={!isEditMode || isDisabled}
-                  value={item.gst}
-                  onKeyDown={(e) => {
-                      handleKeyDown(e, index, 'gst')
-                  }}
-                  ref={el => gstRefs.current[index] = el}
-                  min="0"
-                />
-                </td> */}
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Others"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                    }}
-                    maxLength={48}
-                    type="text"
-                    value={item.exp_before}
-                    readOnly={!isEditMode || isDisabled}
-                    onDoubleClick={() =>
-                      handleDoubleClickAfter("exp_before", index)
-                    } // Pass index here
-                    // onChange={(e) => handleItemChange(index, "exp_before", e.target.value)}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "exp_before");
-                      handleKeyDownExp(e, index, "exp_before");
-                    }}
-                    onFocus={(e) => {
-                      e.target.select(); // Select the entire text when the field is focused
-                      if (WindowBefore) {
-                        setCurrentIndex(index);
-                        setIsModalOpenExp(true);
+                {tableData.itemcode && (
+                  <td style={{ padding: 0, width: 30 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="ItemCode"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                      }}
+                      type="text"
+                      value={item.vcode}
+                      readOnly
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "vcode");
+                        handleOpenModal(e, index, "vcode");
+                        handleOpenModalBack(e, index, "vcode");
+                      }}
+                      onDoubleClick={(e) => {
+                        handleDoubleClick(e, "vcode", index);
+                      }}
+                      ref={(el) => (itemCodeRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
+                {tableData.sdisc && (
+                  <td style={{ padding: 0, width: 300 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="desc"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                      }}
+                      maxLength={48}
+                      value={item.sdisc}
+                      readOnly={!isEditMode || isDisabled}
+                      onChange={(e) =>
+                        handleItemChange(index, "sdisc", e.target.value)
                       }
-                    }}
-                    ref={(el) => (othersRefs.current[index] = el)}
-                  />
-                </td>
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "sdisc");
+                      }}
+                      ref={(el) => (desciptionRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
+                {tableData.hsncode && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Hsn"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      maxLength={8}
+                      readOnly={!isEditMode || isDisabled}
+                      value={item.tariff}
+                      onChange={(e) =>
+                        handleItemChange(index, "tariff", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "tariff");
+                      }}
+                      ref={(el) => (hsnCodeRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
+                {tableData.pcs && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="PCS"
+                      style={{
+                        height: 40,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        fontSize: `${fontSize}px`,
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+                      onChange={(e) =>
+                        handleItemChange(index, "pkgs", e.target.value)
+                      }
+                      onBlur={() => handlePkgsBlur(index)} // Format value on blur
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "pkgs");
+                      }}
+                      ref={(el) => (peciesRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
+                {tableData.qty && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="QTY"
+                      style={{
+                        height: 40,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        fontSize: `${fontSize}px`,
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.weight) === 0 ? "" : item.weight}
+                      onChange={(e) =>
+                        handleItemChange(index, "weight", e.target.value)
+                      }
+                      onBlur={() => handleWeightBlur(index)} // Format value on blur
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "weight");
+                      }}
+                      ref={(el) => (quantityRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
+                {tableData.rate && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Price"
+                      style={{
+                        height: 40,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        fontSize: `${fontSize}px`,
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.rate) === 0 ? "" : item.rate}
+                      onChange={(e) =>
+                        handleItemChange(index, "rate", e.target.value)
+                      }
+                      onBlur={() => handleRateBlur(index)} // Format value on blur
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "rate");
+                      }}
+                      ref={(el) => (priceRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                    />
+                  </td>
+                )}
+                {tableData.amount && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Amount"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      maxLength={48}
+                      readOnly={!isEditMode || isDisabled}
+                      value={Number(item.amount) === 0 ? "" : item.amount}
+                      onBlur={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value)) {
+                          handleItemChange(
+                            index,
+                            "amount",
+                            value.toFixed(rateValue),
+                          );
+                        }
+                      }}
+                      onChange={(e) =>
+                        handleItemChange(index, "amount", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "amount");
+                      }}
+                      ref={(el) => (amountRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      min="0"
+                    />
+                  </td>
+                )}
+                {tableData.discount && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Disc"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      value={Number(item.disc) === 0 ? "" : item.disc}
+                      onChange={(e) =>
+                        handleItemChange(index, "disc", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "disc");
+                      }}
+                      onBlur={() => handleBlur(index, "disc")}
+                      ref={(el) => (discountRef.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      readOnly={!isEditMode || isDisabled}
+                    />
+                  </td>
+                )}
+                {tableData.discount && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      id="discount"
+                      className="discount"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      value={Number(item.discount) === 0 ? "" : item.discount}
+                      onChange={(e) =>
+                        handleItemChange(index, "discount", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "discount");
+                      }}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      ref={(el) => (discount2Ref.current[index] = el)}
+                      onBlur={() => handleBlur(index, "discount")}
+                      readOnly={!isEditMode || isDisabled}
+                    />
+                  </td>
+                )}
+                {tableData.gst && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Others"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "center",
+                      }}
+                      maxLength={2}
+                      value={Number(item.gst) === 0 ? "" : item.gst + "%"}
+                      // value={item.gst +"%"}
+                      readOnly={!isEditMode || isDisabled}
+                    />
+                  </td>
+                )}
+                {tableData.others && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      disabled={!canEditRow(index)}
+                      className="Others"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                      }}
+                      maxLength={48}
+                      type="text"
+                      value={
+                        Number(item.exp_before) === 0 ? "" : item.exp_before
+                      }
+                      readOnly={!isEditMode || isDisabled}
+                      onDoubleClick={(e) =>
+                        handleDoubleClick(e, "exp_before", index)
+                      }
+                      // onChange={(e) => handleItemChange(index, "exp_before", e.target.value)}
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "exp_before");
+                        handleKeyDownExp(e, "exp_before", index);
+                      }}
+                      onFocus={(e) => {
+                        e.target.select(); // Select the entire text when the field is focused
+                        if (WindowBefore) {
+                          setCurrentIndex(index);
+                          setIsModalOpenExp(true);
+                        }
+                      }}
+                      ref={(el) => (othersRefs.current[index] = el)}
+                    />
+                  </td>
+                )}
                 {isModalOpenExp && currentIndex !== null && (
                   <div className="Modalz">
                     <div className="Modal-content">
@@ -4112,7 +4582,7 @@ const handleDateChange = (date) => {
                             handleInputChange(
                               currentIndex,
                               "gross",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                         />
@@ -4125,6 +4595,63 @@ const handleDateChange = (date) => {
                         </label>
                       </div>
                       {[
+                        { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
+                        { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
+                        { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
+                        { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
+                        { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
+                        ].map((field, idx) => {
+                          const rateIndex = idx * 2;
+                          const valueIndex = idx * 2 + 1;
+
+                          return (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "10px" }}>
+                              
+                              <label style={{ width: "100px", fontWeight: "bold" }}>
+                                {field.label}
+                              </label>
+
+                              {/* RATE FIELD */}
+                              <input
+                                ref={(el) => (expRateRefs.current[rateIndex] = el)}
+                                value={items[currentIndex][field.rate]}
+                                style={{
+                                  border: "1px solid black",
+                                  padding: "5px",
+                                  width: "120px",
+                                  textAlign: "right",
+                                  borderRadius: "4px",
+                                }}
+                                onChange={(e) =>
+                                  handleInputChange(currentIndex, field.rate, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDownModal(e, rateIndex)}
+                              />
+
+                              {/* VALUE FIELD */}
+                              <input
+                                ref={(el) => (expRateRefs.current[valueIndex] = el)}
+                                value={items[currentIndex][field.value]}
+                                style={{
+                                  border: "1px solid black",
+                                  padding: "5px",
+                                  width: "120px",
+                                  textAlign: "right",
+                                  borderRadius: "4px",
+                                }}
+                                onBlur={() =>
+                                  handleExpenseBlur(currentIndex, field.value)
+                                }
+                                onChange={(e) =>
+                                  handleInputChange(currentIndex, field.value, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDownModal(e, valueIndex)}
+                              />
+                            </div>
+                          );
+                      })}
+
+                      {/* {[
                         { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
                         { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
                         { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
@@ -4159,7 +4686,7 @@ const handleDateChange = (date) => {
                               handleInputChange(
                                 currentIndex,
                                 field.rate,
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             onKeyDown={(e) => handleKeyDownModal(e, idx)}
@@ -4174,22 +4701,32 @@ const handleDateChange = (date) => {
                               textAlign: "right",
                               borderRadius: "4px",
                             }}
+                            onBlur={() =>
+                              handleExpenseBlur(currentIndex, field.value)
+                            }
                             onChange={(e) =>
                               handleInputChange(
                                 currentIndex,
                                 field.value,
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
                         </div>
-                      ))}
+                      ))} */}
                       <Button
-                        ref={closeButtonRef} // Assign ref to close button
+                        ref={closeButtonRef}
                         onClick={() => {
+                          const idx = currentIndex; // store before reset
+
                           setIsModalOpenExp(false);
-                          setCurrentIndex(null); // Reset the index when closing the modal
-                          handleAddItem();
+                          setCurrentIndex(null);
+
+                          // restore focus to Others field
+                          setTimeout(() => {
+                            othersRefs.current[idx]?.focus();
+                            othersRefs.current[idx]?.select();
+                          }, 0);
                         }}
                         style={{
                           borderColor: "transparent",
@@ -4202,133 +4739,221 @@ const handleDateChange = (date) => {
                     </div>
                   </div>
                 )}
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="CTax"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      color: "black",
-                    }}
-                    maxLength={48}
-                    disabled
-                    value={item.ctax}
-                    onChange={(e) =>
-                      handleItemChange(index, "ctax", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "ctax");
-                    }}
-                    ref={(el) => (cgstRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="STax"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      color: "black",
-                    }}
-                    maxLength={48}
-                    disabled
-                    value={item.stax}
-                    onChange={(e) =>
-                      handleItemChange(index, "stax", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "stax");
-                    }}
-                    ref={(el) => (sgstRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    min="0"
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="ITax"
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      textAlign: "right",
-                      color: "black",
-                    }}
-                    maxLength={48}
-                    disabled
-                    value={item.itax}
-                    onChange={(e) =>
-                      handleItemChange(index, "itax", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "itax");
-                    }}
-                    ref={(el) => (igstRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                    min="0"
-                  />
-                </td>
-                {/* <td style={{ padding: 0 }}>
+                {tableData.cgst && (
+                  <td style={{ padding: 0 }}>
                     <input
-                    className="TotalTable"
+                      className="CTax"
                       style={{
+                        height: 40,
                         fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        color: "black",
                       }}
-                      disabled
                       maxLength={48}
-                      readOnly
-                      value={item.vamt}
+                      disabled
+                      value={Number(item.ctax) === 0 ? "" : item.ctax}
+                      onChange={(e) =>
+                        handleItemChange(index, "ctax", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "ctax");
+                      }}
+                      ref={(el) => (cgstRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
                     />
-                  </td> */}
+                  </td>
+                )}
+                {tableData.sgst && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      className="STax"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        color: "black",
+                      }}
+                      maxLength={48}
+                      disabled
+                      value={Number(item.stax) === 0 ? "" : item.stax}
+                      onChange={(e) =>
+                        handleItemChange(index, "stax", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "stax");
+                      }}
+                      ref={(el) => (sgstRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      min="0"
+                    />
+                  </td>
+                )}
+                {tableData.igst && (
+                  <td style={{ padding: 0 }}>
+                    <input
+                      className="ITax"
+                      style={{
+                        height: 40,
+                        fontSize: `${fontSize}px`,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        border: "none",
+                        padding: 5,
+                        textAlign: "right",
+                        color: "black",
+                      }}
+                      maxLength={48}
+                      disabled
+                      value={Number(item.itax) === 0 ? "" : item.itax}
+                      onChange={(e) =>
+                        handleItemChange(index, "itax", e.target.value)
+                      }
+                      onKeyDown={(e) => {
+                        handleKeyDown(e, index, "itax");
+                      }}
+                      ref={(el) => (igstRefs.current[index] = el)}
+                      onFocus={(e) => e.target.select()} // Select text on focus
+                      min="0"
+                    />
+                  </td>
+                )}
                 {isEditMode && (
-                <td style={{ padding: 0}}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",  // horizontally center
-                      alignItems: "center",      // vertically center
-                      height: "100%",            // takes full cell height
-                    }}
-                  >
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteItem(index)}
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
-                </td>
+                  <td style={{ padding: 0 }}>
+                    {canEditRow(index) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
+                      >
+                        <IconButton color="error" size="small" tabIndex={-1}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    )}
+                  </td>
                 )}
               </tr>
             ))}
           </tbody>
+          <tfoot
+            style={{
+              background: color,
+              position: "sticky",
+              bottom: -6,
+              fontSize: `${fontSize}px`,
+              borderTop: "1px solid black",
+            }}
+          >
+            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+              {tableData.itemcode && <td></td>}
+              {tableData.sdisc && <td>TOTAL</td>}
+              {tableData.hsncode && <td></td>}
+              {tableData.pcs && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0)
+                    .toFixed(pkgsValue)}
+                </td>
+              )}
+              {tableData.qty && (
+                <td>
+                  {items
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.weight || 0),
+                      0,
+                    )
+                    .toFixed(weightValue)}
+                </td>
+              )}
+              {tableData.rate && <td></td>}
+              {tableData.amount && (
+                <td>
+                  {items
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0,
+                    )
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.discount && (
+                <>
+                  <td>
+                    {items
+                      .reduce(
+                        (sum, item) => sum + parseFloat(item.disc || 0),
+                        0,
+                      )
+                      .toFixed(2)}
+                  </td>
+                  <td>
+                    {items
+                      .reduce(
+                        (sum, item) => sum + parseFloat(item.discount || 0),
+                        0,
+                      )
+                      .toFixed(2)}
+                  </td>
+                </>
+              )}
+              {tableData.gst && <td></td>}
+              {tableData.others && (
+                <td>
+                  {items
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.exp_before || 0),
+                      0,
+                    )
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.cgst && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.ctax || 0), 0)
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.sgst && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.stax || 0), 0)
+                    .toFixed(2)}
+                </td>
+              )}
+              {tableData.igst && (
+                <td>
+                  {items
+                    .reduce((sum, item) => sum + parseFloat(item.itax || 0), 0)
+                    .toFixed(2)}
+                </td>
+              )}
+              {isEditMode && <td></td>}
+            </tr>
+          </tfoot>
         </Table>
       </div>
       {showModal && (
-      <ProductModal
-        products={products}
-        allFields={allFields}
-        onSelect={handleProductSelect}
-        onClose={handleModalDone}
-        tenant={tenant}
-        initialKey={pressedKey}
-        fetchParentProducts={fetchProducts}
-      />
+        <ProductModal
+          products={products}
+          allFields={allFields}
+          onSelect={handleProductSelect}
+          onClose={handleModalDone}
+          tenant={tenant}
+          initialKey={pressedKey}
+          fetchParentProducts={fetchProducts}
+        />
       )}
 
       <div className="addbutton" style={{ marginTop: 2, marginBottom: 5 }}>
@@ -4338,24 +4963,27 @@ const handleDateChange = (date) => {
       </div>
       {/* Bottom Part */}
       <div className="Belowcontents">
-        <div className="bottomcontainer1">
-          <div style={{display:'flex',flexDirection:'column',marginLeft:5}}>
+        <div
+          className="Parent"
+          style={{ display: "flex", flexDirection: "row" }}
+        >
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <TextField
-            className="Remz custom-bordered-input"
+              className="Remz custom-bordered-input"
               id="rem2"
               value={formData.rem2}
               inputRef={remarksRef}
-              label='REMARKS'
+              label="REMARKS"
               onChange={HandleValueChange}
               onKeyDown={(e) => {
                 handleKeyDowndown(e, transportRef);
               }}
               inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                },
               }}
               onFocus={(e) => e.target.select()}
               size="small"
@@ -4363,21 +4991,22 @@ const handleDateChange = (date) => {
               // sx={{ width: 280 }}
             />
             <TextField
-            className="Remz custom-bordered-input"
+              className="Remz custom-bordered-input"
               id="v_tpt"
               value={formData.v_tpt}
               inputRef={transportRef}
-              label='TRANSPORT'
+              label="TRANSPORT"
               onChange={HandleValueChange}
-              onKeyDown={(e) => { handleKeyDowndown(e, brokerRef);
-              handleOpenModalTpt(e, "v_tpt", "v_tpt")
+              onKeyDown={(e) => {
+                handleKeyDowndown(e, brokerRef);
+                handleOpenModalTpt(e, "v_tpt", "v_tpt");
               }}
               inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                },
               }}
               onFocus={(e) => e.target.select()}
               size="small"
@@ -4385,229 +5014,300 @@ const handleDateChange = (date) => {
               // sx={{ width: 280 }}
             />
             <TextField
-            className="Remz custom-bordered-input"
+              className="Remz custom-bordered-input"
               id="broker"
               value={formData.broker}
               inputRef={brokerRef}
-              label='BROKER'
+              label="BROKER"
               onChange={HandleValueChange}
               onKeyDown={(e) => {
                 handleKeyDowndown(e, expAfterGSTRef);
-                handleOpenModalBroker(e, "broker", "broker")
+                handleOpenModalBroker(e, "broker", "broker");
               }}
-              inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 280 }}
-            />
-          </div>
-          <div style={{display:'flex',flexDirection:'column',marginLeft:5}}>
-            <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-            <TextField
-             className="TCSRATE custom-bordered-input"
-              inputRef={tcsRef}
-              id="tcs1_rate"
-              label='%'
-              value={formData.tcs1_rate}
-              onChange={handleNumericValue}
-              onKeyDown={(e) => handleKeyDowndown(e, tcsRef2)}
               inputProps={{
                 maxLength: 48,
                 style: {
                   height: 20,
                   fontSize: `${fontSize}px`,
-                  color: 'red',
                 },
               }}
               onFocus={(e) => e.target.select()}
               size="small"
               variant="filled"
-              InputProps={{ readOnly: !isEditMode || isDisabled }}
-            />
-            <TextField
-            className="TCSPER custom-bordered-input"
-              id="tcs1"
-              value={formData.tcs1}
-              // disabled
-              label='TCS 206c1H'
-              onChange={handleNumericValue}
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fontSize}px`,
-                  color: 'red',
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 120 }}
             />
           </div>
-          <div style={{ display: "flex", flexDirection: "row",alignItems: "center" }}>
-            <TextField
-            className="TCSRATE custom-bordered-input"
-              inputRef={tcsRef2}
-              id="tcs206_rate"
-              value={formData.tcs206_rate}
-              onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
-              label="%"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fontSize}px`,
-                  color: 'red',
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              InputProps={{ readOnly: !isEditMode || isDisabled }}
-            />
-
-            <TextField
-            className="TCSPER custom-bordered-input"
-              id="tcs206"
-              value={formData.tcs206}
-              onChange={handleNumericValue}
-              label="TCS 206C@"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fontSize}px`,
-                  color: 'red',
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 120 }}
-            />
-          </div>
-          </div>
-          {/* C/S/I/TDS */}
-          <div style={{display:'flex',flexDirection:'column',marginLeft:5}}>
-           <div style={{display:'flex',flexDirection:'row'}}>
-            <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.Ctds}
-            label="C.TDS"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-          <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.Stds}
-            label="S.TDS"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-          </div>
-          <div style={{display:'flex',flexDirection:'row'}}>
-            <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.iTds}
-            label="I.TDS"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-          {/* <text style={{ fontSize: 20, margin: 5 }}>=</text>  */}
-          <TextField
-            className="CTDS custom-bordered-input"
-            value={formData.Tds2}
-            label="TOTAL"
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                backgroundColor: "white",
-                borderRadius: 5,
-              },
-            }}
-            sx={{
-              // width: 150,
-              "& .MuiOutlinedInput-root": {
-                border: "1px solid black",
-                borderRadius: 1,
-              },
-            }}
-          />
-          </div>
-          <div className="duedatez">
-            <DatePicker
-              id="duedate"
+          <div
+            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+          >
+            <div className="duedatez">
+              <InputMask
+                mask="99-99-9999"
+                placeholder="dd-mm-yyyy"
+                value={formData.duedate}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, duedate: e.target.value })
+                }
+              >
+                {(props) => (
+                  <TextField
+                    className="custom-bordered-input"
+                    {...props}
+                    label="DUE DATE"
+                    size="small"
+                    variant="filled"
+                    fullWidth
+                    style={{ width: 225 }}
+                  />
+                )}
+              </InputMask>
+              {/* <InputMask
+              className="custom-bordered-input"
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
               value={formData.duedate}
-              className="dueDatePICKER"
-              selected={expiredDate}
-              onChange={handleDateChange}
               readOnly={!isEditMode || isDisabled}
-              dateFormat="dd-MM-yyyy"
-              customInput={<TextField className="custom-bordered-input" label=" DUE DATE" variant="filled" size="small" />}
-              // placement="bottom-start" // <-- use this, not popperPlacement
-            />
-          </div>
-          </div>
-          {/* TOTAL GST */}
-          <div className="Totalcontainer">
+              onChange={(e) =>
+                setFormData({ ...formData, duedate: e.target.value })
+              }
+            >
+              {(inputProps) => (
+                <TextField
+                  {...inputProps}
+                  className="custom-bordered-input"
+                />
+              )}
+          </InputMask> */}
+              {/* <DatePicker
+                id="duedate"
+                value={formatDateDDMMYYYY(formData.duedate)}
+                className="dueDatePICKER"
+                selected={expiredDate}
+                onChange={handleDateChange}
+                readOnly={!isEditMode || isDisabled}
+                dateFormat="dd-MM-yyyy"
+                customInput={
+                  <TextField
+                    className="custom-bordered-input"
+                    label="DUE DATE"
+                    variant="filled"
+                    size="small"
+                    sx={{
+                      "& .MuiInputBase-root": {
+                        height: 47, // Adjust height here
+                      },
+                      "& .MuiInputBase-input": {
+                        padding: "20px 14px 6px", // more top padding so text sits lower
+                      },
+                    }}
+                  />
+                }
+              /> */}
+            </div>
             <div>
-             <TextField
+              <TextField
+                className="custom-bordered-input"
+                id="srv_tax"
+                value={formData.srv_tax}
+                // disabled
+                label="TDS 194-Q"
+                onChange={handleNumericValue}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: "red",
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                sx={{ width: 225 }}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <TextField
+                className="TCSRATE custom-bordered-input"
+                inputRef={tcsRef2}
+                id="tcs1_rate"
+                value={formData.tcs1_rate}
+                onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    tcs1_rate: e.target.value,
+                  }))
+                }
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: "red",
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+              />
+
+              <TextField
+                className="TCSPER custom-bordered-input"
+                id="tcs1"
+                value={formData.tcs1}
+                label="TCS 206C@"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: "red",
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                // sx={{ width: 120 }}
+              />
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginLeft: 5,
+              marginTop: "auto",
+            }}
+          >
+            {formData.Tds2 && Number(formData.Tds2) > 0 && (
+              <TextField
+                className="custom-bordered-input"
+                id="tax"
+                value={"2%"}
+                label="GST. TDS"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                sx={{ width: 120 }}
+              />
+            )}
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.Ctds}
+                label="C.TDS"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.Stds}
+                label="S.TDS"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.iTds}
+                label="I.TDS"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+              <span style={{ fontSize: 20, marginTop: "10px" }}>=</span>
+              <TextField
+                className="CTDS custom-bordered-input"
+                value={formData.Tds2}
+                label="TOTAL"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                  },
+                }}
+                sx={{
+                  // width: 150,
+                  "& .MuiOutlinedInput-root": {
+                    border: "1px solid black",
+                    borderRadius: 1,
+                  },
+                }}
+              />
+            </div>
+          </div>
+          <div
+            className="totals"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginLeft: "auto",
+              marginRight: "12px",
+            }}
+          >
+            <TextField
               className="TOTALFIELDS custom-bordered-input"
               id="tax"
               value={formData.tax}
@@ -4624,358 +5324,260 @@ const handleDateChange = (date) => {
               variant="filled"
               // sx={{ width: 150 }}
             />
-            </div>
             <div>
-            <TextField
-              className="TOTALFIELDS custom-bordered-input"
-              inputRef={addLessRef}
-              id="exp_before"
-              value={formData.exp_before}
-              label="ADD / LESS"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fontSize}px`,
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 150 }}
-            />
-            </div>
-            <div>
-            <TextField
-            className="TOTALFIELDS custom-bordered-input"
-            inputRef={expAfterGSTRef}
-            id="expafterGST"
-            value={formData.expafterGST}
-            label="EXP AFTER GST"
-            onKeyDown={(e) => {
-              handleKeyDowndown(e, saveButtonRef);
-              handleKeyDownAfter(e);
-            }}
-            onFocus={(e) => {
-              e.target.select();
-              if (WindowAfter) {
-                setIsModalOpenAfter(true);
-              }
-            }}
-            onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            size="small"
-            variant="filled"
-            // sx={{ width: 150 }}
-          />
-          {isModalOpenAfter && (
-                <div className="Modal">
-                  <div className="Modal-content">
-                    <h1 className="headingE">EXPENSE AFTER TAX</h1>
-                    <div className="form-group">
-                      <input
-                        type="checkbox"
-                        id="gross"
-                        checked={formData.gross}
-                        onChange={handleGross}
-                      />
-                      <label
-                        style={{ marginLeft: 5 }}
-                        className="label"
-                        htmlFor="Gross"
+              <TextField
+                className="TOTALFIELDS custom-bordered-input"
+                inputRef={expAfterGSTRef}
+                id="expafterGST"
+                value={formData.expafterGST}
+                label="EXP AFTER GST"
+                onKeyDown={(e) => {
+                  handleKeyDowndown(e, saveButtonRef);
+                  handleKeyDownAfter(e);
+                }}
+                onFocus={(e) => {
+                  e.target.select();
+                  if (WindowAfter) {
+                    setIsModalOpenAfter(true);
+                  }
+                }}
+                onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                size="small"
+                variant="filled"
+                // sx={{ width: 150 }}
+              />
+              {isModalOpenAfter && (
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 1000,
+                  }}
+                >
+                  <div
+                    style={{
+                      background: 'linear-gradient(to bottom, #edc5a7,#a5d8ed)',
+                      padding: "25px 30px",
+                      borderRadius: "12px",
+                      width: "450px",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      animation: "fadeIn 0.3s ease-in-out",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        textAlign: "center",
+                        marginBottom: "20px",
+                        fontWeight: "600",
+                        color: "#333",
+                        fontSize:"18px",
+                      }}
+                    >
+                      EXPENSE AFTER TAX
+                    </h2>
+
+                    {/* Expense Rows */}
+                    {[
+                    { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
+                    { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
+                    { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
+                    { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
+                    { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
+                  ].map((item, index) => {
+                    const rateIndex = index * 2;
+                    const amountIndex = index * 2 + 1;
+
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: "12px",
+                        }}
                       >
-                        GROSS
-                      </label>
+                        <div
+                          style={{
+                            flex: 1,
+                            fontWeight: "bold",
+                            color: "#444",
+                          }}
+                        >
+                          {item.label}
+                        </div>
+
+                        {/* RATE */}
+                        <input
+                          ref={(el) => (expAfterRefs.current[rateIndex] = el)}
+                          id={item.rate}
+                          value={formData[item.rate]}
+                          onChange={handleNumberChange}
+                          onKeyDown={(e) => handleKeyDownAfterw2(e, rateIndex)}
+                          placeholder="Rate"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            marginRight: "8px",
+                            textAlign: "right",
+                          }}
+                        />
+
+                        {/* AMOUNT */}
+                        <input
+                          ref={(el) => (expAfterRefs.current[amountIndex] = el)}
+                          id={item.amount}
+                          value={formData[item.amount]}
+                          onChange={handleNumberChange}
+                          onKeyDown={(e) => handleKeyDownAfterw2(e, amountIndex)}
+                          placeholder="Amount"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            textAlign: "right",
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+
+                    {/* {[
+                      { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
+                      { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
+                      { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
+                      { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
+                      { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
+                    ].map((item, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            flex: 1,
+                            fontWeight: "bold",
+                            color: "#444",
+                          }}
+                        >
+                          {item.label}
+                        </div>
+
+                        <input
+                          id={item.rate}
+                          value={formData[item.rate]}
+                          onChange={handleNumberChange}
+                          placeholder="Rate"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            marginRight: "8px",
+                            textAlign: "right",
+                          }}
+                        />
+
+                        <input
+                          id={item.amount}
+                          value={formData[item.amount]}
+                          onChange={handleNumberChange}
+                          placeholder="Amount"
+                          style={{
+                            width: "90px",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            border: "1px solid black",
+                            textAlign: "right",
+                          }}
+                        />
+                      </div>
+                    ))} */}
+
+                    {/* Close Button */}
+                    <div style={{ textAlign: "center", marginTop: "20px" }}>
+                      <Button
+                        ref={closeAfterRef}
+                        onClick={closeModalAfter}
+                        style={{
+                          backgroundColor: "#ff4d4f",
+                          border: "none",
+                          padding: "8px 20px",
+                          borderRadius: "6px",
+                          fontWeight: "500",
+                        }}
+                      >
+                        CLOSE
+                      </Button>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense6}</text>
-                      <input
-                        id="Exp_rate6"
-                        value={formData.Exp_rate6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp6"
-                        value={formData.Exp6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense7}</text>
-                      <input
-                        id="Exp_rate7"
-                        value={formData.Exp_rate7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp7"
-                        value={formData.Exp7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense8}</text>
-                      <input
-                        id="Exp_rate8"
-                        value={formData.Exp_rate8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp8"
-                        value={formData.Exp8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense9}</text>
-                      <input
-                        id="Exp_rate9"
-                        value={formData.Exp_rate9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 18,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp9"
-                        value={formData.Exp9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense10}</text>
-                      <input
-                        id="Exp_rate10"
-                        value={formData.Exp_rate10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 24.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp10"
-                        value={formData.Exp10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <Button
-                      onClick={closeModalAfter}
-                      style={{
-                        borderColor: "transparent",
-                        backgroundColor: "red",
-                        marginTop: 10,
-                      }}
-                    >
-                      CLOSE
-                    </Button>
                   </div>
                 </div>
               )}
-          </div>
-          </div>
-          {/* CGST/SGTS/IGST */}
-          <div className="TotalGSTdiv">
-          <div>
+            </div>
             <TextField
-              id="cgst"
-              value={formData.cgst}
-              label="CGST"
+              id="grandtotal"
+              value={formData.grandtotal}
+              label="GRAND TOTAL"
+              onKeyDown={handleKeyDownTab2} // Handle Tab key here
               inputProps={{
                 maxLength: 48,
                 style: {
                   height: 20,
                   fontSize: `${fontSize}px`,
+                  color: "red",
+                  fontWeight: "bold",
                 },
               }}
               size="small"
               variant="filled"
               className="TOTALFIELDS custom-bordered-input"
-              // sx={{ width: 150 }} // Adjust width as needed
+              // sx={{ width: 150 }}
             />
-          </div>
-          <div>
-            <TextField
-            id="sgst"
-            value={formData.sgst}
-            label="SGST"
-            inputProps={{
-              maxLength: 48,
-              style: { height: 20, fontSize: `${fontSize}px` },
-            }}
-            size="small"
-            variant="filled"
-            className="TOTALFIELDS custom-bordered-input"
-            // sx={{ width: 150 }}
-          />
-          </div>
-          <div>
-            <TextField
-            id="igst"
-            value={formData.igst}
-            label="IGST"
-            inputProps={{
-              maxLength: 48,
-              style: { height: 20, fontSize: `${fontSize}px` },
-            }}
-            size="small"
-            variant="filled"
-            className="TOTALFIELDS custom-bordered-input"
-            // sx={{ width: 150 }}
-          />
-          </div>
-          </div>
-          {/* GRAND TOTAL */}
-          <div className="TotalGSTdiv">
-            <div>
-            <TextField
-            className="TOTALFIELDS custom-bordered-input"
-            id="sub_total"
-            value={formData.sub_total}
-            label="VALUE"
-            size="small"
-            variant="filled"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-            }}
-            // sx={{ width: 150 }} // Adjust width as needed
-          />
-          </div>
-          {T11 && (
-          <div>
-            <TextField
-            className="TOTALFIELDS custom-bordered-input"
-            id="ExpRoundoff"
-            value={formData.ExpRoundoff}
-            label="ROUND OFF"
-            size="small"
-            variant="filled"
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-              },
-            }}
-            // sx={{ width: 150 }} // Adjust width as needed
-          />
-          </div>
-          )} 
-          <div>
-          <TextField
-            id="grandtotal"
-            value={formData.grandtotal}
-            label="GRAND TOTAL"
-            onKeyDown={handleKeyDownTab2} // Handle Tab key here
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fontSize}px`,
-                color: "red",
-                fontWeight: "bold",
-              },
-            }}
-            size="small"
-            variant="filled"
-            className="TOTALFIELDS custom-bordered-input"
-            // sx={{ width: 150 }}
-          />
-          </div>
           </div>
         </div>
         <div className="Buttonsgroupz">
           <Button
-            ref={addButtonRef} 
+            ref={addButtonRef}
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[0] }}
+            style={{ background: color }}
             onClick={handleAdd}
             disabled={!isAddEnabled}
           >
             Add
           </Button>
+          {isFAModalOpen && (
+            <FAVoucherModal
+              open={isFAModalOpen}
+              onClose={() => setIsFAModalOpen(false)}
+              tenant={tenant}
+              voucherno={formData.vbillno}
+              vtype="S"
+            />
+          )}
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[1] }}
+            style={{ background: color }}
             onClick={handleEditClick}
             disabled={!isAddEnabled}
           >
@@ -4983,7 +5585,7 @@ const handleDateChange = (date) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{backgroundColor: buttonColors[2] }}
+            style={{ background: color }}
             onClick={handlePrevious}
             disabled={!isPreviousEnabled}
           >
@@ -4991,7 +5593,7 @@ const handleDateChange = (date) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{backgroundColor: buttonColors[3] }}
+            style={{ background: color }}
             onClick={handleNext}
             disabled={!isNextEnabled}
           >
@@ -4999,7 +5601,7 @@ const handleDateChange = (date) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[4] }}
+            style={{ background: color }}
             onClick={handleFirst}
             disabled={!isFirstEnabled}
           >
@@ -5007,7 +5609,7 @@ const handleDateChange = (date) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[5] }}
+            style={{ background: color }}
             onClick={handleLast}
             disabled={!isLastEnabled}
           >
@@ -5015,32 +5617,38 @@ const handleDateChange = (date) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{  backgroundColor: buttonColors[6] }}
+            style={{ background: color }}
             disabled={!isSearchEnabled}
+            onClick={() => {
+              fetchAllBills();
+              setShowSearch(true);
+            }}
           >
             Search
           </Button>
           <Button
             ref={printButtonRef}
             className="Buttonz"
-            // onClick={handleOpen}
             onClick={openPrintMenu}
-            style={{  backgroundColor: buttonColors[7] }}
+            style={{ background: color }}
             disabled={!isPrintEnabled}
           >
             Print
           </Button>
-          <BillPrintMenu 
-          isOpen={isMenuOpen} 
-          onClose={closePrintMenu} 
-          preview={handleOpen} 
-          formDataSale={formData}
-          handlePrint={handlePrintClick}
-          setSelectedCopies={setSelectedCopies}
-           />
+
+          <BillPrintMenu
+            isOpen={isMenuOpen}
+            onClose={closePrintMenu}
+            preview={handleOpen}
+            formDataSale={formData}
+            handlePrint={handlePrintClick}
+            setSelectedCopies={setSelectedCopies}
+            onFaView={handleViewFAVoucher}
+          />
+
           <Button
             className="delete"
-            style={{ backgroundColor: buttonColors[8] }}
+            style={{ background: color }}
             onClick={handleDeleteClick}
             disabled={!isDeleteEnabled}
           >
@@ -5048,7 +5656,7 @@ const handleDateChange = (date) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ backgroundColor: buttonColors[9] }}
+            style={{ background: color }}
             onClick={handleExit}
           >
             Exit
@@ -5056,14 +5664,91 @@ const handleDateChange = (date) => {
           <Button
             ref={saveButtonRef}
             className="Buttonz"
-            // onClick={handleDataSave}
-            disabled={!isSubmitEnabled}
-            style={{ backgroundColor: buttonColors[10] }}
+            onClick={handleDataSave}
+            disabled
+            style={{ background: color }}
           >
             Save
           </Button>
         </div>
       </div>
+      {/* Search Modal */}
+      <Modal show={showSearch} onHide={() => setShowSearch(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Search</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <Form.Control
+              type="text"
+              placeholder="Enter Bill No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+            />
+            <DatePicker
+              selected={searchDate}
+              onChange={(date) => setSearchDate(date)}
+              placeholderText="Select Date"
+              dateFormat="dd-MM-yyyy"
+              className="form-control"
+            />
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchBillNo("");
+                setSearchDate(null);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>BillNo</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>City</th>
+                  <th>GrandTotal</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredBills.map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.formData.vbillno}</td>
+                    <td>
+                      {new Date(bill.formData.date).toLocaleDateString("en-GB")}
+                    </td>
+                    <td>{bill.customerDetails?.[0]?.vacode}</td>
+                    <td>{bill.customerDetails?.[0]?.city}</td>
+                    <td>{bill.formData.grandtotal}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          handleSelectBill(bill);
+                          setShowSearch(false);
+                        }}
+                      >
+                        Select
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

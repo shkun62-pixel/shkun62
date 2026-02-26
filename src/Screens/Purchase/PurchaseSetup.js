@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
+import PurWin from "./PurWin";
 
 const PurchaseSetup = ({ onClose }) => {
   const { company } = useContext(CompanyContext);
@@ -261,6 +262,16 @@ const PurchaseSetup = ({ onClose }) => {
       ...prev,
       reportformat: e.target.value,
     }));
+  };
+
+  const [openPurWin, setOpenPurWin] = useState(false);
+
+  const handleOpen = () => {
+    setOpenPurWin(true);
+  };
+
+  const handleClose = () => {
+    setOpenPurWin(false);
   };
 
   // FETCH DATA
@@ -5128,6 +5139,19 @@ const PurchaseSetup = ({ onClose }) => {
             >
               {"CLOSE"}
             </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ backgroundColor: "#1d92f1", color: "#fff" }}
+              onClick={handleOpen}
+            >
+              PURCHASE SERIES
+            </Button>
+
+            <PurWin
+              isOpen={openPurWin}
+              onClose={handleClose}
+            />
           </Stack>
         </form>
       </div>

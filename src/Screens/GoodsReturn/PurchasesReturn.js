@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,forwardRef } from "react";
 import "../Purchase/Purchase.css";
-import DatePicker from "react-datepicker";
+import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ProductModal from "../Modals/ProductModal";
@@ -24,9 +25,21 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BillPrintMenu from "../Modals/BillPrintMenu";
 import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../Shared/useCompanySetup";
+import { Modal, Form } from "react-bootstrap";
+import useTdsApplicable from "../Shared/useTdsApplicable";
+import { useNavigate, useLocation } from "react-router-dom";
+import FAVoucherModal from "../Shared/FAVoucherModal";
+import useShortcuts from "../Shared/useShortcuts";
+
+const LOCAL_STORAGE_KEY = "TABLEdataVisibility";
 
 const CreditNote = () => {
-  const { CompanyState } = useCompanySetup();
+
+  const location = useLocation();
+  const purId = location.state?.purId;
+  const navigate = useNavigate();
+  const { applicable194Q } = useTdsApplicable();
+  const { CompanyState, unitType } = useCompanySetup();
   const [selectedInvoice, setSelectedInvoice] = useState("InvoicePDFPur");
   const invoiceComponents = {
     InvoicePDFPur,
@@ -38,7 +51,7 @@ const CreditNote = () => {
 
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-    const tenant = "shkun_05062025_05062026"
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026"
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -50,13 +63,17 @@ const CreditNote = () => {
   const [title, setTitle] = useState("(View)");
   const [currentIndex, setCurrentIndex] = useState(null);
   const itemCodeRefs = useRef([]);
+  const tableContainerRef = useRef(null);
   const datePickerRef = useRef([]);
+  const dueDateRef = useRef([]);
+  const voucherNoRef = useRef(null);
   const desciptionRefs = useRef([]);
   const peciesRefs = useRef([]);
   const quantityRefs = useRef([]);
   const priceRefs = useRef([]);
   const amountRefs = useRef([]);
   const discountRef = useRef([]);
+  const discount2Ref = useRef([]);
   const othersRefs = useRef([]);
   const cgstRefs = useRef([]);
   const sgstRefs = useRef([]);
@@ -67,6 +84,7 @@ const CreditNote = () => {
   const expAfterGSTRef = useRef(null);
   const printButtonRef = useRef(null);
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   // const handleClose = () => setOpen(false);
@@ -90,6 +108,7 @@ const CreditNote = () => {
     vtype: "P",
     vno: 0,
     vbillno: 0,
+    vbdate:"",
     exfor: "",
     trpt: "",
     p_entry: "",
@@ -146,70 +165,155 @@ const CreditNote = () => {
       Add1: "",
       city: "",
       state: "",
+      bsGroup:"",
       Tcs206c1H: "",
       TDS194Q: "",
     },
   ]);
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      vcode: "",
-      sdisc: "",
-      Units: "",
-      pkgs: "",
-      weight: "",
-      rate: 0,
-      amount: 0,
-      disc: "",
-      discount: "",
-      gst: 0,
-      Pcodes01: "",
-      Pcodess: "",
-      Scodes01: "",
-      Scodess: "",
-      Exp_rate1: 0,
-      Exp_rate2: 0,
-      Exp_rate3: 0,
-      Exp_rate4: 0,
-      Exp_rate5: 0,
-      Exp1: 0,
-      Exp2: 0,
-      Exp3: 0,
-      Exp4: 0,
-      Exp5: 0,
-      RateCal: "",
-      Qtyperpc: 0,
-      exp_before: 0,
-      ctax: 0,
-      stax: 0,
-      itax: 0,
-      tariff: "",
-      vamt: 0,
-    },
-  ]);
+  const MIN_ROWS = 5;
+
+  const createEmptyRow = (id, expRates = {}) => ({
+    id,
+    vcode: "",
+    sdisc: "",
+    Units: "",
+    pkgs: "0",
+    weight: "0",
+    rate: "0",
+    amount: "0",
+    disc: 0,
+    discount: "",
+    gst: 0,
+    RateCal:"",
+    Qtyperpc:0,
+    Pcodes01: "",
+    Pcodess: "",
+    Scodes01: "",
+    Scodess: "",
+    Exp_rate1: expRates.ExpRate1 ?? 0,
+    Exp_rate2: expRates.ExpRate2 ?? 0,
+    Exp_rate3: expRates.ExpRate3 ?? 0,
+    Exp_rate4: expRates.ExpRate4 ?? 0,
+    Exp_rate5: expRates.ExpRate5 ?? 0,
+    Exp1: 0,
+    Exp2: 0,
+    Exp3: 0,
+    Exp4: 0,
+    Exp5: 0,
+    exp_before: 0,
+    ctax: "0.00",
+    stax: "0.00",
+    itax: "0.00",
+    tariff: "",
+    vamt: "0.00",
+  });
+
+  const normalizeItems = (items = [], expRates = {}) => {
+    const rows = [...items];
+
+    while (rows.length < MIN_ROWS) {
+      rows.push(createEmptyRow(rows.length + 1, expRates));
+    }
+
+    return rows;
+  };
+
+  const [items, setItems] = useState(() => normalizeItems());
+  // const [items, setItems] = useState([
+  //   {
+  //     id: 1,
+  //     vcode: "",
+  //     sdisc: "",
+  //     Units: "",
+  //     pkgs: "",
+  //     weight: "",
+  //     rate: 0,
+  //     amount: 0,
+  //     disc: "",
+  //     discount: "",
+  //     gst: 0,
+  //     Pcodes01: "",
+  //     Pcodess: "",
+  //     Scodes01: "",
+  //     Scodess: "",
+  //     Exp_rate1: 0,
+  //     Exp_rate2: 0,
+  //     Exp_rate3: 0,
+  //     Exp_rate4: 0,
+  //     Exp_rate5: 0,
+  //     Exp1: 0,
+  //     Exp2: 0,
+  //     Exp3: 0,
+  //     Exp4: 0,
+  //     Exp5: 0,
+  //     RateCal: "",
+  //     Qtyperpc: 0,
+  //     exp_before: 0,
+  //     ctax: 0,
+  //     stax: 0,
+  //     itax: 0,
+  //     tariff: "",
+  //     vamt: 0,
+  //   },
+  // ]);
 
   useEffect(() => {
-    if (addButtonRef.current) {
+    if (addButtonRef.current && !purId) {
       addButtonRef.current.focus();
     }
   }, []);
 
+    const defaultTableFields = {
+      itemcode: true,
+      sdisc: true,
+      hsncode: true,
+      pcs: true,
+      qty: true,
+      rate: true,
+      amount: true,
+      discount: false,
+      others: true,
+      gst:false,
+      cgst: true,
+      sgst: true,
+      igst: true,
+    };
+    
+    const [tableData, settableData] = useState(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+    
+    // Only keep keys that exist in defaultFormData
+    const sanitized = Object.fromEntries(
+      Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+        Object.hasOwn(defaultTableFields, key)
+      )
+    );
+    
+    return sanitized;
+  });
+  
+  
+    // Save to localStorage whenever tableData changes
+    useEffect(() => {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tableData));
+    }, [tableData]);
+  
+    const handleCheckboxChange = (field) => {
+      settableData((prev) => ({ ...prev, [field]: !prev[field] }));
+    };
+    
   const customerNameRef = useRef(null);
   const grNoRef = useRef(null);
+  const vbDateRef = useRef(null);
   const termsRef = useRef(null);
   const vehicleNoRef = useRef(null);
   const selfInvRef = useRef(null);
   const vBillNoRef = useRef(null);
   const tableRef = useRef(null);
 
-  useEffect(() => {
-    if (customerNameRef.current) {
-      customerNameRef.current.focus();
-    }
-  }, []);
-
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
@@ -224,6 +328,7 @@ const CreditNote = () => {
     }
   };
 
+  const [purchaseData, setPurchaseData] = useState([]);
   const [T11, setT11] = useState(false); // State to hold T11 value
   const [T12, setT12] = useState(false); // State to hold T11 value
   const [pkgsValue, setpkgsValue] = useState(3);
@@ -277,7 +382,7 @@ const CreditNote = () => {
   const fetchPurSetup = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchasesetup`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchasesetup`
       );
       if (!response.ok) throw new Error("Failed to fetch sales setup");
 
@@ -337,7 +442,7 @@ const CreditNote = () => {
         setSelectedInvoice(formDataFromAPI.reportformat);
         setSupplyType(formDataFromAPI.conv);
         setDefaultbutton(formDataFromAPI.T14);
-        // Update T21 and T12 states
+        // Update T11 and T12 states
         setT12(T12Value === "Yes");
         setT11(T11Value === "Yes");
       } else {
@@ -364,17 +469,17 @@ const CreditNote = () => {
     Defaultbutton
   ]);
 
-  // Getting UnitType From the Company Setup
-  const getUnitTypeFromLocalStorage = () => {
-    const companySetup = localStorage.getItem("companySetup");
-    if (companySetup) {
-      const parsedData = JSON.parse(companySetup);
-      return parsedData?.formData?.unitType || ""; // Safely access unitType or return an empty string if not found
-    }
-    return ""; // Return an empty string if no data in localStorage
-  };
-  // Usage
-  const unitType = getUnitTypeFromLocalStorage();
+  useEffect(() => {
+    setItems((prev) =>
+      normalizeItems(prev, {
+        ExpRate1,
+        ExpRate2,
+        ExpRate3,
+        ExpRate4,
+        ExpRate5,
+      })
+    );
+  }, [ExpRate1, ExpRate2, ExpRate3, ExpRate4, ExpRate5]);
 
   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
     let totalValue = 0;
@@ -428,98 +533,137 @@ const CreditNote = () => {
     const Exp1Multiplier9 = Pos9 === "-Ve" ? -1 : 1;
     const Exp1Multiplier10 = Pos10 === "-Ve" ? -1 : 1;
 
-    if (CalExp6 === "P" || CalExp6 === "p") {
-      exp6 = (totalpcs * exp6Rate) / 100 || 0;
-    } else if (CalExp6 === "W" || CalExp6 === "w") {
-      exp6 = (totalQty * exp6Rate) / 100 || 0;
-    } else if (CalExp6 === "V" || CalExp6 === "V" || CalExp6 === "") {
-      exp6 = (subTotal * exp6Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp6) {
+      exp6 = parseFloat(formDataOverride.Exp6) || 0;
+    } else {
+      if (CalExp6 === "P" || CalExp6 === "p") {
+        exp6 = (totalpcs * exp6Rate) / 100 || 0;
+      } else if (CalExp6 === "W" || CalExp6 === "w") {
+        exp6 = (totalQty * exp6Rate) / 100 || 0;
+      } else {
+        exp6 = (subTotal * exp6Rate) / 100 || 0;
+      }
     }
-    exp6 *= Exp1Multiplier6; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp6 = exp6.toFixed(2);
+    exp6 *= Exp1Multiplier6;
+    if (!formDataOverride._manual_Exp6) {
+      formDataOverride.Exp6 = exp6.toFixed(2);
+    }
+
     // EXP 7
-    if (CalExp7 === "P" || CalExp7 === "p") {
-      exp7 = (totalpcs * exp7Rate) / 100 || 0;
-    } else if (CalExp7 === "W" || CalExp7 === "w") {
-      exp7 = (totalQty * exp7Rate) / 100 || 0;
-    } else if (CalExp7 === "V" || CalExp7 === "V" || CalExp7 === "") {
-      exp7 = (subTotal * exp7Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp7) {
+      exp7 = parseFloat(formDataOverride.Exp7) || 0;
+    } else {
+      if (CalExp7 === "P" || CalExp7 === "p") {
+        exp7 = (totalpcs * exp7Rate) / 100 || 0;
+      } else if (CalExp7 === "W" || CalExp7 === "w") {
+        exp7 = (totalQty * exp7Rate) / 100 || 0;
+      } else {
+        exp7 = (subTotal * exp7Rate) / 100 || 0;
+      }
     }
-    exp7 *= Exp1Multiplier7; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp7 = exp7.toFixed(2);
+
+    exp7 *= Exp1Multiplier7;
+      if (!formDataOverride._manual_Exp7) {
+      formDataOverride.Exp7 = exp7.toFixed(2);
+    }
+
     // EXP 8
-    if (CalExp8 === "P" || CalExp8 === "p") {
-      exp8 = (totalpcs * exp8Rate) / 100 || 0;
-    } else if (CalExp8 === "W" || CalExp8 === "w") {
-      exp8 = (totalQty * exp8Rate) / 100 || 0;
-    } else if (CalExp8 === "V" || CalExp8 === "V" || CalExp8 === "") {
-      exp8 = (subTotal * exp8Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp8) {
+      exp8 = parseFloat(formDataOverride.Exp8) || 0;
+    } else {
+      if (CalExp8 === "P" || CalExp8 === "p") {
+        exp8 = (totalpcs * exp8Rate) / 100 || 0;
+      } else if (CalExp8 === "W" || CalExp8 === "w") {
+        exp8 = (totalQty * exp8Rate) / 100 || 0;
+      } else {
+        exp8 = (subTotal * exp8Rate) / 100 || 0;
+      }
     }
-    exp8 *= Exp1Multiplier8; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp8 = exp8.toFixed(2);
+
+    exp8 *= Exp1Multiplier8;
+      if (!formDataOverride._manual_Exp8) {
+      formDataOverride.Exp8 = exp8.toFixed(2);
+    }
+
     // EXP 9
-    if (CalExp9 === "P" || CalExp9 === "p") {
-      exp9 = (totalpcs * exp9Rate) / 100 || 0;
-    } else if (CalExp9 === "W" || CalExp9 === "w") {
-      exp9 = (totalQty * exp9Rate) / 100 || 0;
-    } else if (CalExp9 === "V" || CalExp9 === "V" || CalExp9 === "") {
-      exp9 = (subTotal * exp9Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp9) {
+      exp9 = parseFloat(formDataOverride.Exp9) || 0;
+    } else {
+      if (CalExp9 === "P" || CalExp9 === "p") {
+        exp9 = (totalpcs * exp9Rate) / 100 || 0;
+      } else if (CalExp9 === "W" || CalExp9 === "w") {
+        exp9 = (totalQty * exp9Rate) / 100 || 0;
+      } else {
+        exp9 = (subTotal * exp9Rate) / 100 || 0;
+      }
     }
-    exp9 *= Exp1Multiplier9; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp9 = exp9.toFixed(2);
+
+    exp9 *= Exp1Multiplier9;
+      if (!formDataOverride._manual_Exp9) {
+      formDataOverride.Exp9 = exp9.toFixed(2);
+    }
+
     // EXP 10
-    if (CalExp10 === "P" || CalExp10 === "p") {
-      exp10 = (totalpcs * exp10Rate) / 100 || 0;
-    } else if (CalExp10 === "W" || CalExp10 === "w") {
-      exp10 = (totalQty * exp10Rate) / 100 || 0;
-    } else if (CalExp10 === "V" || CalExp10 === "V" || CalExp10 === "") {
-      exp10 = (subTotal * exp10Rate) / 100 || 0;
+    if (formDataOverride._manual_Exp10) {
+      exp10 = parseFloat(formDataOverride.Exp10) || 0;
+    } else {
+      if (CalExp10 === "P" || CalExp10 === "p") {
+        exp10 = (totalpcs * exp10Rate) / 100 || 0;
+      } else if (CalExp10 === "W" || CalExp10 === "w") {
+        exp10 = (totalQty * exp10Rate) / 100 || 0;
+      } else {
+        exp10 = (subTotal * exp10Rate) / 100 || 0;
+      }
     }
-    exp10 *= Exp1Multiplier10; // Apply negative only for Exp if Pos is "-Ve"
-    formDataOverride.Exp10 = exp10.toFixed(2);
+
+    exp10 *= Exp1Multiplier10;
+      if (!formDataOverride._manual_Exp10) {
+      formDataOverride.Exp10 = exp10.toFixed(2);
+    }
+
 
     // Calculate Total Expenses
     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
 
     let gstTotal = cgstTotal + sgstTotal + igstTotal;
-    let grandTotal =
-      totalValue + gstTotal + totalOthers + totalExpenses - totalDis;
+    let grandTotal = totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
+    // let grandTotal = totalValue + gstTotal + totalOthers + totalExpenses - totalDis;
+    let taxable = parseFloat(formDataOverride.sub_total);
     // ✅ Skip TCS Calculation if skipTCS is true
     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
-    let tcs1 = skipTCS ? parseFloat(formDataOverride.tcs1) : 0;
-    let tcs1Rate = skipTCS ? parseFloat(formDataOverride.tcs1_rate) : 0;
+    let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
+    let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
     let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
     let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
 
-    if (!skipTCS && unitType === "Trading") {
-      tcs206 = (grandTotal * 1) / 100; // 1% TCS
-      tcs206Rate = 1;
-      grandTotal += tcs206;
-    } else if (skipTCS) {
-      grandTotal += parseFloat(tcs206); // Add existing TCS to grand total
-    }
-
-    const isTcs206c1HYes =
-      supplierdetails?.some(
-        (cust) => cust.Tcs206c1H?.toLowerCase() === "yes"
-      ) || false;
-    if (!skipTCS && isTcs206c1HYes) {
-      tcs1 = (grandTotal * 0.1) / 100; // 0.1%
-      tcs1Rate = 0.1;
+    if (!skipTCS) {
+      tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
       grandTotal += tcs1;
     } else if (skipTCS) {
       grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
     }
 
-    const isTDS149QYes =
-      supplierdetails?.some((cust) => cust.TDS194Q?.toLowerCase() === "yes") ||
-      false;
-    if (!skipTCS && isTDS149QYes) {
-      srv_tax = (grandTotal * 2) / 100; // 2%
-      srvRate = 2;
+    if (!skipTCS && applicable194Q === "Above 10 Crore") {
+      srv_tax = (taxable * 0.1) / 100;
+      srvRate = 0.1;
       // grandTotal += srv_tax;
     }
+    // const isTcs206c1HYes =supplierdetails?.some( (cust) => cust.Tcs206c1H?.toLowerCase() === "yes") || false;
+    // if (!skipTCS && isTcs206c1HYes) {
+    //   tcs1 = (grandTotal * 0.1) / 100; // 0.1%
+    //   tcs1Rate = 0.1;
+    //   grandTotal += tcs1;
+    // } else if (skipTCS) {
+    //   grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
+    // }
+
+    // const isTDS149QYes = supplierdetails?.some((cust) => cust.TDS194Q?.toLowerCase() === "yes") || false;
+    // if (!skipTCS && isTDS149QYes) {
+    //   srv_tax = (grandTotal * 2) / 100; // 2%
+    //   srvRate = 2;
+    //   // grandTotal += srv_tax;
+    // }
 
     let cTds = 0,
       sTds = 0,
@@ -532,7 +676,7 @@ const CreditNote = () => {
         item.tariff &&
         applicableTariffs.some((tariff) => item.tariff.startsWith(tariff))
       ) {
-        if (gstNumber === same) {
+        if (CompanyState == supplierdetails[0].state) {
           cTds = totalValue * 0.01;
           sTds = totalValue * 0.01;
           tcspercentage = "2%";
@@ -597,7 +741,7 @@ const CreditNote = () => {
 
   useEffect(() => {
     setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T11, T12]);
+  }, [items, T11, T12, formData.tcs1_rate]);
 
   // Api Response
   const [data, setData] = useState([]);
@@ -622,37 +766,120 @@ const CreditNote = () => {
   const [shouldFocusPrint, setShouldFocusPrint] = useState(false); // 👈 New flag to track
   const [shouldFocusAdd, setShouldFocusAdd] = useState(false); // 👈 New flag to track
 
+    // 👇 Sync vbdate with date when not in ABC mode
+  useEffect(() => {
+    if (!isAbcmode) {
+      setFormData((prev) => ({
+        ...prev,
+        vbdate: prev.date,
+        duedate: prev.date,
+      }));
+    }
+  }, [formData.date, isAbcmode]);
+
+  // state
+  const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+  
+  // when user clicks “FA VOUCHER VIEW” inside BillPrintMenu
+  const handleViewFAVoucher = () => {
+    // we need a voucher number for FA — you’re using formData.vno for FA entries
+    if (!formData?.vno) {
+      toast.info("No voucher number found.", { position: "top-center" });
+      return;
+    }
+    setIsFAModalOpen(true);
+  };
+
   useEffect(() => {
     const hasVcode =
       isEditMode && items.some((item) => String(item.vcode).trim() !== "");
     setIsSubmitEnabled(hasVcode);
   }, [items]);
 
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
+
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
+
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
-      );
-      // console.log("Response: ", response.data);
+      let response;
+      if (purId) {
+        console.log(purId);
+        
+        response = await axios.get(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstget/${purId}`
+        );
+      } else {
+        response = await axios.get(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
+        );
+      }
+      // const response = await axios.get(
+      //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
+      // );
 
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
-        // Ensure date is valid
-        const isValidDate = (date) => {
-          return !isNaN(Date.parse(date));
-        };
-
-        // Update form data, use current date if date is invalid or not available
+      
         const updatedFormData = {
           ...lastEntry.formData,
-          date: isValidDate(lastEntry.formData.date)
-            ? lastEntry.formData.date
-            : new Date().toLocaleDateString("en-IN"),
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(lastEntry.formData.vbdate),
         };
 
         setFirstTimeCheckData("DataAvailable");
         setFormData(updatedFormData);
-        //console.log(updatedFormData, "Formdata2");
 
         // Update items and supplier details
         const updatedItems = lastEntry.items.map((item) => ({
@@ -661,7 +888,8 @@ const CreditNote = () => {
         const updatedCustomer = lastEntry.supplierdetails.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        // setItems(updatedItems);
+        setItems(normalizeItems(lastEntry.items));
         setsupplierdetails(updatedCustomer);
 
         // Set custGst from the supplier details
@@ -671,7 +899,9 @@ const CreditNote = () => {
 
         // Set data and index
         setData1({ ...lastEntry, formData: updatedFormData });
-        setIndex(lastEntry.vno);
+        // setData1({ ...lastEntry, formData: updatedFormData });
+         setIndex(lastEntry.formData.vno);
+        // setIndex(lastEntry.vno);
         return lastEntry; // ✅ Return this for use in handleAdd
       } else {
         setFirstTimeCheckData("DataNotAvailable");
@@ -689,10 +919,11 @@ const CreditNote = () => {
   const initializeEmptyData = () => {
     // Default date as current date
     const emptyFormData = {
-      date: new Date().toLocaleDateString(), // Use today's date
+      date: "", // Use today's date
       vtype: "P",
       vno: 0,
       vbillno: 0,
+      vbdate:"",
       exfor: "",
       trpt: "",
       p_entry: "",
@@ -747,6 +978,8 @@ const CreditNote = () => {
         disc: "",
         discount: "",
         gst: 0,
+        RateCal:"",
+        Qtyperpc:0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
@@ -779,13 +1012,15 @@ const CreditNote = () => {
         Add1: "",
         city: "",
         state: "",
+        bsGroup:"",
         Tcs206c1H: "",
         TDS194Q: "",
       },
     ];
     // Set the empty data
     setFormData(emptyFormData);
-    setItems(emptyItems);
+    setItems(normalizeItems([]));
+    // setItems(emptyItems);
     setsupplierdetails(emptysupplier);
     setData1({
       formData: emptyFormData,
@@ -797,7 +1032,28 @@ const CreditNote = () => {
 
   useEffect(() => {
     fetchData(); // Fetch data when component mounts
-  }, []); // Empty dependency array ensures it only runs once when component mounts
+  }, []);
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && !isEditMode && purId) {
+        const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
+
+        navigate(-1); // go back
+        setTimeout(() => {
+          // restore modal state after navigation
+          if (modalState.keepModalOpen) {
+            window.dispatchEvent(
+              new CustomEvent("reopenTrailModal", { detail: modalState })
+            );
+          }
+        }, 50);
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isEditMode]);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -811,6 +1067,99 @@ const CreditNote = () => {
     setIsDisabled(true);
   }, []);
 
+  // Modal & Search states
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [searchDate, setSearchDate] = useState(""); // DD-MM-YYYY
+  const billNoRef = useRef(null);
+  const dateRef = useRef(null);
+  const proceedRef = useRef(null);
+  useEffect(() => {
+    if (showSearch) {
+      setTimeout(() => billNoRef.current?.focus(), 100);
+    }
+  }, [showSearch]);
+
+  // 🔹 Fetch all bills
+  const fetchAllBills = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
+      );
+      if (Array.isArray(res.data)) {
+        setAllBills(res.data);
+        setFilteredBills([]); // empty until Proceed
+      }
+    } catch (error) {
+      console.error("Error fetching bills", error);
+    }
+  };
+
+  // 🔹 Proceed button logic
+  const handleProceed = () => {
+    // ✅ Require at least one filter
+    if (searchBillNo.trim() === "" && searchDate.trim() === "") {
+      alert("Please enter Bill No or Date to proceed.");
+      return; // stop execution
+    }
+
+    let filtered = allBills;
+
+    // Filter by Bill No
+    if (searchBillNo.trim() !== "") {
+      filtered = filtered.filter((bill) =>
+        bill.formData.vno.toString().includes(searchBillNo.trim())
+      );
+    }
+
+    // Filter by Date (DD-MM-YYYY)
+    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
+      filtered = filtered.filter((bill) => {
+        const billDate = formatDateToDDMMYYYY(bill.formData.date);
+        return billDate === searchDate;
+      });
+    }
+
+    setFilteredBills(filtered);
+  };
+
+  // 🔹 Select bill
+  const handleSelectBill = (bill) => {
+    setFormData({
+      ...bill.formData,
+      date: formatDateToDDMMYYYY(bill.formData.date),
+      duedate: formatDateToDDMMYYYY(bill.formData.duedate),
+      vbdate: formatDateToDDMMYYYY(bill.formData.vbdate),
+    });
+    setsupplierdetails(bill.supplierdetails);
+    setItems(normalizeItems(bill.items));
+    setShowSearch(false);
+    setFilteredBills([]);
+    setSearchBillNo("");
+    setSearchDate("");
+  };
+
+  const fetchVoucherNumbers = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last-voucherno`
+      );
+
+      return {
+        lastVno: res?.data?.lastVno || 0,
+        nextVno: res?.data?.nextVno || 1,
+      };
+    } catch (error) {
+      console.error("Error fetching voucher numbers:", error);
+      toast.error("Unable to fetch voucher number", {
+        position: "top-center",
+      });
+      return null;
+    }
+  };
+
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("(View)");
@@ -818,13 +1167,18 @@ const CreditNote = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}/next`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/${data1._id}/next`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
           setData1(nextData);
           setIndex(index + 1);
-          setFormData(nextData.formData);
+          setFormData({
+          ...nextData.formData,
+          date: formatDateToDDMMYYYY(nextData.formData.date),
+          duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(nextData.formData.vbdate),
+          });
 
           // Update items and supplier details
           const updatedItems = nextData.items.map((item) => ({
@@ -833,7 +1187,7 @@ const CreditNote = () => {
           const updatedCustomer = nextData.supplierdetails.map((item) => ({
             ...item,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setsupplierdetails(updatedCustomer);
 
           // Set custGst from the supplier details
@@ -856,13 +1210,18 @@ const CreditNote = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}/previous`
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/${data1._id}/previous`
         );
         if (response.status === 200 && response.data) {
           const prevData = response.data.data;
           setData1(prevData);
           setIndex(index - 1);
-          setFormData(prevData.formData);
+          setFormData({
+          ...prevData.formData,
+          date: formatDateToDDMMYYYY(prevData.formData.date),
+          duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(prevData.formData.vbdate),
+          });
 
           // Update items and supplier details
           const updatedItems = prevData.items.map((item) => ({
@@ -871,7 +1230,7 @@ const CreditNote = () => {
           const updatedCustomer = prevData.supplierdetails.map((item) => ({
             ...item,
           }));
-          setItems(updatedItems);
+          setItems(normalizeItems(updatedItems));
           setsupplierdetails(updatedCustomer);
 
           // Set custGst from the supplier details
@@ -892,13 +1251,18 @@ const CreditNote = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/first`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
         setData1(firstData);
         setIndex(0);
-        setFormData(firstData.formData);
+        setFormData({
+          ...firstData.formData,
+          date: formatDateToDDMMYYYY(firstData.formData.date),
+          duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(firstData.formData.vbdate),
+        });
 
         // Update items and supplier details
         const updatedItems = firstData.items.map((item) => ({
@@ -907,7 +1271,7 @@ const CreditNote = () => {
         const updatedCustomer = firstData.supplierdetails.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setsupplierdetails(updatedCustomer);
 
         // Set custGst from the supplier details
@@ -928,14 +1292,19 @@ const CreditNote = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
         setData1(lastData);
         const lastIndex = response.data.length - 1;
         setIndex(lastIndex);
-        setFormData(lastData.formData);
+        setFormData({
+          ...lastData.formData,
+          date: formatDateToDDMMYYYY(lastData.formData.date),
+          duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(lastData.formData.vbdate),
+        });
 
         // Update items and supplier details
         const updatedItems = lastData.items.map((item) => ({
@@ -944,7 +1313,7 @@ const CreditNote = () => {
         const updatedCustomer = lastData.supplierdetails.map((item) => ({
           ...item,
         }));
-        setItems(updatedItems);
+        setItems(normalizeItems(updatedItems));
         setsupplierdetails(updatedCustomer);
 
         // Set custGst from the supplier details
@@ -959,23 +1328,35 @@ const CreditNote = () => {
     }
   };
 
+  const getTodayDDMMYYYY = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
   const handleAdd = async () => {
     try {
-     const lastEntry = await fetchData();
-     const lastvoucherno = lastEntry?.formData?.vno ? parseInt(lastEntry.formData.vno) + 1 : 1;
-      let lastBillno = formData.vbillno ? parseInt(formData.vbillno) + 1 : 1;
-      const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
+
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
+
+      const lastvoucherno = voucherData.nextVno;
+      const lastvno = voucherData.nextVno;
+      
       const newData = {
-        date: today,
+        date: getTodayDDMMYYYY(),
         vtype: "P",
         vno: lastvoucherno,
         vbillno: "",
+        vbdate: getTodayDDMMYYYY(),
         exfor: "",
         trpt: "",
         p_entry: "",
         stype: "",
         btype: "",
-        conv: SupplyType,
+        conv: "",
         vacode1: "",
         rem2: "",
         v_tpt: "",
@@ -986,7 +1367,7 @@ const CreditNote = () => {
         tcs1: 0,
         tcs206_rate: 0,
         tcs206: 0,
-        duedate: "",
+        duedate: getTodayDDMMYYYY(),
         gr: "",
         tdson: "",
         pcess: 0,
@@ -1017,41 +1398,15 @@ const CreditNote = () => {
       };
       setData([...data, newData]);
       setFormData(newData);
-      setItems([
-        {
-          id: 1,
-          vcode: "",
-          sdisc: "",
-          Units: "",
-          pkgs: 0,
-          weight: 0,
-          rate: 0,
-          amount: 0,
-          disc: "",
-          discount: "",
-          gst: 0,
-          Pcodes01: "",
-          Pcodess: "",
-          Scodes01: "",
-          Scodess: "",
-          Exp_rate1: ExpRate1 || 0,
-          Exp_rate2: ExpRate2 || 0,
-          Exp_rate3: ExpRate3 || 0,
-          Exp_rate4: ExpRate4 || 0,
-          Exp_rate5: ExpRate5 || 0,
-          Exp1: 0,
-          Exp2: 0,
-          Exp3: 0,
-          Exp4: 0,
-          Exp5: 0,
-          exp_before: 0,
-          ctax: 0,
-          stax: 0,
-          itax: 0,
-          tariff: "",
-          vamt: 0,
-        },
-      ]);
+      setItems(
+        normalizeItems([], {
+          ExpRate1,
+          ExpRate2,
+          ExpRate3,
+          ExpRate4,
+          ExpRate5,
+        })
+      );
       setsupplierdetails([
         {
           // VcodeSup
@@ -1062,6 +1417,7 @@ const CreditNote = () => {
           Add1: "",
           city: "",
           state: "",
+          bsGroup:"",
           Tcs206c1H: "",
           TDS194Q: "",
         },
@@ -1080,10 +1436,130 @@ const CreditNote = () => {
       setIsEditMode(true);
       setTitle("NEW");
       if (datePickerRef.current) {
-        datePickerRef.current.setFocus();
+        datePickerRef.current.focus();
       }
     } catch (error) {
       console.error("Error adding new entry:", error);
+    }
+  };
+
+  const handleExit = async () => {
+    // Check if grandtotal is Greater Than zero
+    if (formData.grandtotal > 0 && isEditMode) {
+      const confirmExit = window.confirm(
+        "Are you sure you want to Exit? Unsaved changes may be lost."
+      );
+      if (!confirmExit) {
+        return;
+      }
+    }
+    
+    if(!isEditMode){
+      navigate("/dashboard"); 
+      return;
+    }
+
+    setTitle("(View)");
+    try {
+      const response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/last`
+      );
+
+      if (response.status === 200 && response.data.data) {
+        const lastEntry = response.data.data;
+        setFormData({
+          ...lastEntry.formData,
+          date: formatDateToDDMMYYYY(lastEntry.formData.date),
+          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+          vbdate: formatDateToDDMMYYYY(lastEntry.formData.vbdate),
+        });
+        setData1(response.data.data);
+        setItems(normalizeItems(lastEntry.items));
+        setsupplierdetails(
+          lastEntry.supplierdetails.map((item) => ({ ...item }))
+        );
+
+        setIsDisabled(true);
+        setIndex(lastEntry.formData);
+        setIsAddEnabled(true);
+        setIsEditMode(false);
+        setIsSubmitEnabled(false);
+        setIsPreviousEnabled(true);
+        setIsNextEnabled(true);
+        setIsFirstEnabled(true);
+        setIsLastEnabled(true);
+        setIsSearchEnabled(true);
+        setIsSPrintEnabled(true);
+        setIsDeleteEnabled(true);
+      } else {
+        console.log("No data available");
+        const newData = {
+          date: "",
+          vtype: "P",
+          vno: 0,
+          vbillno: 0,
+          vbdate:"",
+          exfor: "",
+          trpt: "",
+          p_entry: "",
+          stype: "",
+          btype: "",
+          conv: "",
+          vacode1: "",
+          rem2: "",
+          v_tpt: "",
+          broker: "",
+          srv_rate: "",
+          srv_tax: "",
+          tcs1_rate: "",
+          tcs1: "",
+          tcs206_rate: "",
+          tcs206: "",
+          duedate: "",
+          gr: "",
+          tdson: "",
+          pcess: "",
+          tax: "",
+          cess1: "",
+          cess2: "",
+          sub_total: "",
+          exp_before: "",
+          Exp_rate6: "",
+          Exp_rate7: "",
+          Exp_rate8: "",
+          Exp_rate9: "",
+          Exp_rate10: "",
+          Exp6: "",
+          Exp7: "'",
+          Exp8: "",
+          Exp9: "",
+          Exp10: "",
+          cgst: "",
+          sgst: "",
+          igst: "",
+          expafterGST: "",
+          grandtotal: "",
+        };
+        setFormData(newData); // Set default form data
+        setItems(normalizeItems([]));
+        setsupplierdetails([
+          {
+            Vcode: "",
+            vacode: "",
+            gstno: "",
+            pan: "",
+            Add1: "",
+            city: "",
+            state: "",
+            bsGroup: "",
+            Tcs206c1H: "",
+            TDS194Q: "",
+          },
+        ]);
+        setIsDisabled(true);
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
     }
   };
 
@@ -1108,63 +1584,65 @@ const CreditNote = () => {
 
   const handleSaveClick = async () => {
     document.body.style.backgroundColor = "white";
-    setIsSubmitEnabled(true); // Ensure submit button is enabled initially
+    setIsSubmitEnabled(true);
     let isDataSaved = false;
 
     try {
-      // Validation: Check supplierdetails
-      const isValid = supplierdetails.every((item) => item.vacode !== "");
+      // --- 1) VALIDATIONS ---------------------------------------------------
+      const isValid = supplierdetails.every((item) => (item.vacode || "") !== "");
       if (!isValid) {
-        toast.error("Please Fill the Customer Details", {
-          position: "top-center",
-        });
+        toast.error("Please Fill the Customer Details", { position: "top-center" });
         return;
       }
 
-      // Validation: Check at least one item filled
-      const nonEmptyItems = items.filter((item) => item.sdisc.trim() !== "");
+      // --- Duplicate BILL NO check -----------------------------------------------
+      const customerName = supplierdetails[0]?.vacode;
+      const billNo = formData.vbillno;
+
+      if (!isAbcmode && checkDuplicateBill(customerName, billNo)) {
+        toast.error(`Bill No "${billNo}" already exists for customer "${customerName}".`, { 
+          position: "top-center" 
+        });
+        return; // 🚫 STOP SAVE
+      }
+      const p_entry = formData.p_entry;
+      if (!isAbcmode && checkDuplicatePEntry(p_entry)) {
+        toast.error(`Self Inv No Already exists: "${p_entry}".`, { 
+          position: "top-center" 
+        });
+        return; // 🚫 STOP SAVE
+      }
+
+      const nonEmptyItems = items.filter((item) => (item.sdisc || "").trim() !== "");
       if (nonEmptyItems.length === 0) {
-        toast.error("Please fill in at least one Items name.", {
-          position: "top-center",
-        });
+        toast.error("Please fill in at least one Items name.", { position: "top-center" });
         return;
       }
 
-      // ✅ Check for duplicate p_entry only when adding (not editing)
-      if (!isAbcmode && formData.p_entry && formData.p_entry !== "0") {
-        try {
-          const res = await axios.get(
-            "https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/purchase"
-          );
-          const allPurchases = res.data || [];
+      const voucherData = await fetchVoucherNumbers();
+      if (!voucherData) return;
 
-          const duplicate = allPurchases.find(
-            (item) => item.formData?.p_entry === formData.p_entry
-          );
-          if (duplicate) {
-            toast.error(`Self Invoice No Already Exists.`, {
-              position: "top-center",
-            });
-            return;
-          }
-        } catch (fetchError) {
-          console.error("Error checking duplicates:", fetchError);
-          toast.error("Error checking duplicate p_entry. Please try again.", {
-            position: "top-center",
-          });
-          return;
-        }
+      if (!isAbcmode && Number(formData.vno) <= Number(voucherData.lastVno)) {
+        toast.error(`Voucher No ${formData.vno} already used!`, {
+          position: "top-center",
+        });
+        setIsSubmitEnabled(true);
+        return;
       }
 
-
-      // ✅ Prepare combinedData here (use your existing combinedData logic)
+      // --- 2) BUILD PAYLOAD -------------------------------------------------
       const combinedData = {
         _id: formData._id,
         formData: {
-          date: selectedDate.toLocaleDateString("en-IN"),
+          // keep dates as locale strings; backend normalizes
+          date: formData.date,
+          duedate: formData.duedate,
+
+          // core fields
           vtype: formData.vtype,
           vno: formData.vno,
           vbillno: formData.vbillno,
+          vbdate: formData.vbdate,
           exfor: formData.exfor,
           trpt: formData.trpt,
           p_entry: formData.p_entry,
@@ -1175,15 +1653,17 @@ const CreditNote = () => {
           rem2: formData.rem2,
           v_tpt: formData.v_tpt,
           broker: formData.broker,
+
+          // TDS/TCS
           srv_rate: formData.srv_rate,
           srv_tax: formData.srv_tax,
           tcs1_rate: formData.tcs1_rate,
           tcs1: formData.tcs1,
           tcs206_rate: formData.tcs206_rate,
           tcs206: formData.tcs206,
-          duedate: expiredDate.toLocaleDateString("en-IN"),
-          gr: formData.gr,
           tdson: formData.tdson,
+
+          // taxes & totals
           pcess: formData.pcess,
           tax: formData.tax,
           cess1: formData.cess1,
@@ -1211,42 +1691,68 @@ const CreditNote = () => {
           ExpRoundoff: formData.ExpRoundoff,
           grandtotal: formData.grandtotal,
 
-          cgst_ac: setupFormData.cgst_ac,
+          // (optional) if your backend matches by these
+          fy: formData.fy,
+          series: formData.series,
+          uom_default: formData.uom_default,
+
+          // ---- Setup (Purchase) accounts
+          cgst_ac:  setupFormData.cgst_ac,
           cgst_code: setupFormData.cgst_code,
-          sgst_ac: setupFormData.sgst_ac,
+          cgst_ac1: setupFormData.cgst_ac1,
+          cgst_code1: setupFormData.cgst_code1,
+          cgst_ac2: setupFormData.cgst_ac2,
+          cgst_code2: setupFormData.cgst_code2,
+
+          sgst_ac:  setupFormData.sgst_ac,
           sgst_code: setupFormData.sgst_code,
-          igst_ac: setupFormData.igst_ac,
+          sgst_ac1: setupFormData.sgst_ac1,
+          sgst_code1: setupFormData.sgst_code1,
+          sgst_ac2: setupFormData.sgst_ac2,
+          sgst_code2: setupFormData.sgst_code2,
+
+          igst_ac:  setupFormData.igst_ac,
           igst_code: setupFormData.igst_code,
+          igst_ac1: setupFormData.igst_ac1,
+          igst_code1: setupFormData.igst_code1,
+          igst_ac2: setupFormData.igst_ac1,   // (as you had)
+          igst_code2: setupFormData.igst_code1,
 
-          expense1_code: setupFormData.E1Code,
-          expense1_ac: setupFormData.E1name,
+          Adcode: setupFormData.Adcode,
+          Ad_ac:  setupFormData.Ad_ac,
 
-          expense2_code: setupFormData.E2Code,
-          expense2_ac: setupFormData.E2name,
+          cesscode: setupFormData.cesscode,
+          cessAc:   setupFormData.cessAc,
 
-          expense3_code: setupFormData.E3Code,
-          expense3_ac: setupFormData.E3name,
+          tds_code: setupFormData.tds_code,
+          tds_ac:   setupFormData.tds_ac,
 
-          expense4_code: setupFormData.E4Code,
-          expense4_ac: setupFormData.E4name,
+          tcs_code:   setupFormData.tcs_code,
+          tcs_ac:     setupFormData.tcs_ac,
+          tcs206code: setupFormData.tcs206code,
+          tcs206ac:   setupFormData.tcs206ac,
 
-          expense5_code: setupFormData.E5Code,
-          expense5_ac: setupFormData.E5name,
+          discount_code: setupFormData.discount_code,
+          discount_ac:   setupFormData.discount_code, // kept as you had
 
-          expense6_code: setupFormData.E6Code,
-          expense6_ac: setupFormData.E6name,
+          // TDS ACCOUNTS
+          cTds_code: setupFormData.cTds_code,
+          cTds_ac: setupFormData.cTds_ac,
+          sTds_code: setupFormData.sTds_code,
+          sTds_ac: setupFormData.sTds_ac,
+          iTds_code: setupFormData.iTds_code,
+          iTds_ac: setupFormData.iTds_ac,
 
-          expense7_code: setupFormData.E7Code,
-          expense7_ac: setupFormData.E7name,
-
-          expense8_code: setupFormData.E8Code,
-          expense8_ac: setupFormData.E8name,
-
-          expense9_code: setupFormData.E9Code,
-          expense9_ac: setupFormData.E9name,
-          
-          expense10_code: setupFormData.E10Code,
-          expense10_ac: setupFormData.E10name,
+          expense1_code: setupFormData.E1Code,  expense1_ac: setupFormData.E1name,
+          expense2_code: setupFormData.E2Code,  expense2_ac: setupFormData.E2name,
+          expense3_code: setupFormData.E3Code,  expense3_ac: setupFormData.E3name,
+          expense4_code: setupFormData.E4Code,  expense4_ac: setupFormData.E4name,
+          expense5_code: setupFormData.E5Code,  expense5_ac: setupFormData.E5name,
+          expense6_code: setupFormData.E6Code,  expense6_ac: setupFormData.E6name,
+          expense7_code: setupFormData.E7Code,  expense7_ac: setupFormData.E7name,
+          expense8_code: setupFormData.E8Code,  expense8_ac: setupFormData.E8name,
+          expense9_code: setupFormData.E9Code,  expense9_ac: setupFormData.E9name,
+          expense10_code: setupFormData.E10Code, expense10_ac: setupFormData.E10name,
         },
         items: nonEmptyItems.map((item) => ({
           id: item.id,
@@ -1260,6 +1766,8 @@ const CreditNote = () => {
           disc: item.disc,
           discount: item.discount,
           gst: item.gst,
+          RateCal: item.RateCal,
+          Qtyperpc: item.Qtyperpc,
           Pcodess: item.Pcodess,
           Pcodes01: item.Pcodes01,
           Scodess: item.Scodess,
@@ -1289,56 +1797,135 @@ const CreditNote = () => {
           Add1: item.Add1,
           city: item.city,
           state: item.state,
+          bsGroup: item.bsGroup,
           Tcs206c1H: item.Tcs206c1H,
           TDS194Q: item.TDS194Q,
         })),
       };
 
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst${
-        isAbcmode ? `/${data1._id}` : ""
-      }`;
-      const method = isAbcmode ? "put" : "post";
+      // --- 3) SAVE PURCHASE GST --------------------------------------------
+      let apiEndpoint = "";
+      let method = "";
 
-      const response = await axios({
-        method,
-        url: apiEndpoint,
-        data: combinedData,
-      });
+      if (isAbcmode) {
+        // Edit Mode → use "purchasegstsave1/:id"
+        const editId = data1?._id || combinedData?._id;
+        if (!editId) {
+          toast.error("Edit id missing for update.", { position: "top-center" });
+          return;
+        }
+        apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstsave1/${editId}`;
+        method = "put";
+      } else {
+        // Add Mode → normal "purchasegstsave"
+        apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegstsave`;
+        method = "post";
+      }
+
+      const response = await axios({ method, url: apiEndpoint, data: combinedData });
+
+      // Extract the new/updated PurchaseGst id
+      const purchaseId =
+        response?.data?.purchaseId ||   // preferred (backend create returns this)
+        response?.data?._id ||          // legacy (if PUT returns doc)
+        (isAbcmode ? data1?._id : null);
+
+      if (!purchaseId) {
+        console.warn("purchaseId not found in /purchasegstsave response. Ensure backend returns { ok: true, purchaseId }.");
+      }
+
       if (response.status === 200 || response.status === 201) {
-        fetchData();
+        // --- 5) POST/PUT FA ENTRIES with purchaseId ------------------------
+        try {
+          const faMethod = isAbcmode ? "put" : "post";
+          const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasefaFile`;
+
+          await axios({
+            method: faMethod,
+            url: faUrl,
+            data: {
+              purchaseId, // ⭐ ensures we hit/update the same FAFile
+              formData: combinedData.formData,
+              items: combinedData.items,
+              supplierdetails: combinedData.supplierdetails,
+            },
+          });
+        } catch (faErr) {
+          console.error("purchasefaFile error:", faErr);
+          toast.warn(
+            "Purchase saved & stock updated, but FA posting failed. Try 'Post to FA' later.",
+            { position: "top-center" }
+          );
+        }
+
+        // --- 6) REFRESH + UI STATE -----------------------------------------
+        fetchData?.();
         isDataSaved = true;
       }
     } catch (error) {
       console.error("Error saving data:", error);
-      toast.error("Failed to save data. Please try again.", {
-        position: "top-center",
-      });
+      toast.error("Failed to save data. Please try again.", { position: "top-center" });
     } finally {
-      setIsSubmitEnabled(!isDataSaved); // disable if saved, keep enabled if error/duplicate
+      // setIsSubmitEnabled(!isDataSaved);
       if (isDataSaved) {
-        setTitle("View");
-        setIsAddEnabled(true);
-        setIsDisabled(true);
-        setIsEditMode(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsSearchEnabled(true);
-        setIsDeleteEnabled(true);
+        setTitle?.("View");
+        setIsSubmitEnabled(false);
+        setIsAddEnabled?.(true);
+        setIsDisabled?.(true);
+        setIsEditMode?.(false);
+        setIsPreviousEnabled?.(true);
+        setIsNextEnabled?.(true);
+        setIsFirstEnabled?.(true);
+        setIsLastEnabled?.(true);
+        setIsSPrintEnabled?.(true);
+        setIsSearchEnabled?.(true);
+        setIsDeleteEnabled?.(true);
         toast.success("Data Saved Successfully!", { position: "top-center" });
-        if (Defaultbutton === "Print") {
-          setShouldFocusPrint(true); // 👈 Signal that we should focus after enable
-        } else if (Defaultbutton === "Add") {
-          setShouldFocusAdd(true)
-        }
+        if (Defaultbutton === "Print") setShouldFocusPrint?.(true);
+        else if (Defaultbutton === "Add") setShouldFocusAdd?.(true);
       } else {
-        setIsAddEnabled(false);
-        setIsDisabled(false);
+        setIsAddEnabled?.(false);
+        setIsDisabled?.(false);
       }
     }
   };
+
+  const handleDataSave = async () => {
+    handleSaveClick();
+
+  };
+
+  const handleDeleteClick = async (id) => {
+  if (!id) {
+    toast.error("Invalid ID. Please select an item to delete.", {
+      position: "top-center",
+    });
+    return;
+  }
+
+  const userConfirmed = window.confirm(
+    "Are you sure you want to delete this item?"
+  );
+  if (!userConfirmed) return;
+
+  try {
+    // ✅ use the id passed into the function, not data1._id
+    const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/purchasegst/${data1._id}`;
+    const response = await axios.delete(apiEndpoint);
+
+    if (response.status === 200) {
+      toast.success("Data deleted successfully!", { position: "top-center" });
+      fetchData(); // Refresh the data after successful deletion
+    } else {
+      throw new Error(`Failed to delete data: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    toast.error(`Failed to delete data. Error: ${error.message}`, {
+      position: "top-center",
+    });
+  }
+};
 
   useEffect(() => {
     if (shouldFocusPrint && isPrintEnabled && printButtonRef.current) {
@@ -1350,36 +1937,6 @@ const CreditNote = () => {
       setShouldFocusAdd(false); // Reset flag
     }
   }, [isPrintEnabled,shouldFocusPrint,isAddEnabled,shouldFocusAdd]);
-
-  const handleDeleteClick = async (id) => {
-    if (!id) {
-      toast.error("Invalid ID. Please select an item to delete.", {
-        position: "top-center",
-      });
-      return;
-    }
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?"
-    );
-    if (!userConfirmed) return;
-    try {
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/${data1._id}`;
-      const response = await axios.delete(apiEndpoint);
-
-      if (response.status === 200) {
-        toast.success("Data deleted successfully!", { position: "top-center" });
-        fetchData(); // Refresh the data after successful deletion
-      } else {
-        throw new Error(`Failed to delete data: ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      toast.error(`Failed to delete data. Error: ${error.message}`, {
-        position: "top-center",
-      });
-    } finally {
-    }
-  };
 
   // Modal For Product Selection
   const [products, setProducts] = useState([]);
@@ -1412,73 +1969,128 @@ const CreditNote = () => {
     }
     setLoading(false);
   };
+    const [postingSetup, setPostingSetup] = useState({
+    isDefault: false,
+    rows: [],
+  });
+  useEffect(() => {
+    const fetchPostingSetup = async () => {
+      try {
+        const res = await axios.get(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/sale-purchase-posting-setup`,
+        );
 
-  // const fetchProducts = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/stockmaster`
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch products");
-  //     }
-  //     const data = await response.json();
-  //     // Flatten the data to make the nested formData directly accessible
-  //     const flattenedData = data.map((item) => ({
-  //       ...item.formData,
-  //       _id: item._id,
-  //       PurchaseAcc: item.PurchaseAcc,
-  //       SaleAcc: item.SaleAcc,
-  //     }));
-  //     setProducts(flattenedData);
-  //     setLoading(false);
-  //     //console.log(flattenedData);
-  //   } catch (error) {
-  //     setError(error.message);
-  //     setLoading(false);
-  //   }
-  // };
+        if (res.data?.ok) {
+          setPostingSetup({
+            isDefault: res.data.item.isDefault,
+            rows: res.data.item.rows || [],
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch posting setup", error);
+      }
+    };
 
-  const handleItemChange = (index, key, value, field) => {
+    fetchPostingSetup();
+  }, []);
+
+    const handleItemChange = (index, key, value, field) => {
     // If key is "pkgs" or "weight", allow only numbers and a single decimal point
     if (
       (key === "pkgs" ||
         key === "weight" ||
         key === "tariff" ||
         key === "rate" ||
-        key === "disc") &&
-      !/^\d*\.?\d*$/.test(value)
+        key === "disc" ||
+        key === "discount" ||
+        key === "amount") &&
+      !/^-?\d*\.?\d*$/.test(value)
     ) {
       return; // reject invalid input
     }
+
+    // Always force disc/discount to be negative
+    if (key === "disc" || key === "discount") {
+      const numeric = parseFloat(value);
+      if (!isNaN(numeric)) {
+        value = -Math.abs(numeric); // Force negative
+      }
+    }
+
     const updatedItems = [...items];
-    updatedItems[index][key] = value;
+    if (["sdisc"].includes(key)) {
+      updatedItems[index][key] = capitalizeWords(value);
+    } else {
+      updatedItems[index][key] = value;
+    }
 
     // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
       const selectedProduct = products.find(
-        (product) => product.Aheads === value
+        (product) => product.Aheads === value,
       );
+
       if (selectedProduct) {
+        // ✅ Always update these
         updatedItems[index]["vcode"] = selectedProduct.Acodes;
         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+
+        // ✅ ABC MODE special logic
+        if (isAbcmode) {
+          const mrp = parseFloat(selectedProduct.Mrps);
+
+          if (!isNaN(mrp) && mrp > 0) {
+            updatedItems[index]["rate"] = mrp;
+          }
+
+          setItems(updatedItems);
+          return; // 🚫 stop further changes
+        }
+
+        // ⬇️ Normal mode (unchanged)
         updatedItems[index]["Units"] = selectedProduct.TradeName;
         updatedItems[index]["rate"] = selectedProduct.Mrps;
         updatedItems[index]["gst"] = selectedProduct.itax_rate;
         updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-        updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-        updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-        updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+
+        if (postingSetup?.isDefault === true) {
+          const gstRate = String(selectedProduct.itax_rate);
+
+          const matchedSetup = postingSetup.rows.find(
+            (row) => String(row.gst) === gstRate,
+          );
+
+          if (matchedSetup) {
+            updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
+            updatedItems[index]["Scodess"] = matchedSetup.Scodess;
+            updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
+            updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
+          } else {
+            updatedItems[index]["Scodes01"] = "";
+            updatedItems[index]["Scodess"] = "";
+            updatedItems[index]["Pcodes01"] = "";
+            updatedItems[index]["Pcodess"] = "";
+          }
+        } else {
+          updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+        }
+
         updatedItems[index]["RateCal"] = selectedProduct.Rateins;
         updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-      } else {
-        updatedItems[index]["rate"] = ""; // Reset price if product not found
-        updatedItems[index]["gst"] = ""; // Reset gst if product not found
+        updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
       }
     }
+
     let pkgs = parseFloat(updatedItems[index].pkgs);
-    let Qtyperpkgs = updatedItems[index].Qtyperpc;
-    let AL = pkgs * Qtyperpkgs;
+    pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+    let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+    Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
+    let AL = pkgs * Qtyperpkgs || 0;
     let gst;
     if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
       updatedItems[index]["weight"] = AL.toFixed(weightValue);
@@ -1497,12 +2109,17 @@ const CreditNote = () => {
     } else {
       gst = parseFloat(updatedItems[index].gst);
     }
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
+
+    let weight = parseFloat(updatedItems[index].weight);
+    weight = isNaN(weight) ? 0 : weight;
+
+    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+    const rate = parseFloat(updatedItems[index].rate) || 0;
+
+    const totalAccordingWeight = weight * rate;
+    const totalAccordingPkgs = pkgsVal * rate;
+    const totalAccordingPkgsQty = pkgsVal * Qtyperpkgs * rate;
+
     let RateCal = updatedItems[index].RateCal;
     let TotalAcc = totalAccordingWeight; // Set a default value
 
@@ -1514,24 +2131,71 @@ const CreditNote = () => {
       RateCal === undefined
     ) {
       TotalAcc = totalAccordingWeight;
-      console.log("Default");
     } else if (RateCal === "Wt/Qty") {
       TotalAcc = totalAccordingWeight;
-      console.log("totalAccordingWeight");
+      // console.log("totalAccordingWeight");
     } else if (RateCal === "Pc/Pkgs") {
       TotalAcc = totalAccordingPkgs;
-      console.log("totalAccordingPkgs");
+      // console.log("totalAccordingPkgs");
     }
-    let others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let per = ((disc / 100) * TotalAcc).toFixed(2);
-    let Amounts = TotalAcc - per + others;
-    console.log("DISCITEM::", disc);
+    // 🔥 If user manually edits amount → recalculate rate
+    if (
+      key === "amount" &&
+      value !== "" &&
+      !isNaN(parseFloat(value)) &&
+      !value.endsWith(".")
+    ) {
+      let enteredAmount = parseFloat(value);
+      let qty = 0;
+
+      if (RateCal === "Pc/Pkgs") {
+        qty = parseFloat(updatedItems[index].pkgs) || 0;
+      } else {
+        qty = parseFloat(updatedItems[index].weight) || 0;
+      }
+
+      const currentMrp = parseFloat(updatedItems[index].curMrp);
+
+      // // ✅ STOP if MRP exists and is valid (> 0)
+      if (!isNaN(currentMrp) && currentMrp > 0) {
+        return; // ❌ Do not recalculate rate
+      }
+
+      // Otherwise recalc rate
+      if (qty > 0 && enteredAmount > 0) {
+        let newRate = enteredAmount / qty;
+
+        updatedItems[index]["rate"] = T11
+          ? Math.round(newRate).toFixed(2)
+          : newRate.toFixed(2);
+
+        TotalAcc = enteredAmount;
+      }
+    }
 
     // Ensure TotalAcc is a valid number before calling toFixed()
     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+    let others = parseFloat(updatedItems[index].exp_before) || 0;
+    let disc = parseFloat(updatedItems[index].disc) || 0;
+    let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+    let per;
+    if (key === "discount") {
+      per = manualDiscount;
+    } else {
+      per = (disc / 100) * TotalAcc;
+      updatedItems[index]["discount"] = T11
+        ? Math.round(per).toFixed(2)
+        : per.toFixed(2);
+    }
+
+    // ✅ Convert to float for reliable calculation
+    per = parseFloat(per);
+    let Amounts = TotalAcc + per + others;
+
+    // Ensure TotalAcc is a valid number before calling toFixed()
+    // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
     // Check if GST number starts with "0" to "3"
-    const same = custGst.substring(0, 2);
     let cgst, sgst, igst;
     if (CompanyState == supplierdetails[0].state) {
       cgst = (Amounts * (gst / 2)) / 100 || 0;
@@ -1541,25 +2205,29 @@ const CreditNote = () => {
       cgst = sgst = 0;
       igst = (Amounts * gst) / 100 || 0;
     }
-    // Set CGST and SGST to 0 if IGST is applied, and vice versa
-    if (igst > 0) {
-      cgst = 0;
-      sgst = 0;
-    } else {
-      igst = 0;
-    }
+
     // Calculate the total with GST and Others
-    // let rate = parseFloat(updatedItems[index].rate) || 0;
     let totalWithGST = Amounts + cgst + sgst + igst;
-    // totalWithGST += others;
     // Update CGST, SGST, Others, and total fields in the item
     if (T11) {
-      updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-      updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      if (key !== "discount") {
+        updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+      }
+
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
     } else {
-      updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-      updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      if (key !== "discount") {
+        updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+      }
+
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      }
+
       updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
     }
     if (T12) {
@@ -1572,11 +2240,261 @@ const CreditNote = () => {
       updatedItems[index]["itax"] = igst.toFixed(2);
     }
     // Calculate the percentage of the value based on the GST percentage
-    const percentage = ((totalWithGST - Amounts) / TotalAcc) * 100;
+    const percentage =
+      TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
     setItems(updatedItems);
     calculateTotalGst();
   };
+
+  // const handleItemChange = (index, key, value, field) => {
+  //   // If key is "pkgs" or "weight", allow only numbers and a single decimal point
+  //   if ((key === "pkgs" || key === "weight" || key === "tariff" || key === "rate" || key === "disc" || key === "discount" || key === "amount") && !/^-?\d*\.?\d*$/.test(value)) {
+  //     return; // reject invalid input
+  //   }
+
+  //   // Always force disc/discount to be negative
+  //   if (key === "disc" || key === "discount") {
+  //     const numeric = parseFloat(value);
+  //     if (!isNaN(numeric)) {
+  //       value = -Math.abs(numeric); // Force negative
+  //     }
+  //   }
+
+  //   const updatedItems = [...items];
+  //   if (["sdisc"].includes(key)) {
+  //     updatedItems[index][key] = capitalizeWords(value);
+  //   } else {
+  //     updatedItems[index][key] = value;
+  //   }
+  //   if (key === "amount" && value === "") {
+  //     updatedItems[index]["rate"] = "";
+  //     updatedItems[index]["ctax"] = "";
+  //     updatedItems[index]["stax"] = "";
+  //     updatedItems[index]["itax"] = "";
+  //     updatedItems[index]["vamt"] = "";
+  //     updatedItems[index]["amount"] = "";
+  //     setItems(updatedItems);
+  //     return;
+  //   }
+
+  //   // ✅ Reverse Rate Calculation (Amount → Rate)
+  //   if (key === "amount") {
+
+  //     // ❗ If amount is empty, clear rate and stop
+  //     if (value === "") {
+  //       updatedItems[index]["rate"] = "";
+  //       setItems(updatedItems);
+  //       return;
+  //     }
+
+  //     const amount = parseFloat(value) || 0;
+  //     const weight = parseFloat(updatedItems[index].weight) || 0;
+  //     const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
+
+  //     let newRate = 0;
+
+  //     if (weight > 0) {
+  //       newRate = amount / weight || 0 ;
+  //     } else if (pkgs > 0) {
+  //       newRate = amount / pkgs || 0;
+  //     }
+
+  //     if (!isNaN(newRate) && isFinite(newRate)) {
+  //       updatedItems[index]["rate"] = T11
+  //         ? Math.round(newRate).toFixed(2)
+  //         : newRate.toFixed(2);
+  //     }
+  //   }
+
+  //   // If the key is 'name', find the corresponding product and set the price
+  //   if (key === "name") {
+  //     const selectedProduct = products.find(
+  //       (product) => product.Aheads === value
+  //     );
+  //     if (selectedProduct) {
+  //       updatedItems[index]["vcode"] = selectedProduct.Acodes;
+  //       updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+  //       updatedItems[index]["Units"] = selectedProduct.TradeName;
+  //       updatedItems[index]["rate"] = selectedProduct.Mrps;
+  //       updatedItems[index]["gst"] = selectedProduct.itax_rate;
+  //       updatedItems[index]["tariff"] = selectedProduct.Hsn;
+  //        if (postingSetup?.isDefault === true) {
+  //         // 🔥 NEW LOGIC → API controlled
+
+  //         const gstRate = String(selectedProduct.itax_rate);
+
+  //         const matchedSetup = postingSetup.rows.find(
+  //           (row) => String(row.gst) === gstRate,
+  //         );
+
+  //         if (matchedSetup) {
+  //           updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
+  //           updatedItems[index]["Scodess"] = matchedSetup.Scodess;
+  //           updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
+  //           updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
+  //         } else {
+  //           // Optional safety if GST not found
+  //           updatedItems[index]["Scodes01"] = "";
+  //           updatedItems[index]["Scodess"] = "";
+  //           updatedItems[index]["Pcodes01"] = "";
+  //           updatedItems[index]["Pcodess"] = "";
+  //         }
+  //       } else {
+  //         updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
+  //         updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+  //         updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
+  //         updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+  //       }
+  //       updatedItems[index]["RateCal"] = selectedProduct.Rateins;
+  //       updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+  //     } else {
+  //       updatedItems[index]["rate"] = ""; // Reset price if product not found
+  //       updatedItems[index]["gst"] = ""; // Reset gst if product not found
+  //     }
+  //   }
+
+  //   let pkgs = parseFloat(updatedItems[index].pkgs);
+  //   pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+  //   let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+  //   Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
+  //   let AL = pkgs * Qtyperpkgs || 0;
+  //   let gst;
+  //   if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
+  //     updatedItems[index]["weight"] = AL.toFixed(weightValue);
+  //   }
+  //   // Calculate CGST and SGST based on the GST value
+  //   if (
+  //     formData.stype === "Tax Free Within State" &&
+  //     custGst.startsWith("03")
+  //   ) {
+  //     gst = 0;
+  //   } else if (
+  //     formData.stype === "Tax Free Interstate" &&
+  //     !custGst.startsWith("03")
+  //   ) {
+  //     gst = 0;
+  //   } else {
+  //     gst = parseFloat(updatedItems[index].gst);
+  //   }
+
+  //   let weight = parseFloat(updatedItems[index].weight);
+  //   weight = isNaN(weight) ? 0 : weight;
+  //   const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+  //   const rate = parseFloat(updatedItems[index].rate) || 0;
+
+  //   const totalAccordingWeight = weight * rate;
+  //   const totalAccordingPkgs = pkgsVal * rate;
+
+  //   let RateCal = updatedItems[index].RateCal;
+  //   let TotalAcc = totalAccordingWeight; // Set a default value
+
+  //   // Calcuate the Amount According to RateCalculation field
+  //   if (
+  //     RateCal === "Default" ||
+  //     RateCal === "" ||
+  //     RateCal === null ||
+  //     RateCal === undefined
+  //   ) {
+  //     TotalAcc = totalAccordingWeight;
+  //     console.log("Default");
+  //   } else if (RateCal === "Wt/Qty") {
+  //     TotalAcc = totalAccordingWeight;
+  //     console.log("totalAccordingWeight");
+  //   } else if (RateCal === "Pc/Pkgs") {
+  //     TotalAcc = totalAccordingPkgs;
+  //     console.log("totalAccordingPkgs");
+  //   }
+  //     // Ensure TotalAcc is a valid number before calling toFixed()
+  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+  //   let others = parseFloat(updatedItems[index].exp_before) || 0;
+  //   let disc = parseFloat(updatedItems[index].disc) || 0;
+  //   let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+  //   let per;
+  //   if (key === "discount") {
+  //     per = manualDiscount;
+  //   } else {
+  //     per = ((disc / 100) * TotalAcc);
+  //     updatedItems[index]["discount"] = T11 ? Math.round(per).toFixed(2) : per.toFixed(2);
+  //   }
+
+  //   // ✅ Convert to float for reliable calculation
+  //   per = parseFloat(per);
+  //   let Amounts = TotalAcc + per + others;
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
+  //   // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+  //   // Check if GST number starts with "0" to "3"
+  //   const same = custGst.substring(0, 2);
+  //   let cgst, sgst, igst;
+  //   if (CompanyState == supplierdetails[0].state) {
+  //     cgst = (Amounts * (gst / 2)) / 100 || 0;
+  //     sgst = (Amounts * (gst / 2)) / 100 || 0;
+  //     igst = 0;
+  //   } else {
+  //     cgst = sgst = 0;
+  //     igst = (Amounts * gst) / 100 || 0;
+  //   }
+
+  //   // Calculate the total with GST and Others
+  //   let totalWithGST = Amounts + cgst + sgst + igst;
+  //   // totalWithGST += others;
+  //   // Update CGST, SGST, Others, and total fields in the item
+  //   if (T11) {
+  //     if (key !== "discount") {
+  //       updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+  //     }
+
+  //     // ❗ Only auto-calc amount if user is NOT typing in amount
+  //     if (key !== "amount") {
+  //       updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+  //     }
+
+  //     updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+  //   } else {
+  //     if (key !== "discount") {
+  //       updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+  //     }
+
+  //     // ❗ Only auto-calc amount if user is NOT typing in amount
+  //     if (key !== "amount") {
+  //       updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+  //     }
+
+  //     updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+  //   }
+  //   // if (T11) {
+  //   //   if (key !== "discount") {
+  //   //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+  //   //   }
+  //   //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+  //   //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+  //   // } else {
+  //   //   if (key !== "discount") {
+  //   //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+  //   //   }
+  //   //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+  //   //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+  //   // }
+  //   if (T12) {
+  //     updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
+  //     updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
+  //     updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
+  //   } else {
+  //     updatedItems[index]["ctax"] = cgst.toFixed(2);
+  //     updatedItems[index]["stax"] = sgst.toFixed(2);
+  //     updatedItems[index]["itax"] = igst.toFixed(2);
+  //   }
+  //   // Calculate the percentage of the value based on the GST percentage
+  //   const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+  //   updatedItems[index]["percentage"] = percentage.toFixed(2);
+  //   setItems(updatedItems);
+  //   calculateTotalGst();
+  // };
 
   const handleProductSelect = (product) => {
     setIsEditMode(true);
@@ -1607,18 +2525,20 @@ const CreditNote = () => {
         weight: 0,
         rate: 0,
         amount: 0,
-        disc: "",
+        disc: 0,
         discount: "",
         gst: 0,
+        RateCal:"",
+        Qtyperpc:0,
         Pcodes01: "",
         Pcodess: "",
         Scodes01: "",
         Scodess: "",
-        Exp_rate1: 0,
-        Exp_rate2: 0,
-        Exp_rate3: 0,
-        Exp_rate4: 0,
-        Exp_rate5: 0,
+        Exp_rate1: ExpRate1 || 0,
+        Exp_rate2: ExpRate2 || 0,
+        Exp_rate3: ExpRate3 || 0,
+        Exp_rate4: ExpRate4 || 0,
+        Exp_rate5: ExpRate5 || 0,
         Exp1: 0,
         Exp2: 0,
         Exp3: 0,
@@ -1676,7 +2596,7 @@ const CreditNote = () => {
   const fetchCustomers = async () => {
     try {
       const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch products");
@@ -1738,6 +2658,7 @@ const CreditNote = () => {
           Add1: selectedProduct.add1,
           city: selectedProduct.city,
           state: selectedProduct.state,
+          bsGroup: selectedProduct.Bsgroup,
           Tcs206c1H: selectedProduct.tcs206,
           TDS194Q: selectedProduct.tds194q,
         };
@@ -1767,37 +2688,6 @@ const CreditNote = () => {
     setsupplierdetails(updatedItems);
   };
 
-  //   const handleProductSelectCus = (product) => {
-  //   setIsEditMode(true);
-  //   if (selectedItemIndexCus !== null) {
-  //     if (selectedItemIndexCus === "v_tpt") {
-  //       setFormData((prevData) => ({
-  //         ...prevData,
-  //         v_tpt: product.ahead, // Update v_tpt field with selected value
-  //       }));
-  //     } else if (selectedItemIndexCus === "broker") {
-  //       setFormData((prevData) => ({
-  //         ...prevData,
-  //         broker: product.ahead, // Update v_tpt field with selected value
-  //       }));
-  //     } else {
-  //       handleItemChangeCus(selectedItemIndexCus, "name", product.ahead);
-  //     }
-  //     setShowModalCus(false);
-
-  //     // Focus back on the respective input field after selecting the value
-  //     setTimeout(() => {
-  //       if (selectedItemIndexCus === "v_tpt") {
-  //         transportRef.current?.focus(); // Focus back to transport field
-  //       } else if (selectedItemIndexCus === "broker") {
-  //         expAfterGSTRef.current?.focus();
-  //       } else {
-  //         vBillNoRef.current.focus();
-  //       }
-  //     }, 0);
-  //   }
-  // };
-
   const handleProductSelectCus = (product) => {
     if (!product) {
       alert("No product received!");
@@ -1818,6 +2708,7 @@ const CreditNote = () => {
       pan:    product.pan    || '',
       Add1: product.Add1 || '',
       state: product.state    || '',
+      bsGroup: product.Bsgroup || '',
       Tcs206c1H: product.Tcs206c1H    || '',
       TDS194Q: product.TDS194Q    || '',
       
@@ -1831,6 +2722,10 @@ const CreditNote = () => {
 
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
+      setFormData((prev) => ({
+        ...prev,
+        broker: product.agent || ""   // <-- change key name based on your API
+      }));
       if (selectedItemIndexCus === "v_tpt") {
         setFormData((prevData) => ({
           ...prevData,
@@ -1863,6 +2758,7 @@ const CreditNote = () => {
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
+    setIsEditMode(true);
     setPressedKey(""); // resets for next modal open
   };
 
@@ -1941,145 +2837,125 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }));
   };
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  useEffect(() => {
-    // If formData.date has a valid date string, parse it and set selectedDate
-    if (formData.date) {
-      try {
-        const date = new Date(formData.date);
-        if (!isNaN(date.getTime())) {
-          setSelectedDate(date);
-        } else {
-          console.error("Invalid date value in formData.date:", formData.date);
-        }
-      } catch (error) {
-        console.error("Error parsing date:", error);
-      }
-    } else {
-      // If there's no date, we keep selectedDate as null so the DatePicker is blank,
-      // but we can still have it open on today's date via openToDate
-      setSelectedDate(null);
-    }
-  }, [formData.date]);
-
-  const [expiredDate, setexpiredDate] = useState(null);
-
-  useEffect(() => {
-    if (formData.duedate) {
-      setexpiredDate(new Date(formData.duedate));
-    } else {
-      const today = new Date();
-      setexpiredDate(today);
-      setFormData({ ...formData, duedate: today });
-    }
-  }, []);
-
-  const handleDateChange = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Midnight for today
-
-      const selectedDate = new Date(date);
-      selectedDate.setHours(0, 0, 0, 0); // Midnight for selected date
-
-      if (selectedDate > today) {
-        toast.info("You Have Selected a Future Date.", {
-          position: "top-center",
-        });
-      }
-
-      setSelectedDate(date);
-
-      const formattedDate = date.toISOString().split("T")[0]; // e.g., "2025-03-10"
-      setFormData((prev) => ({ ...prev, date: date, duedate: date }));
-    } else {
-      console.error("Invalid date value");
-    }
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  const handleCalendarClose = () => {
-    // If no date is selected when the calendar closes, default to today's date
-    if (!selectedDate) {
-      const today = new Date();
-      setSelectedDate(today);
-    }
-  };
   const HandleInputsChanges = (event) => {
     const { id, value } = event.target;
+    const cap = capitalizeWords(value);
+
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]: cap,
     }));
+
+    // ⭐ If SELF INV field changed
+    if (id === "p_entry") {
+      const upper = value.toUpperCase();
+
+      if (checkDuplicatePEntry(upper)) {
+        alert(`Self Invoice No ${upper} already exists!`);
+      }
+    }
   };
 
-  const handleCapitalAlpha = (event) => {
-  const { id, value } = event.target;
-  // force all letters to uppercase
-  const uppercasedValue = value.toUpperCase();
-  setFormData((prevData) => ({
-    ...prevData,
-    [id]: uppercasedValue,
-  }));
+    // 1️⃣ Fetch purchase API once
+    useEffect(() => {
+      const fetchPurchase = async () => {
+        try {
+          const res = await fetch(
+            `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
+          );
+          const data = await res.json();
+          setPurchaseData(data);
+        } catch (err) {
+          console.error("API Fetch Error", err);
+        }
+      };
+  
+      fetchPurchase();
+    }, []);
+  
+    // 2️⃣ Function to check duplicate bill for same customer
+    const checkDuplicateBill = (customerName, billNo) => {
+      if (!customerName || !billNo) return false;
+  
+      return purchaseData.some((entry) => {
+        const apiCustomer = entry.supplierdetails?.[0]?.vacode?.trim().toUpperCase();
+        const apiBill = entry.formData?.vbillno?.trim().toUpperCase();
+  
+        return (
+          apiCustomer === customerName.trim().toUpperCase() &&
+          apiBill === billNo.trim().toUpperCase()
+        );
+      });
+    };
+
+    // ⭐ 3️⃣ Function to check duplicate SELF INVOICE p_entry (GLOBAL CHECK)
+    const checkDuplicatePEntry = (pEntry) => {
+      if (!pEntry) return false;
+
+      return purchaseData.some((entry) => {
+        const apiPentry = entry.formData?.p_entry?.trim().toUpperCase();
+        return apiPentry === pEntry.trim().toUpperCase();
+      });
+    };
+
+    const handleCapitalAlpha = (event) => {
+    const { id, value } = event.target;
+    const upper = value.toUpperCase();
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: upper,
+    }));
+
+    const customerName = supplierdetails[0].vacode;
+
+    if (customerName && checkDuplicateBill(customerName, upper)) {
+      alert(`Bill No ${upper} already exists for this customer: ${customerName}`);
+    }
   };
 
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
+
     const numberValue = value.replace(/[^0-9.]/g, "");
-    const validNumberValue =
-      numberValue.split(".").length > 2
-        ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
-        : numberValue;
 
     setFormData((prevState) => {
-      const newFormData = { ...prevState, [id]: validNumberValue };
-      return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+      const newFormData = {
+        ...prevState,
+        [id]: numberValue,
+      };
+
+      // If typing directly in expense field → mark it manual
+      if (["Exp6", "Exp7", "Exp8", "Exp9", "Exp10"].includes(id)) {
+        newFormData[`_manual_${id}`] = true;
+      }
+
+      // If typing in rate → disable manual mode
+      if (["Exp_rate6","Exp_rate7","Exp_rate8","Exp_rate9","Exp_rate10"].includes(id)) {
+        const expField = id.replace("Exp_rate", "Exp");
+        newFormData[`_manual_${expField}`] = false;
+      }
+
+      return calculateTotalGst(newFormData, true); // ✅ KEEP THIS
     });
   };
-  // INVOICE
-  const [shopName, setShopName] = useState("NARAYAN FRUIT BAR"); // Set default value here
-  const [description, setDescription] = useState(
-    "STOCKISTS IN : FRESH FRUITS ARE AVAIABLE HERE"
-  );
-  const [address, setAddress] = useState(
-    "AMLOH ROAD, OPP. FRIENDS INDS., MANDI GOBINDGARH (PB)"
-  );
-  const [GSTIN, setGSTIN] = useState("07AAAHT5580L1ZX");
-  const [PAN, setPAN] = useState("BNV5855MN6");
+  // const handleNumberChange = (event) => {
+  //   const { id, value } = event.target;
+  //   const numberValue = value.replace(/[^0-9.]/g, "");
+  //   const validNumberValue =
+  //     numberValue.split(".").length > 2
+  //       ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
+  //       : numberValue;
 
-  // Function to save data to local storage
-  const saveToLocalStorage = () => {
-    localStorage.setItem("shopName", shopName);
-    localStorage.setItem("description", description);
-    localStorage.setItem("address", address);
-    localStorage.setItem("GSTIN", GSTIN);
-    localStorage.setItem("PAN", PAN);
-  };
-
-  // Function to retrieve data from local storage
-  const getFromLocalStorage = () => {
-    const savedShopName = localStorage.getItem("shopName");
-    const savedDescription = localStorage.getItem("description");
-    const savedAddress = localStorage.getItem("address");
-    const savedGSTIN = localStorage.getItem("GSTIN");
-    const savedPAN = localStorage.getItem("PAN");
-
-    if (savedShopName) setShopName(savedShopName);
-    if (savedDescription) setDescription(savedDescription);
-    if (savedAddress) setAddress(savedAddress);
-    if (savedGSTIN) setGSTIN(savedGSTIN);
-    if (savedPAN) setPAN(savedPAN);
-  };
-
-  useEffect(() => {
-    // Retrieve data from local storage when component mounts
-    getFromLocalStorage();
-  }, []);
-
-  useEffect(() => {
-    // Save data to local storage whenever shopName, description, or address change
-    saveToLocalStorage();
-  }, [shopName, description, address, GSTIN, PAN]);
+  //   setFormData((prevState) => {
+  //     const newFormData = { ...prevState, [id]: validNumberValue };
+  //     return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+  //   });
+  // };
 
   const [fontSize, setFontSize] = useState(16.5); // Initial font size in pixels
   const increaseFontSize = () => {
@@ -2089,129 +2965,149 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const handleKeyDown = (event, index, field) => {
-    if (event.key === "Enter") {
-      switch (field) {
-        case "vcode":
-          if (items[index].sdisc.trim() === "") {
-            transportRef.current.focus();
-          } else {
-            desciptionRefs.current[index]?.focus();
-          }
-          break;
-        case "sdisc":
-          hsnCodeRefs.current[index]?.focus();
-          break;
-        case "tariff":
-          peciesRefs.current[index]?.focus();
-          break;
-        case "pkgs":
-          quantityRefs.current[index]?.focus();
-          break;
-        case "weight":
-          priceRefs.current[index]?.focus();
-          break;
-        case "rate":
-          discountRef.current[index]?.focus();
-          break;
-        case "disc":
-          othersRefs.current[index]?.focus();
-          break;
-        case "exp_before":
-          if (index === items.length - 1) {
-            handleAddItem();
-            itemCodeRefs.current[index + 1]?.focus();
-          } else {
-            itemCodeRefs.current[index + 1]?.focus();
-          }
-          break;
-        default:
-          break;
+  const fieldOrder = [
+    { name: "vcode",      refArray: itemCodeRefs },
+    { name: "sdisc",      refArray: desciptionRefs },
+    { name: "tariff",     refArray: hsnCodeRefs },
+    { name: "pkgs",       refArray: peciesRefs },
+    { name: "weight",     refArray: quantityRefs },
+    { name: "rate",       refArray: priceRefs },
+    { name: "amount",     refArray: amountRefs },
+    { name: "disc",       refArray: discountRef },
+    { name: "discount",   refArray: discount2Ref },
+    { name: "exp_before", refArray: othersRefs },
+  ];
+
+const focusRef = (refArray, rowIndex, select = true) => {
+  const el = refArray?.current?.[rowIndex];
+  if (el) {
+    el.focus();
+    if (select) {
+      setTimeout(() => el.select && el.select(), 0);
+    }
+    return true;
+  }
+  return false;
+};
+const focusScrollRow = (refArray, rowIndex) => {
+  const inputEl = refArray?.current?.[rowIndex];
+  const container = tableContainerRef.current;
+
+  if (!inputEl || !container) return;
+
+  inputEl.focus();
+  setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+  const rowEl = inputEl.closest("tr");
+  if (!rowEl) return;
+
+  const rowTop = rowEl.offsetTop;
+  const rowHeight = rowEl.offsetHeight;
+  const containerHeight = container.clientHeight;
+
+  container.scrollTop =
+    rowTop - containerHeight + rowHeight + 60;
+};
+const handleKeyDown = (event, index, field) => {
+  // ------------- ENTER / TAB: move to next field -----------------
+  if (event.key === "Enter" || event.key === "Tab") {
+    event.preventDefault(); // Stop default Tab navigation
+
+    // Special behaviour for vcode in PURCHASE:
+    if (field === "vcode") {
+      if ((items[index].sdisc || "").trim() === "") {
+        // If description empty → go to TRANSPORT
+        transportRef.current?.focus();
+      } else {
+        // Otherwise go to description
+        focusRef(desciptionRefs, index);
+      }
+      return;
+    }
+
+    // Special behaviour for exp_before: next row / new row
+    if (field === "exp_before") {
+      const isLastRow = index === items.length - 1;
+
+     if (isLastRow) {
+        handleAddItem();
+
+        setTimeout(() => {
+          focusScrollRow(itemCodeRefs, index + 1);
+        }, 0);
+      }
+       else {
+        focusScrollRow(itemCodeRefs, index + 1);
+      }
+      return;
+    }
+
+    // Generic: find current in fieldOrder and go to next available field in same row
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+
+    if (currentPos !== -1) {
+      for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+        const nextField = fieldOrder[i];
+        if (focusRef(nextField.refArray, index)) {
+          return;
+        }
       }
     }
-    // Move Right (→)
-    else if (event.key === "ArrowRight") {
-      if (field === "vcode") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-      } else if (field === "sdisc") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-      } else if (field === "tariff") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
-      } else if (field === "pkgs") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
-      } else if (field === "weight") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
-      } else if (field === "rate") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
-      } else if (field === "disc") {
-        othersRefs.current[index]?.focus();
-        setTimeout(() => othersRefs.current[index]?.select(), 0);
+
+    // If nothing else to move to, you can optionally jump somewhere like transport:
+    // transportRef.current?.focus();
+    return;
+  }
+
+  // ------------- ARROW RIGHT: next field in row -----------------
+  if (event.key === "ArrowRight") {
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+    if (currentPos !== -1) {
+      for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+        const nextField = fieldOrder[i];
+        if (focusRef(nextField.refArray, index)) return;
       }
     }
-    // Move Left (←)
-    else if (event.key === "ArrowLeft") {
-      if (field === "exp_before") {
-        discountRef.current[index]?.focus();
-        setTimeout(() => discountRef.current[index]?.select(), 0);
-      } else if (field === "disc") {
-        priceRefs.current[index]?.focus();
-        setTimeout(() => priceRefs.current[index]?.select(), 0);
-      } else if (field === "rate") {
-        quantityRefs.current[index]?.focus();
-        setTimeout(() => quantityRefs.current[index]?.select(), 0);
-      } else if (field === "weight") {
-        peciesRefs.current[index]?.focus();
-        setTimeout(() => peciesRefs.current[index]?.select(), 0);
-      } else if (field === "pkgs") {
-        hsnCodeRefs.current[index]?.focus();
-        setTimeout(() => hsnCodeRefs.current[index]?.select(), 0);
-      } else if (field === "tariff") {
-        desciptionRefs.current[index]?.focus();
-        setTimeout(() => desciptionRefs.current[index]?.select(), 0);
-      } else if (field === "sdisc") {
-        itemCodeRefs.current[index]?.focus();
-        setTimeout(() => itemCodeRefs.current[index]?.select(), 0);
-      } else if (field === "vcode") itemCodeRefs.current[index]?.focus();
+  }
+
+  // ------------- ARROW LEFT: previous field in row -----------------
+  else if (event.key === "ArrowLeft") {
+    const currentPos = fieldOrder.findIndex((f) => f.name === field);
+    if (currentPos !== -1) {
+      for (let i = currentPos - 1; i >= 0; i--) {
+        const prevField = fieldOrder[i];
+        if (focusRef(prevField.refArray, index)) return;
+      }
     }
-    // Move Up
-    else if (event.key === "ArrowUp" && index > 0) {
+  }
+
+  // ------------- ARROW UP: same field, previous row -----------------
+  else if (event.key === "ArrowUp" && index > 0) {
+    const cfg = fieldOrder.find((f) => f.name === field);
+    if (cfg) {
       setTimeout(() => {
-        if (field === "vcode") itemCodeRefs.current[index - 1]?.focus();
-        else if (field === "sdisc") desciptionRefs.current[index - 1]?.focus();
-        else if (field === "tariff") hsnCodeRefs.current[index - 1]?.focus();
-        else if (field === "pkgs") peciesRefs.current[index - 1]?.focus();
-        else if (field === "weight") quantityRefs.current[index - 1]?.focus();
-        else if (field === "rate") priceRefs.current[index - 1]?.focus();
-        else if (field === "disc") discountRef.current[index - 1]?.focus();
-        else if (field === "exp_before") othersRefs.current[index - 1]?.focus();
-      }, 100);
+        focusRef(cfg.refArray, index - 1);
+      }, 50);
     }
-    // Move Down
-    else if (event.key === "ArrowDown" && index < items.length - 1) {
+  }
+
+  // ------------- ARROW DOWN: same field, next row -----------------
+  else if (event.key === "ArrowDown" && index < items.length - 1) {
+    const cfg = fieldOrder.find((f) => f.name === field);
+    if (cfg) {
       setTimeout(() => {
-        if (field === "vcode") itemCodeRefs.current[index + 1]?.focus();
-        else if (field === "sdisc") desciptionRefs.current[index + 1]?.focus();
-        else if (field === "tariff") hsnCodeRefs.current[index + 1]?.focus();
-        else if (field === "pkgs") peciesRefs.current[index + 1]?.focus();
-        else if (field === "weight") quantityRefs.current[index + 1]?.focus();
-        else if (field === "rate") priceRefs.current[index + 1]?.focus();
-        else if (field === "disc") discountRef.current[index + 1]?.focus();
-        else if (field === "exp_before") othersRefs.current[index + 1]?.focus();
-      }, 100);
+        focusRef(cfg.refArray, index + 1);
+      }, 50);
     }
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-      setPressedKey(event.key);
-      openModalForItemCus(index);
-      event.preventDefault();
-    }
-  };
+  }
+
+  // ------------- OPEN MODAL on letter in account name -------------
+  else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+    setPressedKey(event.key);
+    openModalForItemCus(index);
+    event.preventDefault();
+  }
+};
 
   const handleOpenModal = (event, index, field) => {
     if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
@@ -2221,292 +3117,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }
   };
 
-  const handleExit = async () => {
-    // Check if grandtotal is Greater Than zero
-    if (formData.grandtotal > 0 && isEditMode) {
-      const confirmExit = window.confirm(
-        "Are you sure you want to Exit? Unsaved changes may be lost."
-      );
-      if (!confirmExit) {
-        return;
-      }
-    }
-
-    setTitle("(View)");
-    try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`
-      );
-
-      if (response.status === 200 && response.data.data) {
-        const lastEntry = response.data.data;
-        setFormData(lastEntry.formData);
-        setData1(response.data.data);
-        setItems(lastEntry.items.map((item) => ({ ...item })));
-        setsupplierdetails(
-          lastEntry.supplierdetails.map((item) => ({ ...item }))
-        );
-
-        setIsDisabled(true);
-        setIndex(lastEntry.formData);
-        setIsAddEnabled(true);
-        setIsEditMode(false);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-      } else {
-        console.log("No data available");
-        const newData = {
-          date: "",
-          vtype: "P",
-          vno: 0,
-          vbillno: 0,
-          exfor: "",
-          trpt: "",
-          p_entry: "",
-          stype: "",
-          btype: "",
-          conv: "",
-          vacode1: "",
-          rem2: "",
-          v_tpt: "",
-          broker: "",
-          srv_rate: "",
-          srv_tax: "",
-          tcs1_rate: "",
-          tcs1: "",
-          tcs206_rate: "",
-          tcs206: "",
-          duedate: "",
-          gr: "",
-          tdson: "",
-          pcess: "",
-          tax: "",
-          cess1: "",
-          cess2: "",
-          sub_total: "",
-          exp_before: "",
-          Exp_rate6: "",
-          Exp_rate7: "",
-          Exp_rate8: "",
-          Exp_rate9: "",
-          Exp_rate10: "",
-          Exp6: "",
-          Exp7: "'",
-          Exp8: "",
-          Exp9: "",
-          Exp10: "",
-          cgst: "",
-          sgst: "",
-          igst: "",
-          expafterGST: "",
-          grandtotal: "",
-        };
-        setFormData(newData); // Set default form data
-        setItems([
-          {
-            id: 1,
-            vcode: "",
-            sdisc: "",
-            Units: "",
-            pkgs: "",
-            weight: "",
-            rate: 0,
-            amount: 0,
-            disc: "",
-            discount: "",
-            gst: 0,
-            Pcodes01: "",
-            Pcodess: "",
-            Scodes01: "",
-            Scodess: "",
-            Exp_rate1: 0,
-            Exp_rate2: 0,
-            Exp_rate3: 0,
-            Exp_rate4: 0,
-            Exp_rate5: 0,
-            Exp1: 0,
-            Exp2: 0,
-            Exp3: 0,
-            Exp4: 0,
-            Exp5: 0,
-            exp_before: 0,
-            ctax: 0,
-            stax: 0,
-            itax: 0,
-            tariff: "",
-            vamt: 0,
-          },
-        ]);
-        setsupplierdetails([
-          {
-            Vcode: "",
-            vacode: "",
-            gstno: "",
-            pan: "",
-            Add1: "",
-            city: "",
-            state: "",
-            Tcs206c1H: "",
-            TDS194Q: "",
-          },
-        ]);
-        setIsDisabled(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  };
-
-  // const handleExit = async () => {
-  //   try {
-  //       const response = await axios.get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/purchasegst/last`); // Fetch the latest data
-  //       if (response.status === 200 && response.data.data) {
-  //           // If data is available
-  //           const lastEntry = response.data.data;
-  //           setFormData(lastEntry.formData); // Set form data
-  //           setData1(response.data.data);
-  //           const updateditems = lastEntry.items.map(item => ({
-  //             ...item,
-  //         }));
-  //         const updateditems2 = lastEntry.supplierdetails.map(item => ({
-  //           ...item,
-  //       }));
-  //       setItems(updateditems)
-  //       setsupplierdetails(updateditems2);
-  //       setIsDisabled(true); // Disable fields after loading the data
-  //       setIndex(lastEntry.formData)
-  //       setIsAddEnabled(true);
-  //       setIsSubmitEnabled(false);
-  //       setIsPreviousEnabled(true);
-  //       setIsNextEnabled(true);
-  //       setIsFirstEnabled(true);
-  //       setIsLastEnabled(true);
-  //       setIsSearchEnabled(true);
-  //       setIsSPrintEnabled(true)
-  //       setIsDeleteEnabled(true)
-  //       setTitle("VIEW")
-  //       } else {
-  //           // If no data is available, initialize with default values
-  //           //console.log("No data available");
-  //           const newData = {
-  //             date: "",
-  //             vtype: "P",
-  //             vno: 0,
-  //             vbillno: 0,
-  //             exfor: "",
-  //             trpt: "",
-  //             p_entry: 0,
-  //             stype: "",
-  //             btype: "",
-  //             conv: "",
-  //             vacode1: "",
-  //             rem2: "",
-  //             v_tpt: "",
-  //             broker: "",
-  //             srv_rate: "",
-  //             srv_tax: "",
-  //             tcs1_rate: "",
-  //             tcs1: "",
-  //             tcs206_rate: "",
-  //             tcs206: "",
-  //             duedate: "",
-  //             gr: "",
-  //             tdson: "",
-  //             pcess: "",
-  //             tax: "",
-  //             cess1: "",
-  //             cess2: "",
-  //             sub_total: "",
-  //             exp_before: "",
-  //             Exp_rate6: "",
-  //             Exp_rate7: "",
-  //             Exp_rate8: "",
-  //             Exp_rate9:"",
-  //             Exp_rate10: "",
-  //             Exp6: "",
-  //             Exp7: "'",
-  //             Exp8: "",
-  //             Exp9: "",
-  //             Exp10: "",
-  //             cgst: "",
-  //             sgst: "",
-  //             igst: "",
-  //             expafterGST: "",
-  //             grandtotal: "",
-  //           };
-  //           setFormData(newData); // Set default form data
-  //           setItems([{
-  //             id: 1,
-  //             vcode: "",
-  //             sdisc: "",
-  //             Units:"",
-  //             pkgs: "",
-  //             weight: "",
-  //             rate: 0,
-  //             amount: 0,
-  //             disc:"",
-  //             discount:"",
-  //             gst: 0,
-  //             Pcodes01:"",
-  //             Pcodess:"",
-  //             Scodes01:"",
-  //             Scodess:"",
-  //             Exp_rate1:0,
-  //             Exp_rate2:0,
-  //             Exp_rate3:0,
-  //             Exp_rate4:0,
-  //             Exp_rate5:0,
-  //             Exp1:0,
-  //             Exp2:0,
-  //             Exp3:0,
-  //             Exp4:0,
-  //             Exp5:0,
-  //             exp_before: 0,
-  //             ctax: 0,
-  //             stax: 0,
-  //             itax: 0,
-  //             tariff: "",
-  //             vamt: 0,
-  //           }]);
-  //           setsupplierdetails([{
-  //             Vcode:"",
-  //             vacode: "",
-  //             gstno: "",
-  //             pan: "",
-  //             Add1:"",
-  //             city: "",
-  //             state: "",
-  //             Tcs206c1H:"",
-  //             TDS194Q:"",
-  //           }]);
-
-  //           setIsDisabled(true); // Disable fields after loading the default data
-  //       }
-  //   } catch (error) {
-  //       console.error("Errorss fetching data", error);
-  //   }
-  // };
-
-  const advanceRef = useRef(null);
-  const twoBRef = useRef(null);
   const transportRef = useRef(null);
   const brokerRef = useRef(null);
-  const tcsRef = useRef([]);
-  const tdsRef = useRef([]);
-  const tdsRef2 = useRef([]);
-  const GrRef = useRef(null);
-  const vehicelRef = useRef(null);
-  const cess1Ref = useRef(null);
-  const cess2Ref = useRef(null);
 
   const handleKeyDowndown = (event, nextFieldRef) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault(); // Prevent form submission
       if (nextFieldRef.current) {
         nextFieldRef.current.focus();
@@ -2514,7 +3129,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }
   };
   const gradientOptions = [
-    { label: "Lavender", value: "linear-gradient(to right, #e6e6fa, #b19cd9)" },
+    { label: "Lavender", value: "linear-gradient(to right, #d4d4fcff, #b19cd9)" },
     { label: "Yellow", value: "linear-gradient(to right, #fffac2, #ffdd57)" },
     { label: "Skyblue", value: "linear-gradient(to right, #ceedf0, #7fd1e4)" },
     { label: "Green", value: "linear-gradient(to right, #9ff0c3, #45a049)" },
@@ -2532,86 +3147,132 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
   const handleChange = (event) => {
     setColor(event.target.value);
   };
-  const handleInputChange = (index, field, value) => {
-    const numericValue = value.replace(/[^0-9.-]/g, ""); // Allow only numbers, decimal points, and negative signs
+  // const handleInputChange = (index, field, value) => {
+  //   const numericValue = value.replace(/[^0-9.-]/g, ""); // Allow only numbers, decimal points, and negative signs
+  //   const updatedItems = [...items];
+  //   updatedItems[index][field] = numericValue;
+
+  //   // Recalculate expenses when Exp_rate1 to Exp_rate6 change
+  //   const vamt = parseFloat(updatedItems[index].amount) || 0;
+  //   const expRates = [
+  //     parseFloat(updatedItems[index].Exp_rate1) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate2) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate3) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate4) || 0,
+  //     parseFloat(updatedItems[index].Exp_rate5) || 0,
+  //   ];
+  //   const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
+
+  //   let totalExpenses = 0;
+  //   expRates.forEach((rate, i) => {
+  //     const expense = (vamt * rate) / 100;
+  //     updatedItems[index][expFields[i]] = expense.toFixed(2);
+  //     totalExpenses += expense;
+  //   });
+  //   // Update the exp_before field with the total of all expenses
+  //   updatedItems[index].exp_before = totalExpenses.toFixed(2);
+
+  //   const gst = parseFloat(updatedItems[index].gst);
+  //   const totalAccordingWeight =
+  //     parseFloat(updatedItems[index].weight) *
+  //     parseFloat(updatedItems[index].rate);
+  //   const totalAccordingPkgs =
+  //     parseFloat(updatedItems[index].pkgs) *
+  //     parseFloat(updatedItems[index].rate);
+  //   let RateCal = updatedItems[index].RateCal;
+  //   let TotalAcc = totalAccordingWeight; // Set a default value
+
+  //   if (
+  //     RateCal === "Default" ||
+  //     RateCal === "" ||
+  //     RateCal === null ||
+  //     RateCal === undefined
+  //   ) {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Wt/Qty") {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Pc/Pkgs") {
+  //     TotalAcc = totalAccordingPkgs;
+  //   }
+
+  //   const others = parseFloat(updatedItems[index].exp_before) || 0;
+  //   let disc = parseFloat(updatedItems[index].disc) || 0;
+  //   let per = ((disc / 100) * TotalAcc).toFixed(2);
+  //   let Amounts = TotalAcc + others + parseFloat(per);
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
+  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+  //   const gstNumber = "03";
+  //   const same = custGst.substring(0, 2);
+
+  //   let cgst = 0,
+  //     sgst = 0,
+  //     igst = 0;
+  //   if (CompanyState == supplierdetails[0].state) {
+  //     cgst = (Amounts * (gst / 2)) / 100;
+  //     sgst = (Amounts * (gst / 2)) / 100;
+  //   } else {
+  //     igst = (Amounts * gst) / 100;
+  //   }
+
+  //   const totalWithGST = Amounts + cgst + sgst + igst;
+
+  //   // Update tax and total fields
+  //   updatedItems[index]["ctax"] = cgst.toFixed(2);
+  //   updatedItems[index]["stax"] = sgst.toFixed(2);
+  //   updatedItems[index]["itax"] = igst.toFixed(2);
+  //   updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+  //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
+
+  //   setItems(updatedItems);
+  //   calculateTotalGst(); // ✅ Recalculate the grand total
+  // };
+ 
+    const handleInputChange = (index, field, value) => {
+    const numericValue =
+      typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
+
     const updatedItems = [...items];
     updatedItems[index][field] = numericValue;
 
-    // Recalculate expenses when Exp_rate1 to Exp_rate6 change
-    const vamt = parseFloat(updatedItems[index].amount) || 0;
-    const expRates = [
-      parseFloat(updatedItems[index].Exp_rate1) || 0,
-      parseFloat(updatedItems[index].Exp_rate2) || 0,
-      parseFloat(updatedItems[index].Exp_rate3) || 0,
-      parseFloat(updatedItems[index].Exp_rate4) || 0,
-      parseFloat(updatedItems[index].Exp_rate5) || 0,
+    setItems(updatedItems);
+  };
+
+  const handleExpenseBlur = (index, field) => {
+    const updatedItems = [...items];
+    const item = updatedItems[index];
+
+    const vamt = parseFloat(item.amount) || 0;
+
+    const expMap = [
+      { rate: "Exp_rate1", val: "Exp1", flag: "isManual1" },
+      { rate: "Exp_rate2", val: "Exp2", flag: "isManual2" },
+      { rate: "Exp_rate3", val: "Exp3", flag: "isManual3" },
+      { rate: "Exp_rate4", val: "Exp4", flag: "isManual4" },
+      { rate: "Exp_rate5", val: "Exp5", flag: "isManual5" },
     ];
-    const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
 
-    let totalExpenses = 0;
-    expRates.forEach((rate, i) => {
-      const expense = (vamt * rate) / 100;
-      updatedItems[index][expFields[i]] = expense.toFixed(2);
-      totalExpenses += expense;
+    expMap.forEach(({ rate, val, flag }) => {
+      // RATE → VALUE
+      if (field === rate && vamt > 0) {
+        const r = parseFloat(item[rate]) || 0;
+        item[val] = ((vamt * r) / 100).toFixed(2);
+        item[flag] = false; // calculated
+      }
+
+      // VALUE → RATE
+      if (field === val && vamt > 0) {
+        const v = parseFloat(item[val]) || 0;
+
+        item[val] = v.toFixed(2); // fix value to 2 decimals
+        item[rate] = ((v / vamt) * 100).toFixed(2); // 🔥 keep full precision
+        item[flag] = true; // manually entered
+      }
     });
-    // Update the exp_before field with the total of all expenses
-    updatedItems[index].exp_before = totalExpenses.toFixed(2);
-
-    const gst = parseFloat(updatedItems[index].gst);
-    const totalAccordingWeight =
-      parseFloat(updatedItems[index].weight) *
-      parseFloat(updatedItems[index].rate);
-    const totalAccordingPkgs =
-      parseFloat(updatedItems[index].pkgs) *
-      parseFloat(updatedItems[index].rate);
-    let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight; // Set a default value
-
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
-    }
-
-    const others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let per = ((disc / 100) * TotalAcc).toFixed(2);
-    let Amounts = TotalAcc + others - per;
-
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-    const gstNumber = "03";
-    const same = custGst.substring(0, 2);
-
-    let cgst = 0,
-      sgst = 0,
-      igst = 0;
-    if (gstNumber === same) {
-      cgst = (Amounts * (gst / 2)) / 100;
-      sgst = (Amounts * (gst / 2)) / 100;
-    } else {
-      igst = (Amounts * gst) / 100;
-    }
-
-    const totalWithGST = Amounts + cgst + sgst + igst;
-
-    // Update tax and total fields
-    updatedItems[index]["ctax"] = cgst.toFixed(2);
-    updatedItems[index]["stax"] = sgst.toFixed(2);
-    updatedItems[index]["itax"] = igst.toFixed(2);
-    updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-    updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
 
     setItems(updatedItems);
-    calculateTotalGst(); // ✅ Recalculate the grand total
   };
+
   useEffect(() => {
     if (currentIndex !== null && items[currentIndex]) {
       const updatedItems = [...items];
@@ -2620,87 +3281,98 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       const vamt = parseFloat(item.amount) || 0;
       const pkgs = parseFloat(item.pkgs) || 0;
       const weight = parseFloat(item.weight) || 0;
-      // Expense Calculations (Separate Logic for Each Expense)
+      // Expense Calculations
       let Exp1 = 0,
         Exp2 = 0,
         Exp3 = 0,
         Exp4 = 0,
         Exp5 = 0;
+
       const Exp1Multiplier = Pos === "-Ve" ? -1 : 1;
-      const Exp1Multiplier2 = Pos2 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier3 = Pos3 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier4 = Pos4 === "-Ve" ? -1 : 1;
-      const Exp1Multiplier5 = Pos5 === "-Ve" ? -1 : 1;
-      if (item.Exp_rate1) {
-        if (CalExp1 === "W" || CalExp1 === "w") {
+      const Exp2Multiplier = Pos2 === "-Ve" ? -1 : 1;
+      const Exp3Multiplier = Pos3 === "-Ve" ? -1 : 1;
+      const Exp4Multiplier = Pos4 === "-Ve" ? -1 : 1;
+      const Exp5Multiplier = Pos5 === "-Ve" ? -1 : 1;
+
+      // ======================= EXP 1 =======================
+      if (!item.isManual1 && item.Exp_rate1) {
+        if (CalExp1?.toLowerCase() === "w") {
           Exp1 = (weight * parseFloat(item.Exp_rate1)) / 100;
-        } else if (CalExp1 === "P" || CalExp1 === "p") {
+        } else if (CalExp1?.toLowerCase() === "p") {
           Exp1 = (pkgs * parseFloat(item.Exp_rate1)) / 100;
-        } else if (CalExp1 === "V" || CalExp1 === "v" || CalExp1 === "") {
+        } else {
           Exp1 = (vamt * parseFloat(item.Exp_rate1)) / 100;
         }
-        Exp1 *= Exp1Multiplier; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp1 *= Exp1Multiplier;
         item.Exp1 = Exp1.toFixed(2);
       } else {
-        item.Exp1 = "0.00";
+        Exp1 = parseFloat(item.Exp1) || 0;
       }
 
-      if (item.Exp_rate2) {
-        if (CalExp2 === "W" || CalExp2 === "w") {
+      // ======================= EXP 2 =======================
+      if (!item.isManual2 && item.Exp_rate2) {
+        if (CalExp2?.toLowerCase() === "w") {
           Exp2 = (weight * parseFloat(item.Exp_rate2)) / 100;
-        } else if (CalExp2 === "P" || CalExp2 === "p") {
+        } else if (CalExp2?.toLowerCase() === "p") {
           Exp2 = (pkgs * parseFloat(item.Exp_rate2)) / 100;
-        } else if (CalExp2 === "V" || CalExp2 === "v" || CalExp2 === "") {
+        } else {
           Exp2 = (vamt * parseFloat(item.Exp_rate2)) / 100;
         }
-        Exp2 *= Exp1Multiplier2; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp2 *= Exp2Multiplier;
         item.Exp2 = Exp2.toFixed(2);
       } else {
-        item.Exp2 = "0.00";
+        Exp2 = parseFloat(item.Exp2) || 0;
       }
 
-      if (item.Exp_rate3) {
-        if (CalExp3 === "W" || CalExp3 === "w") {
+      // ======================= EXP 3 =======================
+      if (!item.isManual3 && item.Exp_rate3) {
+        if (CalExp3?.toLowerCase() === "w") {
           Exp3 = (weight * parseFloat(item.Exp_rate3)) / 100;
-        } else if (CalExp3 === "P" || CalExp3 === "p") {
+        } else if (CalExp3?.toLowerCase() === "p") {
           Exp3 = (pkgs * parseFloat(item.Exp_rate3)) / 100;
-        } else if (CalExp3 === "V" || CalExp3 === "v" || CalExp3 === "") {
+        } else {
           Exp3 = (vamt * parseFloat(item.Exp_rate3)) / 100;
         }
-        Exp3 *= Exp1Multiplier3; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp3 *= Exp3Multiplier;
         item.Exp3 = Exp3.toFixed(2);
       } else {
-        item.Exp3 = "0.00";
+        Exp3 = parseFloat(item.Exp3) || 0;
       }
 
-      if (item.Exp_rate4) {
-        if (CalExp4 === "W" || CalExp4 === "w") {
+      // ======================= EXP 4 =======================
+      if (!item.isManual4 && item.Exp_rate4) {
+        if (CalExp4?.toLowerCase() === "w") {
           Exp4 = (weight * parseFloat(item.Exp_rate4)) / 100;
-        } else if (CalExp4 === "P" || CalExp4 === "p") {
+        } else if (CalExp4?.toLowerCase() === "p") {
           Exp4 = (pkgs * parseFloat(item.Exp_rate4)) / 100;
-        } else if (CalExp4 === "V" || CalExp4 === "v" || CalExp4 === "") {
+        } else {
           Exp4 = (vamt * parseFloat(item.Exp_rate4)) / 100;
         }
-        Exp4 *= Exp1Multiplier4; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp4 *= Exp4Multiplier;
         item.Exp4 = Exp4.toFixed(2);
       } else {
-        item.Exp4 = "0.00";
+        Exp4 = parseFloat(item.Exp4) || 0;
       }
 
-      if (item.Exp_rate5) {
-        if (CalExp5 === "W" || CalExp5 === "w") {
+      // ======================= EXP 5 =======================
+      if (!item.isManual5 && item.Exp_rate5) {
+        if (CalExp5?.toLowerCase() === "w") {
           Exp5 = (weight * parseFloat(item.Exp_rate5)) / 100;
-        } else if (CalExp5 === "P" || CalExp5 === "p") {
+        } else if (CalExp5?.toLowerCase() === "p") {
           Exp5 = (pkgs * parseFloat(item.Exp_rate5)) / 100;
-        } else if (CalExp5 === "V" || CalExp5 === "v" || CalExp5 === "") {
+        } else {
           Exp5 = (vamt * parseFloat(item.Exp_rate5)) / 100;
         }
-        Exp5 *= Exp1Multiplier5; // Apply negative only for Exp if Pos is "-Ve"
+
+        Exp5 *= Exp5Multiplier;
         item.Exp5 = Exp5.toFixed(2);
       } else {
-        item.Exp5 = "0.00";
+        Exp5 = parseFloat(item.Exp5) || 0;
       }
-
       // Total Expense Before GST
       const totalExpenses = Exp1 + Exp2 + Exp3 + Exp4 + Exp5;
       item.exp_before = totalExpenses.toFixed(2);
@@ -2717,18 +3389,17 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
       let disc = parseFloat(item.disc) || 0;
       let per = ((disc / 100) * TotalAcc).toFixed(2);
-      let Amounts = TotalAcc + totalExpenses - per;
+      let PerCenTage = parseFloat(per);
+      let Amounts = TotalAcc + totalExpenses + parseFloat(per);
 
       TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
 
       // GST Logic Based on State
-      const gstNumber = "03";
-      const same = custGst.substring(0, 2);
       let cgst = 0,
         sgst = 0,
         igst = 0;
 
-      if (gstNumber === same) {
+      if (CompanyState == supplierdetails[0].state) {
         cgst = (Amounts * (gst / 2)) / 100;
         sgst = (Amounts * (gst / 2)) / 100;
       } else {
@@ -2741,16 +3412,15 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
         item.ctax = Math.round(cgst).toFixed(2);
         item.stax = Math.round(sgst).toFixed(2);
         item.itax = Math.round(igst).toFixed(2);
-        item.discount = Math.round(per).toFixed(2);
+        item.discount = Math.round(PerCenTage).toFixed(2);
         item.vamt = Math.round(totalWithGST).toFixed(2);
       } else {
         item.ctax = cgst.toFixed(2);
         item.stax = sgst.toFixed(2);
         item.itax = igst.toFixed(2);
-        item.discount = parseFloat(per).toFixed(2);
+        item.discount = PerCenTage.toFixed(2);
         item.vamt = totalWithGST.toFixed(2);
       }
-
       updatedItems[currentIndex] = item;
       setItems(updatedItems);
       calculateTotalGst();
@@ -2798,11 +3468,14 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     setIsModalOpen(false);
   };
   const [isModalOpenExp, setIsModalOpenExp] = useState(false);
-  const handleKeyDownExp = (e) => {
-    if (e.key === "F2") {
-      setIsModalOpenExp(true);
-    }
-  };
+
+ const handleKeyDownExp = (e, fieldName, index) => {
+  if (e.key === "F2" && fieldName === "exp_before") {
+    e.preventDefault(); // Optional: stop default F2 behavior
+    setCurrentIndex(index);
+    setIsModalOpenExp(true);
+  }
+};
   const closeModalExp = () => {
     setIsModalOpenExp(false);
   };
@@ -2826,57 +3499,48 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       setIsModalOpenExp(true); // Open the modal
     }
   };
-  const handleExpAfterGst = (event) => {
-    const { id, value } = event.target;
-    const subTotal = parseFloat(formData.sub_total) || 0;
 
-    // Initialize newFormData and expenses
-    let newFormData = { ...formData, [id]: value };
-    let expense = 0;
+  const expRateRefs = useRef([]); // Store refs for Exp_rate fields
+  const closeButtonRef = useRef(null); // Ref for the close button
 
-    // Check if the value is empty; if so, set corresponding Exp value to 0
-    if (value === "") {
-      newFormData[id] = 0; // Ensure Exp_rate is set to 0
-    } else {
-      const expRate = parseFloat(value) || 0;
+  useEffect(() => {
+    if (isModalOpenExp && expRateRefs.current[0]) {
+      expRateRefs.current[0].focus(); // Focus on the first Exp_rate input when modal opens
+    }
+  }, [isModalOpenExp]);
 
-      // Calculate percentage for Exp_rate7 to Exp_rate12
-      switch (id) {
-        case "Exp_rate7":
-          newFormData.Exp7 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate8":
-          newFormData.Exp8 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate9":
-          newFormData.Exp9 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate10":
-          newFormData.Exp10 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate11":
-          newFormData.Exp11 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        case "Exp_rate12":
-          newFormData.Exp12 = ((subTotal * expRate) / 100).toFixed(2);
-          break;
-        default:
-          break;
+  const handleKeyDownModal = (event, index) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+
+      if (index < expRateRefs.current.length - 1) {
+        expRateRefs.current[index + 1]?.focus();
+        expRateRefs.current[index + 1]?.select();
+      } else {
+        closeButtonRef.current?.focus();
       }
     }
+  };
 
-    // Calculate total of Exp7 to Exp12 and update expafterGST
-    const totalExpenses =
-      parseFloat(newFormData.Exp7 || 0) +
-      parseFloat(newFormData.Exp8 || 0) +
-      parseFloat(newFormData.Exp9 || 0) +
-      parseFloat(newFormData.Exp10 || 0) +
-      parseFloat(newFormData.Exp11 || 0) +
-      parseFloat(newFormData.Exp12 || 0);
+  // EXP AFTER
+  const expAfterRefs = useRef([]);
+  const closeAfterRef = useRef(null);
+  useEffect(() => {
+    if (isModalOpenAfter && expAfterRefs.current[0]) {
+      expAfterRefs.current[0].focus();
+    }
+  }, [isModalOpenAfter]);
+  const handleKeyDownAfterw2 = (event, index) => {
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
 
-    newFormData.expafterGST = totalExpenses.toFixed(2);
-
-    setFormData(newFormData);
+      if (index < expAfterRefs.current.length - 1) {
+        expAfterRefs.current[index + 1]?.focus();
+        expAfterRefs.current[index + 1]?.select();
+      } else {
+        closeAfterRef.current?.focus();
+      }
+    }
   };
 
   // Update the blur handlers so that they always format the value to 2 decimals.
@@ -2898,48 +3562,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     if (isNaN(value)) {
       value = 0;
     }
-    // Validation: Check if weight is null, NaN, or <= 0
-    // if (isNaN(value) || value <= 0) {
-    //   // Custom Confirmation Toast
-    //   toast.info(
-    //     ({ closeToast }) => (
-    //       <div>
-    //          <p style={{fontSize:20,color:'black'}}>⚠️ Quantity is invalid. It Should be Greater than 0 </p>
-    //         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px'}}>
-    //           <button
-    //             onClick={() => {
-    //               closeToast(); // Close the toast
-    //               // Focus back on the invalid input
-    //               const weightInput = document.querySelectorAll('.QTY')[index];
-    //               if (weightInput) {
-    //                 weightInput.focus();
-    //               }
-    //             }}
-    //             style={{width:100,backgroundColor: '#2ecc71',color: 'white',border: 'none',padding: '5px 10px',borderRadius: '5px',cursor: 'pointer'}}
-    //           >
-    //             OK
-    //           </button>
-    //         </div>
-    //       </div>
-    //     ),
-    //     {
-    //       position: 'top-center',
-    //       autoClose: false,
-    //       closeOnClick: false,
-    //       closeButton: false,
-    //       draggable: false,
-    //       style: {
-    //         width: '400px',
-    //         border:'1px solid black',
-    //         textAlign: 'center',
-    //         borderRadius: '12px',
-    //         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-    //         marginTop:150,
-    //       },
-    //     }
-    //   );
-    //   return;
-    // }
     updatedItems[index].weight = value.toFixed(decimalPlaces) || 0;
     setItems(updatedItems);
   };
@@ -2955,6 +3577,16 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     setItems(updatedItems);
   };
 
+  const handleBlur = (index, field) => {
+    const decimalPlaces = 2;
+    const updatedItems = [...items];
+    let value = parseFloat(updatedItems[index][field]);
+    if (isNaN(value)) {
+      value = 0;
+    }
+    updatedItems[index][field] = value.toFixed(decimalPlaces);
+    setItems(updatedItems);
+  };
   const handleKeyDownTab = (e) => {
     if (e.key === "Tab") {
       e.preventDefault(); // prevent default Tab behavior
@@ -2976,13 +3608,50 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       onAfterPrint: () => setOpen(false), // auto-close after print
     });
   
-    const handlePrintClick = () => {
+  const handlePrintClick = () => {
     setOpen(true);
     setTimeout(() => {
       handlePrint();
       setOpen(false); // hide right after print
     }, 300);
-    };
+  };
+
+  const isRowFilled = (row) => {
+    return (row.sdisc || "").trim() !== "";
+  };
+  const canEditRow = (rowIndex) => {
+      // 🔒 If not in edit mode, nothing is editable
+      if (!isEditMode) return false;
+
+      // First row is editable in edit mode
+      if (rowIndex === 0) return true;
+
+      // All previous rows must be filled
+      for (let i = 0; i < rowIndex; i++) {
+        if (!isRowFilled(items[i])) {
+          return false;
+        }
+      }
+      return true;
+  };
+
+  // ShortCuts for Buttons
+  const AnyModalOpen = showModalCus || showModal ||
+    isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
+  useShortcuts({
+    handleAdd,
+    handleEdit: handleEditClick,
+    handlePrevious,
+    handleNext,
+    handleFirst,
+    handleLast,
+    handleExit,
+    handlePrint: openPrintMenu,
+    isEditMode,
+    isModalOpen: AnyModalOpen,   // 👈 here
+  });
+
+  const nonEmptyItems2 = items.filter((item) => (item.sdisc || "").trim() !== "");
   return (
     <div>
       <div>
@@ -2992,7 +3661,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
         {SelectedInvoiceComponent && (
           <SelectedInvoiceComponent
             formData={formData}
-            items={items}
+            items={nonEmptyItems2}
             supplierdetails={supplierdetails}
             isOpen={open}
             handleClose={handleCloseInvoice}
@@ -3011,30 +3680,38 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       </div>
       <div className="pur_toppart ">
         <div className="Dated ">
-          <DatePicker
-            popperClassName="custom-datepicker-popper"
-            ref={datePickerRef}
-            className="DatePICKER"
-            id="date"
-            // If selectedDate is null, nothing is "selected" in the calendar
-            selected={selectedDate || null}
-            // This ensures that if there's no selected date,
-            // the calendar will open focused on today's date:
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
+          <InputMask
+            mask="99-99-9999"
+            placeholder="dd-mm-yyyy"
+            value={formData.date}
             readOnly={!isEditMode || isDisabled}
-          />
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+          >
+            {(inputProps) => (
+              <input
+                {...inputProps}
+                className="DatePICKER"
+                ref={datePickerRef}
+                onKeyDown={(e) => {
+                  handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
+                }}
+              />
+            )}
+          </InputMask>
           <div className="billdivz">
             <TextField
+              inputRef={voucherNoRef}
               className="billzNo custom-bordered-input"
               id="vno"
               value={formData.vno}
               variant="filled"
               size="small"
               label="V.NO"
-              onKeyDown={handleKeyDownTab} // Handle Tab key here
+              onKeyDown={(e) => {
+                handleEnterKeyPress(voucherNoRef,customerNameRef )(e);
+              }}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -3047,50 +3724,136 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             />
           </div>
           <div className="Setup">
-            <button
-              style={{ height: 45 }}
-              onClick={openModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-1 rounded shadow text-sm sm:text-base"
-            >
-              SETUP
-            </button>
+              <button
+                className="Button"
+                style={{ backgroundColor: "blue", color: "white", fontWeight: "bold" }}
+                onClick={openModal}
+              >
+                SETUP
+              </button>
 
-            {/* Settings Button */}
-            {/* <button
-              onClick={() => setDrawerOpen(true)}
-              className="Setting text-xl text-blue-700"
-            >
-              <FaCog />
-            </button> */}
-            {/* Fullscreen Overlay Drawer */}
-            {drawerOpen && (
-              <>
-                {/* Background Overlay */}
+              {/* Settings Button */}
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(true)}
+                className="Setting text-xl text-blue-700"
+                style={{
+                  cursor: "pointer",
+                  border: "none",
+                  background: "transparent",
+                  padding: 6,
+                  borderRadius: 10,
+                }}
+                title="Settings"
+              >
+                <FaCog />
+              </button>
+
+              {/* Premium Settings Modal */}
+              <Modal
+                show={settingsOpen}
+                onHide={() => setSettingsOpen(false)}
+                centered
+                size="lg"
+                backdrop="static"
+                keyboard={true}
+                dialogClassName="p-0"
+                style={{ maxHeight: "100vh", overflowY: "hidden", marginTop:-10 }}
+              >
+                {/* Premium Header */}
                 <div
-                  className="fixed inset-0 bg-black bg-opacity-50 z-40"
-                  onClick={() => setDrawerOpen(false)}
-                ></div>
-
-                {/* Drawer Panel */}
-                <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out">
-                  {/* Drawer Header */}
-                  <div className="flex justify-between items-center px-4 py-3 border-b">
-                    <span className="font-bold text-lg">Options</span>
-                    <button
-                      onClick={() => setDrawerOpen(false)}
-                      className="text-xl text-gray-600"
-                    >
-                      <FaTimes />
-                    </button>
+                  style={{
+                    padding: "14px 18px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderBottom: "1px solid rgba(0,0,0,0.08)",
+                    background:
+                      "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.10), rgba(255,255,255,0.85))",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
+                      Options
+                    </div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      Customize table fields & theme
+                    </div>
                   </div>
 
-                  {/* Drawer Body */}
-                  <div className="flex flex-col p-4 gap-3">
-                    {/* Color Selector */}
+                  <button
+                    onClick={() => setSettingsOpen(false)}
+                    style={{
+                      height: 38,
+                      width: 38,
+                      borderRadius: 12,
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      background: "rgba(255,255,255,0.8)",
+                      display: "grid",
+                      placeItems: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Close"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+
+                {/* Body */}
+                <Modal.Body style={{ padding: 18, background: "rgba(249,250,251,0.85)" }}>
+                  {/* Theme Card */}
+                  <div
+                    style={{
+                      borderRadius: 16,
+                      padding: 14,
+                      background: "rgba(255,255,255,0.9)",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                          COLOR / GRADIENT
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                          Choose header theme
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          height: 34,
+                          width: 34,
+                          borderRadius: 12,
+                          background: color,
+                          border: "1px solid rgba(255,255,255,0.7)",
+                          boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
+                        }}
+                        title="Preview"
+                      />
+                    </div>
+
                     <select
-                      className="border border-gray-400 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       value={color}
                       onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: 12,
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        background: "white",
+                        fontSize: 13,
+                        outline: "none",
+                      }}
                     >
                       {gradientOptions.map((option, index) => (
                         <option key={index} value={option.value}>
@@ -3098,27 +3861,122 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                         </option>
                       ))}
                     </select>
+                  </div>
 
-                    {/* Font Size Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={decreaseFontSize}
-                        className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
-                      >
-                        <FaMinus />
-                      </button>
+                  {/* Fields Card */}
+                  <div
+                    style={{
+                      borderRadius: 16,
+                      padding: 14,
+                      background: "rgba(255,255,255,0.9)",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                          SELECT TABLE FIELDS
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                          Toggle column visibility
+                        </div>
+                      </div>
 
-                      <button
-                        onClick={increaseFontSize}
-                        className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center text-lg"
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          padding: "6px 10px",
+                          borderRadius: 10,
+                          background: "rgba(17,24,39,0.06)",
+                          color: "#374151",
+                        }}
                       >
-                        <FaPlus />
-                      </button>
+                        {Object.values(tableData).filter(Boolean).length}/
+                        {Object.keys(tableData).length}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        maxHeight: "52vh",
+                        overflowY: "auto",
+                        paddingRight: 6,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      {Object.keys(tableData).map((field) => {
+                        const checked = tableData[field];
+                        return (
+                          <div
+                            key={field}
+                            onClick={() => handleCheckboxChange(field)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: 10,
+                              padding: "10px 12px",
+                              borderRadius: 14,
+                              cursor: "pointer",
+                              border: checked
+                                ? "1px solid rgba(59,130,246,0.35)"
+                                : "1px solid rgba(0,0,0,0.10)",
+                              background: checked
+                                ? "linear-gradient(180deg, rgba(59,130,246,0.10), rgba(255,255,255,0.85))"
+                                : "rgba(255,255,255,0.8)",
+                              boxShadow: checked
+                                ? "0 12px 26px rgba(37,99,235,0.10)"
+                                : "0 10px 18px rgba(0,0,0,0.05)",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => handleCheckboxChange(field)}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ height: 16, width: 16 }}
+                              />
+                              <div>
+                                <div style={{ fontSize: 13, fontWeight: 800, color: "#111827" }}>
+                                  {field.toUpperCase()}
+                                </div>
+                                <div style={{ fontSize: 12, color: "#6B7280" }}>
+                                  Show / hide column
+                                </div>
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 800,
+                                padding: "5px 9px",
+                                borderRadius: 10,
+                                background: checked ? "#2563EB" : "rgba(17,24,39,0.06)",
+                                color: checked ? "white" : "#4B5563",
+                              }}
+                            >
+                              {checked ? "ON" : "OFF"}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
-              </>
-            )}
+                </Modal.Body>
+              </Modal>
           </div>
           {isModalOpen && <PurchaseSetup onClose={closeModal} />}
         </div>
@@ -3135,7 +3993,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     value={item.vacode}
                     className="customerNAME custom-bordered-input"
                     onKeyDown={(e) => {
-                      handleEnterKeyPress(customerNameRef, grNoRef)(e);
+                      handleEnterKeyPress(customerNameRef, vBillNoRef)(e);
                       handleKeyDown(e, index, "accountname");
                       handleOpenModalBack(e, index, "accountname");
                     }}
@@ -3241,9 +4099,9 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               value={formData.vbillno}
               variant="filled"
               size="small"
-              label="BILL NO"
-              onChange={handleNumberChange}
-              onKeyDown={handleEnterKeyPress(vBillNoRef, grNoRef)}
+              label="CN.NO"
+              onChange={handleCapitalAlpha}
+              onKeyDown={handleEnterKeyPress(vBillNoRef, vbDateRef)}
               inputProps={{
                 maxLength: 48,
                 style: {
@@ -3254,13 +4112,30 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 readOnly: !isEditMode || isDisabled,
               }}
             />
-            <DatePicker
-              className="DatePICKERP"
-              id="date"
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              dateFormat="dd-MM-yyyy"
-            />
+              <div style={{marginTop:2}}>
+              <InputMask
+                mask="99-99-9999"
+                value={formData.vbdate}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, vbdate: e.target.value })
+                }
+              >
+                {(props) => (
+                  <TextField
+                    inputRef={vbDateRef}
+                    className="custom-bordered-input"
+                    {...props}
+                    label="DATE"
+                    size="small"
+                    variant="filled"
+                    fullWidth
+                   onKeyDown={handleEnterKeyPress(vbDateRef, grNoRef)}
+                   style={{ width: 165 }}
+                  />
+                )}
+              </InputMask>
+              </div>
           </div>
           <div className="GRNo">
             <TextField
@@ -3361,24 +4236,30 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 fullWidth
                 size="small"
                 variant="filled"
-                disabled={!isEditMode || isDisabled}
-                //  className="custom-select"
-                className="TAXtypez custom-bordered-input"
+                className="custom-bordered-input"
                 sx={{
-                  // width: '250px',
                   fontSize: `${fontSize}px`,
                   "& .MuiFilledInput-root": {
-                    height: 48, // adjust as needed (default ~56px for filled)
+                    height: 47, // adjust as needed (default ~56px for filled)
                   },
                 }}
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
-                  className="TAXtypez"
+                  className="TAXtypez custom-bordered-input"
                   labelId="taxtype-label"
                   id="stype"
                   value={formData.stype}
-                  onChange={handleTaxType}
+                  onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleTaxType(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleTaxType}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -3387,6 +4268,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   inputProps={{
                     sx: {
                       fontSize: `${fontSize}px`,
+                      pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
                 >
@@ -3421,25 +4303,34 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   // width: '250px',
                   fontSize: `${fontSize}px`,
                   "& .MuiFilledInput-root": {
-                    height: 48, // adjust as needed (default ~56px for filled)
+                    height: 47, // adjust as needed (default ~56px for filled)
                   },
                 }}
                 size="small"
-                disabled={!isEditMode || isDisabled}
                 variant="filled"
               >
                 <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
                 <Select
-                  className="SupplyTYPE"
+                  className="SupplyTYPE custom-bordered-input"
                   labelId="supply-label"
                   id="supply"
                   value={formData.conv}
-                  onChange={handleSupply}
+                   onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleSupply(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleSupply}
                   label="SUPPLY TYPE"
                   displayEmpty
                   inputProps={{
                     sx: {
                       fontSize: `${fontSize}px`,
+                      pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
                   MenuProps={{ disablePortal: true }}
@@ -3447,10 +4338,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   <MenuItem value="">
                     <em></em>
                   </MenuItem>
-                  <MenuItem value="Manufacturing Sale">
-                    1. Manufacturing Sale
+                  <MenuItem value="Weight Difference">
+                    Weight Difference
                   </MenuItem>
-                  <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
+                  <MenuItem value="Rate Difference">Rate Difference</MenuItem>
+                  <MenuItem value="Other Purpose">Other Purpose</MenuItem>
                 </Select>
               </FormControl>
             </div>
@@ -3458,7 +4350,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
         </div>
       </div>
       {/* Table content */}
-      <div className="tablestyle">
+      <div ref={tableContainerRef} className="tablestylez">
         <Table ref={tableRef} className="custom-table">
           <thead
             style={{
@@ -3469,29 +4361,30 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             }}
           >
             <tr style={{ color: "#575a5a" }}>
-              <th>ITEMCODE</th>
-              <th>DESCRIPTION</th>
-              <th>HSNCODE</th>
-              <th>PCS</th>
-              <th>QTY</th>
-              <th>RATE</th>
-              <th>AMOUNT</th>
-              <th>DIS@</th>
-              <th>DISCOUNT</th>
-              {/* <th>GST</th> */}
-              <th>OTHERS</th>
-              <th>CGST</th>
-              <th>SGST</th>
-              <th>IGST</th>
-              {/* <th>TOTAL</th> */}
-              {isEditMode && <th className="text-center">ACTION</th>}
+            {tableData.itemcode && <th>ITEMCODE</th>}
+            {tableData.sdisc && <th>DESCRIPTION</th>}
+            {tableData.hsncode && <th>HSNCODE</th>}
+            {tableData.pcs && <th>PCS</th>}
+            {tableData.qty && <th>QTY</th>}
+            {tableData.rate && <th>RATE</th>}
+            {tableData.amount && <th>AMOUNT</th>}
+            {tableData.discount && <th>DIS@</th>}
+            {tableData.discount && <th>DISCOUNT</th>}
+            {tableData.gst && <th>GST</th>}
+            {tableData.others && <th>OTHERS</th>}
+            {tableData.cgst && <th>CGST</th>}
+            {tableData.sgst && <th>SGST</th>}
+            {tableData.igst && <th>IGST</th>}
+            {isEditMode && <th className="text-center">DELETE</th>}
             </tr>
           </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+          <tbody>
             {items.map((item, index) => (
               <tr key={item.id}>
+                {tableData.itemcode && (
                 <td style={{ padding: 0, width: 30 }}>
                   <input
+                   disabled={!canEditRow(index)}
                     className="ItemCode"
                     style={{
                       height: 40,
@@ -3504,18 +4397,23 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     type="text"
                     value={item.vcode}
                     readOnly
-                    // onClick={() => openModalForItem(index)}
                     onKeyDown={(e) => {
                       handleKeyDown(e, index, "vcode");
                       handleOpenModal(e, index, "vcode");
                       handleOpenModalBack(e, index, "vcode");
                     }}
+                    onDoubleClick={(e) => {
+                     handleDoubleClickAfter(e,"vcode", index)
+                    }}
                     ref={(el) => (itemCodeRefs.current[index] = el)}
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                )}
+                {tableData.sdisc && (
                 <td style={{ padding: 0, width: 300 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="desc"
                     style={{
                       height: 40,
@@ -3525,6 +4423,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                     }}
+                    maxLength={48}
                     value={item.sdisc}
                     readOnly={!isEditMode || isDisabled}
                     onChange={(e) =>
@@ -3537,8 +4436,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                )}
+                {tableData.hsncode && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Hsn"
                     style={{
                       height: 40,
@@ -3549,6 +4451,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       padding: 5,
                       textAlign: "right",
                     }}
+                    maxLength={8}
                     readOnly={!isEditMode || isDisabled}
                     value={item.tariff}
                     onChange={(e) =>
@@ -3561,8 +4464,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                  )}
+                {tableData.pcs && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="PCS"
                     style={{
                       height: 40,
@@ -3575,7 +4481,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.pkgs} // Show raw value during input
+                    value={Number(item.pkgs) === 0 ? "" : item.pkgs}
                     onChange={(e) =>
                       handleItemChange(index, "pkgs", e.target.value)
                     }
@@ -3587,8 +4493,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                  )}
+                {tableData.qty && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="QTY"
                     style={{
                       height: 40,
@@ -3601,7 +4510,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.weight} // Show raw value during input
+                    value={Number(item.weight) === 0 ? "" : item.weight}
                     onChange={(e) =>
                       handleItemChange(index, "weight", e.target.value)
                     }
@@ -3613,8 +4522,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                  )}
+                {tableData.rate && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Price"
                     style={{
                       height: 40,
@@ -3627,7 +4539,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.rate} // Show raw value during input
+                    value={Number(item.rate) === 0 ? "" : item.rate}
                     onChange={(e) =>
                       handleItemChange(index, "rate", e.target.value)
                     }
@@ -3639,8 +4551,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                  )}
+                {tableData.amount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Amount"
                     style={{
                       height: 40,
@@ -3651,19 +4566,31 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       padding: 5,
                       textAlign: "right",
                     }}
-                    type="number"
+                    maxLength={48}
                     readOnly={!isEditMode || isDisabled}
-                    value={item.amount}
+                    value={Number(item.amount) === 0 ? "" : item.amount}
+                    onBlur={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) {
+                        handleItemChange(index, "amount", value.toFixed(rateValue));
+                      }
+                    }}
+                    onChange={(e) =>
+                      handleItemChange(index, "amount", e.target.value)
+                    }
                     onKeyDown={(e) => {
                       handleKeyDown(e, index, "amount");
                     }}
                     ref={(el) => (amountRefs.current[index] = el)}
-                    min="0"
                     onFocus={(e) => e.target.select()} // Select text on focus
+                    min="0"
                   />
                 </td>
+                  )}
+                {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="Disc"
                     style={{
                       height: 40,
@@ -3674,19 +4601,24 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       padding: 5,
                       textAlign: "right",
                     }}
-                    value={item.disc}
+                    value={Number(item.disc) === 0 ? "" : item.disc}
                     onChange={(e) =>
                       handleItemChange(index, "disc", e.target.value)
                     }
                     onKeyDown={(e) => {
                       handleKeyDown(e, index, "disc");
                     }}
+                    onBlur={() => handleBlur(index, "disc")}
                     ref={(el) => (discountRef.current[index] = el)}
                     onFocus={(e) => e.target.select()} // Select text on focus
+                    readOnly={!isEditMode || isDisabled}
                   />
                 </td>
+                  )}
+                {tableData.discount && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
                     className="discount"
                     style={{
                       height: 40,
@@ -3697,28 +4629,44 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       padding: 5,
                       textAlign: "right",
                     }}
-                    value={item.discount}
+                    value={Number(item.discount) === 0 ? "" : item.discount}
                     onChange={(e) =>
                       handleItemChange(index, "discount", e.target.value)
                     }
+                    onKeyDown={(e) => {
+                      handleKeyDown(e, index, "discount");
+                    }}
                     onFocus={(e) => e.target.select()} // Select text on focus
+                    ref={(el) => (discount2Ref.current[index] = el)}
+                    onBlur={() => handleBlur(index, "discount")}
+                    readOnly={!isEditMode || isDisabled}
                   />
                 </td>
-                {/* <td>
-                      <input
-                      style={{ width: 56, height: 30, fontSize: `${fontSize}px` }}
-                      className="inputfields"
-                      readOnly={!isEditMode || isDisabled}
-                      value={item.gst}
-                      onKeyDown={(e) => {
-                          handleKeyDown(e, index, 'gst')
-                      }}
-                      ref={el => gstRefs.current[index] = el}
-                      min="0"
-                      />
-                  </td> */}
+                )}
+                {tableData.gst && (
                 <td style={{ padding: 0 }}>
                   <input
+                  disabled={!canEditRow(index)}
+                    className="Others"
+                    style={{
+                      height: 40,
+                      fontSize: `${fontSize}px`,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                      textAlign: "center",
+                    }}
+                    maxLength={2}
+                    value={Number(item.gst) === 0 ? "" : item.gst +"%"}
+                    readOnly={!isEditMode || isDisabled}
+                  />
+                </td>
+                )}
+                {tableData.others && (
+                <td style={{ padding: 0 }}>
+                  <input
+                  disabled={!canEditRow(index)}
                     className="Others"
                     style={{
                       height: 40,
@@ -3729,19 +4677,20 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       padding: 5,
                       textAlign: "right",
                     }}
+                    maxLength={48}
                     type="text"
-                    value={item.exp_before}
+                    value={Number(item.exp_before) === 0 ? "" : item.exp_before}
                     readOnly={!isEditMode || isDisabled}
                     onDoubleClick={() =>
                       handleDoubleClickAfter("exp_before", index)
                     } // Pass index here
-                    // onChange={(e) =>handleItemChange(index, "exp_before", e.target.value)}
+                    // onChange={(e) => handleItemChange(index, "exp_before", e.target.value)}
                     onKeyDown={(e) => {
                       handleKeyDown(e, index, "exp_before");
-                      handleKeyDownExp(e);
+                       handleKeyDownExp(e, "exp_before", index)
                     }}
                     onFocus={(e) => {
-                      e.target.select();
+                      e.target.select(); // Select the entire text when the field is focused
                       if (WindowBefore) {
                         setCurrentIndex(index);
                         setIsModalOpenExp(true);
@@ -3750,7 +4699,114 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     ref={(el) => (othersRefs.current[index] = el)}
                   />
                 </td>
+                )}
                 {isModalOpenExp && currentIndex !== null && (
+                  <div className="Modalz">
+                    <div className="Modal-content">
+                      <h1 className="headingE">ADD/LESS BEFORE GST</h1>
+                      <div className="form-group">
+                        <input
+                          type="checkbox"
+                          id="gross"
+                          checked={items[currentIndex]?.gross || false}
+                          onChange={(e) =>
+                            handleInputChange(
+                              currentIndex,
+                              "gross",
+                              e.target.checked,
+                            )
+                          }
+                        />
+                        <label
+                          style={{ marginLeft: 5 }}
+                          className="label"
+                          htmlFor="Gross"
+                        >
+                          GROSS
+                        </label>
+                      </div>
+                      {[
+                        { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
+                        { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
+                        { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
+                        { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
+                        { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
+                        ].map((field, idx) => {
+                          const rateIndex = idx * 2;
+                          const valueIndex = idx * 2 + 1;
+
+                          return (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "10px" }}>
+                              
+                              <label style={{ width: "100px", fontWeight: "bold" }}>
+                                {field.label}
+                              </label>
+
+                              {/* RATE FIELD */}
+                              <input
+                                ref={(el) => (expRateRefs.current[rateIndex] = el)}
+                                value={items[currentIndex][field.rate]}
+                                style={{
+                                  border: "1px solid black",
+                                  padding: "5px",
+                                  width: "120px",
+                                  textAlign: "right",
+                                  borderRadius: "4px",
+                                }}
+                                onChange={(e) =>
+                                  handleInputChange(currentIndex, field.rate, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDownModal(e, rateIndex)}
+                              />
+
+                              {/* VALUE FIELD */}
+                              <input
+                                ref={(el) => (expRateRefs.current[valueIndex] = el)}
+                                value={items[currentIndex][field.value]}
+                                style={{
+                                  border: "1px solid black",
+                                  padding: "5px",
+                                  width: "120px",
+                                  textAlign: "right",
+                                  borderRadius: "4px",
+                                }}
+                                onBlur={() =>
+                                  handleExpenseBlur(currentIndex, field.value)
+                                }
+                                onChange={(e) =>
+                                  handleInputChange(currentIndex, field.value, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDownModal(e, valueIndex)}
+                              />
+                            </div>
+                          );
+                      })}
+                      <Button
+                        ref={closeButtonRef}
+                        onClick={() => {
+                          const idx = currentIndex; // store before reset
+
+                          setIsModalOpenExp(false);
+                          setCurrentIndex(null);
+
+                          // restore focus to Others field
+                          setTimeout(() => {
+                            othersRefs.current[idx]?.focus();
+                            othersRefs.current[idx]?.select();
+                          }, 0);
+                        }}
+                        style={{
+                          borderColor: "transparent",
+                          backgroundColor: "red",
+                          marginTop: 10,
+                        }}
+                      >
+                        CLOSE
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {/* {isModalOpenExp && currentIndex !== null && (
                   <div className="Modal">
                     <div className="Modal-content">
                       <h1 className="headingE">ADD/LESS BEFORE GST</h1>
@@ -3797,6 +4853,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                           </label>
 
                           <input
+                            ref={(el) => (expRateRefs.current[idx] = el)} // Assign ref dynamically
                             value={items[currentIndex][field.rate]}
                             style={{
                               border: "1px solid black",
@@ -3812,6 +4869,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                                 e.target.value
                               )
                             }
+                            onKeyDown={(e) => handleKeyDownModal(e, idx)}
                           />
 
                           <input
@@ -3834,10 +4892,18 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                         </div>
                       ))}
                       <Button
+                        ref={closeButtonRef}
                         onClick={() => {
+                          const idx = currentIndex; // store before reset
+
                           setIsModalOpenExp(false);
-                          setCurrentIndex(null); // Reset the index when closing the modal
-                          transportRef.current.focus();
+                          setCurrentIndex(null);
+
+                          // restore focus to Others field
+                          setTimeout(() => {
+                            othersRefs.current[idx]?.focus();
+                            othersRefs.current[idx]?.select();
+                          }, 0);
                         }}
                         style={{
                           borderColor: "transparent",
@@ -3849,7 +4915,8 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       </Button>
                     </div>
                   </div>
-                )}
+                )} */}
+                {tableData.cgst && (
                 <td style={{ padding: 0 }}>
                   <input
                     className="CTax"
@@ -3861,9 +4928,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
+                      color: "black",
                     }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.ctax}
+                    maxLength={48}
+                    disabled
+                    value={Number(item.ctax) === 0 ? "" : item.ctax}
                     onChange={(e) =>
                       handleItemChange(index, "ctax", e.target.value)
                     }
@@ -3871,8 +4940,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       handleKeyDown(e, index, "ctax");
                     }}
                     ref={(el) => (cgstRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()} // Select text on focus
                   />
                 </td>
+                )}
+                {tableData.sgst && (
                 <td style={{ padding: 0 }}>
                   <input
                     className="STax"
@@ -3884,9 +4956,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
+                      color: "black",
                     }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.stax}
+                    maxLength={48}
+                    disabled
+                    value={Number(item.stax) === 0 ? "" : item.stax}
                     onChange={(e) =>
                       handleItemChange(index, "stax", e.target.value)
                     }
@@ -3894,9 +4968,12 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       handleKeyDown(e, index, "stax");
                     }}
                     ref={(el) => (sgstRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()} // Select text on focus
                     min="0"
                   />
                 </td>
+                )}
+                {tableData.igst && (
                 <td style={{ padding: 0 }}>
                   <input
                     className="ITax"
@@ -3908,9 +4985,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
+                      color: "black",
                     }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.itax}
+                    maxLength={48}
+                    disabled
+                    value={Number(item.itax) === 0 ? "" : item.itax}
                     onChange={(e) =>
                       handleItemChange(index, "itax", e.target.value)
                     }
@@ -3918,42 +4997,73 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       handleKeyDown(e, index, "itax");
                     }}
                     ref={(el) => (igstRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()} // Select text on focus
                     min="0"
                   />
                 </td>
-                {/* <td style={{ padding: 0 }}>
-                    <input
-                    className="TotalTable"
-                      style={{
-                        fontSize: `${fontSize}px`,
-                      }}
-                      readOnly
-                      value={item.vamt}
-                    />
-                  </td> */}
+                )}
                 {isEditMode && (
                   <td style={{ padding: 0 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center", // horizontally center
-                        alignItems: "center", // vertically center
-                        height: "100%", // takes full cell height
-                      }}
-                    >
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDeleteItem(index)}
-                        size="small"
+                    {canEditRow(index) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
                       >
-                        <DeleteIcon />
-                      </IconButton>
-                    </div>
+                        <IconButton
+                          color="error"
+                          size="small"
+                          tabIndex={-1}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    )}
                   </td>
                 )}
               </tr>
             ))}
           </tbody>
+          <tfoot style={{ background: color, position: "sticky", bottom: -6, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+            {tableData.itemcode && <td></td>}
+            {tableData.sdisc && <td>TOTAL</td>}
+            {tableData.hsncode && <td></td>}
+            {tableData.pcs && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(pkgsValue)}</td>
+            )}
+            {tableData.qty && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(weightValue)}</td>
+            )}
+            {tableData.rate && <td></td>}
+            {tableData.amount && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}</td>
+            )}
+            {tableData.discount && (
+              <>
+                <td>{items.reduce((sum, item) => sum + parseFloat(item.disc || 0), 0).toFixed(2)}</td>
+                <td>{items.reduce((sum, item) => sum + parseFloat(item.discount || 0), 0).toFixed(2)}</td>
+              </>
+            )}
+            {tableData.gst && <td></td>}
+            {tableData.others && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.exp_before || 0), 0).toFixed(2)}</td>
+            )}
+            {tableData.cgst && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.ctax || 0), 0).toFixed(2)}</td>
+            )}
+            {tableData.sgst && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.stax || 0), 0).toFixed(2)}</td>
+            )}
+            {tableData.igst && (
+              <td>{items.reduce((sum, item) => sum + parseFloat(item.itax || 0), 0).toFixed(2)}</td>
+            )}
+            {isEditMode && <td></td>}
+          </tr>
+          </tfoot>
         </Table>
       </div>
       {showModal && (
@@ -4029,7 +5139,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 onChange={HandleInputsChanges}
                 onKeyDown={(e) => {
                   handleOpenModalTpt(e, "broker", "broker");
-                  handleKeyDowndown(e, expAfterGSTRef);
+                  handleKeyDowndown(e, dueDateRef);
                 }}
                 inputProps={{
                   maxLength: 48,
@@ -4046,14 +5156,14 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               />
             </div>
           </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+          {/* TDS ON */}
+          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
           >
             <div>
               <FormControl
                 variant="filled"
                 size="small"
-                disabled={!isEditMode || isDisabled}
+                // disabled={!isEditMode || isDisabled}
                 sx={{
                   // width: '100%', // Let width be controlled by content or parent
                   "& .MuiFilledInput-root": {
@@ -4076,13 +5186,24 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   className="TDSon custom-bordered-input"
                   id="tdson"
                   value={formData.tdson}
-                  onChange={handleTdsOn}
+                  onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                    handleTdsOn(e);
+                  }}
+                  onOpen={(e) => {
+                    if (!isEditMode || isDisabled) {
+                      e.preventDefault(); // prevent dropdown opening
+                    }
+                  }}
+                  // onChange={handleTdsOn}
                   displayEmpty
                   inputProps={{ "aria-label": "Without label" }}
                   sx={{
                     color: "red",
                     fontWeight: "bold",
                     fontSize: `${fontSize}px`, // 👈 Dynamic font size
+                    backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white", // mimic disabled style
+                    pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                   }}
                   MenuProps={{ disablePortal: true }}
                 >
@@ -4101,6 +5222,25 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 </Select>
               </FormControl>
             </div>
+              <TextField
+                className="custom-bordered-input"
+                id="srv_tax"
+                value={formData.srv_tax}
+                // disabled
+                label='TDS 194-Q'
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    color: 'red',
+                  },
+                }}
+                onFocus={(e) => e.target.select()}
+                size="small"
+                variant="filled"
+                sx={{ width: 225 }}
+              />
             <div
               style={{
                 display: "flex",
@@ -4111,10 +5251,16 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               <TextField
                 className="TCSRATE custom-bordered-input"
                 // inputRef={tcsRef2}
-                id="tcs206_rate"
-                value={formData.tcs206_rate}
+                id="tcs1_rate"
+                value={formData.tcs1_rate}
                 // onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
-                label="%"
+                // label="%"
+                onChange={(e) =>
+                  setFormData(prev => ({
+                    ...prev,
+                    tcs1_rate: e.target.value
+                  }))
+                }
                 inputProps={{
                   maxLength: 48,
                   style: {
@@ -4132,9 +5278,8 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
               <TextField
                 className="TCSPER custom-bordered-input"
-                id="tcs206"
-                value={formData.tcs206}
-                onChange={handleNumberChange}
+                id="tcs1"
+                value={formData.tcs1}
                 label="TCS @"
                 inputProps={{
                   maxLength: 48,
@@ -4150,7 +5295,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 // sx={{ width: 120 }}
               />
             </div>
-            <div
+            {/* <div
               style={{
                 display: "flex",
                 flexDirection: "row",
@@ -4199,13 +5344,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 variant="filled"
                 // sx={{ width: 120 }}
               />
-            </div>
+            </div> */}
           </div>
           {/* C/S/I/TDS */}
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
-          >
-            <div style={{ display: "flex", flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5,marginTop:"auto"}}>
+            <div className="tdstax" style={{ display: "flex", flexDirection: "row" }}>
               <TextField
                 className="CTDS custom-bordered-input"
                 value={formData.Ctds}
@@ -4250,8 +5393,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   },
                 }}
               />
-            </div>
-            <div style={{ display: "flex", flexDirection: "row" }}>
               <TextField
                 className="CTDS custom-bordered-input"
                 value={formData.iTds}
@@ -4274,8 +5415,8 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   },
                 }}
               />
-              {/* <text style={{ fontSize: 20, margin: 5 }}>=</text>  */}
-              <TextField
+              <span style={{ fontSize: 20, marginTop: "10px" }}>=</span> 
+               <TextField
                 className="CTDS custom-bordered-input"
                 value={formData.Tds2}
                 label="TOTAL"
@@ -4299,10 +5440,34 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               />
             </div>
           </div>
-          {/* CESS */}
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
-          >
+          {/* Due Date */}
+          <div style={{ display: "flex", flexDirection: "column",marginLeft:"auto",marginRight:5 }}>
+            <div className="duedatez">
+                 <InputMask
+                mask="99-99-9999"
+                value={formData.duedate}
+                readOnly={!isEditMode || isDisabled}
+                onChange={(e) =>
+                  setFormData({ ...formData, duedate: e.target.value })
+                }
+              >
+                {(props) => (
+                  <TextField
+                    inputRef={dueDateRef}
+                    className="custom-bordered-input"
+                    {...props}
+                    label="INPUT DATE"
+                    size="small"
+                    variant="filled"
+                    fullWidth
+                   onKeyDown={(e) => {
+                        handleKeyDowndown(e, expAfterGSTRef);
+                      }}
+                   style={{ width: 165 }}
+                  />
+                )}
+              </InputMask>
+            </div>
             <div>
               <TextField
                 id="cess1"
@@ -4317,8 +5482,8 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 }}
                 size="small"
                 variant="filled"
-                className="TOTALFIELDS custom-bordered-input"
-                // sx={{ width: 150 }} // Adjust width as needed
+                className="custom-bordered-input"
+                sx={{ width: 165 }} // Adjust width as needed
               />
             </div>
             <div>
@@ -4335,90 +5500,18 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 }}
                 size="small"
                 variant="filled"
-                className="TOTALFIELDS custom-bordered-input"
-                // sx={{ width: 150 }} // Adjust width as needed
-              />
-            </div>
-            <div className="duedatez">
-              <DatePicker
-                id="duedate"
-                value={formData.duedate}
-                className="dueDatePICKER"
-                selected={expiredDate}
-                onChange={handleDateChange}
-                readOnly={!isEditMode || isDisabled}
-                dateFormat="dd-MM-yyyy"
-                customInput={
-                  <TextField
-                    className="custom-bordered-input"
-                    label=" DUE DATE"
-                    variant="filled"
-                    size="small"
-                    // sx={{ width: 150 }}
-                  />
-                }
-                // placement="bottom-start" // <-- use this, not popperPlacement
+                className="custom-bordered-input"
+                sx={{ width: 165 }} // Adjust width as needed
               />
             </div>
           </div>
-          {/* CGST/SGTS/IGST */}
-          <div className="Totalcontainer">
-            <div>
-              <TextField
-                id="cgst"
-                value={formData.cgst}
-                label="CGST"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                  },
-                }}
-                size="small"
-                variant="filled"
-                className="TOTALFIELDS custom-bordered-input"
-                // sx={{ width: 150 }} // Adjust width as needed
-              />
-            </div>
-            <div>
-              <TextField
-                id="sgst"
-                value={formData.sgst}
-                label="SGST"
-                inputProps={{
-                  maxLength: 48,
-                  style: { height: 20, fontSize: `${fontSize}px` },
-                }}
-                size="small"
-                variant="filled"
-                className="TOTALFIELDS custom-bordered-input"
-                // sx={{ width: 150 }}
-              />
-            </div>
-            <div>
-              <TextField
-                id="igst"
-                value={formData.igst}
-                label="IGST"
-                inputProps={{
-                  maxLength: 48,
-                  style: { height: 20, fontSize: `${fontSize}px` },
-                }}
-                size="small"
-                variant="filled"
-                className="TOTALFIELDS custom-bordered-input"
-                // sx={{ width: 150 }}
-              />
-            </div>
-          </div>
-          {/* TOTAL GST */}
+          {/* TOTALS */}
           <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+            style={{ display: "flex", flexDirection: "column",marginRight:"12px"}}
           >
             <div>
               <TextField
-                className="TOTALFIELDS custom-bordered-input"
+                className="TOTALFIELD custom-bordered-input"
                 id="tax"
                 value={formData.tax}
                 label="TOTAL GST"
@@ -4437,27 +5530,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             </div>
             <div>
               <TextField
-                className="TOTALFIELDS custom-bordered-input"
-                // inputRef={addLessRef}
-                id="exp_before"
-                value={formData.exp_before}
-                label="ADD / LESS"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                  },
-                }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                // sx={{ width: 150 }}
-              />
-            </div>
-            <div>
-              <TextField
-                className="TOTALFIELDS custom-bordered-input"
+                className="TOTALFIELD custom-bordered-input"
                 inputRef={expAfterGSTRef}
                 id="expafterGST"
                 value={formData.expafterGST}
@@ -4486,218 +5559,131 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 // sx={{ width: 150 }}
               />
               {isModalOpenAfter && (
-                <div className="Modal">
-                  <div className="Modal-content">
-                    <h1 className="headingE">EXPENSE AFTER TAX</h1>
-                    <div className="form-group">
-                      <input
-                        type="checkbox"
-                        id="gross"
-                        checked={formData.gross}
-                        onChange={handleGross}
-                      />
-                      <label
-                        style={{ marginLeft: 5 }}
-                        className="label"
-                        htmlFor="Gross"
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 1000,
+                  }}
+                >
+                  <div
+                    style={{
+                      background: 'linear-gradient(to bottom, #edc5a7,#a5d8ed)',
+                      padding: "25px 30px",
+                      borderRadius: "12px",
+                      width: "450px",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      animation: "fadeIn 0.3s ease-in-out",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        textAlign: "center",
+                        marginBottom: "20px",
+                        fontWeight: "600",
+                        color: "#333",
+                        fontSize:"18px",
+                      }}
+                    >
+                      EXPENSE AFTER TAX
+                    </h2>
+
+                    {/* Expense Rows */}
+                    {[
+                    { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
+                    { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
+                    { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
+                    { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
+                    { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
+                    ].map((item, index) => {
+                      const rateIndex = index * 2;
+                      const amountIndex = index * 2 + 1;
+
+                      return (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: 1,
+                              fontWeight: "bold",
+                              color: "#444",
+                            }}
+                          >
+                            {item.label}
+                          </div>
+
+                          {/* RATE */}
+                          <input
+                            ref={(el) => (expAfterRefs.current[rateIndex] = el)}
+                            id={item.rate}
+                            value={formData[item.rate]}
+                            onChange={handleNumberChange}
+                            onKeyDown={(e) => handleKeyDownAfterw2(e, rateIndex)}
+                            placeholder="Rate"
+                            style={{
+                              width: "90px",
+                              padding: "6px",
+                              borderRadius: "6px",
+                              border: "1px solid black",
+                              marginRight: "8px",
+                              textAlign: "right",
+                            }}
+                          />
+
+                          {/* AMOUNT */}
+                          <input
+                            ref={(el) => (expAfterRefs.current[amountIndex] = el)}
+                            id={item.amount}
+                            value={formData[item.amount]}
+                            onChange={handleNumberChange}
+                            onKeyDown={(e) => handleKeyDownAfterw2(e, amountIndex)}
+                            placeholder="Amount"
+                            style={{
+                              width: "90px",
+                              padding: "6px",
+                              borderRadius: "6px",
+                              border: "1px solid black",
+                              textAlign: "right",
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+
+                    {/* Close Button */}
+                    <div style={{ textAlign: "center", marginTop: "20px" }}>
+                      <Button
+                        ref={closeAfterRef}
+                        onClick={closeModalAfter}
+                        style={{
+                          backgroundColor: "#ff4d4f",
+                          border: "none",
+                          padding: "8px 20px",
+                          borderRadius: "6px",
+                          fontWeight: "500",
+                        }}
                       >
-                        GROSS
-                      </label>
+                        CLOSE
+                      </Button>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense6}</text>
-                      <input
-                        id="Exp_rate6"
-                        value={formData.Exp_rate6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp6"
-                        value={formData.Exp6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense7}</text>
-                      <input
-                        id="Exp_rate7"
-                        value={formData.Exp_rate7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp7"
-                        value={formData.Exp7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense8}</text>
-                      <input
-                        id="Exp_rate8"
-                        value={formData.Exp_rate8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp8"
-                        value={formData.Exp8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense9}</text>
-                      <input
-                        id="Exp_rate9"
-                        value={formData.Exp_rate9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 18,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp9"
-                        value={formData.Exp9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense10}</text>
-                      <input
-                        id="Exp_rate10"
-                        value={formData.Exp_rate10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 24.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp10"
-                        value={formData.Exp10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <Button
-                      onClick={closeModalAfter}
-                      style={{
-                        borderColor: "transparent",
-                        backgroundColor: "red",
-                        marginTop: 10,
-                      }}
-                    >
-                      CLOSE
-                    </Button>
                   </div>
                 </div>
               )}
             </div>
-          </div>
-          {/* GRAND TOTAL */}
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
-          >
-            <div>
-              <TextField
-                className="TOTALFIELDS custom-bordered-input"
-                id="sub_total"
-                value={formData.sub_total}
-                label="VALUE"
-                size="small"
-                variant="filled"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                  },
-                }}
-                // sx={{ width: 150 }} // Adjust width as needed
-              />
-            </div>
-            <div>
-              {T11 && (
-                <TextField
-                  className="RoundOff custom-bordered-input"
-                  value={formData.ExpRoundoff}
-                  label="ROUND OFF"
-                  size="small"
-                  variant="outlined"
-                  inputProps={{
-                    maxLength: 48,
-                    style: { height: 20, fontSize: `${fontSize}px` },
-                  }}
-                  sx={{ width: 150 }}
-                />
-              )}
-            </div>
-            <div>
+               <div>
               <TextField
                 id="grandtotal"
                 value={formData.grandtotal}
@@ -4713,7 +5699,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 }}
                 size="small"
                 variant="filled"
-                className="TOTALFIELDS custom-bordered-input"
+                className="TOTALFIELD custom-bordered-input"
                 // sx={{ width: 150 }}
               />
             </div>
@@ -4723,7 +5709,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           <Button
           ref={addButtonRef}
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[0] }}
+            style={{background: color }}
             onClick={handleAdd}
             disabled={!isAddEnabled}
           >
@@ -4731,7 +5717,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[1] }}
+            style={{background: color }}
             onClick={handleEditClick}
             disabled={!isAddEnabled}
           >
@@ -4739,7 +5725,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[2] }}
+            style={{background: color }}
             onClick={handlePrevious}
             disabled={!isPreviousEnabled}
           >
@@ -4747,7 +5733,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[3] }}
+            style={{background: color }}
             onClick={handleNext}
             disabled={!isNextEnabled}
           >
@@ -4755,7 +5741,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[4] }}
+            style={{background: color }}
             onClick={handleFirst}
             disabled={!isFirstEnabled}
           >
@@ -4763,7 +5749,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[5] }}
+            style={{background: color }}
             onClick={handleLast}
             disabled={!isLastEnabled}
           >
@@ -4771,16 +5757,31 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </Button>
           <Button
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[6] }}
+            style={{background: color }}
             disabled={!isSearchEnabled}
+            onClick={() => {
+              fetchAllBills();
+              setShowSearch(true);
+            }}
           >
             Search
           </Button>
+
+          {isFAModalOpen && (
+            <FAVoucherModal
+              open={isFAModalOpen}
+              onClose={() => setIsFAModalOpen(false)}
+              tenant={tenant}
+              voucherno={formData.vno}
+              vtype="P"
+            />
+          )}
+
           <Button
             ref={printButtonRef}
             className="Buttonz"
             onClick={openPrintMenu}
-            style={{ color: "black", backgroundColor: buttonColors[7] }}
+            style={{background: color }}
             disabled={!isPrintEnabled}
           >
             Print
@@ -4792,10 +5793,11 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           formDataSale={formData}
           handlePrint={handlePrintClick}
           setSelectedCopies={setSelectedCopies}
+          onFaView={handleViewFAVoucher}
             />
           <Button
-            className="delete"
-            style={{ color: "black", backgroundColor: buttonColors[8] }}
+            className="Buttonz"
+            style={{background: color }}
             onClick={handleDeleteClick}
             disabled={!isDeleteEnabled}
           >
@@ -4804,22 +5806,126 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           <Button
             onClick={handleExit}
             className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[9] }}
+            style={{background: color }}
           >
             Exit
           </Button>
           <Button
             ref={saveButtonRef}
             className="Buttonz"
-            // onClick={handleSaveClick}
-            disabled={!isSubmitEnabled}
-            style={{ color: "black", backgroundColor: buttonColors[10] }}
+            onClick={handleDataSave}
+            disabled
+            style={{background: color }}
           >
             Save
           </Button>
         </div>
       </div>
+      {/* Search Modal */}
+      <Modal show={showSearch} onHide={() => setShowSearch(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Search</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {/* Filters */}
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <Form.Control
+              ref={billNoRef}
+              type="text"
+              placeholder="Enter Bill No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+              onKeyDown={handleEnterKeyPress(billNoRef, dateRef)}
+            />
+
+            <InputMask
+              mask="99-99-9999"
+              placeholder="DD-MM-YYYY"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            >
+              {(inputProps) => (
+                <input
+                  {...inputProps}
+                  className="form-control"
+                  ref={dateRef}
+                  onKeyDown={handleEnterKeyPress(dateRef, proceedRef)}
+                />
+              )}
+            </InputMask>
+
+            {/* <InputMask
+              mask="99-99-9999"
+              placeholder="DD-MM-YYYY"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+              className="form-control"
+            /> */}
+
+            <Button ref={proceedRef} variant="primary" onClick={handleProceed}>
+              Proceed
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchBillNo("");
+                setSearchDate("");
+                setFilteredBills([]);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+
+          {/* Results */}
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Bill No</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>City</th>
+                  <th>Grand Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredBills.map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.formData.vno}</td>
+                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
+                    <td>{bill.supplierdetails?.[0]?.vacode}</td>
+                    <td>{bill.supplierdetails?.[0]?.city}</td>
+                    <td>{bill.formData.grandtotal}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSelectBill(bill)}
+                      >
+                        Select
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
 export default CreditNote;
+
