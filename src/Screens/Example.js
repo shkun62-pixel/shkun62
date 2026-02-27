@@ -2768,228 +2768,239 @@
 
 // export default Example;
 
-import React, { useState } from "react";
-import axios from "axios";
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
-import { Button, Spinner, Form, Row, Col } from "react-bootstrap";
-import InputMask from "react-input-mask";
-import SaleWin from "./Sale/SaleWin";
+// import React, { useState } from "react";
+// import axios from "axios";
+// import ExcelJS from "exceljs";
+// import { saveAs } from "file-saver";
+// import { Button, Spinner, Form, Row, Col } from "react-bootstrap";
+// import InputMask from "react-input-mask";
+
+// const Example = () => {
+//   const [loading, setLoading] = useState(false);
+//   const [fromDate, setFromDate] = useState("");
+//   const [toDate, setToDate] = useState("");
+
+//   const parseDate = (dateStr) => {
+//     const [day, month, year] = dateStr.split("/");
+//     return new Date(`${year}-${month}-${day}`);
+//   };
+
+//   const filterByDate = (data, dateField) => {
+//     const from = parseDate(fromDate);
+//     const to = parseDate(toDate);
+
+//     return data.filter((item) => {
+//       let rawDate = item.formData?.[dateField];
+//       if (!rawDate) return false;
+
+//       let dateObj;
+
+//       if (rawDate.includes("T")) {
+//         dateObj = new Date(rawDate);
+//       } else {
+//         const [d, m, y] = rawDate.split("-");
+//         dateObj = new Date(`${y}-${m}-${d}`);
+//       }
+
+//       return dateObj >= from && dateObj <= to;
+//     });
+//   };
+
+//   const calculateSales3B = (salesData) => {
+//     let taxable = 0;
+//     let igst = 0;
+//     let cgst = 0;
+//     let sgst = 0;
+
+//     salesData.forEach((sale) => {
+//       taxable += Number(sale.formData?.sub_total || 0);
+//       igst += Number(sale.formData?.igst || 0);
+//       cgst += Number(sale.formData?.cgst || 0);
+//       sgst += Number(sale.formData?.sgst || 0);
+//     });
+
+//     return { taxable, igst, cgst, sgst };
+//   };
+
+//   const calculatePurchaseITC = (purchaseData) => {
+//     let igst = 0;
+//     let cgst = 0;
+//     let sgst = 0;
+
+//     purchaseData.forEach((purchase) => {
+//       igst += Number(purchase.formData?.igst || 0);
+//       cgst += Number(purchase.formData?.cgst || 0);
+//       sgst += Number(purchase.formData?.sgst || 0);
+//     });
+
+//     return { igst, cgst, sgst };
+//   };
+
+//   const exportGSTR3B = async () => {
+//     try {
+//       if (!fromDate || !toDate) {
+//         alert("Please select From and To date");
+//         return;
+//       }
+
+//       setLoading(true);
+
+//       // 🔹 Fetch Sales
+//       const salesResponse = await axios.get(
+//         "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+//       );
+
+//       // 🔹 Fetch Purchase
+//       const purchaseResponse = await axios.get(
+//         "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase"
+//       );
+
+//       const filteredSales = filterByDate(
+//         salesResponse.data,
+//         "date"
+//       );
+
+//       const filteredPurchase = filterByDate(
+//         purchaseResponse.data,
+//         "date"
+//       );
+
+//       // 🔹 Load Template
+//       const templateResponse = await fetch("excel/gstr3b.xlsx");
+//       const buffer = await templateResponse.arrayBuffer();
+
+//       const workbook = new ExcelJS.Workbook();
+//       await workbook.xlsx.load(buffer, {
+//         ignoreNodes: [
+//           "dataValidations",
+//           "sheetProtection",
+//           "conditionalFormatting"
+//         ]
+//       });
+
+//       workbook.definedNames.model = [];
+
+//       const sheet3B = workbook.getWorksheet("Sheet2");
+
+//       // 🔹 Calculate totals
+//       const salesTotals = calculateSales3B(filteredSales);
+//       const purchaseTotals = calculatePurchaseITC(filteredPurchase);
+
+//       // ==========================
+//       // 🔥 3.1(a) Row 14
+//       // ==========================
+//       sheet3B.getCell("D14").value = Number(salesTotals.taxable.toFixed(2));
+//       sheet3B.getCell("G14").value = Number(salesTotals.igst.toFixed(2));
+//       sheet3B.getCell("J14").value = Number(salesTotals.cgst.toFixed(2));
+//       sheet3B.getCell("M14").value = Number(salesTotals.sgst.toFixed(2));
+
+//       // ==========================
+//       // 🔥 4(A)(5) Row 27
+//       // ==========================
+//       sheet3B.getCell("D27").value = Number(purchaseTotals.igst.toFixed(2));
+//       sheet3B.getCell("E27").value = Number(purchaseTotals.cgst.toFixed(2));
+//       sheet3B.getCell("F27").value = Number(purchaseTotals.sgst.toFixed(2));
+
+//       const fileBuffer = await workbook.xlsx.writeBuffer();
+
+//       saveAs(
+//         new Blob([fileBuffer], {
+//           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+//         }),
+//         "GSTR3B_Export.xlsx"
+//       );
+
+//     } catch (error) {
+//       console.error(error);
+//       alert("Export Failed");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div style={{ padding: 20 }}>
+//       <Row className="mb-3">
+//         <Col md={3}>
+//           <Form.Label>From Date</Form.Label>
+//           <InputMask
+//             mask="99/99/9999"
+//             value={fromDate}
+//             onChange={(e) => setFromDate(e.target.value)}
+//           >
+//             {(inputProps) => (
+//               <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
+//             )}
+//           </InputMask>
+//         </Col>
+
+//         <Col md={3}>
+//           <Form.Label>To Date</Form.Label>
+//           <InputMask
+//             mask="99/99/9999"
+//             value={toDate}
+//             onChange={(e) => setToDate(e.target.value)}
+//           >
+//             {(inputProps) => (
+//               <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
+//             )}
+//           </InputMask>
+//         </Col>
+
+//         <Col md={3} className="d-flex align-items-end">
+//           <Button onClick={exportGSTR3B} disabled={loading}>
+//             {loading ? (
+//               <>
+//                 <Spinner
+//                   animation="border"
+//                   size="sm"
+//                   style={{ marginRight: 8 }}
+//                 />
+//                 Exporting...
+//               </>
+//             ) : (
+//               "Export GSTR-3B"
+//             )}
+//           </Button>
+//         </Col>
+//       </Row>
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+import React,{useState} from 'react'
+import Button from '@mui/material/Button';
+import SaleModal from './Sale/SaleModal ';
 
 const Example = () => {
-  const [loading, setLoading] = useState(false);
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-    const [openSaleWin, setOpenSaleWin] = useState(false);
-  
-    const handleOpen = () => {
-      setOpenSaleWin(true);
-    };
-  
-    const handleClose = () => {
-      setOpenSaleWin(false);
-    };
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
-  const parseDate = (dateStr) => {
-    const [day, month, year] = dateStr.split("/");
-    return new Date(`${year}-${month}-${day}`);
+  const openSaleModal = () => {
+    setIsSaleModalOpen(true);
   };
 
-  const filterByDate = (data, dateField) => {
-    const from = parseDate(fromDate);
-    const to = parseDate(toDate);
-
-    return data.filter((item) => {
-      let rawDate = item.formData?.[dateField];
-      if (!rawDate) return false;
-
-      let dateObj;
-
-      if (rawDate.includes("T")) {
-        dateObj = new Date(rawDate);
-      } else {
-        const [d, m, y] = rawDate.split("-");
-        dateObj = new Date(`${y}-${m}-${d}`);
-      }
-
-      return dateObj >= from && dateObj <= to;
-    });
+  const closeSaleModal = () => {
+    setIsSaleModalOpen(false);
   };
-
-  const calculateSales3B = (salesData) => {
-    let taxable = 0;
-    let igst = 0;
-    let cgst = 0;
-    let sgst = 0;
-
-    salesData.forEach((sale) => {
-      taxable += Number(sale.formData?.sub_total || 0);
-      igst += Number(sale.formData?.igst || 0);
-      cgst += Number(sale.formData?.cgst || 0);
-      sgst += Number(sale.formData?.sgst || 0);
-    });
-
-    return { taxable, igst, cgst, sgst };
-  };
-
-  const calculatePurchaseITC = (purchaseData) => {
-    let igst = 0;
-    let cgst = 0;
-    let sgst = 0;
-
-    purchaseData.forEach((purchase) => {
-      igst += Number(purchase.formData?.igst || 0);
-      cgst += Number(purchase.formData?.cgst || 0);
-      sgst += Number(purchase.formData?.sgst || 0);
-    });
-
-    return { igst, cgst, sgst };
-  };
-
-  const exportGSTR3B = async () => {
-    try {
-      if (!fromDate || !toDate) {
-        alert("Please select From and To date");
-        return;
-      }
-
-      setLoading(true);
-
-      // 🔹 Fetch Sales
-      const salesResponse = await axios.get(
-        "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
-      );
-
-      // 🔹 Fetch Purchase
-      const purchaseResponse = await axios.get(
-        "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase"
-      );
-
-      const filteredSales = filterByDate(
-        salesResponse.data,
-        "date"
-      );
-
-      const filteredPurchase = filterByDate(
-        purchaseResponse.data,
-        "date"
-      );
-
-      // 🔹 Load Template
-      const templateResponse = await fetch("excel/gstr3b.xlsx");
-      const buffer = await templateResponse.arrayBuffer();
-
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer, {
-        ignoreNodes: [
-          "dataValidations",
-          "sheetProtection",
-          "conditionalFormatting"
-        ]
-      });
-
-      workbook.definedNames.model = [];
-
-      const sheet3B = workbook.getWorksheet("Sheet2");
-
-      // 🔹 Calculate totals
-      const salesTotals = calculateSales3B(filteredSales);
-      const purchaseTotals = calculatePurchaseITC(filteredPurchase);
-
-      // ==========================
-      // 🔥 3.1(a) Row 14
-      // ==========================
-      sheet3B.getCell("D14").value = Number(salesTotals.taxable.toFixed(2));
-      sheet3B.getCell("G14").value = Number(salesTotals.igst.toFixed(2));
-      sheet3B.getCell("J14").value = Number(salesTotals.cgst.toFixed(2));
-      sheet3B.getCell("M14").value = Number(salesTotals.sgst.toFixed(2));
-
-      // ==========================
-      // 🔥 4(A)(5) Row 27
-      // ==========================
-      sheet3B.getCell("D27").value = Number(purchaseTotals.igst.toFixed(2));
-      sheet3B.getCell("E27").value = Number(purchaseTotals.cgst.toFixed(2));
-      sheet3B.getCell("F27").value = Number(purchaseTotals.sgst.toFixed(2));
-
-      const fileBuffer = await workbook.xlsx.writeBuffer();
-
-      saveAs(
-        new Blob([fileBuffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        }),
-        "GSTR3B_Export.xlsx"
-      );
-
-    } catch (error) {
-      console.error(error);
-      alert("Export Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div style={{ padding: 20 }}>
-      <Row className="mb-3">
-        <Col md={3}>
-          <Form.Label>From Date</Form.Label>
-          <InputMask
-            mask="99/99/9999"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-          >
-            {(inputProps) => (
-              <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
-            )}
-          </InputMask>
-        </Col>
-
-        <Col md={3}>
-          <Form.Label>To Date</Form.Label>
-          <InputMask
-            mask="99/99/9999"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-          >
-            {(inputProps) => (
-              <Form.Control {...inputProps} placeholder="DD/MM/YYYY" />
-            )}
-          </InputMask>
-        </Col>
-
-        <Col md={3} className="d-flex align-items-end">
-          <Button onClick={exportGSTR3B} disabled={loading}>
-            {loading ? (
-              <>
-                <Spinner
-                  animation="border"
-                  size="sm"
-                  style={{ marginRight: 8 }}
-                />
-                Exporting...
-              </>
-            ) : (
-              "Export GSTR-3B"
-            )}
-          </Button>
-            <Button
-                        variant="contained"
-                        color="primary"
-                        style={{ backgroundColor: "#89f580", color: "#fff" }}
-                        onClick={handleOpen}
-                      >
-                        Sale Series
-                      </Button>
-          
-                      <SaleWin
-                        isOpen={openSaleWin}
-                        onClose={handleClose}
-                      />
-        </Col>
-      </Row>
+    <div>
+    <Button
+      variant="contained"
+      color="primary"
+      style={{ backgroundColor: "#1d92f1", color: "#fff", marginLeft: 10 }}
+      onClick={openSaleModal}
+    >
+      SALE MODAL
+    </Button>
+    <SaleModal
+      isOpen={isSaleModalOpen}
+      onClose={closeSaleModal}
+      // onNavigate={handleModalNavigate}
+    />
     </div>
-  );
-};
+  )
+}
 
-export default Example;
-
+export default Example

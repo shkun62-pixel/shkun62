@@ -185,34 +185,71 @@ export default function MonthlyFormModal({ open, onClose }) {
     return Object.values(hsnMap);
   };
 
+  // const groupB2CSData = (data) => {
+  //   const grouped = {};
+
+  //   data.forEach((sale) => {
+  //     const customer = sale.customerDetails?.[0] || {};
+  //     const form = sale.formData || {};
+  //     const item = sale.items?.[0] || {};
+
+  //     const stateName = customer.state || "Unknown";
+  //     const stateCode = GST_STATE_CODES[stateName] || "";
+  //     const rate = Number(item.gst || 0);
+
+  //     const key = `${stateName}_${rate}`;
+
+  //     if (!grouped[key]) {
+  //       grouped[key] = {
+  //         type: "OE",
+  //         placeOfSupply: stateCode
+  //           ? `${stateCode}-${stateName}`
+  //           : stateName,
+  //         rate: rate,
+  //         taxableValue: 0,
+  //         cess: 0,
+  //       };
+  //     }
+
+  //     grouped[key].taxableValue += Number(form.sub_total || 0);
+  //     grouped[key].cess += Number(form.pcess || 0);
+  //   });
+
+  //   return Object.values(grouped);
+  // };
+
   const groupB2CSData = (data) => {
     const grouped = {};
 
     data.forEach((sale) => {
       const customer = sale.customerDetails?.[0] || {};
-      const form = sale.formData || {};
-      const item = sale.items?.[0] || {};
-
       const stateName = customer.state || "Unknown";
       const stateCode = GST_STATE_CODES[stateName] || "";
-      const rate = Number(item.gst || 0);
 
-      const key = `${stateName}_${rate}`;
+      // 🔥 LOOP ALL ITEMS (instead of first item)
+      (sale.items || []).forEach((item) => {
+        const rate = Number(item.gst || 0);
+        const taxable = Number(item.amount || 0);   // item-wise taxable
+        const cess = Number(item.cess || 0);        // if exists
 
-      if (!grouped[key]) {
-        grouped[key] = {
-          type: "OE",
-          placeOfSupply: stateCode
-            ? `${stateCode}-${stateName}`
-            : stateName,
-          rate: rate,
-          taxableValue: 0,
-          cess: 0,
-        };
-      }
+        const key = `${stateName}_${rate}`;
 
-      grouped[key].taxableValue += Number(form.sub_total || 0);
-      grouped[key].cess += Number(form.pcess || 0);
+        if (!grouped[key]) {
+          grouped[key] = {
+            type: "OE",
+            placeOfSupply: stateCode
+              ? `${stateCode}-${stateName}`
+              : stateName,
+            rate: rate,
+            taxableValue: 0,
+            cess: 0,
+          };
+        }
+
+        // ✅ ADD ITEM WISE (not invoice subtotal)
+        grouped[key].taxableValue += taxable;
+        grouped[key].cess += cess;
+      });
     });
 
     return Object.values(grouped);
@@ -277,37 +314,62 @@ export default function MonthlyFormModal({ open, onClose }) {
         // ✅ B2B SHEET
         // ======================
         const b2bSheet = workbook.getWorksheet("b2b,sez,de");
-        let b2bStartRow = 5;
+        let currentRow = 5;
 
-        b2bData.forEach((sale, index) => {
-          const row = b2bSheet.getRow(b2bStartRow + index);
-
+        b2bData.forEach((sale) => {
           const customer = sale.customerDetails?.[0] || {};
-          const item = sale.items?.[0] || {};
           const form = sale.formData || {};
           const gstNumber = customer.gstno || "";
           const stateCode = gstNumber.substring(0, 2);
 
-          row.getCell(1).value = gstNumber;
-          row.getCell(2).value = customer.vacode || "";
-          row.getCell(3).value = form.vbillno || "";
-          row.getCell(4).value = form.date ? new Date(form.date) : "";
-          row.getCell(5).value = Number(form.grandtotal || 0);
-          row.getCell(6).value = stateCode
-            ? `${stateCode}-${customer.state || ""}`
-            : "";
-          row.getCell(7).value = "N";
-          row.getCell(9).value = "Regular B2B";
-          row.getCell(11).value = item.gst || 0;
-          row.getCell(12).value = Number(form.sub_total || 0);
-          row.getCell(13).value = Number(form.pcess || 0);
+          // 🔥 GROUP BY GST RATE
+          const rateMap = {};
 
-          row.commit();
+          (sale.items || []).forEach((item) => {
+            const rate = Number(item.gst || 0);
+
+            if (!rateMap[rate]) {
+              rateMap[rate] = {
+                taxableValue: 0,
+                cgst: 0,
+                sgst: 0,
+                igst: 0,
+                cess: 0,
+              };
+            }
+
+            rateMap[rate].taxableValue += Number(item.amount || 0);
+            rateMap[rate].cgst += Number(item.ctax || 0);
+            rateMap[rate].sgst += Number(item.stax || 0);
+            rateMap[rate].igst += Number(item.itax || 0);
+          });
+
+          // 🔥 CREATE ROW FOR EACH RATE
+          Object.keys(rateMap).forEach((rate) => {
+            const data = rateMap[rate];
+
+            const row = b2bSheet.getRow(currentRow++);
+
+            row.getCell(1).value = gstNumber;
+            row.getCell(2).value = customer.vacode || "";
+            row.getCell(3).value = form.vbillno || "";
+            row.getCell(4).value = form.date ? new Date(form.date) : "";
+            row.getCell(5).value = Number(form.grandtotal || 0);
+            row.getCell(6).value = stateCode
+              ? `${stateCode}-${customer.state || ""}`
+              : "";
+            row.getCell(7).value = "N";
+            row.getCell(9).value = "Regular B2B";
+            row.getCell(11).value = Number(rate);
+            row.getCell(12).value = data.taxableValue;
+            row.getCell(13).value = data.cess;
+
+            row.commit();
+          });
         });
 
        // ===== B2CS Sheet =====
         const b2csSheet = workbook.getWorksheet("b2cs");
-
         const groupedB2CS = groupB2CSData(b2csData);
 
         let b2csStartRow = 5;
@@ -315,12 +377,12 @@ export default function MonthlyFormModal({ open, onClose }) {
         groupedB2CS.forEach((data, index) => {
           const row = b2csSheet.getRow(b2csStartRow + index);
 
-          row.getCell(1).value = data.type;                // Type (OE)
-          row.getCell(2).value = data.placeOfSupply;      // Place of Supply
-          row.getCell(4).value = data.rate;               // Rate
-          row.getCell(5).value = data.taxableValue;       // Taxable Value
-          row.getCell(6).value = data.cess;               // Cess Amount
-          row.getCell(7).value = "";                      // E-commerce GSTIN
+          row.getCell(1).value = data.type;          
+          row.getCell(2).value = data.placeOfSupply; 
+          row.getCell(4).value = data.rate;          
+          row.getCell(5).value = data.taxableValue;  
+          row.getCell(6).value = data.cess;          
+          row.getCell(7).value = "";                 
 
           row.commit();
         });

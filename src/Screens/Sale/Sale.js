@@ -5098,20 +5098,8 @@ import useShortcuts from "../Shared/useShortcuts";
 
 const LOCAL_STORAGE_KEY = "tabledataVisibility";
 
-// ✅ Forward ref so DatePicker can focus the input
-const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
-  <InputMask
-    mask="99-99-9999"
-    maskChar="_"
-    value={value}
-    onChange={onChange}
-    onBlur={onBlur}
-  >
-    {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
-  </InputMask>
-));
-
 const Sale = () => {
+
   const location = useLocation();
   const saleId = location.state?.saleId;
   const navigate = useNavigate();
@@ -5190,6 +5178,7 @@ const Sale = () => {
   const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
   const [formData, setFormData] = useState({
     date: "",
+    valpha:"",
     vtype: "S",
     vbillno: 0,
     vno: 0,
@@ -6019,6 +6008,7 @@ const Sale = () => {
     // Default date as current date
     const emptyFormData = {
       date: new Date().toLocaleDateString(), // Use today's date
+      valpha:"",
       vtype: "S",
       vbillno: 0,
       vno: 0,
@@ -6420,6 +6410,7 @@ const Sale = () => {
 
       const newData = {
         date: getTodayDDMMYYYY(),
+        valpha: selectedValpha,
         vbillno: lastvoucherno,
         vno: lastvno,
         vtype: "S",
@@ -6573,6 +6564,7 @@ const Sale = () => {
         console.log("No data available");
         const newData = {
           date: "",
+          valpha:"",
           vtype: "S",
           vbillno: 0,
           vno: 0,
@@ -6691,6 +6683,7 @@ const Sale = () => {
       // 2) Build base form with setup codes (common to both add/edit)
       const baseForm = {
         date: formData.date,
+        valpha: formData.valpha,
         duedate: formData.duedate,
         vtype: formData.vtype,
         vbillno: formData.vbillno,
@@ -7112,6 +7105,9 @@ const Sale = () => {
         // ✅ Always update these
         updatedItems[index]["vcode"] = selectedProduct.Acodes;
         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+        updatedItems[index]["gst"] = selectedProduct.itax_rate;
+        updatedItems[index]["tariff"] = selectedProduct.Hsn;
+        updatedItems[index]["Units"] = selectedProduct.TradeName;
 
         // ✅ ABC MODE special logic
         if (isAbcmode) {
@@ -8490,24 +8486,6 @@ const Sale = () => {
     (item) => (item.sdisc || "").trim() !== "",
   );
 
-  const formatDateDDMMYYYY = (date) => {
-    if (!date) return "";
-
-    // If already dd/mm/yyyy
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
-      return date.replaceAll("/", "-");
-    }
-
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return "";
-
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-
-    return `${day}-${month}-${year}`;
-  };
-
   // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || showModal || showModalAcc ||
    isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
@@ -8523,6 +8501,27 @@ const Sale = () => {
     isEditMode,
     isModalOpen: AnyModalOpen,   // 👈 here
   });
+
+  // Storing Valpha
+  // Get object from navigation
+  const saleWinFromState = location.state?.saleWin;
+
+  // Load from localStorage if refresh
+  const saleWinFromStorage = localStorage.getItem("saleWin")
+    ? JSON.parse(localStorage.getItem("saleWin"))
+    : null;
+
+  // Final object (state first, then storage)
+  const saleWin = saleWinFromState || saleWinFromStorage;
+
+  // Extract valpha safely
+  const selectedValpha = saleWin?.valpha || "";
+
+  useEffect(() => {
+    if (saleWinFromState) {
+      localStorage.setItem("saleWin", JSON.stringify(saleWinFromState));
+    }
+  }, [saleWinFromState]);
 
   return (
     <div>

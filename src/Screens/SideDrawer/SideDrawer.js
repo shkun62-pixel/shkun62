@@ -41,7 +41,7 @@ import shkunlogo from "./s.jpeg";
 import { styled } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { useEditMode } from "../../EditModeContext";
-import SaleModal from "./SaleModal ";
+import SaleModal from "../Sale/SaleModal ";
 import PurchaseModal from "./PurchaseModal";
 import CashModal from "./CashModal";
 import BankModal from "./BankModal";

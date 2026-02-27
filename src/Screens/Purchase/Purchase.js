@@ -2033,6 +2033,9 @@ const Purchase = () => {
         // ✅ Always update these
         updatedItems[index]["vcode"] = selectedProduct.Acodes;
         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+        updatedItems[index]["gst"] = selectedProduct.itax_rate;
+        updatedItems[index]["tariff"] = selectedProduct.Hsn;
+        updatedItems[index]["Units"] = selectedProduct.TradeName;
 
         // ✅ ABC MODE special logic
         if (isAbcmode) {

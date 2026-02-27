@@ -13,7 +13,7 @@ import InvoiceSale3 from "../InvoicePDF/InvoiceSale3";
 import InvoiceKaryana from "../InvoicePDF/InvoiceKaryana";
 import InvoiceG4 from "../InvoicePDF/InvoiceG4";
 import InvoiceSlip from "../InvoicePDF/InvoiceSlip";
-import SaleWin from "./SaleWin";
+import SaleWinModal from "./SaleWinModal";
 import {
   Box,
   Grid,
@@ -4651,8 +4651,8 @@ const SaleSetup = ({ onClose }) => {
               SALE SERIES
             </Button>
 
-            <SaleWin
-              isOpen={openSaleWin}
+            <SaleWinModal
+              open={openSaleWin}
               onClose={handleClose}
             />
           </Stack>

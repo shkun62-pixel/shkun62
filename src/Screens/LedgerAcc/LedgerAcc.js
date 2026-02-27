@@ -1377,20 +1377,8 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
 
     const handleNumericValue = (event) => {
       const { id, value } = event.target;
-
       // Allow only numeric values with optional decimal
       if (/^\d*\.?\d*$/.test(value) || value === "") {
-        // Only check duplicates if we have a list loaded
-        if (value && existingAcCodeList.length > 0) {
-          const isDuplicate = existingAcCodeList.includes(value);
-          if (isDuplicate) {
-            toast.error("Ac Code Already Exists !!", {
-              position: "top-center",
-            });
-            return; // stop further execution
-          }
-        }
-
         // If valid and not duplicate, update state
         setFormData((prevData) => ({
           ...prevData,

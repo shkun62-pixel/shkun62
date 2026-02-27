@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
-import PurWin from "./PurWin";
+import PurWinModal from "./PurWinModal";
 
 const PurchaseSetup = ({ onClose }) => {
   const { company } = useContext(CompanyContext);
@@ -5148,8 +5148,8 @@ const PurchaseSetup = ({ onClose }) => {
               PURCHASE SERIES
             </Button>
 
-            <PurWin
-              isOpen={openPurWin}
+            <PurWinModal
+              open={openPurWin}
               onClose={handleClose}
             />
           </Stack>

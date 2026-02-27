@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
+import BankWinModal from "../BankVoucher/BankWinModal";
 
 const CashBankSetup = ({ onClose }) => {
   const { company } = useContext(CompanyContext);
@@ -1075,6 +1076,15 @@ const CashBankSetup = ({ onClose }) => {
     }
   };
 
+  const [openSaleWin, setopenBankWin] = useState(false);
+
+  const handleOpen = () => {
+    setopenBankWin(true);
+  };
+
+  const handleClose = () => {
+    setopenBankWin(false);
+  };
   // Header section with logo and title
   const headerSection = (
     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -1784,6 +1794,19 @@ const CashBankSetup = ({ onClose }) => {
             >
               {"CLOSE"}
             </Button>
+            <Button
+            variant="contained"
+            color="primary"
+            style={{ backgroundColor: "#1d92f1", color: "#fff" }}
+            onClick={handleOpen}
+          >
+            BANK SERIES
+          </Button>
+
+          <BankWinModal
+            open={openSaleWin}
+            onClose={handleClose}
+          />
           </Stack>
         </form>
       </div>
