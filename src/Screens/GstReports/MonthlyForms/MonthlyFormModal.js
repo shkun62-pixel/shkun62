@@ -268,7 +268,6 @@ export default function MonthlyFormModal({ open, onClose }) {
       const to = parseDate(formData.toDate);
 
       // GSTR-1 EXPORT
-
       if (formData.reportName === "GSTR-1 Offline Excel") {
 
         const response = await axios.get(
@@ -617,6 +616,117 @@ export default function MonthlyFormModal({ open, onClose }) {
               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           }),
           "GSTR3B.xlsx"
+        );
+      }
+
+      // GSTR-1 IFF
+      else if (formData.reportName === "GSTR-1 IFF (Monthly)") {
+
+        const response = await axios.get(
+          "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+        );
+
+        const salesData = response.data;
+
+        const filteredData = salesData.filter((sale) => {
+          const saleDate = new Date(sale.formData?.date);
+          return saleDate >= from && saleDate <= to;
+        });
+
+        if (filteredData.length === 0) {
+          alert("No Data Found for Selected Date Range");
+          return;
+        }
+
+        // ✅ SPLIT REGISTERED & UNREGISTERED
+        const b2bData = filteredData.filter(
+          (sale) => sale.customerDetails?.[0]?.gstno?.trim()
+        );
+
+        const b2csData = filteredData.filter(
+          (sale) => !sale.customerDetails?.[0]?.gstno?.trim()
+        );
+
+        const templateResponse = await fetch("excel/gstr-f.xlsx");
+        const buffer = await templateResponse.arrayBuffer();
+
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer, {
+          ignoreNodes: [
+            "dataValidations",
+            "sheetProtection",
+            "conditionalFormatting",
+          ],
+        });
+
+        workbook.definedNames.model = [];
+
+        // ======================
+        // ✅ B2B SHEET
+        // ======================
+        const b2bSheet = workbook.getWorksheet("b2b,sez,de");
+        let currentRow = 5;
+
+        b2bData.forEach((sale) => {
+          const customer = sale.customerDetails?.[0] || {};
+          const form = sale.formData || {};
+          const gstNumber = customer.gstno || "";
+          const stateCode = gstNumber.substring(0, 2);
+
+          // 🔥 GROUP BY GST RATE
+          const rateMap = {};
+
+          (sale.items || []).forEach((item) => {
+            const rate = Number(item.gst || 0);
+
+            if (!rateMap[rate]) {
+              rateMap[rate] = {
+                taxableValue: 0,
+                cgst: 0,
+                sgst: 0,
+                igst: 0,
+                cess: 0,
+              };
+            }
+
+            rateMap[rate].taxableValue += Number(item.amount || 0);
+            rateMap[rate].cgst += Number(item.ctax || 0);
+            rateMap[rate].sgst += Number(item.stax || 0);
+            rateMap[rate].igst += Number(item.itax || 0);
+          });
+
+          // 🔥 CREATE ROW FOR EACH RATE
+          Object.keys(rateMap).forEach((rate) => {
+            const data = rateMap[rate];
+
+            const row = b2bSheet.getRow(currentRow++);
+
+            row.getCell(1).value = gstNumber;
+            row.getCell(2).value = customer.vacode || "";
+            row.getCell(3).value = form.vbillno || "";
+            row.getCell(4).value = form.date ? new Date(form.date) : "";
+            row.getCell(5).value = Number(form.grandtotal || 0);
+            row.getCell(6).value = stateCode
+              ? `${stateCode}-${customer.state || ""}`
+              : "";
+            row.getCell(7).value = "N";
+            row.getCell(9).value = "Regular B2B";
+            row.getCell(11).value = Number(rate);
+            row.getCell(12).value = data.taxableValue;
+            row.getCell(13).value = data.cess;
+
+            row.commit();
+          });
+        });
+
+        const fileBuffer = await workbook.xlsx.writeBuffer();
+
+        saveAs(
+          new Blob([fileBuffer], {
+            type:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          }),
+          "gstr-f.xlsx"
         );
       }
 

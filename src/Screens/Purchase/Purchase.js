@@ -739,9 +739,9 @@ const Purchase = () => {
     };
   };
 
-  useEffect(() => {
-    setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T11, T12, formData.tcs1_rate]);
+  // useEffect(() => {
+  //   setFormData((prevState) => calculateTotalGst(prevState));
+  // }, [items, T11, T12, formData.tcs1_rate]);
 
   // Api Response
   const [data, setData] = useState([]);
@@ -2245,8 +2245,11 @@ const Purchase = () => {
     const percentage =
       TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
+
     setItems(updatedItems);
-    calculateTotalGst();
+    const updatedForm = calculateTotalGst(formData);
+    setFormData(updatedForm);
+
   };
 
   // const handleItemChange = (index, key, value, field) => {
@@ -3489,7 +3492,7 @@ const handleKeyDown = (event, index, field) => {
   };
   const closeModalAfter = () => {
     setIsModalOpenAfter(false);
-    saveButtonRef.current.focus();
+    expAfterGSTRef.current.focus();
   };
 
   const handleDoubleClickAfter = (fieldName, index) => {

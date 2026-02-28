@@ -5782,9 +5782,9 @@ const Sale = () => {
     };
   };
 
-  useEffect(() => {
-    setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T21, T12, formData.tcs1_rate]);
+  // useEffect(() => {
+  //   setFormData((prevState) => calculateTotalGst(prevState));
+  // }, [items, T21, T12, formData.tcs1_rate]);
 
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
@@ -7326,7 +7326,8 @@ const Sale = () => {
       TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
     updatedItems[index]["percentage"] = percentage.toFixed(2);
     setItems(updatedItems);
-    calculateTotalGst();
+    const updatedForm = calculateTotalGst(formData);
+    setFormData(updatedForm);
   };
 
   // Function to handle adding a new item
