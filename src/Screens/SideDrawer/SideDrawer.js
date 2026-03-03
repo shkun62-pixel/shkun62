@@ -42,7 +42,8 @@ import { styled } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { useEditMode } from "../../EditModeContext";
 import SaleModal from "../Sale/SaleModal ";
-import PurchaseModal from "./PurchaseModal";
+// import PurchaseModal from "./PurchaseModal";
+import PurModal from "../Purchase/PurModal"
 import CashModal from "./CashModal";
 import BankModal from "./BankModal";
 import TdsModal from "./TdsModal";
@@ -397,7 +398,7 @@ export default function App() {
                     </StyledIcon>
                     <StyledListItemText primary="Purchase" />
                   </StyledListItem>
-                  <PurchaseModal
+                  <PurModal
                     isOpen={isPurModalOpen}
                     onClose={closePurModal}
                     onNavigate={handleModalNavigate}
