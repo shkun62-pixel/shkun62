@@ -46,12 +46,14 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   const [imageSrc, setImageSrc] = useState(null);
   const fileInputRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
+  const [mode, setMode] = useState(""); // "dr" or "cr"
   const [isModalOpenMisc, setIsModalOpenMisc] = useState(false);
   const inputRefs = useRef([]); // Array to hold references for input fields
   const [toastOpen, setToastOpen] = useState(false); // Track if toast is open
   const [formData, setFormData] = useState({
     Bsgroup: "",
     Bscode:"",
+    crCode:"",
     acode: "",
     gstNo: "",
     ahead: "",
@@ -246,23 +248,52 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       }
     };
 
-  const handleSelectBsgroup = (selectedItem) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      Bsgroup: selectedItem.name,
-      Bscode: selectedItem.code,
-      group: selectedItem.group,
-    }));
+  // const handleSelectBsgroup = (selectedItem) => {
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     Bsgroup: selectedItem.name,
+  //     Bscode: selectedItem.code,
+  //     group: selectedItem.group,
+  //   }));
 
-    setTimeout(() => {
-      if (selectedItem.group !== "Balance Sheet") {
-        // Focus A/C NAME
-        inputRefs.current[1]?.focus();
+  //   setTimeout(() => {
+  //     if (selectedItem.group !== "Balance Sheet") {
+  //       // Focus A/C NAME
+  //       inputRefs.current[1]?.focus();
+  //     } else {
+  //       // Focus GST NO
+  //       inputRefs.current[0]?.focus();
+  //     }
+  //   }, 300);
+  // };
+    const handleOpenDr = () => {
+    setMode("dr");
+    setShowModal(true);
+  };
+
+  const handleOpenCr = () => {
+    setMode("cr");
+    setShowModal(true);
+  };
+
+  const handleSelectBsgroup = (selectedItem) => {
+    setFormData((prevData) => {
+      if (mode === "dr") {
+        return {
+          ...prevData,
+          Bsgroup: selectedItem.name,
+          Bscode: selectedItem.code,
+        };
       } else {
-        // Focus GST NO
-        inputRefs.current[0]?.focus();
+        return {
+          ...prevData,
+          Bsgroup: selectedItem.name,
+          crCode: selectedItem.code,
+        };
       }
-    }, 300);
+    });
+
+    setShowModal(false);
   };
 
   // Api Response
@@ -320,6 +351,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
               const emptyFormData = {
                   Bsgroup: "",
                   Bscode:"",
+                  crCode:"",
                   acode: "",
                   gstNo: "",
                   ahead: "",
@@ -389,6 +421,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           const emptyFormData = {
               Bsgroup: "",
               Bscode:"",
+              crCode:"",
               acode: "",
               gstNo: "",
               ahead: "",
@@ -628,6 +661,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       const newData = {
         Bsgroup: "",
         Bscode:"",
+        crCode:"",
         acode: lastvoucherno,
         gstNo: "",
         ahead: "",
@@ -1133,6 +1167,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
         const newData = {
         Bsgroup: "",
         Bscode:"",
+        crCode:"",
         acode: "",
         gstNo: "",
         ahead: "",
@@ -2907,6 +2942,12 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
             </Select>
             </FormControl>
             </div>
+            {isEditMode && (
+            <div style={{display:'flex', flexDirection:'row',marginLeft:100}}>
+              <Button onClick={handleOpenDr} className="Buttonz">Dr.Group</Button>
+              <Button onClick={handleOpenCr} className="Buttonz">Cr.Group</Button>
+            </div>
+            )}
             <div>
             </div>
           </div>

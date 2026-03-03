@@ -1735,7 +1735,7 @@ const BankVoucher = () => {
   };
 
   // ShortCuts for Buttons
-  const AnyModalOpen = showModalCus || showModalAcc
+  const AnyModalOpen = showModalCus || showModalAcc || showSearch || printChoiceOpen
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -1748,6 +1748,29 @@ const BankVoucher = () => {
     isEditMode,
     isModalOpen: AnyModalOpen,   // 👈 here
   });
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+
+        if (showSearch) {
+          setShowSearch(false);
+          return;
+        }
+
+        if (printChoiceOpen) {
+          setPrintChoiceOpen(false);
+          return;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showSearch, printChoiceOpen]);
 
   return (
     <div>

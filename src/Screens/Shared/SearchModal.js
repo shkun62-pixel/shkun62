@@ -142,7 +142,7 @@ const SearchModal = ({
   };
 
   return (
-    <Modal show={show} onHide={onClose} size="lg" centered>
+    <Modal show={show} onHide={onClose} size="lg" centered keyboard={false}>
       <Modal.Header closeButton>
         <Modal.Title>Search</Modal.Title>
       </Modal.Header>
@@ -153,7 +153,7 @@ const SearchModal = ({
           <Form.Control
             ref={billNoRef}
             type="text"
-            placeholder="Enter Bill No..."
+            placeholder="Enter Voucher No..."
             value={searchBillNo}
             onChange={(e) => setSearchBillNo(e.target.value)}
             onKeyDown={handleEnterKeyPress(billNoRef, dateRef)}

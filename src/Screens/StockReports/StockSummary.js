@@ -223,6 +223,24 @@ const StockSummary = () => {
   // -------------------- UI Helpers --------------------
   const fmt = (v) => (v === null || v === undefined || v === "" ? "" : v);
 
+  const handleExit = () => {
+    navigate("/dashboard");
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        handleExit();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <div style={{ padding: "10px" }}>
       <Card
@@ -305,6 +323,9 @@ const StockSummary = () => {
 
             <Button className="Buttonz" onClick={handleOpen} disabled={loading}>
               {loading ? "Loading..." : "Print"}
+            </Button>
+            <Button className="Buttonz" onClick={handleExit} disabled={loading}>
+              Exit
             </Button>
           </div>
         </div>

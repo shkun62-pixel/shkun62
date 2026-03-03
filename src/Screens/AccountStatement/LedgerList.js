@@ -784,6 +784,44 @@ const LedgerList = () => {
     );
   };
 
+  const handleExit = () => {
+    if (showModal || showOptions || showColumnModal) {
+      return;
+    }
+
+    navigate("/dashboard");
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+
+        if (showColumnModal) {
+          setShowColumnModal(false);
+          return;
+        }
+
+        if (showOptions) {
+          setShowOptions(false);
+          return;
+        }
+
+        if (showModal) {
+          setShowModal(false);
+          return;
+        }
+
+        navigate("/dashboard");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showModal, showOptions, showColumnModal]);
+
   return (
     <div style={{ padding: "20px" }}>
       <Card className={styles.cardL}>
@@ -984,13 +1022,20 @@ const LedgerList = () => {
             style={{ marginRight: "20px", marginTop: "10px" }}
             onClick={handleModify}
           >
-            Modify
+            MODIFY
+          </Button>
+          <Button
+            style={{ marginRight: "20px", marginTop: "10px" }}
+            onClick={handleExit}
+          >
+            EXIT
           </Button>
         </div>
       </Card>
       {/* ... Modal Account Statement ... */}
       <Modal
         show={showModal}
+        keyboard={false}   // ✅ ADD THIS
         onHide={() => {
           setShowModal(false);
           setActiveRowIndex(0); // ✅ reset highlight when closing modal manually
@@ -1453,6 +1498,7 @@ const LedgerList = () => {
       <Modal
         style={{ zIndex: 100000 }}
         show={showOptions}
+        keyboard={false}   // ✅ ADD THIS
         onHide={() => setShowOptions(false)}
         centered
       >
@@ -1622,6 +1668,7 @@ const LedgerList = () => {
       {/* Column Selection Modal */}
       <Modal
         show={showColumnModal}
+        keyboard={false}   // ✅ ADD THIS
         onHide={() => setShowColumnModal(false)}
         centered
       >

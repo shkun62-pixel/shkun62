@@ -6185,9 +6185,26 @@ const Sale = () => {
   const handleSelectBill = (bill) => {
     setFormData(bill.formData);
     setcustomerDetails(bill.customerDetails);
-    setItems(bill.items);
+    setItems(normalizeItems(bill.items));
     setshipped(bill.shipped);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        if (showSearch) {
+          setShowSearch(false);
+          return;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showSearch]);
 
   const getTodayDDMMYYYY = () => {
     const today = new Date();
@@ -8489,7 +8506,7 @@ const Sale = () => {
 
   // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || showModal || showModalAcc ||
-   isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
+   isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen || showSearch
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -9700,70 +9717,6 @@ const Sale = () => {
                             </div>
                           );
                       })}
-
-                      {/* {[
-                        { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
-                        { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
-                        { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
-                        { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
-                        { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
-                      ].map((field, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: "10px", // Spacing between items
-                            marginBottom: "10px", // Space between rows
-                          }}
-                        >
-                          <label style={{ width: "100px", fontWeight: "bold" }}>
-                            {field.label}
-                          </label>
-
-                          <input
-                            ref={(el) => (expRateRefs.current[idx] = el)} // Assign ref dynamically
-                            value={items[currentIndex][field.rate]}
-                            style={{
-                              border: "1px solid black",
-                              padding: "5px",
-                              width: "120px",
-                              textAlign: "right",
-                              borderRadius: "4px",
-                            }}
-                            onChange={(e) =>
-                              handleInputChange(
-                                currentIndex,
-                                field.rate,
-                                e.target.value,
-                              )
-                            }
-                            onKeyDown={(e) => handleKeyDownModal(e, idx)}
-                          />
-
-                          <input
-                            value={items[currentIndex][field.value]}
-                            style={{
-                              border: "1px solid black",
-                              padding: "5px",
-                              width: "120px",
-                              textAlign: "right",
-                              borderRadius: "4px",
-                            }}
-                            onBlur={() =>
-                              handleExpenseBlur(currentIndex, field.value)
-                            }
-                            onChange={(e) =>
-                              handleInputChange(
-                                currentIndex,
-                                field.value,
-                                e.target.value,
-                              )
-                            }
-                          />
-                        </div>
-                      ))} */}
                       <Button
                         ref={closeButtonRef}
                         onClick={() => {
@@ -10111,48 +10064,6 @@ const Sale = () => {
                   />
                 )}
               </InputMask>
-              {/* <InputMask
-              className="custom-bordered-input"
-              mask="99-99-9999"
-              placeholder="dd-mm-yyyy"
-              value={formData.duedate}
-              readOnly={!isEditMode || isDisabled}
-              onChange={(e) =>
-                setFormData({ ...formData, duedate: e.target.value })
-              }
-            >
-              {(inputProps) => (
-                <TextField
-                  {...inputProps}
-                  className="custom-bordered-input"
-                />
-              )}
-          </InputMask> */}
-              {/* <DatePicker
-                id="duedate"
-                value={formatDateDDMMYYYY(formData.duedate)}
-                className="dueDatePICKER"
-                selected={expiredDate}
-                onChange={handleDateChange}
-                readOnly={!isEditMode || isDisabled}
-                dateFormat="dd-MM-yyyy"
-                customInput={
-                  <TextField
-                    className="custom-bordered-input"
-                    label="DUE DATE"
-                    variant="filled"
-                    size="small"
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        height: 47, // Adjust height here
-                      },
-                      "& .MuiInputBase-input": {
-                        padding: "20px 14px 6px", // more top padding so text sits lower
-                      },
-                    }}
-                  />
-                }
-              /> */}
             </div>
             <div>
               <TextField
@@ -10508,63 +10419,6 @@ const Sale = () => {
                       </div>
                     );
                   })}
-
-                    {/* {[
-                      { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
-                      { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
-                      { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
-                      { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
-                      { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
-                    ].map((item, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            flex: 1,
-                            fontWeight: "bold",
-                            color: "#444",
-                          }}
-                        >
-                          {item.label}
-                        </div>
-
-                        <input
-                          id={item.rate}
-                          value={formData[item.rate]}
-                          onChange={handleNumberChange}
-                          placeholder="Rate"
-                          style={{
-                            width: "90px",
-                            padding: "6px",
-                            borderRadius: "6px",
-                            border: "1px solid black",
-                            marginRight: "8px",
-                            textAlign: "right",
-                          }}
-                        />
-
-                        <input
-                          id={item.amount}
-                          value={formData[item.amount]}
-                          onChange={handleNumberChange}
-                          placeholder="Amount"
-                          style={{
-                            width: "90px",
-                            padding: "6px",
-                            borderRadius: "6px",
-                            border: "1px solid black",
-                            textAlign: "right",
-                          }}
-                        />
-                      </div>
-                    ))} */}
-
                     {/* Close Button */}
                     <div style={{ textAlign: "center", marginTop: "20px" }}>
                       <Button
@@ -10584,183 +10438,6 @@ const Sale = () => {
                   </div>
                 </div>
               )}
-              {/* {isModalOpenAfter && (
-                <div className="Modal">
-                  <div className="Modal-content">
-                    <h1 className="headingE">EXPENSE AFTER TAX</h1>
-                    <div className="form-group">
-                      <input
-                        type="checkbox"
-                        id="gross"
-                        checked={formData.gross}
-                        onChange={handleGross}
-                      />
-                      <label
-                        style={{ marginLeft: 5 }}
-                        className="label"
-                        htmlFor="Gross"
-                      >
-                        GROSS
-                      </label>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense6}</text>
-                      <input
-                        id="Exp_rate6"
-                        value={formData.Exp_rate6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp6"
-                        value={formData.Exp6}
-                        onChange={handleNumberChange} // ✅ ADD THIS
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense7}</text>
-                      <input
-                        id="Exp_rate7"
-                        value={formData.Exp_rate7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp7"
-                        value={formData.Exp7}
-                        onChange={handleNumberChange} // ✅ ADD THIS
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense8}</text>
-                      <input
-                        id="Exp_rate8"
-                        value={formData.Exp_rate8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp8"
-                        value={formData.Exp8}
-                        onChange={handleNumberChange} // ✅ ADD THIS
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense9}</text>
-                      <input
-                        id="Exp_rate9"
-                        value={formData.Exp_rate9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 18,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp9"
-                        value={formData.Exp9}
-                        onChange={handleNumberChange} // ✅ ADD THIS
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense10}</text>
-                      <input
-                        id="Exp_rate10"
-                        value={formData.Exp_rate10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 24.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp10"
-                        value={formData.Exp10}
-                        onChange={handleNumberChange} // ✅ ADD THIS
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <Button
-                      onClick={closeModalAfter}
-                      style={{
-                        borderColor: "transparent",
-                        backgroundColor: "red",
-                        marginTop: 10,
-                      }}
-                    >
-                      CLOSE
-                    </Button>
-                  </div>
-                </div>
-              )} */}
             </div>
             <TextField
               id="grandtotal"
@@ -10902,7 +10579,7 @@ const Sale = () => {
         </div>
       </div>
       {/* Search Modal */}
-      <Modal show={showSearch} onHide={() => setShowSearch(false)} size="lg">
+      <Modal show={showSearch} keyboard={false} onHide={() => setShowSearch(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>

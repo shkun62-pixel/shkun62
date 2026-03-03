@@ -1995,13 +1995,13 @@ import React, { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { TextField } from "@mui/material";
+import ProductModal from "./Modals/ProductModal";
 
 const Example = () => {
   const LOCAL_STORAGE_KEY = "tabledataVisibility";
   const [T11, setT11] = useState(false);
   const [T12, setT12] = useState(false);
   const [T21, setT21] = useState(false);
-  const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     date: "",
     valpha:"",
@@ -2090,215 +2090,439 @@ const Example = () => {
       vamt: "0.00",
     },
   ]);
-  const capitalizeWords = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+    React.useEffect(() => {
+      // Fetch products from the API when the component mounts
+      fetchProducts();
+    }, []);
+  
+    const fetchProducts = async (search = "") => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch products");
+        const data = await response.json();
+        const flattenedData = data.data.map((item) => ({
+          ...item.formData,
+          _id: item._id,
+        }));
+        setProducts(flattenedData);
+      } catch (error) {
+        setError(error.message);
+      }
+      setLoading(false);
+    };
+  
+    const capitalizeWords = (str) => {
+      return str.replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+  
+    // Modal For Items
+    const [products, setProducts] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  
+    const handleItemChange = (index, key, value) => {
+  // Allow only numeric fields
+  const numericFields = [
+    "pkgs",
+    "weight",
+    "rate",
+    "amount",
+    "disc",
+    "discount",
+    "tariff",
+  ];
+
+  if (numericFields.includes(key) && !/^-?\d*\.?\d*$/.test(value)) {
+    return;
+  }
+
+  const updatedItems = [...items];
+  const item = { ...updatedItems[index] };
+
+  // Force discount negative
+  if (key === "disc" || key === "discount") {
+    const num = parseFloat(value);
+    value = isNaN(num) ? "" : -Math.abs(num);
+  }
+
+  // Capitalize description
+  if (key === "sdisc") {
+    item[key] = value.replace(/\b\w/g, (c) => c.toUpperCase());
+  } else {
+    item[key] = value;
+  }
+
+  // ==============================
+  // 🔥 PRODUCT SELECTION
+  // ==============================
+  if (key === "name") {
+    const selectedProduct = products.find(
+      (product) => product.Aheads === value
+    );
+
+    if (selectedProduct) {
+      item.vcode = selectedProduct.Acodes;
+      item.sdisc = selectedProduct.Aheads;
+      item.Units = selectedProduct.TradeName;
+      item.rate = selectedProduct.Mrps || 0;
+      item.gst = selectedProduct.itax_rate || 0;
+      item.tariff = selectedProduct.Hsn;
+      item.RateCal = selectedProduct.Rateins;
+      item.Qtyperpc = selectedProduct.Qpps || 0;
+      item.curMrp = selectedProduct.Mrps || 0;
+    }
+  }
+
+  // ==============================
+  // 🔥 AUTO WEIGHT CALCULATION
+  // ==============================
+  const pkgs = parseFloat(item.pkgs) || 0;
+  const qtyPerPc = parseFloat(item.Qtyperpc) || 0;
+
+  if (pkgs > 0 && qtyPerPc > 0 && key !== "weight") {
+    item.weight = (pkgs * qtyPerPc).toFixed(2);
+  }
+
+  const weight = parseFloat(item.weight) || 0;
+  const rate = parseFloat(item.rate) || 0;
+  const gst = parseFloat(item.gst) || 0;
+
+  // ==============================
+  // 🔥 AMOUNT CALCULATION
+  // ==============================
+  let baseAmount = 0;
+
+  if (item.RateCal === "Pc/Pkgs") {
+    baseAmount = pkgs * rate;
+  } else {
+    baseAmount = weight * rate;
+  }
+
+  // If user manually edits amount → recalc rate
+  if (
+    key === "amount" &&
+    value !== "" &&
+    !value.endsWith(".")
+  ) {
+    const enteredAmount = parseFloat(value) || 0;
+    let qty = item.RateCal === "Pc/Pkgs" ? pkgs : weight;
+
+    const currentMrp = parseFloat(item.curMrp);
+
+    if (!isNaN(currentMrp) && currentMrp > 0) {
+      // Do not allow rate override if MRP exists
+    } else if (qty > 0) {
+      let newRate = enteredAmount / qty;
+      item.rate = T21
+        ? Math.round(newRate).toFixed(2)
+        : newRate.toFixed(2);
+    }
+
+    baseAmount = enteredAmount;
+  }
+
+  baseAmount = isNaN(baseAmount) ? 0 : baseAmount;
+
+  // ==============================
+  // 🔥 DISCOUNT CALCULATION
+  // ==============================
+  let discountValue = 0;
+  let discPercent = parseFloat(item.disc) || 0;
+  let manualDiscount = parseFloat(item.discount) || 0;
+
+  if (key === "discount") {
+    discountValue = manualDiscount;
+  } else {
+    discountValue = (discPercent / 100) * baseAmount;
+    item.discount = T21
+      ? Math.round(discountValue).toFixed(2)
+      : discountValue.toFixed(2);
+  }
+
+  discountValue = parseFloat(discountValue) || 0;
+
+  const others = parseFloat(item.exp_before) || 0;
+  const taxableAmount = baseAmount + discountValue + others;
+
+  // ==============================
+  // 🔥 GST CALCULATION
+  // ==============================
+  let cgst = 0,
+    sgst = 0,
+    igst = 0;
+
+  const CompanyState = "Punjab";
+
+  if (CompanyState === "Punjab") {
+    cgst = (taxableAmount * gst) / 200;
+    sgst = (taxableAmount * gst) / 200;
+  } else {
+    igst = (taxableAmount * gst) / 100;
+  }
+
+  const totalWithGST = taxableAmount + cgst + sgst + igst;
+
+  // ==============================
+  // 🔥 ROUNDING LOGIC
+  // ==============================
+  if (T21) {
+    item.amount = Math.round(baseAmount).toFixed(2);
+    item.discount = Math.round(discountValue).toFixed(2);
+    item.vamt = Math.round(totalWithGST).toFixed(2);
+  } else {
+    item.amount = baseAmount.toFixed(2);
+    item.vamt = totalWithGST.toFixed(2);
+  }
+
+  if (T12) {
+    item.ctax = Math.round(cgst).toFixed(2);
+    item.stax = Math.round(sgst).toFixed(2);
+    item.itax = Math.round(igst).toFixed(2);
+  } else {
+    item.ctax = cgst.toFixed(2);
+    item.stax = sgst.toFixed(2);
+    item.itax = igst.toFixed(2);
+  }
+
+  updatedItems[index] = item;
+  setItems(updatedItems);
+};
+  // const handleItemChange = (index, key, value, field) => {
+  //   // If key is "pkgs" or "weight", allow only numbers and a single decimal point
+  //   if (
+  //     (key === "pkgs" ||
+  //       key === "weight" ||
+  //       key === "tariff" ||
+  //       key === "rate" ||
+  //       key === "disc" ||
+  //       key === "discount" || key === "amount") &&
+  //     !/^-?\d*\.?\d*$/.test(value)
+  //   ) {
+  //     return; // reject invalid input
+  //   }
+
+  //   // Always force disc/discount to be negative
+  //   if (key === "disc" || key === "discount") {
+  //     const numeric = parseFloat(value);
+  //     if (!isNaN(numeric)) {
+  //       value = -Math.abs(numeric); // Force negative
+  //     }
+  //   }
+
+  //   const updatedItems = [...items];
+  //   if (["sdisc"].includes(key)) {
+  //     updatedItems[index][key] = capitalizeWords(value);
+  //   } else {
+  //     updatedItems[index][key] = value;
+  //   }
+
+  //   // If the key is 'name', find the corresponding product and set the price
+  //   if (key === "name") {
+  //     const selectedProduct = products.find(
+  //       (product) => product.Aheads === value,
+  //     );
+
+  //     if (selectedProduct) {
+  //       // ✅ Always update these
+  //       updatedItems[index]["vcode"] = selectedProduct.Acodes;
+  //       updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+
+  //       // ⬇️ Normal mode (unchanged)
+  //       updatedItems[index]["Units"] = selectedProduct.TradeName;
+  //       updatedItems[index]["rate"] = selectedProduct.Mrps;
+  //       updatedItems[index]["gst"] = selectedProduct.itax_rate;
+  //       updatedItems[index]["tariff"] = selectedProduct.Hsn;
+  //       updatedItems[index]["Scodes01"] = selectedProduct.Scodes01;
+  //       updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+  //       updatedItems[index]["Pcodes01"] = selectedProduct.Pcodes01;
+  //       updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+  //       updatedItems[index]["RateCal"] = selectedProduct.Rateins;
+  //       updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+  //       updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
+  //     }
+  //   }
+
+  //   let pkgs = parseFloat(updatedItems[index].pkgs);
+  //   pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+  //   let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+  //   Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
+
+  //   let AL = pkgs * Qtyperpkgs || 0;
+  //   let gst = parseFloat(updatedItems[index].gst) || 0;
+  //   if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
+  //     updatedItems[index]["weight"] = AL.toFixed(2);
+  //   }
+
+  //   let weight = parseFloat(updatedItems[index].weight);
+  //   weight = isNaN(weight) ? 0 : weight;
+
+  //   const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+  //   const rate = parseFloat(updatedItems[index].rate) || 0;
+
+  //   const totalAccordingWeight = weight * rate;
+  //   const totalAccordingPkgs = pkgsVal * rate;
+
+  //   let RateCal = updatedItems[index].RateCal;
+  //   let TotalAcc = totalAccordingWeight; // Set a default value
+
+  //   // Calcuate the Amount According to RateCalculation field
+  //   if (
+  //     RateCal === "Default" ||
+  //     RateCal === "" ||
+  //     RateCal === null ||
+  //     RateCal === undefined
+  //   ) {
+  //     TotalAcc = totalAccordingWeight;
+  //   } else if (RateCal === "Wt/Qty") {
+  //     TotalAcc = totalAccordingWeight;
+  //     // console.log("totalAccordingWeight");
+  //   } else if (RateCal === "Pc/Pkgs") {
+  //     TotalAcc = totalAccordingPkgs;
+  //     // console.log("totalAccordingPkgs");
+  //   }
+  //   // 🔥 If user manually edits amount → recalculate rate
+  //   if (
+  //     key === "amount" &&
+  //     value !== "" &&
+  //     !isNaN(parseFloat(value)) &&
+  //     !value.endsWith(".")
+  //   ) {
+  //     let enteredAmount = parseFloat(value);
+  //     let qty = 0;
+
+  //     if (RateCal === "Pc/Pkgs") {
+  //       qty = parseFloat(updatedItems[index].pkgs) || 0;
+  //     } else {
+  //       qty = parseFloat(updatedItems[index].weight) || 0;
+  //     }
+
+  //     const currentMrp = parseFloat(updatedItems[index].curMrp);
+
+  //     // // ✅ STOP if MRP exists and is valid (> 0)
+  //     if (!isNaN(currentMrp) && currentMrp > 0) {
+  //       return; // ❌ Do not recalculate rate
+  //     }
+
+  //     // Otherwise recalc rate
+  //     if (qty > 0 && enteredAmount > 0) {
+  //       let newRate = enteredAmount / qty;
+
+  //       updatedItems[index]["rate"] = T21
+  //         ? Math.round(newRate).toFixed(2)
+  //         : newRate.toFixed(2);
+
+  //       TotalAcc = enteredAmount;
+  //     }
+  //   }
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
+  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+  //   let others = parseFloat(updatedItems[index].exp_before) || 0;
+  //   let disc = parseFloat(updatedItems[index].disc) || 0;
+  //   let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+  //   let per;
+  //   if (key === "discount") {
+  //     per = manualDiscount;
+  //   } else {
+  //     per = (disc / 100) * TotalAcc;
+  //     updatedItems[index]["discount"] = T21
+  //       ? Math.round(per).toFixed(2)
+  //       : per.toFixed(2);
+  //   }
+
+  //   // ✅ Convert to float for reliable calculation
+  //   per = parseFloat(per);
+  //   let Amounts = TotalAcc + per + others;
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
+  //   // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+  //   // Check if GST number starts with "0" to "3"
+  //   let cgst, sgst, igst;
+  //   let CompanyState = "Punjab"; 
+  //   if (CompanyState === "Punjab") {
+  //     cgst = (Amounts * (gst / 2)) / 100 || 0;
+  //     sgst = (Amounts * (gst / 2)) / 100 || 0;
+  //     igst = 0;
+  //   } else {
+  //     cgst = sgst = 0;
+  //     igst = (Amounts * gst) / 100 || 0;
+  //   }
+
+  //   // Calculate the total with GST and Others
+  //   let totalWithGST = Amounts + cgst + sgst + igst;
+  //   // Update CGST, SGST, Others, and total fields in the item
+  //   if (T21) {
+  //     if (key !== "discount") {
+  //       updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+  //     }
+
+  //     if (key !== "amount") {
+  //       updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+  //     }
+
+  //     updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+  //   } else {
+  //     if (key !== "discount") {
+  //       updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+  //     }
+
+  //     if (key !== "amount") {
+  //       updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+  //     }
+
+  //     updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+  //   }
+  //   if (T12) {
+  //     updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
+  //     updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
+  //     updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
+  //   } else {
+  //     updatedItems[index]["ctax"] = cgst.toFixed(2);
+  //     updatedItems[index]["stax"] = sgst.toFixed(2);
+  //     updatedItems[index]["itax"] = igst.toFixed(2);
+  //   }
+  //   // Calculate the percentage of the value based on the GST percentage
+  //   const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+  //   updatedItems[index]["percentage"] = percentage.toFixed(2);
+  //   setItems(updatedItems);
+  //   // calculateTotalGst();
+  // };
+
+  const handleProductSelect = (product) => {
+    if (selectedItemIndex !== null) {
+      handleItemChange(selectedItemIndex, "name", product.Aheads);
+      setShowModal(false);
+    }
   };
-   const closeModalAfter = () => {
-    setIsModalOpenAfter(false);
+
+  const handleModalDone = (product) => {
+    if (product) {
+      // console.log(product);
+      handleProductSelect(product);
+    }
+    setShowModal(false);
+    fetchProducts();
   };
-  const handleItemChange = (index, key, value, field) => {
-    // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-    if (
-      (key === "pkgs" ||
-        key === "weight" ||
-        key === "tariff" ||
-        key === "rate" ||
-        key === "disc" ||
-        key === "discount" || key === "amount") &&
-      !/^-?\d*\.?\d*$/.test(value)
-    ) {
-      return; // reject invalid input
-    }
 
-    // Always force disc/discount to be negative
-    if (key === "disc" || key === "discount") {
-      const numeric = parseFloat(value);
-      if (!isNaN(numeric)) {
-        value = -Math.abs(numeric); // Force negative
-      }
-    }
-
-    const updatedItems = [...items];
-    if (["sdisc"].includes(key)) {
-      updatedItems[index][key] = capitalizeWords(value);
-    } else {
-      updatedItems[index][key] = value;
-    }
-
-    // If the key is 'name', find the corresponding product and set the price
-    if (key === "name") {
-      const selectedProduct = products.find(
-        (product) => product.Aheads === value,
-      );
-
-      if (selectedProduct) {
-        // ✅ Always update these
-        updatedItems[index]["vcode"] = selectedProduct.Acodes;
-        updatedItems[index]["sdisc"] = selectedProduct.Aheads;
-
-        // ⬇️ Normal mode (unchanged)
-        updatedItems[index]["Units"] = selectedProduct.TradeName;
-        updatedItems[index]["rate"] = selectedProduct.Mrps;
-        updatedItems[index]["gst"] = selectedProduct.itax_rate;
-        updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        updatedItems[index]["Scodes01"] = selectedProduct.Scodes01;
-        updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-        updatedItems[index]["Pcodes01"] = selectedProduct.Pcodes01;
-        updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
-        updatedItems[index]["RateCal"] = selectedProduct.Rateins;
-        updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-        updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
-      }
-    }
-
-    let pkgs = parseFloat(updatedItems[index].pkgs);
-    pkgs = isNaN(pkgs) ? 0 : pkgs;
-
-    let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
-    Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
-
-
-    let AL = pkgs * Qtyperpkgs || 0;
-    let gst = parseFloat(updatedItems[index].gst) || 0;
-    if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
-      updatedItems[index]["weight"] = AL.toFixed(2);
-    }
-
-    let weight = parseFloat(updatedItems[index].weight);
-    weight = isNaN(weight) ? 0 : weight;
-
-    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
-    const rate = parseFloat(updatedItems[index].rate) || 0;
-
-    const totalAccordingWeight = weight * rate;
-    const totalAccordingPkgs = pkgsVal * rate;
-
-    let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight; // Set a default value
-
-    // Calcuate the Amount According to RateCalculation field
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-      // console.log("totalAccordingWeight");
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
-      // console.log("totalAccordingPkgs");
-    }
-    // 🔥 If user manually edits amount → recalculate rate
-    if (
-      key === "amount" &&
-      value !== "" &&
-      !isNaN(parseFloat(value)) &&
-      !value.endsWith(".")
-    ) {
-      let enteredAmount = parseFloat(value);
-      let qty = 0;
-
-      if (RateCal === "Pc/Pkgs") {
-        qty = parseFloat(updatedItems[index].pkgs) || 0;
-      } else {
-        qty = parseFloat(updatedItems[index].weight) || 0;
-      }
-
-      const currentMrp = parseFloat(updatedItems[index].curMrp);
-
-      // // ✅ STOP if MRP exists and is valid (> 0)
-      if (!isNaN(currentMrp) && currentMrp > 0) {
-        return; // ❌ Do not recalculate rate
-      }
-
-      // Otherwise recalc rate
-      if (qty > 0 && enteredAmount > 0) {
-        let newRate = enteredAmount / qty;
-
-        updatedItems[index]["rate"] = T21
-          ? Math.round(newRate).toFixed(2)
-          : newRate.toFixed(2);
-
-        TotalAcc = enteredAmount;
-      }
-    }
-
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-
-    let others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
-    let per;
-    if (key === "discount") {
-      per = manualDiscount;
-    } else {
-      per = (disc / 100) * TotalAcc;
-      updatedItems[index]["discount"] = T21
-        ? Math.round(per).toFixed(2)
-        : per.toFixed(2);
-    }
-
-    // ✅ Convert to float for reliable calculation
-    per = parseFloat(per);
-    let Amounts = TotalAcc + per + others;
-
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-    // Check if GST number starts with "0" to "3"
-    let cgst, sgst, igst;
-    let CompanyState = "Punjab"; 
-    if (CompanyState === "Punjab") {
-      cgst = (Amounts * (gst / 2)) / 100 || 0;
-      sgst = (Amounts * (gst / 2)) / 100 || 0;
-      igst = 0;
-    } else {
-      cgst = sgst = 0;
-      igst = (Amounts * gst) / 100 || 0;
-    }
-
-    // Calculate the total with GST and Others
-    let totalWithGST = Amounts + cgst + sgst + igst;
-    // Update CGST, SGST, Others, and total fields in the item
-    if (T21) {
-      if (key !== "discount") {
-        updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-      }
-
-      if (key !== "amount") {
-        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-      }
-
-      updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-    } else {
-      if (key !== "discount") {
-        updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-      }
-
-      if (key !== "amount") {
-        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-      }
-
-      updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-    }
-    if (T12) {
-      updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
-      updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
-      updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
-    } else {
-      updatedItems[index]["ctax"] = cgst.toFixed(2);
-      updatedItems[index]["stax"] = sgst.toFixed(2);
-      updatedItems[index]["itax"] = igst.toFixed(2);
-    }
-    // Calculate the percentage of the value based on the GST percentage
-    const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
-    updatedItems[index]["percentage"] = percentage.toFixed(2);
-    setItems(updatedItems);
-    // calculateTotalGst();
+  const openModalForItem = (index) => {
+      setSelectedItemIndex(index);
+      setShowModal(true);
   };
+
+  const allFields = products.length
+    ? Object.keys(products[0])
+    : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
 
   const defaultTableFields = {
     itemcode: true,
@@ -2329,12 +2553,6 @@ const Example = () => {
 
     return sanitized;
   });
- const [isModalOpenAfter, setIsModalOpenAfter] = useState(false);
-  const handleDoubleClickAfter = (fieldName) => {
-    if (fieldName === "expafterGST" ) {
-      setIsModalOpenAfter(true);
-    }
-  };
 
   // Calculate Total GST
   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
@@ -2576,30 +2794,12 @@ const Example = () => {
     setFormData((prevState) => calculateTotalGst(prevState));
   }, [items, T21, T12, formData.tcs1_rate]);
 
-  const handleNumberChange = (event) => {
-    const { id, value } = event.target;
-
-    const numberValue = value.replace(/[^0-9.]/g, "");
-
-    setFormData((prevState) => {
-      const newFormData = {
-        ...prevState,
-        [id]: numberValue,
-      };
-
-      // If typing directly in expense field → mark it manual
-      if (["Exp6", "Exp7", "Exp8", "Exp9", "Exp10"].includes(id)) {
-        newFormData[`_manual_${id}`] = true;
-      }
-
-      // If typing in rate → disable manual mode
-      if (["Exp_rate6","Exp_rate7","Exp_rate8","Exp_rate9","Exp_rate10"].includes(id)) {
-        const expField = id.replace("Exp_rate", "Exp");
-        newFormData[`_manual_${expField}`] = false;
-      }
-
-      return calculateTotalGst(newFormData, true); // ✅ KEEP THIS
-    });
+  const handleDoubleClick = (event, fieldName, index) => {
+    if ( fieldName === "vcode") {
+      setSelectedItemIndex(index);
+      setShowModal(true);
+      event.preventDefault();
+    }
   };
   
   return (
@@ -2646,6 +2846,9 @@ const Example = () => {
                         }}
                         type="text"
                         value={item.vcode}
+                         onDoubleClick={(e) => {
+                        handleDoubleClick(e, "vcode", index);
+                      }}
                       />
                     </td>
                   )}
@@ -2897,139 +3100,16 @@ const Example = () => {
             </tbody>
           </Table>
       </div>
-      <TextField
-        className="TOTALFIELDS custom-bordered-input"
-        id="expafterGST"
-        value={formData.expafterGST}
-        label="EXP AFTER GST"
-        onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
-        inputProps={{
-          maxLength: 48,
-          style: {
-            height: 20,
-          },
-        }}
-        size="small"
-        variant="filled"
-        // sx={{ width: 150 }}
-      />
-      {isModalOpenAfter && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              background: 'linear-gradient(to bottom, #edc5a7,#a5d8ed)',
-              padding: "25px 30px",
-              borderRadius: "12px",
-              width: "450px",
-              boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
-              animation: "fadeIn 0.3s ease-in-out",
-            }}
-          >
-            <h2
-              style={{
-                textAlign: "center",
-                marginBottom: "20px",
-                fontWeight: "600",
-                color: "#333",
-                fontSize:"18px",
-              }}
-            >
-              EXPENSE AFTER TAX
-            </h2>
-
-            {/* Expense Rows */}
-            {[
-            { label: "Expense6", rate: "Exp_rate6", amount: "Exp6" },
-            { label: "Expense7", rate: "Exp_rate7", amount: "Exp7" },
-            { label: "Expense8", rate: "Exp_rate8", amount: "Exp8" },
-            { label: "Expense9", rate: "Exp_rate9", amount: "Exp9" },
-            { label: "Expense10", rate: "Exp_rate10", amount: "Exp10" },
-          ].map((item, index) => {
-            const rateIndex = index * 2;
-            const amountIndex = index * 2 + 1;
-
-            return (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    flex: 1,
-                    fontWeight: "bold",
-                    color: "#444",
-                  }}
-                >
-                  {item.label}
-                </div>
-
-                {/* RATE */}
-                <input
-                  id={item.rate}
-                  value={formData[item.rate]}
-                  onChange={handleNumberChange}
-                  placeholder="Rate"
-                  style={{
-                    width: "90px",
-                    padding: "6px",
-                    borderRadius: "6px",
-                    border: "1px solid black",
-                    marginRight: "8px",
-                    textAlign: "right",
-                  }}
-                />
-
-                {/* AMOUNT */}
-                <input
-                  id={item.amount}
-                  value={formData[item.amount]}
-                  onChange={handleNumberChange}
-                  placeholder="Amount"
-                  style={{
-                    width: "90px",
-                    padding: "6px",
-                    borderRadius: "6px",
-                    border: "1px solid black",
-                    textAlign: "right",
-                  }}
-                />
-              </div>
-            );
-          })}
-            {/* Close Button */}
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <Button
-                onClick={closeModalAfter}
-                style={{
-                  backgroundColor: "#ff4d4f",
-                  border: "none",
-                  padding: "8px 20px",
-                  borderRadius: "6px",
-                  fontWeight: "500",
-                }}
-              >
-                CLOSE
-              </Button>
-            </div>
-          </div>
-        </div>
+      {showModal && (
+        <ProductModal
+          products={products}
+          allFields={allFields}
+          onSelect={handleProductSelect}
+          onClose={handleModalDone}
+          tenant={tenant}
+          initialKey={pressedKey}
+          fetchParentProducts={fetchProducts}
+        />
       )}
     </div>
   );

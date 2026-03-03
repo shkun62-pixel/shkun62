@@ -5,7 +5,7 @@ import "./AnexureModal.css";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 
-const AnexureModal = ({ show, handleClose, onSelect, handleExit }) => {
+const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
   const { company } = useContext(CompanyContext);
   const tenant = company?.databaseName;
 
@@ -21,22 +21,51 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef(null);
 
+  // useEffect(() => {
+  //   if (show) {
+  //     axios
+  //       .get(
+  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`
+  //       )
+  //       .then((response) => {
+  //         setData(response.data);
+  //         setFilteredData(response.data);
+  //         setSelectedIndex(0);
+  //         setTimeout(() => searchInputRef.current?.focus(), 100);
+  //       })
+  //       .catch((error) => console.error("Error fetching data:", error));
+  //   }
+  // }, [show]);
+
   useEffect(() => {
     if (show) {
       axios
-        .get(
-          `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`
-        )
+        .get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`)
         .then((response) => {
-          setData(response.data);
-          setFilteredData(response.data);
+          let result = response.data;
+
+          // 🔥 FILTER BASED ON DR / CR
+          if (mode === "dr") {
+            result = result.filter(
+              (item) => item.formData.drCr?.toLowerCase() === "debit"
+            );
+          }
+
+          if (mode === "cr") {
+            result = result.filter(
+              (item) => item.formData.drCr?.toLowerCase() === "credit"
+            );
+          }
+
+          setData(result);
+          setFilteredData(result);
           setSelectedIndex(0);
           setTimeout(() => searchInputRef.current?.focus(), 100);
         })
         .catch((error) => console.error("Error fetching data:", error));
     }
-  }, [show]);
-
+  }, [show, mode]);
+  
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);

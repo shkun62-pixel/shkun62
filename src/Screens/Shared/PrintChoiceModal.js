@@ -24,6 +24,7 @@ export default function PrintChoiceModal({ open, onClose, onNormal, onFA }) {
       show={open}
       onHide={onClose}
       centered
+      keyboard={false}
       backdrop="static"
       contentClassName="custom-modal-content"
     >

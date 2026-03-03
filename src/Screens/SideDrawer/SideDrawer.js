@@ -968,7 +968,7 @@ export default function App() {
                       }}
                     >
                       <List>
-                        <StyledListItem
+                        {/* <StyledListItem
                           button
                           onClick={() => handleNavigation("/StockReport")}
                         >
@@ -976,7 +976,7 @@ export default function App() {
                             <WidgetsIcon />
                           </StyledIcon>
                           <StyledListItemText primary="Particular Item" />
-                        </StyledListItem>
+                        </StyledListItem> */}
                         <StyledListItem
                           button
                           onClick={() => handleNavigation("/StockSummary")}

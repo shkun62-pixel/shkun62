@@ -1471,7 +1471,7 @@ const CashVoucher = () => {
   };
 
   // ShortCuts for Buttons
-  const AnyModalOpen = showModalCus;
+  const AnyModalOpen = showModalCus || printChoiceOpen || showSearch;
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -1484,6 +1484,29 @@ const CashVoucher = () => {
     isEditMode,
     isModalOpen: AnyModalOpen,   // 👈 here
   });
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+
+        if (showSearch) {
+          setShowSearch(false);
+          return;
+        }
+
+        if (printChoiceOpen) {
+          setPrintChoiceOpen(false);
+          return;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showSearch, printChoiceOpen]);
 
   return (
     <div>

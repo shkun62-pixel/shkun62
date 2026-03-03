@@ -1140,6 +1140,23 @@ const Purchase = () => {
     setSearchDate("");
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        if (showSearch) {
+          setShowSearch(false);
+          return;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showSearch]);
+
   const fetchVoucherNumbers = async () => {
     try {
       const res = await axios.get(
@@ -3642,7 +3659,7 @@ const handleKeyDown = (event, index, field) => {
 
   // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || showModal ||
-    isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
+    isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen || showSearch
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -6032,7 +6049,7 @@ const handleKeyDown = (event, index, field) => {
         </div>
       </div>
       {/* Search Modal */}
-      <Modal show={showSearch} onHide={() => setShowSearch(false)} size="lg">
+      <Modal show={showSearch} keyboard={false} onHide={() => setShowSearch(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>
