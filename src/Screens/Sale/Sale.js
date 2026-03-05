@@ -5847,12 +5847,6 @@ const Sale = () => {
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [setupFormData, setsetupFormData] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // Search Modal states
-  const [showSearch, setShowSearch] = useState(false);
-  const [allBills, setAllBills] = useState([]);
-  const [searchBillNo, setSearchBillNo] = useState("");
-  const [filteredBills, setFilteredBills] = useState([]);
-  const [searchDate, setSearchDate] = useState(null);
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -6129,6 +6123,16 @@ const Sale = () => {
     // Add this line to set isDisabled to true initially
   }, []);
 
+    // Search Modal states
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchDate, setSearchDate] = useState(null);
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
+    // ⭐ infinite scroll state
+  const [visibleCount, setVisibleCount] = useState(10);
+
   // Fetch all bills for search
   const fetchAllBills = async () => {
     try {
@@ -6148,38 +6152,30 @@ const Sale = () => {
   useEffect(() => {
     let filtered = allBills;
 
-    // Filter by Bill No if entered
     if (searchBillNo.trim() !== "") {
       filtered = filtered.filter((bill) =>
         bill.formData.vbillno
           .toString()
           .toLowerCase()
-          .includes(searchBillNo.toLowerCase()),
+          .includes(searchBillNo.toLowerCase())
       );
     }
 
-    const formatLocalDate = (date) => {
-      const d = new Date(date);
-      if (isNaN(d)) return null; // invalid date
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
-
-    // Filter by Date if selected
     if (searchDate) {
-      const selected = formatLocalDate(searchDate);
+      const selected = formatDateToDDMMYYYY(searchDate);
 
       if (selected) {
         filtered = filtered.filter((bill) => {
-          const billDate = formatLocalDate(bill.formData.date);
+          const billDate = formatDateToDDMMYYYY(bill.formData.date);
           return billDate === selected;
         });
       }
     }
 
     setFilteredBills(filtered);
+
+    // ⭐ reset visible rows when search changes
+    setVisibleCount(30);
   }, [searchBillNo, searchDate, allBills]);
 
   const handleSelectBill = (bill) => {
@@ -6188,6 +6184,37 @@ const Sale = () => {
     setItems(normalizeItems(bill.items));
     setshipped(bill.shipped);
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!showSearch) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveRowIndex((prev) =>
+          prev < filteredBills.length - 1 ? prev + 1 : prev
+        );
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const bill = filteredBills[activeRowIndex];
+        if (bill) {
+          handleSelectBill(bill);
+          setShowSearch(false);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredBills, activeRowIndex, showSearch]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -10792,6 +10819,7 @@ const Sale = () => {
             disabled={!isSearchEnabled}
             onClick={() => {
               fetchAllBills();
+              setActiveRowIndex(0);
               setShowSearch(true);
             }}
           >
@@ -10846,70 +10874,94 @@ const Sale = () => {
         </div>
       </div>
       {/* Search Modal */}
-      <Modal show={showSearch} keyboard={false} onHide={() => setShowSearch(false)} size="lg">
+      <Modal
+        show={showSearch}
+        keyboard={false}
+        backdrop="static"
+        onHide={() => setShowSearch(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-            <Form.Control
-              type="text"
-              placeholder="Enter Bill No..."
+            <TextField
+              className="custom-bordered-input"
+              size="small"
+              variant="filled"
+              label="Enter Bill No..."
               value={searchBillNo}
               onChange={(e) => setSearchBillNo(e.target.value)}
             />
-            <DatePicker
-              selected={searchDate}
-              onChange={(date) => setSearchDate(date)}
-              placeholderText="Select Date"
-              dateFormat="dd-MM-yyyy"
-              className="form-control"
-            />
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSearchBillNo("");
-                setSearchDate(null);
-              }}
+
+            <InputMask
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
             >
-              Clear
-            </Button>
+              {(props) => (
+                <TextField
+                  className="custom-bordered-input"
+                  {...props}
+                  label="DATE"
+                  size="small"
+                  variant="filled"
+                  fullWidth
+                  style={{ width: 230, marginLeft: 5 }}
+                />
+              )}
+            </InputMask>
           </div>
-          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-            <Table striped bordered hover>
+
+          <div
+            style={{ maxHeight: "300px", overflowY: "auto" }}
+            onScroll={(e) => {
+              const bottom =
+                e.target.scrollHeight - e.target.scrollTop <=
+                e.target.clientHeight + 5;
+
+              if (bottom && visibleCount < filteredBills.length) {
+                setVisibleCount((prev) => prev + 30);
+              }
+            }}
+          >
+            <Table>
               <thead>
                 <tr>
-                  <th>BillNo</th>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>City</th>
-                  <th>GrandTotal</th>
-                  <th>Action</th>
+                  <th>BILL NO</th>
+                  <th>DATE</th>
+                  <th>CUSTOMER</th>
+                  <th>CITY</th>
+                  <th>GRAND TOTAL</th>
                 </tr>
               </thead>
+
               <tbody>
-                {filteredBills.map((bill) => (
-                  <tr key={bill._id}>
+                {filteredBills.slice(0, visibleCount).map((bill, index) => (
+                  <tr key={bill._id}
+                  style={{
+                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                    cursor: "pointer",
+                  }}
+                   onClick={() => {
+                    setActiveRowIndex(index);
+                    handleSelectBill(bill);
+                    setShowSearch(false);
+                  }}
+                  >
                     <td>{bill.formData.vbillno}</td>
                     <td>
-                      {new Date(bill.formData.date).toLocaleDateString("en-GB")}
+                      {formatDateToDDMMYYYY(bill.formData.date)}
                     </td>
                     <td>{bill.customerDetails?.[0]?.vacode}</td>
                     <td>{bill.customerDetails?.[0]?.city}</td>
                     <td>{bill.formData.grandtotal}</td>
-                    <td>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          handleSelectBill(bill);
-                          setShowSearch(false);
-                        }}
-                      >
-                        Select
-                      </Button>
-                    </td>
                   </tr>
                 ))}
+
                 {filteredBills.length === 0 && (
                   <tr>
                     <td colSpan="6" style={{ textAlign: "center" }}>

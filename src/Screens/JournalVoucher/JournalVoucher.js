@@ -1223,39 +1223,7 @@ const JournalVoucher = () => {
     }
   };
 
-  const handleSearchClick = () => {
-    setSearchResults([]); // Clear the search results when reopening the modal
-    setShowSearchModal(true); // Open the modal
-  };
 
-  const handleCloseSearchModal = () => {
-    setSearchResults([]); // Clear search results when the modal is closed
-    setShowSearchModal(false); // Close the modal
-  };
-
-  const handleSelectSearchResult = (selectedData) => {
-    setFormData(selectedData.formData); // Update the form with the selected search data
-    setItems(selectedData.items); // Update items with the selected search result
-    setShowSearchModal(false); // Close the modal
-    setSearchResults([]); // Clear search results after selecting a result
-  };
-
-  const handleSearch = async (searchDate) => {
-    try {
-      console.log(searchDate, "Hellloooo");
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/search?date=${searchDate}`,
-      );
-
-      if (response.status === 200) {
-        setSearchResults(response.data.data); // Assuming the data is in response.data.data
-      } else {
-        setSearchResults([]); // Clear results if no data is found
-      }
-    } catch (error) {
-      console.error("Error fetching search data", error);
-    }
-  };
   // Update the blur handlers so that they always format the value to 2 decimals.
   const handlePkgsBlur = (index) => {
     const decimalPlaces = 2;
@@ -1318,23 +1286,70 @@ const JournalVoucher = () => {
     }
   };
 
-  const [showSearch, setShowSearch] = useState(false);
-  const [allBills, setAllBills] = useState([]);
-  const [filteredBills, setFilteredBills] = useState([]);
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
 
-  const [searchBillNo, setSearchBillNo] = useState("");
-  const [searchDate, setSearchDate] = useState("");
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
 
-  // 🔹 ISO → DD-MM-YYYY
-  const isoToDDMMYYYY = (isoDate) => {
-    const d = new Date(isoDate);
-    if (isNaN(d)) return "";
-    return `${String(d.getDate()).padStart(2, "0")}-${String(
-      d.getMonth() + 1,
-    ).padStart(2, "0")}-${d.getFullYear()}`;
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
   };
 
-  // 🔹 Fetch Bills
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchDate, setSearchDate] = useState(null);
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
+    // ⭐ infinite scroll state
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  // Fetch all bills for search
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
@@ -1342,31 +1357,43 @@ const JournalVoucher = () => {
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
-        setFilteredBills([]);
+        setFilteredBills(res.data);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Error fetching bills", error);
     }
   };
 
-  // 🔹 Proceed
-  const handleProceed = () => {
+  // Update filtering logic
+  useEffect(() => {
     let filtered = allBills;
 
-    if (searchBillNo.trim()) {
-      filtered = filtered.filter((b) =>
-        b.formData.voucherno.toString().includes(searchBillNo),
+    if (searchBillNo.trim() !== "") {
+      filtered = filtered.filter((bill) =>
+        bill.formData.voucherno
+          .toString()
+          .toLowerCase()
+          .includes(searchBillNo.toLowerCase())
       );
     }
 
-    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-      filtered = filtered.filter((b) => b.formData.date === searchDate);
+    if (searchDate) {
+      const selected = formatDateToDDMMYYYY(searchDate);
+
+      if (selected) {
+        filtered = filtered.filter((bill) => {
+          const billDate = formatDateToDDMMYYYY(bill.formData.date);
+          return billDate === selected;
+        });
+      }
     }
 
     setFilteredBills(filtered);
-  };
 
-  // 🔹 Select
+    // ⭐ reset visible rows when search changes
+    setVisibleCount(30);
+  }, [searchBillNo, searchDate, allBills]);
+
   const handleSelectBill = (bill) => {
     setFormData({
       ...bill.formData,
@@ -1378,6 +1405,37 @@ const JournalVoucher = () => {
     setSearchBillNo("");
     setSearchDate("");
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!showSearch) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveRowIndex((prev) =>
+          prev < filteredBills.length - 1 ? prev + 1 : prev
+        );
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const bill = filteredBills[activeRowIndex];
+        if (bill) {
+          handleSelectBill(bill);
+          setShowSearch(false);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredBills, activeRowIndex, showSearch]);
 
   // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || showSearch || printChoiceOpen;
@@ -1417,6 +1475,17 @@ const JournalVoucher = () => {
     };
   }, [showSearch, printChoiceOpen]);
 
+  const getBalance = () => {
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    items.forEach((row) => {
+      totalDebit += parseFloat(row.debit) || 0;
+      totalCredit += parseFloat(row.credit) || 0;
+    });
+
+    return totalDebit - totalCredit;
+  };
   return (
     <div>
       <ToastContainer />
@@ -1451,16 +1520,6 @@ const JournalVoucher = () => {
             />
           )}
         </InputMask>
-        {/* <DatePicker
-            ref={datePickerRef}
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => checkFutureDate(selectedDate)}
-            customInput={<MaskedInput />}
-          /> */}
         <div style={{ display: "flex", flexDirection: "row", marginTop: 5 }}>
           <TextField
             inputRef={VoucherRef}
@@ -1596,6 +1655,14 @@ const JournalVoucher = () => {
                       handleItemChangeCus(index, "narration", e.target.value)
                     }
                     onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (!item.narration || item.narration.trim() === "") {
+                          const updatedItems = [...items];
+                          updatedItems[index].narration = "Journal Narration";
+                          setItems(updatedItems);
+                        }
+                      }
+
                       if (
                         e.key === "Tab" &&
                         suggestionRow === index &&
@@ -1696,7 +1763,17 @@ const JournalVoucher = () => {
                     ref={(el) => (debitRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "debit")}
                     onBlur={() => handlePkgsBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
+                    onFocus={(e) => {
+                      const balance = getBalance();
+
+                      if (!item.debit && balance < 0) {
+                        const updatedItems = [...items];
+                        updatedItems[index].debit = Math.abs(balance);
+                        setItems(updatedItems);
+                      }
+
+                      e.target.select();
+                    }}
                   />
                 </td>
                 <td style={{ padding: 0, width: 250 }}>
@@ -1717,7 +1794,17 @@ const JournalVoucher = () => {
                     ref={(el) => (credittRefs.current[index] = el)}
                     onKeyDown={(e) => handleKeyDown(e, index, "credit")}
                     onBlur={() => handleWeightBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
+                    onFocus={(e) => {
+                      const balance = getBalance();
+
+                      if (!item.credit && balance > 0) {
+                        const updatedItems = [...items];
+                        updatedItems[index].credit = balance;
+                        setItems(updatedItems);
+                      }
+
+                      e.target.select();
+                    }}
                   />
                 </td>
                 {isEditMode && (
@@ -1842,41 +1929,18 @@ const JournalVoucher = () => {
           >
             Last
           </Button>
-          {/* <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[6],
-            }}
-            onClick={handleSearchClick} // Handle search button click
-            disabled={!isSearchEnabled}
-          >
-            Search
-          </Button> */}
           <Button
             className="Buttonz"
             style={{ backgroundColor: buttonColors[6] }}
             onClick={() => {
               fetchAllBills();
+              setActiveRowIndex(0);
               setShowSearch(true);
             }}
             disabled={!isSearchEnabled}
           >
             Search
           </Button>
-          <SearchModal
-            show={showSearch}
-            onClose={() => setShowSearch(false)}
-            bills={allBills}
-            filteredBills={filteredBills}
-            searchBillNo={searchBillNo}
-            setSearchBillNo={setSearchBillNo}
-            searchDate={searchDate}
-            setSearchDate={setSearchDate}
-            onProceed={handleProceed}
-            onSelectBill={handleSelectBill}
-            isoToDDMMYYYY={isoToDDMMYYYY}
-          />
           <Button
             //  onClick={handleOpen}
             onClick={handlePrintClick}
@@ -1939,6 +2003,107 @@ const JournalVoucher = () => {
           </Button>
         </div>
       </div>
+      {/* Search Modal */}
+      <Modal
+        show={showSearch}
+        keyboard={false}
+        backdrop="static"
+        onHide={() => setShowSearch(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Search</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <TextField
+              className="custom-bordered-input"
+              size="small"
+              variant="filled"
+              label="Enter V.No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+            />
+
+            <InputMask
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            >
+              {(props) => (
+                <TextField
+                  className="custom-bordered-input"
+                  {...props}
+                  label="DATE"
+                  size="small"
+                  variant="filled"
+                  fullWidth
+                  style={{ width: 230, marginLeft: 5 }}
+                />
+              )}
+            </InputMask>
+          </div>
+
+          <div
+            style={{ maxHeight: "300px", overflowY: "auto" }}
+            onScroll={(e) => {
+              const bottom =
+                e.target.scrollHeight - e.target.scrollTop <=
+                e.target.clientHeight + 5;
+
+              if (bottom && visibleCount < filteredBills.length) {
+                setVisibleCount((prev) => prev + 30);
+              }
+            }}
+          >
+            <Table>
+              <thead>
+                <tr>
+                  <th>V.NO</th>
+                  <th>DATE</th>
+                  <th>ACCOUNT</th>
+                  <th>DEBIT</th>
+                  <th>CREDIT</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredBills.slice(0, visibleCount).map((bill, index) => (
+                  <tr key={bill._id}
+                  style={{
+                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setActiveRowIndex(index);
+                    handleSelectBill(bill);
+                    setShowSearch(false);
+                  }}
+                  >
+                    <td>{bill.formData.voucherno}</td>
+                    <td>
+                      {formatDateToDDMMYYYY(bill.formData.date)}
+                    </td>
+                    <td>{bill.items?.[0]?.accountname}</td>
+                    <td>{bill.formData.totaldebit}</td>
+                    <td>{bill.formData.totalcredit}</td>
+                  </tr>
+                ))}
+
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

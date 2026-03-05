@@ -1074,14 +1074,8 @@ const Purchase = () => {
   const [filteredBills, setFilteredBills] = useState([]);
   const [searchBillNo, setSearchBillNo] = useState("");
   const [searchDate, setSearchDate] = useState(""); // DD-MM-YYYY
-  const billNoRef = useRef(null);
-  const dateRef = useRef(null);
-  const proceedRef = useRef(null);
-  useEffect(() => {
-    if (showSearch) {
-      setTimeout(() => billNoRef.current?.focus(), 100);
-    }
-  }, [showSearch]);
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   // 🔹 Fetch all bills
   const fetchAllBills = async () => {
@@ -1091,40 +1085,41 @@ const Purchase = () => {
       );
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
-        setFilteredBills([]); // empty until Proceed
+        setFilteredBills(res.data);
       }
     } catch (error) {
       console.error("Error fetching bills", error);
     }
   };
 
-  // 🔹 Proceed button logic
-  const handleProceed = () => {
-    // ✅ Require at least one filter
-    if (searchBillNo.trim() === "" && searchDate.trim() === "") {
-      alert("Please enter Bill No or Date to proceed.");
-      return; // stop execution
-    }
-
+  useEffect(() => {
     let filtered = allBills;
 
-    // Filter by Bill No
     if (searchBillNo.trim() !== "") {
       filtered = filtered.filter((bill) =>
-        bill.formData.vno.toString().includes(searchBillNo.trim())
+        bill.formData.vno
+          .toString()
+          .toLowerCase()
+          .includes(searchBillNo.toLowerCase())
       );
     }
 
-    // Filter by Date (DD-MM-YYYY)
-    if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-      filtered = filtered.filter((bill) => {
-        const billDate = formatDateToDDMMYYYY(bill.formData.date);
-        return billDate === searchDate;
-      });
+    if (searchDate) {
+      const selected = formatDateToDDMMYYYY(searchDate);
+
+      if (selected) {
+        filtered = filtered.filter((bill) => {
+          const billDate = formatDateToDDMMYYYY(bill.formData.date);
+          return billDate === selected;
+        });
+      }
     }
 
     setFilteredBills(filtered);
-  };
+
+    // ⭐ reset visible rows when search changes
+    setVisibleCount(30);
+  }, [searchBillNo, searchDate, allBills]);
 
   // 🔹 Select bill
   const handleSelectBill = (bill) => {
@@ -1141,6 +1136,37 @@ const Purchase = () => {
     setSearchBillNo("");
     setSearchDate("");
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!showSearch) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveRowIndex((prev) =>
+          prev < filteredBills.length - 1 ? prev + 1 : prev
+        );
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const bill = filteredBills[activeRowIndex];
+        if (bill) {
+          handleSelectBill(bill);
+          setShowSearch(false);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredBills, activeRowIndex, showSearch]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -6033,6 +6059,7 @@ const handleKeyDown = (event, index, field) => {
             disabled={!isSearchEnabled}
             onClick={() => {
               fetchAllBills();
+              setActiveRowIndex(0);
               setShowSearch(true);
             }}
           >
@@ -6094,93 +6121,91 @@ const handleKeyDown = (event, index, field) => {
         </div>
       </div>
       {/* Search Modal */}
-      <Modal show={showSearch} keyboard={false} onHide={() => setShowSearch(false)} size="lg">
+      <Modal
+        show={showSearch}
+        keyboard={false}
+        backdrop="static"
+        onHide={() => setShowSearch(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Search</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
-          {/* Filters */}
           <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-            <Form.Control
-              ref={billNoRef}
-              type="text"
-              placeholder="Enter Bill No..."
+            <TextField
+              className="custom-bordered-input"
+              size="small"
+              variant="filled"
+              label="Enter Bill No..."
               value={searchBillNo}
               onChange={(e) => setSearchBillNo(e.target.value)}
-              onKeyDown={handleEnterKeyPress(billNoRef, dateRef)}
             />
 
             <InputMask
               mask="99-99-9999"
-              placeholder="DD-MM-YYYY"
+              placeholder="dd-mm-yyyy"
               value={searchDate}
               onChange={(e) => setSearchDate(e.target.value)}
             >
-              {(inputProps) => (
-                <input
-                  {...inputProps}
-                  className="form-control"
-                  ref={dateRef}
-                  onKeyDown={handleEnterKeyPress(dateRef, proceedRef)}
+              {(props) => (
+                <TextField
+                  className="custom-bordered-input"
+                  {...props}
+                  label="DATE"
+                  size="small"
+                  variant="filled"
+                  fullWidth
+                  style={{ width: 230, marginLeft: 5 }}
                 />
               )}
             </InputMask>
-
-            {/* <InputMask
-              mask="99-99-9999"
-              placeholder="DD-MM-YYYY"
-              value={searchDate}
-              onChange={(e) => setSearchDate(e.target.value)}
-              className="form-control"
-            /> */}
-
-            <Button ref={proceedRef} variant="primary" onClick={handleProceed}>
-              Proceed
-            </Button>
-
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSearchBillNo("");
-                setSearchDate("");
-                setFilteredBills([]);
-              }}
-            >
-              Clear
-            </Button>
           </div>
 
-          {/* Results */}
-          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-            <Table striped bordered hover>
+          <div
+            style={{ maxHeight: "300px", overflowY: "auto" }}
+            onScroll={(e) => {
+              const bottom =
+                e.target.scrollHeight - e.target.scrollTop <=
+                e.target.clientHeight + 5;
+
+              if (bottom && visibleCount < filteredBills.length) {
+                setVisibleCount((prev) => prev + 30);
+              }
+            }}
+          >
+            <Table>
               <thead>
                 <tr>
-                  <th>Bill No</th>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>City</th>
-                  <th>Grand Total</th>
-                  <th>Action</th>
+                  <th>BILL NO</th>
+                  <th>DATE</th>
+                  <th>SUPPLIER</th>
+                  <th>CITY</th>
+                  <th>GRAND TOTAL</th>
                 </tr>
               </thead>
 
               <tbody>
-                {filteredBills.map((bill) => (
-                  <tr key={bill._id}>
+                {filteredBills.slice(0, visibleCount).map((bill, index) => (
+                  <tr key={bill._id}
+                  style={{
+                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setActiveRowIndex(index);
+                    handleSelectBill(bill);
+                    setShowSearch(false);
+                  }}
+                  >
                     <td>{bill.formData.vno}</td>
-                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
+                    <td>
+                     {formatDateToDDMMYYYY(bill.formData.date)}
+                    </td>
                     <td>{bill.supplierdetails?.[0]?.vacode}</td>
                     <td>{bill.supplierdetails?.[0]?.city}</td>
                     <td>{bill.formData.grandtotal}</td>
-                    <td>
-                      <Button
-                        size="sm"
-                        onClick={() => handleSelectBill(bill)}
-                      >
-                        Select
-                      </Button>
-                    </td>
                   </tr>
                 ))}
 

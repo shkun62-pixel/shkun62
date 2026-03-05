@@ -392,6 +392,14 @@ const SaleSumm = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [rows, activeRow, showModal]);
 
+  const openRowModal = (index) => {
+    const row = rows[index];
+    if (row?.account) {
+      setSelectedAccount(row.account);
+      setShowModal(true);
+    }
+  };
+
   useEffect(() => {
     if (!showModal) return;
 
@@ -521,6 +529,10 @@ const SaleSumm = () => {
                   key={i}
                   className={i === activeRow ? styles.activeRow : ""}
                   style={{ height: 32 }}
+                  onDoubleClick={() => {
+                    setActiveRow(i);        // set active row
+                    openRowModal(i);        // open modal
+                  }}
                 >
                   <td>{r.accountName}</td>
                   <td className="text-end">{r.pcs ? r.pcs.toFixed(3) : ""}</td>

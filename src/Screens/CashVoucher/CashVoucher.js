@@ -171,137 +171,157 @@ const CashVoucher = () => {
     setCurrentDate(formattedDate);
     setCurrentDay(day);
   }, []);
-
-  // Search functions
-//   const [showSearchModal, setShowSearchModal] = useState(false); // State to handle modal visibility
-//   const [searchResults, setSearchResults] = useState([]); // State to store search results
-//   const handleSearchClick = () => {
-//     setSearchResults([]); // Clear the search results when reopening the modal
-//     setShowSearchModal(true); // Open the modal
-//   };
-
-//   const handleCloseSearchModal = () => {
-//     setSearchResults([]); // Clear search results when the modal is closed
-//     setShowSearchModal(false); // Close the modal
-//   };
-
-//   const handleSelectSearchResult = (selectedData) => {
-//     setFormData(selectedData.formData); // Update the form with the selected search data
-//     setItems(selectedData.items); // Update items with the selected search result
-//     setShowSearchModal(false); // Close the modal
-//     setSearchResults([]); // Clear search results after selecting a result
-//   };
-
-//   const formatDateToDDMMYYYY = (dateStr) => {
-//     if (!dateStr) return "";
-//     const [year, month, day] = dateStr.split("-");
-//     return `${day}-${month}-${year}`;
-//   };
-
-// const handleSearch = async (searchDate) => {
-//   // ✅ only search when full date is typed
-//   if (!/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-//     setSearchResults([]);
-//     return;
-//   }
-
-//   try {
-//     const response = await axios.get(
-//       `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/search?date=${searchDate}`
-//     );
-
-//     if (response.status === 200) {
-//       setSearchResults(response.data.data || []);
-//     } else {
-//       setSearchResults([]);
-//     }
-//   } catch (error) {
-//     console.error("Error fetching search data", error);
-//     setSearchResults([]);
-//   }
-// };
-
-
-  // const handleSearch = async (searchDate) => {
-  //   try {
-  //     // console.log(searchDate,"Hellloooo");
-  //     const response = await axios.get(
-  //       `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/search?date=${searchDate}`
-  //     );
-
-  //     if (response.status === 200) {
-  //       setSearchResults(response.data.data); // Assuming the data is in response.data.data
-  //     } else {
-  //       setSearchResults([]); // Clear results if no data is found
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching search data", error);
-  //   }
-  // };
  
-   const [showSearch, setShowSearch] = useState(false);
-   const [allBills, setAllBills] = useState([]);
-   const [filteredBills, setFilteredBills] = useState([]);
- 
-   const [searchBillNo, setSearchBillNo] = useState("");
-   const [searchDate, setSearchDate] = useState("");
- 
-   // 🔹 ISO → DD-MM-YYYY
-   const isoToDDMMYYYY = (isoDate) => {
-     const d = new Date(isoDate);
-     if (isNaN(d)) return "";
-     return `${String(d.getDate()).padStart(2, "0")}-${String(
-       d.getMonth() + 1
-     ).padStart(2, "0")}-${d.getFullYear()}`;
-   };
- 
-   // 🔹 Fetch Bills
-   const fetchAllBills = async () => {
-     try {
-       const res = await axios.get(
-         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`
-       );
-       if (Array.isArray(res.data)) {
-         setAllBills(res.data);
-         setFilteredBills([]);
-       }
-     } catch (err) {
-       console.error(err);
-     }
-   };
- 
-   // 🔹 Proceed
-   const handleProceed = () => {
-     let filtered = allBills;
- 
-     if (searchBillNo.trim()) {
-       filtered = filtered.filter((b) =>
-         b.formData.voucherno.toString().includes(searchBillNo)
-       );
-     }
- 
-     if (/^\d{2}-\d{2}-\d{4}$/.test(searchDate)) {
-       filtered = filtered.filter(
-         (b) => b.formData.date === searchDate
-       );
-     }
- 
-     setFilteredBills(filtered);
-   };
- 
-   // 🔹 Select
-   const handleSelectBill = (bill) => {
-     setFormData({
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
+
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
+
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  // Search Modal states
+  const [showSearch, setShowSearch] = useState(false);
+  const [allBills, setAllBills] = useState([]);
+  const [searchBillNo, setSearchBillNo] = useState("");
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [searchDate, setSearchDate] = useState(null);
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
+    // ⭐ infinite scroll state
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  // Fetch all bills for search
+  const fetchAllBills = async () => {
+    try {
+      const res = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`,
+      );
+      if (Array.isArray(res.data)) {
+        setAllBills(res.data);
+        setFilteredBills(res.data);
+      }
+    } catch (error) {
+      console.error("Error fetching bills", error);
+    }
+  };
+
+  // Update filtering logic
+  useEffect(() => {
+    let filtered = allBills;
+
+    if (searchBillNo.trim() !== "") {
+      filtered = filtered.filter((bill) =>
+        bill.formData.voucherno
+          .toString()
+          .toLowerCase()
+          .includes(searchBillNo.toLowerCase())
+      );
+    }
+
+    if (searchDate) {
+      const selected = formatDateToDDMMYYYY(searchDate);
+
+      if (selected) {
+        filtered = filtered.filter((bill) => {
+          const billDate = formatDateToDDMMYYYY(bill.formData.date);
+          return billDate === selected;
+        });
+      }
+    }
+
+    setFilteredBills(filtered);
+
+    // ⭐ reset visible rows when search changes
+    setVisibleCount(30);
+  }, [searchBillNo, searchDate, allBills]);
+
+  const handleSelectBill = (bill) => {
+    setFormData({
        ...bill.formData,
        date: bill.formData.date,
      });
       setItems(normalizeItems(bill.items));
       setShowSearch(false);
-      setFilteredBills([]);
       setSearchBillNo("");
       setSearchDate("");
-   };
+  };
   
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!showSearch) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveRowIndex((prev) =>
+          prev < filteredBills.length - 1 ? prev + 1 : prev
+        );
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const bill = filteredBills[activeRowIndex];
+        if (bill) {
+          handleSelectBill(bill);
+          setShowSearch(false);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredBills, activeRowIndex, showSearch]);
   
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   // Fetch Data
@@ -1895,83 +1915,15 @@ const CashVoucher = () => {
           <Button
             className="Buttonz"
             style={{  backgroundColor: buttonColors[6] }}
-            onClick={() => {
+             onClick={() => {
               fetchAllBills();
+              setActiveRowIndex(0);
               setShowSearch(true);
             }}
             disabled={!isSearchEnabled}
           >
             Search
           </Button>
-           <SearchModal
-            show={showSearch}
-            onClose={() => setShowSearch(false)}
-            bills={allBills}
-            filteredBills={filteredBills}
-            searchBillNo={searchBillNo}
-            setSearchBillNo={setSearchBillNo}
-            searchDate={searchDate}
-            setSearchDate={setSearchDate}
-            onProceed={handleProceed}
-            onSelectBill={handleSelectBill}
-            isoToDDMMYYYY={isoToDDMMYYYY}
-          />
-          {/* Modal for Search */}
-          {/* <Modal show={showSearchModal} onHide={handleCloseSearchModal} centered>
-            <Modal.Header closeButton>
-              <Modal.Title>Search by Date</Modal.Title>
-            </Modal.Header>
-
-            <Modal.Body>
-         
-              <div style={{ marginBottom: "10px" }}>
-                <InputMask
-                  mask="99-99-9999"
-                  placeholder="DD-MM-YYYY"
-                  className="form-control"
-                  onChange={(e) => handleSearch(e.target.value)}
-                />
-              </div>
-
-            
-              {searchResults.length > 0 ? (
-                <Table bordered hover>
-                  <thead>
-                    <tr>
-                      <th>Voucher No.</th>
-                      <th>Date</th>
-                      <th>Cash In Hand</th>
-                      <th>Total Payment</th>
-                      <th>Total Receipt</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {searchResults.map((result, index) => (
-                      <tr
-                        key={index}
-                        onClick={() => handleSelectSearchResult(result)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <td>{result.formData.voucherno}</td>
-                        <td>{result.formData.date}</td>
-                        <td>{result.formData.cashinhand}</td>
-                        <td>{result.formData.totalpayment}</td>
-                        <td>{result.formData.totalreceipt}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              ) : (
-                <p>No results found</p>
-              )}
-            </Modal.Body>
-
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseSearchModal}>
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal> */}
           <Button
             className="Buttonz"
             style={{  backgroundColor: buttonColors[7] }}
@@ -2006,6 +1958,119 @@ const CashVoucher = () => {
           </Button>
         </div>
       </div>
+      {/* Search Modal */}
+      <Modal
+        show={showSearch}
+        keyboard={false}
+        backdrop="static"
+        onHide={() => setShowSearch(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Search</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <TextField
+              className="custom-bordered-input"
+              size="small"
+              variant="filled"
+              label="Enter Bill No..."
+              value={searchBillNo}
+              onChange={(e) => setSearchBillNo(e.target.value)}
+            />
+
+            <InputMask
+              mask="99-99-9999"
+              placeholder="dd-mm-yyyy"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            >
+              {(props) => (
+                <TextField
+                  className="custom-bordered-input"
+                  {...props}
+                  label="DATE"
+                  size="small"
+                  variant="filled"
+                  fullWidth
+                  style={{ width: 230, marginLeft: 5 }}
+                />
+              )}
+            </InputMask>
+
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchBillNo("");
+                setSearchDate(null);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+
+          <div
+            style={{ maxHeight: "300px", overflowY: "auto" }}
+            onScroll={(e) => {
+              const bottom =
+                e.target.scrollHeight - e.target.scrollTop <=
+                e.target.clientHeight + 5;
+
+              if (bottom && visibleCount < filteredBills.length) {
+                setVisibleCount((prev) => prev + 30);
+              }
+            }}
+          >
+            <Table>
+              <thead>
+                <tr>
+                  <th>V.NO</th>
+                  <th>DATE</th>
+                  <th>ACCOUNT</th>
+                  <th>PAYMENT</th>
+                  <th>RECEIPT</th>
+                  <th>DISCOUNT</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredBills.slice(0, visibleCount).map((bill, index) => (
+                  <tr key={bill._id}
+                  style={{
+                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                    cursor: "pointer",
+                  }}
+                   onClick={() => {
+                    setActiveRowIndex(index);
+                    handleSelectBill(bill);
+                    setShowSearch(false);
+                  }}
+                  >
+                    <td>{bill.formData.voucherno}</td>
+                    <td>
+                      {formatDateToDDMMYYYY(bill.formData.date)}
+                    </td>
+                    <td>{bill.items?.[0]?.accountname}</td>
+                    <td>{bill.formData.totalpayment}</td>
+                    <td>{bill.formData.totalreceipt}</td>
+                    <td>{bill.formData.totaldiscount}</td>
+                  </tr>
+                ))}
+
+                {filteredBills.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      No matching records
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

@@ -15,13 +15,11 @@ const StyledModal = styled(Box)({
     top: '48%',
     left: '55%',
     transform: 'translate(-50%, -50%)',
-    width: "60%",
-    height: "92%",
-    background: 'linear-gradient(to right,rgb(238, 238, 248), #b19cd9)',
-    boxShadow: `5px 5px 15px rgb(255, 248, 248),
-    -5px -5px 15px rgba(255, 255, 255, 0.1),
-    inset 5px 5px 10px rgba(0, 0, 0, 0.2),
-    inset -5px -5px 10px rgba(255, 255, 255, 0.2)`,
+    background: 'linear-gradient(to right,rgb(238, 238, 248), #ccb8f1)',
+    // boxShadow: `5px 5px 15px rgb(255, 248, 248),
+    // -5px -5px 15px rgba(255, 255, 255, 0.1),
+    // inset 5px 5px 10px rgba(0, 0, 0, 0.2),
+    // inset -5px -5px 10px rgba(255, 255, 255, 0.2)`,
     border: '2px solid black',
     padding: 16,
     borderRadius: 15,
@@ -461,195 +459,227 @@ const handleSelectChange = (selectedOption) => {
     return (
         <Modal
             open={isOpen}
-            onClose={onClose}
+            onClose={(event, reason) => {
+              if (reason !== "backdropClick") {
+                onClose();
+              }
+            }}
             tabIndex={0} // Ensure modal is focusable for keyboard events
+            keyboard={false}
+            backdrop="static"
         >
             <StyledModal>
             {/* <ToastContainer/> */}
-                <h2 style={{ textAlign: 'center', marginBottom: 20, color: '#6242a2',letterSpacing:4,fontFamily:'Times New Roman',fontWeight:'bold'}}>BALANCE SHEET ANNEXURE FORM</h2>
+                <h2 style={{ textAlign: 'center', marginBottom: 20, color: '#6242a2',letterSpacing:4,fontFamily:'Times New Roman',fontWeight:'bold', fontSize:28}}>
+                  BALANCE SHEET ANNEXURE FORM</h2>
                 <text style={{marginLeft:"45%"}}>{title}</text>
-                <div style={{display:'flex',flexDirection:'column',marginLeft:"2%"}}>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Name</text>
-                    <input
-                    id='name'
-                    className='NAME'
-                    value={formData.name}
-                    onChange={handleValueChange}
-                    readOnly={!isEditMode || isDisabled}
-                    ref={(el) => (inputRefs.current[0] = el)} // Assign ref
-                      onKeyDown={(e) => handleKeyDown(e, 0)} // Handle Enter key
+                <div style={{display:'flex', flexDirection:"row", justifyContent:'space-between'}}>
+              
+                  <div style={{display:'flex', flexDirection:'column'}}>
+                    <TextField
+                      id="name"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="NAME"
+                      value={formData.name}
+                      onChange={handleValueChange}
+                      inputRef={(el) => (inputRefs.current[0] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 0)}
+                      InputProps={{
+                        readOnly: !isEditMode || isDisabled,
+                      }}
+                      sx={{ width: 400,mb:1 }}
                     />
-                    <Button onClick={handleAdd} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}}  disabled={!isAddEnabled} >ADD</Button>
-                </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Code</text>
-                    <input
-                    id='code'
-                    className='Code'
-                    value={formData.code}
-                    onChange={handleNumericValue}
-                    readOnly={!isEditMode || isDisabled}
-                    ref={(el) => (inputRefs.current[1] = el)} // Assign ref
-                    onKeyDown={(e) => handleKeyDown(e, 1)} // Handle Enter key
+                   <TextField
+                      id="code"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="CODE"
+                      value={formData.code}
+                      onChange={handleValueChange}
+                      inputRef={(el) => (inputRefs.current[1] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 1)}
+                      InputProps={{
+                        readOnly: !isEditMode || isDisabled,
+                      }}
+                       sx={{ width: 400,mb:1 }}
                     />
-                    <Button onClick={handleEditClick} disabled={!isAddEnabled} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}}>EDIT</Button>
-                </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Details in B/Sheet</text>
-                    <select
-                className="Bsheet"
-                id="bSheet"
-                style={{
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-                value={formData.bSheet}
-                onChange={handleDetails}
-                disabled={!isEditMode || isDisabled}
-                ref={(el) => (inputRefs.current[2] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 2)} // Handle Enter key
-              >
-                <option value=""></option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
-              <Button onClick={handlePrevious} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}} disabled={!isPreviousEnabled}>PREVIOUS</Button>
-                </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Debit/Credit</text>
-                    <select
-                className="DrCr"
-                id="drCr"
-                style={{
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-                value={formData.drCr}
-                onChange={handleCreditDebit}
-                disabled={!isEditMode || isDisabled}
-                ref={(el) => (inputRefs.current[3] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 3)} // Handle Enter key
-              >
-                <option value=""></option>
-                <option value="Credit">Credit</option>
-                <option value="Debit">Debit</option>
-              </select>
-                    <Button onClick={handleNext} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}} disabled={!isNextEnabled}>NEXT</Button>
-                </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Description</text>
-                    <input
-                    id='desciption'
-                    className='Description'
-                    value={formData.desciption}
-                    onChange={handleValueChange}
-                    readOnly={!isEditMode || isDisabled}
-                    ref={(el) => (inputRefs.current[4] = el)} // Assign ref
-                    onKeyDown={(e) => handleKeyDown(e, 4)} // Handle Enter key
+                    <TextField
+                      select
+                      id="bSheet"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="DETAIL IN B.SHEET"
+                      value={formData.bSheet}
+                      onChange={handleDetails}
+                      disabled={!isEditMode || isDisabled}
+                      inputRef={(el) => (inputRefs.current[2] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 2)}
+                      SelectProps={{ native: true }}
+                       sx={{ width: 400,mb:1 }}
+                    >
+                      <option value=""></option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </TextField>
+                    <TextField
+                      select
+                      id="drCr"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="DEBIT / CREDIT"
+                      value={formData.drCr}
+                      onChange={handleCreditDebit}
+                      disabled={!isEditMode || isDisabled}
+                      inputRef={(el) => (inputRefs.current[3] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 3)}
+                      SelectProps={{ native: true }}
+                       sx={{ width: 400,mb:1 }}
+                    >
+                      <option value=""></option>
+                      <option value="Credit">Credit</option>
+                      <option value="Debit">Debit</option>
+                    </TextField>
+                    <TextField
+                      id="desciption"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="DESCRIPTION"
+                      value={formData.desciption}
+                      onChange={handleValueChange}
+                      inputRef={(el) => (inputRefs.current[4] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 4)}
+                      InputProps={{
+                        readOnly: !isEditMode || isDisabled,
+                      }}
+                       sx={{ width: 400,mb:1 }}
                     />
-                    <Button onClick={handleDeleteClick} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}} disabled={!isAddEnabled}>DELETE</Button>
-                </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Dr/Cr Effect</text>
-                    <input
-                    id='drCrEffect'
-                    className='Effect'
-                    value={formData.drCrEffect}
-                    onChange={handleNumericValue}
-                    readOnly={!isEditMode || isDisabled}
-                    ref={(el) => (inputRefs.current[5] = el)} // Assign ref
-                    onKeyDown={(e) => handleKeyDown(e, 5)} // Handle Enter key
+                    <TextField
+                      id="drCrEffect"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="DR / CR EFFECT"
+                      value={formData.drCrEffect}
+                      onChange={handleNumericValue}
+                      inputRef={(el) => (inputRefs.current[5] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 5)}
+                      InputProps={{
+                        readOnly: !isEditMode || isDisabled,
+                      }}
+                       sx={{ width: 400,mb:1 }}
                     />
-                    <Button onClick={handleSaveClick}  
-                    ref={(el) => (inputRefs.current[9] = el)} // Assign ref
-                    onKeyDown={(e) => handleKeyDown(e, 9)} // Handle Enter key
-                    disabled={!isSubmitEnabled} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}}>SAVE</Button>
-                </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Annx.Serial</text>
-                    <input
-                    id='Annxserial'
-                    className='Annx'
-                    value={formData.Annxserial}
-                    onChange={handleValueChange}
-                    readOnly={!isEditMode || isDisabled}
-                    ref={(el) => (inputRefs.current[6] = el)} // Assign ref
-                    onKeyDown={(e) => handleKeyDown(e, 6)} // Handle Enter key
+                    <TextField
+                      id="Annxserial"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="ANNX SERIAL"
+                      value={formData.Annxserial}
+                      onChange={handleValueChange}
+                      inputRef={(el) => (inputRefs.current[6] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 6)}
+                      InputProps={{
+                        readOnly: !isEditMode || isDisabled,
+                      }}
+                       sx={{ width: 400,mb:1 }}
                     />
-                    <Button onClick={handleOpen} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}}>SEARCH</Button>
-                </div>
-               <Modal open={open} onClose={handleClose}>
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          width: 400,
-                          bgcolor: "background.paper",
-                          boxShadow: 24,
-                          p: 4,
-                          borderRadius: 2,
-                        }}
-                      >
-                        <Typography variant="h6" mb={2}>
-                          Select Anexure
-                        </Typography>
-                        <Autocomplete
-                          fullWidth
-                          options={data}
-                          getOptionLabel={(option) => option.formData.name} // Display name
-                          value={selectedOption}
-                          onChange={handleSelect} // Handle selection
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              variant="outlined"
-                              label="Search and Select"
-                              inputRef={autoCompleteRef} // Set focus on open
-                            />
-                          )}
+                    <TextField
+                      select
+                      id="group"
+                      size="small"
+                      className="custom-bordered-input"
+                      variant='filled'
+                      label="GROUP"
+                      value={formData.group}
+                      onChange={handleGroup}
+                      disabled={!isEditMode || isDisabled}
+                      inputRef={(el) => (inputRefs.current[7] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 7)}
+                      SelectProps={{ native: true }}
+                       sx={{ width: 400,mb:1 }}
+                    >
+                      <option value=""></option>
+                      <option value="Trading / Mfg Account">Trading / Mfg Account</option>
+                      <option value="Profit and Loss Account">Profit and Loss Account</option>
+                      <option value="Balance Sheet">Balance Sheet</option>
+                    </TextField>
+                    <Autocomplete
+                      options={optionsList}
+                      getOptionLabel={(option) => option.label || ""}
+                      value={optionsList.find(
+                        (option) => option.value === formData.BalanceSheet
+                      ) || null}
+                      onChange={(event, newValue) => {
+                        handleSelectChange(newValue);
+                      }}
+                      disabled={!isEditMode || isDisabled}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="BALANCE SHEET"
+                           variant='filled'
+                          placeholder="Select balance sheet item..."
+                          className="custom-bordered-input"
                         />
-                      </Box>
-                    </Modal>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                    <text style={{fontSize:18}}>Group</text>
-                    <select
-                className="Group"
-                id="group"
-                style={{
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-                value={formData.group}
-                onChange={handleGroup}
-                disabled={!isEditMode || isDisabled}
-                ref={(el) => (inputRefs.current[7] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 7)} // Handle Enter key
-              >
-                <option value=""></option>
-                <option value="Trading / Mfg Account">Trading / Mfg Account</option>
-                <option value="Profit and Loss Account"> Profit and Loss Account</option>
-                <option value="Balance Sheet">Balance Sheet</option>
-              </select>
-                    <Button onClick={handleActionExit} style={{backgroundColor:'#7755B7',color:'white',width:"15%",marginLeft:'5%'}}>EXIT</Button>
+                      )}
+                      ref={(el) => (inputRefs.current[8] = el)}
+                      onKeyDown={(e) => handleKeyDown(e, 8)}
+                       sx={{ width: 400,mb:1 }}
+                    />
+                  </div>
+              
+                  <div style={{display:'flex', flexDirection:'column'}}>
+                    <Button onClick={handleAdd} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >ADD</Button>
+                    <Button onClick={handleEditClick} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >EDIT</Button>
+                    <Button onClick={handlePrevious} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isPreviousEnabled} >PREVIOUS</Button>
+                    <Button onClick={handleNext} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isNextEnabled} >NEXT</Button>
+                    <Button onClick={handleDeleteClick} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >DELETE</Button>
+                    <Button onClick={handleSaveClick} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >SAVE</Button>
+                    <Button onClick={handleOpen}  style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >SEARCH</Button>
+                    <Button onClick={handleActionExit} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >EXIT</Button>
+                  </div>
                 </div>
-                <div style={{display:'flex',flexDirection:'row',marginTop:10}}>
-                <text style={{fontSize:18,marginTop:5}}>BalanceSheet</text>
-                <Select
-                className='MultiSelect'
-                options={optionsList}
-                value={optionsList.find((option) => option.value === formData.BalanceSheet)}
-                onChange={handleSelectChange}
-                placeholder="Select balance sheet item..."
-                isDisabled={!isEditMode || isDisabled} 
-                ref={(el) => (inputRefs.current[8] = el)} // Assign ref
-                onKeyDown={(e) => handleKeyDown(e, 8)} // Handle Enter key 
-                />
-               </div>
-                <text style={{fontFamily:'cursive',fontSize:20,fontWeight:'bold',color:'red',letterSpacing:3,marginTop:"8%"}}>NOTE : For New Group Please Click "Add" Button</text>
-                </div>
+    
+                <Modal open={open} onClose={handleClose}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: 400,
+                      bgcolor: "background.paper",
+                      boxShadow: 24,
+                      p: 4,
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography variant="h6" mb={2}>
+                      Select Anexure
+                    </Typography>
+                    <Autocomplete
+                      fullWidth
+                      options={data}
+                      getOptionLabel={(option) => option.formData.name} // Display name
+                      value={selectedOption}
+                      onChange={handleSelect} // Handle selection
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Search and Select"
+                          inputRef={autoCompleteRef} // Set focus on open
+                        />
+                      )}
+                    />
+                  </Box>
+                </Modal>
             </StyledModal>
         </Modal>
     );

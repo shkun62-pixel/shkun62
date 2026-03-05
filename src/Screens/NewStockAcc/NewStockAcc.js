@@ -85,6 +85,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
       AcCode: "",
     },
   ]);
+  const [title, setTitle] = useState("VIEW");
 
    // Modal For Items
     const [products, setProducts] = useState([]);
@@ -562,7 +563,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
  
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
-    console.log(data1._id);
+    setTitle("VIEW");
     try {
       if (data1) {
         const response = await axios.get(
@@ -595,6 +596,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
   const handlePrevious = async () => {
     document.body.style.backgroundColor = "white";
+    setTitle("VIEW");
     try {
       if (data1) {
         const response = await axios.get(
@@ -628,6 +630,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
   const handleFirst = async () => {
     document.body.style.backgroundColor = "white";
+    setTitle("VIEW");
     try {
       const response = await axios.get(
         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/first`
@@ -658,6 +661,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
   const handleLast = async () => {
     document.body.style.backgroundColor = "white";
+    setTitle("VIEW");
     try {
       const response = await axios.get(
         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/stockmaster/last`
@@ -689,6 +693,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
   const handleAdd = async () => {
     // document.body.style.backgroundColor = '#D5ECF3';
+    setTitle("NEW");
     try {
       const voucherData = await fetchVoucherNumbers();
       if (!voucherData) return;
@@ -762,6 +767,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     document.body.style.backgroundColor = "white"; // Reset background color
     setIsAddEnabled(true); // Enable "Add" button
     setIsSubmitEnabled(false);
+    setTitle("VIEW");
 
     if(!isEditMode){
       navigate("/dashboard"); 
@@ -1050,6 +1056,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
       });
     } finally {
       setIsSubmitEnabled(false);
+      setTitle("VIEW");
       isDataSaved ? setIsAddEnabled(true) : setIsAddEnabled(false);
       setIsDisabled(!isDataSaved);
       setIsEditMode(!isDataSaved);
@@ -1140,6 +1147,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
     }
   };
   const handleEditClick = () => {
+    setTitle("EDIT");
     setIsDisabled(false);
     setIsEditMode(true);
     setIsSubmitEnabled(true);
@@ -1313,6 +1321,9 @@ const NewStockAcc = ({ onSave, StockId }) => {
                 readOnly: !isEditMode || isDisabled,
               }}
             />
+            <span style={{marginLeft:20}} className="text-black-500 font-semibold text-base sm:text-lg">
+              {title}
+            </span>
           </div>
           <div style={{marginTop:2}}>
             <Autocomplete

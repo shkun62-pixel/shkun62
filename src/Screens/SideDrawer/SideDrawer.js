@@ -464,17 +464,17 @@ export default function App() {
                     </StyledIcon>
                     <StyledListItemText primary="Stock Account" />
                   </StyledListItem>
-                  <StyledListItem button onClick={openAnnexureParent}>
+                  <StyledListItem button onClick={() => handleNavigation("/Repost?type=Annexure")}>
                     <StyledIcon>
                       <LocalOfferIcon />
                     </StyledIcon>
                     <StyledListItemText primary="Annexure" />
                   </StyledListItem>
-                  <AnnexureModalParent
+                  {/* <AnnexureModalParent
                     isOpen={isAnnexureOpen}
                     onClose={closeAnnexureParent}
                     onNavigate={handleModalNavigate}
-                  />
+                  /> */}
                   <StyledListItem
                     button
                     onClick={() => handleNavigation("/StockTransfer")}
