@@ -30,9 +30,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CompanyContext } from "../Context/CompanyContext";
 
-/* =========================
-   Styled Modal Card (NO BORDER RADIUS)
-========================= */
 const ModalCard = styled(Box)(() => ({
   position: "absolute",
   top: "50%",
@@ -57,14 +54,6 @@ function clampIndex(i, len) {
   return i;
 }
 
-/**
- * ✅ Change this baseURL according to your setup:
- * - If you already have axios instance with baseURL, replace with that.
- * - If you use /tenant/api directly via nginx proxy, keep it.
- */
-// const API_LIST = "/tenant/api/purchase-win"; // GET
-// const API_UPDATE = (id) => `/tenant/api/purchase-win/${id}`; // PUT
-
 const PurModal = ({ isOpen, onClose, onNavigate }) => {
   const navigate = useNavigate();
   const focusTrapRef = useRef(null);
@@ -87,7 +76,7 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
 
   const isPrimaryRow = (row) => {
     const n = String(row?.name || "").toUpperCase().trim();
-    return n === "purchase GST" || n === "purchase GST SERVICE";
+    return n === "PURCHASE GST" || n === "PURCHASE GST SERVICE";
   };
 
   // ✅ Load rows from API when modal opens
@@ -139,7 +128,7 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
     if (!row?.path) return;
 
     // ✅ pass FULL row to next screen
-    navigate(row.path, { state: { purchaseWin: row } });
+    navigate(row.path, { state: { purWin: row } });
 
     if (onNavigate) onNavigate(row);
     onClose?.();
@@ -178,7 +167,7 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
 
       setIsEditing(false);
     } catch (e) {
-      console.error("purchase-win update error:", e);
+      console.error("pur-win update error:", e);
       // optional: alert
       // alert(e?.response?.data?.message || "Update failed");
     } finally {
@@ -258,7 +247,7 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
                 lineHeight: 1.1,
               }}
             >
-              Purchase
+              PURCHASE
             </Typography>
             <Typography
               sx={{
@@ -499,6 +488,19 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
                                   Fast entry • invoices • GST reporting
                                 </Typography>
                               )}
+                                <Typography
+                                  sx={{
+                                    mt: 0.4,
+                                    fontSize: 12,
+                                    fontWeight: 800,
+                                    color: "rgba(30,41,59,.70)",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {row.valpha}
+                                </Typography>
                             </Box>
 
                             {/* Right: Actions */}

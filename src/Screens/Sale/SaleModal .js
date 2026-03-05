@@ -204,9 +204,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CompanyContext } from "../Context/CompanyContext";
 
-/* =========================
-   Styled Modal Card (NO BORDER RADIUS)
-========================= */
 const ModalCard = styled(Box)(() => ({
   position: "absolute",
   top: "50%",
@@ -230,14 +227,6 @@ function clampIndex(i, len) {
   if (i >= len) return 0;
   return i;
 }
-
-/**
- * ✅ Change this baseURL according to your setup:
- * - If you already have axios instance with baseURL, replace with that.
- * - If you use /tenant/api directly via nginx proxy, keep it.
- */
-// const API_LIST = "/tenant/api/sale-win"; // GET
-// const API_UPDATE = (id) => `/tenant/api/sale-win/${id}`; // PUT
 
 const SaleModal = ({ isOpen, onClose, onNavigate }) => {
   const navigate = useNavigate();
@@ -673,6 +662,19 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
                                   Fast entry • invoices • GST reporting
                                 </Typography>
                               )}
+                                <Typography
+                                  sx={{
+                                    mt: 0.4,
+                                    fontSize: 12,
+                                    fontWeight: 800,
+                                    color: "rgba(30,41,59,.70)",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {row.valpha}
+                                </Typography>
                             </Box>
 
                             {/* Right: Actions */}

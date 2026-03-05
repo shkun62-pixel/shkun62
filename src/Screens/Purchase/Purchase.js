@@ -106,6 +106,7 @@ const Purchase = () => {
   const [formData, setFormData] = useState({
     date: "",
     vtype: "P",
+    valpha:"",
     vno: 0,
     vbillno: 0,
     vbdate:"",
@@ -920,6 +921,7 @@ const Purchase = () => {
     const emptyFormData = {
       date: "", // Use today's date
       vtype: "P",
+      valpha:"",
       vno: 0,
       vbillno: 0,
       vbdate:"",
@@ -1364,6 +1366,7 @@ const Purchase = () => {
       const newData = {
         date: getTodayDDMMYYYY(),
         vtype: "P",
+        valpha: selectedValpha,
         vno: lastvoucherno,
         vbillno: "",
         vbdate: getTodayDDMMYYYY(),
@@ -1512,6 +1515,7 @@ const Purchase = () => {
         const newData = {
           date: "",
           vtype: "P",
+          valpha:"",
           vno: 0,
           vbillno: 0,
           vbdate:"",
@@ -1656,6 +1660,7 @@ const Purchase = () => {
 
           // core fields
           vtype: formData.vtype,
+          valpha: formData.valpha,
           vno: formData.vno,
           vbillno: formData.vbillno,
           vbdate: formData.vbdate,
@@ -3694,6 +3699,26 @@ const handleKeyDown = (event, index, field) => {
   });
 
   const nonEmptyItems2 = items.filter((item) => (item.sdisc || "").trim() !== "");
+
+  // Storing Valpha
+  const purWinFromState = location.state?.purWin;
+
+  // Load from localStorage if refresh
+  const purWinFromStorage = localStorage.getItem("purWin")
+    ? JSON.parse(localStorage.getItem("purWin"))
+    : null;
+
+  // Final object (state first, then storage)
+  const purWin = purWinFromState || purWinFromStorage;
+
+  // Extract valpha safely
+  const selectedValpha = purWin?.valpha || "";
+
+  useEffect(() => {
+    if (purWinFromState) {
+      localStorage.setItem("purWin", JSON.stringify(purWinFromState));
+    }
+  }, [purWinFromState]);
   return (
     <div>
       <div>

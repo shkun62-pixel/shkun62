@@ -30,9 +30,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CompanyContext } from "../Context/CompanyContext";
 
-/* =========================
-   Styled Modal Card (NO BORDER RADIUS)
-========================= */
 const ModalCard = styled(Box)(() => ({
   position: "absolute",
   top: "50%",
@@ -57,14 +54,6 @@ function clampIndex(i, len) {
   return i;
 }
 
-/**
- * ✅ Change this baseURL according to your setup:
- * - If you already have axios instance with baseURL, replace with that.
- * - If you use /tenant/api directly via nginx proxy, keep it.
- */
-// const API_LIST = "/tenant/api/bank-win"; // GET
-// const API_UPDATE = (id) => `/tenant/api/bank-win/${id}`; // PUT
-
 const BankModal = ({ isOpen, onClose, onNavigate }) => {
   const navigate = useNavigate();
   const focusTrapRef = useRef(null);
@@ -87,7 +76,7 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
 
   const isPrimaryRow = (row) => {
     const n = String(row?.name || "").toUpperCase().trim();
-    return n === "Bank" || n === "Bank 2";
+    return n === "BANK VOUCHER" || n === "BANK 2";
   };
 
   // ✅ Load rows from API when modal opens
@@ -258,7 +247,7 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
                 lineHeight: 1.1,
               }}
             >
-              Bank
+              BANK
             </Typography>
             <Typography
               sx={{
@@ -496,9 +485,22 @@ const API_UPDATE = (id) => `https://www.shkunweb.com/shkunlive/${tenant}/tenant/
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  Fast entry • invoices • GST reporting
+                                  Fast entry
                                 </Typography>
                               )}
+                                <Typography
+                                  sx={{
+                                    mt: 0.4,
+                                    fontSize: 12,
+                                    fontWeight: 800,
+                                    color: "rgba(30,41,59,.70)",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {row.valpha}
+                                </Typography>
                             </Box>
 
                             {/* Right: Actions */}

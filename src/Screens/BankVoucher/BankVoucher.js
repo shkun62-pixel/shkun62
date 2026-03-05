@@ -77,6 +77,7 @@ const BankVoucher = () => {
   const [fontSize, setFontSize] = useState(17);
   const [formData, setFormData] = useState({
     vtype: "B",
+    valpha:"",
     date: "",
     voucherno: 0,
     user: "Owner",
@@ -600,6 +601,7 @@ const BankVoucher = () => {
           voucherno: 0,
           date: "", // Use today's date
           vtype: "B",
+          valpha:"",
           user: "Owner",
           totalpayment: "",
           totalreceipt: "",
@@ -655,6 +657,7 @@ const BankVoucher = () => {
         voucherno: 0,
         date: "", // Use today's date
         vtype: "B",
+        valpha:"",
         user: "Owner",
         totalpayment: "",
         totalreceipt: "",
@@ -903,6 +906,7 @@ const BankVoucher = () => {
 
       const newData = {
         vtype: "B",
+        valpha: selectedValpha,
         date: getTodayDDMMYYYY(),
         voucherno: lastvoucherno,
         user: "Owner",
@@ -1000,6 +1004,7 @@ const BankVoucher = () => {
         console.log("No data available");
         const newData = {
           vtype: "B",
+          valpha:"",
           date: "",
           voucherno: 0,
           user: "Owner",
@@ -1115,6 +1120,7 @@ const BankVoucher = () => {
           formData: {
             date: formData.date,
             vtype: formData.vtype,
+            valpha: formData.valpha,
             voucherno: formData.voucherno,
             user: formData.user || "",
             totalpayment: formData.totalpayment,
@@ -1156,6 +1162,7 @@ const BankVoucher = () => {
           formData: {
             date: formData.date,
             vtype: formData.vtype,
+            valpha: formData.valpha,
             voucherno: formData.voucherno,
             user: formData.user || "",
             totalpayment: formData.totalpayment,
@@ -1351,14 +1358,6 @@ const BankVoucher = () => {
             focusAndScroll(accountNameRefs, index + 1);
           }
           break;
-        // case "remarks":
-        //   if (index === items.length - 1) {
-        //     handleAddItem();
-        //     accountNameRefs.current[index + 1]?.focus();
-        //   } else {
-        //     accountNameRefs.current[index + 1]?.focus();
-        //   }
-        //   break;
         default:
           break;
       }
@@ -1771,6 +1770,26 @@ const BankVoucher = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [showSearch, printChoiceOpen]);
+
+  // Storing Valpha
+  const bankWinFromState = location.state?.bankWin;
+
+  // Load from localStorage if refresh
+  const bankWinFromStorage = localStorage.getItem("bankWin")
+    ? JSON.parse(localStorage.getItem("bankWin"))
+    : null;
+
+  // Final object (state first, then storage)
+  const bankWin = bankWinFromState || bankWinFromStorage;
+
+  // Extract valpha safely
+  const selectedValpha = bankWin?.valpha || "";
+
+  useEffect(() => {
+    if (bankWinFromState) {
+      localStorage.setItem("bankWin", JSON.stringify(bankWinFromState));
+    }
+  }, [bankWinFromState]);
 
   return (
     <div>
