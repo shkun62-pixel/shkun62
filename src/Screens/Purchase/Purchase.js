@@ -2010,268 +2010,18 @@ const Purchase = () => {
     fetchPostingSetup();
   }, []);
 
-    const handleItemChange = (index, key, value, field) => {
-    // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-    if (
-      (key === "pkgs" ||
-        key === "weight" ||
-        key === "tariff" ||
-        key === "rate" ||
-        key === "disc" ||
-        key === "discount" ||
-        key === "amount") &&
-      !/^-?\d*\.?\d*$/.test(value)
-    ) {
-      return; // reject invalid input
-    }
-
-    // Always force disc/discount to be negative
-    if (key === "disc" || key === "discount") {
-      const numeric = parseFloat(value);
-      if (!isNaN(numeric)) {
-        value = -Math.abs(numeric); // Force negative
-      }
-    }
-
-    const updatedItems = [...items];
-    if (["sdisc"].includes(key)) {
-      updatedItems[index][key] = capitalizeWords(value);
-    } else {
-      updatedItems[index][key] = value;
-    }
-
-    // If the key is 'name', find the corresponding product and set the price
-    if (key === "name") {
-      const selectedProduct = products.find(
-        (product) => product.Aheads === value,
-      );
-
-      if (selectedProduct) {
-        // ✅ Always update these
-        updatedItems[index]["vcode"] = selectedProduct.Acodes;
-        updatedItems[index]["sdisc"] = selectedProduct.Aheads;
-        updatedItems[index]["gst"] = selectedProduct.itax_rate;
-        updatedItems[index]["tariff"] = selectedProduct.Hsn;
-        updatedItems[index]["Units"] = selectedProduct.TradeName;
-
-        // ✅ ABC MODE special logic
-        if (isAbcmode) {
-          const mrp = parseFloat(selectedProduct.Mrps);
-
-          if (!isNaN(mrp) && mrp > 0) {
-            updatedItems[index]["rate"] = mrp;
-          }
-
-          setItems(updatedItems);
-          return; // 🚫 stop further changes
-        }
-
-        // ⬇️ Normal mode (unchanged)
-        updatedItems[index]["Units"] = selectedProduct.TradeName;
-        updatedItems[index]["rate"] = selectedProduct.Mrps;
-        updatedItems[index]["gst"] = selectedProduct.itax_rate;
-        updatedItems[index]["tariff"] = selectedProduct.Hsn;
-
-        if (postingSetup?.isDefault === true) {
-          const gstRate = String(selectedProduct.itax_rate);
-
-          const matchedSetup = postingSetup.rows.find(
-            (row) => String(row.gst) === gstRate,
-          );
-
-          if (matchedSetup) {
-            updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
-            updatedItems[index]["Scodess"] = matchedSetup.Scodess;
-            updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
-            updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
-          } else {
-            updatedItems[index]["Scodes01"] = "";
-            updatedItems[index]["Scodess"] = "";
-            updatedItems[index]["Pcodes01"] = "";
-            updatedItems[index]["Pcodess"] = "";
-          }
-        } else {
-          updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-          updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
-        }
-
-        updatedItems[index]["RateCal"] = selectedProduct.Rateins;
-        updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-        updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
-      }
-    }
-
-    let pkgs = parseFloat(updatedItems[index].pkgs);
-    pkgs = isNaN(pkgs) ? 0 : pkgs;
-
-    let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
-    Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
-
-    let AL = pkgs * Qtyperpkgs || 0;
-    let gst;
-    if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
-      updatedItems[index]["weight"] = AL.toFixed(weightValue);
-    }
-    // Calculate CGST and SGST based on the GST value
-    if (
-      formData.stype === "Tax Free Within State" &&
-      custGst.startsWith("03")
-    ) {
-      gst = 0;
-    } else if (
-      formData.stype === "Tax Free Interstate" &&
-      !custGst.startsWith("03")
-    ) {
-      gst = 0;
-    } else {
-      gst = parseFloat(updatedItems[index].gst);
-    }
-
-    let weight = parseFloat(updatedItems[index].weight);
-    weight = isNaN(weight) ? 0 : weight;
-
-    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
-    const rate = parseFloat(updatedItems[index].rate) || 0;
-
-    const totalAccordingWeight = weight * rate;
-    const totalAccordingPkgs = pkgsVal * rate;
-    const totalAccordingPkgsQty = pkgsVal * Qtyperpkgs * rate;
-
-    let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight; // Set a default value
-
-    // Calcuate the Amount According to RateCalculation field
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-      // console.log("totalAccordingWeight");
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
-      // console.log("totalAccordingPkgs");
-    }
-    // 🔥 If user manually edits amount → recalculate rate
-    if (
-      key === "amount" &&
-      value !== "" &&
-      !isNaN(parseFloat(value)) &&
-      !value.endsWith(".")
-    ) {
-      let enteredAmount = parseFloat(value);
-      let qty = 0;
-
-      if (RateCal === "Pc/Pkgs") {
-        qty = parseFloat(updatedItems[index].pkgs) || 0;
-      } else {
-        qty = parseFloat(updatedItems[index].weight) || 0;
-      }
-
-      const currentMrp = parseFloat(updatedItems[index].curMrp);
-
-      // // ✅ STOP if MRP exists and is valid (> 0)
-      if (!isNaN(currentMrp) && currentMrp > 0) {
-        return; // ❌ Do not recalculate rate
-      }
-
-      // Otherwise recalc rate
-      if (qty > 0 && enteredAmount > 0) {
-        let newRate = enteredAmount / qty;
-
-        updatedItems[index]["rate"] = T11
-          ? Math.round(newRate).toFixed(2)
-          : newRate.toFixed(2);
-
-        TotalAcc = enteredAmount;
-      }
-    }
-
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-
-    let others = parseFloat(updatedItems[index].exp_before) || 0;
-    let disc = parseFloat(updatedItems[index].disc) || 0;
-    let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
-    let per;
-    if (key === "discount") {
-      per = manualDiscount;
-    } else {
-      per = (disc / 100) * TotalAcc;
-      updatedItems[index]["discount"] = T11
-        ? Math.round(per).toFixed(2)
-        : per.toFixed(2);
-    }
-
-    // ✅ Convert to float for reliable calculation
-    per = parseFloat(per);
-    let Amounts = TotalAcc + per + others;
-
-    // Ensure TotalAcc is a valid number before calling toFixed()
-    // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-    // Check if GST number starts with "0" to "3"
-    let cgst, sgst, igst;
-    if (CompanyState == supplierdetails[0].state) {
-      cgst = (Amounts * (gst / 2)) / 100 || 0;
-      sgst = (Amounts * (gst / 2)) / 100 || 0;
-      igst = 0;
-    } else {
-      cgst = sgst = 0;
-      igst = (Amounts * gst) / 100 || 0;
-    }
-
-    // Calculate the total with GST and Others
-    let totalWithGST = Amounts + cgst + sgst + igst;
-    // Update CGST, SGST, Others, and total fields in the item
-    if (T11) {
-      if (key !== "discount") {
-        updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-      }
-
-      if (key !== "amount") {
-        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-      }
-
-      updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-    } else {
-      if (key !== "discount") {
-        updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-      }
-
-      if (key !== "amount") {
-        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-      }
-
-      updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-    }
-    if (T12) {
-      updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
-      updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
-      updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
-    } else {
-      updatedItems[index]["ctax"] = cgst.toFixed(2);
-      updatedItems[index]["stax"] = sgst.toFixed(2);
-      updatedItems[index]["itax"] = igst.toFixed(2);
-    }
-    // Calculate the percentage of the value based on the GST percentage
-    const percentage =
-      TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
-    updatedItems[index]["percentage"] = percentage.toFixed(2);
-
-    setItems(updatedItems);
-    const updatedForm = calculateTotalGst(formData);
-    setFormData(updatedForm);
-
-  };
-
   // const handleItemChange = (index, key, value, field) => {
   //   // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-  //   if ((key === "pkgs" || key === "weight" || key === "tariff" || key === "rate" || key === "disc" || key === "discount" || key === "amount") && !/^-?\d*\.?\d*$/.test(value)) {
+  //   if (
+  //     (key === "pkgs" ||
+  //       key === "weight" ||
+  //       key === "tariff" ||
+  //       key === "rate" ||
+  //       key === "disc" ||
+  //       key === "discount" ||
+  //       key === "amount") &&
+  //     !/^-?\d*\.?\d*$/.test(value)
+  //   ) {
   //     return; // reject invalid input
   //   }
 
@@ -2289,61 +2039,40 @@ const Purchase = () => {
   //   } else {
   //     updatedItems[index][key] = value;
   //   }
-  //   if (key === "amount" && value === "") {
-  //     updatedItems[index]["rate"] = "";
-  //     updatedItems[index]["ctax"] = "";
-  //     updatedItems[index]["stax"] = "";
-  //     updatedItems[index]["itax"] = "";
-  //     updatedItems[index]["vamt"] = "";
-  //     updatedItems[index]["amount"] = "";
-  //     setItems(updatedItems);
-  //     return;
-  //   }
-
-  //   // ✅ Reverse Rate Calculation (Amount → Rate)
-  //   if (key === "amount") {
-
-  //     // ❗ If amount is empty, clear rate and stop
-  //     if (value === "") {
-  //       updatedItems[index]["rate"] = "";
-  //       setItems(updatedItems);
-  //       return;
-  //     }
-
-  //     const amount = parseFloat(value) || 0;
-  //     const weight = parseFloat(updatedItems[index].weight) || 0;
-  //     const pkgs = parseFloat(updatedItems[index].pkgs) || 0;
-
-  //     let newRate = 0;
-
-  //     if (weight > 0) {
-  //       newRate = amount / weight || 0 ;
-  //     } else if (pkgs > 0) {
-  //       newRate = amount / pkgs || 0;
-  //     }
-
-  //     if (!isNaN(newRate) && isFinite(newRate)) {
-  //       updatedItems[index]["rate"] = T11
-  //         ? Math.round(newRate).toFixed(2)
-  //         : newRate.toFixed(2);
-  //     }
-  //   }
 
   //   // If the key is 'name', find the corresponding product and set the price
   //   if (key === "name") {
   //     const selectedProduct = products.find(
-  //       (product) => product.Aheads === value
+  //       (product) => product.Aheads === value,
   //     );
+
   //     if (selectedProduct) {
+  //       // ✅ Always update these
   //       updatedItems[index]["vcode"] = selectedProduct.Acodes;
   //       updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+  //       updatedItems[index]["gst"] = selectedProduct.itax_rate;
+  //       updatedItems[index]["tariff"] = selectedProduct.Hsn;
+  //       updatedItems[index]["Units"] = selectedProduct.TradeName;
+
+  //       // ✅ ABC MODE special logic
+  //       if (isAbcmode) {
+  //         const mrp = parseFloat(selectedProduct.Mrps);
+
+  //         if (!isNaN(mrp) && mrp > 0) {
+  //           updatedItems[index]["rate"] = mrp;
+  //         }
+
+  //         setItems(updatedItems);
+  //         return; // 🚫 stop further changes
+  //       }
+
+  //       // ⬇️ Normal mode (unchanged)
   //       updatedItems[index]["Units"] = selectedProduct.TradeName;
   //       updatedItems[index]["rate"] = selectedProduct.Mrps;
   //       updatedItems[index]["gst"] = selectedProduct.itax_rate;
   //       updatedItems[index]["tariff"] = selectedProduct.Hsn;
-  //        if (postingSetup?.isDefault === true) {
-  //         // 🔥 NEW LOGIC → API controlled
 
+  //       if (postingSetup?.isDefault === true) {
   //         const gstRate = String(selectedProduct.itax_rate);
 
   //         const matchedSetup = postingSetup.rows.find(
@@ -2356,7 +2085,6 @@ const Purchase = () => {
   //           updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
   //           updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
   //         } else {
-  //           // Optional safety if GST not found
   //           updatedItems[index]["Scodes01"] = "";
   //           updatedItems[index]["Scodess"] = "";
   //           updatedItems[index]["Pcodes01"] = "";
@@ -2368,11 +2096,10 @@ const Purchase = () => {
   //         updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
   //         updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
   //       }
+
   //       updatedItems[index]["RateCal"] = selectedProduct.Rateins;
   //       updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-  //     } else {
-  //       updatedItems[index]["rate"] = ""; // Reset price if product not found
-  //       updatedItems[index]["gst"] = ""; // Reset gst if product not found
+  //       updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
   //     }
   //   }
 
@@ -2404,11 +2131,13 @@ const Purchase = () => {
 
   //   let weight = parseFloat(updatedItems[index].weight);
   //   weight = isNaN(weight) ? 0 : weight;
+
   //   const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
   //   const rate = parseFloat(updatedItems[index].rate) || 0;
 
   //   const totalAccordingWeight = weight * rate;
   //   const totalAccordingPkgs = pkgsVal * rate;
+  //   const totalAccordingPkgsQty = pkgsVal * Qtyperpkgs * rate;
 
   //   let RateCal = updatedItems[index].RateCal;
   //   let TotalAcc = totalAccordingWeight; // Set a default value
@@ -2421,15 +2150,49 @@ const Purchase = () => {
   //     RateCal === undefined
   //   ) {
   //     TotalAcc = totalAccordingWeight;
-  //     console.log("Default");
   //   } else if (RateCal === "Wt/Qty") {
   //     TotalAcc = totalAccordingWeight;
-  //     console.log("totalAccordingWeight");
+  //     // console.log("totalAccordingWeight");
   //   } else if (RateCal === "Pc/Pkgs") {
   //     TotalAcc = totalAccordingPkgs;
-  //     console.log("totalAccordingPkgs");
+  //     // console.log("totalAccordingPkgs");
   //   }
-  //     // Ensure TotalAcc is a valid number before calling toFixed()
+  //   // 🔥 If user manually edits amount → recalculate rate
+  //   if (
+  //     key === "amount" &&
+  //     value !== "" &&
+  //     !isNaN(parseFloat(value)) &&
+  //     !value.endsWith(".")
+  //   ) {
+  //     let enteredAmount = parseFloat(value);
+  //     let qty = 0;
+
+  //     if (RateCal === "Pc/Pkgs") {
+  //       qty = parseFloat(updatedItems[index].pkgs) || 0;
+  //     } else {
+  //       qty = parseFloat(updatedItems[index].weight) || 0;
+  //     }
+
+  //     const currentMrp = parseFloat(updatedItems[index].curMrp);
+
+  //     // // ✅ STOP if MRP exists and is valid (> 0)
+  //     if (!isNaN(currentMrp) && currentMrp > 0) {
+  //       return; // ❌ Do not recalculate rate
+  //     }
+
+  //     // Otherwise recalc rate
+  //     if (qty > 0 && enteredAmount > 0) {
+  //       let newRate = enteredAmount / qty;
+
+  //       updatedItems[index]["rate"] = T11
+  //         ? Math.round(newRate).toFixed(2)
+  //         : newRate.toFixed(2);
+
+  //       TotalAcc = enteredAmount;
+  //     }
+  //   }
+
+  //   // Ensure TotalAcc is a valid number before calling toFixed()
   //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
 
   //   let others = parseFloat(updatedItems[index].exp_before) || 0;
@@ -2439,8 +2202,10 @@ const Purchase = () => {
   //   if (key === "discount") {
   //     per = manualDiscount;
   //   } else {
-  //     per = ((disc / 100) * TotalAcc);
-  //     updatedItems[index]["discount"] = T11 ? Math.round(per).toFixed(2) : per.toFixed(2);
+  //     per = (disc / 100) * TotalAcc;
+  //     updatedItems[index]["discount"] = T11
+  //       ? Math.round(per).toFixed(2)
+  //       : per.toFixed(2);
   //   }
 
   //   // ✅ Convert to float for reliable calculation
@@ -2449,9 +2214,7 @@ const Purchase = () => {
 
   //   // Ensure TotalAcc is a valid number before calling toFixed()
   //   // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-
   //   // Check if GST number starts with "0" to "3"
-  //   const same = custGst.substring(0, 2);
   //   let cgst, sgst, igst;
   //   if (CompanyState == supplierdetails[0].state) {
   //     cgst = (Amounts * (gst / 2)) / 100 || 0;
@@ -2464,14 +2227,12 @@ const Purchase = () => {
 
   //   // Calculate the total with GST and Others
   //   let totalWithGST = Amounts + cgst + sgst + igst;
-  //   // totalWithGST += others;
   //   // Update CGST, SGST, Others, and total fields in the item
   //   if (T11) {
   //     if (key !== "discount") {
   //       updatedItems[index]["discount"] = Math.round(per).toFixed(2);
   //     }
 
-  //     // ❗ Only auto-calc amount if user is NOT typing in amount
   //     if (key !== "amount") {
   //       updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
   //     }
@@ -2482,26 +2243,12 @@ const Purchase = () => {
   //       updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
   //     }
 
-  //     // ❗ Only auto-calc amount if user is NOT typing in amount
   //     if (key !== "amount") {
   //       updatedItems[index]["amount"] = TotalAcc.toFixed(2);
   //     }
 
   //     updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
   //   }
-  //   // if (T11) {
-  //   //   if (key !== "discount") {
-  //   //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-  //   //   }
-  //   //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-  //   //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-  //   // } else {
-  //   //   if (key !== "discount") {
-  //   //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-  //   //   }
-  //   //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-  //   //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-  //   // }
   //   if (T12) {
   //     updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
   //     updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
@@ -2512,11 +2259,284 @@ const Purchase = () => {
   //     updatedItems[index]["itax"] = igst.toFixed(2);
   //   }
   //   // Calculate the percentage of the value based on the GST percentage
-  //   const percentage = TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+  //   const percentage =
+  //     TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
   //   updatedItems[index]["percentage"] = percentage.toFixed(2);
+
   //   setItems(updatedItems);
-  //   calculateTotalGst();
+  //   const updatedForm = calculateTotalGst(formData);
+  //   setFormData(updatedForm);
+
   // };
+
+  const handleItemChange = (index, key, value, field) => {
+    if (
+      (key === "pkgs" ||
+        key === "weight" ||
+        key === "tariff" ||
+        key === "rate" ||
+        key === "disc" ||
+        key === "discount" ||
+        key === "amount") &&
+      !/^-?\d*\.?\d*$/.test(value)
+    ) {
+      return;
+    }
+
+    if (key === "disc" || key === "discount") {
+      const numeric = parseFloat(value);
+      if (!isNaN(numeric)) {
+        value = -Math.abs(numeric);
+      }
+    }
+
+    const updatedItems = [...items];
+
+    if (["sdisc"].includes(key)) {
+      updatedItems[index][key] = capitalizeWords(value);
+    } else {
+      updatedItems[index][key] = value;
+    }
+
+    // ================= PRODUCT SELECTION =================
+    if (key === "name") {
+      const selectedProduct = products.find(
+        (product) => product.Aheads === value
+      );
+
+      if (selectedProduct) {
+        updatedItems[index]["vcode"] = selectedProduct.Acodes;
+        updatedItems[index]["sdisc"] = selectedProduct.Aheads;
+        updatedItems[index]["gst"] = selectedProduct.itax_rate;
+        updatedItems[index]["tariff"] = selectedProduct.Hsn;
+        updatedItems[index]["Units"] = selectedProduct.TradeName;
+
+        if (isAbcmode) {
+          const mrp = parseFloat(selectedProduct.Mrps);
+
+          if (!isNaN(mrp) && mrp > 0) {
+            updatedItems[index]["rate"] = mrp;
+
+            // 🔥 FORCE AMOUNT CALCULATION BEFORE RETURN
+            const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+            const weightVal = parseFloat(updatedItems[index].weight) || 0;
+            const RateCal = selectedProduct.Rateins;
+
+            let total = 0;
+
+            if (RateCal === "Pc/Pkgs") {
+              total = pkgsVal * mrp;
+            } else {
+              total = weightVal * mrp;
+            }
+
+            updatedItems[index]["amount"] = T11
+              ? Math.round(total).toFixed(2)
+              : total.toFixed(2);
+          }
+
+          setItems(updatedItems);
+          return; 
+        }
+
+        updatedItems[index]["Units"] = selectedProduct.TradeName;
+        updatedItems[index]["rate"] = selectedProduct.Mrps;
+        updatedItems[index]["gst"] = selectedProduct.itax_rate;
+        updatedItems[index]["tariff"] = selectedProduct.Hsn;
+
+        if (postingSetup?.isDefault === true) {
+          const gstRate = String(selectedProduct.itax_rate);
+
+          const matchedSetup = postingSetup.rows.find(
+            (row) => String(row.gst) === gstRate
+          );
+
+          if (matchedSetup) {
+            updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
+            updatedItems[index]["Scodess"] = matchedSetup.Scodess;
+            updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
+            updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
+          } else {
+            updatedItems[index]["Scodes01"] = "";
+            updatedItems[index]["Scodess"] = "";
+            updatedItems[index]["Pcodes01"] = "";
+            updatedItems[index]["Pcodess"] = "";
+          }
+        } else {
+          updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
+          updatedItems[index]["Scodess"] = selectedProduct.Scodess;
+          updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
+          updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
+        }
+
+        updatedItems[index]["RateCal"] = selectedProduct.Rateins;
+        updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
+        updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
+
+        // 🔥🔥🔥 ONLY ADDITION (Nothing else changed)
+        key = "rate";
+      }
+    }
+
+    // ================= REST OF YOUR ORIGINAL CODE (UNCHANGED) =================
+
+    let pkgs = parseFloat(updatedItems[index].pkgs);
+    pkgs = isNaN(pkgs) ? 0 : pkgs;
+
+    let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
+    Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
+
+    let AL = pkgs * Qtyperpkgs || 0;
+    let gst;
+
+    if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
+      updatedItems[index]["weight"] = AL.toFixed(weightValue);
+    }
+
+    if (
+      formData.stype === "Tax Free Within State" &&
+      custGst.startsWith("03")
+    ) {
+      gst = 0;
+    } else if (
+      formData.stype === "Tax Free Interstate" &&
+      !custGst.startsWith("03")
+    ) {
+      gst = 0;
+    } else {
+      gst = parseFloat(updatedItems[index].gst);
+    }
+
+    let weight = parseFloat(updatedItems[index].weight);
+    weight = isNaN(weight) ? 0 : weight;
+
+    const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
+    const rate = parseFloat(updatedItems[index].rate) || 0;
+
+    const totalAccordingWeight = weight * rate;
+    const totalAccordingPkgs = pkgsVal * rate;
+
+    let RateCal = updatedItems[index].RateCal;
+    let TotalAcc = totalAccordingWeight;
+
+    if (
+      RateCal === "Default" ||
+      RateCal === "" ||
+      RateCal === null ||
+      RateCal === undefined
+    ) {
+      TotalAcc = totalAccordingWeight;
+    } else if (RateCal === "Wt/Qty") {
+      TotalAcc = totalAccordingWeight;
+    } else if (RateCal === "Pc/Pkgs") {
+      TotalAcc = totalAccordingPkgs;
+    }
+
+    const currentMrp = parseFloat(updatedItems[index].curMrp);
+
+    if (
+      key === "amount" &&
+      value !== "" &&
+      !isNaN(parseFloat(value)) &&
+      !value.endsWith(".")
+    ) {
+      let enteredAmount = parseFloat(value);
+      let qty = 0;
+
+      if (RateCal === "Pc/Pkgs") {
+        qty = parseFloat(updatedItems[index].pkgs) || 0;
+      } else {
+        qty = parseFloat(updatedItems[index].weight) || 0;
+      }
+
+      if (!isNaN(currentMrp) && currentMrp > 0) {
+        return;
+      }
+
+      if (qty > 0 && enteredAmount > 0) {
+        let newRate = enteredAmount / qty;
+
+        updatedItems[index]["rate"] = T11
+          ? Math.round(newRate).toFixed(2)
+          : newRate.toFixed(2);
+
+        TotalAcc = enteredAmount;
+      }
+    }
+
+    TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
+
+    let others = parseFloat(updatedItems[index].exp_before) || 0;
+    let disc = parseFloat(updatedItems[index].disc) || 0;
+    let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
+
+    let per;
+    if (key === "discount") {
+      per = manualDiscount;
+    } else {
+      per = (disc / 100) * TotalAcc;
+      updatedItems[index]["discount"] = T11
+        ? Math.round(per).toFixed(2)
+        : per.toFixed(2);
+    }
+
+    per = parseFloat(per);
+    let Amounts = TotalAcc + per + others;
+
+    let cgst, sgst, igst;
+    if (CompanyState == supplierdetails[0].state) {
+      cgst = (Amounts * (gst / 2)) / 100 || 0;
+      sgst = (Amounts * (gst / 2)) / 100 || 0;
+      igst = 0;
+    } else {
+      cgst = sgst = 0;
+      igst = (Amounts * gst) / 100 || 0;
+    }
+
+    let totalWithGST = Amounts + cgst + sgst + igst;
+
+    if (T11) {
+      if (key !== "discount") {
+        updatedItems[index]["discount"] = Math.round(per).toFixed(2);
+      }
+
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
+      }
+
+      updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
+    } else {
+      if (key !== "discount") {
+        updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
+      }
+
+      if (key !== "amount") {
+        updatedItems[index]["amount"] = TotalAcc.toFixed(2);
+      }
+
+      updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
+    }
+
+    if (T12) {
+      updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
+      updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
+      updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
+    } else {
+      updatedItems[index]["ctax"] = cgst.toFixed(2);
+      updatedItems[index]["stax"] = sgst.toFixed(2);
+      updatedItems[index]["itax"] = igst.toFixed(2);
+    }
+
+    const percentage =
+      TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
+
+    updatedItems[index]["percentage"] = percentage.toFixed(2);
+
+    setItems(updatedItems);
+
+    const updatedForm = calculateTotalGst(formData);
+    setFormData(updatedForm);
+  };
 
   const handleProductSelect = (product) => {
     setIsEditMode(true);
