@@ -45,7 +45,8 @@ import SaleModal from "../Sale/SaleModal ";
 // import PurchaseModal from "./PurchaseModal";
 import PurModal from "../Purchase/PurModal"
 import CashModal from "./CashModal";
-import BankModal from "./BankModal";
+// import BankModal from "./BankModal";
+import BankModal from "../BankVoucher/BankModal"
 import TdsModal from "./TdsModal";
 import AnnexureModalParent from "../Modals/AnnexureModalParent";
 import BalanceSheet from "../BalanceSheet/BalanceSheet";
