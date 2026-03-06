@@ -2773,6 +2773,7 @@
 
 // export default Example;
 
+// JOURNAL TABLE
 import React, { useState } from "react";
 import Table from "react-bootstrap/Table";
 import ProductModalCustomer from "./Modals/ProductModalCustomer";
@@ -2882,50 +2883,30 @@ const Example = () => {
     setItems(updatedItems);
   };
 
-const handleProductSelectCus = (product) => {
-  if (!product) {
-    alert("No product received!");
+  const handleProductSelectCus = (product) => {
+    if (!product) {
+      alert("No product received!");
+      setShowModalCus(false);
+      return;
+    }
+
+    // clone the array
+    const newCustomers = [...items];
+
+    // overwrite the one at the selected index
+    newCustomers[selectedItemIndexCus] = {
+      ...newCustomers[selectedItemIndexCus],
+      accountname: product.ahead || "",
+      acode: product.acode
+    };
+    const nameValue = product.ahead || product.name || "";
+    if (selectedItemIndexCus !== null) {
+      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+      setShowModalCus(false);
+    }
+    setItems(newCustomers);
     setShowModalCus(false);
-    return;
-  }
-
-  const newCustomers = [...items];
-
-  newCustomers[selectedItemIndexCus] = {
-    ...newCustomers[selectedItemIndexCus],
-    accountname: product.ahead || "",
-    acode: product.acode,
   };
-
-  // 🔹 Calculate total debit and credit
-  let totalDebit = 0;
-  let totalCredit = 0;
-
-  newCustomers.forEach((row) => {
-    totalDebit += parseFloat(row.debit) || 0;
-    totalCredit += parseFloat(row.credit) || 0;
-  });
-
-  const balance = totalDebit - totalCredit;
-
-  // 🔹 If balance exists, auto fill opposite field
-  if (balance > 0) {
-    newCustomers[selectedItemIndexCus].credit = balance;
-    newCustomers[selectedItemIndexCus].disableDebit = true;
-  } else if (balance < 0) {
-    newCustomers[selectedItemIndexCus].debit = Math.abs(balance);
-    newCustomers[selectedItemIndexCus].disableCredit = true;
-  }
-
-  const nameValue = product.ahead || product.name || "";
-
-  if (selectedItemIndexCus !== null) {
-    handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-  }
-
-  setItems(newCustomers);
-  setShowModalCus(false);
-};
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
@@ -2993,6 +2974,17 @@ const handleProductSelectCus = (product) => {
     };
     setItems([...items, newItem]);
   };
+    const getBalance = () => {
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    items.forEach((row) => {
+      totalDebit += parseFloat(row.debit) || 0;
+      totalCredit += parseFloat(row.credit) || 0;
+    });
+
+    return totalDebit - totalCredit;
+  };
   return (
     <div>
       <div className="Tablesection">
@@ -3044,6 +3036,13 @@ const handleProductSelectCus = (product) => {
                       handleItemChangeCus(index, "narration", e.target.value)
                     }
                     onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (!item.narration || item.narration.trim() === "") {
+                          const updatedItems = [...items];
+                          updatedItems[index].narration = "Journal Narration";
+                          setItems(updatedItems);
+                        }
+                      }
                       if (
                         e.key === "Tab" &&
                         suggestionRow === index &&
@@ -3096,7 +3095,18 @@ const handleProductSelectCus = (product) => {
                     }}
                     value={Number(item.debit) === 0 ? "" : item.debit}
                     onChange={(e) => handleNumberChange(e, index, "debit")}
-                    onFocus={(e) => e.target.select()} // Select text on focus
+                    onFocus={(e) => {
+                      const balance = getBalance();
+
+                      if (!item.debit && balance < 0) {
+                        const updatedItems = [...items];
+                        updatedItems[index].debit = Math.abs(balance);
+                        setItems(updatedItems);
+                      }
+
+                      e.target.select();
+                    }}
+
                   />
                 </td>
                 <td style={{ padding: 0, width: 250 }}>
@@ -3111,7 +3121,17 @@ const handleProductSelectCus = (product) => {
                     }}
                     value={Number(item.credit) === 0 ? "" : item.credit}
                     onChange={(e) => handleNumberChange(e, index, "credit")}
-                    onFocus={(e) => e.target.select()} // Select text on focus
+                      onFocus={(e) => {
+                      const balance = getBalance();
+
+                      if (!item.credit && balance > 0) {
+                        const updatedItems = [...items];
+                        updatedItems[index].credit = balance;
+                        setItems(updatedItems);
+                      }
+
+                      e.target.select();
+                    }}
                   />
                 </td>
               </tr>
@@ -3128,6 +3148,7 @@ const handleProductSelectCus = (product) => {
           />
         )}
       </div>
+      
       <Button onClick={handleAddItem} style={{ margin: 20 }}>
         Add Item
       </Button> 
@@ -3136,3 +3157,77 @@ const handleProductSelectCus = (product) => {
 };
 
 export default Example;
+
+// ANNEXURE PARENT
+// import React,{useState} from 'react'
+// import AnexureModal from './Modals/AnexureModal ';
+// import { Button } from 'react-bootstrap';
+
+// const Example = () => {
+//  const [formData, setFormData] = useState({
+//     Bsgroup: "",
+//     Bscode:"",
+//     crCode:"",
+//     group:"",
+//   });
+//   const [mode, setMode] = useState(""); // "dr" or "cr"
+//   const [showModal, setShowModal] = useState(false);
+//   const handleAdd = async () => {
+//     setShowModal(true);
+//   };
+
+//   const handleOpenDr = () => {
+//     setMode("dr");
+//     setShowModal(true);
+//   };
+
+//   const handleOpenCr = () => {
+//     setMode("cr");
+//     setShowModal(true);
+//   };
+
+//   const handleSelectBsgroup = (selectedItem) => {
+//     setFormData((prevData) => {
+//       if (mode === "dr") {
+//         return {
+//           ...prevData,
+//           Bsgroup: selectedItem.name,
+//           Bscode: selectedItem.code,
+//           group: selectedItem.group,
+//         };
+//       } else {
+//         return {
+//           ...prevData,
+//           Bsgroup: selectedItem.name,
+//           crCode: selectedItem.code,
+//           group: selectedItem.group,
+//         };
+//       }
+//     });
+//     setShowModal(false);
+//   };
+//   return (
+//     <div>
+//       <h1>BSGROUP: {formData.Bsgroup}</h1>
+//       <h1>BSCODE: {formData.Bscode}</h1>
+//       <h1>CRCODE: {formData.crCode}</h1>
+//       <Button
+//         className="Buttonz"
+//         style={{ color: "black" }}
+//         onClick={handleAdd}
+//       >
+//         Add
+//       </Button>
+//       <Button onClick={handleOpenDr} className="Buttonz">Dr.Group</Button>
+//       <Button onClick={handleOpenCr} className="Buttonz">Cr.Group</Button>
+//       <AnexureModal
+//         show={showModal}
+//         handleClose={() => setShowModal(false)}
+//         onSelect={handleSelectBsgroup} // Pass callback function
+//         selectedCode={mode === "dr" ? formData.Bscode : formData.crCode}
+//       />
+//     </div>
+//   )
+// }
+
+// export default Example

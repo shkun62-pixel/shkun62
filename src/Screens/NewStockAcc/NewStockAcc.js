@@ -226,7 +226,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
       // Focus back on the input field after selecting the value
       setTimeout(() => {
-        inputRefs.current[12]?.focus();
+        inputRefs.current[13]?.focus();
       }, 0);
     }
     setSaleAcc(newCustomers);
@@ -315,7 +315,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
 
       // Focus back on the input field after selecting the value
       setTimeout(() => {
-        inputRefs.current[11]?.focus();
+        inputRefs.current[12]?.focus();
       }, 0);
     }
     setPurchaseAcc(updatedShipped);       // <- update the array in state!
@@ -1593,7 +1593,58 @@ const NewStockAcc = ({ onSave, StockId }) => {
               sx={{ width: 200 }}
             />
             <div style={{ width: 200 }}>
-              <FormControl
+              <Autocomplete
+              disableClearable
+                size="small"
+                options={[
+                  { label: "", value: "" },
+                  { label: "5%", value: 5 },
+                  { label: "12%", value: 12 },
+                  { label: "18%", value: 18 },
+                  { label: "28%", value: 28 },
+                ]}
+                getOptionLabel={(option) => option.label || ""}
+                value={
+                  [
+                    { label: "", value: "" },
+                    { label: "5%", value: 5 },
+                    { label: "12%", value: 12 },
+                    { label: "18%", value: 18 },
+                    { label: "28%", value: 28 },
+                  ].find(opt => opt.value === formData.itax_rate) || null
+                }
+                isOptionEqualToValue={(option, value) => option.value === value.value}
+                autoHighlight
+                onChange={(event, newValue) => {
+                  if (!isEditMode || isDisabled) return;
+
+                  handleChangevalues({
+                    target: {
+                      name: "itax_rate",
+                      value: newValue?.value ?? "",
+                    },
+                  });
+                }}
+
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="GST RATE"
+                    variant="filled"
+                    className="custom-bordered-input"
+                    inputRef={el => (inputRefs.current[9] = el)} // optional if using keyboard navigation
+                    onKeyDown={e => handleKeyDown(e, 9)} // optional
+                    sx={{
+                      "& .MuiFilledInput-root": {
+                        height: "42px",
+                        fontSize: 16,
+                        color: "black",
+                      },
+                    }}
+                  />
+                )}
+              />
+              {/* <FormControl
                 className="custom-bordered-input"
                 fullWidth
                 size="small"
@@ -1625,7 +1676,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
                   <MenuItem value={18}>18%</MenuItem>
                   <MenuItem value={28}>28%</MenuItem>
                 </Select>
-              </FormControl>
+              </FormControl> */}
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "row",marginTop:2 }}>
@@ -1683,8 +1734,8 @@ const NewStockAcc = ({ onSave, StockId }) => {
               size="small"
               label="CESS QTY"
               onChange={handleNumberChange}
-              inputRef={(el) => (inputRefs.current[9] = el)}
-              onKeyDown={(e) => handleKeyDown(e, 9)}
+              inputRef={(el) => (inputRefs.current[10] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 10)}
               onBlur={() => handleRateBlur("Drate")}
               inputProps={{
                 maxLength: 48,
@@ -1705,8 +1756,8 @@ const NewStockAcc = ({ onSave, StockId }) => {
               size="small"
               label="CESS @"
               onChange={handleNumberChange}
-              inputRef={(el) => (inputRefs.current[10] = el)}
-              onKeyDown={(e) => handleKeyDown(e, 10)}
+              inputRef={(el) => (inputRefs.current[11] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 11)}
               onBlur={() => handleRateBlur("Cess_rate")}
               inputProps={{
                 maxLength: 48,
@@ -1729,7 +1780,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
                   label="PURCHASE A/C"
                   className="custom-bordered-input"
                   value={item.Pcodess || ""}
-                  inputRef={(el) => (inputRefs.current[11] = el)}
+                  inputRef={(el) => (inputRefs.current[12] = el)}
                   inputProps={{
                     maxLength: 48,
                     style: {
@@ -1747,7 +1798,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
                   }}
                   onKeyDown={(e) => {
                     handleOpenModal(e, index, "Pcodess");
-                    handleKeyDown(e, 11);
+                    handleKeyDown(e, 12);
                     handleOpenModalBack(e, index, "Pcodess");
                   }}
                   sx={{ width: 400 }}
@@ -1775,7 +1826,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
                   label="SALE A/C"
                   className="custom-bordered-input"
                   value={item.Scodess || ""}
-                  inputRef={(el) => (inputRefs.current[12] = el)}
+                  inputRef={(el) => (inputRefs.current[13] = el)}
                   inputProps={{
                     maxLength: 48,
                     style: {
@@ -1792,7 +1843,7 @@ const NewStockAcc = ({ onSave, StockId }) => {
                   }}
                   onKeyDown={(e) => {
                     handleOpenModal(e, index, "Scodess");
-                    handleKeyDown(e, 12);
+                    handleKeyDown(e, 13);
                     handleOpenModalBack(e, index, "Scodess");
                   }}
                   sx={{ width: 400 }}
@@ -1818,8 +1869,8 @@ const NewStockAcc = ({ onSave, StockId }) => {
               size="small"
               label="SIZE"
               onChange={handleChange}
-              inputRef={(el) => (inputRefs.current[13] = el)}
-              onKeyDown={(e) => handleKeyDown(e, 13)}
+              inputRef={(el) => (inputRefs.current[14] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 14)}
               inputProps={{
                 maxLength: 12,
                 style: {
@@ -1839,8 +1890,8 @@ const NewStockAcc = ({ onSave, StockId }) => {
               size="small"
               label="HSN CODE"
               onChange={handleNumericValue}
-              inputRef={(el) => (inputRefs.current[14] = el)}
-              onKeyDown={(e) => handleKeyDown(e, 14)}
+              inputRef={(el) => (inputRefs.current[15] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 15)}
               inputProps={{
                 maxLength: 12,
                 style: {
@@ -1866,8 +1917,8 @@ const NewStockAcc = ({ onSave, StockId }) => {
               size="small"
               label="SCHEME @"
               onChange={handleNumberChange}
-              inputRef={(el) => (inputRefs.current[15] = el)}
-              onKeyDown={(e) => handleKeyDown(e, 15)}
+              inputRef={(el) => (inputRefs.current[16] = el)}
+              onKeyDown={(e) => handleKeyDown(e, 16)}
               onBlur={() => handleRateBlur("schemes")}
               inputProps={{
                 maxLength: 4,

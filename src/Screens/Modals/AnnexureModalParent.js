@@ -1,5 +1,4 @@
 import React,{useState,useEffect,useRef}from 'react';
-// import Modal from '@mui/material/Modal';
 import { Modal, Box, Autocomplete, TextField, Button, Typography } from "@mui/material";
 import { styled } from '@mui/system';
 import Select from "react-select";
@@ -9,21 +8,38 @@ import { useEditMode } from "../../EditModeContext";
 import axios from 'axios';
 import { CompanyContext } from '../Context/CompanyContext';
 import { useContext } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SaveIcon from "@mui/icons-material/Save";
+import SearchIcon from "@mui/icons-material/Search";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+
 
 const StyledModal = styled(Box)({
-    position: 'absolute',
-    top: '48%',
-    left: '55%',
-    transform: 'translate(-50%, -50%)',
-    background: 'linear-gradient(to right,rgb(238, 238, 248), #ccb8f1)',
-    // boxShadow: `5px 5px 15px rgb(255, 248, 248),
-    // -5px -5px 15px rgba(255, 255, 255, 0.1),
-    // inset 5px 5px 10px rgba(0, 0, 0, 0.2),
-    // inset -5px -5px 10px rgba(255, 255, 255, 0.2)`,
-    border: '2px solid black',
-    padding: 16,
-    borderRadius: 15,
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 820,
+  background: "#ffffff",
+  borderRadius: 14,
+  boxShadow: "0 15px 50px rgba(0,0,0,0.25)",
+  overflow: "hidden",
 });
+
+const actionBtn = {
+  justifyContent: "flex-start",
+  fontWeight: 600,
+  letterSpacing: 1,
+  background: "linear-gradient(135deg,#6a5acd,#7b68ee)",
+  color: "#fff",
+  "&:hover": {
+    background: "linear-gradient(135deg,#5a4bd4,#6b5ce7)",
+  },
+};
 
 const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
 
@@ -48,7 +64,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
      group:"",
      BalanceSheet: "",
      });
-    const [title, setTitle] = useState("(View)");
+    const [title, setTitle] = useState("VIEW");
     const [data, setData] = useState([]);
     const [data1, setData1] = useState([]);
     const [index, setIndex] = useState(0);
@@ -121,7 +137,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
     try {
         await fetchData(); // This should set up the state correctly whether data is found or not
         let lastvoucherno = formData.code ? parseInt(formData.code) + 1 : 1;
-        setTitle("(New)")
+        setTitle("NEW")
           const newData = {
           name:"",
           code:lastvoucherno,
@@ -142,7 +158,6 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
         setIsSubmitEnabled(true);
         setIsDisabled(false);
         setIsEditMode(true);
-        // NameRef.current.focus();
         if (inputRefs.current[0]) {
           inputRefs.current[0].focus();
         }
@@ -152,13 +167,16 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
   };
 
   const handleEditClick = () => {
-    setTitle("(Edit)")
+    setTitle("EDIT")
     setIsDisabled(false);
     setIsEditMode(true);
     setIsPreviousEnabled(false);
     setIsNextEnabled(false);
     setIsSubmitEnabled(true);
     setIsAbcmode(true);
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
+    }
   };
 
   const handleNext = async () => {
@@ -200,7 +218,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
   };
 
   const handleExit = async () => {
-    setTitle("(View)")
+    setTitle("VIEW")
     setIsAddEnabled(true); // Enable "Add" button
     setIsPreviousEnabled(true);
     setIsNextEnabled(true);
@@ -250,6 +268,29 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
         handleNavigation();
       }
     };
+
+    useEffect(() => {
+      const handleEscKey = (event) => {
+        if (event.key === "Escape" && isOpen) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          if (isEditMode) {
+            // Only exit edit mode
+            handleExit();
+          } else {
+            // Close modal normally
+            handleNavigation();
+          }
+        }
+      };
+
+      window.addEventListener("keydown", handleEscKey);
+
+      return () => {
+        window.removeEventListener("keydown", handleEscKey);
+      };
+    }, [isEditMode, isOpen]);
     
     const handleNumericValue = (event) => {
         const { id, value } = event.target;
@@ -270,7 +311,7 @@ const AnnexureModalParent = ({ isOpen, onClose, onNavigate}) => {
       };
       
  // Flatten data for select dropdown
- const flattenData = (data, parentKey = "") => {
+const flattenData = (data, parentKey = "") => {
   let options = [];
   for (let key in data) {
     if (typeof data[key] === "object") {
@@ -317,7 +358,7 @@ const handleSelectChange = (selectedOption) => {
   };
 
   const handleSaveClick = async () => {
-    setTitle("(View)")
+    setTitle("VIEW")
     let isDataSaved = false;
     try {
       const isValid = formData.name.trim() !== ""; // Ensure no empty spaces
@@ -326,11 +367,6 @@ const handleSelectChange = (selectedOption) => {
           position: "top-center",
         });
         return; // Prevent save operation
-      }
-  
-      const userConfirmed = window.confirm("Are you sure you want to save the data?");
-      if (!userConfirmed) {
-        return; // Exit without disabling buttons
       }
   
       const combinedData = {
@@ -403,22 +439,27 @@ const handleSelectChange = (selectedOption) => {
       }
     };
 
-  const handleKeyDown = (e, index) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Prevent default behavior
-      let nextIndex = index + 1;
-  
-      // Find the next input that is not disabled
-      while (inputRefs.current[nextIndex] && inputRefs.current[nextIndex].disabled) {
-        nextIndex += 1;
+    const handleKeyDown = (e, index) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+
+        let nextIndex = index + 1;
+
+        // Skip disabled inputs
+        while (
+          inputRefs.current[nextIndex] &&
+          inputRefs.current[nextIndex].disabled
+        ) {
+          nextIndex += 1;
+        }
+
+        const nextInput = inputRefs.current[nextIndex];
+
+        if (nextInput) {
+          nextInput.focus();
+        }
       }
-  
-      const nextInput = inputRefs.current[nextIndex];
-      if (nextInput) {
-        nextInput.focus(); // Focus the next enabled input field
-      }
-    }
-  };
+    };
 
   // Search options
     const [open, setOpen] = useState(false); // Modal Visibility
@@ -457,231 +498,305 @@ const handleSelectChange = (selectedOption) => {
     }
   };
     return (
-        <Modal
-            open={isOpen}
-            onClose={(event, reason) => {
-              if (reason !== "backdropClick") {
-                onClose();
-              }
-            }}
-            tabIndex={0} // Ensure modal is focusable for keyboard events
-            keyboard={false}
-            backdrop="static"
+      <>
+      <Modal
+          open={isOpen}
+          disableEscapeKeyDown
+          onClose={(event, reason) => {
+            if (reason !== "backdropClick") {
+              handleNavigation();
+            }
+          }}
         >
-            <StyledModal>
-            {/* <ToastContainer/> */}
-                <h2 style={{ textAlign: 'center', marginBottom: 20, color: '#6242a2',letterSpacing:4,fontFamily:'Times New Roman',fontWeight:'bold', fontSize:28}}>
-                  BALANCE SHEET ANNEXURE FORM</h2>
-                <text style={{marginLeft:"45%"}}>{title}</text>
-                <div style={{display:'flex', flexDirection:"row", justifyContent:'space-between'}}>
-              
-                  <div style={{display:'flex', flexDirection:'column'}}>
-                    <TextField
-                      id="name"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="NAME"
-                      value={formData.name}
-                      onChange={handleValueChange}
-                      inputRef={(el) => (inputRefs.current[0] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 0)}
-                      InputProps={{
-                        readOnly: !isEditMode || isDisabled,
-                      }}
-                      sx={{ width: 400,mb:1 }}
-                    />
-                   <TextField
-                      id="code"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="CODE"
-                      value={formData.code}
-                      onChange={handleValueChange}
-                      inputRef={(el) => (inputRefs.current[1] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 1)}
-                      InputProps={{
-                        readOnly: !isEditMode || isDisabled,
-                      }}
-                       sx={{ width: 400,mb:1 }}
-                    />
-                    <TextField
-                      select
-                      id="bSheet"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="DETAIL IN B.SHEET"
-                      value={formData.bSheet}
-                      onChange={handleDetails}
-                      disabled={!isEditMode || isDisabled}
-                      inputRef={(el) => (inputRefs.current[2] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 2)}
-                      SelectProps={{ native: true }}
-                       sx={{ width: 400,mb:1 }}
-                    >
-                      <option value=""></option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </TextField>
-                    <TextField
-                      select
-                      id="drCr"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="DEBIT / CREDIT"
-                      value={formData.drCr}
-                      onChange={handleCreditDebit}
-                      disabled={!isEditMode || isDisabled}
-                      inputRef={(el) => (inputRefs.current[3] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 3)}
-                      SelectProps={{ native: true }}
-                       sx={{ width: 400,mb:1 }}
-                    >
-                      <option value=""></option>
-                      <option value="Credit">Credit</option>
-                      <option value="Debit">Debit</option>
-                    </TextField>
-                    <TextField
-                      id="desciption"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="DESCRIPTION"
-                      value={formData.desciption}
-                      onChange={handleValueChange}
-                      inputRef={(el) => (inputRefs.current[4] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 4)}
-                      InputProps={{
-                        readOnly: !isEditMode || isDisabled,
-                      }}
-                       sx={{ width: 400,mb:1 }}
-                    />
-                    <TextField
-                      id="drCrEffect"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="DR / CR EFFECT"
-                      value={formData.drCrEffect}
-                      onChange={handleNumericValue}
-                      inputRef={(el) => (inputRefs.current[5] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 5)}
-                      InputProps={{
-                        readOnly: !isEditMode || isDisabled,
-                      }}
-                       sx={{ width: 400,mb:1 }}
-                    />
-                    <TextField
-                      id="Annxserial"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="ANNX SERIAL"
-                      value={formData.Annxserial}
-                      onChange={handleValueChange}
-                      inputRef={(el) => (inputRefs.current[6] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 6)}
-                      InputProps={{
-                        readOnly: !isEditMode || isDisabled,
-                      }}
-                       sx={{ width: 400,mb:1 }}
-                    />
-                    <TextField
-                      select
-                      id="group"
-                      size="small"
-                      className="custom-bordered-input"
-                      variant='filled'
-                      label="GROUP"
-                      value={formData.group}
-                      onChange={handleGroup}
-                      disabled={!isEditMode || isDisabled}
-                      inputRef={(el) => (inputRefs.current[7] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 7)}
-                      SelectProps={{ native: true }}
-                       sx={{ width: 400,mb:1 }}
-                    >
-                      <option value=""></option>
-                      <option value="Trading / Mfg Account">Trading / Mfg Account</option>
-                      <option value="Profit and Loss Account">Profit and Loss Account</option>
-                      <option value="Balance Sheet">Balance Sheet</option>
-                    </TextField>
-                    <Autocomplete
-                      options={optionsList}
-                      getOptionLabel={(option) => option.label || ""}
-                      value={optionsList.find(
-                        (option) => option.value === formData.BalanceSheet
-                      ) || null}
-                      onChange={(event, newValue) => {
-                        handleSelectChange(newValue);
-                      }}
-                      disabled={!isEditMode || isDisabled}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="BALANCE SHEET"
-                           variant='filled'
-                          placeholder="Select balance sheet item..."
-                          className="custom-bordered-input"
-                        />
-                      )}
-                      ref={(el) => (inputRefs.current[8] = el)}
-                      onKeyDown={(e) => handleKeyDown(e, 8)}
-                       sx={{ width: 400,mb:1 }}
-                    />
-                  </div>
-              
-                  <div style={{display:'flex', flexDirection:'column'}}>
-                    <Button onClick={handleAdd} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >ADD</Button>
-                    <Button onClick={handleEditClick} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >EDIT</Button>
-                    <Button onClick={handlePrevious} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isPreviousEnabled} >PREVIOUS</Button>
-                    <Button onClick={handleNext} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isNextEnabled} >NEXT</Button>
-                    <Button onClick={handleDeleteClick} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >DELETE</Button>
-                    <Button onClick={handleSaveClick} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >SAVE</Button>
-                    <Button onClick={handleOpen}  style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >SEARCH</Button>
-                    <Button onClick={handleActionExit} style={{backgroundColor:'#7755B7',color:'white', width:150,height:45, marginBottom:10}}  disabled={!isAddEnabled} >EXIT</Button>
-                  </div>
-                </div>
-    
-                <Modal open={open} onClose={handleClose}>
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                      width: 400,
-                      bgcolor: "background.paper",
-                      boxShadow: 24,
-                      p: 4,
-                      borderRadius: 2,
+        <StyledModal>
+
+          {/* HEADER */}
+          <Box
+            sx={{
+              background: "linear-gradient(135deg,#6a5acd,#7b68ee)",
+              color: "white",
+              p: 2,
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="h5" fontWeight="bold" letterSpacing={2}>
+              BALANCE SHEET ANNEXURE
+            </Typography>
+
+            <Typography variant="subtitle2">{title}</Typography>
+          </Box>
+
+          {/* BODY */}
+          <Box sx={{ display: "flex", gap: 3, p: 3 }}>
+
+            {/* FORM SECTION */}
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+              }}
+            >
+
+              <TextField
+                label="NAME"
+                id="name"
+                size="small"
+                variant='filled'
+                className="custom-bordered-input"
+                value={formData.name}
+                onChange={handleValueChange}
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+                inputRef={(el) => (inputRefs.current[0] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 0)}
+              />
+
+              <TextField
+                label="CODE"
+                id="code"
+                variant='filled'
+                className="custom-bordered-input"
+                size="small"
+                value={formData.code}
+                onChange={handleValueChange}
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+                inputRef={(el) => (inputRefs.current[1] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 1)}
+              />
+
+              <TextField
+                select
+                label="DETAIL IN B.SHEET"
+                id="bSheet"
+                variant='filled'
+                className="custom-bordered-input"
+                size="small"
+                value={formData.bSheet}
+                onChange={handleDetails}
+                InputProps={{
+                  readOnly: !isEditMode || isDisabled
+                }}
+                onMouseDown={(e) => {
+                  if (!isEditMode || isDisabled) {
+                    e.preventDefault(); // prevents dropdown
+                  }
+                }}
+                SelectProps={{ native: true }}
+                inputRef={(el) => (inputRefs.current[2] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 2)}
+              >
+                <option value=""></option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </TextField>
+
+              <TextField
+                select
+                label="DEBIT / CREDIT"
+                id="drCr"
+                size="small"
+                variant='filled'
+                className="custom-bordered-input"
+                value={formData.drCr}
+                onChange={handleCreditDebit}
+                InputProps={{
+                  readOnly: !isEditMode || isDisabled
+                }}
+                onMouseDown={(e) => {
+                  if (!isEditMode || isDisabled) {
+                    e.preventDefault(); // prevents dropdown
+                  }
+                }}
+                SelectProps={{ native: true }}
+                inputRef={(el) => (inputRefs.current[3] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 3)}
+              >
+                <option value=""></option>
+                <option value="Credit">Credit</option>
+                <option value="Debit">Debit</option>
+              </TextField>
+
+              <TextField
+                label="DESCRIPTION"
+                id="desciption"
+                size="small"
+                variant='filled'
+                className="custom-bordered-input"
+                value={formData.desciption}
+                onChange={handleValueChange}
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+                inputRef={(el) => (inputRefs.current[4] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 4)}
+              />
+
+              <TextField
+                label="DR / CR EFFECT"
+                id="drCrEffect"
+                size="small"
+                variant='filled'
+                className="custom-bordered-input"
+                value={formData.drCrEffect}
+                onChange={handleNumericValue}
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+                inputRef={(el) => (inputRefs.current[5] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 5)}
+              />
+
+              <TextField
+                label="ANNX SERIAL"
+                id="Annxserial"
+                size="small"
+                variant='filled'
+                className="custom-bordered-input"
+                value={formData.Annxserial}
+                onChange={handleValueChange}
+                InputProps={{ readOnly: !isEditMode || isDisabled }}
+                inputRef={(el) => (inputRefs.current[6] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 6)}
+              />
+
+              <TextField
+                select
+                label="GROUP"
+                id="group"
+                size="small"
+                variant='filled'
+                className="custom-bordered-input"
+                value={formData.group}
+                onChange={handleGroup}
+                InputProps={{
+                  readOnly: !isEditMode || isDisabled
+                }}
+                onMouseDown={(e) => {
+                  if (!isEditMode || isDisabled) {
+                    e.preventDefault(); // prevents dropdown
+                  }
+                }}
+                SelectProps={{ native: true }}
+                inputRef={(el) => (inputRefs.current[7] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 7)}
+              >
+                <option value=""></option>
+                <option value="Trading / Mfg Account">
+                  Trading / Mfg Account
+                </option>
+                <option value="Profit and Loss Account">
+                  Profit and Loss Account
+                </option>
+                <option value="Balance Sheet">Balance Sheet</option>
+              </TextField>
+
+              <Autocomplete
+                options={optionsList}
+                disableClearable
+                getOptionLabel={(option) => option.label || ""}
+                value={
+                  optionsList.find(
+                    (option) => option.value === formData.BalanceSheet
+                  ) || null
+                }
+                onChange={(event, newValue) => handleSelectChange(newValue)}
+                open={isEditMode && !isDisabled ? undefined : false}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="BALANCE SHEET"
+                    size="small"
+                    variant='filled'
+                    className="custom-bordered-input"
+                    InputProps={{
+                      ...params.InputProps,
+                      readOnly: !isEditMode || isDisabled
                     }}
-                  >
-                    <Typography variant="h6" mb={2}>
-                      Select Anexure
-                    </Typography>
-                    <Autocomplete
-                      fullWidth
-                      options={data}
-                      getOptionLabel={(option) => option.formData.name} // Display name
-                      value={selectedOption}
-                      onChange={handleSelect} // Handle selection
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="outlined"
-                          label="Search and Select"
-                          inputRef={autoCompleteRef} // Set focus on open
-                        />
-                      )}
-                    />
-                  </Box>
-                </Modal>
-            </StyledModal>
-        </Modal>
+                    inputRef={(el) => (inputRefs.current[8] = el)}
+                    onKeyDown={(e) => handleKeyDown(e, 8)}
+                  />
+                )}
+              />
+            </Box>
+
+            {/* BUTTON PANEL */}
+            <Box
+              sx={{
+                width: 200,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.2,
+                background: "#f7f7fb",
+                p: 2,
+                borderRadius: 2,
+              }}
+            >
+
+              <Button startIcon={<AddIcon />} sx={actionBtn} onClick={handleAdd} disabled={!isAddEnabled}>ADD</Button>
+
+              <Button startIcon={<EditIcon />} sx={actionBtn} onClick={handleEditClick} disabled={!isAddEnabled}>EDIT</Button>
+
+              <Button startIcon={<NavigateBeforeIcon />} sx={actionBtn} onClick={handlePrevious} disabled={!isPreviousEnabled}>PREVIOUS</Button>
+
+              <Button startIcon={<NavigateNextIcon />} sx={actionBtn} onClick={handleNext} disabled={!isNextEnabled}>NEXT</Button>
+
+              <Button startIcon={<DeleteIcon />} sx={actionBtn} onClick={handleDeleteClick} disabled={!isAddEnabled}>DELETE</Button>
+
+              <Button startIcon={<SaveIcon />} sx={actionBtn} onClick={handleSaveClick} disabled={!isAddEnabled} ref={(el) => (inputRefs.current[9] = el)} >SAVE</Button>
+
+              <Button startIcon={<SearchIcon />} sx={actionBtn} onClick={handleOpen} disabled={!isAddEnabled}>SEARCH</Button>
+
+              <Button startIcon={<ExitToAppIcon />} sx={actionBtn} onClick={handleActionExit}>EXIT</Button>
+
+            </Box>
+
+          </Box>
+
+        </StyledModal>
+      </Modal>
+      {/* Search */}
+      <Modal
+        open={open}
+        onClose={handleClose}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 500,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 3,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" mb={2}>
+            SEARCH ANNEXURE
+          </Typography>
+
+          <Autocomplete
+            options={data}
+            getOptionLabel={(option) => option?.formData?.name || ""}
+            onChange={handleSelect}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search Name"
+                inputRef={autoCompleteRef}
+                autoFocus
+                size="small"
+              />
+            )}
+          />
+
+          <Box mt={2} textAlign="right">
+            <Button variant="contained" onClick={handleClose}>
+              Close
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      </>
+      
     );
 };
 

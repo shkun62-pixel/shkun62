@@ -151,24 +151,28 @@ const JournalVoucher = () => {
       [id]: value,
     }));
   };
-  const calculateTotalPayment = () => {
-    const totalPayment = items.reduce((acc, item) => {
+  const calculateTotalPayment = (data) => {
+    const totalPayment = data.reduce((acc, item) => {
       return acc + parseFloat(item.debit || 0);
     }, 0);
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       totaldebit: totalPayment.toFixed(2),
     }));
   };
-  const calculateTotalReceipt = () => {
-    const totalReceipt = items.reduce((acc, item) => {
+
+  const calculateTotalReceipt = (data) => {
+    const totalReceipt = data.reduce((acc, item) => {
       return acc + parseFloat(item.credit || 0);
     }, 0);
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalcredit: totalReceipt.toFixed(2), // Format to 2 decimal places
+      totalcredit: totalReceipt.toFixed(2),
     }));
   };
+
   const handleNumberChange = (event, index, field) => {
     const value = event.target.value;
 
@@ -190,9 +194,9 @@ const JournalVoucher = () => {
       updatedItems[index].disableDebit = parseFloat(value) > 0;
       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
     }
-    calculateTotalPayment();
-    calculateTotalReceipt();
     setItems(updatedItems);
+    calculateTotalPayment(updatedItems);
+    calculateTotalReceipt(updatedItems);
   };
 
   const capitalizeWords = (str) => {
@@ -1711,40 +1715,6 @@ const JournalVoucher = () => {
                     </div>
                   )}
                 </td>
-                {/* <td style={{ padding: 0 }}>
-                  <input
-                    disabled={!canEditRow(index)}
-                    className="Narration"
-                    list={
-                      showNarrationSuggestions ? "narrationList" : undefined
-                    }
-                    style={{
-                      height: 40,
-                      fontSize: `${fontSize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.narration}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "narration", e.target.value)
-                    }
-                    ref={(el) => (narrationRefs.current[index] = el)}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "narration");
-                    }}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                  {showNarrationSuggestions && (
-                    <datalist id="narrationList">
-                      {narrationSuggestions.map((n, i) => (
-                        <option key={i} value={n} />
-                      ))}
-                    </datalist>
-                  )}
-                </td> */}
                 <td style={{ padding: 0, width: 250 }}>
                   <input
                     className="Debit"
@@ -1770,6 +1740,9 @@ const JournalVoucher = () => {
                         const updatedItems = [...items];
                         updatedItems[index].debit = Math.abs(balance);
                         setItems(updatedItems);
+
+                        calculateTotalPayment(updatedItems);
+                        calculateTotalReceipt(updatedItems);
                       }
 
                       e.target.select();
@@ -1801,6 +1774,9 @@ const JournalVoucher = () => {
                         const updatedItems = [...items];
                         updatedItems[index].credit = balance;
                         setItems(updatedItems);
+
+                        calculateTotalPayment(updatedItems);
+                        calculateTotalReceipt(updatedItems);
                       }
 
                       e.target.select();

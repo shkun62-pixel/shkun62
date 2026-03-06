@@ -14,7 +14,7 @@ import Slide from "@mui/material/Slide";
 import axios from "axios";
 import { useEditMode } from "../../EditModeContext";
 import AnexureModal from "../Modals/AnexureModal ";
-import { Modal, Box, Autocomplete, TextField,  Typography } from "@mui/material";
+import { Modal, Box, Autocomplete, TextField,  Typography, Grid, Divider } from "@mui/material";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
@@ -118,9 +118,24 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
       setIsModalOpenMisc(true);
     }
   };
+  
   const handlecloseMisn = () => {
     setIsModalOpenMisc(false);
+
+    setTimeout(() => {
+      if (inputRefs.current[28]) {
+        inputRefs.current[28].focus();
+      }
+    }, 100);
   };
+  
+  useEffect(() => {
+    if (isModalOpenMisc) {
+      setTimeout(() => {
+        inputRefs.current[35]?.focus(); // first field in modal
+      }, 100);
+    }
+  }, [isModalOpenMisc]);
 
     const [decimalValue, setdecimalValue] = useState(0);
     const fetchCashBankSetup = async () => {
@@ -266,7 +281,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   //     }
   //   }, 300);
   // };
-    const handleOpenDr = () => {
+  const handleOpenDr = () => {
     setMode("dr");
     setShowModal(true);
   };
@@ -283,15 +298,26 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           ...prevData,
           Bsgroup: selectedItem.name,
           Bscode: selectedItem.code,
+          group: selectedItem.group,
         };
       } else {
         return {
           ...prevData,
           Bsgroup: selectedItem.name,
           crCode: selectedItem.code,
+          group: selectedItem.group,
         };
       }
     });
+      setTimeout(() => {
+      if (selectedItem.group !== "Balance Sheet") {
+        // Focus A/C NAME
+        inputRefs.current[1]?.focus();
+      } else {
+        // Focus GST NO
+        inputRefs.current[0]?.focus();
+      }
+    }, 350);
 
     setShowModal(false);
   };
@@ -1021,13 +1047,16 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
         });
         return; // Prevent save operation
       }
-      // const isState = formData.state.trim() !== ""; // Ensure no empty spaces
-      // if (!isState) {
-      //   toast.error("Please Fill the State Name", {
-      //     position: "top-center",
-      //   });
-      //   return; // Prevent save operation
-      // }
+      if (formData.group === "Balance Sheet") {
+        const isState = formData.state.trim() !== "";
+
+        if (!isState) {
+          toast.error("Please Fill the State Name", {
+            position: "top-center",
+          });
+          return; // Prevent save operation
+        }
+      }
   
       const combinedData = {
         _id: formData._id,
@@ -1235,7 +1264,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   };
 
   // ShortCuts for Buttons
-  const AnyModalOpen = showModalCus 
+  const AnyModalOpen = showModalCus || showModal
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -1493,6 +1522,15 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
   const handleAttachClick = () => {
     fileInputRef.current.click(); // manually trigger file input
   };
+
+  // Step 1: Define options once
+  const turnoverOptions = [
+    { label: "", value: "" },
+    { label: "Below 10 Cr", value: "No" },
+    { label: "Above 10 Cr", value: "Yes" },
+    { label: "All Applicable", value: "All" },
+    { label: "Not Applicable", value: "NA" },
+  ];
 
   return (
     <div>
@@ -1964,7 +2002,43 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           />
           </div>
           <div>
-          <FormControl
+          <Autocomplete
+            disableClearable
+            options={Object.values(stateCodes)}
+            value={formData.state || null}
+            size="small"
+            onChange={(event, newValue) => {
+              if (!isEditMode || isDisabled) return;
+
+              setFormData((prev) => ({
+                ...prev,
+                state: newValue || "",
+              }));
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="STATE"
+                variant="filled"
+                className="custom-bordered-input"
+                inputRef={(el) => (inputRefs.current[8] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 8)}
+                inputProps={{
+                  ...params.inputProps,
+                  readOnly: !isEditMode || isDisabled
+                }}
+                sx={{
+                  minWidth: 280,
+                  "& .MuiFilledInput-root": {
+                    height: "42px",
+                    fontSize: 16,
+                    color: formData.state ? "black" : "gray",
+                  },
+                }}
+              />
+            )}
+          />
+          {/* <FormControl
             className="custom-bordered-input"
             fullWidth
             size="small"
@@ -1977,7 +2051,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
                 color: formData.state ? "black" : "gray",
               }}
             >
-              State
+              STATE
             </InputLabel>
 
             <Select
@@ -1997,7 +2071,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
               }}
               inputRef={(el) => (inputRefs.current[8] = el)}
               onKeyDown={(e) => handleKeyDown(e, 8)} // Handle Enter key
-              label="State"
+              label="STATE"
               sx={{
                 backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white",
                 pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto",
@@ -2026,7 +2100,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl> */}
           </div>
           </div>
           <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
@@ -2079,7 +2153,46 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           </div>
           <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
           <div style={{width:300}}>
-          <FormControl
+          <Autocomplete
+            disableClearable
+            size="small"
+            options={[
+              "",
+              "Micro Enterprises",
+              "Small Enterprises",
+              "Medium Enterprises",
+              "Not Covered in MSMED",
+            ]}
+            value={formData.msmed || null}
+            autoHighlight
+            onChange={(event, newValue) => {
+              if (!isEditMode || isDisabled) return;
+
+              setFormData((prev) => ({
+                ...prev,
+                msmed: newValue || "",
+              }));
+            }}
+            // open={isEditMode && !isDisabled ? undefined : false}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="MSMED STATUS"
+                variant="filled"
+                className="custom-bordered-input"
+                inputRef={(el) => (inputRefs.current[11] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 11)}
+                sx={{
+                  "& .MuiFilledInput-root": {
+                    height: "42px",
+                    fontSize: 16,
+                    color: "black",
+                  },
+                }}
+              />
+            )}
+          />
+          {/* <FormControl
           className="custom-bordered-input"
             fullWidth
             size="small"
@@ -2120,7 +2233,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
             <MenuItem value="Medium Enterprises">Medium Enterprises</MenuItem>
             <MenuItem value="Not Covered in MSMED">Not Covered in MSMED</MenuItem>
           </Select>
-          </FormControl>
+          </FormControl> */}
           </div>
            <TextField
             className="custom-bordered-input"
@@ -2283,7 +2396,40 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           </div>
           <div style={{display:'flex',flexDirection:'row',marginTop:2}}>
           <div style={{width:300}}>
-          <FormControl
+          <Autocomplete
+            disableClearable
+            size="small"
+            options={turnoverOptions}
+            getOptionLabel={(option) => option.label || ""}
+            value={turnoverOptions.find(opt => opt.value === formData.tds194q) || null}
+            autoHighlight
+            onChange={(event, newValue) => {
+              if (!isEditMode || isDisabled) return;
+
+              setFormData((prev) => ({
+                ...prev,
+                tds194q: newValue?.value || "",
+              }));
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="TURNOVER FOR 194-Q"
+                variant="filled"
+                className="custom-bordered-input"
+                inputRef={(el) => (inputRefs.current[19] = el)}
+                onKeyDown={(e) => handleKeyDown(e, 19)}
+                sx={{
+                  "& .MuiFilledInput-root": {
+                    height: "42px",
+                    fontSize: 16,
+                    color: "black",
+                  },
+                }}
+              />
+            )}
+          />
+          {/* <FormControl
           className="custom-bordered-input"
             fullWidth
             size="small"
@@ -2324,10 +2470,54 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
             <MenuItem value="All">All Applicable</MenuItem>
             <MenuItem value="NA">Not Applicable</MenuItem>
           </Select>
-          </FormControl>
+          </FormControl> */}
           </div>
           <div style={{width:280}}>
-          <FormControl
+          <Autocomplete
+            disableClearable
+            size="small"
+            options={[
+              { label: "", value: "" },
+              { label: "Yes", value: "Yes" },
+              { label: "No", value: "No" },
+            ]}
+            getOptionLabel={(option) => option.label || ""}
+            value={
+              [
+                { label: "", value: "" },
+                { label: "Yes", value: "Yes" },
+                { label: "No", value: "No" },
+              ].find(opt => opt.value === formData.tcs206) || null
+            }
+            isOptionEqualToValue={(option, value) => option.value === value.value}
+            autoHighlight
+            onChange={(event, newValue) => {
+              if (!isEditMode || isDisabled) return;
+              setFormData(prev => ({
+                ...prev,
+                tcs206: newValue?.value || "",
+              }));
+            }}
+
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="WHETHER APPROVED"
+                variant="filled"
+                className="custom-bordered-input"
+                inputRef={el => (inputRefs.current[20] = el)}
+                onKeyDown={e => handleKeyDown(e, 20)}
+                sx={{
+                  "& .MuiFilledInput-root": {
+                    height: "42px",
+                    fontSize: 16,
+                    color: "black",
+                  },
+                }}
+              />
+            )}
+          />
+          {/* <FormControl
           className="custom-bordered-input"
             fullWidth
             size="small"
@@ -2366,7 +2556,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
               <MenuItem value="Yes">Yes</MenuItem>
               <MenuItem value="No">No</MenuItem>
           </Select>
-          </FormControl>
+          </FormControl> */}
           </div>
           </div>
           <div style={{marginTop:2,display:'flex', flexDirection:'row'}}>
@@ -2389,7 +2579,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
               },
               readOnly: !isEditMode || isDisabled
             }}
-            sx={{ width: "50%" }}
+            sx={{ width: "54%" }}
             />
             <TextField
             className="custom-bordered-input"
@@ -2539,6 +2729,350 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
                 Misc. Information / Attach Image
               </Button>
               {isModalOpenMisc && (
+                <Modal open={isModalOpenMisc}   
+                  onClose={(event, reason) => {
+                    if (reason === "backdropClick") return; // prevent closing on outside click
+                    handlecloseMisn();
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "80%",
+                      // maxHeight: "90vh",
+                      overflow: "auto",
+                      bgcolor: "white",
+                      borderRadius: 3,
+                      boxShadow: 24,
+                      p: 3,
+                    }}
+                  >
+                    <Typography variant="h5" fontWeight="bold" mb={2}>
+                      MISC INFORMATION
+                    </Typography>
+
+                    <Divider sx={{ mb: 2 }} />
+
+                    <Grid container spacing={3}>
+
+                      {/* LEFT SIDE FORM */}
+                      <Grid item xs={12} md={7}>
+                        <Grid container spacing={2}>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Payment Limit"
+                              fullWidth
+                              id="payLimit"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.payLimit}
+                              onChange={handleNumericValue}
+                              inputRef={(el) => (inputRefs.current[35] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 35)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Payment Due Days"
+                              fullWidth
+                              id="payDuedays"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.payDuedays}
+                              onChange={handleNumericValue}
+                              inputRef={(el) => (inputRefs.current[36] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 36)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Interest Grace Days"
+                              fullWidth
+                              id="graceDays"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.graceDays}
+                              onChange={handleNumericValue}
+                              inputRef={(el) => (inputRefs.current[37] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 37)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Sorting Index No"
+                              fullWidth
+                              id="sortingindex"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.sortingindex}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[38] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 38)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              select
+                              fullWidth
+                              label="QTY IN B.SHEET"
+                              id="qtyBsheet"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              size="small"
+                              value={formData.qtyBsheet}
+                              onChange={handleQtyBsheet}
+                              SelectProps={{ native: true }}
+                              inputRef={(el) => (inputRefs.current[39] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 39)}
+                            >
+                              <option value=""></option>
+                              <option value="Yes">Yes</option>
+                              <option value="No">No</option>
+                              <option value="Pcs">Pcs</option>
+                            </TextField>
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Discount"
+                              fullWidth
+                              id="discount"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.discount}
+                              onChange={handleNumericValue}
+                              inputRef={(el) => (inputRefs.current[40] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 40)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Terms EX/FOR"
+                              fullWidth
+                              id="Terms"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.Terms}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[41] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 41)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Trading A/c No"
+                              fullWidth
+                              id="tradingAc"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.tradingAc}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[42] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 42)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Prefix Pur. Invoice"
+                              fullWidth
+                              id="prefixPurInvoice"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.prefixPurInvoice}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[43] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 43)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Typography color="error" fontWeight="bold">
+                              Details for 27-C (TCS)
+                            </Typography>
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              select
+                              fullWidth
+                              label="STATUS"
+                              id="status"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              size="small"
+                              value={formData.status}
+                              onChange={handlestatus}
+                              SelectProps={{ native: true }}
+                              inputRef={(el) => (inputRefs.current[44] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 44)}
+                            >
+                              <option value=""></option>
+                              <option value="Company">1. Company</option>
+                              <option value="Firm">2. Firm</option>
+                              <option value="AOP/BOI">3. AOP/BOI</option>
+                              <option value="HUF">4. HUF</option>
+                              <option value="Individual">5. Individual</option>
+                              <option value="Other">6. Other</option>
+                            </TextField>
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Ward"
+                              fullWidth
+                              id="ward"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.ward}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[45] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 45)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Area Code"
+                              fullWidth
+                              id="areacode"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.areacode}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[46] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 46)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="AO Type"
+                              fullWidth
+                              id="aoType"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.aoType}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[47] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 47)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="Range Code"
+                              fullWidth
+                              id="rangecode"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.rangecode}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[48] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 48)}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <TextField
+                              label="AO No"
+                              fullWidth
+                              id="aoNo"
+                              size="small"
+                              variant='filled'
+                              className="custom-bordered-input"
+                              value={formData.aoNo}
+                              onChange={HandleValueChange}
+                              inputRef={(el) => (inputRefs.current[49] = el)}
+                              onKeyDown={(e) => handleKeyDown(e, 49)}
+                            />
+                          </Grid>
+
+                        </Grid>
+                      </Grid>
+
+                      {/* IMAGE SECTION */}
+                      <Grid item xs={12} md={5}>
+                        <Box
+                          sx={{
+                            border: "1px dashed gray",
+                            borderRadius: 2,
+                            p: 2,
+                            textAlign: "center",
+                          }}
+                        >
+                          {imageSrc ? (
+                            <img
+                              src={imageSrc}
+                              alt="Uploaded"
+                              style={{
+                                width: "100%",
+                                height: 350,
+                                objectFit: "contain",
+                                marginBottom: 10,
+                              }}
+                            />
+                          ) : (
+                            <Typography color="text.secondary">
+                              Attach Image Here
+                            </Typography>
+                          )}
+
+                          <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            style={{ display: "none" }}
+                            onChange={handleImageChange}
+                          />
+
+                          <Button
+                            variant="contained"
+                            sx={{ mt: 2 }}
+                            onClick={handleAttachClick}
+                          >
+                            Attach Image
+                          </Button>
+                        </Box>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            fullWidth
+                            className="Buttonz"
+                            style={{ color: "black", marginLeft:"40%" }}
+                            onClick={handlecloseMisn}
+                            ref={(el) => (inputRefs.current[50] = el)}
+                          >
+                            SAVE
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Modal>
+              )}
+              {/* {isModalOpenMisc && (
               <div className="ModalZZ">
                 <div className="Modal-contentZ">
                   <h3 className="headingEZ">MISC INFORMATION</h3>
@@ -2755,7 +3289,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
                   </Button>
                 </div>
               </div>
-              )}
+              )} */}
             </div> 
             <div style={{marginTop:2}}>
             <TextField
@@ -2901,7 +3435,51 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
             />
             </div>
             <div style={{width:500,marginTop:2}}>
-            <FormControl
+            <Autocomplete
+              disableClearable
+              size="small"
+              options={[
+                { label: "", value: "" },
+                { label: "Yes", value: "Yes" },
+                { label: "No", value: "No" },
+              ]}
+              getOptionLabel={(option) => option.label || ""}
+              value={
+                [
+                  { label: "", value: "" },
+                  { label: "Yes", value: "Yes" },
+                  { label: "No", value: "No" },
+                ].find(opt => opt.value === formData.narration) || null
+              }
+              isOptionEqualToValue={(option, value) => option.value === value.value}
+              autoHighlight
+              onChange={(event, newValue) => {
+                if (!isEditMode || isDisabled) return;
+                setFormData(prev => ({
+                  ...prev,
+                  narration: newValue?.value || "",
+                }));
+              }}
+
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="COMPOSITION/RCM Y/N"
+                  variant="filled"
+                  className="custom-bordered-input"
+                  inputRef={el => (inputRefs.current[34] = el)}
+                  onKeyDown={e => handleKeyDown(e, 34)}
+                  sx={{
+                    "& .MuiFilledInput-root": {
+                      height: "42px",
+                      fontSize: 16,
+                      color: "black",
+                    },
+                  }}
+                />
+              )}
+            />
+            {/* <FormControl
             className="custom-bordered-input"
               fullWidth
               size="small"
@@ -2940,7 +3518,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
               <MenuItem value="Yes">Yes</MenuItem>
               <MenuItem value="No">No</MenuItem>
             </Select>
-            </FormControl>
+            </FormControl> */}
             </div>
             {isEditMode && (
             <div style={{display:'flex', flexDirection:'row',marginLeft:100}}>
@@ -2967,6 +3545,8 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
             handleClose={() => setShowModal(false)}
             onSelect={handleSelectBsgroup} // Pass callback function
             handleExit={handleExit}
+            selectedCode={mode === "dr" ? formData.Bscode : formData.crCode}
+            isEditMode={isEditMode}
           />
           <Button
           disabled={!isAddEnabled}
@@ -3049,7 +3629,7 @@ const LedgerAcc = ({ onClose, onRefresh, ledgerId2}) => {
           </Button>
           <div>
             <Button
-              ref={(el) => (inputRefs.current[34] = el)} // Assign ref
+              ref={(el) => (inputRefs.current[35] = el)} // Assign ref
               // onKeyDown={(e) => handleKeyDown(e, 34)} // Handle Enter key
               className="Buttonz"
               onClick={handleSaveClick}

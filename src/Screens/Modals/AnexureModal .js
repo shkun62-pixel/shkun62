@@ -5,7 +5,7 @@ import "./AnexureModal.css";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 
-const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
+const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode, selectedCode,isEditMode }) => {
   const { company } = useContext(CompanyContext);
   const tenant = company?.databaseName;
 
@@ -21,22 +21,6 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef(null);
 
-  // useEffect(() => {
-  //   if (show) {
-  //     axios
-  //       .get(
-  //         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`
-  //       )
-  //       .then((response) => {
-  //         setData(response.data);
-  //         setFilteredData(response.data);
-  //         setSelectedIndex(0);
-  //         setTimeout(() => searchInputRef.current?.focus(), 100);
-  //       })
-  //       .catch((error) => console.error("Error fetching data:", error));
-  //   }
-  // }, [show]);
-
   useEffect(() => {
     if (show) {
       axios
@@ -44,7 +28,6 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
         .then((response) => {
           let result = response.data;
 
-          // 🔥 FILTER BASED ON DR / CR
           if (mode === "dr") {
             result = result.filter(
               (item) => item.formData.drCr?.toLowerCase() === "debit"
@@ -59,12 +42,53 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
 
           setData(result);
           setFilteredData(result);
-          setSelectedIndex(0);
+
+          let index = 0;
+
+          if (selectedCode) {
+            const foundIndex = result.findIndex(
+              (item) => item.formData.code === selectedCode
+            );
+            if (foundIndex !== -1) {
+              index = foundIndex;
+            }
+          }
+
+          setSelectedIndex(index);
+
           setTimeout(() => searchInputRef.current?.focus(), 100);
         })
         .catch((error) => console.error("Error fetching data:", error));
     }
-  }, [show, mode]);
+  }, [show, mode, selectedCode]);
+  // useEffect(() => {
+  //   if (show) {
+  //     axios
+  //       .get(`https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/anexure`)
+  //       .then((response) => {
+  //         let result = response.data;
+
+  //         // 🔥 FILTER BASED ON DR / CR
+  //         if (mode === "dr") {
+  //           result = result.filter(
+  //             (item) => item.formData.drCr?.toLowerCase() === "debit"
+  //           );
+  //         }
+
+  //         if (mode === "cr") {
+  //           result = result.filter(
+  //             (item) => item.formData.drCr?.toLowerCase() === "credit"
+  //           );
+  //         }
+
+  //         setData(result);
+  //         setFilteredData(result);
+  //         setSelectedIndex(0);
+  //         setTimeout(() => searchInputRef.current?.focus(), 100);
+  //       })
+  //       .catch((error) => console.error("Error fetching data:", error));
+  //   }
+  // }, [show, mode]);
   
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
@@ -77,8 +101,11 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
   };
 
   const handleCloseWithExit = () => {
-    handleExit(); // Call handleExit from main component
-    handleClose(); // Close the modal
+    if(isEditMode){
+      handleClose(); // Close the modal
+    }else{
+      handleExit(); // Call handleExit from main component
+    }
   };
 
   const handleSelection = (index) => {
@@ -118,12 +145,30 @@ const AnexureModal = ({ show, handleClose, onSelect, handleExit, mode  }) => {
     }
   }, [selectedIndex]);
 
+  useEffect(() => {
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
+        handleCloseWithExit();
+      }
+    };
+
+    if (show) {
+      window.addEventListener("keydown", handleEsc);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [show]);
+
   return (
     <Modal
       show={show}
       onHide={handleCloseWithExit}
       centered
       className="custom-modal2"
+      backdrop="static"
+      keyboard={false}
     >
       <Modal.Header className="modal-header-custom">
         <Modal.Title>ANNEXURES LIST</Modal.Title>
