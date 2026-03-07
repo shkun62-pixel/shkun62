@@ -1078,7 +1078,7 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="Party Wise GST Details" />
                 </StyledListItem>
-                <StyledListItem button onClick={() => handleNavigation("/")}>
+                <StyledListItem button onClick={() => handleNavigation("/GstReport?type=PartyGstSumm")}>
                   <StyledIcon style={{}}>
                     <DescriptionIcon />
                   </StyledIcon>

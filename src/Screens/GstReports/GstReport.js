@@ -2,6 +2,7 @@ import React,{useEffect,useState} from "react";
 import HsnDetail from "./HsnWiseReport/HsnDetail";
 import AcwiseGstRep from "./AccWiseGstReport/AcwiseGstRep";
 import MonthlyFormModal from "./MonthlyForms/MonthlyFormModal";
+import PartywiseGstSumm from "./PartyGstSumm/PartywiseGstSumm";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -31,8 +32,11 @@ const GstReport = () => {
       {type === "AcwiseGstReport" && (
         <AcwiseGstRep show={openPurRep} onHide={handleClose} />
       )}
-        {type === "MonthlyForm" && (
+      {type === "MonthlyForm" && (
         <MonthlyFormModal open={openPurRep} onClose={handleClose} />
+      )}
+      {type === "PartyGstSumm" && (
+        <PartywiseGstSumm open={openPurRep} handleClose={handleClose} />
       )}
     </div>
   );

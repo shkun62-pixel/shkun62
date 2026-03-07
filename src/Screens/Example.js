@@ -2974,17 +2974,21 @@ const Example = () => {
     };
     setItems([...items, newItem]);
   };
-    const getBalance = () => {
+
+  const getBalance = (currentIndex) => {
     let totalDebit = 0;
     let totalCredit = 0;
 
-    items.forEach((row) => {
-      totalDebit += parseFloat(row.debit) || 0;
-      totalCredit += parseFloat(row.credit) || 0;
+    items.forEach((row, i) => {
+      if (i !== currentIndex) {
+        totalDebit += parseFloat(row.debit) || 0;
+        totalCredit += parseFloat(row.credit) || 0;
+      }
     });
 
     return totalDebit - totalCredit;
   };
+
   return (
     <div>
       <div className="Tablesection">
@@ -3095,17 +3099,17 @@ const Example = () => {
                     }}
                     value={Number(item.debit) === 0 ? "" : item.debit}
                     onChange={(e) => handleNumberChange(e, index, "debit")}
-                    onFocus={(e) => {
-                      const balance = getBalance();
+                   onFocus={(e) => {
+  const balance = getBalance(index);
 
-                      if (!item.debit && balance < 0) {
-                        const updatedItems = [...items];
-                        updatedItems[index].debit = Math.abs(balance);
-                        setItems(updatedItems);
-                      }
+  if (balance < 0) {
+    const updatedItems = [...items];
+    updatedItems[index].debit = Math.abs(balance);
+    setItems(updatedItems);
+  }
 
-                      e.target.select();
-                    }}
+  e.target.select();
+}}
 
                   />
                 </td>
@@ -3121,17 +3125,17 @@ const Example = () => {
                     }}
                     value={Number(item.credit) === 0 ? "" : item.credit}
                     onChange={(e) => handleNumberChange(e, index, "credit")}
-                      onFocus={(e) => {
-                      const balance = getBalance();
+                    onFocus={(e) => {
+  const balance = getBalance(index);
 
-                      if (!item.credit && balance > 0) {
-                        const updatedItems = [...items];
-                        updatedItems[index].credit = balance;
-                        setItems(updatedItems);
-                      }
+  if (balance > 0) {
+    const updatedItems = [...items];
+    updatedItems[index].credit = balance;
+    setItems(updatedItems);
+  }
 
-                      e.target.select();
-                    }}
+  e.target.select();
+}}
                   />
                 </td>
               </tr>
