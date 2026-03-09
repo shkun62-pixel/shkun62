@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
-  Box,
   Grid,
   TextField,
   Typography,
@@ -11,6 +10,7 @@ import {
 } from "@mui/material";
 import InputMask from "react-input-mask";
 import GSTPrintModal from "./GSTPrintModal";
+import axios from "axios";
 
 const style = {
   position: "absolute",
@@ -34,18 +34,44 @@ export default function PartywiseGstSumm({ open, handleClose }) {
     city: "",
     state: "",
     agent: "",
-    account: "-All-",
+    account: "All",
     condition: "Pending",
-    taxType: "Vat Sale",
+    taxType: "All",
   });
   const [openPrint, setOpenPrint] = useState(false);
+  const [accounts, setAccounts] = useState([]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const res = await axios.get(
+          "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/ledgerAccount"
+        );
+
+        if (res.data?.data) {
+          setAccounts(res.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
+
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal
+      open={open}
+      onClose={(event, reason) => {
+        if (reason === "backdropClick") return;
+        handleClose();
+      }}
+      backdrop="static"
+    >
       <Paper sx={style}>
         <Typography variant="h6" fontWeight="bold" mb={3}>
           Party Wise GST Detail
@@ -184,7 +210,12 @@ export default function PartywiseGstSumm({ open, handleClose }) {
                   fullWidth
                   size="small"
                 >
-                  <MenuItem value="-All-">-All-</MenuItem>
+                  <MenuItem value="All">-All-</MenuItem>
+                  {accounts.map((acc) => (
+                    <MenuItem key={acc._id} value={acc.formData?.ahead}>
+                      {acc.formData?.ahead}
+                    </MenuItem>
+                  ))}
                 </TextField>
               </Grid>
 
@@ -213,8 +244,25 @@ export default function PartywiseGstSumm({ open, handleClose }) {
                   fullWidth
                   size="small"
                 >
-                  <MenuItem value="Vat Sale">Vat Sale</MenuItem>
-                  <MenuItem value="GST Sale">GST Sale</MenuItem>
+                  <MenuItem value="All">All</MenuItem>
+                  <MenuItem value="GST Sale (RD)">GST Sale (RD)</MenuItem>
+                  <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
+                  <MenuItem value="GST (URD)">GST (URD)</MenuItem>
+                  <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
+                  <MenuItem value="Tax Free Within State">
+                    Tax Free Within State
+                  </MenuItem>
+                  <MenuItem value="Tax Free Interstate">
+                    Tax Free Interstate
+                  </MenuItem>
+                  <MenuItem value="Export Sale">Export Sale</MenuItem>
+                  <MenuItem value="Export Sale(IGST)">
+                    Export Sale(IGST)
+                  </MenuItem>
+                  <MenuItem value="Including GST">Including GST</MenuItem>
+                  <MenuItem value="Including IGST">Including IGST</MenuItem>
+                  <MenuItem value="Not Applicable">Not Applicable</MenuItem>
+                  <MenuItem value="Exempted Sale">Exempted Sale</MenuItem>
                 </TextField>
               </Grid>
             </Grid>
@@ -230,7 +278,7 @@ export default function PartywiseGstSumm({ open, handleClose }) {
               </Grid>
 
               <Grid item>
-                <Button variant="contained" onClick={() => setOpenPrint(true)}>
+                <Button variant="contained" fullWidth onClick={() => setOpenPrint(true)}>
                   Print List
                 </Button>
                 <GSTPrintModal
@@ -242,13 +290,10 @@ export default function PartywiseGstSumm({ open, handleClose }) {
                   city={formData.city}
                   state={formData.state}
                   agent={formData.agent}
+                  accountname = {formData.account}
+                  condition = {formData.condition}
+                  taxType = {formData.taxType}
                 />
-              </Grid>
-
-              <Grid item>
-                <Button variant="contained" fullWidth>
-                  Export List
-                </Button>
               </Grid>
 
               <Grid item>

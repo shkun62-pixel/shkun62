@@ -1072,7 +1072,7 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="GSTR-3B Reconciliation" />
                 </StyledListItem>
-                <StyledListItem button onClick={() => handleNavigation("/")}>
+                <StyledListItem button onClick={() => handleNavigation("/GstReport?type=PartyGstDetail")}>
                   <StyledIcon style={{}}>
                     <DescriptionIcon />
                   </StyledIcon>

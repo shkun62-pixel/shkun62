@@ -3,6 +3,7 @@ import HsnDetail from "./HsnWiseReport/HsnDetail";
 import AcwiseGstRep from "./AccWiseGstReport/AcwiseGstRep";
 import MonthlyFormModal from "./MonthlyForms/MonthlyFormModal";
 import PartywiseGstSumm from "./PartyGstSumm/PartywiseGstSumm";
+import PwiseGSTDetail from "./PartywiseGSTDetail/PwiseGSTDetail";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -37,6 +38,9 @@ const GstReport = () => {
       )}
       {type === "PartyGstSumm" && (
         <PartywiseGstSumm open={openPurRep} handleClose={handleClose} />
+      )}
+      {type === "PartyGstDetail" && (
+        <PwiseGSTDetail open={openPurRep} onClose={handleClose} />
       )}
     </div>
   );
