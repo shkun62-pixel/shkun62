@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef  } from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import axios from "axios";
 import Table from "react-bootstrap/Table";
@@ -34,6 +34,7 @@ export default function GSTPrintModal({
 }) {
 
   const {companyName, companyAdd, companyCity} = useCompanySetup();
+  const printRef = useRef();
   const [data, setData] = useState([]);
 
   // UNIVERSAL DATE PARSER
@@ -186,6 +187,58 @@ export default function GSTPrintModal({
   const grandTotalGst = data.reduce((sum, p) => sum + p.totalGst, 0);
   const grandTotalBill = data.reduce((sum, p) => sum + p.totalBill, 0);
 
+  const handlePrint = () => {
+    const WinPrint = window.open("", "", "width=1200,height=800");
+
+    WinPrint.document.write(`
+      <html>
+      <head>
+      <style>
+        @page { size: A4; margin: 10mm; }
+        body { font-family: serif; font-size: 12px; }
+        .print-header { text-align: center; margin-bottom: 14px; }
+        .company-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .company-address, .company-city { font-size: 12px; }
+        .report-title { margin-top: 6px; font-size: 13px; font-weight: bold; }
+
+        table { border-collapse: collapse; width: 100%; }
+
+        th, td {
+          border: 1px solid black;
+          padding: 4px;
+          font-size: 11px;
+        }
+
+        th {
+          background: #f0f0f0;
+          text-align: center;
+        }
+
+        .text-end { text-align: right; }
+      </style>
+      </head>
+
+      <body>
+
+        <div class="print-header">
+          <div class="company-name">${companyName}</div>
+          <div class="company-address">${companyAdd}</div>
+          <div class="company-city">${companyCity}</div>
+          <div class="report-title">
+            C.FORM STATEMENT FROM ${startDate} TO ${endDate}
+          </div>
+        </div>
+    `);
+
+    WinPrint.document.write(printRef.current.innerHTML);
+
+    WinPrint.document.write("</body></html>");
+
+    WinPrint.document.close();
+    WinPrint.print();
+    WinPrint.close();
+  };
+
   const exportToExcel = () => {
     const sheetData = [];
 
@@ -326,6 +379,7 @@ export default function GSTPrintModal({
           C.FORM STATEMENT FROM DT. {startDate} To {endDate}
         </Typography>
 
+        <div ref={printRef}>
         <Table bordered size="sm" style={{ marginTop: 10 }}>
           <thead>
             <tr>
@@ -403,9 +457,9 @@ export default function GSTPrintModal({
             </tr>
           </tbody>
         </Table>
-
+        </div>
         <Box mt={3} display="flex" gap={2}>
-          <Button variant="contained" onClick={() => window.print()}>
+          <Button variant="contained" onClick={handlePrint}>
             PRINT
           </Button>
           <Button variant="contained" onClick={exportToExcel} >EXPORT </Button>
