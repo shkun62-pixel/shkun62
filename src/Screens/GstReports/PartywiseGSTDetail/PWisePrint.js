@@ -3,8 +3,10 @@ import { Modal, Box, Typography, Button } from "@mui/material";
 import Table from "react-bootstrap/Table";
 import axios from "axios";
 import useCompanySetup from "../../Shared/useCompanySetup";
+import * as XLSX from "sheetjs-style";
+import { saveAs } from "file-saver";
 
-const PWisePrint = ({ open, onClose, saleType, dates }) => {
+const PWisePrint = ({  open, onClose,  saleType, dates, broker, lessNote, gstType, selectedAccounts, selectedAccountCode}) => {
 
   const {companyName, companyAdd, companyCity} = useCompanySetup();
   const [reportData, setReportData] = useState([]);
@@ -28,7 +30,54 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
 
       const res = await axios.get(url);
 
-      setReportData(res.data);
+      let data = res.data;
+
+      // DATE FILTER
+      data = data.filter((bill) => {
+        const billDate = formatDateToDDMMYYYY(bill.formData?.date);
+        return billDate >= dates.from && billDate <= dates.upto;
+      });
+
+      // BROKER FILTER
+      if (broker) {
+        data = data.filter((bill) => {
+          const partyBroker =
+            saleType === "sale"
+              ? bill.formData?.broker
+              : bill.formData?.broker;
+
+          return partyBroker?.toLowerCase().includes(broker.toLowerCase());
+        });
+      }
+      
+      // ACCOUNT FILTER
+      if (selectedAccounts && selectedAccounts.length > 0) {
+        data = data.filter((bill) => {
+
+          const partyCode =
+            saleType === "sale"
+              ? bill.customerDetails?.[0]?.Vcode
+              : bill.supplierdetails?.[0]?.Vcode;
+
+          return selectedAccounts.includes(partyCode);
+        });
+      }
+
+      // SINGLE ACCOUNT FILTER (A/C Name field)
+      else if (selectedAccountCode) {
+        data = data.filter((bill) => {
+
+          const partyCode =
+            saleType === "sale"
+              ? bill.customerDetails?.[0]?.Vcode
+              : bill.supplierdetails?.[0]?.Vcode;
+
+          return partyCode === selectedAccountCode;
+        });
+      }
+
+      setReportData(data);
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -73,6 +122,7 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
         pkgs: parseFloat(item.pkgs),
         value: parseFloat(item.amount),
         gst,
+        tcs1: parseFloat(item.tcs1),
       });
     });
 
@@ -152,6 +202,159 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
     WinPrint.focus();
     WinPrint.print();
     WinPrint.close();
+    };
+
+    const handleExportExcel = () => {
+
+      const wb = XLSX.utils.book_new();
+      let excelData = [];
+
+      excelData.push([companyName]);
+      excelData.push([companyAdd]);
+      excelData.push([companyCity]);
+      excelData.push([]);
+
+      Object.keys(groupedData).forEach((party) => {
+
+        const partyData = groupedData[party];
+        const rows = partyData.rows;
+
+        excelData.push([`GST Detail of M/S : ${partyData.partyName}`]);
+        excelData.push([partyData.city]);
+        excelData.push([`From ${dates.from} To ${dates.upto}`]);
+        excelData.push([]);
+
+        excelData.push([
+          "Date",
+          "Bill No",
+          "Description",
+          "Pcs",
+          "Quantity",
+          "Value",
+          "GST",
+          "TCS",
+        ]);
+
+        const dataStart = excelData.length + 1;
+
+        rows.forEach((r) => {
+          excelData.push([
+            formatDateToDDMMYYYY(r.date),
+            r.billNo,
+            r.description,
+            Number(r.pkgs),
+            Number(r.qty),
+            Number(r.value),
+            Number(r.gst),
+            Number(r.tcs1 || 0),
+          ]);
+        });
+
+        const dataEnd = excelData.length;
+
+        excelData.push([
+          "",
+          "",
+          "Total",
+          { f: `SUBTOTAL(9,D${dataStart}:D${dataEnd})` },
+          { f: `SUBTOTAL(9,E${dataStart}:E${dataEnd})` },
+          { f: `SUBTOTAL(9,F${dataStart}:F${dataEnd})` },
+          { f: `SUBTOTAL(9,G${dataStart}:G${dataEnd})` },
+          { f: `SUBTOTAL(9,H${dataStart}:H${dataEnd})` },
+        ]);
+
+        excelData.push([]);
+        excelData.push([]);
+
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+      /* COLUMN WIDTH */
+      ws["!cols"] = [
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 32 },
+        { wch: 10 },
+        { wch: 12 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 12 },
+      ];
+
+      /* MERGE COMPANY HEADER */
+      ws["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
+      ];
+
+      const range = XLSX.utils.decode_range(ws["!ref"]);
+
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+
+          const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+          const cell = ws[cellAddress];
+
+          if (!cell) continue;
+
+          if (!cell.s) cell.s = {};
+
+          /* COMPANY HEADER STYLE */
+          if (R === 0 || R === 1 || R === 2) {
+            cell.s = {
+              font: { bold: true, sz: 14 },
+              alignment: { horizontal: "center", vertical: "center" }
+            };
+          }
+
+          /* TABLE HEADER STYLE */
+          if (cell.v === "Date") {
+
+            for (let i = 0; i < 8; i++) {
+
+              const headerCell = ws[XLSX.utils.encode_cell({ r: R, c: i })];
+
+              if (headerCell) {
+
+                headerCell.s = {
+                  font: { bold: true },
+                  alignment: { horizontal: "center" },
+                  fill: { fgColor: { rgb: "D9E1F2" } },
+                  border: {
+                    top: { style: "thin" },
+                    bottom: { style: "thin" },
+                    left: { style: "thin" },
+                    right: { style: "thin" }
+                  }
+                };
+
+              }
+            }
+          }
+
+          /* NUMBER ALIGNMENT */
+          if (C >= 3) {
+            cell.s.alignment = { horizontal: "right" };
+          }
+
+        }
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, "GST Report");
+
+      const excelBuffer = XLSX.write(wb, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+
+      saveAs(blob, "GST_Detail.xlsx");
+
     };
 
     const formatDateToDDMMYYYY = (dateStr) => {
@@ -258,6 +461,7 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
             const totalpkgs = rows.reduce((a, b) => a + b.pkgs, 0);
             const totalValue = rows.reduce((a, b) => a + b.value, 0);
             const totalVat = rows.reduce((a, b) => a + b.gst, 0);
+            const totalTcs = rows.reduce((a, b) => a + b.tcs1, 0);
 
             return (
               <Box key={index} sx={{ mb: 4 }}>
@@ -281,8 +485,6 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
                       <th style={{ textAlign: "right" }}>Quantity</th>
                       <th style={{ textAlign: "right" }}>Value</th>
                       <th style={{ textAlign: "right" }}>GST</th>
-                      <th style={{ textAlign: "right" }}>Ex.Duty</th>
-                      <th style={{ textAlign: "right" }}>Duty PMT</th>
                       <th style={{ textAlign: "right" }}>Tcs</th>
                     </tr>
                   </thead>
@@ -297,9 +499,7 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
                         <td style={{ textAlign: "right" }}>{r.qty.toFixed(3)}</td>
                         <td style={{ textAlign: "right" }}>{r.value.toFixed(2)}</td>
                         <td style={{ textAlign: "right" }}>{r.gst.toFixed(2)}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td style={{ textAlign: "right" }}>{Number(r.tcs1 || 0).toFixed(2)}</td>
                       </tr>
                     ))}
 
@@ -311,9 +511,7 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
                       <td>{totalQty.toFixed(3)}</td>
                       <td>{totalValue.toFixed(2)}</td>
                       <td>{totalVat.toFixed(2)}</td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
+                      <td>{Number(totalTcs || 0).toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </Table>
@@ -329,11 +527,19 @@ const PWisePrint = ({ open, onClose, saleType, dates }) => {
             borderTop: "1px solid #ccc",
             display: "flex",
             justifyContent: "flex-end",
+            gap:2
           }}
         >
-            <Button variant="contained" color="primary" onClick={handlePrint}>
-                Print
-            </Button>
+          <Button variant="contained" color="primary" onClick={handlePrint}>
+              Print
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleExportExcel}
+          >
+            Export
+          </Button>
 
           <Button variant="contained" color="error" onClick={onClose}>
             Close

@@ -27,6 +27,7 @@ const PAGE_SIZE = 10;
 const PwiseGSTDetail = ({ open, onClose }) => {
   // -------- STATES --------
 
+  const [selectedAccountCode, setSelectedAccountCode] = useState(null);
   const [saleType, setSaleType] = useState("sale");
   const [gstType, setGstType] = useState("gst");
   const [lessNote, setLessNote] = useState(true);
@@ -35,7 +36,6 @@ const PwiseGSTDetail = ({ open, onClose }) => {
   const [search, setSearch] = useState("");
 
   const [city, setCity] = useState("");
-  const [dutyRate, setDutyRate] = useState("");
   const [broker, setBroker] = useState("");
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -151,6 +151,8 @@ const PwiseGSTDetail = ({ open, onClose }) => {
 
   const handleSelectAccount = (acc, index) => {
     setSearch(acc.formData?.ahead || "");
+    setCity(acc.formData?.city || "");
+    setSelectedAccountCode(acc.formData?.acode);   // ⭐ important
     setSelectedIndex(index);
   };
 
@@ -190,6 +192,8 @@ const PwiseGSTDetail = ({ open, onClose }) => {
 
       if (acc) {
         setSearch(acc.formData?.ahead || "");
+        setCity(acc.formData?.city || "");
+        setSelectedAccountCode(acc.formData?.acode);
       }
     }
   };
@@ -210,7 +214,7 @@ const PwiseGSTDetail = ({ open, onClose }) => {
   };
 
   const handleSelectAll = () => {
-    const ids = filteredSelectionAccounts.map((acc) => acc._id);
+    const ids = filteredSelectionAccounts.map((acc) => acc.formData?.acode);
     setSelectedAccounts(ids);
   };
 
@@ -346,7 +350,6 @@ const PwiseGSTDetail = ({ open, onClose }) => {
                   fullWidth
                   size="small"
                   label="A/C Name"
-                  placeholder="Search account..."
                   value={search}
                   inputRef={searchRef}
                   onKeyDown={handleKeyDown}
@@ -395,17 +398,7 @@ const PwiseGSTDetail = ({ open, onClose }) => {
                     />
                   </Grid>
 
-                  <Grid item xs={6}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Duty Rate"
-                      value={dutyRate}
-                      onChange={(e) => setDutyRate(e.target.value)}
-                    />
-                  </Grid>
-
-                  <Grid item xs={6}>
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
                       size="small"
@@ -500,10 +493,16 @@ const PwiseGSTDetail = ({ open, onClose }) => {
                   </Button>
                 </Grid>
                 <PWisePrint
-                open={reportOpen}
-                onClose={()=>setReportOpen(false)}
-                saleType={saleType}
-                dates={dates}
+                  open={reportOpen}
+                  onClose={()=>setReportOpen(false)}
+                  saleType={saleType}
+                  dates={dates}
+                  city={city}
+                  broker={broker}
+                  lessNote={lessNote}
+                  gstType={gstType}
+                  selectedAccounts={selectedAccounts}
+                  selectedAccountCode={selectedAccountCode}
                 />
 
                 <Grid item xs={12}>
@@ -600,8 +599,8 @@ const PwiseGSTDetail = ({ open, onClose }) => {
                   <td style={{ textAlign: "center" }}>
                     <input
                       type="checkbox"
-                      checked={selectedAccounts.includes(acc._id)}
-                      onChange={() => handleCheckboxChange(acc._id)}
+                      checked={selectedAccounts.includes(acc.formData?.acode)}
+                      onChange={() => handleCheckboxChange(acc.formData?.acode)}
                     />
                   </td>
 
@@ -640,7 +639,7 @@ const PwiseGSTDetail = ({ open, onClose }) => {
             color="error"
             onClick={() => setSelectionModalOpen(false)}
           >
-            Close
+            Done
           </Button>
         </Box>
 
