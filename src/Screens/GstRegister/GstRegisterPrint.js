@@ -100,7 +100,7 @@ const GstRegisterPrint = ({ isOpen, handleClose, rows, summary, fromDate, toDate
             </span>
 
             <span style={{ fontSize: 25, fontWeight: "bold", marginLeft: "auto" }}>
-              From : {formatDate(fromDate)}
+              From : {fromDate}
             </span>
 
             <span
@@ -111,7 +111,7 @@ const GstRegisterPrint = ({ isOpen, handleClose, rows, summary, fromDate, toDate
                 marginRight: 20,
               }}
             >
-              Upto : {formatDate(toDate)}
+              Upto : {toDate}
             </span>
           </div>
 

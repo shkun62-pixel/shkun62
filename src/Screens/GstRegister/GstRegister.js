@@ -1,15 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./GstRegister.css";
 import GstRegisterPrint from "./GstRegisterPrint";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import InputMask from "react-input-mask";
+import { TextField, MenuItem } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import useCompanySetup from "../Shared/useCompanySetup";
 
 export default function GstRegister() {
 
+  const {companyName, companyAdd, companyCity} = useCompanySetup();
+  const printRef = useRef();
   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
-  const [fromDate, setFromDate] = useState("2025-04-01");
-  const [toDate, setToDate] = useState("2026-03-30");
+  const [fromDate, setFromDate] = useState("01-04-2025");
+  const [toDate, setToDate] = useState("31-03-2026");
   const [sale, setSale] = useState([]);
   const [purchase, setPurchase] = useState([]);
   const [rows, setRows] = useState([]);
@@ -74,7 +91,7 @@ export default function GstRegister() {
   const fetchSale = async () => {
     try {
       const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
       );
       setSale(res.data || []);
     } catch (err) {
@@ -86,7 +103,7 @@ export default function GstRegister() {
   const fetchPurchase = async () => {
     try {
       const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`,
       );
       setPurchase(res.data || []);
     } catch (err) {
@@ -106,7 +123,6 @@ export default function GstRegister() {
 
     if (periodStart) periodStart.setHours(0, 0, 0, 0);
     if (periodEnd) periodEnd.setHours(23, 59, 59, 999);
-
 
     const sumGSTFromArr = (arr, isPurchase) =>
       arr.reduce(
@@ -129,7 +145,7 @@ export default function GstRegister() {
             cess: acc.cess + cess,
           };
         },
-        { cgst: 0, sgst: 0, igst: 0, cess: 0 }
+        { cgst: 0, sgst: 0, igst: 0, cess: 0 },
       );
 
     const prevPurchEntries = purchase.filter((p) => {
@@ -154,7 +170,7 @@ export default function GstRegister() {
     // Prepare current entries
     const purchCurrent = purchase
       .map((p) => ({
-        _id: p._id,              // ✅ ADD
+        _id: p._id, // ✅ ADD
         type: "purchase",
         date: parseDate(p.formData?.date),
         rawDate: p.formData?.date,
@@ -170,7 +186,7 @@ export default function GstRegister() {
       .map((s) => {
         const item = s.items?.[0] || {};
         return {
-          _id: s._id,             // ✅ ADD
+          _id: s._id, // ✅ ADD
           type: "sale",
           date: parseDate(s.formData?.date),
           rawDate: s.formData?.date,
@@ -264,7 +280,7 @@ export default function GstRegister() {
               igst: acc.igst + x.igst,
               cess: acc.cess + x.cess,
             }),
-            { cgst: 0, sgst: 0, igst: 0, cess: 0 }
+            { cgst: 0, sgst: 0, igst: 0, cess: 0 },
           );
 
         const totalSale = entry.original
@@ -276,7 +292,7 @@ export default function GstRegister() {
               igst: acc.igst + x.igst,
               cess: acc.cess + x.cess,
             }),
-            { cgst: 0, sgst: 0, igst: 0, cess: 0 }
+            { cgst: 0, sgst: 0, igst: 0, cess: 0 },
           );
 
         running = {
@@ -288,7 +304,7 @@ export default function GstRegister() {
 
         builtRows.push({
           sr: idx + 1,
-          _id: entry._id,        // ✅ STORE ID
+          _id: entry._id, // ✅ STORE ID
           date: entry.rawDate,
           bill: "",
           opening: openingForRow,
@@ -302,8 +318,8 @@ export default function GstRegister() {
 
       builtRows.push({
         sr: idx + 1,
-        _id: entry._id, 
-        entryType: entry.type,   // ✅ sale / purchase
+        _id: entry._id,
+        entryType: entry.type, // ✅ sale / purchase
         date:
           entry.rawDate && entry.type !== "group"
             ? parseDate(entry.rawDate).toLocaleDateString()
@@ -330,7 +346,7 @@ export default function GstRegister() {
         igst: acc.igst + x.igst,
         cess: acc.cess + x.cess,
       }),
-      { cgst: 0, sgst: 0, igst: 0, cess: 0 }
+      { cgst: 0, sgst: 0, igst: 0, cess: 0 },
     );
 
     const totalSale = saleCurrent.reduce(
@@ -340,7 +356,7 @@ export default function GstRegister() {
         igst: acc.igst + x.igst,
         cess: acc.cess + x.cess,
       }),
-      { cgst: 0, sgst: 0, igst: 0, cess: 0 }
+      { cgst: 0, sgst: 0, igst: 0, cess: 0 },
     );
 
     const closingTotals = {
@@ -359,16 +375,6 @@ export default function GstRegister() {
     });
   };
 
-  // const handleRowDoubleClick = (row) => {
-  //   if (viewMode !== "Record Wise") return;
-
-  //   if (row._id) {
-  //     setSelectedRowId(row._id);   // ✅ highlight
-  //     alert(`ID: ${row._id}`);
-  //   }else{
-  //     alert("ID Not Found!!")
-  //   }
-  // };
   const handleRowDoubleClick = (row) => {
     if (viewMode !== "Record Wise") return;
     if (!row._id || !row.entryType) return;
@@ -387,10 +393,152 @@ export default function GstRegister() {
       });
     }
   };
+  
+  const handlePrint = () => {
+    const WinPrint = window.open("", "", "width=1200,height=800");
 
+    WinPrint.document.write(`
+      <html>
+      <head>
+      <style>
+        @page { size: A4 landscape; margin: 10mm; }
+
+        body { font-family: serif; font-size: 12px; margin:0; padding:0; }
+
+        .print-header { text-align: center; margin-bottom: 14px; }
+        .company-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .company-address, .company-city { font-size: 12px; }
+        .report-title { margin-top: 6px; font-size: 13px; font-weight: bold; }
+
+        table { border-collapse: collapse; width: 100% !important; }
+        th, td { border: 1px solid black; padding: 4px; font-size: 11px; }
+        th { background: #f0f0f0; text-align: center; }
+        .text-end { text-align: right; }
+
+        /* IMPORTANT FIX FOR PRINT */
+        .MuiCard-root{
+          height:auto !important;
+          max-height:none !important;
+          box-shadow:none !important;
+        }
+
+        .MuiTableContainer-root{
+          height:auto !important;
+          max-height:none !important;
+          overflow:visible !important;
+        }
+
+        /* --- Summary Row --- */
+        .summary-grid {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          margin-top: 12px;
+        }
+
+        .summary-card {
+          flex: 1;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          padding: 8px;
+          font-size: 11px;
+          text-align: center;
+          background: #f7f9fc;
+        }
+
+        @media print {
+          body { font-size: 11px; }
+          .summary-grid { flex-direction: row !important; }
+        }
+
+      </style>
+      </head>
+      <body>
+
+        <div class="print-header">
+          <div class="company-name">${companyName}</div>
+          <div class="company-address">${companyAdd}</div>
+          <div class="company-city">${companyCity}</div>
+          <div class="report-title">
+            GST REGISTER FROM ${fromDate} TO ${toDate}
+          </div>
+        </div>
+    `);
+
+    // TABLE
+    WinPrint.document.write(printRef.current.innerHTML);
+
+    // SUMMARY
+    WinPrint.document.write(`
+      <div class="summary-grid">
+
+        <div class="summary-card">
+          <b>OPENING</b><br>
+          CGST: ${fmt(summary.opening.cgst)}<br>
+          SGST: ${fmt(summary.opening.sgst)}<br>
+          IGST: ${fmt(summary.opening.igst)}<br>
+          CESS: ${fmt(summary.opening.cess)}<br>
+          <b>Total: ${fmt(
+            summary.opening.cgst +
+            summary.opening.sgst +
+            summary.opening.igst +
+            summary.opening.cess
+          )}</b>
+        </div>
+
+        <div class="summary-card">
+          <b>PURCHASE</b><br>
+          CGST: ${fmt(summary.purchase.cgst)}<br>
+          SGST: ${fmt(summary.purchase.sgst)}<br>
+          IGST: ${fmt(summary.purchase.igst)}<br>
+          CESS: ${fmt(summary.purchase.cess)}<br>
+          <b>Total: ${fmt(
+            summary.purchase.cgst +
+            summary.purchase.sgst +
+            summary.purchase.igst +
+            summary.purchase.cess
+          )}</b>
+        </div>
+
+        <div class="summary-card">
+          <b>SALE</b><br>
+          CGST: ${fmt(summary.sale.cgst)}<br>
+          SGST: ${fmt(summary.sale.sgst)}<br>
+          IGST: ${fmt(summary.sale.igst)}<br>
+          CESS: ${fmt(summary.sale.cess)}<br>
+          <b>Total: ${fmt(
+            summary.sale.cgst +
+            summary.sale.sgst +
+            summary.sale.igst +
+            summary.sale.cess
+          )}</b>
+        </div>
+
+        <div class="summary-card">
+          <b>CLOSING</b><br>
+          CGST: ${fmt(summary.closing.cgst)}<br>
+          SGST: ${fmt(summary.closing.sgst)}<br>
+          IGST: ${fmt(summary.closing.igst)}<br>
+          CESS: ${fmt(summary.closing.cess)}<br>
+          <b>Total: ${fmt(
+            summary.closing.cgst +
+            summary.closing.sgst +
+            summary.closing.igst +
+            summary.closing.cess
+          )}</b>
+        </div>
+
+      </div>
+    `);
+
+    WinPrint.document.write("</body></html>");
+    WinPrint.document.close();
+    WinPrint.print();
+    WinPrint.close();
+  };
 
   return (
-    <div className="p-3">
+    <div className="p-2">
       <h4 style={{ marginTop: -40 }} className="headerSale">
         GST REGISTER
       </h4>
@@ -398,40 +546,65 @@ export default function GstRegister() {
       {/* Filters & View Mode */}
       <div className="d-flex gap-3 my-3 align-items-center">
         <div>
-          <label>From:</label>
-          <input
-            type="date"
+          <InputMask
+            mask="99-99-9999"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-          />
+          >
+            {(inputProps) => (
+              <TextField
+                {...inputProps}
+                fullWidth
+                label="FROM"
+                variant="filled"
+                className="custom-bordered-input"
+                size="small"
+                name="fromDate"
+              />
+            )}
+          </InputMask>
         </div>
         <div>
-          <label>To:</label>
-          <input
-            type="date"
+          <InputMask
+            mask="99-99-9999"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-          />
+          >
+            {(inputProps) => (
+              <TextField
+                {...inputProps}
+                fullWidth
+                label="UPTO"
+                variant="filled"
+                className="custom-bordered-input"
+                size="small"
+                name="to"
+              />
+            )}
+          </InputMask>
         </div>
 
         <div>
-          <label>View Mode:</label>
-          <select
+          <TextField
+            label="VIEW MODE"
+            select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value)}
-            className="form-select"
-            style={{ width: "150px" }}
+            size="small"
+            variant="filled"
+            sx={{ width: 180 }}
+            className="custom-bordered-input"
           >
-            <option value="Record Wise">Record Wise</option>
-            <option value="Date Wise">Date Wise</option>
-            <option value="Month Wise">Month Wise</option>
-          </select>
+            <MenuItem value="Record Wise">Record Wise</MenuItem>
+            <MenuItem value="Date Wise">Date Wise</MenuItem>
+            <MenuItem value="Month Wise">Month Wise</MenuItem>
+          </TextField>
         </div>
 
         <Button
           className="Buttonz"
           variant="contained"
-          onClick={() => setPrintOpen(true)}
+          onClick={handlePrint}
         >
           Print
         </Button>
@@ -447,158 +620,206 @@ export default function GstRegister() {
       </div>
 
       {/* Table */}
-      <table className="custom-table table table-bordered text-center small">
-        <thead style={{ backgroundColor: "#4F81BD", color: "white", fontSize: "16px" }}>
-          <tr>
-            <th rowSpan="2">Sr</th>
-            <th rowSpan="2">Date</th>
-            <th rowSpan="2">B.No</th>
-            <th colSpan="4">Opening Balance</th>
-            <th colSpan="4">Gst Purchase</th>
-            <th colSpan="4">Gst Sale</th>
-            <th colSpan="4">Closing Balance</th>
-          </tr>
-          <tr>
-            <th>C.Gst</th>
-            <th>S.Gst</th>
-            <th>I.Gst</th>
-            <th>Cess</th>
-            <th>C.Gst</th>
-            <th>S.Gst</th>
-            <th>I.Gst</th>
-            <th>Cess</th>
-            <th>C.Gst</th>
-            <th>S.Gst</th>
-            <th>I.Gst</th>
-            <th>Cess</th>
-            <th>C.Gst</th>
-            <th>S.Gst</th>
-            <th>I.Gst</th>
-            <th>Cess</th>
-          </tr>
-        </thead>
-        <tbody style={{ fontSize: "14px" }}>
-          {rows.map((r) => (
-            <tr key={r.sr}
-              onDoubleClick={() => handleRowDoubleClick(r)}
-              className={r._id === selectedRowId ? "selected-rowId" : ""}
-              style={{
-                cursor: viewMode === "Record Wise" ? "pointer" : "default",
-                
-              }}
-            >
-              <td>{r.sr}</td>
-              <td>{r.date}</td>
-              <td>{r.bill}</td>
+      <div ref={printRef}>
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+          overflow: "hidden",
+          height: 370,
+          maxHeight: 370,
+        }}
+      >
+        <CardContent sx={{ padding: 0 }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              width: "100%",
+              height: 370,
+              maxHeight: 370,
+              overflowY: "auto",
+              overflowX: "auto",
+              scrollbarWidth: "thin",
+              "&::-webkit-scrollbar": {
+                width: 8,
+                height: 8,
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "#bdbdbd",
+                borderRadius: 10,
+              },
+            }}
+          >
+            <Table size="small">
+              {/* HEADER */}
+              <TableHead>
+                {/* FIRST HEADER ROW */}
+                <TableRow
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 3,
+                    "& th": {
+                      background: "linear-gradient(90deg,#4F81BD,#3A6AA3)",
+                      color: "white",
+                      fontWeight: 600,
+                      textAlign: "center",
+                      fontSize: 14,
+                      height: 40,
+                    },
+                  }}
+                >
+                  <TableCell rowSpan={2}>SR</TableCell>
+                  <TableCell rowSpan={2}>DATE</TableCell>
+                  <TableCell rowSpan={2}>B.NO</TableCell>
 
-              {/* Opening */}
-              <td>{fmt(r.opening?.cgst)}</td>
-              <td>{fmt(r.opening?.sgst)}</td>
-              <td>{fmt(r.opening?.igst)}</td>
-              <td>{fmt(r.opening?.cess)}</td>
+                  <TableCell colSpan={4}>OPENING BALANCE</TableCell>
+                  <TableCell colSpan={4}>GST PURCHASE</TableCell>
+                  <TableCell colSpan={4}>GST SALE</TableCell>
+                  <TableCell colSpan={4}>CLOSING BALANCE</TableCell>
+                </TableRow>
 
-              {/* Purchase */}
-              <td>{fmt(r.purchase?.cgst)}</td>
-              <td>{fmt(r.purchase?.sgst)}</td>
-              <td>{fmt(r.purchase?.igst)}</td>
-              <td>{fmt(r.purchase?.cess)}</td>
+                {/* SECOND HEADER ROW */}
+                <TableRow
+                  sx={{
+                    position: "sticky",
+                    top: 40,
+                    zIndex: 2,
+                    "& th": {
+                      background: "#5A8DC9",
+                      color: "white",
+                      fontWeight: 600,
+                      textAlign: "center",
+                      fontSize: 13,
+                      height: 40,
+                    },
+                  }}
+                >
+                  {/* Opening */}
+                  <TableCell>CGST</TableCell>
+                  <TableCell>SGST</TableCell>
+                  <TableCell>IGST</TableCell>
+                  <TableCell>CESS</TableCell>
 
-              {/* Sale */}
-              <td>{fmt(r.sale?.cgst)}</td>
-              <td>{fmt(r.sale?.sgst)}</td>
-              <td>{fmt(r.sale?.igst)}</td>
-              <td>{fmt(r.sale?.cess)}</td>
+                  {/* Purchase */}
+                  <TableCell>CGST</TableCell>
+                  <TableCell>SGST</TableCell>
+                  <TableCell>IGST</TableCell>
+                  <TableCell>CESS</TableCell>
 
-              {/* Closing */}
-              <td>{fmt(r.closing?.cgst)}</td>
-              <td>{fmt(r.closing?.sgst)}</td>
-              <td>{fmt(r.closing?.igst)}</td>
-              <td>{fmt(r.closing?.cess)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {/* Sale */}
+                  <TableCell>CGST</TableCell>
+                  <TableCell>SGST</TableCell>
+                  <TableCell>IGST</TableCell>
+                  <TableCell>CESS</TableCell>
+
+                  {/* Closing */}
+                  <TableCell>CGST</TableCell>
+                  <TableCell>SGST</TableCell>
+                  <TableCell>IGST</TableCell>
+                  <TableCell>CESS</TableCell>
+                </TableRow>
+              </TableHead>
+
+              {/* BODY */}
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow
+                    key={r.sr}
+                    hover
+                    onDoubleClick={() => handleRowDoubleClick(r)}
+                    sx={{
+                      "& td": {
+                        fontSize: "13px",
+                      },
+                      "&:nth-of-type(even)": {
+                        backgroundColor: "#fafafa",
+                      },
+                      "&:hover": {
+                        backgroundColor: "#E3F2FD",
+                      },
+                      backgroundColor:
+                        r._id === selectedRowId ? "#BBDEFB" : "inherit",
+                      cursor:
+                        viewMode === "Record Wise" ? "pointer" : "default",
+                    }}
+                  >
+                    <TableCell align="center">{r.sr}</TableCell>
+                    <TableCell align="center">{r.date}</TableCell>
+                    <TableCell align="center">{r.bill}</TableCell>
+
+                    {/* Opening */}
+                    <TableCell align="right">{fmt(r.opening?.cgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.opening?.sgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.opening?.igst)}</TableCell>
+                    <TableCell align="right">{fmt(r.opening?.cess)}</TableCell>
+
+                    {/* Purchase */}
+                    <TableCell align="right">{fmt(r.purchase?.cgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.purchase?.sgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.purchase?.igst)}</TableCell>
+                    <TableCell align="right">{fmt(r.purchase?.cess)}</TableCell>
+
+                    {/* Sale */}
+                    <TableCell align="right">{fmt(r.sale?.cgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.sale?.sgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.sale?.igst)}</TableCell>
+                    <TableCell align="right">{fmt(r.sale?.cess)}</TableCell>
+
+                    {/* Closing */}
+                    <TableCell align="right">{fmt(r.closing?.cgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.closing?.sgst)}</TableCell>
+                    <TableCell align="right">{fmt(r.closing?.igst)}</TableCell>
+                    <TableCell align="right">{fmt(r.closing?.cess)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+      </div>
 
       {/* Summary */}
-      <div className="mt-2">
-        <table className="custom-table table table-bordered text-center small">
-          <thead style={{ backgroundColor: "#4F81BD", color: "white", fontSize: "16px" }}>
-            <tr>
-              <th></th>
-              <th>CGST</th>
-              <th>SGST</th>
-              <th>IGST</th>
-              <th>Cess</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody style={{ fontSize: "14px" }}>
-            <tr>
-              <td>Opening Balance</td>
-              <td>{fmt(summary.opening.cgst)}</td>
-              <td>{fmt(summary.opening.sgst)}</td>
-              <td>{fmt(summary.opening.igst)}</td>
-              <td>{fmt(summary.opening.cess)}</td>
-              <td>
-                {fmt(
-                  (summary.opening.cgst || 0) +
-                    (summary.opening.sgst || 0) +
-                    (summary.opening.igst || 0) +
-                    (summary.opening.cess || 0)
-                )}
-              </td>
-            </tr>
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        {[
+          { label: "OPENING", data: summary.opening },
+          { label: "PURCHASE", data: summary.purchase },
+          { label: "SALE", data: summary.sale },
+          { label: "CLOSING", data: summary.closing },
+        ].map((item, i) => (
+          <Grid item xs={12} md={3} key={i}>
+            <Card
+              sx={{
+                borderRadius: 3,
+                boxShadow: 3,
+                background: "linear-gradient(135deg,#ffffff,#f5f7fb)",
+              }}
+            >
+              <CardContent>
+                <h6 style={{ fontWeight: 600 }}>{item.label}</h6>
 
-            <tr>
-              <td>Gst Purchase</td>
-              <td>{fmt(summary.purchase.cgst)}</td>
-              <td>{fmt(summary.purchase.sgst)}</td>
-              <td>{fmt(summary.purchase.igst)}</td>
-              <td>{fmt(summary.purchase.cess)}</td>
-              <td>
-                {fmt(
-                  (summary.purchase.cgst || 0) +
-                    (summary.purchase.sgst || 0) +
-                    (summary.purchase.igst || 0) +
-                    (summary.purchase.cess || 0)
-                )}
-              </td>
-            </tr>
+                <div>CGST : {fmt(item.data.cgst)}</div>
+                <div>SGST : {fmt(item.data.sgst)}</div>
+                <div>IGST : {fmt(item.data.igst)}</div>
+                <div>CESS : {fmt(item.data.cess)}</div>
 
-            <tr>
-              <td>Gst Sale</td>
-              <td>{fmt(summary.sale.cgst)}</td>
-              <td>{fmt(summary.sale.sgst)}</td>
-              <td>{fmt(summary.sale.igst)}</td>
-              <td>{fmt(summary.sale.cess)}</td>
-              <td>
-                {fmt(
-                  (summary.sale.cgst || 0) +
-                    (summary.sale.sgst || 0) +
-                    (summary.sale.igst || 0) +
-                    (summary.sale.cess || 0)
-                )}
-              </td>
-            </tr>
+                <hr />
 
-            <tr>
-              <td>Closing Balance</td>
-              <td>{fmt(summary.closing.cgst)}</td>
-              <td>{fmt(summary.closing.sgst)}</td>
-              <td>{fmt(summary.closing.igst)}</td>
-              <td>{fmt(summary.closing.cess)}</td>
-              <td>
-                {fmt(
-                  (summary.closing.cgst || 0) +
-                    (summary.closing.sgst || 0) +
-                    (summary.closing.igst || 0) +
-                    (summary.closing.cess || 0)
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <b>
+                  Total :{" "}
+                  {fmt(
+                    item.data.cgst +
+                      item.data.sgst +
+                      item.data.igst +
+                      item.data.cess,
+                  )}
+                </b>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </div>
   );
 }
