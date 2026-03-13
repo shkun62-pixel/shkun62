@@ -18,6 +18,8 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import financialYear from "../../Shared/financialYear";
 import useCompanySetup from "../../Shared/useCompanySetup";
+import SaleRegister from "./SaleRegister";
+import PurRegister from "./PurRegister";
 
 const style = {
   position: "absolute",
@@ -96,6 +98,23 @@ export default function MonthlyFormModal({ open, onClose }) {
     selectSeries: false,
   });
 
+  const [openSaleRegister, setOpenSaleRegister] = useState(false);
+  const handleOpenSaleRegister = () => {
+    setOpenSaleRegister(true);
+  };
+
+  const handleCloseSaleRegister = () => {
+    setOpenSaleRegister(false);
+  };
+  const [openPurRegister, setOpenPurRegister] = useState(false);
+  const handleOpenPurRegister = () => {
+    setOpenPurRegister(true);
+  };
+
+  const handleClosePurRegister = () => {
+    setOpenPurRegister(false);
+  };
+
   const getCurrentFYAndMonth = () => {
     const today = new Date();
 
@@ -166,8 +185,26 @@ export default function MonthlyFormModal({ open, onClose }) {
   };
 
   const parseDate = (dateStr) => {
-    const [day, month, year] = dateStr.split("/");
-    return new Date(`${year}-${month}-${day}`);
+    if (!dateStr) return null;
+
+    // ISO format (2026-03-09T00:00:00.000Z)
+    if (dateStr.includes("T")) {
+      return new Date(dateStr);
+    }
+
+    // dd/mm/yyyy
+    if (dateStr.includes("/")) {
+      const [day, month, year] = dateStr.split("/");
+      return new Date(year, month - 1, day);
+    }
+
+    // dd-mm-yyyy
+    if (dateStr.includes("-")) {
+      const [day, month, year] = dateStr.split("-");
+      return new Date(year, month - 1, day);
+    }
+
+    return new Date(dateStr);
   };
 
   const groupHSNData = (salesData) => {
@@ -204,39 +241,6 @@ export default function MonthlyFormModal({ open, onClose }) {
 
     return Object.values(hsnMap);
   };
-
-  // const groupB2CSData = (data) => {
-  //   const grouped = {};
-
-  //   data.forEach((sale) => {
-  //     const customer = sale.customerDetails?.[0] || {};
-  //     const form = sale.formData || {};
-  //     const item = sale.items?.[0] || {};
-
-  //     const stateName = customer.state || "Unknown";
-  //     const stateCode = GST_STATE_CODES[stateName] || "";
-  //     const rate = Number(item.gst || 0);
-
-  //     const key = `${stateName}_${rate}`;
-
-  //     if (!grouped[key]) {
-  //       grouped[key] = {
-  //         type: "OE",
-  //         placeOfSupply: stateCode
-  //           ? `${stateCode}-${stateName}`
-  //           : stateName,
-  //         rate: rate,
-  //         taxableValue: 0,
-  //         cess: 0,
-  //       };
-  //     }
-
-  //     grouped[key].taxableValue += Number(form.sub_total || 0);
-  //     grouped[key].cess += Number(form.pcess || 0);
-  //   });
-
-  //   return Object.values(grouped);
-  // };
 
   const groupB2CSData = (data) => {
     const grouped = {};
@@ -934,60 +938,76 @@ export default function MonthlyFormModal({ open, onClose }) {
         nameSheet.getCell("A1").value = "DETAIL OF OUTWARD SUPPLY";
         nameSheet.getCell("F7").value = "Apr-25";
 
-        // ---- FLATTEN DATA ----
-        let allRows = [];
+        let groupeddata = {};
 
         salesFiltered.forEach((sale) => {
           const customer = sale.customerDetails?.[0] || {};
           const form = sale.formData || {};
           const items = sale.items || [];
 
-          items.forEach((item) => {
-            allRows.push({
+          const key = `${customer.vacode}_${form.vno}`;
+
+          if (!groupeddata[key]) {
+            groupeddata[key] = {
               customerName: customer.vacode || "",
               customerGST: customer.gstno || "",
               form,
-              item,
-            });
+              taxable: 0,
+              igst: 0,
+              cgst: 0,
+              sgst: 0,
+              total: 0,
+              weight: 0,
+              pkgs: 0,
+              gstRate: 0,
+              tariff: "",
+            };
+          }
+
+          items.forEach((item) => {
+            groupeddata[key].taxable += Number(item.amount || 0);
+            groupeddata[key].igst += Number(item.itax || 0);
+            groupeddata[key].cgst += Number(item.ctax || 0);
+            groupeddata[key].sgst += Number(item.stax || 0);
+            groupeddata[key].total += Number(item.vamt || 0);
+            groupeddata[key].weight += Number(item.weight || 0);
+            groupeddata[key].pkgs += Number(item.pkgs || 0);
+
+            groupeddata[key].gstRate = Number(item.gst || 0);
+            groupeddata[key].tariff = item.tariff || "";
           });
         });
 
         // ---- SORT ALPHABETICALLY ----
+        let allRows = Object.values(groupeddata);
         allRows.sort((a, b) => a.customerName.localeCompare(b.customerName));
 
         // ---- INSERT ROWS ----
         allRows.forEach((data) => {
-          const { customerName, customerGST, form, item } = data;
 
           const row = nameSheet.getRow(nameStartRow++);
 
-          const taxable = Number(item.amount || 0);
-          const igst = Number(item.itax || 0);
-          const cgst = Number(item.ctax || 0);
-          const sgst = Number(item.stax || 0);
-          const total = Number(item.vamt || 0);
-          const gstRate = Number(item.gst || 0);
+          row.getCell("A").value = data.customerGST;
+          row.getCell("B").value = data.customerName;
+          row.getCell("C").value = formatDate(data.form.date);
+          row.getCell("D").value = data.form.vno || "";
+          row.getCell("E").value = data.tariff || "";
 
-          row.getCell("A").value = customerGST;
-          row.getCell("B").value = customerName;
-          row.getCell("C").value = formatDate(form.date);
-          row.getCell("D").value = form.vno || "";
-          row.getCell("E").value = item.tariff || "";
-          row.getCell("F").value = taxable;
+          row.getCell("F").value = data.taxable;
 
-          row.getCell("G").value = igst > 0 ? gstRate : 0;
-          row.getCell("H").value = igst;
+          row.getCell("G").value = data.igst > 0 ? data.gstRate : 0;
+          row.getCell("H").value = data.igst;
 
-          row.getCell("I").value = cgst > 0 ? gstRate / 2 : 0;
-          row.getCell("J").value = cgst;
+          row.getCell("I").value = data.cgst > 0 ? data.gstRate / 2 : 0;
+          row.getCell("J").value = data.cgst;
 
-          row.getCell("K").value = sgst > 0 ? gstRate / 2 : 0;
-          row.getCell("L").value = sgst;
+          row.getCell("K").value = data.sgst > 0 ? data.gstRate / 2 : 0;
+          row.getCell("L").value = data.sgst;
 
           row.getCell("M").value = 0;
-          row.getCell("N").value = total;
-          row.getCell("O").value = Number(item.weight || 0);
-          row.getCell("P").value = Number(item.pkgs || 0);
+          row.getCell("N").value = data.total;
+          row.getCell("O").value = data.weight;
+          row.getCell("P").value = data.pkgs;
 
           row.commit();
         });
@@ -1064,6 +1084,9 @@ export default function MonthlyFormModal({ open, onClose }) {
           row.commit();
 
         });
+        workbook.views = [{
+            activeTab: workbook.getWorksheet("GROSS").id - 1,},
+        ];
 
         const fileBuffer = await workbook.xlsx.writeBuffer();
 
@@ -1077,18 +1100,18 @@ export default function MonthlyFormModal({ open, onClose }) {
       
       // PURCHASE GSTR-2
       else if (formData.reportName === "Purchase GSTR-2") {
-        const salesRes = await axios.get(
+        const purRes = await axios.get(
           "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase",
         );
 
-        const salesFiltered = salesRes.data.filter((sale) => {
+        const purFiltered = purRes.data.filter((pur) => {
 
-          const form = sale.formData || {};
-          const items = sale.items || [];
+          const form = pur.formData || {};
+          const items = pur.items || [];
 
-          const saleDate = new Date(form.date);
+          const purDate = parseDate(form.date);
 
-          const dateMatch = saleDate >= from && saleDate <= to;
+          const dateMatch = purDate >= from && purDate <= to;
 
           const taxTypeMatch =
             formData.taxTypeS === "All" ||
@@ -1123,10 +1146,10 @@ export default function MonthlyFormModal({ open, onClose }) {
 
         let grouped = {};
 
-        salesFiltered.forEach((sale) => {
-          const customer = sale.supplierdetails?.[0] || {};
-          const form = sale.formData || {};
-          const items = sale.items || [];
+        purFiltered.forEach((pur) => {
+          const customer = pur.supplierdetails?.[0] || {};
+          const form = pur.formData || {};
+          const items = pur.items || [];
 
           const key = String(customer.Vcode || "UNKNOWN");
 
@@ -1209,10 +1232,10 @@ export default function MonthlyFormModal({ open, onClose }) {
           `${formData.fromDate} - ${formData.toDate}`;
         productSheet.getCell("F7").value = "Apr-25";
 
-        salesFiltered.forEach((sale) => {
-          const customer = sale.supplierdetails?.[0] || {};
-          const form = sale.formData || {};
-          const items = sale.items || [];
+        purFiltered.forEach((pur) => {
+          const customer = pur.supplierdetails?.[0] || {};
+          const form = pur.formData || {};
+          const items = pur.items || [];
 
           items.forEach((item) => {
             const row = productSheet.getRow(productStartRow++);
@@ -1248,7 +1271,7 @@ export default function MonthlyFormModal({ open, onClose }) {
             row.getCell("R").value = formatDate(form.date);
             row.getCell("S").value = item.sdisc || "";
             row.getCell("T").value = item.sdisc || "";
-            row.getCell("U").value = item.Scodess || "";
+            row.getCell("U").value = item.Pcodess || "";
 
             row.commit();
           });
@@ -1265,10 +1288,10 @@ export default function MonthlyFormModal({ open, onClose }) {
         // ---- FLATTEN DATA ----
         let allRows = [];
 
-        salesFiltered.forEach((sale) => {
-          const customer = sale.supplierdetails?.[0] || {};
-          const form = sale.formData || {};
-          const items = sale.items || [];
+        purFiltered.forEach((pur) => {
+          const customer = pur.supplierdetails?.[0] || {};
+          const form = pur.formData || {};
+          const items = pur.items || [];
 
           items.forEach((item) => {
             allRows.push({
@@ -1332,65 +1355,68 @@ export default function MonthlyFormModal({ open, onClose }) {
         billSheet.getCell("B7").value = `${formData.fromDate} - ${formData.toDate}`;
         billSheet.getCell("F7").value = "Apr-25";
 
-        // LOOP SALES (ONE ROW PER BILL)
+        // LOOP PURCHASE (ONE ROW PER ITEM)
 
-        salesFiltered.forEach((sale) => {
+        purFiltered.forEach((pur) => {
 
-          const customer = sale.supplierdetails?.[0] || {};
-          const form = sale.formData || {};
-          const items = sale.items || [];
-
-          const row = billSheet.getRow(billStartRow++);
-
-          const taxable = Number(form.sub_total || 0);
-          const igst = Number(form.igst || 0);
-          const cgst = Number(form.cgst || 0);
-          const sgst = Number(form.sgst || 0);
-          const cess = Number(form.cess1 || 0);
-
-          const totalGST = igst + cgst + sgst;
-          const totalAmount = taxable + totalGST + cess;
-
-          let totalWeight = 0;
-          let totalPkgs = 0;
-          let tarrif = "";
-          let gstRate = 0
-          let SaleAc = "";
+          const customer = pur.supplierdetails?.[0] || {};
+          const form = pur.formData || {};
+          const items = pur.items || [];
 
           items.forEach((item) => {
-            totalWeight += Number(item.weight || 0);
-            totalPkgs += Number(item.pkgs || 0);
-            tarrif = item.tariff || "" ;
-            gstRate = Number(item.gst || 0);
-            SaleAc = item.Scodess || "";
+
+            const row = billSheet.getRow(billStartRow++);
+
+            const taxable = Number(item.amount || 0);
+            const igst = Number(item.itax || 0);
+            const cgst = Number(item.ctax || 0);
+            const sgst = Number(item.stax || 0);
+            const cess = Number(item.cess || 0);
+
+            const totalAmount = taxable + igst + cgst + sgst + cess;
+
+            const gstRate = Number(item.gst || 0);
+            const tariff = item.tariff || "";
+            const purAc = item.Pcodess || "";
+
+            const weight = Number(item.weight || 0);
+            const pkgs = Number(item.pkgs || 0);
+
+            row.getCell("A").value = customer.gstno || "";
+            row.getCell("B").value = customer.vacode || "";
+            row.getCell("C").value = formatDate(form.date);
+            row.getCell("D").value = form.vno || "";
+            row.getCell("E").value = tariff;
+            row.getCell("F").value = taxable;
+
+            row.getCell("G").value = igst > 0 ? gstRate : 0;
+            row.getCell("H").value = igst;
+
+            row.getCell("I").value = cgst > 0 ? gstRate / 2 : 0;
+            row.getCell("J").value = cgst;
+
+            row.getCell("K").value = sgst > 0 ? gstRate / 2 : 0;
+            row.getCell("L").value = sgst;
+
+            row.getCell("M").value = cess;
+            row.getCell("N").value = totalAmount;
+            row.getCell("O").value = weight;
+            row.getCell("P").value = pkgs;
+            row.getCell("Q").value = form.stype || "";
+            row.getCell("R").value = formatDate(form.date);
+            row.getCell("S").value = purAc;
+
+            row.commit();
+
           });
 
-          row.getCell("A").value = customer.gstno || "";
-          row.getCell("B").value = customer.vacode || "";
-          row.getCell("C").value = formatDate(form.date);
-          row.getCell("D").value = form.vno || "";
-          row.getCell("E").value = tarrif || "";
-          row.getCell("F").value = taxable;
-
-          row.getCell("G").value = igst > 0 ? gstRate : 0;
-          row.getCell("H").value = igst;
-
-          row.getCell("I").value = cgst > 0 ? gstRate / 2 : 0;
-          row.getCell("J").value = cgst;
-
-          row.getCell("K").value = sgst > 0 ? gstRate / 2 : 0;
-          row.getCell("L").value = sgst;
-          row.getCell("M").value = cess;
-          row.getCell("N").value = totalAmount;
-          row.getCell("O").value = totalWeight;
-          row.getCell("P").value = totalPkgs;
-          row.getCell("Q").value = form.stype || "";
-          row.getCell("R").value = formatDate(form.date);
-          row.getCell("S").value = SaleAc || "";
-
-          row.commit();
-
         });
+
+        workbook.views = [
+          {
+            activeTab: workbook.getWorksheet("GROSS").id - 1,
+          },
+        ];
 
         const fileBuffer = await workbook.xlsx.writeBuffer();
 
@@ -1402,178 +1428,16 @@ export default function MonthlyFormModal({ open, onClose }) {
         );
       }
 
-      // PURCHASE GSTR-2
-      // else if (formData.reportName === "Purchase GSTR-2") {
-      //   const purRes = await axios.get(
-      //     "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase",
-      //   );
+      // SALE REGISTER
+      else if(formData.reportName === "Sale Register"){
+        handleOpenSaleRegister()
+      }
 
-      //   const purFiltered = purRes.data.filter((sale) => {
-      //     const purDate = new Date(sale.formData?.date);
-      //     return purDate >= from && purDate <= to;
-      //   });
+      // PURCHASE REGISTER
+      else if(formData.reportName === "Purchase Register"){
+        handleOpenPurRegister()
+      }
 
-      //   // Load Template
-      //   const templateResponse = await fetch("excel/gstr-2.xlsx");
-      //   const buffer = await templateResponse.arrayBuffer();
-
-      //   const workbook = new ExcelJS.Workbook();
-      //   await workbook.xlsx.load(buffer);
-
-      //   workbook.definedNames.model = [];
-
-      //   const sheet = workbook.getWorksheet("GROSS");
-
-      //   // Company Details
-      //   sheet.getCell("B3").value = "1.GSTIN : " + companyGST;
-      //   sheet.getCell("B5").value =
-      //     "2.NAME OF TAXABLE PERSON : " + companyName + ", " + companyCity;
-      //   sheet.getCell("B7").value = `${formData.fromDate} - ${formData.toDate}`;
-
-      //   // ===============================
-      //   // GROUP PURCHASE BY SUPPLIER Vcode
-      //   // ===============================
-
-      //   let grouped = {};
-
-      //   purFiltered.forEach((pur) => {
-      //     const supplier = pur.supplierdetails?.[0] || {};
-      //     const form = pur.formData || {};
-      //     const items = pur.items || [];
-
-      //     const key = String(supplier.Vcode || "UNKNOWN");
-
-      //     const taxable = Number(form.sub_total || 0);
-      //     const igst = Number(form.igst || 0);
-      //     const cgst = Number(form.cgst || 0);
-      //     const sgst = Number(form.sgst || 0);
-      //     const cess = Number(form.cess1 || 0);
-
-      //     let totalWeight = 0;
-      //     let totalPkgs = 0;
-
-      //     items.forEach((item) => {
-      //       totalWeight += Number(item.weight || 0);
-      //       totalPkgs += Number(item.pkgs || 0);
-      //     });
-
-      //     if (!grouped[key]) {
-      //       grouped[key] = {
-      //         gstno: supplier.gstno || "",
-      //         name: supplier.vacode || "",
-      //         taxable: 0,
-      //         igst: 0,
-      //         cgst: 0,
-      //         sgst: 0,
-      //         cess: 0,
-      //         weight: 0,
-      //         pkgs: 0,
-      //       };
-      //     }
-
-      //     grouped[key].taxable += taxable;
-      //     grouped[key].igst += igst;
-      //     grouped[key].cgst += cgst;
-      //     grouped[key].sgst += sgst;
-      //     grouped[key].cess += cess;
-      //     grouped[key].weight += totalWeight;
-      //     grouped[key].pkgs += totalPkgs;
-      //   });
-
-      //   // ===============================
-      //   // WRITE GROUPED DATA TO GROSS
-      //   // ===============================
-
-      //   let startRow = 13;
-
-      //   Object.values(grouped).forEach((data) => {
-      //     const row = sheet.getRow(startRow++);
-
-      //     const totalGST = data.igst + data.cgst + data.sgst;
-      //     const totalAmount = data.taxable + totalGST + data.cess;
-
-      //     row.getCell("A").value = data.gstno;
-      //     row.getCell("B").value = data.name;
-      //     row.getCell("C").value = data.taxable;
-      //     row.getCell("E").value = data.igst;
-      //     row.getCell("G").value = data.cgst;
-      //     row.getCell("I").value = data.sgst;
-      //     row.getCell("L").value = totalGST;
-      //     row.getCell("M").value = data.cess;
-      //     row.getCell("N").value = totalAmount;
-      //     row.getCell("O").value = data.weight;
-      //     row.getCell("P").value = data.pkgs;
-
-      //     row.commit();
-      //   });
-
-      //   // ===============================
-      //   // PRODUCT WISE (NO GROUPING)
-      //   // ===============================
-
-      //   const productSheet = workbook.getWorksheet("PRODUCT_WISE");
-
-      //   let productStartRow = 13;
-
-      //   productSheet.getCell("A3").value = companyGST;
-      //   productSheet.getCell("A5").value = companyName + ", " + companyCity;
-      //   productSheet.getCell("B7").value =
-      //     `${formData.fromDate} - ${formData.toDate}`;
-
-      //   purFiltered.forEach((pur) => {
-      //     const supplier = pur.supplierdetails?.[0] || {};
-      //     const form = pur.formData || {};
-      //     const items = pur.items || [];
-
-      //     items.forEach((item) => {
-      //       const row = productSheet.getRow(productStartRow++);
-
-      //       const taxable = Number(item.amount || 0);
-      //       const igst = Number(item.itax || 0);
-      //       const cgst = Number(item.ctax || 0);
-      //       const sgst = Number(item.stax || 0);
-      //       const total = Number(item.vamt || 0);
-      //       const gstRate = Number(item.gst || 0);
-
-      //       row.getCell("A").value = supplier.gstno || "";
-      //       row.getCell("B").value = supplier.vacode || "";
-      //       row.getCell("C").value = form.date ? new Date(form.date) : "";
-      //       row.getCell("D").value = form.vno || "";
-      //       row.getCell("E").value = item.tariff || "";
-      //       row.getCell("F").value = taxable;
-
-      //       row.getCell("G").value = igst > 0 ? gstRate : 0;
-      //       row.getCell("H").value = igst;
-
-      //       row.getCell("I").value = cgst > 0 ? gstRate / 2 : 0;
-      //       row.getCell("J").value = cgst;
-
-      //       row.getCell("K").value = sgst > 0 ? gstRate / 2 : 0;
-      //       row.getCell("L").value = sgst;
-
-      //       row.getCell("M").value = 0;
-      //       row.getCell("N").value = total;
-      //       row.getCell("O").value = Number(item.weight || 0);
-      //       row.getCell("P").value = Number(item.pkgs || 0);
-      //       row.getCell("Q").value = form.stype || "";
-      //       row.getCell("R").value = form.date ? new Date(form.date) : "";
-      //       row.getCell("S").value = item.sdisc || "";
-      //       row.getCell("T").value = item.sdisc || "";
-      //       row.getCell("U").value = item.Scodess || "";
-
-      //       row.commit();
-      //     });
-      //   });
-
-      //   const fileBuffer = await workbook.xlsx.writeBuffer();
-
-      //   saveAs(
-      //     new Blob([fileBuffer], {
-      //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      //     }),
-      //     "gstr-2.xlsx",
-      //   );
-      // } 
       else {
         alert("Export not configured for selected report");
       }
@@ -1756,7 +1620,8 @@ export default function MonthlyFormModal({ open, onClose }) {
               </Grid>
             </Grid>
           )}
-          {formData.reportName === "Sale GSTR-1"  && (
+          {(formData.reportName === "Sale GSTR-1" || formData.reportName === "Purchase GSTR-2"
+           || formData.reportName === "Sale Register" || formData.reportName === "Purchase Register")  && (
             <Grid container spacing={1} mt={1}>
               {/* Default UOM */}
               <Grid item xs={4}>
@@ -1991,6 +1856,16 @@ export default function MonthlyFormModal({ open, onClose }) {
               "Export"
             )}
           </Button>
+          <SaleRegister
+            open={openSaleRegister}
+            onClose={handleCloseSaleRegister}
+            formData={formData}
+          />
+          <PurRegister
+            open={openPurRegister}
+            onClose={handleClosePurRegister}
+            formData={formData}
+          />
         </Box>
       </Box>
     </Modal>
