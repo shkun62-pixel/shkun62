@@ -2,10 +2,12 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import axios from "axios";
 import useCompanySetup from "../../Shared/useCompanySetup";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 const SaleRegister = ({ open, onClose, formData }) => {
   const printRef = useRef();
-  const { companyName, companyAdd, companyCity, companyGST } =
+  const { companyName, companyAdd, companyCity, companyGST, companyPAN } =
     useCompanySetup();
   const [sales, setSales] = useState([]);
 
@@ -44,6 +46,84 @@ const SaleRegister = ({ open, onClose, formData }) => {
     fetchSales();
   }, [open, formData]);
 
+  // const { rows, totals } = useMemo(() => {
+  //   const totals = {
+  //     totalValue: 0,
+  //     interValue: 0,
+  //     interIGST: 0,
+  //     b2bValue: 0,
+  //     b2bCGST: 0,
+  //     b2bSGST: 0,
+  //     b2bCESS: 0,
+  //     b2cValue: 0,
+  //     b2cCGST: 0,
+  //     b2cSGST: 0,
+  //   };
+
+  //   const rows = sales.map((sale) => {
+  //     const f = sale.formData || {};
+  //     const cust = sale.customerDetails?.[0] || {};
+
+  //     const igst = Number(f.igst || 0);
+  //     const cgst = Number(f.cgst || 0);
+  //     const sgst = Number(f.sgst || 0);
+  //     const cess = Number(f.cess || 0);
+
+  //     const taxable = Number(f.sub_total || 0);
+  //     const grand = Number(f.grandtotal || 0);
+
+  //     totals.totalValue += grand;
+
+  //     const row = {
+  //       date: f.date,
+  //       bill: f.vbillno,
+  //       name: cust.vacode,
+  //       gst: cust.gstno,
+  //       total: grand,
+
+  //       interValue: "",
+  //       interIGST: "",
+  //       b2bValue: "",
+  //       b2bCGST: "",
+  //       b2bSGST: "",
+  //       b2bCESS: "",
+  //       b2cValue: "",
+  //       b2cCGST: "",
+  //       b2cSGST: "",
+  //     };
+
+  //     if (igst > 0) {
+  //       row.interValue = taxable;
+  //       row.interIGST = igst;
+
+  //       totals.interValue += taxable;
+  //       totals.interIGST += igst;
+  //     } else if (cust.gstno) {
+  //       row.b2bValue = taxable;
+  //       row.b2bCGST = cgst;
+  //       row.b2bSGST = sgst;
+  //       row.b2bCESS = cess;
+
+  //       totals.b2bValue += taxable;
+  //       totals.b2bCGST += cgst;
+  //       totals.b2bSGST += sgst;
+  //       totals.b2bCESS += cess;
+  //     } else {
+  //       row.b2cValue = taxable;
+  //       row.b2cCGST = cgst;
+  //       row.b2cSGST = sgst;
+
+  //       totals.b2cValue += taxable;
+  //       totals.b2cCGST += cgst;
+  //       totals.b2cSGST += sgst;
+  //     }
+
+  //     return row;
+  //   });
+
+  //   return { rows, totals };
+  // }, [sales]);
+
   const { rows, totals } = useMemo(() => {
     const totals = {
       totalValue: 0,
@@ -56,6 +136,8 @@ const SaleRegister = ({ open, onClose, formData }) => {
       b2cValue: 0,
       b2cCGST: 0,
       b2cSGST: 0,
+      unRegOutValue: 0,
+      unRegOutIGST: 0,
     };
 
     const rows = sales.map((sale) => {
@@ -69,6 +151,9 @@ const SaleRegister = ({ open, onClose, formData }) => {
 
       const taxable = Number(f.sub_total || 0);
       const grand = Number(f.grandtotal || 0);
+      const taxType = f.stype || "";
+
+      const isRegistered = cust.gstno && cust.gstno.trim() !== "";
 
       totals.totalValue += grand;
 
@@ -81,22 +166,31 @@ const SaleRegister = ({ open, onClose, formData }) => {
 
         interValue: "",
         interIGST: "",
+
         b2bValue: "",
         b2bCGST: "",
         b2bSGST: "",
         b2bCESS: "",
+
         b2cValue: "",
         b2cCGST: "",
         b2cSGST: "",
+
+        unRegOutValue: "",
+        unRegOutIGST: "",
+
+        Taxtype : taxType
       };
 
-      if (igst > 0) {
+      if (isRegistered && igst > 0) {
+        // INTER STATE (Registered)
         row.interValue = taxable;
         row.interIGST = igst;
 
         totals.interValue += taxable;
         totals.interIGST += igst;
-      } else if (cust.gstno) {
+      } else if (isRegistered) {
+        // TAXABLE PERSON (Registered within state)
         row.b2bValue = taxable;
         row.b2bCGST = cgst;
         row.b2bSGST = sgst;
@@ -106,7 +200,15 @@ const SaleRegister = ({ open, onClose, formData }) => {
         totals.b2bCGST += cgst;
         totals.b2bSGST += sgst;
         totals.b2bCESS += cess;
+      } else if (!isRegistered && igst > 0) {
+        // UNREGISTERED OUT OF STATE
+        row.unRegOutValue = taxable;
+        row.unRegOutIGST = igst;
+
+        totals.unRegOutValue += taxable;
+        totals.unRegOutIGST += igst;
       } else {
+        // RETAIL SALE WITHIN STATE
         row.b2cValue = taxable;
         row.b2cCGST = cgst;
         row.b2cSGST = sgst;
@@ -239,102 +341,60 @@ const SaleRegister = ({ open, onClose, formData }) => {
     }, 500);
   };
 
-  //   const handlePrint = () => {
-  //     const WinPrint = window.open("", "", "width=1200,height=800");
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
 
-  //     WinPrint.document.write(`
-  //         <html>
-  //         <head>
-  //         <style>
-  //         @page { size: A4 landscape; margin: 10mm; }
+    const response = await fetch("excel/vat31.xlsx");
+    const buffer = await response.arrayBuffer();
 
-  //         body{
-  //             font-family: serif;
-  //             font-size: 12px;
-  //         }
+    await workbook.xlsx.load(buffer);
 
-  //         .print-header{
-  //             text-align:center;
-  //             margin-bottom:14px;
-  //         }
+    const worksheet = workbook.getWorksheet("VAT31");
 
-  //         .company-name{
-  //             font-size:16px;
-  //             font-weight:bold;
-  //             text-transform:uppercase;
-  //         }
+    worksheet.getCell("A1").value = companyName;
+    worksheet.getCell("A2").value = companyCity;
+    worksheet.getCell("A3").value = "GSTIN : " + companyGST;
+    worksheet.getCell("A4").value = "PAN : " + companyPAN; 
 
-  //         .company-address,
-  //         .company-city{
-  //             font-size:12px;
-  //         }
+    worksheet.getCell("E5").value = formData.fromDate;
+    worksheet.getCell("E6").value = formData.toDate;
 
-  //         /* TABLE */
+    let startRow = 8; // your data row in template
 
-  //         table{
-  //             border-collapse:collapse;
-  //             width:100%;
-  //         }
+    rows.forEach((r, index) => {
+      const row = worksheet.getRow(startRow + index);
 
-  //         thead{
-  //             display:table-header-group; /* repeat header on each page */
-  //         }
+      row.getCell(1).value = r.bill;
+      row.getCell(2).value = new Date(r.date).toLocaleDateString();
+      row.getCell(3).value = r.name;
+      row.getCell(4).value = r.gst;
 
-  //         th,td{
-  //             border:1px solid black;
-  //             padding:4px 6px;
-  //             font-size:11px;
-  //         }
+      row.getCell(5).value = r.total;
 
-  //         th{
-  //             background:#f0f0f0;
-  //             text-align:center;
-  //             vertical-align:middle;
-  //             font-weight:bold;
-  //         }
+      row.getCell(6).value = r.interValue;
+      row.getCell(7).value = r.interIGST;
+      row.getCell(8).value = r.interIGST;
 
-  //         /* ensure header rows align properly */
+      row.getCell(9).value = r.b2bValue;
+      row.getCell(10).value = r.b2bCGST;
+      row.getCell(11).value = r.b2bSGST;
+      row.getCell(12).value = r.b2bCESS;
 
-  //         thead tr:first-child th{
-  //             border-bottom:1px solid black;
-  //         }
+      row.getCell(13).value = r.b2cValue;
+      row.getCell(14).value = r.b2cCGST;
+      row.getCell(15).value = r.b2cSGST;
 
-  //         thead tr:nth-child(2) th{
-  //             border-top:1px solid black;
-  //         }
+      row.getCell(16).value = r.unRegOutValue;
+      row.getCell(17).value = r.unRegOutIGST;
+      row.getCell(19).value = r.Taxtype;
 
-  //         .text-end{
-  //             text-align:right;
-  //         }
+      row.commit();
+    });
 
-  //         tfoot td{
-  //             font-weight:bold;
-  //         }
+    const fileBuffer = await workbook.xlsx.writeBuffer();
 
-  //         .page-break{
-  //             page-break-after:always;
-  //         }
-  //         </style>
-  //         </head>
-
-  //         <body>
-
-  //         <div class="print-header">
-  //             <div class="company-name">${companyName}</div>
-  //             <div class="company-address">${companyAdd}</div>
-  //             <div class="company-city">${companyCity}</div>
-  //         </div>
-  //     `);
-
-  //     WinPrint.document.write(printRef.current.innerHTML);
-
-  //     WinPrint.document.write("</body></html>");
-
-  //     WinPrint.document.close();
-  //     WinPrint.focus();
-  //     WinPrint.print();
-  //     WinPrint.close();
-  //   };
+    saveAs(new Blob([fileBuffer]), "VAT31.xlsx");
+  };
 
   return (
     <Modal
@@ -412,9 +472,10 @@ const SaleRegister = ({ open, onClose, formData }) => {
                   <th rowSpan="2">GSTIN</th>
                   <th rowSpan="2">TOTAL</th>
 
-                  <th colSpan="2">INTER STATE</th>
-                  <th colSpan="4">TAXABLE PERSON</th>
+                  <th colSpan="2">INTER STATE SALES</th>
+                  <th colSpan="4">SALES TO TAXABLE PERSON</th>
                   <th colSpan="3">RETAIL SALE WITHIN STATE</th>
+                  <th colSpan="2">UN-REG OUT</th>
 
                   <th rowSpan="2">EXPORT</th>
                 </tr>
@@ -431,6 +492,9 @@ const SaleRegister = ({ open, onClose, formData }) => {
                   <th>VALUE</th>
                   <th>CGST</th>
                   <th>SGST</th>
+
+                  <th>VALUE</th>
+                  <th>I.TAX</th>
                 </tr>
               </thead>
 
@@ -456,10 +520,14 @@ const SaleRegister = ({ open, onClose, formData }) => {
                     <td className="text-end">{format2(r.b2cCGST)}</td>
                     <td className="text-end">{format2(r.b2cSGST)}</td>
 
+                    <td className="text-end">{format2(r.unRegOutValue)}</td>
+                    <td className="text-end">{format2(r.unRegOutIGST)}</td>
+
                     <td></td>
                   </tr>
                 ))}
               </tbody>
+
               <tfoot
                 className="table-secondary fw-bold"
                 style={{
@@ -487,6 +555,11 @@ const SaleRegister = ({ open, onClose, formData }) => {
                   <td className="text-end">{totals.b2cCGST.toFixed(2)}</td>
                   <td className="text-end">{totals.b2cSGST.toFixed(2)}</td>
 
+                  <td className="text-end">
+                    {totals.unRegOutValue.toFixed(2)}
+                  </td>
+                  <td className="text-end">{totals.unRegOutIGST.toFixed(2)}</td>
+
                   <td></td>
                 </tr>
               </tfoot>
@@ -512,7 +585,8 @@ const SaleRegister = ({ open, onClose, formData }) => {
           >
             Print
           </Button>
-          <Button variant="contained" onClick={onClose}>
+          <Button  variant="contained" sx={{ mr: 2 }} onClick={handleExportExcel}>Export</Button>
+          <Button variant="contained" color="warning" onClick={onClose}>
             Close
           </Button>
         </Box>

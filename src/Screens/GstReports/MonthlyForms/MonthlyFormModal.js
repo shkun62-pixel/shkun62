@@ -16,6 +16,7 @@ import InputMask from "react-input-mask";
 import axios from "axios";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import * as XLSX from "sheetjs-style";
 import financialYear from "../../Shared/financialYear";
 import useCompanySetup from "../../Shared/useCompanySetup";
 import SaleRegister from "./SaleRegister";
@@ -276,6 +277,336 @@ export default function MonthlyFormModal({ open, onClose }) {
 
     return Object.values(grouped);
   };
+
+  // Expoting HSNWISE SALE
+  const exportSaleExcel = async () => {
+  const res = await axios.get(
+    "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+  );
+
+  const sales = res.data;
+
+  let rows = [];
+
+  sales.forEach((sale) => {
+    const form = sale.formData || {};
+    const party = sale.customerDetails?.[0] || {};
+
+    (sale.items || []).forEach((item) => {
+      rows.push([
+        new Date(form.date).toLocaleDateString("en-GB"),
+        form.vbillno,
+        item.tariff,
+        item.sdisc,
+        item.pkgs,
+        Number(item.weight || 0),
+        item.Units,
+        party.vacode,
+        party.gstno,
+        item.gst,
+        Number(item.amount || 0),
+        Number(item.ctax || 0),
+        Number(item.stax || 0),
+        Number(item.itax || 0),
+        0,
+        Number(item.vamt || 0),
+        new Date(form.date).toLocaleDateString("en-GB"),
+        form.trpt,
+        form.stype,
+      ]);
+    });
+  });
+
+  const header = [[
+    "Date",
+    "Bill No.",
+    "HSN",
+    "Description",
+    "Pkgs",
+    "Weight",
+    "Unit",
+    "Party Name",
+    "GST No.",
+    "GST %",
+    "Taxable Value",
+    "C.GST",
+    "S.GST",
+    "I.GST",
+    "Cess",
+    "Total",
+    "",
+    "Vehicle #",
+    "Tx Type",
+  ]];
+
+  const data = [
+    ["COUSINS INDUSTRIES PVT LTD"],
+    ["MANDI GOBINDGARH"],
+    ["GSTIN : 03QTLPS9810L1ZQ"],
+    ["HSN WISE INVOICE SALE FROM 01-04-2025 TO 30-03-2026"],
+    [],
+    ...header,
+    ...rows,
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+
+  /* ---------- MERGE HEADER ---------- */
+
+  ws["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 18 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 18 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 18 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 18 } },
+  ];
+
+  /* ---------- CENTER COMPANY HEADER ---------- */
+
+  ["A1", "A2", "A3", "A4"].forEach((cell) => {
+    if (ws[cell]) {
+      ws[cell].s = {
+        font: { bold: true, sz: 14 },
+        alignment: { horizontal: "center" },
+      };
+    }
+  });
+
+  /* ---------- HEADER STYLE ---------- */
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const address = XLSX.utils.encode_cell({ r: 5, c: C });
+
+    if (!ws[address]) continue;
+
+    ws[address].s = {
+      font: { bold: true },
+      alignment: { horizontal: "center" },
+      fill: { fgColor: { rgb: "D9E1F2" } },
+      border: {
+        top: { style: "thin" },
+        bottom: { style: "thin" },
+        left: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+  }
+
+  /* ---------- AUTO COLUMN WIDTH ---------- */
+
+  const autoWidth = (data) => {
+    const colWidths = [];
+
+    data.forEach((row) => {
+      row.forEach((cell, i) => {
+        const len = cell ? cell.toString().length : 10;
+
+        if (colWidths[i]) {
+          if (len > colWidths[i]) colWidths[i] = len;
+        } else {
+          colWidths[i] = len;
+        }
+      });
+    });
+
+    return colWidths.map((w) => ({ wch: w + 3 }));
+  };
+
+  ws["!cols"] = autoWidth(data);
+
+  /* ---------- FIX DATE COLUMN WIDTH ---------- */
+
+  ws["!cols"][0] = { wch: 12 }; // Date column
+  ws["!cols"][1] = { wch: 8 };  // Bill No
+  ws["!cols"][2] = { wch: 10 }; // HSN
+
+  /* ---------- ADD SUBTOTAL ROW ---------- */
+
+  const startRow = 7;
+  const endRow = rows.length + 6;
+
+  XLSX.utils.sheet_add_aoa(
+    ws,
+    [[
+      "",
+      "",
+      "",
+      "",
+      "",
+      { f: `SUBTOTAL(9,F${startRow}:F${endRow})` },
+      "",
+      "",
+      "",
+      "",
+      { f: `SUBTOTAL(9,K${startRow}:K${endRow})` },
+      { f: `SUBTOTAL(9,L${startRow}:L${endRow})` },
+      { f: `SUBTOTAL(9,M${startRow}:M${endRow})` },
+      { f: `SUBTOTAL(9,N${startRow}:N${endRow})` },
+      "",
+      { f: `SUBTOTAL(9,P${startRow}:P${endRow})` }
+    ]],
+    { origin: -1 }
+  );
+
+  /* ---------- EXPORT ---------- */
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet 1");
+
+  XLSX.writeFile(wb, "hsndet.xlsx");
+};
+  // const exportSaleExcel = async () => {
+  //   const res = await axios.get(
+  //     "https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"
+  //   );
+
+  //   const sales = res.data;
+
+  //   let rows = [];
+
+  //   let totals = {
+  //     weight: 0,
+  //     taxable: 0,
+  //     cgst: 0,
+  //     sgst: 0,
+  //     igst: 0,
+  //     cess: 0,
+  //     total: 0,
+  //   };
+
+  //   sales.forEach((sale) => {
+  //     const form = sale.formData || {};
+  //     const party = sale.customerDetails?.[0] || {};
+
+  //     (sale.items || []).forEach((item) => {
+  //       const taxable = Number(item.amount || 0);
+  //       const cgst = Number(item.ctax || 0);
+  //       const sgst = Number(item.stax || 0);
+  //       const igst = Number(item.itax || 0);
+  //       const total = Number(item.vamt || 0);
+  //       const weight = Number(item.weight || 0);
+
+  //       totals.weight += weight;
+  //       totals.taxable += taxable;
+  //       totals.cgst += cgst;
+  //       totals.sgst += sgst;
+  //       totals.igst += igst;
+  //       totals.total += total;
+
+  //       rows.push([
+  //         new Date(form.date).toLocaleDateString("en-GB"),
+  //         form.vbillno,
+  //         item.tariff,
+  //         item.sdisc,
+  //         item.pkgs,
+  //         weight,
+  //         item.Units,
+  //         party.vacode,
+  //         party.gstno,
+  //         item.gst,
+  //         taxable,
+  //         cgst,
+  //         sgst,
+  //         igst,
+  //         0,
+  //         total,
+  //         new Date(form.date).toLocaleDateString("en-GB"),
+  //         form.trpt,
+  //         form.stype,
+  //       ]);
+  //     });
+  //   });
+
+  //   rows.push([
+  //     "",
+  //     "",
+  //     "",
+  //     "",
+  //     "",
+  //     totals.weight,
+  //     "",
+  //     "",
+  //     "",
+  //     "",
+  //     totals.taxable,
+  //     totals.cgst,
+  //     totals.sgst,
+  //     totals.igst,
+  //     totals.cess,
+  //     totals.total,
+  //   ]);
+
+  //   const header = [
+  //     [
+  //       "Date",
+  //       "Bill No.",
+  //       "HSN",
+  //       "Description",
+  //       "Pkgs",
+  //       "Weight",
+  //       "Unit",
+  //       "Party Name",
+  //       "GST No.",
+  //       "GST %",
+  //       "Taxable Value",
+  //       "C.GST",
+  //       "S.GST",
+  //       "I.GST",
+  //       "Cess",
+  //       "Total",
+  //       "",
+  //       "Vehicle #",
+  //       "Tx Type",
+  //     ],
+  //   ];
+
+  //   const data = [
+  //     ["COUSINS INDUSTRIES PVT LTD"],
+  //     ["MANDI GOBINDGARH"],
+  //     ["GSTIN : 03QTLPS9810L1ZQ"],
+  //     ["HSN WISE INVOICE SALE FROM 01-04-2025 TO 30-03-2026"],
+  //     [],
+  //     ...header,
+  //     ...rows,
+  //   ];
+
+  //   const ws = XLSX.utils.aoa_to_sheet(data);
+
+  //   ws["!merges"] = [
+  //     { s: { r: 0, c: 0 }, e: { r: 0, c: 18 } },
+  //     { s: { r: 1, c: 0 }, e: { r: 1, c: 18 } },
+  //     { s: { r: 2, c: 0 }, e: { r: 2, c: 18 } },
+  //     { s: { r: 3, c: 0 }, e: { r: 3, c: 18 } },
+  //   ];
+
+  //   const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  //   for (let C = range.s.c; C <= range.e.c; ++C) {
+  //     const address = XLSX.utils.encode_cell({ r: 5, c: C });
+
+  //     if (!ws[address]) continue;
+
+  //     ws[address].s = {
+  //       font: { bold: true },
+  //       alignment: { horizontal: "center" },
+  //       fill: {
+  //         fgColor: { rgb: "D9E1F2" },
+  //       },
+  //       border: {
+  //         top: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         left: { style: "thin" },
+  //         right: { style: "thin" },
+  //       },
+  //     };
+  //   }
+
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, "Sheet 1");
+
+  //   XLSX.writeFile(wb, "hsndet.xlsx");
+  // };
 
   const handleExport = async () => {
     if (!formData.fromDate || !formData.toDate) {
@@ -1438,6 +1769,11 @@ export default function MonthlyFormModal({ open, onClose }) {
         handleOpenPurRegister()
       }
 
+      // SALLE HSNWISE 
+      else if(formData.reportName === "Hsnwise Sale"){
+        exportSaleExcel()
+      }
+
       else {
         alert("Export not configured for selected report");
       }
@@ -1513,6 +1849,7 @@ export default function MonthlyFormModal({ open, onClose }) {
             <MenuItem value="Job Work GSTR-04">Job Work GSTR-04</MenuItem>
             <MenuItem value="Sale Register">Sale Register</MenuItem>
             <MenuItem value="Purchase Register">Purchase Register</MenuItem>
+            <MenuItem value="Hsnwise Sale">HSN Wise Invoice Sale</MenuItem>
           </TextField>
 
           {/* 🔹 Conditional Fields */}
