@@ -2465,12 +2465,7 @@ const Purchase = () => {
 
     const currentMrp = parseFloat(updatedItems[index].curMrp);
 
-    if (
-      key === "amount" &&
-      value !== "" &&
-      !isNaN(parseFloat(value)) &&
-      !value.endsWith(".")
-    ) {
+    if (key === "amount" && value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
       let enteredAmount = parseFloat(value);
       let qty = 0;
 
@@ -2480,19 +2475,22 @@ const Purchase = () => {
         qty = parseFloat(updatedItems[index].weight) || 0;
       }
 
+      // 🔹 Keep your currentMrp logic exactly as it is
       if (!isNaN(currentMrp) && currentMrp > 0) {
         return;
       }
 
+      // 🔹 Only calculate rate if quantity > 0
       if (qty > 0 && enteredAmount > 0) {
         let newRate = enteredAmount / qty;
 
         updatedItems[index]["rate"] = T11
           ? Math.round(newRate).toFixed(2)
           : newRate.toFixed(2);
-
-        TotalAcc = enteredAmount;
       }
+
+      // 🔹 Always set TotalAcc to enteredAmount so taxes calculate
+      TotalAcc = enteredAmount;
     }
 
     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;

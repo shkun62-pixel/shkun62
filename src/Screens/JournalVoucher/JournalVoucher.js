@@ -1493,6 +1493,17 @@ const JournalVoucher = () => {
     return totalDebit - totalCredit;
   };
 
+  const handleNumericValue = (event) => {
+    const { id, value } = event.target;
+    // Allow only numeric values, including optional decimal points
+    if (/^\d*\.?\d*$/.test(value) || value === "") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+    }
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -1535,7 +1546,7 @@ const JournalVoucher = () => {
             label="VOUCHER NO."
             onFocus={(e) => e.target.select()} // Select text on focus
             onKeyDown={handleBankEnter}
-            // onChange={handleInputChange}
+            onChange={handleNumericValue}
             inputProps={{
               maxLength: 48,
               style: {

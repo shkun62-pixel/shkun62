@@ -1528,6 +1528,17 @@ const CashVoucher = () => {
     };
   }, [showSearch, printChoiceOpen]);
 
+  const handleNumericValue = (event) => {
+    const { id, value } = event.target;
+    // Allow only numeric values, including optional decimal points
+    if (/^\d*\.?\d*$/.test(value) || value === "") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+    }
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -1571,16 +1582,6 @@ const CashVoucher = () => {
               />
             )}
         </InputMask>
-         {/* <DatePicker
-            ref={datePickerRef}
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => checkFutureDate(selectedDate)}
-            customInput={<MaskedInput />}
-          /> */}
         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
           <TextField
           inputRef={voucherRef}
@@ -1589,10 +1590,7 @@ const CashVoucher = () => {
           label="VOUCHER NO."
           onFocus={(e) => e.target.select()}  // Select text on focus
           onKeyDown={handleVoucherEnter}
-          // onKeyDown={(e) => {
-          //   handleEnterKeyPress(voucherRef,accountNameRefs )(e);
-          // }}
-          // onChange={handleInputChange}
+          onChange={handleNumericValue}
           inputProps={{
             maxLength: 48,
             style: {
