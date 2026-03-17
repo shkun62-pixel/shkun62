@@ -5017,6 +5017,7 @@ const handleKeyDown = (event, index, field) => {
                           color="error"
                           size="small"
                           tabIndex={-1}
+                          onClick={() => handleDeleteItem(index)}
                         >
                           <DeleteIcon />
                         </IconButton>

@@ -2467,6 +2467,18 @@ const Purchase = () => {
 
     if (key === "amount" && value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
       let enteredAmount = parseFloat(value);
+      let rateVal = parseFloat(updatedItems[index].rate) || 0;
+
+      // 🔥 NEW: Auto calculate qty when rate + amount entered
+      if (rateVal > 0 && enteredAmount > 0) {
+        let newQty = enteredAmount / rateVal;
+
+        if (RateCal === "Pc/Pkgs") {
+          updatedItems[index]["pkgs"] = newQty.toFixed(pkgsValue);
+        } else {
+          updatedItems[index]["weight"] = newQty.toFixed(weightValue);
+        }
+      }
       let qty = 0;
 
       if (RateCal === "Pc/Pkgs") {
@@ -5143,6 +5155,7 @@ const handleKeyDown = (event, index, field) => {
                           color="error"
                           size="small"
                           tabIndex={-1}
+                          onClick={() => handleDeleteItem(index)}
                         >
                           <DeleteIcon />
                         </IconButton>

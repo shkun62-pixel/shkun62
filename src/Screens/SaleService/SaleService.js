@@ -7960,7 +7960,9 @@ const SaleService = () => {
                           height: "100%",
                         }}
                       >
-                        <IconButton color="error" size="small" tabIndex={-1}>
+                        <IconButton color="error" size="small" tabIndex={-1}
+                        onClick={() => handleDeleteItem(index)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </div>

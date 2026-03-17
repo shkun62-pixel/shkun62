@@ -1205,6 +1205,7 @@ const handleItemRateBlur = (id, field) => {
                           color="error"
                           size="small"
                           tabIndex={-1}
+                          onClick={() => handleDeleteItem(index)}
                         >
                           <DeleteIcon />
                         </IconButton>

@@ -1645,395 +1645,6 @@
 
 // export default Example;
 
-// JOURNAL TABLE
-// import React, { useState } from "react";
-// import Table from "react-bootstrap/Table";
-// import ProductModalCustomer from "./Modals/ProductModalCustomer";
-// import { Button } from "react-bootstrap";
-
-// const Example = () => {
-//   const tenant = "shkun_05062025_05062026";
-//   const [items, setItems] = useState([
-//     {
-//       id: "",
-//       accountname: "",
-//       narration: "",
-//       debit: "",
-//       credit: "",
-//       disableDebit: false,
-//       disableCredit: false,
-//     },
-//   ]);
-
-//   const capitalizeWords = (str) => {
-//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
-//   };
-
-//   // Modal For Customer
-//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-//   const [productsCus, setProductsCus] = useState([]);
-//   const [showModalCus, setShowModalCus] = useState(false);
-//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-//   const [loadingCus, setLoadingCus] = useState(true);
-//   const [errorCus, setErrorCus] = useState(null);
-//   const [suggestionRow, setSuggestionRow] = useState(null);
-//   const [suggestionText, setSuggestionText] = useState("");
-
-//   React.useEffect(() => {
-//     fetchCustomers();
-//   }, []);
-
-//   const fetchCustomers = async () => {
-//     try {
-//       const response = await fetch(
-//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
-//       );
-//       if (!response.ok) {
-//         throw new Error("Failed to fetch products");
-//       }
-//       const data = await response.json();
-//       // Ensure to extract the formData for easier access in the rest of your app
-//       const formattedData = data.map((item) => ({
-//         ...item.formData,
-//         _id: item._id,
-//       }));
-//       setProductsCus(formattedData);
-//       setLoadingCus(false);
-//     } catch (error) {
-//       setErrorCus(error.message);
-//       setLoadingCus(false);
-//     }
-//   };
-
-//   const handleItemChangeCus = (index, key, value) => {
-//     const updatedItems = [...items];
-//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-//     // If the key is 'name', find the corresponding product and set the price
-//     if (key === "name") {
-//       const selectedProduct = productsCus.find(
-//         (product) => product.ahead === value,
-//       );
-//       if (selectedProduct) {
-//         updatedItems[index]["accountname"] = selectedProduct.ahead;
-//         updatedItems[index]["acode"] = selectedProduct.acode;
-//       }
-//     }
-//     // Disable credit field if debit field is filled
-//     if (key === "debit") {
-//       updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
-//     }
-
-//     // Disable debit field if credit field is filled
-//     if (key === "credit") {
-//       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
-//     }
-
-//     if (key === "narration") {
-//       const inputValue = value.trim().toLowerCase();
-
-//       if (inputValue !== "") {
-//         // Find first matching accountname from ALL rows
-//         const matchedItem = items.find(
-//           (row) =>
-//             row.accountname &&
-//             row.accountname.toLowerCase().startsWith(inputValue)
-//         );
-
-//         if (matchedItem) {
-//           setSuggestionRow(index);
-//           setSuggestionText(matchedItem.accountname);
-//         } else {
-//           setSuggestionRow(null);
-//           setSuggestionText("");
-//         }
-//       } else {
-//         setSuggestionRow(null);
-//         setSuggestionText("");
-//       }
-//     }
-
-//     setItems(updatedItems);
-//   };
-
-//   const handleProductSelectCus = (product) => {
-//     if (!product) {
-//       alert("No product received!");
-//       setShowModalCus(false);
-//       return;
-//     }
-
-//     // clone the array
-//     const newCustomers = [...items];
-
-//     // overwrite the one at the selected index
-//     newCustomers[selectedItemIndexCus] = {
-//       ...newCustomers[selectedItemIndexCus],
-//       accountname: product.ahead || "",
-//       acode: product.acode
-//     };
-//     const nameValue = product.ahead || product.name || "";
-//     if (selectedItemIndexCus !== null) {
-//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-//       setShowModalCus(false);
-//     }
-//     setItems(newCustomers);
-//     setShowModalCus(false);
-//   };
-
-//   const handleCloseModalCus = () => {
-//     setShowModalCus(false);
-//     setPressedKey(""); // resets for next modal open
-//   };
-
-//   const openModalForItemCus = (index) => {
-//     setSelectedItemIndexCus(index);
-//     setShowModalCus(true);
-//   };
-
-//   const allFieldsCus = productsCus.reduce((fields, product) => {
-//     Object.keys(product).forEach((key) => {
-//       if (!fields.includes(key)) {
-//         fields.push(key);
-//       }
-//     });
-
-//     return fields;
-//   }, []);
-
-//   const handleNumberChange = (event, index, field) => {
-//     const value = event.target.value;
-
-//     // Validate that the input is numeric
-//     if (!/^\d*\.?\d*$/.test(value)) {
-//       return;
-//     }
-
-//     const updatedItems = [...items];
-//     updatedItems[index][field] = value;
-
-//     // If the field is 'debit' and its value is greater than zero, disable 'credit'
-//     if (field === "debit") {
-//       updatedItems[index].disableCredit = parseFloat(value) > 0;
-//       updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
-//     }
-//     // If the field is 'credit' and its value is greater than zero, disable 'debit'
-//     else if (field === "credit") {
-//       updatedItems[index].disableDebit = parseFloat(value) > 0;
-//       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
-//     }
-//     setItems(updatedItems);
-//   };
-
-//   const handleKeyDown = (event, index, field) => {
-//     // Open Modal on Letter Input in Account Name
-//     if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-//       setPressedKey(event.key);
-//       openModalForItemCus(index);
-//       event.preventDefault();
-//     }
-//   };
-
-//   const handleAddItem = () => {
-//     const newItem = {
-//       id: items.length + 1,
-//       accountname: "",
-//       acode:0,
-//       narration: "",
-//       debit: "",
-//       credit: "",
-//       disableDebit: false,
-//       disableCredit: false,
-//     };
-//     setItems([...items, newItem]);
-//   };
-
-//   const getBalance = (currentIndex) => {
-//     let totalDebit = 0;
-//     let totalCredit = 0;
-
-//     items.forEach((row, i) => {
-//       if (i !== currentIndex) {
-//         totalDebit += parseFloat(row.debit) || 0;
-//         totalCredit += parseFloat(row.credit) || 0;
-//       }
-//     });
-
-//     return totalDebit - totalCredit;
-//   };
-
-//   return (
-//     <div>
-//       <div className="Tablesection">
-//         <Table className="custom-table">
-//           <thead>
-//             <tr style={{ color: "white" }}>
-//               <th>ACCOUNT NAME</th>
-//               <th>NARRATION</th>
-//               <th>DEBIT</th>
-//               <th>CREDIT</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {items.map((item, index) => (
-//               <tr key={`${item.accountname}-${index}`}>
-//                 <td style={{ padding: 0 }}>
-//                   <input
-//                     className="Account"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: 5,
-//                     }}
-//                     type="text"
-//                     value={item.accountname}
-//                     onKeyDown={(e) => {
-//                       handleKeyDown(e, index, "accountname");
-//                     }}
-//                     onFocus={(e) => e.target.select()} // Select text on focus
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, position: "relative" }}>
-//                   <input
-//                     className="Narration"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       padding: "5px 8px",
-//                       fontSize: "14px",
-//                       position: "relative",
-//                       background: "transparent",
-//                     }}
-//                     value={item.narration}
-//                     onChange={(e) =>
-//                       handleItemChangeCus(index, "narration", e.target.value)
-//                     }
-//                     onKeyDown={(e) => {
-//                       if (e.key === "Enter") {
-//                         if (!item.narration || item.narration.trim() === "") {
-//                           const updatedItems = [...items];
-//                           updatedItems[index].narration = "Journal Narration";
-//                           setItems(updatedItems);
-//                         }
-//                       }
-//                       if (
-//                         e.key === "Tab" &&
-//                         suggestionRow === index &&
-//                         suggestionText
-//                       ) {
-//                         e.preventDefault();
-
-//                         const updatedItems = [...items];
-//                         updatedItems[index].narration = suggestionText;
-//                         setItems(updatedItems);
-
-//                         setSuggestionRow(null);
-//                         setSuggestionText("");
-//                       }
-//                     }}
-//                   />
-
-//                   {/* 👇 Show only remaining text */}
-//                   {suggestionRow === index && suggestionText && (
-//                     <div
-//                       style={{
-//                         position: "absolute",
-//                         top: 0,
-//                         left: 8,
-//                         height: "100%",
-//                         display: "flex",
-//                         alignItems: "center",
-//                         color: "#bbb",
-//                         fontSize: "14px",
-//                         pointerEvents: "none",
-//                       }}
-//                     >
-//                       <span style={{ visibility: "hidden" }}>
-//                         {item.narration}
-//                       </span>
-//                       <span>{suggestionText.slice(item.narration.length)}</span>
-//                     </div>
-//                   )}
-//                 </td>
-
-//                 <td style={{ padding: 0, width: 250 }}>
-//                   <input
-//                     className="Debit"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       paddingRight: 10,
-//                     }}
-//                     value={Number(item.debit) === 0 ? "" : item.debit}
-//                     onChange={(e) => handleNumberChange(e, index, "debit")}
-//                    onFocus={(e) => {
-//   const balance = getBalance(index);
-
-//   if (balance < 0) {
-//     const updatedItems = [...items];
-//     updatedItems[index].debit = Math.abs(balance);
-//     setItems(updatedItems);
-//   }
-
-//   e.target.select();
-// }}
-
-//                   />
-//                 </td>
-//                 <td style={{ padding: 0, width: 250 }}>
-//                   <input
-//                     className="Credits"
-//                     style={{
-//                       height: 40,
-//                       width: "100%",
-//                       boxSizing: "border-box",
-//                       border: "none",
-//                       paddingRight: 10,
-//                     }}
-//                     value={Number(item.credit) === 0 ? "" : item.credit}
-//                     onChange={(e) => handleNumberChange(e, index, "credit")}
-//                     onFocus={(e) => {
-//   const balance = getBalance(index);
-
-//   if (balance > 0) {
-//     const updatedItems = [...items];
-//     updatedItems[index].credit = balance;
-//     setItems(updatedItems);
-//   }
-
-//   e.target.select();
-// }}
-//                   />
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
-//         {showModalCus && (
-//           <ProductModalCustomer
-//             allFields={allFieldsCus}
-//             onSelect={handleProductSelectCus}
-//             onClose={handleCloseModalCus}
-//             initialKey={pressedKey}
-//             tenant={tenant}
-//           />
-//         )}
-//       </div>
-      
-//       <Button onClick={handleAddItem} style={{ margin: 20 }}>
-//         Add Item
-//       </Button> 
-//     </div>
-//   );
-// };
-
-// export default Example;
-
 // ANNEXURE PARENT
 // import React,{useState} from 'react'
 // import AnexureModal from './Modals/AnexureModal ';
@@ -2110,1102 +1721,1490 @@
 
 
 // SALE TABLE
+// import React, { useState, useEffect } from "react";
+// import Table from "react-bootstrap/Table";
+// import Button from "react-bootstrap/Button";
+// import { TextField } from "@mui/material";
+// import ProductModal from "./Modals/ProductModal";
+// import ProductModalCustomer from "./Modals/ProductModalCustomer";
 
-import React, { useState, useEffect } from "react";
+// const Example = () => {
+//   const LOCAL_STORAGE_KEY = "tabledataVisibility";
+//   const [T11, setT11] = useState(false);
+//   const [T12, setT12] = useState(false);
+//   const [T21, setT21] = useState(false);
+//   const [formData, setFormData] = useState({
+//     date: "",
+//     valpha:"",
+//     vtype: "S",
+//     vbillno: 0,
+//     vno: 0,
+//     gr: "",
+//     exfor: "",
+//     trpt: "",
+//     stype: "",
+//     btype: "",
+//     conv: "",
+//     rem1: "",
+//     rem2: "",
+//     v_tpt: "",
+//     broker: "",
+//     gross: false,
+//     tcsper: 0,
+//     srv_rate: 0,
+//     srv_tax: 0,
+//     tcs1_rate: 0,
+//     tcs1: 0,
+//     tcs206_rate: 0,
+//     tcs206: 0,
+//     duedate: "",
+//     pcess: 0,
+//     tax: 0,
+//     sub_total: 0,
+//     exp_before: 0,
+//     Exp_rate6: 0,
+//     Exp_rate7: 0,
+//     Exp_rate8: 0,
+//     Exp_rate9: 0,
+//     Exp_rate10: 0,
+//     Exp6: 0,
+//     Exp7: 0,
+//     Exp8: 0,
+//     Exp9: 0,
+//     Exp10: 0,
+//     Tds2: "",
+//     Ctds: "",
+//     Stds: "",
+//     iTds: "",
+//     cgst: 0,
+//     sgst: 0,
+//     igst: 0,
+//     expafterGST: 0,
+//     ExpRoundoff: 0,
+//     grandtotal: 0,
+//   });
+ 
+//   const [items, setItems] = useState([
+//     {
+//       id: 1,
+//       vcode: "",
+//       sdisc: "",
+//       Units: "",
+//       pkgs: "0.00",
+//       weight: "0.00",
+//       rate: "0.00",
+//       amount: "0.00",
+//       disc: 0,
+//       discount: "",
+//       gst: 18,
+//       Pcodes01: "",
+//       Pcodess: "",
+//       Scodes01: "",
+//       Scodess: "",
+//       Exp_rate1: 0,
+//       Exp_rate2: 0,
+//       Exp_rate3: 0,
+//       Exp_rate4: 0,
+//       Exp_rate5: 0,
+//       Exp1: 0,
+//       Exp2: 0,
+//       Exp3: 0,
+//       Exp4: 0,
+//       Exp5: 0,
+//       exp_before: 0,
+//       RateCal: "",
+//       Qtyperpc: 0,
+//       ctax: "0.00",
+//       stax: "0.00",
+//       itax: "0.00",
+//       tariff: "",
+//       vamt: "0.00",
+//     },
+//   ]);
+//     const [customerDetails, setcustomerDetails] = useState([
+//       {
+//         Vcode: "",
+//         vacode: "",
+//         gstno: "",
+//         pan: "",
+//         Add1: "",
+//         city: "",
+//         state: "",
+//         Tcs206c1H: "",
+//         TDS194Q: "",
+//       },
+//     ]);
+//   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+//     React.useEffect(() => {
+//       // Fetch products from the API when the component mounts
+//       fetchProducts();
+//     }, []);
+  
+//     const fetchProducts = async (search = "") => {
+//       setLoading(true);
+//       try {
+//         const response = await fetch(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
+//         );
+//         if (!response.ok) throw new Error("Failed to fetch products");
+//         const data = await response.json();
+//         const flattenedData = data.data.map((item) => ({
+//           ...item.formData,
+//           _id: item._id,
+//         }));
+//         setProducts(flattenedData);
+//       } catch (error) {
+//         setError(error.message);
+//       }
+//       setLoading(false);
+//     };
+  
+//     const capitalizeWords = (str) => {
+//       return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//     };
+  
+//     // Modal For Items
+//     const [products, setProducts] = useState([]);
+//     const [showModal, setShowModal] = useState(false);
+//     const [selectedProduct, setSelectedProduct] = useState(null);
+//     const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState(null);
+//     const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  
+//     const handleItemChange = (index, key, value) => {
+//   // Allow only numeric fields
+//   const numericFields = [
+//     "pkgs",
+//     "weight",
+//     "rate",
+//     "amount",
+//     "disc",
+//     "discount",
+//     "tariff",
+//   ];
+
+//   if (numericFields.includes(key) && !/^-?\d*\.?\d*$/.test(value)) {
+//     return;
+//   }
+
+//   const updatedItems = [...items];
+//   const item = { ...updatedItems[index] };
+
+//   // Force discount negative
+//   if (key === "disc" || key === "discount") {
+//     const num = parseFloat(value);
+//     value = isNaN(num) ? "" : -Math.abs(num);
+//   }
+
+//   // Capitalize description
+//   if (key === "sdisc") {
+//     item[key] = value.replace(/\b\w/g, (c) => c.toUpperCase());
+//   } else {
+//     item[key] = value;
+//   }
+
+//   // ==============================
+//   // 🔥 PRODUCT SELECTION
+//   // ==============================
+//   if (key === "name") {
+//     const selectedProduct = products.find(
+//       (product) => product.Aheads === value
+//     );
+
+//     if (selectedProduct) {
+//       item.vcode = selectedProduct.Acodes;
+//       item.sdisc = selectedProduct.Aheads;
+//       item.Units = selectedProduct.TradeName;
+//       item.rate = selectedProduct.Mrps || 0;
+//       item.gst = selectedProduct.itax_rate || 0;
+//       item.tariff = selectedProduct.Hsn;
+//       item.RateCal = selectedProduct.Rateins;
+//       item.Qtyperpc = selectedProduct.Qpps || 0;
+//       item.curMrp = selectedProduct.Mrps || 0;
+//     }
+//   }
+
+//   // ==============================
+//   // 🔥 AUTO WEIGHT CALCULATION
+//   // ==============================
+//   const pkgs = parseFloat(item.pkgs) || 0;
+//   const qtyPerPc = parseFloat(item.Qtyperpc) || 0;
+
+//   if (pkgs > 0 && qtyPerPc > 0 && key !== "weight") {
+//     item.weight = (pkgs * qtyPerPc).toFixed(2);
+//   }
+
+//   const weight = parseFloat(item.weight) || 0;
+//   const rate = parseFloat(item.rate) || 0;
+//   const gst = parseFloat(item.gst) || 0;
+
+//   // ==============================
+//   // 🔥 AMOUNT CALCULATION
+//   // ==============================
+//   let baseAmount = 0;
+
+//   if (item.RateCal === "Pc/Pkgs") {
+//     baseAmount = pkgs * rate;
+//   } else {
+//     baseAmount = weight * rate;
+//   }
+
+//   // If user manually edits amount → recalc rate
+//   if (
+//     key === "amount" &&
+//     value !== "" &&
+//     !value.endsWith(".")
+//   ) {
+//     const enteredAmount = parseFloat(value) || 0;
+//     let qty = item.RateCal === "Pc/Pkgs" ? pkgs : weight;
+
+//     const currentMrp = parseFloat(item.curMrp);
+
+//     if (!isNaN(currentMrp) && currentMrp > 0) {
+//       // Do not allow rate override if MRP exists
+//     } else if (qty > 0) {
+//       let newRate = enteredAmount / qty;
+//       item.rate = T21
+//         ? Math.round(newRate).toFixed(2)
+//         : newRate.toFixed(2);
+//     }
+
+//     baseAmount = enteredAmount;
+//   }
+
+//   baseAmount = isNaN(baseAmount) ? 0 : baseAmount;
+
+//   // ==============================
+//   // 🔥 DISCOUNT CALCULATION
+//   // ==============================
+//   let discountValue = 0;
+//   let discPercent = parseFloat(item.disc) || 0;
+//   let manualDiscount = parseFloat(item.discount) || 0;
+
+//   if (key === "discount") {
+//     discountValue = manualDiscount;
+//   } else {
+//     discountValue = (discPercent / 100) * baseAmount;
+//     item.discount = T21
+//       ? Math.round(discountValue).toFixed(2)
+//       : discountValue.toFixed(2);
+//   }
+
+//   discountValue = parseFloat(discountValue) || 0;
+
+//   const others = parseFloat(item.exp_before) || 0;
+//   const taxableAmount = baseAmount + discountValue + others;
+
+//   // ==============================
+//   // 🔥 GST CALCULATION
+//   // ==============================
+//   let cgst = 0,
+//     sgst = 0,
+//     igst = 0;
+
+//   const CompanyState = "Punjab";
+
+//   if (CompanyState === "Punjab") {
+//     cgst = (taxableAmount * gst) / 200;
+//     sgst = (taxableAmount * gst) / 200;
+//   } else {
+//     igst = (taxableAmount * gst) / 100;
+//   }
+
+//   const totalWithGST = taxableAmount + cgst + sgst + igst;
+
+//   // ==============================
+//   // 🔥 ROUNDING LOGIC
+//   // ==============================
+//   if (T21) {
+//     item.amount = Math.round(baseAmount).toFixed(2);
+//     item.discount = Math.round(discountValue).toFixed(2);
+//     item.vamt = Math.round(totalWithGST).toFixed(2);
+//   } else {
+//     item.amount = baseAmount.toFixed(2);
+//     item.vamt = totalWithGST.toFixed(2);
+//   }
+
+//   if (T12) {
+//     item.ctax = Math.round(cgst).toFixed(2);
+//     item.stax = Math.round(sgst).toFixed(2);
+//     item.itax = Math.round(igst).toFixed(2);
+//   } else {
+//     item.ctax = cgst.toFixed(2);
+//     item.stax = sgst.toFixed(2);
+//     item.itax = igst.toFixed(2);
+//   }
+
+//   updatedItems[index] = item;
+//   setItems(updatedItems);
+// };
+
+//   const handleProductSelect = (product) => {
+//     if (selectedItemIndex !== null) {
+//       handleItemChange(selectedItemIndex, "name", product.Aheads);
+//       setShowModal(false);
+//     }
+//   };
+
+//   const handleModalDone = (product) => {
+//     if (product) {
+//       // console.log(product);
+//       handleProductSelect(product);
+//     }
+//     setShowModal(false);
+//     fetchProducts();
+//   };
+
+//   const openModalForItem = (index) => {
+//       setSelectedItemIndex(index);
+//       setShowModal(true);
+//   };
+
+//   const allFields = products.length
+//     ? Object.keys(products[0])
+//     : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+
+//   const defaultTableFields = {
+//     itemcode: true,
+//     sdisc: true,
+//     hsncode: true,
+//     pcs: true,
+//     qty: true,
+//     rate: true,
+//     amount: true,
+//     discount: false,
+//     others: true,
+//     gst: false,
+//     cgst: true,
+//     sgst: true,
+//     igst: true,
+//   };
+  
+//   const [tableData, settableData] = useState(() => {
+//     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+//     const parsed = saved ? JSON.parse(saved) : {};
+
+//     // Only keep keys that exist in defaultFormData
+//     const sanitized = Object.fromEntries(
+//       Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+//         Object.hasOwn(defaultTableFields, key),
+//       ),
+//     );
+
+//     return sanitized;
+//   });
+
+//   // Calculate Total GST
+//   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
+//     let totalValue = 0;
+//     let cgstTotal = 0;
+//     let sgstTotal = 0;
+//     let igstTotal = 0;
+//     let totalOthers = 0;
+//     let totalpcs = 0;
+//     let totalQty = 0;
+//     let totalDis = 0;
+//     const applicableTariffs = [
+//       "7204",
+//       "7602",
+//       "7902",
+//       "7404",
+//       "7503",
+//       "8002",
+//       "8101",
+//       "7802",
+//       "8112",
+//       "8113",
+//       "8104",
+//     ];
+
+//     items.forEach((item) => {
+//       const value = parseFloat(item.amount || 0);
+//       totalValue += value || 0;
+//       cgstTotal += parseFloat(item.ctax || 0);
+//       sgstTotal += parseFloat(item.stax || 0);
+//       igstTotal += parseFloat(item.itax || 0);
+//       totalOthers += parseFloat(item.exp_before || 0);
+//       totalpcs += parseFloat(item.pkgs || 0);
+//       totalQty += parseFloat(item.weight || 0);
+//       totalDis += parseFloat(item.discount || 0);
+//     });
+//     // Expense Calculations
+//     const subTotal = parseFloat(formDataOverride.sub_total) || 0;
+//     let exp6Rate = parseFloat(formDataOverride.Exp_rate6) || 0;
+//     let exp7Rate = parseFloat(formDataOverride.Exp_rate7) || 0;
+//     let exp8Rate = parseFloat(formDataOverride.Exp_rate8) || 0;
+//     let exp9Rate = parseFloat(formDataOverride.Exp_rate9) || 0;
+//     let exp10Rate = parseFloat(formDataOverride.Exp_rate10) || 0;
+//     let exp6 = 0;
+//     let exp7 = 0;
+//     let exp8 = 0;
+//     let exp9 = 0;
+//     let exp10 = 0;
+//     let CalExp6 ,CalExp7, CalExp8, CalExp9 ,CalExp10;
+//     const Exp1Multiplier6 = 1
+//     const Exp1Multiplier7 = 1;
+//     const Exp1Multiplier8 = 1;
+//     const Exp1Multiplier9 = 1;
+//     const Exp1Multiplier10 = 1
+
+//     if (formDataOverride._manual_Exp6) {
+//       exp6 = parseFloat(formDataOverride.Exp6) || 0;
+//     } else {
+//       if (CalExp6 === "P" || CalExp6 === "p") {
+//         exp6 = (totalpcs * exp6Rate) / 100 || 0;
+//       } else if (CalExp6 === "W" || CalExp6 === "w") {
+//         exp6 = (totalQty * exp6Rate) / 100 || 0;
+//       } else {
+//         exp6 = (subTotal * exp6Rate) / 100 || 0;
+//       }
+//     }
+//     exp6 *= Exp1Multiplier6;
+//     if (!formDataOverride._manual_Exp6) {
+//       formDataOverride.Exp6 = exp6.toFixed(2);
+//     }
+
+//     // EXP 7
+//     if (formDataOverride._manual_Exp7) {
+//       exp7 = parseFloat(formDataOverride.Exp7) || 0;
+//     } else {
+//       if (CalExp7 === "P" || CalExp7 === "p") {
+//         exp7 = (totalpcs * exp7Rate) / 100 || 0;
+//       } else if (CalExp7 === "W" || CalExp7 === "w") {
+//         exp7 = (totalQty * exp7Rate) / 100 || 0;
+//       } else {
+//         exp7 = (subTotal * exp7Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp7 *= Exp1Multiplier7;
+//       if (!formDataOverride._manual_Exp7) {
+//       formDataOverride.Exp7 = exp7.toFixed(2);
+//     }
+
+//     // EXP 8
+//     if (formDataOverride._manual_Exp8) {
+//       exp8 = parseFloat(formDataOverride.Exp8) || 0;
+//     } else {
+//       if (CalExp8 === "P" || CalExp8 === "p") {
+//         exp8 = (totalpcs * exp8Rate) / 100 || 0;
+//       } else if (CalExp8 === "W" || CalExp8 === "w") {
+//         exp8 = (totalQty * exp8Rate) / 100 || 0;
+//       } else {
+//         exp8 = (subTotal * exp8Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp8 *= Exp1Multiplier8;
+//       if (!formDataOverride._manual_Exp8) {
+//       formDataOverride.Exp8 = exp8.toFixed(2);
+//     }
+
+//     // EXP 9
+//     if (formDataOverride._manual_Exp9) {
+//       exp9 = parseFloat(formDataOverride.Exp9) || 0;
+//     } else {
+//       if (CalExp9 === "P" || CalExp9 === "p") {
+//         exp9 = (totalpcs * exp9Rate) / 100 || 0;
+//       } else if (CalExp9 === "W" || CalExp9 === "w") {
+//         exp9 = (totalQty * exp9Rate) / 100 || 0;
+//       } else {
+//         exp9 = (subTotal * exp9Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp9 *= Exp1Multiplier9;
+//       if (!formDataOverride._manual_Exp9) {
+//       formDataOverride.Exp9 = exp9.toFixed(2);
+//     }
+
+//     // EXP 10
+//     if (formDataOverride._manual_Exp10) {
+//       exp10 = parseFloat(formDataOverride.Exp10) || 0;
+//     } else {
+//       if (CalExp10 === "P" || CalExp10 === "p") {
+//         exp10 = (totalpcs * exp10Rate) / 100 || 0;
+//       } else if (CalExp10 === "W" || CalExp10 === "w") {
+//         exp10 = (totalQty * exp10Rate) / 100 || 0;
+//       } else {
+//         exp10 = (subTotal * exp10Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp10 *= Exp1Multiplier10;
+//       if (!formDataOverride._manual_Exp10) {
+//       formDataOverride.Exp10 = exp10.toFixed(2);
+//     }
+
+//     // Calculate Total Expenses
+//     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
+//     let gstTotal = cgstTotal + sgstTotal + igstTotal;
+//     let grandTotal =
+//       totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
+//     let taxable = parseFloat(formDataOverride.sub_total) || 0;
+//     // ✅ Skip TCS Calculation if skipTCS is true
+//     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
+//     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
+//     let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
+//     let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
+//     let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
+//     let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
+
+//     if (!skipTCS) {
+//       tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
+//       grandTotal += tcs1;
+//     } else if (skipTCS) {
+//       grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
+//     }
+
+//     let cTds = 0,
+//       sTds = 0,
+//       iTds = 0,
+//       tcspercentage = "0";
+//       let CompanyState = "Punjab"
+//     items.forEach((item) => {
+//       if (
+//         item.tariff &&
+//         applicableTariffs.some((tariff) => item.tariff.startsWith(tariff))
+//       ) {
+//         if (CompanyState == "Punjab") {
+//           cTds = totalValue * 0.01;
+//           sTds = totalValue * 0.01;
+//           tcspercentage = "2%";
+//         } else {
+//           iTds = totalValue * 0.02;
+//           tcspercentage = "2%";
+//         }
+//       }
+//     });
+
+//     let totalTds = cTds + sTds + iTds;
+//     let expafterGST = tcs206 + tcs1;
+//     let originalGrandTotal = grandTotal; // Save the unrounded grandTotal
+
+//     if (T21) {
+//       totalValue = Math.round(totalValue);
+//       grandTotal = Math.round(grandTotal);
+//       totalDis = Math.round(totalDis);
+//     }
+
+//     if (T12) {
+//       gstTotal = Math.round(gstTotal);
+//       cgstTotal = Math.round(cgstTotal);
+//       sgstTotal = Math.round(sgstTotal);
+//       igstTotal = Math.round(igstTotal);
+//       totalOthers = Math.round(totalOthers);
+//       expafterGST = Math.round(expafterGST);
+//       totalTds = Math.round(totalTds);
+//       tcs206 = Math.round(tcs206);
+//       srv_tax = Math.round(srv_tax);
+//       cTds = Math.round(cTds);
+//       sTds = Math.round(sTds);
+//       iTds = Math.round(iTds);
+//     }
+//     // Calculate Round-Off Difference
+//     let ExpRoundoff = grandTotal - originalGrandTotal;
+
+//     return {
+//       ...formDataOverride,
+//       tcsper: tcspercentage,
+//       tcs206: tcs206.toFixed(2),
+//       tcs206_rate: tcs206Rate.toFixed(2),
+//       tcs1: tcs1.toFixed(2),
+//       tcs1_rate: tcs1Rate.toFixed(2),
+//       srv_tax: srv_tax.toFixed(2),
+//       srv_rate: srvRate.toFixed(2),
+//       tax: gstTotal.toFixed(2),
+//       cgst: cgstTotal.toFixed(2),
+//       sgst: sgstTotal.toFixed(2),
+//       igst: igstTotal.toFixed(2),
+//       sub_total: totalValue.toFixed(2),
+//       Tds2: totalTds.toFixed(2),
+//       Ctds: cTds.toFixed(2),
+//       Stds: sTds.toFixed(2),
+//       iTds: iTds.toFixed(2),
+//       grandtotal: grandTotal.toFixed(2),
+//       exp_before: (totalOthers - totalDis).toFixed(2),
+//       expafterGST: (totalExpenses + tcs206 + tcs1).toFixed(2),
+//       ExpRoundoff: ExpRoundoff.toFixed(2),
+//     };
+//   };
+
+//   useEffect(() => {
+//     setFormData((prevState) => calculateTotalGst(prevState));
+//   }, [items, T21, T12, formData.tcs1_rate]);
+//    // Modal For Customer
+//     React.useEffect(() => {
+//       // Fetch products from the API when the component mounts
+//       fetchCustomers();
+//     }, []);
+  
+//     const fetchCustomers = async () => {
+//       try {
+//         const response = await fetch(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
+//         );
+//         if (!response.ok) {
+//           throw new Error("Failed to fetch products");
+//         }
+//         const data = await response.json();
+//         // Ensure to extract the formData for easier access in the rest of your app
+//         const formattedData = data.map((item) => ({
+//           ...item.formData,
+//           _id: item._id,
+//         }));
+//         setProductsCus(formattedData);
+//         setLoadingCus(false);
+//       } catch (error) {
+//         setErrorCus(error.message);
+//         setLoadingCus(false);
+//       }
+//     };
+  
+//     // Modal For CustomerDetails
+//     const [productsCus, setProductsCus] = useState([]);
+//     const [showModalCus, setShowModalCus] = useState(false);
+//     const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//     const [loadingCus, setLoadingCus] = useState(true);
+//     const [errorCus, setErrorCus] = useState(null);
+   
+//     const handleItemChangeCus = (index, key, value) => {
+//       const updatedItems = [...customerDetails];
+//       updatedItems[index][key] = value;
+  
+//       if (key === "name") {
+//         const selectedProduct = productsCus.find(
+//           (product) => product.ahead === value,
+//         );
+//         if (selectedProduct) {
+//           updatedItems[index] = {
+//             ...updatedItems[index],
+//             Vcode: selectedProduct.acode,
+//             vacode: selectedProduct.ahead,
+//             gstno: selectedProduct.gstNo,
+//             pan: selectedProduct.pan,
+//             Add1: selectedProduct.add1,
+//             city: selectedProduct.city,
+//             state: selectedProduct.state,
+//             Tcs206c1H: selectedProduct.tcs206,
+//             TDS194Q: selectedProduct.tds194q,
+//           };
+
+//         }
+//       }
+//       setcustomerDetails(updatedItems);
+//     };
+  
+//     const handleProductSelectCus = (product) => {
+//       if (!product) {
+//         alert("No product received!");
+//         setShowModalCus(false);
+//         return;
+//       }
+  
+//       // clone the array
+//       const newCustomers = [...customerDetails];
+  
+//       // overwrite the one at the selected index
+//       newCustomers[selectedItemIndexCus] = {
+//         ...newCustomers[selectedItemIndexCus],
+//         Vcode: product.acode || "",
+//         vacode: product.ahead || "",
+//         city: product.city || "",
+//         gstno: product.gstNo || "",
+//         pan: product.pan || "",
+//         Add1: product.add1 || "",
+//         state: product.state || "",
+//         Tcs206c1H: product.tcs206 || "",
+//         TDS194Q: product.tds194q || "",
+//       };
+
+//       const nameValue = product.ahead || product.name || "";
+//       if (selectedItemIndexCus !== null) {
+//         setFormData((prev) => ({
+//           ...prev,
+//           broker: product.agent || "", // <-- change key name based on your API
+//         }));
+//         if (selectedItemIndexCus === "v_tpt") {
+//           setFormData((prevData) => ({
+//             ...prevData,
+//             v_tpt: nameValue,
+//           }));
+//         } else {
+//           handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//         }
+//       }
+//       setcustomerDetails(newCustomers);
+//       setShowModalCus(false);
+//     };
+  
+//     const handleCloseModalCus = () => {
+//       setShowModalCus(false);
+//       setPressedKey(""); // resets for next modal open
+//     };
+  
+//     const openModalForItemCus = (index) => {
+//         setSelectedItemIndexCus(index);
+//         setShowModalCus(true);
+//     };
+  
+//     const allFieldsCus = productsCus.reduce((fields, product) => {
+//       Object.keys(product).forEach((key) => {
+//         if (!fields.includes(key)) {
+//           fields.push(key);
+//         }
+//       });
+  
+//       return fields;
+//     }, []);
+
+//   const handleDoubleClick = (event, fieldName, index) => {
+//     if ( fieldName === "vcode") {
+//       setSelectedItemIndex(index);
+//       setShowModal(true);
+//       event.preventDefault();
+//     }
+//     if ( fieldName === "accountname") {
+//       setSelectedItemIndexCus(index);
+//       setShowModalCus(true);
+//       event.preventDefault();
+//     }
+//   };
+
+  
+//   return (
+//     <div>
+//       {customerDetails.map((item, index) => (
+//         <div key={item.vacode}>
+//           <div className="CUS">
+//             <div className="customerdiv">
+//               <TextField
+//                 label="CUSTOMER NAME"
+//                 variant="filled"
+//                 size="small"
+//                 value={item.vacode}
+//                 className="customerNAME custom-bordered-input"
+//                 onDoubleClick={(e) => {
+//                   handleDoubleClick(e, "accountname", index);
+//                 }}
+//                 onFocus={(e) => e.target.select()}
+//                 inputProps={{
+//                   maxLength: 48,
+//                   style: {
+//                     height: "20px",
+//                   },
+//                 }}
+//               />
+//             </div>
+//           </div>
+//         </div>
+//       ))}
+//       {showModalCus && (
+//         <ProductModalCustomer
+//           allFields={allFieldsCus}
+//           onSelect={handleProductSelectCus}
+//           onClose={handleCloseModalCus}
+//           initialKey={pressedKey}
+//           tenant={tenant}
+//         />
+//       )}
+//       <div style={{ marginTop: 5 }} className="tablediv">
+//          <Table className="custom-table">
+//             <thead
+//               style={{
+//                 textAlign: "center",
+//                 position: "sticky",
+//                 top: 0,
+//               }}
+//             >
+//               <tr style={{ color: "#575a5a" }}>
+//                 {tableData.itemcode && <th>ITEMCODE</th>}
+//                 {tableData.sdisc && <th>DESCRIPTION</th>}
+//                 {tableData.hsncode && <th>HSNCODE</th>}
+//                 {tableData.pcs && <th>PCS</th>}
+//                 {tableData.qty && <th>QTY</th>}
+//                 {tableData.rate && <th>RATE</th>}
+//                 {tableData.amount && <th>AMOUNT</th>}
+//                 {tableData.discount && <th>DIS@</th>}
+//                 {tableData.discount && <th>DISCOUNT</th>}
+//                 {tableData.others && <th>OTHERS</th>}
+//                 {tableData.cgst && <th>CGST</th>}
+//                 {tableData.sgst && <th>SGST</th>}
+//                 {tableData.igst && <th>IGST</th>}
+//                 <th>VAmt</th>
+//               </tr>
+//             </thead>
+//             <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+//               {items.map((item, index) => (
+//                 <tr key={item.id}>
+//                   {tableData.itemcode && (
+//                     <td style={{ padding: 0, width: 30 }}>
+//                       <input
+//                         className="ItemCode"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                         }}
+//                         type="text"
+//                         value={item.vcode}
+//                          onDoubleClick={(e) => {
+//                         handleDoubleClick(e, "vcode", index);
+//                       }}
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.sdisc && (
+//                     <td style={{ padding: 0, width: 300 }}>
+//                       <input
+//                         className="desc"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                         }}
+//                         maxLength={48}
+//                         value={item.sdisc}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "sdisc", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.hsncode && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Hsn"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={8}
+//                         value={item.tariff}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "tariff", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.pcs && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="PCS"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "pkgs", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.qty && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="QTY"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.weight) === 0 ? "" : item.weight}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "weight", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.rate && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Price"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.rate) === 0 ? "" : item.rate}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "rate", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.amount && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Amount"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.amount) === 0 ? "" : item.amount}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "amount", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.discount && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Disc"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         value={Number(item.disc) === 0 ? "" : item.disc}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "disc", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.discount && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         id="discount"
+//                         className="discount"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         value={Number(item.discount) === 0 ? "" : item.discount}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "discount", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.others && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Others"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         type="text"
+//                         value={
+//                           Number(item.exp_before) === 0 ? "" : item.exp_before
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.cgst && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="CTax"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                           color: "black",
+//                         }}
+//                         maxLength={48}
+//                         disabled
+//                         value={Number(item.ctax) === 0 ? "" : item.ctax}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "ctax", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.sgst && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="STax"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                           color: "black",
+//                         }}
+//                         maxLength={48}
+//                         disabled
+//                         value={Number(item.stax) === 0 ? "" : item.stax}
+//                         onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.igst && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="ITax"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                           color: "black",
+//                         }}
+//                         maxLength={48}
+//                         disabled
+//                         value={Number(item.itax) === 0 ? "" : item.itax}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "itax", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   <td>{item.vamt}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </Table>
+//       </div>
+//       {showModal && (
+//         <ProductModal
+//           products={products}
+//           allFields={allFields}
+//           onSelect={handleProductSelect}
+//           onClose={handleModalDone}
+//           tenant={tenant}
+//           initialKey={pressedKey}
+//           fetchParentProducts={fetchProducts}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+// JOURNAL TABLE
+import React, { useState } from "react";
 import Table from "react-bootstrap/Table";
-import Button from "react-bootstrap/Button";
-import { TextField } from "@mui/material";
-import ProductModal from "./Modals/ProductModal";
 import ProductModalCustomer from "./Modals/ProductModalCustomer";
+import { Button } from "react-bootstrap";
 
 const Example = () => {
-  const LOCAL_STORAGE_KEY = "tabledataVisibility";
-  const [T11, setT11] = useState(false);
-  const [T12, setT12] = useState(false);
-  const [T21, setT21] = useState(false);
-  const [formData, setFormData] = useState({
-    date: "",
-    valpha:"",
-    vtype: "S",
-    vbillno: 0,
-    vno: 0,
-    gr: "",
-    exfor: "",
-    trpt: "",
-    stype: "",
-    btype: "",
-    conv: "",
-    rem1: "",
-    rem2: "",
-    v_tpt: "",
-    broker: "",
-    gross: false,
-    tcsper: 0,
-    srv_rate: 0,
-    srv_tax: 0,
-    tcs1_rate: 0,
-    tcs1: 0,
-    tcs206_rate: 0,
-    tcs206: 0,
-    duedate: "",
-    pcess: 0,
-    tax: 0,
-    sub_total: 0,
-    exp_before: 0,
-    Exp_rate6: 0,
-    Exp_rate7: 0,
-    Exp_rate8: 0,
-    Exp_rate9: 0,
-    Exp_rate10: 0,
-    Exp6: 0,
-    Exp7: 0,
-    Exp8: 0,
-    Exp9: 0,
-    Exp10: 0,
-    Tds2: "",
-    Ctds: "",
-    Stds: "",
-    iTds: "",
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
-    expafterGST: 0,
-    ExpRoundoff: 0,
-    grandtotal: 0,
-  });
- 
+  const tenant = "shkun_05062025_05062026";
   const [items, setItems] = useState([
     {
-      id: 1,
-      vcode: "",
-      sdisc: "",
-      Units: "",
-      pkgs: "0.00",
-      weight: "0.00",
-      rate: "0.00",
-      amount: "0.00",
-      disc: 0,
-      discount: "",
-      gst: 18,
-      Pcodes01: "",
-      Pcodess: "",
-      Scodes01: "",
-      Scodess: "",
-      Exp_rate1: 0,
-      Exp_rate2: 0,
-      Exp_rate3: 0,
-      Exp_rate4: 0,
-      Exp_rate5: 0,
-      Exp1: 0,
-      Exp2: 0,
-      Exp3: 0,
-      Exp4: 0,
-      Exp5: 0,
-      exp_before: 0,
-      RateCal: "",
-      Qtyperpc: 0,
-      ctax: "0.00",
-      stax: "0.00",
-      itax: "0.00",
-      tariff: "",
-      vamt: "0.00",
+      id: "",
+      accountname: "",
+      narration: "",
+      debit: "",
+      credit: "",
+      disableDebit: false,
+      disableCredit: false,
     },
   ]);
-    const [customerDetails, setcustomerDetails] = useState([
-      {
-        Vcode: "",
-        vacode: "",
-        gstno: "",
-        pan: "",
-        Add1: "",
-        city: "",
-        state: "",
-        Tcs206c1H: "",
-        TDS194Q: "",
-      },
-    ]);
-  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
-    React.useEffect(() => {
-      // Fetch products from the API when the component mounts
-      fetchProducts();
-    }, []);
-  
-    const fetchProducts = async (search = "") => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
+
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  // Modal For Customer
+  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const [productsCus, setProductsCus] = useState([]);
+  const [showModalCus, setShowModalCus] = useState(false);
+  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+  const [loadingCus, setLoadingCus] = useState(true);
+  const [errorCus, setErrorCus] = useState(null);
+  const [suggestionRow, setSuggestionRow] = useState(null);
+  const [suggestionText, setSuggestionText] = useState("");
+
+  React.useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch(
+        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+      const data = await response.json();
+      // Ensure to extract the formData for easier access in the rest of your app
+      const formattedData = data.map((item) => ({
+        ...item.formData,
+        _id: item._id,
+      }));
+      setProductsCus(formattedData);
+      setLoadingCus(false);
+    } catch (error) {
+      setErrorCus(error.message);
+      setLoadingCus(false);
+    }
+  };
+
+  const handleItemChangeCus = (index, key, value) => {
+    const updatedItems = [...items];
+    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+    // If the key is 'name', find the corresponding product and set the price
+    if (key === "name") {
+      const selectedProduct = productsCus.find(
+        (product) => product.ahead === value,
+      );
+      if (selectedProduct) {
+        updatedItems[index]["accountname"] = selectedProduct.ahead;
+        updatedItems[index]["acode"] = selectedProduct.acode;
+      }
+    }
+    // Disable credit field if debit field is filled
+    if (key === "debit") {
+      updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
+    }
+
+    // Disable debit field if credit field is filled
+    if (key === "credit") {
+      updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+    }
+
+    if (key === "narration") {
+      const inputValue = value.trim().toLowerCase();
+
+      if (inputValue !== "") {
+        // Find first matching accountname from ALL rows
+        const matchedItem = items.find(
+          (row) =>
+            row.accountname &&
+            row.accountname.toLowerCase().startsWith(inputValue)
         );
-        if (!response.ok) throw new Error("Failed to fetch products");
-        const data = await response.json();
-        const flattenedData = data.data.map((item) => ({
-          ...item.formData,
-          _id: item._id,
-        }));
-        setProducts(flattenedData);
-      } catch (error) {
-        setError(error.message);
-      }
-      setLoading(false);
-    };
-  
-    const capitalizeWords = (str) => {
-      return str.replace(/\b\w/g, (char) => char.toUpperCase());
-    };
-  
-    // Modal For Items
-    const [products, setProducts] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [selectedItemIndex, setSelectedItemIndex] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  
-    const handleItemChange = (index, key, value) => {
-  // Allow only numeric fields
-  const numericFields = [
-    "pkgs",
-    "weight",
-    "rate",
-    "amount",
-    "disc",
-    "discount",
-    "tariff",
-  ];
 
-  if (numericFields.includes(key) && !/^-?\d*\.?\d*$/.test(value)) {
-    return;
-  }
-
-  const updatedItems = [...items];
-  const item = { ...updatedItems[index] };
-
-  // Force discount negative
-  if (key === "disc" || key === "discount") {
-    const num = parseFloat(value);
-    value = isNaN(num) ? "" : -Math.abs(num);
-  }
-
-  // Capitalize description
-  if (key === "sdisc") {
-    item[key] = value.replace(/\b\w/g, (c) => c.toUpperCase());
-  } else {
-    item[key] = value;
-  }
-
-  // ==============================
-  // 🔥 PRODUCT SELECTION
-  // ==============================
-  if (key === "name") {
-    const selectedProduct = products.find(
-      (product) => product.Aheads === value
-    );
-
-    if (selectedProduct) {
-      item.vcode = selectedProduct.Acodes;
-      item.sdisc = selectedProduct.Aheads;
-      item.Units = selectedProduct.TradeName;
-      item.rate = selectedProduct.Mrps || 0;
-      item.gst = selectedProduct.itax_rate || 0;
-      item.tariff = selectedProduct.Hsn;
-      item.RateCal = selectedProduct.Rateins;
-      item.Qtyperpc = selectedProduct.Qpps || 0;
-      item.curMrp = selectedProduct.Mrps || 0;
-    }
-  }
-
-  // ==============================
-  // 🔥 AUTO WEIGHT CALCULATION
-  // ==============================
-  const pkgs = parseFloat(item.pkgs) || 0;
-  const qtyPerPc = parseFloat(item.Qtyperpc) || 0;
-
-  if (pkgs > 0 && qtyPerPc > 0 && key !== "weight") {
-    item.weight = (pkgs * qtyPerPc).toFixed(2);
-  }
-
-  const weight = parseFloat(item.weight) || 0;
-  const rate = parseFloat(item.rate) || 0;
-  const gst = parseFloat(item.gst) || 0;
-
-  // ==============================
-  // 🔥 AMOUNT CALCULATION
-  // ==============================
-  let baseAmount = 0;
-
-  if (item.RateCal === "Pc/Pkgs") {
-    baseAmount = pkgs * rate;
-  } else {
-    baseAmount = weight * rate;
-  }
-
-  // If user manually edits amount → recalc rate
-  if (
-    key === "amount" &&
-    value !== "" &&
-    !value.endsWith(".")
-  ) {
-    const enteredAmount = parseFloat(value) || 0;
-    let qty = item.RateCal === "Pc/Pkgs" ? pkgs : weight;
-
-    const currentMrp = parseFloat(item.curMrp);
-
-    if (!isNaN(currentMrp) && currentMrp > 0) {
-      // Do not allow rate override if MRP exists
-    } else if (qty > 0) {
-      let newRate = enteredAmount / qty;
-      item.rate = T21
-        ? Math.round(newRate).toFixed(2)
-        : newRate.toFixed(2);
-    }
-
-    baseAmount = enteredAmount;
-  }
-
-  baseAmount = isNaN(baseAmount) ? 0 : baseAmount;
-
-  // ==============================
-  // 🔥 DISCOUNT CALCULATION
-  // ==============================
-  let discountValue = 0;
-  let discPercent = parseFloat(item.disc) || 0;
-  let manualDiscount = parseFloat(item.discount) || 0;
-
-  if (key === "discount") {
-    discountValue = manualDiscount;
-  } else {
-    discountValue = (discPercent / 100) * baseAmount;
-    item.discount = T21
-      ? Math.round(discountValue).toFixed(2)
-      : discountValue.toFixed(2);
-  }
-
-  discountValue = parseFloat(discountValue) || 0;
-
-  const others = parseFloat(item.exp_before) || 0;
-  const taxableAmount = baseAmount + discountValue + others;
-
-  // ==============================
-  // 🔥 GST CALCULATION
-  // ==============================
-  let cgst = 0,
-    sgst = 0,
-    igst = 0;
-
-  const CompanyState = "Punjab";
-
-  if (CompanyState === "Punjab") {
-    cgst = (taxableAmount * gst) / 200;
-    sgst = (taxableAmount * gst) / 200;
-  } else {
-    igst = (taxableAmount * gst) / 100;
-  }
-
-  const totalWithGST = taxableAmount + cgst + sgst + igst;
-
-  // ==============================
-  // 🔥 ROUNDING LOGIC
-  // ==============================
-  if (T21) {
-    item.amount = Math.round(baseAmount).toFixed(2);
-    item.discount = Math.round(discountValue).toFixed(2);
-    item.vamt = Math.round(totalWithGST).toFixed(2);
-  } else {
-    item.amount = baseAmount.toFixed(2);
-    item.vamt = totalWithGST.toFixed(2);
-  }
-
-  if (T12) {
-    item.ctax = Math.round(cgst).toFixed(2);
-    item.stax = Math.round(sgst).toFixed(2);
-    item.itax = Math.round(igst).toFixed(2);
-  } else {
-    item.ctax = cgst.toFixed(2);
-    item.stax = sgst.toFixed(2);
-    item.itax = igst.toFixed(2);
-  }
-
-  updatedItems[index] = item;
-  setItems(updatedItems);
-};
-
-  const handleProductSelect = (product) => {
-    if (selectedItemIndex !== null) {
-      handleItemChange(selectedItemIndex, "name", product.Aheads);
-      setShowModal(false);
-    }
-  };
-
-  const handleModalDone = (product) => {
-    if (product) {
-      // console.log(product);
-      handleProductSelect(product);
-    }
-    setShowModal(false);
-    fetchProducts();
-  };
-
-  const openModalForItem = (index) => {
-      setSelectedItemIndex(index);
-      setShowModal(true);
-  };
-
-  const allFields = products.length
-    ? Object.keys(products[0])
-    : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
-
-  const defaultTableFields = {
-    itemcode: true,
-    sdisc: true,
-    hsncode: true,
-    pcs: true,
-    qty: true,
-    rate: true,
-    amount: true,
-    discount: false,
-    others: true,
-    gst: false,
-    cgst: true,
-    sgst: true,
-    igst: true,
-  };
-  
-  const [tableData, settableData] = useState(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const parsed = saved ? JSON.parse(saved) : {};
-
-    // Only keep keys that exist in defaultFormData
-    const sanitized = Object.fromEntries(
-      Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
-        Object.hasOwn(defaultTableFields, key),
-      ),
-    );
-
-    return sanitized;
-  });
-
-  // Calculate Total GST
-  const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
-    let totalValue = 0;
-    let cgstTotal = 0;
-    let sgstTotal = 0;
-    let igstTotal = 0;
-    let totalOthers = 0;
-    let totalpcs = 0;
-    let totalQty = 0;
-    let totalDis = 0;
-    const applicableTariffs = [
-      "7204",
-      "7602",
-      "7902",
-      "7404",
-      "7503",
-      "8002",
-      "8101",
-      "7802",
-      "8112",
-      "8113",
-      "8104",
-    ];
-
-    items.forEach((item) => {
-      const value = parseFloat(item.amount || 0);
-      totalValue += value || 0;
-      cgstTotal += parseFloat(item.ctax || 0);
-      sgstTotal += parseFloat(item.stax || 0);
-      igstTotal += parseFloat(item.itax || 0);
-      totalOthers += parseFloat(item.exp_before || 0);
-      totalpcs += parseFloat(item.pkgs || 0);
-      totalQty += parseFloat(item.weight || 0);
-      totalDis += parseFloat(item.discount || 0);
-    });
-    // Expense Calculations
-    const subTotal = parseFloat(formDataOverride.sub_total) || 0;
-    let exp6Rate = parseFloat(formDataOverride.Exp_rate6) || 0;
-    let exp7Rate = parseFloat(formDataOverride.Exp_rate7) || 0;
-    let exp8Rate = parseFloat(formDataOverride.Exp_rate8) || 0;
-    let exp9Rate = parseFloat(formDataOverride.Exp_rate9) || 0;
-    let exp10Rate = parseFloat(formDataOverride.Exp_rate10) || 0;
-    let exp6 = 0;
-    let exp7 = 0;
-    let exp8 = 0;
-    let exp9 = 0;
-    let exp10 = 0;
-    let CalExp6 ,CalExp7, CalExp8, CalExp9 ,CalExp10;
-    const Exp1Multiplier6 = 1
-    const Exp1Multiplier7 = 1;
-    const Exp1Multiplier8 = 1;
-    const Exp1Multiplier9 = 1;
-    const Exp1Multiplier10 = 1
-
-    if (formDataOverride._manual_Exp6) {
-      exp6 = parseFloat(formDataOverride.Exp6) || 0;
-    } else {
-      if (CalExp6 === "P" || CalExp6 === "p") {
-        exp6 = (totalpcs * exp6Rate) / 100 || 0;
-      } else if (CalExp6 === "W" || CalExp6 === "w") {
-        exp6 = (totalQty * exp6Rate) / 100 || 0;
-      } else {
-        exp6 = (subTotal * exp6Rate) / 100 || 0;
-      }
-    }
-    exp6 *= Exp1Multiplier6;
-    if (!formDataOverride._manual_Exp6) {
-      formDataOverride.Exp6 = exp6.toFixed(2);
-    }
-
-    // EXP 7
-    if (formDataOverride._manual_Exp7) {
-      exp7 = parseFloat(formDataOverride.Exp7) || 0;
-    } else {
-      if (CalExp7 === "P" || CalExp7 === "p") {
-        exp7 = (totalpcs * exp7Rate) / 100 || 0;
-      } else if (CalExp7 === "W" || CalExp7 === "w") {
-        exp7 = (totalQty * exp7Rate) / 100 || 0;
-      } else {
-        exp7 = (subTotal * exp7Rate) / 100 || 0;
-      }
-    }
-
-    exp7 *= Exp1Multiplier7;
-      if (!formDataOverride._manual_Exp7) {
-      formDataOverride.Exp7 = exp7.toFixed(2);
-    }
-
-    // EXP 8
-    if (formDataOverride._manual_Exp8) {
-      exp8 = parseFloat(formDataOverride.Exp8) || 0;
-    } else {
-      if (CalExp8 === "P" || CalExp8 === "p") {
-        exp8 = (totalpcs * exp8Rate) / 100 || 0;
-      } else if (CalExp8 === "W" || CalExp8 === "w") {
-        exp8 = (totalQty * exp8Rate) / 100 || 0;
-      } else {
-        exp8 = (subTotal * exp8Rate) / 100 || 0;
-      }
-    }
-
-    exp8 *= Exp1Multiplier8;
-      if (!formDataOverride._manual_Exp8) {
-      formDataOverride.Exp8 = exp8.toFixed(2);
-    }
-
-    // EXP 9
-    if (formDataOverride._manual_Exp9) {
-      exp9 = parseFloat(formDataOverride.Exp9) || 0;
-    } else {
-      if (CalExp9 === "P" || CalExp9 === "p") {
-        exp9 = (totalpcs * exp9Rate) / 100 || 0;
-      } else if (CalExp9 === "W" || CalExp9 === "w") {
-        exp9 = (totalQty * exp9Rate) / 100 || 0;
-      } else {
-        exp9 = (subTotal * exp9Rate) / 100 || 0;
-      }
-    }
-
-    exp9 *= Exp1Multiplier9;
-      if (!formDataOverride._manual_Exp9) {
-      formDataOverride.Exp9 = exp9.toFixed(2);
-    }
-
-    // EXP 10
-    if (formDataOverride._manual_Exp10) {
-      exp10 = parseFloat(formDataOverride.Exp10) || 0;
-    } else {
-      if (CalExp10 === "P" || CalExp10 === "p") {
-        exp10 = (totalpcs * exp10Rate) / 100 || 0;
-      } else if (CalExp10 === "W" || CalExp10 === "w") {
-        exp10 = (totalQty * exp10Rate) / 100 || 0;
-      } else {
-        exp10 = (subTotal * exp10Rate) / 100 || 0;
-      }
-    }
-
-    exp10 *= Exp1Multiplier10;
-      if (!formDataOverride._manual_Exp10) {
-      formDataOverride.Exp10 = exp10.toFixed(2);
-    }
-
-    // Calculate Total Expenses
-    const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
-    let gstTotal = cgstTotal + sgstTotal + igstTotal;
-    let grandTotal =
-      totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
-    let taxable = parseFloat(formDataOverride.sub_total) || 0;
-    // ✅ Skip TCS Calculation if skipTCS is true
-    let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
-    let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
-    let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
-    let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
-    let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
-    let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
-
-    if (!skipTCS) {
-      tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
-      grandTotal += tcs1;
-    } else if (skipTCS) {
-      grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
-    }
-
-    let cTds = 0,
-      sTds = 0,
-      iTds = 0,
-      tcspercentage = "0";
-      let CompanyState = "Punjab"
-    items.forEach((item) => {
-      if (
-        item.tariff &&
-        applicableTariffs.some((tariff) => item.tariff.startsWith(tariff))
-      ) {
-        if (CompanyState == "Punjab") {
-          cTds = totalValue * 0.01;
-          sTds = totalValue * 0.01;
-          tcspercentage = "2%";
+        if (matchedItem) {
+          setSuggestionRow(index);
+          setSuggestionText(matchedItem.accountname);
         } else {
-          iTds = totalValue * 0.02;
-          tcspercentage = "2%";
+          setSuggestionRow(null);
+          setSuggestionText("");
         }
+      } else {
+        setSuggestionRow(null);
+        setSuggestionText("");
+      }
+    }
+
+    setItems(updatedItems);
+  };
+
+  const handleProductSelectCus = (product) => {
+    if (!product) {
+      alert("No product received!");
+      setShowModalCus(false);
+      return;
+    }
+
+    // clone the array
+    const newCustomers = [...items];
+
+    // overwrite the one at the selected index
+    newCustomers[selectedItemIndexCus] = {
+      ...newCustomers[selectedItemIndexCus],
+      accountname: product.ahead || "",
+      acode: product.acode
+    };
+    const nameValue = product.ahead || product.name || "";
+    if (selectedItemIndexCus !== null) {
+      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+      setShowModalCus(false);
+    }
+    setItems(newCustomers);
+    setShowModalCus(false);
+  };
+
+  const handleCloseModalCus = () => {
+    setShowModalCus(false);
+    setPressedKey(""); // resets for next modal open
+  };
+
+  const openModalForItemCus = (index) => {
+    setSelectedItemIndexCus(index);
+    setShowModalCus(true);
+  };
+
+  const allFieldsCus = productsCus.reduce((fields, product) => {
+    Object.keys(product).forEach((key) => {
+      if (!fields.includes(key)) {
+        fields.push(key);
       }
     });
 
-    let totalTds = cTds + sTds + iTds;
-    let expafterGST = tcs206 + tcs1;
-    let originalGrandTotal = grandTotal; // Save the unrounded grandTotal
+    return fields;
+  }, []);
 
-    if (T21) {
-      totalValue = Math.round(totalValue);
-      grandTotal = Math.round(grandTotal);
-      totalDis = Math.round(totalDis);
+  const handleNumberChange = (event, index, field) => {
+    const value = event.target.value;
+
+    // Validate that the input is numeric
+    if (!/^\d*\.?\d*$/.test(value)) {
+      return;
     }
 
-    if (T12) {
-      gstTotal = Math.round(gstTotal);
-      cgstTotal = Math.round(cgstTotal);
-      sgstTotal = Math.round(sgstTotal);
-      igstTotal = Math.round(igstTotal);
-      totalOthers = Math.round(totalOthers);
-      expafterGST = Math.round(expafterGST);
-      totalTds = Math.round(totalTds);
-      tcs206 = Math.round(tcs206);
-      srv_tax = Math.round(srv_tax);
-      cTds = Math.round(cTds);
-      sTds = Math.round(sTds);
-      iTds = Math.round(iTds);
-    }
-    // Calculate Round-Off Difference
-    let ExpRoundoff = grandTotal - originalGrandTotal;
+    const updatedItems = [...items];
+    updatedItems[index][field] = value;
 
-    return {
-      ...formDataOverride,
-      tcsper: tcspercentage,
-      tcs206: tcs206.toFixed(2),
-      tcs206_rate: tcs206Rate.toFixed(2),
-      tcs1: tcs1.toFixed(2),
-      tcs1_rate: tcs1Rate.toFixed(2),
-      srv_tax: srv_tax.toFixed(2),
-      srv_rate: srvRate.toFixed(2),
-      tax: gstTotal.toFixed(2),
-      cgst: cgstTotal.toFixed(2),
-      sgst: sgstTotal.toFixed(2),
-      igst: igstTotal.toFixed(2),
-      sub_total: totalValue.toFixed(2),
-      Tds2: totalTds.toFixed(2),
-      Ctds: cTds.toFixed(2),
-      Stds: sTds.toFixed(2),
-      iTds: iTds.toFixed(2),
-      grandtotal: grandTotal.toFixed(2),
-      exp_before: (totalOthers - totalDis).toFixed(2),
-      expafterGST: (totalExpenses + tcs206 + tcs1).toFixed(2),
-      ExpRoundoff: ExpRoundoff.toFixed(2),
-    };
+    // If the field is 'debit' and its value is greater than zero, disable 'credit'
+    if (field === "debit") {
+      updatedItems[index].disableCredit = parseFloat(value) > 0;
+      updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
+    }
+    // If the field is 'credit' and its value is greater than zero, disable 'debit'
+    else if (field === "credit") {
+      updatedItems[index].disableDebit = parseFloat(value) > 0;
+      updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
+    }
+    setItems(updatedItems);
   };
 
-  useEffect(() => {
-    setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T21, T12, formData.tcs1_rate]);
-   // Modal For Customer
-    React.useEffect(() => {
-      // Fetch products from the API when the component mounts
-      fetchCustomers();
-    }, []);
-  
-    const fetchCustomers = async () => {
-      try {
-        const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data = await response.json();
-        // Ensure to extract the formData for easier access in the rest of your app
-        const formattedData = data.map((item) => ({
-          ...item.formData,
-          _id: item._id,
-        }));
-        setProductsCus(formattedData);
-        setLoadingCus(false);
-      } catch (error) {
-        setErrorCus(error.message);
-        setLoadingCus(false);
-      }
-    };
-  
-    // Modal For CustomerDetails
-    const [productsCus, setProductsCus] = useState([]);
-    const [showModalCus, setShowModalCus] = useState(false);
-    const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-    const [loadingCus, setLoadingCus] = useState(true);
-    const [errorCus, setErrorCus] = useState(null);
-   
-    const handleItemChangeCus = (index, key, value) => {
-      const updatedItems = [...customerDetails];
-      updatedItems[index][key] = value;
-  
-      if (key === "name") {
-        const selectedProduct = productsCus.find(
-          (product) => product.ahead === value,
-        );
-        if (selectedProduct) {
-          updatedItems[index] = {
-            ...updatedItems[index],
-            Vcode: selectedProduct.acode,
-            vacode: selectedProduct.ahead,
-            gstno: selectedProduct.gstNo,
-            pan: selectedProduct.pan,
-            Add1: selectedProduct.add1,
-            city: selectedProduct.city,
-            state: selectedProduct.state,
-            Tcs206c1H: selectedProduct.tcs206,
-            TDS194Q: selectedProduct.tds194q,
-          };
-
-        }
-      }
-      setcustomerDetails(updatedItems);
-    };
-  
-    const handleProductSelectCus = (product) => {
-      if (!product) {
-        alert("No product received!");
-        setShowModalCus(false);
-        return;
-      }
-  
-      // clone the array
-      const newCustomers = [...customerDetails];
-  
-      // overwrite the one at the selected index
-      newCustomers[selectedItemIndexCus] = {
-        ...newCustomers[selectedItemIndexCus],
-        Vcode: product.acode || "",
-        vacode: product.ahead || "",
-        city: product.city || "",
-        gstno: product.gstNo || "",
-        pan: product.pan || "",
-        Add1: product.add1 || "",
-        state: product.state || "",
-        Tcs206c1H: product.tcs206 || "",
-        TDS194Q: product.tds194q || "",
-      };
-
-      const nameValue = product.ahead || product.name || "";
-      if (selectedItemIndexCus !== null) {
-        setFormData((prev) => ({
-          ...prev,
-          broker: product.agent || "", // <-- change key name based on your API
-        }));
-        if (selectedItemIndexCus === "v_tpt") {
-          setFormData((prevData) => ({
-            ...prevData,
-            v_tpt: nameValue,
-          }));
-        } else {
-          handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-        }
-      }
-      setcustomerDetails(newCustomers);
-      setShowModalCus(false);
-    };
-  
-    const handleCloseModalCus = () => {
-      setShowModalCus(false);
-      setPressedKey(""); // resets for next modal open
-    };
-  
-    const openModalForItemCus = (index) => {
-        setSelectedItemIndexCus(index);
-        setShowModalCus(true);
-    };
-  
-    const allFieldsCus = productsCus.reduce((fields, product) => {
-      Object.keys(product).forEach((key) => {
-        if (!fields.includes(key)) {
-          fields.push(key);
-        }
-      });
-  
-      return fields;
-    }, []);
-
-  const handleDoubleClick = (event, fieldName, index) => {
-    if ( fieldName === "vcode") {
-      setSelectedItemIndex(index);
-      setShowModal(true);
-      event.preventDefault();
-    }
-    if ( fieldName === "accountname") {
-      setSelectedItemIndexCus(index);
-      setShowModalCus(true);
+  const handleKeyDown = (event, index, field) => {
+    // Open Modal on Letter Input in Account Name
+    if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+      setPressedKey(event.key);
+      openModalForItemCus(index);
       event.preventDefault();
     }
   };
 
-  
+  const handleAddItem = () => {
+    const newItem = {
+      id: items.length + 1,
+      accountname: "",
+      acode:0,
+      narration: "",
+      debit: "",
+      credit: "",
+      disableDebit: false,
+      disableCredit: false,
+    };
+    setItems([...items, newItem]);
+  };
+
+  const getBalance = (currentIndex) => {
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    items.forEach((row, i) => {
+      if (i !== currentIndex) {
+        totalDebit += parseFloat(row.debit) || 0;
+        totalCredit += parseFloat(row.credit) || 0;
+      }
+    });
+
+    return totalDebit - totalCredit;
+  };
+
   return (
     <div>
-      {customerDetails.map((item, index) => (
-        <div key={item.vacode}>
-          <div className="CUS">
-            <div className="customerdiv">
-              <TextField
-                label="CUSTOMER NAME"
-                variant="filled"
-                size="small"
-                value={item.vacode}
-                className="customerNAME custom-bordered-input"
-                onDoubleClick={(e) => {
-                  handleDoubleClick(e, "accountname", index);
-                }}
-                onFocus={(e) => e.target.select()}
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: "20px",
-                  },
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      ))}
-      {showModalCus && (
-        <ProductModalCustomer
-          allFields={allFieldsCus}
-          onSelect={handleProductSelectCus}
-          onClose={handleCloseModalCus}
-          initialKey={pressedKey}
-          tenant={tenant}
-        />
-      )}
-      <div style={{ marginTop: 5 }} className="tablediv">
-         <Table className="custom-table">
-            <thead
-              style={{
-                textAlign: "center",
-                position: "sticky",
-                top: 0,
-              }}
-            >
-              <tr style={{ color: "#575a5a" }}>
-                {tableData.itemcode && <th>ITEMCODE</th>}
-                {tableData.sdisc && <th>DESCRIPTION</th>}
-                {tableData.hsncode && <th>HSNCODE</th>}
-                {tableData.pcs && <th>PCS</th>}
-                {tableData.qty && <th>QTY</th>}
-                {tableData.rate && <th>RATE</th>}
-                {tableData.amount && <th>AMOUNT</th>}
-                {tableData.discount && <th>DIS@</th>}
-                {tableData.discount && <th>DISCOUNT</th>}
-                {tableData.others && <th>OTHERS</th>}
-                {tableData.cgst && <th>CGST</th>}
-                {tableData.sgst && <th>SGST</th>}
-                {tableData.igst && <th>IGST</th>}
-                <th>VAmt</th>
-              </tr>
-            </thead>
-            <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
-              {items.map((item, index) => (
-                <tr key={item.id}>
-                  {tableData.itemcode && (
-                    <td style={{ padding: 0, width: 30 }}>
-                      <input
-                        className="ItemCode"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                        }}
-                        type="text"
-                        value={item.vcode}
-                         onDoubleClick={(e) => {
-                        handleDoubleClick(e, "vcode", index);
+      <div className="Tablesection">
+        <Table className="custom-table">
+          <thead>
+            <tr style={{ color: "white" }}>
+              <th>ACCOUNT NAME</th>
+              <th>NARRATION</th>
+              <th>DEBIT</th>
+              <th>CREDIT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, index) => (
+              <tr key={`${item.accountname}-${index}`}>
+                <td style={{ padding: 0 }}>
+                  <input
+                    className="Account"
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: 5,
+                    }}
+                    type="text"
+                    value={item.accountname}
+                    onKeyDown={(e) => {
+                      handleKeyDown(e, index, "accountname");
+                    }}
+                    onFocus={(e) => e.target.select()} // Select text on focus
+                  />
+                </td>
+                <td style={{ padding: 0, position: "relative" }}>
+                  <input
+                    className="Narration"
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      padding: "5px 8px",
+                      fontSize: "14px",
+                      position: "relative",
+                      background: "transparent",
+                    }}
+                    value={item.narration}
+                    onChange={(e) =>
+                      handleItemChangeCus(index, "narration", e.target.value)
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (!item.narration || item.narration.trim() === "") {
+                          const updatedItems = [...items];
+                          updatedItems[index].narration = "Journal Narration";
+                          setItems(updatedItems);
+                        }
+                      }
+                      if (
+                        e.key === "Tab" &&
+                        suggestionRow === index &&
+                        suggestionText
+                      ) {
+                        e.preventDefault();
+
+                        const updatedItems = [...items];
+                        updatedItems[index].narration = suggestionText;
+                        setItems(updatedItems);
+
+                        setSuggestionRow(null);
+                        setSuggestionText("");
+                      }
+                    }}
+                  />
+
+                  {/* 👇 Show only remaining text */}
+                  {suggestionRow === index && suggestionText && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 8,
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        color: "#bbb",
+                        fontSize: "14px",
+                        pointerEvents: "none",
                       }}
-                      />
-                    </td>
+                    >
+                      <span style={{ visibility: "hidden" }}>
+                        {item.narration}
+                      </span>
+                      <span>{suggestionText.slice(item.narration.length)}</span>
+                    </div>
                   )}
-                  {tableData.sdisc && (
-                    <td style={{ padding: 0, width: 300 }}>
-                      <input
-                        className="desc"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                        }}
-                        maxLength={48}
-                        value={item.sdisc}
-                        onChange={(e) =>
-                          handleItemChange(index, "sdisc", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.hsncode && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Hsn"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={8}
-                        value={item.tariff}
-                        onChange={(e) =>
-                          handleItemChange(index, "tariff", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.pcs && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="PCS"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.pkgs) === 0 ? "" : item.pkgs}
-                        onChange={(e) =>
-                          handleItemChange(index, "pkgs", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.qty && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="QTY"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.weight) === 0 ? "" : item.weight}
-                        onChange={(e) =>
-                          handleItemChange(index, "weight", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.rate && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Price"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.rate) === 0 ? "" : item.rate}
-                        onChange={(e) =>
-                          handleItemChange(index, "rate", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.amount && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Amount"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.amount) === 0 ? "" : item.amount}
-                        onChange={(e) =>
-                          handleItemChange(index, "amount", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.discount && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Disc"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        value={Number(item.disc) === 0 ? "" : item.disc}
-                        onChange={(e) =>
-                          handleItemChange(index, "disc", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.discount && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        id="discount"
-                        className="discount"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        value={Number(item.discount) === 0 ? "" : item.discount}
-                        onChange={(e) =>
-                          handleItemChange(index, "discount", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.others && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Others"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        type="text"
-                        value={
-                          Number(item.exp_before) === 0 ? "" : item.exp_before
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.cgst && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="CTax"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                          color: "black",
-                        }}
-                        maxLength={48}
-                        disabled
-                        value={Number(item.ctax) === 0 ? "" : item.ctax}
-                        onChange={(e) =>
-                          handleItemChange(index, "ctax", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.sgst && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="STax"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                          color: "black",
-                        }}
-                        maxLength={48}
-                        disabled
-                        value={Number(item.stax) === 0 ? "" : item.stax}
-                        onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
-                      />
-                    </td>
-                  )}
-                  {tableData.igst && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="ITax"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                          color: "black",
-                        }}
-                        maxLength={48}
-                        disabled
-                        value={Number(item.itax) === 0 ? "" : item.itax}
-                        onChange={(e) =>
-                          handleItemChange(index, "itax", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  <td>{item.vamt}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+                </td>
+
+                <td style={{ padding: 0, width: 250 }}>
+                  <input
+                    className="Debit"
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      paddingRight: 10,
+                    }}
+                    value={Number(item.debit) === 0 ? "" : item.debit}
+                    onChange={(e) => handleNumberChange(e, index, "debit")}
+                   onFocus={(e) => {
+  const balance = getBalance(index);
+
+  if (balance < 0) {
+    const updatedItems = [...items];
+    updatedItems[index].debit = Math.abs(balance);
+    setItems(updatedItems);
+  }
+
+  e.target.select();
+}}
+
+                  />
+                </td>
+                <td style={{ padding: 0, width: 250 }}>
+                  <input
+                    className="Credits"
+                    style={{
+                      height: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      border: "none",
+                      paddingRight: 10,
+                    }}
+                    value={Number(item.credit) === 0 ? "" : item.credit}
+                    onChange={(e) => handleNumberChange(e, index, "credit")}
+                    onFocus={(e) => {
+  const balance = getBalance(index);
+
+  if (balance > 0) {
+    const updatedItems = [...items];
+    updatedItems[index].credit = balance;
+    setItems(updatedItems);
+  }
+
+  e.target.select();
+}}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+        {showModalCus && (
+          <ProductModalCustomer
+            allFields={allFieldsCus}
+            onSelect={handleProductSelectCus}
+            onClose={handleCloseModalCus}
+            initialKey={pressedKey}
+            tenant={tenant}
+          />
+        )}
       </div>
-      {showModal && (
-        <ProductModal
-          products={products}
-          allFields={allFields}
-          onSelect={handleProductSelect}
-          onClose={handleModalDone}
-          tenant={tenant}
-          initialKey={pressedKey}
-          fetchParentProducts={fetchProducts}
-        />
-      )}
+      
+      <Button onClick={handleAddItem} style={{ margin: 20 }}>
+        Add Item
+      </Button> 
     </div>
   );
 };

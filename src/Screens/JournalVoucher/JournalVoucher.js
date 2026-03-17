@@ -1676,7 +1676,17 @@ const JournalVoucher = () => {
                       if (e.key === "Enter") {
                         if (!item.narration || item.narration.trim() === "") {
                           const updatedItems = [...items];
-                          updatedItems[index].narration = "Journal Narration";
+
+                          // 🔥 Get previous row narration
+                          let prevNarration = "";
+                          if (index > 0) {
+                            prevNarration = updatedItems[index - 1].narration || "";
+                          }
+
+                          // 🔥 Apply logic
+                          updatedItems[index].narration =
+                            prevNarration.trim() !== "" ? prevNarration : "Journal Narration";
+
                           setItems(updatedItems);
                         }
                       }
@@ -1810,7 +1820,9 @@ const JournalVoucher = () => {
                           height: "100%",
                         }}
                       >
-                        <IconButton color="error" size="small" tabIndex={-1}>
+                        <IconButton color="error" size="small" tabIndex={-1}
+                        onClick={() => handleDeleteItem(index)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </div>
