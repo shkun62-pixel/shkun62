@@ -23,7 +23,6 @@ import InvoiceG4 from "../InvoicePDF/InvoiceG4";
 import InvoiceSlip from "../InvoicePDF/InvoiceSlip";
 import { useReactToPrint } from "react-to-print";
 import { useEditMode } from "../../EditModeContext";
-// import { CompanyContext } from "../../context/CompanyContext";
 import { CompanyContext } from "../Context/CompanyContext";
 import { useContext } from "react";
 import TextField from "@mui/material/TextField";
@@ -38,9 +37,9 @@ import FAVoucherModal from "../Shared/FAVoucherModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import useShortcuts from "../Shared/useShortcuts";
 
-const LOCAL_STORAGE_KEY = "tabledataVisibility";
+const LOCAL_STORAGE_KEY = "tabledataSR";
 
-const DebitNote = () => {
+const SalesReturn = () => {
   const location = useLocation();
   const saleId = location.state?.saleId;
   const navigate = useNavigate();
@@ -123,6 +122,8 @@ const DebitNote = () => {
     vbillno: 0,
     vno: 0,
     bno: "",
+    order:"",
+    order_date:"",
     exfor: "",
     trpt: "",
     stype: "",
@@ -300,11 +301,35 @@ const DebitNote = () => {
   const grNoRef = useRef(null);
   const termsRef = useRef(null);
   const vehicleNoRef = useRef(null);
+  const billcashRef = useRef(null);
+  const taxTypreRef = useRef(null);
+  const supplyRef = useRef(null);
   const tableRef = useRef(null);
+  const [openModalCr, setOpenModalCr] = useState(false);
+  const orderRef = useRef(null);
+  const orderDateRef = useRef(null);
 
+  // 🔹 Focus order field when modal opens
+  useEffect(() => {
+    if (openModalCr) {
+      setTimeout(() => {
+        orderRef.current?.focus();
+      }, 100);
+    }
+  }, [openModalCr]);
+
+  // 🔹 Your same function (slightly enhanced)
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
+
+      // 🔥 NEW: if nextRef is a function → execute it
+      if (typeof nextRef === "function") {
+        nextRef();
+        return;
+      }
+
+      // ✅ your original logic (UNCHANGED)
       if (nextRef && nextRef.current) {
         nextRef.current.focus();
       } else {
@@ -317,6 +342,21 @@ const DebitNote = () => {
       }
     }
   };
+  // const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+  //   if (event.key === "Enter" || event.key === "Tab") {
+  //     event.preventDefault();
+  //     if (nextRef && nextRef.current) {
+  //       nextRef.current.focus();
+  //     } else {
+  //       if (tableRef.current) {
+  //         const firstInputInTable = tableRef.current.querySelector("input");
+  //         if (firstInputInTable) {
+  //           firstInputInTable.focus();
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
   const [T11, setT11] = useState(false);
   const [T12, setT12] = useState(false);
   const [T21, setT21] = useState(false);
@@ -752,20 +792,6 @@ const DebitNote = () => {
     });
   };
 
-  // const handleNumberChange = (event) => {
-  //   const { id, value } = event.target;
-  //   const numberValue = value.replace(/[^0-9.]/g, "");
-  //   const validNumberValue =
-  //     numberValue.split(".").length > 2
-  //       ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
-  //       : numberValue;
-
-  //   setFormData((prevState) => {
-  //     const newFormData = { ...prevState, [id]: validNumberValue };
-  //     return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
-  //   });
-  // };
-
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
@@ -902,9 +928,6 @@ const DebitNote = () => {
           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
         );
       }
-      // const response = await axios.get(
-      //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
-      // );
 
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
@@ -952,6 +975,8 @@ const DebitNote = () => {
       vbillno: 0,
       vno: 0,
       bno: "",
+      order:"",
+      order_date:"",
       exfor: "",
       trpt: "",
       stype: "",
@@ -1353,6 +1378,8 @@ const DebitNote = () => {
         vno: lastvno,
         vtype: "S",
         bno: "",
+        order:"",
+        order_date:"",
         exfor: "",
         trpt: "",
         stype: "",
@@ -1505,6 +1532,8 @@ const DebitNote = () => {
           vtype: "S",
           vbillno: 0,
           vno: 0,
+          order:"",
+          order_date:"",
           bno: "",
           exfor: "",
           trpt: "",
@@ -1625,6 +1654,8 @@ const DebitNote = () => {
         vbillno: formData.vbillno,
         vno: formData.vno,
         bno: formData.bno,
+        order: formData.order,
+        order_date: formData.order_date,
         exfor: formData.exfor,
         trpt: formData.trpt,
         stype: formData.stype,
@@ -2232,19 +2263,6 @@ const DebitNote = () => {
 
       updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
     }
-    // if (T21) {
-    //   if (key !== "discount") {
-    //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-    //   }
-    //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-    //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-    // } else {
-    //   if (key !== "discount") {
-    //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-    //   }
-    //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-    //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-    // }
     if (T12) {
       updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
       updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
@@ -2579,13 +2597,6 @@ const DebitNote = () => {
       return;
     }
 
-    // Defensive: index of the row being edited
-    // if (typeof selectedItemIndexAcc !== "number") {
-    //   alert("No shipped row selected!");
-    //   setShowModalAcc(false);
-    //   return;
-    // }
-
     // Deep copy shipped array
     const updatedShipped = [...shipped];
 
@@ -2728,85 +2739,6 @@ const DebitNote = () => {
       }));
     }
   };
-
-  // const handleInputChange = (index, field, value) => {
-  //   const numericValue =
-  //     typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
-  //   const updatedItems = [...items];
-  //   updatedItems[index][field] = numericValue;
-
-  //   // Recalculate expenses when Exp_rate1 to Exp_rate6 change
-  //   const vamt = parseFloat(updatedItems[index].amount) || 0;
-  //   const expRates = [
-  //     parseFloat(updatedItems[index].Exp_rate1) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate2) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate3) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate4) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate5) || 0,
-  //   ];
-  //   const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
-
-  //   let totalExpenses = 0;
-  //   expRates.forEach((rate, i) => {
-  //     const expense = (vamt * rate) / 100;
-  //     updatedItems[index][expFields[i]] = expense.toFixed(2);
-  //     totalExpenses += expense;
-  //   });
-
-  //   // Update the exp_before field with the total of all expenses
-  //   updatedItems[index].exp_before = totalExpenses.toFixed(2);
-
-  //   const gst = parseFloat(updatedItems[index].gst);
-  //   const totalAccordingWeight =
-  //     parseFloat(updatedItems[index].weight) *
-  //     parseFloat(updatedItems[index].rate);
-  //   const totalAccordingPkgs =
-  //     parseFloat(updatedItems[index].pkgs) *
-  //     parseFloat(updatedItems[index].rate);
-  //   let RateCal = updatedItems[index].RateCal;
-  //   let TotalAcc = totalAccordingWeight; // Set a default value
-
-  //   if (
-  //     RateCal === "Default" ||
-  //     RateCal === "" ||
-  //     RateCal === null ||
-  //     RateCal === undefined
-  //   ) {
-  //     TotalAcc = totalAccordingWeight;
-  //   } else if (RateCal === "Wt/Qty") {
-  //     TotalAcc = totalAccordingWeight;
-  //   } else if (RateCal === "Pc/Pkgs") {
-  //     TotalAcc = totalAccordingPkgs;
-  //   }
-  //   const others = parseFloat(updatedItems[index].exp_before) || 0;
-  //   let disc = parseFloat(updatedItems[index].disc) || 0;
-  //   let per = ((disc / 100) * TotalAcc).toFixed(2);
-  //   let Amounts = TotalAcc + others + parseFloat(per);
-
-  //   // Ensure TotalAcc is a valid number before calling toFixed()
-  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-  //   let cgst = 0,
-  //     sgst = 0,
-  //     igst = 0;
-  //   if (CompanyState == customerDetails[0].state) {
-  //     cgst = (Amounts * (gst / 2)) / 100;
-  //     sgst = (Amounts * (gst / 2)) / 100;
-  //   } else {
-  //     igst = (Amounts * gst) / 100;
-  //   }
-
-  //   const totalWithGST = Amounts + cgst + sgst + igst;
-
-  //   // Update tax and total fields
-  //   updatedItems[index]["ctax"] = cgst.toFixed(2);
-  //   updatedItems[index]["stax"] = sgst.toFixed(2);
-  //   updatedItems[index]["itax"] = igst.toFixed(2);
-  //   updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-  //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
-
-  //   setItems(updatedItems);
-  //   calculateTotalGst(); // ✅ Recalculate the grand total
-  // };
 
   const handleInputChange = (index, field, value) => {
     const numericValue =
@@ -3090,11 +3022,6 @@ const DebitNote = () => {
       if (field === "exp_before") {
         const isLastRow = index === items.length - 1;
 
-        // if (isLastRow) {
-        //   handleAddItem();
-        //   // Focus ItemCode of newly added row
-        //   focusRef(itemCodeRefs, index + 1);
-        // }
         if (isLastRow) {
           handleAddItem();
 
@@ -3228,11 +3155,11 @@ const DebitNote = () => {
   ];
 
   const [color, setColor] = useState(() => {
-    return localStorage.getItem("SelectedColors") || gradientOptions[0].value;
+    return localStorage.getItem("SelectedColorsSR") || gradientOptions[0].value;
   });
 
   useEffect(() => {
-    localStorage.setItem("SelectedColors", color);
+    localStorage.setItem("SelectedColorsSR", color);
   }, [color]);
 
   const handleChange = (event) => {
@@ -3354,7 +3281,7 @@ const DebitNote = () => {
   };
 
   // Permission For Sale Form Open
-  const formData22 = JSON.parse(localStorage.getItem("formDATA") || "{}");
+  const formData22 = JSON.parse(localStorage.getItem("formDATAD") || "{}");
   const canAccessSale = formData22.S_add === true;
 
   // useEffect(() => {
@@ -3419,24 +3346,6 @@ const DebitNote = () => {
     (item) => (item.sdisc || "").trim() !== "",
   );
 
-  const formatDateDDMMYYYY = (date) => {
-    if (!date) return "";
-
-    // If already dd/mm/yyyy
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
-      return date.replaceAll("/", "-");
-    }
-
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return "";
-
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-
-    return `${day}-${month}-${year}`;
-  };
-
   // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || showModal || showModalAcc ||
    isModalOpen || isModalOpenAfter || isModalOpenExp || drawerOpen
@@ -3473,7 +3382,7 @@ const DebitNote = () => {
       </div>
       <div style={{ display: "flex", flexDirection: "row", marginTop: -30 }}>
         <h1 className="headerSale">
-          DEBIT NOTE{" "}
+          DEBIT NOTE
           <span className="text-black-500 font-semibold text-base sm:text-lg">
             {title}
           </span>
@@ -3976,33 +3885,69 @@ const DebitNote = () => {
                     size="small"
                     variant="filled"
                     fullWidth
-                    onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
+                    onKeyDown={handleEnterKeyPress( termsRef,
+                      () => setOpenModalCr(true)
+                    )}
                   />
                 )}
               </InputMask>
-              {/* <TextField
-                inputRef={termsRef}
-                className="custom-bordered-input"
-                id="exfor"
-                value={formData.exfor}
-                variant="filled"
-                label="TERMS"
-                size="small"
-                onChange={HandleValueChange}
-                onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
-                onFocus={(e) => e.target.select()}
-                inputProps={{
-                  maxLength: 10,
-                  style: {
-                    height: "20px",
-                    fontSize: `${fontSize}px`,
-                    // padding: "0 8px"
-                  },
-                  readOnly: !isEditMode || isDisabled,
-                }}
-                // sx={{ width: 128}}
-              /> */}
             </div>
+            <Modal
+              show={openModalCr}
+              onHide={() => {}}
+              backdrop="static"
+              keyboard={false}
+              centered
+              restoreFocus={false}
+              onExited={() => {
+                vehicleNoRef.current?.focus();
+              }}
+            >
+              <Modal.Header>
+                <Modal.Title>CN DETAIL</Modal.Title>
+              </Modal.Header>
+      
+              <Modal.Body>
+                {/* ORDER */}
+                <TextField
+                  inputRef={orderRef}
+                  label="CREDIT NOTE NO"
+                  className="custom-bordered-input"
+                  variant="filled"
+                  fullWidth
+                  margin="dense"
+                  value={formData.order}
+                  onChange={(e) =>
+                    setFormData({ ...formData, order: e.target.value })
+                  }
+                  onKeyDown={handleEnterKeyPress(orderRef, orderDateRef)}
+                />
+      
+                {/* ORDER DATE */}
+                <InputMask
+                  mask="99-99-9999"
+                  value={formData.order_date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, order_date: e.target.value })
+                  }
+                >
+                  {(props) => (
+                    <TextField
+                      {...props}
+                      inputRef={orderDateRef}
+                      className="custom-bordered-input"
+                      variant="filled"
+                      label="CREDIT NOTE DT"
+                      fullWidth
+                      margin="dense"
+                      onKeyDown={handleEnterKeyPress(orderDateRef, () => {
+                        setOpenModalCr(false);
+                      })}
+                    />
+                  )}
+                </InputMask>
+              </Modal.Body>
+            </Modal>
           </div>
           <div className="VehicleDiv">
             <TextField
@@ -4014,7 +3959,7 @@ const DebitNote = () => {
               label="VEHICLE NO."
               size="small"
               onChange={handleCapitalAlpha}
-              onKeyDown={handleEnterKeyPress(vehicleNoRef, null)}
+              onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
               onFocus={(e) => e.target.select()}
               inputProps={{
                 maxLength: 48,
@@ -4040,6 +3985,7 @@ const DebitNote = () => {
               >
                 <InputLabel id="billcash-label">BILL TYPE</InputLabel>
                 <Select
+                inputRef={billcashRef}
                   className="custom-bordered-input"
                   labelId="billcash-label"
                   id="billcash"
@@ -4048,10 +3994,22 @@ const DebitNote = () => {
                     if (!isEditMode || isDisabled) return; // prevent changing
                     handleBillCash(e);
                   }}
-                  onOpen={(e) => {
-                    if (!isEditMode || isDisabled) {
-                      e.preventDefault(); // prevent dropdown opening
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(billcashRef, taxTypreRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
                     }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
                   }}
                   label="BILL TYPE"
                   displayEmpty
@@ -4090,6 +4048,7 @@ const DebitNote = () => {
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
+                inputRef={taxTypreRef}
                   className="TAXtypez"
                   labelId="taxtype-label"
                   id="stype"
@@ -4098,12 +4057,23 @@ const DebitNote = () => {
                     if (!isEditMode || isDisabled) return; // prevent changing
                     handleTaxType(e);
                   }}
-                  onOpen={(e) => {
-                    if (!isEditMode || isDisabled) {
-                      e.preventDefault(); // prevent dropdown opening
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(taxTypreRef, supplyRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
                     }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
                   }}
-                  // onChange={handleTaxType}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -4157,6 +4127,7 @@ const DebitNote = () => {
               >
                 <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
                 <Select
+                inputRef={supplyRef}
                   className="SupplyTYPE"
                   labelId="supply-label"
                   id="supply"
@@ -4165,12 +4136,23 @@ const DebitNote = () => {
                     if (!isEditMode || isDisabled) return; // prevent changing
                     handleSupply(e);
                   }}
-                  onOpen={(e) => {
-                    if (!isEditMode || isDisabled) {
-                      e.preventDefault(); // prevent dropdown opening
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(supplyRef, null)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
                     }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
                   }}
-                  // onChange={handleSupply}
                   label="SUPPLY TYPE"
                   displayEmpty
                   inputProps={{
@@ -5755,4 +5737,4 @@ const DebitNote = () => {
   );
 };
 
-export default DebitNote;
+export default SalesReturn;

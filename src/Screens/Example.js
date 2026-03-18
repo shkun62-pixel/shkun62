@@ -2823,390 +2823,835 @@
 // export default Example;
 
 // JOURNAL TABLE
-import React, { useState } from "react";
-import Table from "react-bootstrap/Table";
-import ProductModalCustomer from "./Modals/ProductModalCustomer";
-import { Button } from "react-bootstrap";
+// import React, { useState } from "react";
+// import Table from "react-bootstrap/Table";
+// import ProductModalCustomer from "./Modals/ProductModalCustomer";
+// import { Button } from "react-bootstrap";
+
+// const Example = () => {
+//   const tenant = "shkun_05062025_05062026";
+//   const [items, setItems] = useState([
+//     {
+//       id: "",
+//       accountname: "",
+//       narration: "",
+//       debit: "",
+//       credit: "",
+//       disableDebit: false,
+//       disableCredit: false,
+//     },
+//   ]);
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+
+//   // Modal For Customer
+//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+//   const [productsCus, setProductsCus] = useState([]);
+//   const [showModalCus, setShowModalCus] = useState(false);
+//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//   const [loadingCus, setLoadingCus] = useState(true);
+//   const [errorCus, setErrorCus] = useState(null);
+//   const [suggestionRow, setSuggestionRow] = useState(null);
+//   const [suggestionText, setSuggestionText] = useState("");
+
+//   React.useEffect(() => {
+//     fetchCustomers();
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductsCus(formattedData);
+//       setLoadingCus(false);
+//     } catch (error) {
+//       setErrorCus(error.message);
+//       setLoadingCus(false);
+//     }
+//   };
+
+//   const handleItemChangeCus = (index, key, value) => {
+//     const updatedItems = [...items];
+//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+//     // If the key is 'name', find the corresponding product and set the price
+//     if (key === "name") {
+//       const selectedProduct = productsCus.find(
+//         (product) => product.ahead === value,
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["accountname"] = selectedProduct.ahead;
+//         updatedItems[index]["acode"] = selectedProduct.acode;
+//       }
+//     }
+//     // Disable credit field if debit field is filled
+//     if (key === "debit") {
+//       updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
+//     }
+
+//     // Disable debit field if credit field is filled
+//     if (key === "credit") {
+//       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+//     }
+
+//     if (key === "narration") {
+//       const inputValue = value.trim().toLowerCase();
+
+//       if (inputValue !== "") {
+//         // Find first matching accountname from ALL rows
+//         const matchedItem = items.find(
+//           (row) =>
+//             row.accountname &&
+//             row.accountname.toLowerCase().startsWith(inputValue)
+//         );
+
+//         if (matchedItem) {
+//           setSuggestionRow(index);
+//           setSuggestionText(matchedItem.accountname);
+//         } else {
+//           setSuggestionRow(null);
+//           setSuggestionText("");
+//         }
+//       } else {
+//         setSuggestionRow(null);
+//         setSuggestionText("");
+//       }
+//     }
+
+//     setItems(updatedItems);
+//   };
+
+//   const handleProductSelectCus = (product) => {
+//     if (!product) {
+//       alert("No product received!");
+//       setShowModalCus(false);
+//       return;
+//     }
+
+//     // clone the array
+//     const newCustomers = [...items];
+
+//     // overwrite the one at the selected index
+//     newCustomers[selectedItemIndexCus] = {
+//       ...newCustomers[selectedItemIndexCus],
+//       accountname: product.ahead || "",
+//       acode: product.acode
+//     };
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexCus !== null) {
+//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//       setShowModalCus(false);
+//     }
+//     setItems(newCustomers);
+//     setShowModalCus(false);
+//   };
+
+//   const handleCloseModalCus = () => {
+//     setShowModalCus(false);
+//     setPressedKey(""); // resets for next modal open
+//   };
+
+//   const openModalForItemCus = (index) => {
+//     setSelectedItemIndexCus(index);
+//     setShowModalCus(true);
+//   };
+
+//   const allFieldsCus = productsCus.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   const handleNumberChange = (event, index, field) => {
+//     const value = event.target.value;
+
+//     // Validate that the input is numeric
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+
+//     const updatedItems = [...items];
+//     updatedItems[index][field] = value;
+
+//     // If the field is 'debit' and its value is greater than zero, disable 'credit'
+//     if (field === "debit") {
+//       updatedItems[index].disableCredit = parseFloat(value) > 0;
+//       updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
+//     }
+//     // If the field is 'credit' and its value is greater than zero, disable 'debit'
+//     else if (field === "credit") {
+//       updatedItems[index].disableDebit = parseFloat(value) > 0;
+//       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
+//     }
+//     setItems(updatedItems);
+//   };
+
+//   const handleKeyDown = (event, index, field) => {
+//     // Open Modal on Letter Input in Account Name
+//     if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+//       setPressedKey(event.key);
+//       openModalForItemCus(index);
+//       event.preventDefault();
+//     }
+//   };
+
+//   const handleAddItem = () => {
+//     const newItem = {
+//       id: items.length + 1,
+//       accountname: "",
+//       acode:0,
+//       narration: "",
+//       debit: "",
+//       credit: "",
+//       disableDebit: false,
+//       disableCredit: false,
+//     };
+//     setItems([...items, newItem]);
+//   };
+
+//   const getBalance = (currentIndex) => {
+//     let totalDebit = 0;
+//     let totalCredit = 0;
+
+//     items.forEach((row, i) => {
+//       if (i !== currentIndex) {
+//         totalDebit += parseFloat(row.debit) || 0;
+//         totalCredit += parseFloat(row.credit) || 0;
+//       }
+//     });
+
+//     return totalDebit - totalCredit;
+//   };
+
+//   return (
+//     <div>
+//       <div className="Tablesection">
+//         <Table className="custom-table">
+//           <thead>
+//             <tr style={{ color: "white" }}>
+//               <th>ACCOUNT NAME</th>
+//               <th>NARRATION</th>
+//               <th>DEBIT</th>
+//               <th>CREDIT</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {items.map((item, index) => (
+//               <tr key={`${item.accountname}-${index}`}>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                     className="Account"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.accountname}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "accountname");
+//                     }}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, position: "relative" }}>
+//                   <input
+//                     className="Narration"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: "5px 8px",
+//                       fontSize: "14px",
+//                       position: "relative",
+//                       background: "transparent",
+//                     }}
+//                     value={item.narration}
+//                     onChange={(e) =>
+//                       handleItemChangeCus(index, "narration", e.target.value)
+//                     }
+//                     onKeyDown={(e) => {
+//                       if (e.key === "Enter") {
+//                         if (!item.narration || item.narration.trim() === "") {
+//                           const updatedItems = [...items];
+//                           updatedItems[index].narration = "Journal Narration";
+//                           setItems(updatedItems);
+//                         }
+//                       }
+//                       if (
+//                         e.key === "Tab" &&
+//                         suggestionRow === index &&
+//                         suggestionText
+//                       ) {
+//                         e.preventDefault();
+
+//                         const updatedItems = [...items];
+//                         updatedItems[index].narration = suggestionText;
+//                         setItems(updatedItems);
+
+//                         setSuggestionRow(null);
+//                         setSuggestionText("");
+//                       }
+//                     }}
+//                   />
+
+//                   {/* 👇 Show only remaining text */}
+//                   {suggestionRow === index && suggestionText && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: 0,
+//                         left: 8,
+//                         height: "100%",
+//                         display: "flex",
+//                         alignItems: "center",
+//                         color: "#bbb",
+//                         fontSize: "14px",
+//                         pointerEvents: "none",
+//                       }}
+//                     >
+//                       <span style={{ visibility: "hidden" }}>
+//                         {item.narration}
+//                       </span>
+//                       <span>{suggestionText.slice(item.narration.length)}</span>
+//                     </div>
+//                   )}
+//                 </td>
+
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Debit"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     value={Number(item.debit) === 0 ? "" : item.debit}
+//                     onChange={(e) => handleNumberChange(e, index, "debit")}
+//                    onFocus={(e) => {
+//   const balance = getBalance(index);
+
+//   if (balance < 0) {
+//     const updatedItems = [...items];
+//     updatedItems[index].debit = Math.abs(balance);
+//     setItems(updatedItems);
+//   }
+
+//   e.target.select();
+// }}
+
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Credits"
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     value={Number(item.credit) === 0 ? "" : item.credit}
+//                     onChange={(e) => handleNumberChange(e, index, "credit")}
+//                     onFocus={(e) => {
+//   const balance = getBalance(index);
+
+//   if (balance > 0) {
+//     const updatedItems = [...items];
+//     updatedItems[index].credit = balance;
+//     setItems(updatedItems);
+//   }
+
+//   e.target.select();
+// }}
+//                   />
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </Table>
+//         {showModalCus && (
+//           <ProductModalCustomer
+//             allFields={allFieldsCus}
+//             onSelect={handleProductSelectCus}
+//             onClose={handleCloseModalCus}
+//             initialKey={pressedKey}
+//             tenant={tenant}
+//           />
+//         )}
+//       </div>
+      
+//       <Button onClick={handleAddItem} style={{ margin: 20 }}>
+//         Add Item
+//       </Button> 
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+// import React,{useRef, useState} from 'react'
+// import { useEditMode } from '../EditModeContext';
+// import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+// import TextField from "@mui/material/TextField";
+
+// const Example = () => {
+//   const [formData, setFormData] = useState({
+//     date: "",
+//     vtype: "P",
+//     vno: 0,
+//     vbillno: 0,
+//     vbdate:"",
+//     exfor: "",
+//     trpt: "",
+//     p_entry: "",
+//     invdt:"",
+//     stype: "",
+//     btype: "",
+//   });
+//   const customerNameRef = useRef(null);
+//   const grNoRef = useRef(null);
+//   const vbDateRef = useRef(null);
+//   const termsRef = useRef(null);
+//   const vehicleNoRef = useRef(null);
+//   const selfInvRef = useRef(null);
+//   const invDtRef = useRef(null);
+//   const billcashRef = useRef(null);
+//   const taxTypreRef = useRef(null);
+//   const supplyRef = useRef(null);
+//   const vBillNoRef = useRef(null);
+//   const tableRef = useRef(null);
+
+//   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+//   const { isEditMode, setIsEditMode } = useEditMode();
+
+//   // 🔹 Your same function (slightly enhanced)
+//   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault();
+
+//       // 🔥 NEW: if nextRef is a function → execute it
+//       if (typeof nextRef === "function") {
+//         nextRef();
+//         return;
+//       }
+
+//       // ✅ your original logic (UNCHANGED)
+//       if (nextRef && nextRef.current) {
+//         nextRef.current.focus();
+//       } else {
+//         if (tableRef.current) {
+//           const firstInputInTable = tableRef.current.querySelector("input");
+//           if (firstInputInTable) {
+//             firstInputInTable.focus();
+//           }
+//         }
+//       }
+//     }
+//   };
+//   const handleTaxType = (event) => {
+//     const { value } = event.target; // Get the selected value from the event
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       stype: value, // Update the ratecalculate field in FormData
+//     }));
+//   };
+//   const handleBillCash = (event) => {
+//     const { value } = event.target; // Get the selected value from the event
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       btype: value, // Update the ratecalculate field in FormData
+//     }));
+//   };
+//   const handleSupply = (event) => {
+//     const { value } = event.target; // Get the selected value from the event
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       conv: value, // Update the ratecalculate field in FormData
+//     }));
+//   };
+
+//   return (
+//     <div>
+//       <div className="VehicleDiv">
+//         <TextField
+//           inputRef={vehicleNoRef}
+//           className="VEHICLE custom-bordered-input"
+//           id="trpt"
+//           value={formData.trpt}
+//           variant="filled"
+//           label="VEHICLE NO."
+//           size="small"
+//           onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
+//           inputProps={{
+//             maxLength: 48,
+//             style: {
+//               height: "20px",
+//             },
+//           }}
+//         />
+//         <div className="BillType">
+//           <FormControl
+//             className=" Billss custom-bordered-input"
+//             sx={{
+//               "& .MuiFilledInput-root": {
+//                 height: 48,
+//               },
+//             }}
+//             size="small"
+//             variant="filled"
+//           >
+//             <InputLabel id="billcash-label">BILL TYPE</InputLabel>
+//             <Select
+//               className="custom-bordered-input"
+//               labelId="billcash-label"
+//               id="billcash"
+//               value={formData.btype}
+//               onChange={(e) => {
+//                 if (!isEditMode || isDisabled) return; // prevent changing
+//                 handleBillCash(e);
+//               }}
+//               onOpen={(e) => {
+//                 if (!isEditMode || isDisabled) {
+//                   e.preventDefault(); // prevent dropdown opening
+//                 }
+//               }}
+//               label="BILL TYPE"
+//               displayEmpty
+//               inputProps={{
+//                 sx: {
+//                   pointerEvents:
+//                     !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
+//                 },
+//               }}
+//               MenuProps={{ disablePortal: true }}
+//             >
+//               <MenuItem value="">
+//                 <em></em>
+//               </MenuItem>
+//               <MenuItem value="Bill">Bill</MenuItem>
+//               <MenuItem value="Cash">Cash</MenuItem>
+//             </Select>
+//           </FormControl>
+//         </div>
+//       </div>
+//       <div className="TAXDiv">
+//         <div>
+//           <FormControl
+//             fullWidth
+//             size="small"
+//             variant="filled"
+//             className="custom-bordered-input"
+//             sx={{
+//               "& .MuiFilledInput-root": {
+//                 height: 47,
+//               },
+//             }}
+//           >
+//             <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
+//             <Select
+//               className="TAXtypez custom-bordered-input"
+//               labelId="taxtype-label"
+//               id="stype"
+//               value={formData.stype}
+//               onChange={(e) => {
+//               if (!isEditMode || isDisabled) return; // prevent changing
+//                 handleTaxType(e);
+//               }}
+//               onOpen={(e) => {
+//                 if (!isEditMode || isDisabled) {
+//                   e.preventDefault(); // prevent dropdown opening
+//                 }
+//               }}
+//               label="TAX TYPE"
+//               displayEmpty
+//               MenuProps={{
+//                 disablePortal: true,
+//               }}
+//               inputProps={{
+//                 sx: {
+//                   pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+//                 },
+//               }}
+//             >
+//               <MenuItem value="">
+//                 <em></em>
+//               </MenuItem>
+//               <MenuItem value="GST Sale (RD)">GST Sale (RD)</MenuItem>
+//               <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
+//               <MenuItem value="GST (URD)">GST (URD)</MenuItem>
+//               <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
+//               <MenuItem value="Tax Free Within State">
+//                 Tax Free Within State
+//               </MenuItem>
+//               <MenuItem value="Tax Free Interstate">
+//                 Tax Free Interstate
+//               </MenuItem>
+//               <MenuItem value="Export Sale">Export Sale</MenuItem>
+//               <MenuItem value="Export Sale(IGST)">
+//                 Export Sale(IGST)
+//               </MenuItem>
+//               <MenuItem value="Including GST">Including GST</MenuItem>
+//               <MenuItem value="Including IGST">Including IGST</MenuItem>
+//               <MenuItem value="Not Applicable">Not Applicable</MenuItem>
+//               <MenuItem value="Exempted Sale">Exempted Sale</MenuItem>
+//             </Select>
+//           </FormControl>
+//         </div>
+//         <div style={{ marginTop: 3 }}>
+//           <FormControl
+//             className="SupplyTYPE custom-bordered-input"
+//             sx={{
+//               // width: '250px',
+//               "& .MuiFilledInput-root": {
+//                 height: 47, // adjust as needed (default ~56px for filled)
+//               },
+//             }}
+//             size="small"
+//             variant="filled"
+//           >
+//             <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
+//             <Select
+//               className="SupplyTYPE custom-bordered-input"
+//               labelId="supply-label"
+//               id="supply"
+//               value={formData.conv}
+//                 onChange={(e) => {
+//               if (!isEditMode || isDisabled) return; // prevent changing
+//                 handleSupply(e);
+//               }}
+//               onOpen={(e) => {
+//                 if (!isEditMode || isDisabled) {
+//                   e.preventDefault(); // prevent dropdown opening
+//                 }
+//               }}
+//               label="SUPPLY TYPE"
+//               displayEmpty
+//               inputProps={{
+//                 sx: {
+//                   pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
+//                 },
+//               }}
+//               MenuProps={{ disablePortal: true }}
+//             >
+//               <MenuItem value="">
+//                 <em></em>
+//               </MenuItem>
+//               <MenuItem value="Weight Difference">
+//                 Weight Difference
+//               </MenuItem>
+//               <MenuItem value="Rate Difference">Rate Difference</MenuItem>
+//               <MenuItem value="Other Purpose">Other Purpose</MenuItem>
+//             </Select>
+//           </FormControl>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default Example
+
+import React, { useRef, useState } from "react";
+import { useEditMode } from "../EditModeContext";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import TextField from "@mui/material/TextField";
 
 const Example = () => {
-  const tenant = "shkun_05062025_05062026";
-  const [items, setItems] = useState([
-    {
-      id: "",
-      accountname: "",
-      narration: "",
-      debit: "",
-      credit: "",
-      disableDebit: false,
-      disableCredit: false,
-    },
-  ]);
+  const [formData, setFormData] = useState({
+    trpt: "",
+    stype: "",
+    btype: "",
+    conv: "",
+  });
 
-  const capitalizeWords = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
-  };
+  const vehicleNoRef = useRef(null);
+  const billcashRef = useRef(null);
+  const taxTypreRef = useRef(null);
+  const supplyRef = useRef(null);
+  const tableRef = useRef(null);
 
-  // Modal For Customer
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const [productsCus, setProductsCus] = useState([]);
-  const [showModalCus, setShowModalCus] = useState(false);
-  const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
-  const [loadingCus, setLoadingCus] = useState(true);
-  const [errorCus, setErrorCus] = useState(null);
-  const [suggestionRow, setSuggestionRow] = useState(null);
-  const [suggestionText, setSuggestionText] = useState("");
+  const [isDisabled] = useState(false);
+  const { isEditMode } = useEditMode();
 
-  React.useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
-    try {
-      const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/shkun_05062025_05062026/tenant/api/ledgerAccount`,
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = await response.json();
-      // Ensure to extract the formData for easier access in the rest of your app
-      const formattedData = data.map((item) => ({
-        ...item.formData,
-        _id: item._id,
-      }));
-      setProductsCus(formattedData);
-      setLoadingCus(false);
-    } catch (error) {
-      setErrorCus(error.message);
-      setLoadingCus(false);
-    }
-  };
-
-  const handleItemChangeCus = (index, key, value) => {
-    const updatedItems = [...items];
-    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-    // If the key is 'name', find the corresponding product and set the price
-    if (key === "name") {
-      const selectedProduct = productsCus.find(
-        (product) => product.ahead === value,
-      );
-      if (selectedProduct) {
-        updatedItems[index]["accountname"] = selectedProduct.ahead;
-        updatedItems[index]["acode"] = selectedProduct.acode;
-      }
-    }
-    // Disable credit field if debit field is filled
-    if (key === "debit") {
-      updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
-    }
-
-    // Disable debit field if credit field is filled
-    if (key === "credit") {
-      updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
-    }
-
-    if (key === "narration") {
-      const inputValue = value.trim().toLowerCase();
-
-      if (inputValue !== "") {
-        // Find first matching accountname from ALL rows
-        const matchedItem = items.find(
-          (row) =>
-            row.accountname &&
-            row.accountname.toLowerCase().startsWith(inputValue)
-        );
-
-        if (matchedItem) {
-          setSuggestionRow(index);
-          setSuggestionText(matchedItem.accountname);
-        } else {
-          setSuggestionRow(null);
-          setSuggestionText("");
-        }
-      } else {
-        setSuggestionRow(null);
-        setSuggestionText("");
-      }
-    }
-
-    setItems(updatedItems);
-  };
-
-  const handleProductSelectCus = (product) => {
-    if (!product) {
-      alert("No product received!");
-      setShowModalCus(false);
-      return;
-    }
-
-    // clone the array
-    const newCustomers = [...items];
-
-    // overwrite the one at the selected index
-    newCustomers[selectedItemIndexCus] = {
-      ...newCustomers[selectedItemIndexCus],
-      accountname: product.ahead || "",
-      acode: product.acode
-    };
-    const nameValue = product.ahead || product.name || "";
-    if (selectedItemIndexCus !== null) {
-      handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
-      setShowModalCus(false);
-    }
-    setItems(newCustomers);
-    setShowModalCus(false);
-  };
-
-  const handleCloseModalCus = () => {
-    setShowModalCus(false);
-    setPressedKey(""); // resets for next modal open
-  };
-
-  const openModalForItemCus = (index) => {
-    setSelectedItemIndexCus(index);
-    setShowModalCus(true);
-  };
-
-  const allFieldsCus = productsCus.reduce((fields, product) => {
-    Object.keys(product).forEach((key) => {
-      if (!fields.includes(key)) {
-        fields.push(key);
-      }
-    });
-
-    return fields;
-  }, []);
-
-  const handleNumberChange = (event, index, field) => {
-    const value = event.target.value;
-
-    // Validate that the input is numeric
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
-    }
-
-    const updatedItems = [...items];
-    updatedItems[index][field] = value;
-
-    // If the field is 'debit' and its value is greater than zero, disable 'credit'
-    if (field === "debit") {
-      updatedItems[index].disableCredit = parseFloat(value) > 0;
-      updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
-    }
-    // If the field is 'credit' and its value is greater than zero, disable 'debit'
-    else if (field === "credit") {
-      updatedItems[index].disableDebit = parseFloat(value) > 0;
-      updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
-    }
-    setItems(updatedItems);
-  };
-
-  const handleKeyDown = (event, index, field) => {
-    // Open Modal on Letter Input in Account Name
-    if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
-      setPressedKey(event.key);
-      openModalForItemCus(index);
+  // 🔹 YOUR ORIGINAL FUNCTION (UNCHANGED)
+  const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+    if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
+
+      if (typeof nextRef === "function") {
+        nextRef();
+        return;
+      }
+
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      } else {
+        if (tableRef.current) {
+          const firstInput = tableRef.current.querySelector("input");
+          if (firstInput) firstInput.focus();
+        }
+      }
     }
   };
 
-  const handleAddItem = () => {
-    const newItem = {
-      id: items.length + 1,
-      accountname: "",
-      acode:0,
-      narration: "",
-      debit: "",
-      credit: "",
-      disableDebit: false,
-      disableCredit: false,
-    };
-    setItems([...items, newItem]);
-  };
+  // handlers
+  const handleBillCash = (e) =>
+    setFormData((p) => ({ ...p, btype: e.target.value }));
 
-  const getBalance = (currentIndex) => {
-    let totalDebit = 0;
-    let totalCredit = 0;
+  const handleTaxType = (e) =>
+    setFormData((p) => ({ ...p, stype: e.target.value }));
 
-    items.forEach((row, i) => {
-      if (i !== currentIndex) {
-        totalDebit += parseFloat(row.debit) || 0;
-        totalCredit += parseFloat(row.credit) || 0;
-      }
-    });
-
-    return totalDebit - totalCredit;
-  };
+  const handleSupply = (e) =>
+    setFormData((p) => ({ ...p, conv: e.target.value }));
 
   return (
-    <div>
-      <div className="Tablesection">
-        <Table className="custom-table">
-          <thead>
-            <tr style={{ color: "white" }}>
-              <th>ACCOUNT NAME</th>
-              <th>NARRATION</th>
-              <th>DEBIT</th>
-              <th>CREDIT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, index) => (
-              <tr key={`${item.accountname}-${index}`}>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Account"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.accountname}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "accountname");
-                    }}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, position: "relative" }}>
-                  <input
-                    className="Narration"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: "5px 8px",
-                      fontSize: "14px",
-                      position: "relative",
-                      background: "transparent",
-                    }}
-                    value={item.narration}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "narration", e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (!item.narration || item.narration.trim() === "") {
-                          const updatedItems = [...items];
-                          updatedItems[index].narration = "Journal Narration";
-                          setItems(updatedItems);
-                        }
-                      }
-                      if (
-                        e.key === "Tab" &&
-                        suggestionRow === index &&
-                        suggestionText
-                      ) {
-                        e.preventDefault();
-
-                        const updatedItems = [...items];
-                        updatedItems[index].narration = suggestionText;
-                        setItems(updatedItems);
-
-                        setSuggestionRow(null);
-                        setSuggestionText("");
-                      }
-                    }}
-                  />
-
-                  {/* 👇 Show only remaining text */}
-                  {suggestionRow === index && suggestionText && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 8,
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        color: "#bbb",
-                        fontSize: "14px",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <span style={{ visibility: "hidden" }}>
-                        {item.narration}
-                      </span>
-                      <span>{suggestionText.slice(item.narration.length)}</span>
-                    </div>
-                  )}
-                </td>
-
-                <td style={{ padding: 0, width: 250 }}>
-                  <input
-                    className="Debit"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      paddingRight: 10,
-                    }}
-                    value={Number(item.debit) === 0 ? "" : item.debit}
-                    onChange={(e) => handleNumberChange(e, index, "debit")}
-                   onFocus={(e) => {
-  const balance = getBalance(index);
-
-  if (balance < 0) {
-    const updatedItems = [...items];
-    updatedItems[index].debit = Math.abs(balance);
-    setItems(updatedItems);
-  }
-
-  e.target.select();
-}}
-
-                  />
-                </td>
-                <td style={{ padding: 0, width: 250 }}>
-                  <input
-                    className="Credits"
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      paddingRight: 10,
-                    }}
-                    value={Number(item.credit) === 0 ? "" : item.credit}
-                    onChange={(e) => handleNumberChange(e, index, "credit")}
-                    onFocus={(e) => {
-  const balance = getBalance(index);
-
-  if (balance > 0) {
-    const updatedItems = [...items];
-    updatedItems[index].credit = balance;
-    setItems(updatedItems);
-  }
-
-  e.target.select();
-}}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-        {showModalCus && (
-          <ProductModalCustomer
-            allFields={allFieldsCus}
-            onSelect={handleProductSelectCus}
-            onClose={handleCloseModalCus}
-            initialKey={pressedKey}
-            tenant={tenant}
-          />
-        )}
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       
-      <Button onClick={handleAddItem} style={{ margin: 20 }}>
-        Add Item
-      </Button> 
+      {/* VEHICLE */}
+      <TextField
+        inputRef={vehicleNoRef}
+        label="VEHICLE NO."
+        variant="filled"
+        size="small"
+        value={formData.trpt}
+        onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
+      />
+
+      {/* BILL TYPE */}
+      <FormControl variant="filled" size="small">
+        <InputLabel>BILL TYPE</InputLabel>
+        <Select
+          inputRef={billcashRef}
+          value={formData.btype}
+
+          onKeyDown={(e) => {
+            // Arrow key → let MUI open
+            if (e.key === "ArrowDown") return;
+
+            if (e.key === "Enter") {
+              const menuOpen = document.querySelector(".MuiMenu-paper");
+
+              // if open → let MUI select
+              if (menuOpen) return;
+
+              // if closed → go next
+              e.preventDefault();
+              handleEnterKeyPress(billcashRef, taxTypreRef)(e);
+            }
+          }}
+
+          onChange={(e) => {
+            handleBillCash(e);
+
+            // optional auto next
+            setTimeout(() => {
+              taxTypreRef.current?.focus();
+            }, 0);
+          }}
+        >
+          <MenuItem value="">
+            <em></em>
+          </MenuItem>
+          <MenuItem value="Bill">Bill</MenuItem>
+          <MenuItem value="Cash">Cash</MenuItem>
+        </Select>
+      </FormControl>
+
+      {/* TAX TYPE */}
+      <FormControl variant="filled" size="small">
+        <InputLabel>TAX TYPE</InputLabel>
+        <Select
+          inputRef={taxTypreRef}
+          value={formData.stype}
+
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") return;
+
+            if (e.key === "Enter") {
+              const menuOpen = document.querySelector(".MuiMenu-paper");
+
+              if (menuOpen) return;
+
+              e.preventDefault();
+              handleEnterKeyPress(taxTypreRef, supplyRef)(e);
+            }
+          }}
+
+          onChange={(e) => {
+            handleTaxType(e);
+
+            setTimeout(() => {
+              supplyRef.current?.focus();
+            }, 0);
+          }}
+        >
+          <MenuItem value="">
+            <em></em>
+          </MenuItem>
+          <MenuItem value="GST Sale (RD)">GST Sale (RD)</MenuItem>
+          <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
+          <MenuItem value="GST (URD)">GST (URD)</MenuItem>
+          <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
+        </Select>
+      </FormControl>
+
+      {/* SUPPLY TYPE */}
+      <FormControl variant="filled" size="small">
+        <InputLabel>SUPPLY TYPE</InputLabel>
+        <Select
+          inputRef={supplyRef}
+          value={formData.conv}
+
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") return;
+
+            if (e.key === "Enter") {
+              const menuOpen = document.querySelector(".MuiMenu-paper");
+
+              if (menuOpen) return;
+
+              e.preventDefault();
+              handleEnterKeyPress(supplyRef, null)(e);
+            }
+          }}
+
+          onChange={(e) => {
+            handleSupply(e);
+          }}
+        >
+          <MenuItem value="">
+            <em></em>
+          </MenuItem>
+          <MenuItem value="Weight Difference">Weight Difference</MenuItem>
+          <MenuItem value="Rate Difference">Rate Difference</MenuItem>
+          <MenuItem value="Other Purpose">Other Purpose</MenuItem>
+        </Select>
+      </FormControl>
     </div>
   );
 };
 
 export default Example;
+

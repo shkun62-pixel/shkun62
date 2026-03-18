@@ -5360,6 +5360,9 @@ const Sale = () => {
   const grNoRef = useRef(null);
   const termsRef = useRef(null);
   const vehicleNoRef = useRef(null);
+  const billcashRef = useRef(null);
+  const taxTypreRef = useRef(null);
+  const supplyRef = useRef(null);
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
@@ -9395,7 +9398,7 @@ const Sale = () => {
               label="VEHICLE NO."
               size="small"
               onChange={handleCapitalAlpha}
-              onKeyDown={handleEnterKeyPress(vehicleNoRef, null)}
+              onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
               onFocus={(e) => e.target.select()}
               inputProps={{
                 maxLength: 48,
@@ -9421,6 +9424,7 @@ const Sale = () => {
               >
                 <InputLabel id="billcash-label">BILL TYPE</InputLabel>
                 <Select
+                inputRef={billcashRef}
                   className="custom-bordered-input"
                   labelId="billcash-label"
                   id="billcash"
@@ -9433,6 +9437,23 @@ const Sale = () => {
                     if (!isEditMode || isDisabled) {
                       e.preventDefault(); // prevent dropdown opening
                     }
+                  }}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(billcashRef, taxTypreRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
                   }}
                   label="BILL TYPE"
                   displayEmpty
@@ -9471,6 +9492,7 @@ const Sale = () => {
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
+                inputRef={taxTypreRef}
                   className="TAXtypez"
                   labelId="taxtype-label"
                   id="stype"
@@ -9484,7 +9506,23 @@ const Sale = () => {
                       e.preventDefault(); // prevent dropdown opening
                     }
                   }}
-                  // onChange={handleTaxType}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(taxTypreRef, supplyRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
+                  }}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -9538,6 +9576,7 @@ const Sale = () => {
               >
                 <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
                 <Select
+                inputRef={supplyRef}
                   className="SupplyTYPE"
                   labelId="supply-label"
                   id="supply"
@@ -9551,7 +9590,23 @@ const Sale = () => {
                       e.preventDefault(); // prevent dropdown opening
                     }
                   }}
-                  // onChange={handleSupply}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(supplyRef, null)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
+                  }}
                   label="SUPPLY TYPE"
                   displayEmpty
                   inputProps={{

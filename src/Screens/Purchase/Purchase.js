@@ -311,6 +311,8 @@ const Purchase = () => {
   const vehicleNoRef = useRef(null);
   const selfInvRef = useRef(null);
   const vBillNoRef = useRef(null);
+  const taxTypreRef = useRef(null);
+  const supplyRef = useRef(null);
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
@@ -4355,7 +4357,7 @@ const handleKeyDown = (event, index, field) => {
                 label="SELF INV#"
                 size="small"
                 onChange={HandleInputsChanges}
-                onKeyDown={handleEnterKeyPress(selfInvRef, null)}
+                onKeyDown={handleEnterKeyPress(selfInvRef, taxTypreRef)}
                 onFocus={(e) => e.target.select()}
                 inputProps={{
                   maxLength: 48,
@@ -4385,6 +4387,7 @@ const handleKeyDown = (event, index, field) => {
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
+                inputRef={taxTypreRef}
                   className="TAXtypez custom-bordered-input"
                   labelId="taxtype-label"
                   id="stype"
@@ -4398,7 +4401,23 @@ const handleKeyDown = (event, index, field) => {
                       e.preventDefault(); // prevent dropdown opening
                     }
                   }}
-                  // onChange={handleTaxType}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(taxTypreRef, supplyRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
+                  }}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -4450,6 +4469,7 @@ const handleKeyDown = (event, index, field) => {
               >
                 <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
                 <Select
+                inputRef={supplyRef}
                   className="SupplyTYPE custom-bordered-input"
                   labelId="supply-label"
                   id="supply"
@@ -4463,7 +4483,23 @@ const handleKeyDown = (event, index, field) => {
                       e.preventDefault(); // prevent dropdown opening
                     }
                   }}
-                  // onChange={handleSupply}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(supplyRef, null)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
+                  }}
                   label="SUPPLY TYPE"
                   displayEmpty
                   inputProps={{

@@ -17,6 +17,7 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Collapse from "@mui/material/Collapse";
 import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import BalanceIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -151,6 +152,7 @@ export default function App() {
   const [isSaleReportOpen, setIsSaleReportOpen] = useState(false);
   const [isBooksOpen, setIsBooksOpen] = useState(false);
   const [isGoodReturn, setIsGoodReturn] = useState(false);
+  const [isdebitCredit, setIsdebitCredit] = useState(false);
   const [isInvOpen, setIsInvOpen] = useState(false);
   const [isStockOpen, setIsStockOpen] = useState(false);
   const [isExtraFeatureOpen, setIsExtraFeatureOpen] = useState(false);
@@ -202,6 +204,7 @@ export default function App() {
       setIsExtraFeatureOpen(false);
       setIsDataSecurityOpen(false);
       setIsGoodReturn(false);
+      setIsdebitCredit(false);
       setIsInvOpen(false);
     } else {
       navigate(path); // Regular navigation
@@ -220,6 +223,7 @@ export default function App() {
       setIsExtraFeatureOpen(false);
       setIsDataSecurityOpen(false);
       setIsGoodReturn(false);
+      setIsdebitCredit(false);
       setIsInvOpen(false);
     }
   };
@@ -315,6 +319,7 @@ export default function App() {
     setIsExtraFeatureOpen(false);
     setIsDataSecurityOpen(false);
     setIsGoodReturn(false);
+    setIsdebitCredit(false);
     setIsInvOpen(false);
   };
 
@@ -370,7 +375,7 @@ export default function App() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 style={{
                   position: "fixed",
-                  top: "50px",
+                  top: "5px",
                   left: "305px",
                   width: "250px",
                   background: "#2f3847",
@@ -404,6 +409,62 @@ export default function App() {
                     onClose={closePurModal}
                     onNavigate={handleModalNavigate}
                   />
+                  {/* Debit Credit note */}
+                  <StyledListItem
+                    button
+                    onMouseEnter={() => setIsdebitCredit(true)}
+                    onMouseLeave={() => setIsdebitCredit(false)}
+                  >
+                    <StyledIcon>
+                      <AccountBalanceWalletIcon />
+                    </StyledIcon>
+                    <StyledListItemText primary="Debit / Credit Note" />
+                  </StyledListItem>
+
+                  {isdebitCredit && (
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -20, opacity: 0 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      onMouseEnter={() => setIsdebitCredit(true)}
+                      onMouseLeave={() => setIsdebitCredit(false)}
+                      style={{
+                        position: "fixed",
+                        top: "100px",
+                        left: "555px",
+                        // width: "220px",
+                        background: "#2f3847",
+                        borderRadius: "10px",
+                        padding: "10px",
+                        zIndex: 30000,
+                        border: "1px solid #444",
+                        boxShadow: "0px 4px 20px rgba(0,0,0,0.3)",
+                      }}
+                    >
+                      <List>
+                        <StyledListItem
+                          button
+                          onClick={() => handleNavigation("/debitnote")}
+                        >
+                          <StyledIcon>
+                            <MenuBookIcon />
+                          </StyledIcon>
+                          <StyledListItemText primary="Debit Note (Purchase Return)" />
+                        </StyledListItem>
+
+                        <StyledListItem
+                          button
+                          onClick={() => handleNavigation("/creditnote")}
+                        >
+                          <StyledIcon>
+                            <MenuBookIcon />
+                          </StyledIcon>
+                          <StyledListItemText primary="Credit Note (Sale Return)" />
+                        </StyledListItem>
+                      </List>
+                    </motion.div>
+                  )}
                   <StyledListItem button onClick={openCashModal}>
                     <StyledIcon>
                       <CurrencyRupeeIcon />
