@@ -21,6 +21,7 @@ import financialYear from "../../Shared/financialYear";
 import useCompanySetup from "../../Shared/useCompanySetup";
 import SaleRegister from "./SaleRegister";
 import PurRegister from "./PurRegister";
+import HsnWiseSum from "./HsnWiseSum";
 
 const style = {
   position: "absolute",
@@ -114,6 +115,11 @@ export default function MonthlyFormModal({ open, onClose }) {
 
   const handleClosePurRegister = () => {
     setOpenPurRegister(false);
+  };
+
+  const [openHsnModal, setHsnModal] = useState(false);
+  const handleOpenHsnModal = () => {
+    setHsnModal(true);
   };
 
   const getCurrentFYAndMonth = () => {
@@ -1978,6 +1984,10 @@ export default function MonthlyFormModal({ open, onClose }) {
         exportHsnExcel()
       }
 
+      // HSN WISE SUMMARY
+      else if(formData.reportName === "Hsnwise Summary"){
+        handleOpenHsnModal()
+      }
       else {
         alert("Export not configured for selected report");
       }
@@ -2055,6 +2065,7 @@ export default function MonthlyFormModal({ open, onClose }) {
             <MenuItem value="Purchase Register">Purchase Register</MenuItem>
             <MenuItem value="Hsnwise Sale">HSN Wise Invoice Sale</MenuItem>
             <MenuItem value="Hsnwise Purchase">HSN Wise Invoice Purchase</MenuItem>
+            <MenuItem value="Hsnwise Summary">HSN Wise Summary</MenuItem>
           </TextField>
 
           {/* 🔹 Conditional Fields */}
@@ -2407,6 +2418,12 @@ export default function MonthlyFormModal({ open, onClose }) {
             open={openPurRegister}
             onClose={handleClosePurRegister}
             formData={formData}
+          />
+          <HsnWiseSum 
+            show={openHsnModal} 
+            handleClose={() => setHsnModal(false)}
+            fromDate = {formData.fromDate}
+            upto = {formData.toDate}
           />
         </Box>
       </Box>
