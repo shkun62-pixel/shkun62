@@ -5095,6 +5095,7 @@ import useTdsApplicable from "../Shared/useTdsApplicable";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import useShortcuts from "../Shared/useShortcuts";
+import F3Modal from "../Modals/F3Modal";
 
 const LOCAL_STORAGE_KEY = "tabledataVisibility";
 
@@ -8848,6 +8849,16 @@ const Sale = () => {
     }
   }, [saleWinFromState]);
 
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedItemIndexForPurchase, setSelectedItemIndexForPurchase] = useState(null);
+  const handleF3Press = (e, index) => {
+    if (e.key === "F3") {
+      e.preventDefault();
+      setSelectedItemIndexForPurchase(index);
+      setShowPurchaseModal(true);
+    }
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -9688,6 +9699,7 @@ const Sale = () => {
                         handleKeyDown(e, index, "vcode");
                         handleOpenModal(e, index, "vcode");
                         handleOpenModalBack(e, index, "vcode");
+                        handleF3Press(e, index)
                       }}
                       onDoubleClick={(e) => {
                         handleDoubleClick(e, "vcode", index);
@@ -11039,6 +11051,41 @@ const Sale = () => {
           </div>
         </Modal.Body>
       </Modal>
+      <F3Modal
+        show={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        tenant={tenant}
+        onSelect={(row) => {
+          const index = selectedItemIndexForPurchase;
+          if (index === null) return;
+
+          // 🔥 Step 1: set base fields via handler
+          handleItemChange(index, "sdisc", row.desc || "");
+          handleItemChange(index, "pkgs", row.pkgs || 0);
+          handleItemChange(index, "weight", row.qty || 0);
+          handleItemChange(index, "rate", row.rate || 0);
+          handleItemChange(index, "gst", row.gst || 0);
+
+          // 🔥 Step 2: set remaining fields manually (no calc needed)
+          setItems((prev) => {
+            const updated = [...prev];
+            const item = { ...updated[index] };
+
+            item.vcode = row.vcode || "";
+            item.Units = row.Units || "";
+            item.tariff = row.tariff || "";
+            item.Pcodes01 = row.Pcodes01 || "";
+            item.Pcodess = row.Pcodess || "";
+            item.Scodes01 = row.Scodes01 || "";
+            item.Scodess = row.Scodess || "";
+            item.RateCal = row.RateCal || "";
+            item.Qtyperpc = row.Qtyperpc || 0;
+
+            updated[index] = item;
+            return updated;
+          });
+        }}
+      />
     </div>
   );
 };
