@@ -344,7 +344,7 @@ export default function GstWorksheet() {
       [companyAdd || ""],
       [companyCity || ""],
       [],
-      [`PERIOD FROM ${formatDate(fromDate)} To ${formatDate(toDate)}`],
+      [`PERIOD FROM ${fromDate} To ${toDate}`],
       [],
       header,
 

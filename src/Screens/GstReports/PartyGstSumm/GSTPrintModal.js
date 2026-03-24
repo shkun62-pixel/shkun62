@@ -15,8 +15,7 @@ const style = {
   bgcolor: "white",
   p: 4,
   borderRadius: 2,
-  maxHeight: "90vh",
-  overflow: "auto",
+  maxHeight: "95vh",
 };
 
 export default function GSTPrintModal({
@@ -379,7 +378,14 @@ export default function GSTPrintModal({
           C.FORM STATEMENT FROM DT. {startDate} To {endDate}
         </Typography>
 
-        <div ref={printRef}>
+        <Box
+          ref={printRef}
+          sx={{
+            maxHeight: "60vh",
+            overflowY: "auto",
+            marginTop: 2,
+          }}
+        >
         <Table bordered size="sm" style={{ marginTop: 10 }}>
           <thead>
             <tr>
@@ -457,7 +463,7 @@ export default function GSTPrintModal({
             </tr>
           </tbody>
         </Table>
-        </div>
+        </Box>
         <Box mt={3} display="flex" gap={2}>
           <Button variant="contained" onClick={handlePrint}>
             PRINT

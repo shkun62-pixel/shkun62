@@ -2371,970 +2371,1155 @@
 // export default Example
 
 // SALE TABLE
-import React, { useState, useEffect } from "react";
-import Table from "react-bootstrap/Table";
-import F3Modal from "./Modals/F3Modal";
-import ProductModal from "./Modals/ProductModal";
+// import React, { useState, useEffect } from "react";
+// import Table from "react-bootstrap/Table";
+// import F3Modal from "./Modals/F3Modal";
+// import ProductModal from "./Modals/ProductModal";
+
+// const Example = () => {
+//   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+//   const [selectedItemIndexForPurchase, setSelectedItemIndexForPurchase] = useState(null);
+//   const LOCAL_STORAGE_KEY = "tabledataVisibility";
+//   const [T11, setT11] = useState(false);
+//   const [T12, setT12] = useState(false);
+//   const [T21, setT21] = useState(false);
+//   const [formData, setFormData] = useState({
+//     date: "",
+//     valpha:"",
+//     vtype: "S",
+//     vbillno: 0,
+//     vno: 0,
+//     gr: "",
+//     exfor: "",
+//     trpt: "",
+//     stype: "",
+//     btype: "",
+//     conv: "",
+//     rem1: "",
+//     rem2: "",
+//     v_tpt: "",
+//     broker: "",
+//     gross: false,
+//     tcsper: 0,
+//     srv_rate: 0,
+//     srv_tax: 0,
+//     tcs1_rate: 0,
+//     tcs1: 0,
+//     tcs206_rate: 0,
+//     tcs206: 0,
+//     duedate: "",
+//     pcess: 0,
+//     tax: 0,
+//     sub_total: 0,
+//     exp_before: 0,
+//     Exp_rate6: 0,
+//     Exp_rate7: 0,
+//     Exp_rate8: 0,
+//     Exp_rate9: 0,
+//     Exp_rate10: 0,
+//     Exp6: 0,
+//     Exp7: 0,
+//     Exp8: 0,
+//     Exp9: 0,
+//     Exp10: 0,
+//     Tds2: "",
+//     Ctds: "",
+//     Stds: "",
+//     iTds: "",
+//     cgst: 0,
+//     sgst: 0,
+//     igst: 0,
+//     expafterGST: 0,
+//     ExpRoundoff: 0,
+//     grandtotal: 0,
+//   });
+ 
+//   const [items, setItems] = useState([
+//     {
+//       id: 1,
+//       vcode: "",
+//       sdisc: "",
+//       Units: "",
+//       pkgs: "0.00",
+//       weight: "0.00",
+//       rate: "0.00",
+//       amount: "0.00",
+//       disc: 0,
+//       discount: "",
+//       gst: 18,
+//       Pcodes01: "",
+//       Pcodess: "",
+//       Scodes01: "",
+//       Scodess: "",
+//       Exp_rate1: 0,
+//       Exp_rate2: 0,
+//       Exp_rate3: 0,
+//       Exp_rate4: 0,
+//       Exp_rate5: 0,
+//       Exp1: 0,
+//       Exp2: 0,
+//       Exp3: 0,
+//       Exp4: 0,
+//       Exp5: 0,
+//       exp_before: 0,
+//       RateCal: "",
+//       Qtyperpc: 0,
+//       ctax: "0.00",
+//       stax: "0.00",
+//       itax: "0.00",
+//       tariff: "",
+//       vamt: "0.00",
+//     },
+//   ]);
+//   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+//     React.useEffect(() => {
+//       // Fetch products from the API when the component mounts
+//       fetchProducts();
+//     }, []);
+  
+//     const fetchProducts = async (search = "") => {
+//       setLoading(true);
+//       try {
+//         const response = await fetch(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
+//         );
+//         if (!response.ok) throw new Error("Failed to fetch products");
+//         const data = await response.json();
+//         const flattenedData = data.data.map((item) => ({
+//           ...item.formData,
+//           _id: item._id,
+//         }));
+//         setProducts(flattenedData);
+//       } catch (error) {
+//         setError(error.message);
+//       }
+//       setLoading(false);
+//     };
+    
+//     const handleF3Press = (e, index) => {
+//       if (e.key === "F3") {
+//         e.preventDefault();
+//         setSelectedItemIndexForPurchase(index);
+//         setShowPurchaseModal(true);
+//       }
+//     };
+//     const capitalizeWords = (str) => {
+//       return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//     };
+  
+//     // Modal For Items
+//     const [products, setProducts] = useState([]);
+//     const [showModal, setShowModal] = useState(false);
+//     const [selectedProduct, setSelectedProduct] = useState(null);
+//     const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState(null);
+//     const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  
+//     const handleItemChange = (index, key, value) => {
+//   // Allow only numeric fields
+//   const numericFields = [
+//     "pkgs",
+//     "weight",
+//     "rate",
+//     "amount",
+//     "disc",
+//     "discount",
+//     "tariff",
+//   ];
+
+//   if (numericFields.includes(key) && !/^-?\d*\.?\d*$/.test(value)) {
+//     return;
+//   }
+
+//   const updatedItems = [...items];
+//   const item = { ...updatedItems[index] };
+
+//   // Force discount negative
+//   if (key === "disc" || key === "discount") {
+//     const num = parseFloat(value);
+//     value = isNaN(num) ? "" : -Math.abs(num);
+//   }
+
+//   // Capitalize description
+//   if (key === "sdisc") {
+//     item[key] = value.replace(/\b\w/g, (c) => c.toUpperCase());
+//   } else {
+//     item[key] = value;
+//   }
+
+//   // ==============================
+//   // 🔥 PRODUCT SELECTION
+//   // ==============================
+//   if (key === "name") {
+//     const selectedProduct = products.find(
+//       (product) => product.Aheads === value
+//     );
+
+//     if (selectedProduct) {
+//       item.vcode = selectedProduct.Acodes;
+//       item.sdisc = selectedProduct.Aheads;
+//       item.Units = selectedProduct.TradeName;
+//       item.rate = selectedProduct.Mrps || 0;
+//       item.gst = selectedProduct.itax_rate || 0;
+//       item.tariff = selectedProduct.Hsn;
+//       item.RateCal = selectedProduct.Rateins;
+//       item.Qtyperpc = selectedProduct.Qpps || 0;
+//       item.curMrp = selectedProduct.Mrps || 0;
+//     }
+//   }
+
+//   // ==============================
+//   // 🔥 AUTO WEIGHT CALCULATION
+//   // ==============================
+//   const pkgs = parseFloat(item.pkgs) || 0;
+//   const qtyPerPc = parseFloat(item.Qtyperpc) || 0;
+
+//   if (pkgs > 0 && qtyPerPc > 0 && key !== "weight") {
+//     item.weight = (pkgs * qtyPerPc).toFixed(2);
+//   }
+
+//   const weight = parseFloat(item.weight) || 0;
+//   const rate = parseFloat(item.rate) || 0;
+//   const gst = parseFloat(item.gst) || 0;
+
+//   // ==============================
+//   // 🔥 AMOUNT CALCULATION
+//   // ==============================
+//   let baseAmount = 0;
+
+//   if (item.RateCal === "Pc/Pkgs") {
+//     baseAmount = pkgs * rate;
+//   } else {
+//     baseAmount = weight * rate;
+//   }
+
+//   // If user manually edits amount → recalc rate
+//   if (
+//     key === "amount" &&
+//     value !== "" &&
+//     !value.endsWith(".")
+//   ) {
+//     const enteredAmount = parseFloat(value) || 0;
+//     let qty = item.RateCal === "Pc/Pkgs" ? pkgs : weight;
+
+//     const currentMrp = parseFloat(item.curMrp);
+
+//     if (!isNaN(currentMrp) && currentMrp > 0) {
+//       // Do not allow rate override if MRP exists
+//     } else if (qty > 0) {
+//       let newRate = enteredAmount / qty;
+//       item.rate = T21
+//         ? Math.round(newRate).toFixed(2)
+//         : newRate.toFixed(2);
+//     }
+
+//     baseAmount = enteredAmount;
+//   }
+
+//   baseAmount = isNaN(baseAmount) ? 0 : baseAmount;
+
+//   // ==============================
+//   // 🔥 DISCOUNT CALCULATION
+//   // ==============================
+//   let discountValue = 0;
+//   let discPercent = parseFloat(item.disc) || 0;
+//   let manualDiscount = parseFloat(item.discount) || 0;
+
+//   if (key === "discount") {
+//     discountValue = manualDiscount;
+//   } else {
+//     discountValue = (discPercent / 100) * baseAmount;
+//     item.discount = T21
+//       ? Math.round(discountValue).toFixed(2)
+//       : discountValue.toFixed(2);
+//   }
+
+//   discountValue = parseFloat(discountValue) || 0;
+
+//   const others = parseFloat(item.exp_before) || 0;
+//   const taxableAmount = baseAmount + discountValue + others;
+
+//   // ==============================
+//   // 🔥 GST CALCULATION
+//   // ==============================
+//   let cgst = 0,
+//     sgst = 0,
+//     igst = 0;
+
+//   const CompanyState = "Punjab";
+
+//   if (CompanyState === "Punjab") {
+//     cgst = (taxableAmount * gst) / 200;
+//     sgst = (taxableAmount * gst) / 200;
+//   } else {
+//     igst = (taxableAmount * gst) / 100;
+//   }
+
+//   const totalWithGST = taxableAmount + cgst + sgst + igst;
+
+//   // ==============================
+//   // 🔥 ROUNDING LOGIC
+//   // ==============================
+//   if (T21) {
+//     item.amount = Math.round(baseAmount).toFixed(2);
+//     item.discount = Math.round(discountValue).toFixed(2);
+//     item.vamt = Math.round(totalWithGST).toFixed(2);
+//   } else {
+//     item.amount = baseAmount.toFixed(2);
+//     item.vamt = totalWithGST.toFixed(2);
+//   }
+
+//   if (T12) {
+//     item.ctax = Math.round(cgst).toFixed(2);
+//     item.stax = Math.round(sgst).toFixed(2);
+//     item.itax = Math.round(igst).toFixed(2);
+//   } else {
+//     item.ctax = cgst.toFixed(2);
+//     item.stax = sgst.toFixed(2);
+//     item.itax = igst.toFixed(2);
+//   }
+
+//   updatedItems[index] = item;
+//   setItems(updatedItems);
+// };
+
+//   const handleProductSelect = (product) => {
+//     if (selectedItemIndex !== null) {
+//       handleItemChange(selectedItemIndex, "name", product.Aheads);
+//       setShowModal(false);
+//     }
+//   };
+
+//   const handleModalDone = (product) => {
+//     if (product) {
+//       // console.log(product);
+//       handleProductSelect(product);
+//     }
+//     setShowModal(false);
+//     fetchProducts();
+//   };
+
+//   const openModalForItem = (index) => {
+//       setSelectedItemIndex(index);
+//       setShowModal(true);
+//   };
+
+//   const allFields = products.length
+//     ? Object.keys(products[0])
+//     : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+
+//   const defaultTableFields = {
+//     itemcode: true,
+//     sdisc: true,
+//     hsncode: true,
+//     pcs: true,
+//     qty: true,
+//     rate: true,
+//     amount: true,
+//     discount: false,
+//     others: true,
+//     gst: false,
+//     cgst: true,
+//     sgst: true,
+//     igst: true,
+//   };
+  
+//   const [tableData, settableData] = useState(() => {
+//     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+//     const parsed = saved ? JSON.parse(saved) : {};
+
+//     // Only keep keys that exist in defaultFormData
+//     const sanitized = Object.fromEntries(
+//       Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
+//         Object.hasOwn(defaultTableFields, key),
+//       ),
+//     );
+
+//     return sanitized;
+//   });
+
+//   // Calculate Total GST
+//   const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
+//     let totalValue = 0;
+//     let cgstTotal = 0;
+//     let sgstTotal = 0;
+//     let igstTotal = 0;
+//     let totalOthers = 0;
+//     let totalpcs = 0;
+//     let totalQty = 0;
+//     let totalDis = 0;
+//     const applicableTariffs = [
+//       "7204",
+//       "7602",
+//       "7902",
+//       "7404",
+//       "7503",
+//       "8002",
+//       "8101",
+//       "7802",
+//       "8112",
+//       "8113",
+//       "8104",
+//     ];
+
+//     items.forEach((item) => {
+//       const value = parseFloat(item.amount || 0);
+//       totalValue += value || 0;
+//       cgstTotal += parseFloat(item.ctax || 0);
+//       sgstTotal += parseFloat(item.stax || 0);
+//       igstTotal += parseFloat(item.itax || 0);
+//       totalOthers += parseFloat(item.exp_before || 0);
+//       totalpcs += parseFloat(item.pkgs || 0);
+//       totalQty += parseFloat(item.weight || 0);
+//       totalDis += parseFloat(item.discount || 0);
+//     });
+//     // Expense Calculations
+//     const subTotal = parseFloat(formDataOverride.sub_total) || 0;
+//     let exp6Rate = parseFloat(formDataOverride.Exp_rate6) || 0;
+//     let exp7Rate = parseFloat(formDataOverride.Exp_rate7) || 0;
+//     let exp8Rate = parseFloat(formDataOverride.Exp_rate8) || 0;
+//     let exp9Rate = parseFloat(formDataOverride.Exp_rate9) || 0;
+//     let exp10Rate = parseFloat(formDataOverride.Exp_rate10) || 0;
+//     let exp6 = 0;
+//     let exp7 = 0;
+//     let exp8 = 0;
+//     let exp9 = 0;
+//     let exp10 = 0;
+//     let CalExp6 ,CalExp7, CalExp8, CalExp9 ,CalExp10;
+//     const Exp1Multiplier6 = 1
+//     const Exp1Multiplier7 = 1;
+//     const Exp1Multiplier8 = 1;
+//     const Exp1Multiplier9 = 1;
+//     const Exp1Multiplier10 = 1
+
+//     if (formDataOverride._manual_Exp6) {
+//       exp6 = parseFloat(formDataOverride.Exp6) || 0;
+//     } else {
+//       if (CalExp6 === "P" || CalExp6 === "p") {
+//         exp6 = (totalpcs * exp6Rate) / 100 || 0;
+//       } else if (CalExp6 === "W" || CalExp6 === "w") {
+//         exp6 = (totalQty * exp6Rate) / 100 || 0;
+//       } else {
+//         exp6 = (subTotal * exp6Rate) / 100 || 0;
+//       }
+//     }
+//     exp6 *= Exp1Multiplier6;
+//     if (!formDataOverride._manual_Exp6) {
+//       formDataOverride.Exp6 = exp6.toFixed(2);
+//     }
+
+//     // EXP 7
+//     if (formDataOverride._manual_Exp7) {
+//       exp7 = parseFloat(formDataOverride.Exp7) || 0;
+//     } else {
+//       if (CalExp7 === "P" || CalExp7 === "p") {
+//         exp7 = (totalpcs * exp7Rate) / 100 || 0;
+//       } else if (CalExp7 === "W" || CalExp7 === "w") {
+//         exp7 = (totalQty * exp7Rate) / 100 || 0;
+//       } else {
+//         exp7 = (subTotal * exp7Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp7 *= Exp1Multiplier7;
+//       if (!formDataOverride._manual_Exp7) {
+//       formDataOverride.Exp7 = exp7.toFixed(2);
+//     }
+
+//     // EXP 8
+//     if (formDataOverride._manual_Exp8) {
+//       exp8 = parseFloat(formDataOverride.Exp8) || 0;
+//     } else {
+//       if (CalExp8 === "P" || CalExp8 === "p") {
+//         exp8 = (totalpcs * exp8Rate) / 100 || 0;
+//       } else if (CalExp8 === "W" || CalExp8 === "w") {
+//         exp8 = (totalQty * exp8Rate) / 100 || 0;
+//       } else {
+//         exp8 = (subTotal * exp8Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp8 *= Exp1Multiplier8;
+//       if (!formDataOverride._manual_Exp8) {
+//       formDataOverride.Exp8 = exp8.toFixed(2);
+//     }
+
+//     // EXP 9
+//     if (formDataOverride._manual_Exp9) {
+//       exp9 = parseFloat(formDataOverride.Exp9) || 0;
+//     } else {
+//       if (CalExp9 === "P" || CalExp9 === "p") {
+//         exp9 = (totalpcs * exp9Rate) / 100 || 0;
+//       } else if (CalExp9 === "W" || CalExp9 === "w") {
+//         exp9 = (totalQty * exp9Rate) / 100 || 0;
+//       } else {
+//         exp9 = (subTotal * exp9Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp9 *= Exp1Multiplier9;
+//       if (!formDataOverride._manual_Exp9) {
+//       formDataOverride.Exp9 = exp9.toFixed(2);
+//     }
+
+//     // EXP 10
+//     if (formDataOverride._manual_Exp10) {
+//       exp10 = parseFloat(formDataOverride.Exp10) || 0;
+//     } else {
+//       if (CalExp10 === "P" || CalExp10 === "p") {
+//         exp10 = (totalpcs * exp10Rate) / 100 || 0;
+//       } else if (CalExp10 === "W" || CalExp10 === "w") {
+//         exp10 = (totalQty * exp10Rate) / 100 || 0;
+//       } else {
+//         exp10 = (subTotal * exp10Rate) / 100 || 0;
+//       }
+//     }
+
+//     exp10 *= Exp1Multiplier10;
+//       if (!formDataOverride._manual_Exp10) {
+//       formDataOverride.Exp10 = exp10.toFixed(2);
+//     }
+
+//     // Calculate Total Expenses
+//     const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
+//     let gstTotal = cgstTotal + sgstTotal + igstTotal;
+//     let grandTotal =
+//       totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
+//     let taxable = parseFloat(formDataOverride.sub_total) || 0;
+//     // ✅ Skip TCS Calculation if skipTCS is true
+//     let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
+//     let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
+//     let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
+//     let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
+//     let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
+//     let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
+
+//     if (!skipTCS) {
+//       tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
+//       grandTotal += tcs1;
+//     } else if (skipTCS) {
+//       grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
+//     }
+
+//     let cTds = 0,
+//       sTds = 0,
+//       iTds = 0,
+//       tcspercentage = "0";
+//       let CompanyState = "Punjab"
+//     items.forEach((item) => {
+//       if (
+//         item.tariff &&
+//         applicableTariffs.some((tariff) => item.tariff.startsWith(tariff))
+//       ) {
+//         if (CompanyState == "Punjab") {
+//           cTds = totalValue * 0.01;
+//           sTds = totalValue * 0.01;
+//           tcspercentage = "2%";
+//         } else {
+//           iTds = totalValue * 0.02;
+//           tcspercentage = "2%";
+//         }
+//       }
+//     });
+
+//     let totalTds = cTds + sTds + iTds;
+//     let expafterGST = tcs206 + tcs1;
+//     let originalGrandTotal = grandTotal; // Save the unrounded grandTotal
+
+//     if (T21) {
+//       totalValue = Math.round(totalValue);
+//       grandTotal = Math.round(grandTotal);
+//       totalDis = Math.round(totalDis);
+//     }
+
+//     if (T12) {
+//       gstTotal = Math.round(gstTotal);
+//       cgstTotal = Math.round(cgstTotal);
+//       sgstTotal = Math.round(sgstTotal);
+//       igstTotal = Math.round(igstTotal);
+//       totalOthers = Math.round(totalOthers);
+//       expafterGST = Math.round(expafterGST);
+//       totalTds = Math.round(totalTds);
+//       tcs206 = Math.round(tcs206);
+//       srv_tax = Math.round(srv_tax);
+//       cTds = Math.round(cTds);
+//       sTds = Math.round(sTds);
+//       iTds = Math.round(iTds);
+//     }
+//     // Calculate Round-Off Difference
+//     let ExpRoundoff = grandTotal - originalGrandTotal;
+
+//     return {
+//       ...formDataOverride,
+//       tcsper: tcspercentage,
+//       tcs206: tcs206.toFixed(2),
+//       tcs206_rate: tcs206Rate.toFixed(2),
+//       tcs1: tcs1.toFixed(2),
+//       tcs1_rate: tcs1Rate.toFixed(2),
+//       srv_tax: srv_tax.toFixed(2),
+//       srv_rate: srvRate.toFixed(2),
+//       tax: gstTotal.toFixed(2),
+//       cgst: cgstTotal.toFixed(2),
+//       sgst: sgstTotal.toFixed(2),
+//       igst: igstTotal.toFixed(2),
+//       sub_total: totalValue.toFixed(2),
+//       Tds2: totalTds.toFixed(2),
+//       Ctds: cTds.toFixed(2),
+//       Stds: sTds.toFixed(2),
+//       iTds: iTds.toFixed(2),
+//       grandtotal: grandTotal.toFixed(2),
+//       exp_before: (totalOthers - totalDis).toFixed(2),
+//       expafterGST: (totalExpenses + tcs206 + tcs1).toFixed(2),
+//       ExpRoundoff: ExpRoundoff.toFixed(2),
+//     };
+//   };
+
+//   useEffect(() => {
+//     setFormData((prevState) => calculateTotalGst(prevState));
+//   }, [items, T21, T12, formData.tcs1_rate]);
+
+//   const handleDoubleClick = (event, fieldName, index) => {
+//     if ( fieldName === "vcode") {
+//       setSelectedItemIndex(index);
+//       setShowModal(true);
+//       event.preventDefault();
+//     }
+//   };
+
+  
+//   return (
+//     <div>
+//       <div style={{ marginTop: 5 }} className="tablediv">
+//          <Table className="custom-table">
+//             <thead
+//               style={{
+//                 textAlign: "center",
+//                 position: "sticky",
+//                 top: 0,
+//               }}
+//             >
+//               <tr style={{ color: "#575a5a" }}>
+//                 {tableData.itemcode && <th>ITEMCODE</th>}
+//                 {tableData.sdisc && <th>DESCRIPTION</th>}
+//                 {tableData.hsncode && <th>HSNCODE</th>}
+//                 {tableData.pcs && <th>PCS</th>}
+//                 {tableData.qty && <th>QTY</th>}
+//                 {tableData.rate && <th>RATE</th>}
+//                 {tableData.amount && <th>AMOUNT</th>}
+//                 {tableData.discount && <th>DIS@</th>}
+//                 {tableData.discount && <th>DISCOUNT</th>}
+//                 {tableData.others && <th>OTHERS</th>}
+//                 {tableData.cgst && <th>CGST</th>}
+//                 {tableData.sgst && <th>SGST</th>}
+//                 {tableData.igst && <th>IGST</th>}
+//                 <th>VAmt</th>
+//               </tr>
+//             </thead>
+//             <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
+//               {items.map((item, index) => (
+//                 <tr key={item.id}>
+//                   {tableData.itemcode && (
+//                     <td style={{ padding: 0, width: 30 }}>
+//                       <input
+//                         className="ItemCode"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                         }}
+//                         type="text"
+//                         value={item.vcode}
+//                          onDoubleClick={(e) => {
+//                         handleDoubleClick(e, "vcode", index);
+//                       }}
+//                       onKeyDown={(e) => handleF3Press(e, index)}
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.sdisc && (
+//                     <td style={{ padding: 0, width: 300 }}>
+//                       <input
+//                         className="desc"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                         }}
+//                         maxLength={48}
+//                         value={item.sdisc}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "sdisc", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.hsncode && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Hsn"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={8}
+//                         value={item.tariff}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "tariff", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.pcs && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="PCS"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "pkgs", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.qty && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="QTY"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.weight) === 0 ? "" : item.weight}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "weight", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.rate && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Price"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.rate) === 0 ? "" : item.rate}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "rate", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.amount && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Amount"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         value={Number(item.amount) === 0 ? "" : item.amount}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "amount", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.discount && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Disc"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         value={Number(item.disc) === 0 ? "" : item.disc}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "disc", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.discount && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         id="discount"
+//                         className="discount"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         value={Number(item.discount) === 0 ? "" : item.discount}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "discount", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.others && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="Others"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                         }}
+//                         maxLength={48}
+//                         type="text"
+//                         value={
+//                           Number(item.exp_before) === 0 ? "" : item.exp_before
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.cgst && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="CTax"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                           color: "black",
+//                         }}
+//                         maxLength={48}
+//                         disabled
+//                         value={Number(item.ctax) === 0 ? "" : item.ctax}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "ctax", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.sgst && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="STax"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                           color: "black",
+//                         }}
+//                         maxLength={48}
+//                         disabled
+//                         value={Number(item.stax) === 0 ? "" : item.stax}
+//                         onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
+//                       />
+//                     </td>
+//                   )}
+//                   {tableData.igst && (
+//                     <td style={{ padding: 0 }}>
+//                       <input
+//                         className="ITax"
+//                         style={{
+//                           height: 40,
+//                           width: "100%",
+//                           boxSizing: "border-box",
+//                           border: "none",
+//                           padding: 5,
+//                           textAlign: "right",
+//                           color: "black",
+//                         }}
+//                         maxLength={48}
+//                         disabled
+//                         value={Number(item.itax) === 0 ? "" : item.itax}
+//                         onChange={(e) =>
+//                           handleItemChange(index, "itax", e.target.value)
+//                         }
+//                       />
+//                     </td>
+//                   )}
+//                   <td>{item.vamt}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </Table>
+//       </div>
+//       {showModal && (
+//         <ProductModal
+//           products={products}
+//           allFields={allFields}
+//           onSelect={handleProductSelect}
+//           onClose={handleModalDone}
+//           tenant={tenant}
+//           initialKey={pressedKey}
+//           fetchParentProducts={fetchProducts}
+//         />
+//       )}
+//       <F3Modal
+//         show={showPurchaseModal}
+//         onClose={() => setShowPurchaseModal(false)}
+//         tenant={tenant}
+//         onSelect={(row) => {
+//                   const index = selectedItemIndexForPurchase;
+//                   if (index === null) return;
+        
+//                   // 🔥 Step 1: set base fields via handler
+//                   handleItemChange(index, "sdisc", row.desc || "");
+//                   handleItemChange(index, "pkgs", row.pkgs || 0);
+//                   handleItemChange(index, "weight", row.qty || 0);
+//                   handleItemChange(index, "rate", row.rate || 0);
+//                   handleItemChange(index, "gst", row.gst || 0);
+        
+//                   // 🔥 Step 2: set remaining fields manually (no calc needed)
+//                   setItems((prev) => {
+//                     const updated = [...prev];
+//                     const item = { ...updated[index] };
+        
+//                     item.vcode = row.vcode || "";
+//                     item.Units = row.Units || "";
+//                     item.tariff = row.tariff || "";
+//                     item.Pcodes01 = row.Pcodes01 || "";
+//                     item.Pcodess = row.Pcodess || "";
+//                     item.Scodes01 = row.Scodes01 || "";
+//                     item.Scodess = row.Scodess || "";
+//                     item.RateCal = row.RateCal || "";
+//                     item.Qtyperpc = row.Qtyperpc || 0;
+        
+//                     updated[index] = item;
+//                     return updated;
+//                   });
+//         }}
+//       />
+//     </div>
+//   );
+// };
+
+// export default Example;
+
+import React,{useState} from 'react'
+import { Button } from 'react-bootstrap';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import axios from 'axios';
 
 const Example = () => {
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [selectedItemIndexForPurchase, setSelectedItemIndexForPurchase] = useState(null);
-  const LOCAL_STORAGE_KEY = "tabledataVisibility";
-  const [T11, setT11] = useState(false);
-  const [T12, setT12] = useState(false);
-  const [T21, setT21] = useState(false);
-  const [formData, setFormData] = useState({
-    date: "",
-    valpha:"",
-    vtype: "S",
-    vbillno: 0,
-    vno: 0,
-    gr: "",
-    exfor: "",
-    trpt: "",
-    stype: "",
-    btype: "",
-    conv: "",
-    rem1: "",
-    rem2: "",
-    v_tpt: "",
-    broker: "",
-    gross: false,
-    tcsper: 0,
-    srv_rate: 0,
-    srv_tax: 0,
-    tcs1_rate: 0,
-    tcs1: 0,
-    tcs206_rate: 0,
-    tcs206: 0,
-    duedate: "",
-    pcess: 0,
-    tax: 0,
-    sub_total: 0,
-    exp_before: 0,
-    Exp_rate6: 0,
-    Exp_rate7: 0,
-    Exp_rate8: 0,
-    Exp_rate9: 0,
-    Exp_rate10: 0,
-    Exp6: 0,
-    Exp7: 0,
-    Exp8: 0,
-    Exp9: 0,
-    Exp10: 0,
-    Tds2: "",
-    Ctds: "",
-    Stds: "",
-    iTds: "",
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
-    expafterGST: 0,
-    ExpRoundoff: 0,
-    grandtotal: 0,
-  });
- 
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      vcode: "",
-      sdisc: "",
-      Units: "",
-      pkgs: "0.00",
-      weight: "0.00",
-      rate: "0.00",
-      amount: "0.00",
-      disc: 0,
-      discount: "",
-      gst: 18,
-      Pcodes01: "",
-      Pcodess: "",
-      Scodes01: "",
-      Scodess: "",
-      Exp_rate1: 0,
-      Exp_rate2: 0,
-      Exp_rate3: 0,
-      Exp_rate4: 0,
-      Exp_rate5: 0,
-      Exp1: 0,
-      Exp2: 0,
-      Exp3: 0,
-      Exp4: 0,
-      Exp5: 0,
-      exp_before: 0,
-      RateCal: "",
-      Qtyperpc: 0,
-      ctax: "0.00",
-      stax: "0.00",
-      itax: "0.00",
-      tariff: "",
-      vamt: "0.00",
-    },
-  ]);
-  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
-    React.useEffect(() => {
-      // Fetch products from the API when the component mounts
-      fetchProducts();
-    }, []);
-  
-    const fetchProducts = async (search = "") => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/stockmaster?search=${encodeURIComponent(search)}`,
-        );
-        if (!response.ok) throw new Error("Failed to fetch products");
-        const data = await response.json();
-        const flattenedData = data.data.map((item) => ({
-          ...item.formData,
-          _id: item._id,
-        }));
-        setProducts(flattenedData);
-      } catch (error) {
-        setError(error.message);
-      }
-      setLoading(false);
-    };
-    
-    const handleF3Press = (e, index) => {
-      if (e.key === "F3") {
-        e.preventDefault();
-        setSelectedItemIndexForPurchase(index);
-        setShowPurchaseModal(true);
-      }
-    };
-    const capitalizeWords = (str) => {
-      return str.replace(/\b\w/g, (char) => char.toUpperCase());
-    };
-  
-    // Modal For Items
-    const [products, setProducts] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [selectedItemIndex, setSelectedItemIndex] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  
-    const handleItemChange = (index, key, value) => {
-  // Allow only numeric fields
-  const numericFields = [
-    "pkgs",
-    "weight",
-    "rate",
-    "amount",
-    "disc",
-    "discount",
-    "tariff",
-  ];
 
-  if (numericFields.includes(key) && !/^-?\d*\.?\d*$/.test(value)) {
-    return;
-  }
 
-  const updatedItems = [...items];
-  const item = { ...updatedItems[index] };
+  const exportSum3B = async () => {
+    try {
+      // ================= API =================
+      const [saleRes, purchaseRes] = await Promise.all([
+        axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"),
+        axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase"),
+      ]);
 
-  // Force discount negative
-  if (key === "disc" || key === "discount") {
-    const num = parseFloat(value);
-    value = isNaN(num) ? "" : -Math.abs(num);
-  }
+      const sales = saleRes.data;
+      const purchases = purchaseRes.data;
 
-  // Capitalize description
-  if (key === "sdisc") {
-    item[key] = value.replace(/\b\w/g, (c) => c.toUpperCase());
-  } else {
-    item[key] = value;
-  }
+      // ================= MONTH MAP =================
+      const monthMap = {
+        3: "B", 4: "C", 5: "D", 6: "E",
+        7: "F", 8: "G", 9: "H", 10: "I",
+        11: "J", 0: "K", 1: "L", 2: "M"
+      };
 
-  // ==============================
-  // 🔥 PRODUCT SELECTION
-  // ==============================
-  if (key === "name") {
-    const selectedProduct = products.find(
-      (product) => product.Aheads === value
-    );
+      // ================= INIT =================
+      const init = () => ({
+        // SALE
+        sale_regWithin: 0,
+        sale_regOut: 0,
+        sale_unregWithin: 0,
+        sale_unregOut: 0,
+        sale_taxFreeWithin: 0,
+        sale_taxFreeOut: 0,
+        sale_export: 0,
 
-    if (selectedProduct) {
-      item.vcode = selectedProduct.Acodes;
-      item.sdisc = selectedProduct.Aheads;
-      item.Units = selectedProduct.TradeName;
-      item.rate = selectedProduct.Mrps || 0;
-      item.gst = selectedProduct.itax_rate || 0;
-      item.tariff = selectedProduct.Hsn;
-      item.RateCal = selectedProduct.Rateins;
-      item.Qtyperpc = selectedProduct.Qpps || 0;
-      item.curMrp = selectedProduct.Mrps || 0;
-    }
-  }
+        // PURCHASE
+        pur_regWithin: 0,
+        pur_regOut: 0,
+        pur_unregWithin: 0,
+        pur_unregOut: 0,
+        pur_taxFreeWithin: 0,
+        pur_taxFreeOut: 0,
+      });
 
-  // ==============================
-  // 🔥 AUTO WEIGHT CALCULATION
-  // ==============================
-  const pkgs = parseFloat(item.pkgs) || 0;
-  const qtyPerPc = parseFloat(item.Qtyperpc) || 0;
+      const monthData = {};
+      Object.values(monthMap).forEach((col) => {
+        monthData[col] = init();
+      });
 
-  if (pkgs > 0 && qtyPerPc > 0 && key !== "weight") {
-    item.weight = (pkgs * qtyPerPc).toFixed(2);
-  }
+      // ================= SALES =================
+      sales.forEach((s) => {
+        const d = new Date(s.formData?.date);
+        const col = monthMap[d.getMonth()];
+        if (!col) return;
 
-  const weight = parseFloat(item.weight) || 0;
-  const rate = parseFloat(item.rate) || 0;
-  const gst = parseFloat(item.gst) || 0;
+        const taxable = Number(s.formData?.sub_total || 0);
+        const igst = Number(s.formData?.igst || 0);
+        const tax = Number(s.formData?.tax || 0);
 
-  // ==============================
-  // 🔥 AMOUNT CALCULATION
-  // ==============================
-  let baseAmount = 0;
+        const customer = s.customerDetails?.[0] || {};
+        const isRegistered = customer.gstno && customer.gstno !== "";
+        const isOut = igst > 0;
+        const isTaxFree = tax === 0;
+        const isExport = s.formData?.stype?.toLowerCase().includes("export");
 
-  if (item.RateCal === "Pc/Pkgs") {
-    baseAmount = pkgs * rate;
-  } else {
-    baseAmount = weight * rate;
-  }
-
-  // If user manually edits amount → recalc rate
-  if (
-    key === "amount" &&
-    value !== "" &&
-    !value.endsWith(".")
-  ) {
-    const enteredAmount = parseFloat(value) || 0;
-    let qty = item.RateCal === "Pc/Pkgs" ? pkgs : weight;
-
-    const currentMrp = parseFloat(item.curMrp);
-
-    if (!isNaN(currentMrp) && currentMrp > 0) {
-      // Do not allow rate override if MRP exists
-    } else if (qty > 0) {
-      let newRate = enteredAmount / qty;
-      item.rate = T21
-        ? Math.round(newRate).toFixed(2)
-        : newRate.toFixed(2);
-    }
-
-    baseAmount = enteredAmount;
-  }
-
-  baseAmount = isNaN(baseAmount) ? 0 : baseAmount;
-
-  // ==============================
-  // 🔥 DISCOUNT CALCULATION
-  // ==============================
-  let discountValue = 0;
-  let discPercent = parseFloat(item.disc) || 0;
-  let manualDiscount = parseFloat(item.discount) || 0;
-
-  if (key === "discount") {
-    discountValue = manualDiscount;
-  } else {
-    discountValue = (discPercent / 100) * baseAmount;
-    item.discount = T21
-      ? Math.round(discountValue).toFixed(2)
-      : discountValue.toFixed(2);
-  }
-
-  discountValue = parseFloat(discountValue) || 0;
-
-  const others = parseFloat(item.exp_before) || 0;
-  const taxableAmount = baseAmount + discountValue + others;
-
-  // ==============================
-  // 🔥 GST CALCULATION
-  // ==============================
-  let cgst = 0,
-    sgst = 0,
-    igst = 0;
-
-  const CompanyState = "Punjab";
-
-  if (CompanyState === "Punjab") {
-    cgst = (taxableAmount * gst) / 200;
-    sgst = (taxableAmount * gst) / 200;
-  } else {
-    igst = (taxableAmount * gst) / 100;
-  }
-
-  const totalWithGST = taxableAmount + cgst + sgst + igst;
-
-  // ==============================
-  // 🔥 ROUNDING LOGIC
-  // ==============================
-  if (T21) {
-    item.amount = Math.round(baseAmount).toFixed(2);
-    item.discount = Math.round(discountValue).toFixed(2);
-    item.vamt = Math.round(totalWithGST).toFixed(2);
-  } else {
-    item.amount = baseAmount.toFixed(2);
-    item.vamt = totalWithGST.toFixed(2);
-  }
-
-  if (T12) {
-    item.ctax = Math.round(cgst).toFixed(2);
-    item.stax = Math.round(sgst).toFixed(2);
-    item.itax = Math.round(igst).toFixed(2);
-  } else {
-    item.ctax = cgst.toFixed(2);
-    item.stax = sgst.toFixed(2);
-    item.itax = igst.toFixed(2);
-  }
-
-  updatedItems[index] = item;
-  setItems(updatedItems);
-};
-
-  const handleProductSelect = (product) => {
-    if (selectedItemIndex !== null) {
-      handleItemChange(selectedItemIndex, "name", product.Aheads);
-      setShowModal(false);
-    }
-  };
-
-  const handleModalDone = (product) => {
-    if (product) {
-      // console.log(product);
-      handleProductSelect(product);
-    }
-    setShowModal(false);
-    fetchProducts();
-  };
-
-  const openModalForItem = (index) => {
-      setSelectedItemIndex(index);
-      setShowModal(true);
-  };
-
-  const allFields = products.length
-    ? Object.keys(products[0])
-    : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
-
-  const defaultTableFields = {
-    itemcode: true,
-    sdisc: true,
-    hsncode: true,
-    pcs: true,
-    qty: true,
-    rate: true,
-    amount: true,
-    discount: false,
-    others: true,
-    gst: false,
-    cgst: true,
-    sgst: true,
-    igst: true,
-  };
-  
-  const [tableData, settableData] = useState(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const parsed = saved ? JSON.parse(saved) : {};
-
-    // Only keep keys that exist in defaultFormData
-    const sanitized = Object.fromEntries(
-      Object.entries({ ...defaultTableFields, ...parsed }).filter(([key]) =>
-        Object.hasOwn(defaultTableFields, key),
-      ),
-    );
-
-    return sanitized;
-  });
-
-  // Calculate Total GST
-  const calculateTotalGst = (formDataOverride = formData, skipTCS = false) => {
-    let totalValue = 0;
-    let cgstTotal = 0;
-    let sgstTotal = 0;
-    let igstTotal = 0;
-    let totalOthers = 0;
-    let totalpcs = 0;
-    let totalQty = 0;
-    let totalDis = 0;
-    const applicableTariffs = [
-      "7204",
-      "7602",
-      "7902",
-      "7404",
-      "7503",
-      "8002",
-      "8101",
-      "7802",
-      "8112",
-      "8113",
-      "8104",
-    ];
-
-    items.forEach((item) => {
-      const value = parseFloat(item.amount || 0);
-      totalValue += value || 0;
-      cgstTotal += parseFloat(item.ctax || 0);
-      sgstTotal += parseFloat(item.stax || 0);
-      igstTotal += parseFloat(item.itax || 0);
-      totalOthers += parseFloat(item.exp_before || 0);
-      totalpcs += parseFloat(item.pkgs || 0);
-      totalQty += parseFloat(item.weight || 0);
-      totalDis += parseFloat(item.discount || 0);
-    });
-    // Expense Calculations
-    const subTotal = parseFloat(formDataOverride.sub_total) || 0;
-    let exp6Rate = parseFloat(formDataOverride.Exp_rate6) || 0;
-    let exp7Rate = parseFloat(formDataOverride.Exp_rate7) || 0;
-    let exp8Rate = parseFloat(formDataOverride.Exp_rate8) || 0;
-    let exp9Rate = parseFloat(formDataOverride.Exp_rate9) || 0;
-    let exp10Rate = parseFloat(formDataOverride.Exp_rate10) || 0;
-    let exp6 = 0;
-    let exp7 = 0;
-    let exp8 = 0;
-    let exp9 = 0;
-    let exp10 = 0;
-    let CalExp6 ,CalExp7, CalExp8, CalExp9 ,CalExp10;
-    const Exp1Multiplier6 = 1
-    const Exp1Multiplier7 = 1;
-    const Exp1Multiplier8 = 1;
-    const Exp1Multiplier9 = 1;
-    const Exp1Multiplier10 = 1
-
-    if (formDataOverride._manual_Exp6) {
-      exp6 = parseFloat(formDataOverride.Exp6) || 0;
-    } else {
-      if (CalExp6 === "P" || CalExp6 === "p") {
-        exp6 = (totalpcs * exp6Rate) / 100 || 0;
-      } else if (CalExp6 === "W" || CalExp6 === "w") {
-        exp6 = (totalQty * exp6Rate) / 100 || 0;
-      } else {
-        exp6 = (subTotal * exp6Rate) / 100 || 0;
-      }
-    }
-    exp6 *= Exp1Multiplier6;
-    if (!formDataOverride._manual_Exp6) {
-      formDataOverride.Exp6 = exp6.toFixed(2);
-    }
-
-    // EXP 7
-    if (formDataOverride._manual_Exp7) {
-      exp7 = parseFloat(formDataOverride.Exp7) || 0;
-    } else {
-      if (CalExp7 === "P" || CalExp7 === "p") {
-        exp7 = (totalpcs * exp7Rate) / 100 || 0;
-      } else if (CalExp7 === "W" || CalExp7 === "w") {
-        exp7 = (totalQty * exp7Rate) / 100 || 0;
-      } else {
-        exp7 = (subTotal * exp7Rate) / 100 || 0;
-      }
-    }
-
-    exp7 *= Exp1Multiplier7;
-      if (!formDataOverride._manual_Exp7) {
-      formDataOverride.Exp7 = exp7.toFixed(2);
-    }
-
-    // EXP 8
-    if (formDataOverride._manual_Exp8) {
-      exp8 = parseFloat(formDataOverride.Exp8) || 0;
-    } else {
-      if (CalExp8 === "P" || CalExp8 === "p") {
-        exp8 = (totalpcs * exp8Rate) / 100 || 0;
-      } else if (CalExp8 === "W" || CalExp8 === "w") {
-        exp8 = (totalQty * exp8Rate) / 100 || 0;
-      } else {
-        exp8 = (subTotal * exp8Rate) / 100 || 0;
-      }
-    }
-
-    exp8 *= Exp1Multiplier8;
-      if (!formDataOverride._manual_Exp8) {
-      formDataOverride.Exp8 = exp8.toFixed(2);
-    }
-
-    // EXP 9
-    if (formDataOverride._manual_Exp9) {
-      exp9 = parseFloat(formDataOverride.Exp9) || 0;
-    } else {
-      if (CalExp9 === "P" || CalExp9 === "p") {
-        exp9 = (totalpcs * exp9Rate) / 100 || 0;
-      } else if (CalExp9 === "W" || CalExp9 === "w") {
-        exp9 = (totalQty * exp9Rate) / 100 || 0;
-      } else {
-        exp9 = (subTotal * exp9Rate) / 100 || 0;
-      }
-    }
-
-    exp9 *= Exp1Multiplier9;
-      if (!formDataOverride._manual_Exp9) {
-      formDataOverride.Exp9 = exp9.toFixed(2);
-    }
-
-    // EXP 10
-    if (formDataOverride._manual_Exp10) {
-      exp10 = parseFloat(formDataOverride.Exp10) || 0;
-    } else {
-      if (CalExp10 === "P" || CalExp10 === "p") {
-        exp10 = (totalpcs * exp10Rate) / 100 || 0;
-      } else if (CalExp10 === "W" || CalExp10 === "w") {
-        exp10 = (totalQty * exp10Rate) / 100 || 0;
-      } else {
-        exp10 = (subTotal * exp10Rate) / 100 || 0;
-      }
-    }
-
-    exp10 *= Exp1Multiplier10;
-      if (!formDataOverride._manual_Exp10) {
-      formDataOverride.Exp10 = exp10.toFixed(2);
-    }
-
-    // Calculate Total Expenses
-    const totalExpenses = exp6 + exp7 + exp8 + exp9 + exp10;
-    let gstTotal = cgstTotal + sgstTotal + igstTotal;
-    let grandTotal =
-      totalValue + gstTotal + totalOthers + totalExpenses + totalDis;
-    let taxable = parseFloat(formDataOverride.sub_total) || 0;
-    // ✅ Skip TCS Calculation if skipTCS is true
-    let tcs206 = skipTCS ? parseFloat(formDataOverride.tcs206) : 0;
-    let tcs206Rate = skipTCS ? parseFloat(formDataOverride.tcs206_rate) : 0;
-    let tcs1 = parseFloat(formDataOverride.tcs1) || 0;
-    let tcs1Rate = parseFloat(formDataOverride.tcs1_rate) || 0;
-    let srvRate = skipTCS ? parseFloat(formDataOverride.srv_rate) : 0;
-    let srv_tax = skipTCS ? parseFloat(formDataOverride.srv_tax) : 0;
-
-    if (!skipTCS) {
-      tcs1 = (grandTotal * tcs1Rate) / 100; // 1% TCS
-      grandTotal += tcs1;
-    } else if (skipTCS) {
-      grandTotal += parseFloat(tcs1); // Add existing TCS to grand total
-    }
-
-    let cTds = 0,
-      sTds = 0,
-      iTds = 0,
-      tcspercentage = "0";
-      let CompanyState = "Punjab"
-    items.forEach((item) => {
-      if (
-        item.tariff &&
-        applicableTariffs.some((tariff) => item.tariff.startsWith(tariff))
-      ) {
-        if (CompanyState == "Punjab") {
-          cTds = totalValue * 0.01;
-          sTds = totalValue * 0.01;
-          tcspercentage = "2%";
+        if (isExport) {
+          monthData[col].sale_export += taxable;
+        } else if (isTaxFree) {
+          if (isOut) monthData[col].sale_taxFreeOut += taxable;
+          else monthData[col].sale_taxFreeWithin += taxable;
+        } else if (isRegistered) {
+          if (isOut) monthData[col].sale_regOut += taxable;
+          else monthData[col].sale_regWithin += taxable;
         } else {
-          iTds = totalValue * 0.02;
-          tcspercentage = "2%";
+          if (isOut) monthData[col].sale_unregOut += taxable;
+          else monthData[col].sale_unregWithin += taxable;
         }
+      });
+
+      // ================= PURCHASE =================
+      purchases.forEach((p) => {
+        let d;
+
+        // handle different date formats
+        if (p.formData?.date?.includes("-")) {
+          const parts = p.formData.date.split("-");
+          d = new Date(parts[2], parts[1] - 1, parts[0]);
+        } else {
+          d = new Date(p.formData?.date);
+        }
+
+        const col = monthMap[d.getMonth()];
+        if (!col) return;
+
+        const taxable = Number(p.formData?.sub_total || 0);
+        const igst = Number(p.formData?.igst || 0);
+        const tax = Number(p.formData?.tax || 0);
+
+        const supplier = p.supplierdetails?.[0] || {};
+        const isRegistered = supplier.gstno && supplier.gstno !== "";
+        const isOut = igst > 0;
+        const isTaxFree = tax === 0;
+
+        if (isTaxFree) {
+          if (isOut) monthData[col].pur_taxFreeOut += taxable;
+          else monthData[col].pur_taxFreeWithin += taxable;
+        } else if (isRegistered) {
+          if (isOut) monthData[col].pur_regOut += taxable;
+          else monthData[col].pur_regWithin += taxable;
+        } else {
+          if (isOut) monthData[col].pur_unregOut += taxable;
+          else monthData[col].pur_unregWithin += taxable;
+        }
+      });
+
+      // ================= LOAD EXCEL =================
+      const res = await fetch("excel/sum3b.xlsx");
+      if (!res.ok) {
+        alert("Template sum3b.xlsx not found");
+        return;
       }
-    });
 
-    let totalTds = cTds + sTds + iTds;
-    let expafterGST = tcs206 + tcs1;
-    let originalGrandTotal = grandTotal; // Save the unrounded grandTotal
+      const buffer = await res.arrayBuffer();
 
-    if (T21) {
-      totalValue = Math.round(totalValue);
-      grandTotal = Math.round(grandTotal);
-      totalDis = Math.round(totalDis);
-    }
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
 
-    if (T12) {
-      gstTotal = Math.round(gstTotal);
-      cgstTotal = Math.round(cgstTotal);
-      sgstTotal = Math.round(sgstTotal);
-      igstTotal = Math.round(igstTotal);
-      totalOthers = Math.round(totalOthers);
-      expafterGST = Math.round(expafterGST);
-      totalTds = Math.round(totalTds);
-      tcs206 = Math.round(tcs206);
-      srv_tax = Math.round(srv_tax);
-      cTds = Math.round(cTds);
-      sTds = Math.round(sTds);
-      iTds = Math.round(iTds);
-    }
-    // Calculate Round-Off Difference
-    let ExpRoundoff = grandTotal - originalGrandTotal;
+      const sheet = workbook.getWorksheet("Pur_Sale");
+      if (!sheet) {
+        alert("Sheet 'Pur_Sale' not found");
+        return;
+      }
 
-    return {
-      ...formDataOverride,
-      tcsper: tcspercentage,
-      tcs206: tcs206.toFixed(2),
-      tcs206_rate: tcs206Rate.toFixed(2),
-      tcs1: tcs1.toFixed(2),
-      tcs1_rate: tcs1Rate.toFixed(2),
-      srv_tax: srv_tax.toFixed(2),
-      srv_rate: srvRate.toFixed(2),
-      tax: gstTotal.toFixed(2),
-      cgst: cgstTotal.toFixed(2),
-      sgst: sgstTotal.toFixed(2),
-      igst: igstTotal.toFixed(2),
-      sub_total: totalValue.toFixed(2),
-      Tds2: totalTds.toFixed(2),
-      Ctds: cTds.toFixed(2),
-      Stds: sTds.toFixed(2),
-      iTds: iTds.toFixed(2),
-      grandtotal: grandTotal.toFixed(2),
-      exp_before: (totalOthers - totalDis).toFixed(2),
-      expafterGST: (totalExpenses + tcs206 + tcs1).toFixed(2),
-      ExpRoundoff: ExpRoundoff.toFixed(2),
-    };
-  };
+      // ================= FILL DATA =================
+      Object.keys(monthData).forEach((col) => {
+        const d = monthData[col];
 
-  useEffect(() => {
-    setFormData((prevState) => calculateTotalGst(prevState));
-  }, [items, T21, T12, formData.tcs1_rate]);
+        // ===== SALES =====
+        sheet.getCell(`${col}7`).value = d.sale_regWithin;
+        sheet.getCell(`${col}8`).value = d.sale_regOut;
+        sheet.getCell(`${col}9`).value = d.sale_unregWithin;
+        sheet.getCell(`${col}10`).value = d.sale_unregOut;
+        sheet.getCell(`${col}11`).value = d.sale_taxFreeWithin;
+        sheet.getCell(`${col}12`).value = d.sale_taxFreeOut;
+        sheet.getCell(`${col}13`).value = d.sale_export;
 
-  const handleDoubleClick = (event, fieldName, index) => {
-    if ( fieldName === "vcode") {
-      setSelectedItemIndex(index);
-      setShowModal(true);
-      event.preventDefault();
+        // ===== PURCHASE =====
+        sheet.getCell(`${col}17`).value = d.pur_regWithin;
+        sheet.getCell(`${col}18`).value = d.pur_regOut;
+        sheet.getCell(`${col}19`).value = d.pur_unregWithin;
+        sheet.getCell(`${col}20`).value = d.pur_unregOut;
+        sheet.getCell(`${col}21`).value = d.pur_taxFreeWithin;
+        sheet.getCell(`${col}22`).value = d.pur_taxFreeOut;
+      });
+
+      // ================= SAVE =================
+      const fileBuffer = await workbook.xlsx.writeBuffer();
+
+      saveAs(
+        new Blob([fileBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+        "sum3b.xlsx"
+      );
+
+    } catch (err) {
+      console.error(err);
+      alert("Export failed");
     }
   };
 
-  
+
   return (
     <div>
-      <div style={{ marginTop: 5 }} className="tablediv">
-         <Table className="custom-table">
-            <thead
-              style={{
-                textAlign: "center",
-                position: "sticky",
-                top: 0,
-              }}
-            >
-              <tr style={{ color: "#575a5a" }}>
-                {tableData.itemcode && <th>ITEMCODE</th>}
-                {tableData.sdisc && <th>DESCRIPTION</th>}
-                {tableData.hsncode && <th>HSNCODE</th>}
-                {tableData.pcs && <th>PCS</th>}
-                {tableData.qty && <th>QTY</th>}
-                {tableData.rate && <th>RATE</th>}
-                {tableData.amount && <th>AMOUNT</th>}
-                {tableData.discount && <th>DIS@</th>}
-                {tableData.discount && <th>DISCOUNT</th>}
-                {tableData.others && <th>OTHERS</th>}
-                {tableData.cgst && <th>CGST</th>}
-                {tableData.sgst && <th>SGST</th>}
-                {tableData.igst && <th>IGST</th>}
-                <th>VAmt</th>
-              </tr>
-            </thead>
-            <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
-              {items.map((item, index) => (
-                <tr key={item.id}>
-                  {tableData.itemcode && (
-                    <td style={{ padding: 0, width: 30 }}>
-                      <input
-                        className="ItemCode"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                        }}
-                        type="text"
-                        value={item.vcode}
-                         onDoubleClick={(e) => {
-                        handleDoubleClick(e, "vcode", index);
-                      }}
-                      onKeyDown={(e) => handleF3Press(e, index)}
-                      />
-                    </td>
-                  )}
-                  {tableData.sdisc && (
-                    <td style={{ padding: 0, width: 300 }}>
-                      <input
-                        className="desc"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                        }}
-                        maxLength={48}
-                        value={item.sdisc}
-                        onChange={(e) =>
-                          handleItemChange(index, "sdisc", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.hsncode && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Hsn"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={8}
-                        value={item.tariff}
-                        onChange={(e) =>
-                          handleItemChange(index, "tariff", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.pcs && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="PCS"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.pkgs) === 0 ? "" : item.pkgs}
-                        onChange={(e) =>
-                          handleItemChange(index, "pkgs", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.qty && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="QTY"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.weight) === 0 ? "" : item.weight}
-                        onChange={(e) =>
-                          handleItemChange(index, "weight", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.rate && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Price"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.rate) === 0 ? "" : item.rate}
-                        onChange={(e) =>
-                          handleItemChange(index, "rate", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.amount && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Amount"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        value={Number(item.amount) === 0 ? "" : item.amount}
-                        onChange={(e) =>
-                          handleItemChange(index, "amount", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.discount && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Disc"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        value={Number(item.disc) === 0 ? "" : item.disc}
-                        onChange={(e) =>
-                          handleItemChange(index, "disc", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.discount && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        id="discount"
-                        className="discount"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        value={Number(item.discount) === 0 ? "" : item.discount}
-                        onChange={(e) =>
-                          handleItemChange(index, "discount", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.others && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="Others"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                        }}
-                        maxLength={48}
-                        type="text"
-                        value={
-                          Number(item.exp_before) === 0 ? "" : item.exp_before
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.cgst && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="CTax"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                          color: "black",
-                        }}
-                        maxLength={48}
-                        disabled
-                        value={Number(item.ctax) === 0 ? "" : item.ctax}
-                        onChange={(e) =>
-                          handleItemChange(index, "ctax", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  {tableData.sgst && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="STax"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                          color: "black",
-                        }}
-                        maxLength={48}
-                        disabled
-                        value={Number(item.stax) === 0 ? "" : item.stax}
-                        onChange={(e) =>handleItemChange(index, "stax", e.target.value)  }
-                      />
-                    </td>
-                  )}
-                  {tableData.igst && (
-                    <td style={{ padding: 0 }}>
-                      <input
-                        className="ITax"
-                        style={{
-                          height: 40,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          border: "none",
-                          padding: 5,
-                          textAlign: "right",
-                          color: "black",
-                        }}
-                        maxLength={48}
-                        disabled
-                        value={Number(item.itax) === 0 ? "" : item.itax}
-                        onChange={(e) =>
-                          handleItemChange(index, "itax", e.target.value)
-                        }
-                      />
-                    </td>
-                  )}
-                  <td>{item.vamt}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-      </div>
-      {showModal && (
-        <ProductModal
-          products={products}
-          allFields={allFields}
-          onSelect={handleProductSelect}
-          onClose={handleModalDone}
-          tenant={tenant}
-          initialKey={pressedKey}
-          fetchParentProducts={fetchProducts}
-        />
-      )}
-      <F3Modal
-        show={showPurchaseModal}
-        onClose={() => setShowPurchaseModal(false)}
-        tenant={tenant}
-        onSelect={(row) => {
-                  const index = selectedItemIndexForPurchase;
-                  if (index === null) return;
-        
-                  // 🔥 Step 1: set base fields via handler
-                  handleItemChange(index, "sdisc", row.desc || "");
-                  handleItemChange(index, "pkgs", row.pkgs || 0);
-                  handleItemChange(index, "weight", row.qty || 0);
-                  handleItemChange(index, "rate", row.rate || 0);
-                  handleItemChange(index, "gst", row.gst || 0);
-        
-                  // 🔥 Step 2: set remaining fields manually (no calc needed)
-                  setItems((prev) => {
-                    const updated = [...prev];
-                    const item = { ...updated[index] };
-        
-                    item.vcode = row.vcode || "";
-                    item.Units = row.Units || "";
-                    item.tariff = row.tariff || "";
-                    item.Pcodes01 = row.Pcodes01 || "";
-                    item.Pcodess = row.Pcodess || "";
-                    item.Scodes01 = row.Scodes01 || "";
-                    item.Scodess = row.Scodess || "";
-                    item.RateCal = row.RateCal || "";
-                    item.Qtyperpc = row.Qtyperpc || 0;
-        
-                    updated[index] = item;
-                    return updated;
-                  });
-        }}
-      />
+      <Button onClick={exportSum3B}>EXPORT</Button>
     </div>
-  );
-};
+  )
+}
 
-export default Example;
+export default Example
+
