@@ -3266,7 +3266,7 @@
 // export default SaleService;
 
 
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../Sale/Sale.css";
 import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
@@ -3303,8 +3303,9 @@ import useTdsApplicable from "../Shared/useTdsApplicable";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import useShortcuts from "../Shared/useShortcuts";
+import F3Modal from "../Modals/F3Modal";
 
-const LOCAL_STORAGE_KEY = "tabledataVisibilityService";
+const LOCAL_STORAGE_KEY = "tabledataSS";
 
 const SaleService = () => {
 
@@ -3335,6 +3336,7 @@ const SaleService = () => {
   const quantityRefs = useRef([]);
   const priceRefs = useRef([]);
   const amountRefs = useRef([]);
+  const gstRef = useRef([]);
   const discountRef = useRef([]);
   const discount2Ref = useRef([]);
   const othersRefs = useRef([]);
@@ -3347,7 +3349,7 @@ const SaleService = () => {
   const remarksRef = useRef(null);
   const transportRef = useRef(null);
   const brokerRef = useRef(null);
-  const gstRef = useRef([]);
+  const tcsRef = useRef([]);
   const tcsRef2 = useRef([]);
   const addLessRef = useRef(null);
   const printButtonRef = useRef(null);
@@ -3452,7 +3454,8 @@ const SaleService = () => {
   const createEmptyRow = (id, expRates = {}) => ({
     id,
     vcode: "",
-    Vacode:"",
+    vacode: "",
+    stk_code: "",
     sdisc: "",
     Units: "",
     pkgs: "0",
@@ -3569,6 +3572,9 @@ const SaleService = () => {
   const grNoRef = useRef(null);
   const termsRef = useRef(null);
   const vehicleNoRef = useRef(null);
+  const billcashRef = useRef(null);
+  const taxTypreRef = useRef(null);
+  const supplyRef = useRef(null);
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
@@ -3991,10 +3997,6 @@ const SaleService = () => {
     };
   };
 
-  // useEffect(() => {
-  //   setFormData((prevState) => calculateTotalGst(prevState));
-  // }, [items, T21, T12, formData.tcs1_rate]);
-
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
 
@@ -4240,7 +4242,8 @@ const SaleService = () => {
       {
         id: 1,
         vcode: "",
-        Vacode:"",
+        vacode: "",
+        stk_code: "",
         sdisc: "",
         Units: "",
         pkgs: "0.00",
@@ -4887,7 +4890,7 @@ const SaleService = () => {
       }
 
       const nonEmptyItems = items.filter(
-        (item) => (item.sdisc || "").trim() !== "",
+        (item) => (item.vacode || "").trim() !== "",
       );
       if (nonEmptyItems.length === 0) {
         toast.error("Please fill in at least one Items name.", {
@@ -4910,13 +4913,6 @@ const SaleService = () => {
         return;
       }
 
-      const ddmmyyyy = (d) => {
-        if (!d) return "";
-        const dd = String(d.getDate()).padStart(2, "0");
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const yyyy = d.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
-      };
       // 2) Build base form with setup codes (common to both add/edit)
       const baseForm = {
         date: formData.date,
@@ -5021,7 +5017,8 @@ const SaleService = () => {
       const itemsPayload = nonEmptyItems.map((item) => ({
         id: item.id,
         vcode: item.vcode,
-        Vacode: item.Vacode,
+        vacode: item.vacode,
+        stk_code: item.stk_code,
         sdisc: item.sdisc,
         Units: item.Units,
         pkgs: item.pkgs,
@@ -5082,44 +5079,45 @@ const SaleService = () => {
       };
 
       // 3) Save Sale GST (add/edit)
-      const saleGstUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
-      const saleGstMethod = isAbcmode ? "put" : "post";
-      const saleRes = await axios({
-        method: saleGstMethod,
-        url: saleGstUrl,
-        data: combinedData,
-      });
+      // const saleGstUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
+      // const saleGstMethod = isAbcmode ? "put" : "post";
+      // const saleRes = await axios({
+      //   method: saleGstMethod,
+      //   url: saleGstUrl,
+      //   data: combinedData,
+      // });
 
-      // Try to extract saleId from response; fallbacks included for PUT/legacy responses
-      const saleId =
-        saleRes?.data?.saleId ||
-        saleRes?.data?._id ||
-        (isAbcmode ? data1?._id : null);
+      // // Try to extract saleId from response; fallbacks included for PUT/legacy responses
+      // const saleId =
+      //   saleRes?.data?.saleId ||
+      //   saleRes?.data?._id ||
+      //   (isAbcmode ? data1?._id : null);
 
-      if (!saleId) {
-        console.warn(
-          "saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.",
-        );
-      }
+      // if (!saleId) {
+      //   console.warn(
+      //     "saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.",
+      //   );
+      // }
 
-      if (saleRes?.status === 200 || saleRes?.status === 201) {
-        // 5) Post FA entries (with setup codes) — include saleId
-        try {
-          const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
-          const faBody = saleId ? { ...combinedData, saleId } : combinedData;
+      // if (saleRes?.status === 200 || saleRes?.status === 201) {
+      //   // 5) Post FA entries (with setup codes) — include saleId
+      //   try {
+      //     const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
+      //     const faBody = saleId ? { ...combinedData, saleId } : combinedData;
 
-          await axios({
-            method: isAbcmode ? "put" : "post",
-            url: faUrl,
-            data: faBody,
-          });
-        } catch (faErr) {
-          console.error("salefaFile error:", faErr);
-        }
+      //     await axios({
+      //       method: isAbcmode ? "put" : "post",
+      //       url: faUrl,
+      //       data: faBody,
+      //     });
+      //   } catch (faErr) {
+      //     console.error("salefaFile error:", faErr);
+      //   }
 
-        fetchData();
-        isDataSaved = true;
-      }
+      //   fetchData();
+      //   isDataSaved = true;
+      // }
+      console.table(combinedData);
     } catch (error) {
       console.error("Error saving data:", error);
       toast.error("Failed to save data. Please try again.", {
@@ -5260,9 +5258,9 @@ const SaleService = () => {
         ...item.formData,
         _id: item._id,
       }));
-      setProducts(flattenedData);
+      // setProducts(flattenedData);
     } catch (error) {
-      setError(error.message);
+      // setError(error.message);
     }
     setLoading(false);
   };
@@ -5335,11 +5333,12 @@ const SaleService = () => {
     // ================= PRODUCT SELECTION =================
     if (key === "name") {
       const selectedProduct = products.find(
-        (product) => product.Aheads === value
+        (product) => product.ahead === value
       );
 
       if (selectedProduct) {
-        updatedItems[index]["vcode"] = selectedProduct.Acodes;
+        updatedItems[index]["vcode"] = selectedProduct.acode;
+        updatedItems[index]["vacode"] = selectedProduct.ahead;
         updatedItems[index]["sdisc"] = selectedProduct.Aheads;
         updatedItems[index]["gst"] = selectedProduct.itax_rate;
         updatedItems[index]["tariff"] = selectedProduct.Hsn;
@@ -5372,11 +5371,6 @@ const SaleService = () => {
           setItems(updatedItems);
           return; 
         }
-
-        updatedItems[index]["Units"] = selectedProduct.TradeName;
-        updatedItems[index]["rate"] = selectedProduct.Mrps;
-        updatedItems[index]["gst"] = selectedProduct.itax_rate;
-        updatedItems[index]["tariff"] = selectedProduct.Hsn;
 
         if (postingSetup?.isDefault === true) {
           const gstRate = String(selectedProduct.itax_rate);
@@ -5468,13 +5462,20 @@ const SaleService = () => {
 
     const currentMrp = parseFloat(updatedItems[index].curMrp);
 
-    if (
-      key === "amount" &&
-      value !== "" &&
-      !isNaN(parseFloat(value)) &&
-      !value.endsWith(".")
-    ) {
+    if (key === "amount" && value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
       let enteredAmount = parseFloat(value);
+      let rateVal = parseFloat(updatedItems[index].rate) || 0;
+
+      // 🔥 NEW: Auto calculate qty when rate + amount entered
+      if (rateVal > 0 && enteredAmount > 0) {
+        let newQty = enteredAmount / rateVal;
+
+        if (RateCal === "Pc/Pkgs") {
+          updatedItems[index]["pkgs"] = newQty.toFixed(pkgsValue);
+        } else {
+          updatedItems[index]["weight"] = newQty.toFixed(weightValue);
+        }
+      }
       let qty = 0;
 
       if (RateCal === "Pc/Pkgs") {
@@ -5483,19 +5484,22 @@ const SaleService = () => {
         qty = parseFloat(updatedItems[index].weight) || 0;
       }
 
+      // 🔹 Keep your currentMrp logic exactly as it is
       if (!isNaN(currentMrp) && currentMrp > 0) {
         return;
       }
 
+      // 🔹 Only calculate rate if quantity > 0
       if (qty > 0 && enteredAmount > 0) {
         let newRate = enteredAmount / qty;
 
         updatedItems[index]["rate"] = T21
           ? Math.round(newRate).toFixed(2)
           : newRate.toFixed(2);
-
-        TotalAcc = enteredAmount;
       }
+
+      // 🔹 Always set TotalAcc to enteredAmount so taxes calculate
+      TotalAcc = enteredAmount;
     }
 
     TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
@@ -5578,7 +5582,8 @@ const SaleService = () => {
       const newItem = {
         id: items.length + 1,
         vcode: "",
-        Vacode:"",
+        vacode: "",
+        stk_code: "",
         sdisc: "",
         Units: "",
         pkgs: 0,
@@ -5632,9 +5637,13 @@ const SaleService = () => {
   };
 
   const handleProductSelect = (product) => {
-    setIsEditMode(true);
     if (selectedItemIndex !== null) {
-      handleItemChange(selectedItemIndex, "name", product.Aheads);
+      const updatedItems = [...items];
+
+      updatedItems[selectedItemIndex]["vacode"] = product.ahead; // 🔥 MAIN LINE
+      updatedItems[selectedItemIndex]["vcode"] = product.acode;  // optional
+
+      setItems(updatedItems);
       setShowModal(false);
     }
   };
@@ -5656,9 +5665,15 @@ const SaleService = () => {
     }
   };
 
-  const allFields = products.length
-    ? Object.keys(products[0])
-    : ["Aheads", "Pcodes01", "UOM", "GST"]; // fallback/default fields
+  const allFields = products.reduce((fields, product) => {
+    Object.keys(product).forEach((key) => {
+      if (!fields.includes(key)) {
+        fields.push(key);
+      }
+    });
+
+    return fields;
+  }, []);
 
   // Modal For Customer
   React.useEffect(() => {
@@ -5680,11 +5695,15 @@ const SaleService = () => {
         ...item.formData,
         _id: item._id,
       }));
+      setProducts(formattedData);
+      setLoading(false);
       setProductsCus(formattedData);
       setLoadingCus(false);
       setProductsAcc(formattedData);
       setLoadingAcc(false);
     } catch (error) {
+      setError(error.message);
+      setLoading(false);
       setErrorCus(error.message);
       setLoadingCus(false);
       setErrorAcc(error.message);
@@ -6255,7 +6274,7 @@ const SaleService = () => {
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
-    { name: "vcode", refArray: itemCodeRefs },
+    { name: "vacode", refArray: itemCodeRefs },
     { name: "sdisc", refArray: desciptionRefs },
     { name: "tariff", refArray: hsnCodeRefs },
     { name: "pkgs", refArray: peciesRefs },
@@ -6296,14 +6315,15 @@ const SaleService = () => {
 
     container.scrollTop = rowTop - containerHeight + rowHeight + 60;
   };
+
   const handleKeyDown = (event, index, field) => {
     // --------------- ENTER / TAB: move to NEXT FIELD -----------------
     if (event.key === "Enter" || event.key === "Tab") {
       event.preventDefault();
 
-      // Special case for vcode: your existing behaviour
-      if (field === "vcode") {
-        if ((items[index].sdisc || "").trim() === "") {
+      // Special case for vacode: your existing behaviour
+      if (field === "vacode") {
+        if ((items[index].vacode || "").trim() === "") {
           // Go to remarks if description is empty
           remarksRef.current?.focus();
         } else {
@@ -6348,7 +6368,7 @@ const SaleService = () => {
 
     // -------------------- ARROW RIGHT --------------------
     else if (event.key === "ArrowRight") {
-      if (field === "vcode") {
+      if (field === "vacode") {
         focusRef(desciptionRefs, index);
       } else if (field === "sdisc") {
         focusRef(hsnCodeRefs, index);
@@ -6397,7 +6417,7 @@ const SaleService = () => {
         focusRef(desciptionRefs, index);
       } else if (field === "sdisc") {
         focusRef(itemCodeRefs, index);
-      } else if (field === "vcode") {
+      } else if (field === "vacode") {
         focusRef(itemCodeRefs, index);
       }
     }
@@ -6421,7 +6441,7 @@ const SaleService = () => {
       setShowModalAcc(true);
       event.preventDefault();
     }
-    if (event.key === "Backspace" && field === "vcode" && isEditMode) {
+    if (event.key === "Backspace" && field === "vacode" && isEditMode) {
       setSelectedItemIndex(index);
       setShowModal(true);
       event.preventDefault();
@@ -6429,7 +6449,7 @@ const SaleService = () => {
   };
 
   const handleOpenModal = (event, index, field) => {
-    if (/^[a-zA-Z]$/.test(event.key) && field === "vcode") {
+    if (/^[a-zA-Z]$/.test(event.key) && field === "vacode") {
       setPressedKey(event.key); // Set the pressed key
       openModalForItem(index);
       event.preventDefault(); // Prevent any default action
@@ -6453,11 +6473,11 @@ const SaleService = () => {
   ];
 
   const [color, setColor] = useState(() => {
-    return localStorage.getItem("SelectedColorsSer") || gradientOptions[0].value;
+    return localStorage.getItem("SelectedColorsSS") || gradientOptions[0].value;
   });
 
   useEffect(() => {
-    localStorage.setItem("SelectedColorsSer", color);
+    localStorage.setItem("SelectedColorsSS", color);
   }, [color]);
 
   const handleChange = (event) => {
@@ -6529,7 +6549,7 @@ const SaleService = () => {
       setShowModalAcc(true);
       event.preventDefault();
     }
-    if (isEditMode && fieldName === "vcode") {
+    if (isEditMode && fieldName === "vacode") {
       setSelectedItemIndex(index);
       setShowModal(true);
       event.preventDefault();
@@ -6607,7 +6627,7 @@ const SaleService = () => {
   };
 
   const isRowFilled = (row) => {
-    return (row.sdisc || "").trim() !== "";
+    return (row.vacode || "").trim() !== "";
   };
   const canEditRow = (rowIndex) => {
     // 🔒 If not in edit mode, nothing is editable
@@ -6626,7 +6646,7 @@ const SaleService = () => {
   };
 
   const nonEmptyItems2 = items.filter(
-    (item) => (item.sdisc || "").trim() !== "",
+    (item) => (item.vacode || "").trim() !== "",
   );
 
   // ShortCuts for Buttons
@@ -6649,8 +6669,8 @@ const SaleService = () => {
   const saleWinFromState = location.state?.saleWin;
 
   // Load from localStorage if refresh
-  const saleWinFromStorage = localStorage.getItem("saleWinSer")
-    ? JSON.parse(localStorage.getItem("saleWinSer"))
+  const saleWinFromStorage = localStorage.getItem("saleWinSS")
+    ? JSON.parse(localStorage.getItem("saleWinSS"))
     : null;
 
   // Final object (state first, then storage)
@@ -6661,9 +6681,19 @@ const SaleService = () => {
 
   useEffect(() => {
     if (saleWinFromState) {
-      localStorage.setItem("saleWinSer", JSON.stringify(saleWinFromState));
-    }
+      localStorage.setItem("saleWinSS", JSON.stringify(saleWinFromState));
+    }    
   }, [saleWinFromState]);
+
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedItemIndexForPurchase, setSelectedItemIndexForPurchase] = useState(null);
+  const handleF3Press = (e, index) => {
+    if (e.key === "F3") {
+      e.preventDefault();
+      setSelectedItemIndexForPurchase(index);
+      setShowPurchaseModal(true);
+    }
+  };
 
   return (
     <div>
@@ -6685,7 +6715,7 @@ const SaleService = () => {
       </div>
       <div style={{ display: "flex", flexDirection: "row", marginTop: -30 }}>
         <h1 className="headerSale">
-          SALE GST SERVICES
+          SALE GST SERVICES{" "}
           <span className="text-black-500 font-semibold text-base sm:text-lg">
             {title}
           </span>
@@ -7205,7 +7235,7 @@ const SaleService = () => {
               label="VEHICLE NO."
               size="small"
               onChange={handleCapitalAlpha}
-              onKeyDown={handleEnterKeyPress(vehicleNoRef, null)}
+              onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
               onFocus={(e) => e.target.select()}
               inputProps={{
                 maxLength: 48,
@@ -7231,6 +7261,7 @@ const SaleService = () => {
               >
                 <InputLabel id="billcash-label">BILL TYPE</InputLabel>
                 <Select
+                inputRef={billcashRef}
                   className="custom-bordered-input"
                   labelId="billcash-label"
                   id="billcash"
@@ -7243,6 +7274,23 @@ const SaleService = () => {
                     if (!isEditMode || isDisabled) {
                       e.preventDefault(); // prevent dropdown opening
                     }
+                  }}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(billcashRef, taxTypreRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
                   }}
                   label="BILL TYPE"
                   displayEmpty
@@ -7281,6 +7329,7 @@ const SaleService = () => {
               >
                 <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
                 <Select
+                inputRef={taxTypreRef}
                   className="TAXtypez"
                   labelId="taxtype-label"
                   id="stype"
@@ -7294,7 +7343,23 @@ const SaleService = () => {
                       e.preventDefault(); // prevent dropdown opening
                     }
                   }}
-                  // onChange={handleTaxType}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(taxTypreRef, supplyRef)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
+                  }}
                   label="TAX TYPE"
                   displayEmpty
                   MenuProps={{
@@ -7348,6 +7413,7 @@ const SaleService = () => {
               >
                 <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
                 <Select
+                inputRef={supplyRef}
                   className="SupplyTYPE"
                   labelId="supply-label"
                   id="supply"
@@ -7361,7 +7427,23 @@ const SaleService = () => {
                       e.preventDefault(); // prevent dropdown opening
                     }
                   }}
-                  // onChange={handleSupply}
+                  onKeyDownCapture={(e) => {
+                    if (e.key === "Enter") {
+                      const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                      // ✅ CLOSED → move next (block opening)
+                      if (!menuOpen) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleEnterKeyPress(supplyRef, null)(e);
+                      }
+                      // ✅ OPEN → let MUI handle selection
+                    }
+
+                    // ArrowDown → let MUI open normally
+                    if (e.key === "ArrowDown") return;
+                  }}
                   label="SUPPLY TYPE"
                   displayEmpty
                   inputProps={{
@@ -7386,7 +7468,6 @@ const SaleService = () => {
           </div>
         </div>
       </div>
-      {/* Top Part Ends Here */}
       {/* Table Part */}
       <div
         ref={tableContainerRef}
@@ -7403,7 +7484,7 @@ const SaleService = () => {
             }}
           >
             <tr style={{ color: "#575a5a" }}>
-              {tableData.itemcode && <th>ITEMCODE</th>}
+              {tableData.itemcode && <th>LEDGER A/C</th>}
               {tableData.sdisc && <th>DESCRIPTION</th>}
               {tableData.hsncode && <th>HSNCODE</th>}
               {tableData.pcs && <th>PCS</th>}
@@ -7424,7 +7505,7 @@ const SaleService = () => {
             {items.map((item, index) => (
               <tr key={item.id}>
                 {tableData.itemcode && (
-                  <td style={{ padding: 0, width: 30 }}>
+                  <td style={{ padding: 0, width: 300 }}>
                     <input
                       disabled={!canEditRow(index)}
                       className="ItemCode"
@@ -7437,15 +7518,16 @@ const SaleService = () => {
                         padding: 5,
                       }}
                       type="text"
-                      value={item.vcode}
+                      value={item.vacode}
                       readOnly
                       onKeyDown={(e) => {
-                        handleKeyDown(e, index, "vcode");
-                        handleOpenModal(e, index, "vcode");
-                        handleOpenModalBack(e, index, "vcode");
+                        handleKeyDown(e, index, "vacode");
+                        handleOpenModal(e, index, "vacode");
+                        handleOpenModalBack(e, index, "vacode");
+                        handleF3Press(e, index)
                       }}
                       onDoubleClick={(e) => {
-                        handleDoubleClick(e, "vcode", index);
+                        handleDoubleClick(e, "vacode", index);
                       }}
                       ref={(el) => (itemCodeRefs.current[index] = el)}
                       onFocus={(e) => e.target.select()} // Select text on focus
@@ -7453,7 +7535,7 @@ const SaleService = () => {
                   </td>
                 )}
                 {tableData.sdisc && (
-                  <td style={{ padding: 0, width: 300 }}>
+                  <td style={{ padding: 0, width: 250 }}>
                     <input
                       disabled={!canEditRow(index)}
                       className="desc"
@@ -7837,7 +7919,7 @@ const SaleService = () => {
                 )}
                 {tableData.gst && (
                   <td style={{ padding: 0 }}>
-                    <input
+                   <input
                       disabled={!canEditRow(index)}
                       className="Others"
                       id="gst"
@@ -7861,6 +7943,7 @@ const SaleService = () => {
                       }}
                       readOnly={!isEditMode || isDisabled}
                     />
+
                   </td>
                 )}
                 {tableData.cgst && (
@@ -7960,9 +8043,7 @@ const SaleService = () => {
                           height: "100%",
                         }}
                       >
-                        <IconButton color="error" size="small" tabIndex={-1}
-                        onClick={() => handleDeleteItem(index)}
-                        >
+                        <IconButton color="error" size="small" tabIndex={-1} onClick={() => handleDeleteItem(index)}>
                           <DeleteIcon />
                         </IconButton>
                       </div>
@@ -8071,14 +8152,13 @@ const SaleService = () => {
         </Table>
       </div>
       {showModal && (
-        <ProductModal
-          products={products}
+        <ProductModalCustomer
           allFields={allFields}
           onSelect={handleProductSelect}
           onClose={handleModalDone}
-          tenant={tenant}
           initialKey={pressedKey}
-          fetchParentProducts={fetchProducts}
+          tenant={tenant}
+          onRefresh={fetchCustomers}
         />
       )}
 
@@ -8803,6 +8883,41 @@ const SaleService = () => {
           </div>
         </Modal.Body>
       </Modal>
+      <F3Modal
+        show={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        tenant={tenant}
+        onSelect={(row) => {
+          const index = selectedItemIndexForPurchase;
+          if (index === null) return;
+
+          // 🔥 Step 1: set base fields via handler
+          handleItemChange(index, "sdisc", row.desc || "");
+          handleItemChange(index, "pkgs", row.pkgs || 0);
+          handleItemChange(index, "weight", row.qty || 0);
+          handleItemChange(index, "rate", row.rate || 0);
+          handleItemChange(index, "gst", row.gst || 0);
+
+          // 🔥 Step 2: set remaining fields manually (no calc needed)
+          setItems((prev) => {
+            const updated = [...prev];
+            const item = { ...updated[index] };
+
+            item.stk_code = row.vcode || "";
+            item.Units = row.Units || "";
+            item.tariff = row.tariff || "";
+            item.Pcodes01 = row.Pcodes01 || "";
+            item.Pcodess = row.Pcodess || "";
+            item.Scodes01 = row.Scodes01 || "";
+            item.Scodess = row.Scodess || "";
+            item.RateCal = row.RateCal || "";
+            item.Qtyperpc = row.Qtyperpc || 0;
+
+            updated[index] = item;
+            return updated;
+          });
+        }}
+      />
     </div>
   );
 };
