@@ -8519,57 +8519,47 @@ const Sale = () => {
       return;
     }
 
-    // -------------------- ARROW RIGHT --------------------
-    else if (event.key === "ArrowRight") {
-      if (field === "vcode") {
-        focusRef(desciptionRefs, index);
-      } else if (field === "sdisc") {
-        focusRef(hsnCodeRefs, index);
-      } else if (field === "tariff") {
-        focusRef(peciesRefs, index);
-      } else if (field === "pkgs") {
-        focusRef(quantityRefs, index);
-      } else if (field === "weight") {
-        focusRef(priceRefs, index);
-      } else if (field === "rate") {
-        // If amount column exists, go there first, else to disc
-        if (!focusRef(amountRefs, index)) {
-          focusRef(discountRef, index);
+    // ------------- ARROW RIGHT: next field in row -----------------
+    if (event.key === "ArrowRight") {
+      const currentPos = fieldOrder.findIndex((f) => f.name === field);
+      if (currentPos !== -1) {
+        for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+          const nextField = fieldOrder[i];
+          if (focusRef(nextField.refArray, index)) return;
         }
-      } else if (field === "amount") {
-        focusRef(discountRef, index);
-      } else if (field === "disc") {
-        focusRef(discount2Ref, index);
-      } else if (field === "discount") {
-        focusRef(othersRefs, index);
       }
     }
 
-    // -------------------- ARROW LEFT --------------------
+    // ------------- ARROW LEFT: previous field in row -----------------
     else if (event.key === "ArrowLeft") {
-      if (field === "exp_before") {
-        focusRef(discount2Ref, index);
-      } else if (field === "discount") {
-        focusRef(discountRef, index);
-      } else if (field === "disc") {
-        focusRef(amountRefs, index);
-      } else if (field === "amount") {
-        focusRef(priceRefs, index);
-      } else if (field === "rate") {
-        focusRef(quantityRefs, index);
-      } else if (field === "weight") {
-        focusRef(peciesRefs, index);
-      } else if (field === "pkgs") {
-        focusRef(hsnCodeRefs, index);
-      } else if (field === "tariff") {
-        focusRef(desciptionRefs, index);
-      } else if (field === "sdisc") {
-        focusRef(itemCodeRefs, index);
-      } else if (field === "vcode") {
-        focusRef(itemCodeRefs, index);
+      const currentPos = fieldOrder.findIndex((f) => f.name === field);
+      if (currentPos !== -1) {
+        for (let i = currentPos - 1; i >= 0; i--) {
+          const prevField = fieldOrder[i];
+          if (focusRef(prevField.refArray, index)) return;
+        }
       }
     }
 
+    // ------------- ARROW UP: same field, previous row -----------------
+    else if (event.key === "ArrowUp" && index > 0) {
+      const cfg = fieldOrder.find((f) => f.name === field);
+      if (cfg) {
+        setTimeout(() => {
+          focusRef(cfg.refArray, index - 1);
+        }, 50);
+      }
+    }
+
+    // ------------- ARROW DOWN: same field, next row -----------------
+    else if (event.key === "ArrowDown" && index < items.length - 1) {
+      const cfg = fieldOrder.find((f) => f.name === field);
+      if (cfg) {
+        setTimeout(() => {
+          focusRef(cfg.refArray, index + 1);
+        }, 50);
+      }
+    }
     // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);

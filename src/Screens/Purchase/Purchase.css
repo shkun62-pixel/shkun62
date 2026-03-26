@@ -573,6 +573,12 @@
 .TDSon{
 width: 100%;
 }
+.SetupPS{
+    margin-left: auto;
+}
+.ConvPS{
+    margin-left: 10px;
+}
 
 /* Media query */
 @media (max-width: 768px) {

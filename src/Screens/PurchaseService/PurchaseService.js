@@ -278,6 +278,7 @@ const PurchaseService = () => {
   const vBillNoRef = useRef(null);
   const taxTypreRef = useRef(null);
   const supplyRef = useRef(null);
+  const convRef = useRef(null);
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
@@ -1348,7 +1349,7 @@ const PurchaseService = () => {
         p_entry: "",
         stype: "",
         btype: "",
-        conv: SupplyType,
+        conv: "Services",
         vacode1: "",
         rem2: "",
         v_tpt: "",
@@ -2019,6 +2020,11 @@ const PurchaseService = () => {
       updatedItems[index][key] = value;
     }
 
+    // 🔥 Reset manual amount when qty/rate changes
+    if (["pkgs", "weight", "rate"].includes(key)) {
+      updatedItems[index]["isManualAmount"] = false;
+    }
+
     // ================= PRODUCT SELECTION =================
     if (key === "name") {
       const selectedProduct = products.find(
@@ -2138,24 +2144,30 @@ const PurchaseService = () => {
     const totalAccordingPkgs = pkgsVal * rate;
 
     let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight;
+    let TotalAcc;
 
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
+    // ✅ USE MANUAL AMOUNT IF ENTERED
+    if (updatedItems[index].isManualAmount) {
+      TotalAcc = parseFloat(updatedItems[index].amount) || 0;
+    } else {
+      if (
+        RateCal === "Default" ||
+        RateCal === "" ||
+        RateCal === null ||
+        RateCal === undefined
+      ) {
+        TotalAcc = totalAccordingWeight;
+      } else if (RateCal === "Wt/Qty") {
+        TotalAcc = totalAccordingWeight;
+      } else if (RateCal === "Pc/Pkgs") {
+        TotalAcc = totalAccordingPkgs;
+      }
     }
 
     const currentMrp = parseFloat(updatedItems[index].curMrp);
 
     if (key === "amount" && value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
+      updatedItems[index]["isManualAmount"] = true;
       let enteredAmount = parseFloat(value);
       let rateVal = parseFloat(updatedItems[index].rate) || 0;
 
@@ -2614,7 +2626,15 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     const { value } = event.target; // Get the selected value from the event
     setFormData((prevState) => ({
       ...prevState,
-      conv: value, // Update the ratecalculate field in FormData
+      btype: value, 
+    }));
+  };
+
+  const handleConv = (event) => {
+    const { value } = event.target; // Get the selected value from the event
+    setFormData((prevState) => ({
+      ...prevState,
+      conv: value, 
     }));
   };
 
@@ -2839,57 +2859,43 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
     // -------------------- ARROW RIGHT --------------------
     else if (event.key === "ArrowRight") {
-      if (field === "vacode") {
-        focusRef(desciptionRefs, index);
-      } else if (field === "sdisc") {
-        focusRef(hsnCodeRefs, index);
-      } else if (field === "tariff") {
-        focusRef(peciesRefs, index);
-      } else if (field === "pkgs") {
-        focusRef(quantityRefs, index);
-      } else if (field === "weight") {
-        focusRef(priceRefs, index);
-      } else if (field === "rate") {
-        // If amount column exists, go there first, else to disc
-        if (!focusRef(amountRefs, index)) {
-          focusRef(discountRef, index);
+      event.preventDefault();
+
+      const currentPos = fieldOrder.findIndex((f) => f.name === field);
+
+      if (currentPos !== -1) {
+        for (let i = currentPos + 1; i < fieldOrder.length; i++) {
+          const nextField = fieldOrder[i];
+
+          // skip if disabled
+          if (nextField.isDisabled?.(index)) continue;
+
+          // move only if exists
+          if (focusRef(nextField.refArray, index)) {
+            return;
+          }
         }
-      } else if (field === "amount") {
-        focusRef(discountRef, index);
-      } else if (field === "disc") {
-        focusRef(discount2Ref, index);
-      } else if (field === "discount") {
-        focusRef(othersRefs, index);
-      }else if (field === "exp_before") {
-        focusRef(gstRef, index);
       }
     }
 
     // -------------------- ARROW LEFT --------------------
     else if (event.key === "ArrowLeft") {
-      if (field === "gst") {
-        focusRef(othersRefs, index);
-      }
-      else if (field === "exp_before") {
-        focusRef(discount2Ref, index);
-      } else if (field === "discount") {
-        focusRef(discountRef, index);
-      } else if (field === "disc") {
-        focusRef(amountRefs, index);
-      } else if (field === "amount") {
-        focusRef(priceRefs, index);
-      } else if (field === "rate") {
-        focusRef(quantityRefs, index);
-      } else if (field === "weight") {
-        focusRef(peciesRefs, index);
-      } else if (field === "pkgs") {
-        focusRef(hsnCodeRefs, index);
-      } else if (field === "tariff") {
-        focusRef(desciptionRefs, index);
-      } else if (field === "sdisc") {
-        focusRef(itemCodeRefs, index);
-      } else if (field === "vacode") {
-        focusRef(itemCodeRefs, index);
+      event.preventDefault();
+
+      const currentPos = fieldOrder.findIndex((f) => f.name === field);
+
+      if (currentPos !== -1) {
+        for (let i = currentPos - 1; i >= 0; i--) {
+          const prevField = fieldOrder[i];
+
+          // skip if disabled
+          if (prevField.isDisabled?.(index)) continue;
+
+          // move only if exists
+          if (focusRef(prevField.refArray, index)) {
+            return;
+          }
+        }
       }
     }
 
@@ -3512,16 +3518,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               />
             )}
           </InputMask>
-          {/* <DatePicker
-            ref={datePickerRef}
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => validateDate(selectedDate)}
-            customInput={<MaskedInput />}
-          /> */}
           <div className="billdivz">
             <TextField
               inputRef={voucherNoRef}
@@ -3532,7 +3528,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               size="small"
               label="V.NO"
               onKeyDown={(e) => {
-                handleEnterKeyPress(voucherNoRef,customerNameRef )(e);
+                handleEnterKeyPress(voucherNoRef,convRef )(e);
               }}
               inputProps={{
                 maxLength: 48,
@@ -3545,7 +3541,71 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               }}
             />
           </div>
-          <div className="Setup">
+          <div className="ConvPS">
+            <FormControl
+              className="SupplyTYPE custom-bordered-input"
+              sx={{
+                fontSize: `${fontSize}px`,
+                "& .MuiFilledInput-root": {
+                  height: 48, // adjust as needed (default ~56px for filled)
+                },
+              }}
+              size="small"
+              variant="filled"
+            >
+              <Select
+              inputRef={convRef}
+                className="SupplyTYPE"
+                labelId="supply-label"
+                id="conv"
+                value={formData.conv}
+                onChange={(e) => {
+                  if (!isEditMode || isDisabled) return; // prevent changing
+                  handleConv(e);
+                }}
+                onOpen={(e) => {
+                  if (!isEditMode || isDisabled) {
+                    e.preventDefault(); // prevent dropdown opening
+                  }
+                }}
+                onKeyDownCapture={(e) => {
+                  if (e.key === "Enter") {
+                    const menuOpen = document.querySelector(".MuiMenu-paper");
+
+                    // ✅ CLOSED → move next (block opening)
+                    if (!menuOpen) {
+                      e.preventDefault();
+                      e.stopPropagation();
+
+                      handleEnterKeyPress(convRef, customerNameRef)(e);
+                    }
+                    // ✅ OPEN → let MUI handle selection
+                  }
+
+                  // ArrowDown → let MUI open normally
+                  if (e.key === "ArrowDown") return;
+                }}
+                displayEmpty
+                inputProps={{
+                  sx: {
+                    fontSize: `${fontSize}px`,
+                    pointerEvents:
+                      !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
+                  },
+                }}
+                MenuProps={{ disablePortal: true }}
+              >
+                <MenuItem value="">
+                  <em></em>
+                </MenuItem>
+                <MenuItem value="Goods">
+                  Goods
+                </MenuItem>
+                <MenuItem value="Services">Services</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+          <div className="SetupPS">
               <button
                 className="Button"
                 style={{ backgroundColor: "blue", color: "white", fontWeight: "bold" }}
@@ -3798,28 +3858,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     </div>
                   </div>
                 </Modal.Body>
-
-                {/* Footer */}
-                {/* <Modal.Footer
-                  style={{
-                    borderTop: "1px solid rgba(0,0,0,0.08)",
-                    background: "rgba(255,255,255,0.9)",
-                  }}
-                >
-                  <button
-                    onClick={() => setSettingsOpen(false)}
-                    style={{
-                      padding: "10px 14px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(0,0,0,0.10)",
-                      background: "rgba(17,24,39,0.06)",
-                      fontWeight: 800,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Close
-                  </button>
-                </Modal.Footer> */}
               </Modal>
           </div>
           {isModalOpen && <PurchaseSetup onClose={closeModal} />}
@@ -3831,7 +3869,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 <div className="customerdiv">
                   <TextField
                     inputRef={customerNameRef}
-                    label="CUSTOMER NAME"
+                    label="SUPPLIER NAME"
                     variant="filled"
                     size="small"
                     value={item.vacode}
@@ -3943,7 +3981,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               value={formData.vbillno}
               variant="filled"
               size="small"
-              label="BILL NO"
+              label="DOC NO"
               onChange={handleCapitalAlpha}
               onKeyDown={handleEnterKeyPress(vBillNoRef, vbDateRef)}
               inputProps={{
@@ -4174,13 +4212,13 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 size="small"
                 variant="filled"
               >
-                <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
+                <InputLabel id="supply-label">BILL / CASH</InputLabel>
                 <Select
                 inputRef={supplyRef}
                   className="SupplyTYPE custom-bordered-input"
                   labelId="supply-label"
                   id="supply"
-                  value={formData.conv}
+                  value={formData.btype}
                    onChange={(e) => {
                   if (!isEditMode || isDisabled) return; // prevent changing
                     handleSupply(e);
@@ -4207,7 +4245,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     // ArrowDown → let MUI open normally
                     if (e.key === "ArrowDown") return;
                   }}
-                  label="SUPPLY TYPE"
+                  label="BILL / CASH"
                   displayEmpty
                   inputProps={{
                     sx: {
@@ -4220,10 +4258,10 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   <MenuItem value="">
                     <em></em>
                   </MenuItem>
-                  <MenuItem value="Manufacturing Sale">
-                    1. Manufacturing Sale
+                  <MenuItem value="Bill">
+                    Bill
                   </MenuItem>
-                  <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
+                  <MenuItem value="Cash">Cash Memo</MenuItem>
                 </Select>
               </FormControl>
             </div>
@@ -4242,7 +4280,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             }}
           >
             <tr style={{ color: "#575a5a" }}>
-            {tableData.itemcode && <th>ITEMCODE</th>}
+            {tableData.itemcode && <th>LEDGER A/C</th>}
             {tableData.sdisc && <th>DESCRIPTION</th>}
             {tableData.hsncode && <th>HSNCODE</th>}
             {tableData.pcs && <th>PCS</th>}
@@ -4263,7 +4301,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             {items.map((item, index) => (
               <tr key={item.id}>
                 {tableData.itemcode && (
-                <td style={{ padding: 0, width: 30 }}>
+                <td style={{ padding: 0, width: 300 }}>
                   <input
                    disabled={!canEditRow(index)}
                     className="ItemCode"
@@ -4292,7 +4330,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 </td>
                 )}
                 {tableData.sdisc && (
-                <td style={{ padding: 0, width: 300 }}>
+                <td style={{ padding: 0, width: 250 }}>
                   <input
                   disabled={!canEditRow(index)}
                     className="desc"
@@ -5127,7 +5165,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             </div> */}
           </div>
           {/* C/S/I/TDS */}
-          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5,marginTop:"auto"}}>
+          {/* <div style={{ display: "flex", flexDirection: "column", marginLeft: 5,marginTop:"auto"}}>
             <div className="tdstax" style={{ display: "flex", flexDirection: "row" }}>
               <TextField
                 className="CTDS custom-bordered-input"
@@ -5219,12 +5257,12 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 }}
               />
             </div>
-          </div>
+          </div> */}
           {/* Due Date */}
           <div style={{ display: "flex", flexDirection: "column",marginLeft:"auto",marginRight:5 }}>
             <div className="duedatez">
               <div className={`erp-input3 ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
-                <span className="erp-label3">DUE DATE</span>
+                <span className="erp-label3">INPUT DATE</span>
                 <InputMask
                   mask="99-99-9999"
                   value={formData.duedate}

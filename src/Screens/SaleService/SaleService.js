@@ -5330,6 +5330,11 @@ const SaleService = () => {
       updatedItems[index][key] = value;
     }
 
+    // 🔥 Reset manual amount when qty/rate changes
+    if (["pkgs", "weight", "rate"].includes(key)) {
+      updatedItems[index]["isManualAmount"] = false;
+    }
+
     // ================= PRODUCT SELECTION =================
     if (key === "name") {
       const selectedProduct = products.find(
@@ -5445,24 +5450,30 @@ const SaleService = () => {
     const totalAccordingPkgs = pkgsVal * rate;
 
     let RateCal = updatedItems[index].RateCal;
-    let TotalAcc = totalAccordingWeight;
+    let TotalAcc;
 
-    if (
-      RateCal === "Default" ||
-      RateCal === "" ||
-      RateCal === null ||
-      RateCal === undefined
-    ) {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Wt/Qty") {
-      TotalAcc = totalAccordingWeight;
-    } else if (RateCal === "Pc/Pkgs") {
-      TotalAcc = totalAccordingPkgs;
+    // ✅ USE MANUAL AMOUNT IF ENTERED
+    if (updatedItems[index].isManualAmount) {
+      TotalAcc = parseFloat(updatedItems[index].amount) || 0;
+    } else {
+      if (
+        RateCal === "Default" ||
+        RateCal === "" ||
+        RateCal === null ||
+        RateCal === undefined
+      ) {
+        TotalAcc = totalAccordingWeight;
+      } else if (RateCal === "Wt/Qty") {
+        TotalAcc = totalAccordingWeight;
+      } else if (RateCal === "Pc/Pkgs") {
+        TotalAcc = totalAccordingPkgs;
+      }
     }
 
     const currentMrp = parseFloat(updatedItems[index].curMrp);
 
     if (key === "amount" && value !== "" && !isNaN(parseFloat(value)) && !value.endsWith(".")) {
+      updatedItems[index]["isManualAmount"] = true;
       let enteredAmount = parseFloat(value);
       let rateVal = parseFloat(updatedItems[index].rate) || 0;
 
