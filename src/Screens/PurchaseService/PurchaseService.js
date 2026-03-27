@@ -118,6 +118,10 @@ const PurchaseService = () => {
     conv: "",
     vacode1: "",
     rem2: "",
+    cash_name: "",
+    cash_add1: "",
+    cash_city: "",
+    cash_state: "",
     v_tpt: "",
     broker: "",
     srv_rate: 0,
@@ -279,6 +283,12 @@ const PurchaseService = () => {
   const taxTypreRef = useRef(null);
   const supplyRef = useRef(null);
   const convRef = useRef(null);
+  const cNameRef = useRef(null);
+  const cAddRef = useRef(null);
+  const cCityRef = useRef(null);
+  const cStateRef = useRef(null);
+  const transportRef = useRef(null);
+  const brokerRef = useRef(null);
   const tableRef = useRef(null);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
@@ -879,6 +889,10 @@ const PurchaseService = () => {
       conv: "",
       vacode1: "",
       rem2: "",
+      cash_name: "",
+      cash_add1: "",
+      cash_city: "",
+      cash_state: "",
       v_tpt: "",
       broker: "",
       srv_rate: 0,
@@ -1348,10 +1362,14 @@ const PurchaseService = () => {
         trpt: "",
         p_entry: "",
         stype: "",
-        btype: "",
+        btype: "Bill",
         conv: "Services",
         vacode1: "",
         rem2: "",
+        cash_name: "",
+        cash_add1: "",
+        cash_city: "",
+        cash_state: "",
         v_tpt: "",
         broker: "",
         srv_rate: 0,
@@ -1501,6 +1519,10 @@ const PurchaseService = () => {
           conv: "",
           vacode1: "",
           rem2: "",
+          cash_name: "",
+          cash_add1: "",
+          cash_city: "",
+          cash_state: "",
           v_tpt: "",
           broker: "",
           srv_rate: "",
@@ -1646,6 +1668,10 @@ const PurchaseService = () => {
           conv: formData.conv,
           vacode1: formData.vacode1,
           rem2: formData.rem2,
+          cash_name: formData.cash_name,
+          cash_add1: formData.cash_add1,
+          cash_city: formData.cash_city,
+          cash_state: formData.cash_state,
           v_tpt: formData.v_tpt,
           broker: formData.broker,
 
@@ -2429,6 +2455,11 @@ const PurchaseService = () => {
       setShowModalCus(true);
       event.preventDefault();
     }
+    if (event.key === "ArrowDown" && field === "cash_name") {
+      setSelectedItemIndexCus(index);
+      setShowModalCus(true);
+      event.preventDefault();
+    }
   };
 
   const determineSaleType = (state, gstno, CompanyState) => {
@@ -2537,6 +2568,14 @@ const PurchaseService = () => {
           ...prevData,
           broker: nameValue, // Update v_tpt field with selected value
         }));
+      } else if (selectedItemIndexCus === "cash_name") {
+        setFormData((prevData) => ({
+          ...prevData,
+          cash_name: nameValue, // Update v_tpt field with selected value
+          cash_add1: product.add1,
+          cash_city: product.city,
+          cash_state: product.state,
+        }));
       } else {
         handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
       }
@@ -2548,9 +2587,11 @@ const PurchaseService = () => {
     // restore focus
     setTimeout(() => {
       if (selectedItemIndexCus === "v_tpt") {
-        transportRef.current?.focus(); // Focus back to transport field
+        transportRef.current?.focus();
       } else if (selectedItemIndexCus === "broker") {
         expAfterGSTRef.current?.focus();
+      } else if (selectedItemIndexCus === "cash_name") {
+        cNameRef.current?.focus();
       } else {
         vBillNoRef.current.focus();
       }
@@ -2816,7 +2857,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
       if (field === "vacode") {
         if ((items[index].vacode || "").trim() === "") {
           // Go to remarks if description is empty
-          transportRef.current?.focus();
+          cNameRef.current?.focus();
         } else {
           focusRef(desciptionRefs, index);
         }
@@ -2915,17 +2956,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     }
   };
 
-  const transportRef = useRef(null);
-  const brokerRef = useRef(null);
-
-  const handleKeyDowndown = (event, nextFieldRef) => {
-    if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault(); // Prevent form submission
-      if (nextFieldRef.current) {
-        nextFieldRef.current.focus();
-      }
-    }
-  };
   const gradientOptions = [
     { label: "Lavender", value: "linear-gradient(to right, #d4d4fcff, #b19cd9)" },
     { label: "Yellow", value: "linear-gradient(to right, #fffac2, #ffdd57)" },
@@ -2945,86 +2975,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
   const handleChange = (event) => {
     setColor(event.target.value);
   };
-  // const handleInputChange = (index, field, value) => {
-  //   const numericValue = value.replace(/[^0-9.-]/g, ""); // Allow only numbers, decimal points, and negative signs
-  //   const updatedItems = [...items];
-  //   updatedItems[index][field] = numericValue;
-
-  //   // Recalculate expenses when Exp_rate1 to Exp_rate6 change
-  //   const vamt = parseFloat(updatedItems[index].amount) || 0;
-  //   const expRates = [
-  //     parseFloat(updatedItems[index].Exp_rate1) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate2) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate3) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate4) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate5) || 0,
-  //   ];
-  //   const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
-
-  //   let totalExpenses = 0;
-  //   expRates.forEach((rate, i) => {
-  //     const expense = (vamt * rate) / 100;
-  //     updatedItems[index][expFields[i]] = expense.toFixed(2);
-  //     totalExpenses += expense;
-  //   });
-  //   // Update the exp_before field with the total of all expenses
-  //   updatedItems[index].exp_before = totalExpenses.toFixed(2);
-
-  //   const gst = parseFloat(updatedItems[index].gst);
-  //   const totalAccordingWeight =
-  //     parseFloat(updatedItems[index].weight) *
-  //     parseFloat(updatedItems[index].rate);
-  //   const totalAccordingPkgs =
-  //     parseFloat(updatedItems[index].pkgs) *
-  //     parseFloat(updatedItems[index].rate);
-  //   let RateCal = updatedItems[index].RateCal;
-  //   let TotalAcc = totalAccordingWeight; // Set a default value
-
-  //   if (
-  //     RateCal === "Default" ||
-  //     RateCal === "" ||
-  //     RateCal === null ||
-  //     RateCal === undefined
-  //   ) {
-  //     TotalAcc = totalAccordingWeight;
-  //   } else if (RateCal === "Wt/Qty") {
-  //     TotalAcc = totalAccordingWeight;
-  //   } else if (RateCal === "Pc/Pkgs") {
-  //     TotalAcc = totalAccordingPkgs;
-  //   }
-
-  //   const others = parseFloat(updatedItems[index].exp_before) || 0;
-  //   let disc = parseFloat(updatedItems[index].disc) || 0;
-  //   let per = ((disc / 100) * TotalAcc).toFixed(2);
-  //   let Amounts = TotalAcc + others + parseFloat(per);
-
-  //   // Ensure TotalAcc is a valid number before calling toFixed()
-  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-  //   const gstNumber = "03";
-  //   const same = custGst.substring(0, 2);
-
-  //   let cgst = 0,
-  //     sgst = 0,
-  //     igst = 0;
-  //   if (CompanyState == supplierdetails[0].state) {
-  //     cgst = (Amounts * (gst / 2)) / 100;
-  //     sgst = (Amounts * (gst / 2)) / 100;
-  //   } else {
-  //     igst = (Amounts * gst) / 100;
-  //   }
-
-  //   const totalWithGST = Amounts + cgst + sgst + igst;
-
-  //   // Update tax and total fields
-  //   updatedItems[index]["ctax"] = cgst.toFixed(2);
-  //   updatedItems[index]["stax"] = sgst.toFixed(2);
-  //   updatedItems[index]["itax"] = igst.toFixed(2);
-  //   updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-  //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
-
-  //   setItems(updatedItems);
-  //   calculateTotalGst(); // ✅ Recalculate the grand total
-  // };
  
     const handleInputChange = (index, field, value) => {
     const numericValue =
@@ -3543,20 +3493,38 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           </div>
           <div className="ConvPS">
             <FormControl
-              className="SupplyTYPE custom-bordered-input"
+              variant="outlined"
               sx={{
-                fontSize: `${fontSize}px`,
-                "& .MuiFilledInput-root": {
-                  height: 48, // adjust as needed (default ~56px for filled)
+                minWidth: 150, // optional
+                "& .MuiOutlinedInput-root": {
+                  height: 46,
+                  backgroundColor: "white",
+                  
+                  "& fieldset": {
+                    borderColor: "#918e8e",
+                  },
+                  borderBottom: "2px solid #918e8e",
+
+                  "&:hover fieldset": {
+                    borderColor: "#918e8e",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#1976d2",
+                  },
+                },
+                "& .MuiSelect-select": {
+                  display: "flex",
+                  alignItems: "center", // 👈 vertical center text
+                  height: "100%",
+                  padding: "0 12px", // adjust spacing
+                  backgroundColor: "white",
+                  fontSize: `${fontSize}px`,
+                  fontWeight: "bold"
                 },
               }}
-              size="small"
-              variant="filled"
             >
               <Select
               inputRef={convRef}
-                className="SupplyTYPE"
-                labelId="supply-label"
                 id="conv"
                 value={formData.conv}
                 onChange={(e) => {
@@ -3579,10 +3547,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
 
                       handleEnterKeyPress(convRef, customerNameRef)(e);
                     }
-                    // ✅ OPEN → let MUI handle selection
                   }
-
-                  // ArrowDown → let MUI open normally
                   if (e.key === "ArrowDown") return;
                 }}
                 displayEmpty
@@ -3994,34 +3959,38 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 readOnly: !isEditMode || isDisabled,
               }}
             />
-            <div className={`erp-input3 ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
-              <span style={{marginTop:8}} className="erp-label3">BILL DATE</span>
-              <InputMask
-                mask="99-99-9999"
-                value={formData.vbdate}
-                readOnly={!isEditMode || isDisabled}
-                onChange={(e) =>
-                  setFormData({ ...formData, vbdate: e.target.value })
-                }
-              >
-                {(inputProps) => (
-                  <input
-                    {...inputProps}
-                    style={{marginTop:5}}
-                    ref={vbDateRef}
-                    className="erp-field3 custom-style3"
-                    onKeyDown={handleEnterKeyPress(vbDateRef, grNoRef)}
-                  />
-                )}
-              </InputMask>
-              </div>
-            {/* <DatePicker
-              className="DatePICKERP"
-              id="date"
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              dateFormat="dd-MM-yyyy"
-            /> */}
+          <div style={{marginTop:3}}>
+          <InputMask
+            mask="99-99-9999"
+            value={formData.vbdate}
+            onChange={(e) =>
+              setFormData({ ...formData, vbdate: e.target.value })
+            }
+          >
+            {(props) => (
+              <TextField
+                {...props}
+                inputRef={vbDateRef}
+                label="BILL DATE"
+                size="small"
+                variant="filled"
+                fullWidth
+                className="custom-bordered-input"
+                sx={{
+                  fontSize: `${fontSize}px`,
+                  width: 165,
+                  "& .MuiFilledInput-root": {
+                    height: 48,
+                  },
+                  "& .MuiInputBase-input": {
+                    paddingTop: "20px",
+                  },
+                }}
+                onKeyDown={handleEnterKeyPress(vbDateRef, grNoRef)}
+              />
+            )}
+          </InputMask>
+          </div>
           </div>
           <div className="GRNo">
             <TextField
@@ -4895,9 +4864,105 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           onRefresh={fetchCustomers}
         />
       )}
+      <div style={{marginTop:-12,marginLeft:5}}>
+        <span style={{fontWeight:"bold"}}>SUPPLIER DETAILS IF ANY</span>
+      </div>
 
       <div className="Belowcontents">
         <div className="bottomcontainer1">
+          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}>
+            <TextField
+            inputRef={cNameRef}
+            id="cash_name"
+            label="NAME"
+            value={formData.cash_name}
+            onChange={HandleInputsChanges}
+            onKeyDown={(e) => {
+              handleOpenModalTpt(e, "cash_name", "cash_name");
+              handleEnterKeyPress(cNameRef, cAddRef)(e);
+            }}
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: 20,
+                fontSize: `${fontSize}px`,
+                readOnly: !isEditMode || isDisabled,
+              },
+            }}
+            size="small"
+            variant="filled"
+            className="Remz custom-bordered-input"
+            sx={{ width: 400 }}
+            />
+            <TextField
+              inputRef={cAddRef}
+              id="cash_add1"
+              label="ADDRESS"
+              value={formData.cash_add1}
+              onChange={HandleInputsChanges}
+              onKeyDown={(e) => {
+                handleEnterKeyPress(cAddRef, cCityRef)(e);
+              }}
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                  readOnly: !isEditMode || isDisabled,
+                },
+              }}
+              size="small"
+              variant="filled"
+              className="Remz custom-bordered-input"
+              sx={{ width: 400 }}
+            />
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <TextField
+              inputRef={cCityRef}
+              id="cash_city"
+              label="PLACE"
+              value={formData.cash_city}
+              onChange={HandleInputsChanges}
+              onKeyDown={(e) => {
+                handleEnterKeyPress(cCityRef, cStateRef)(e);
+              }}
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                  readOnly: !isEditMode || isDisabled,
+                },
+              }}
+              size="small"
+              variant="filled"
+              className="Remz custom-bordered-input"
+              sx={{ width: 200 }}
+            />
+            <TextField
+              inputRef={cStateRef}
+              id="cash_state"
+              label="STATE"
+              value={formData.cash_state}
+              onChange={HandleInputsChanges}
+              onKeyDown={(e) => {
+                handleEnterKeyPress(cStateRef, transportRef)(e);
+              }}
+              inputProps={{
+                maxLength: 48,
+                style: {
+                  height: 20,
+                  fontSize: `${fontSize}px`,
+                  readOnly: !isEditMode || isDisabled,
+                },
+              }}
+              size="small"
+              variant="filled"
+              className="Remz custom-bordered-input"
+              sx={{ width: 200 }}
+            />
+          </div>
+          </div>
           <div
             style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
           >
@@ -4907,9 +4972,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 label="2B STATUS"
                 value={formData.vacode1}
                 onChange={HandleInputsChanges}
-                onKeyDown={(e) => {
-                  handleKeyDowndown(e, transportRef);
-                }}
                 inputProps={{
                   maxLength: 48,
                   style: {
@@ -4932,7 +4994,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 onChange={HandleInputsChanges}
                 onKeyDown={(e) => {
                   handleOpenModalTpt(e, "v_tpt", "v_tpt");
-                  handleKeyDowndown(e, brokerRef);
+                  handleEnterKeyPress(transportRef, brokerRef)(e);
                 }}
                 inputProps={{
                   maxLength: 48,
@@ -4957,7 +5019,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 onChange={HandleInputsChanges}
                 onKeyDown={(e) => {
                   handleOpenModalTpt(e, "broker", "broker");
-                  handleKeyDowndown(e, dueDateRef);
+                  handleEnterKeyPress(brokerRef, dueDateRef)(e);
                 }}
                 inputProps={{
                   maxLength: 48,
@@ -4975,7 +5037,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
             </div>
           </div>
           {/* TDS ON */}
-          <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+          {/* <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
           >
             <div>
               <FormControl
@@ -5113,57 +5175,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 // sx={{ width: 120 }}
               />
             </div>
-            {/* <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <TextField
-                className="TCSRATE custom-bordered-input"
-                inputRef={tcsRef}
-                id="tcs1_rate"
-                label="%"
-                value={formData.tcs1_rate}
-                onChange={handleNumberChange}
-                // onKeyDown={(e) => handleKeyDowndown(e, tcsRef2)}
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                    color: "red",
-                  },
-                }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                // sx={{ width: 100}}
-                InputProps={{ readOnly: !isEditMode || isDisabled }}
-              />
-              <TextField
-                className="TCSPER custom-bordered-input"
-                id="tcs1"
-                value={formData.tcs1}
-                // disabled
-                label="TCS 206c1H"
-                onChange={handleNumberChange}
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fontSize}px`,
-                    color: "red",
-                  },
-                }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                // sx={{ width: 120 }}
-              />
-            </div> */}
-          </div>
+          </div> */}
           {/* C/S/I/TDS */}
           {/* <div style={{ display: "flex", flexDirection: "column", marginLeft: 5,marginTop:"auto"}}>
             <div className="tdstax" style={{ display: "flex", flexDirection: "row" }}>
@@ -5261,28 +5273,37 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
           {/* Due Date */}
           <div style={{ display: "flex", flexDirection: "column",marginLeft:"auto",marginRight:5 }}>
             <div className="duedatez">
-              <div className={`erp-input3 ${(!isEditMode || isDisabled) ? "disabled" : ""}`}>
-                <span className="erp-label3">INPUT DATE</span>
-                <InputMask
-                  mask="99-99-9999"
-                  value={formData.duedate}
-                  readOnly={!isEditMode || isDisabled}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duedate: e.target.value })
-                  }
-                >
-                  {(inputProps) => (
-                    <input
-                      {...inputProps}
-                      ref={dueDateRef}
-                      className="erp-field3 custom-style3"
-                      onKeyDown={(e) => {
-                        handleKeyDowndown(e, expAfterGSTRef);
-                      }}
-                    />
-                  )}
-                </InputMask>
-              </div>
+              <InputMask
+                mask="99-99-9999"
+                value={formData.duedate}
+                onChange={(e) =>
+                  setFormData({ ...formData, duedate: e.target.value })
+                }
+              >
+                {(props) => (
+                  <TextField
+                    {...props}
+                    inputRef={dueDateRef}
+                    label="INPUT DATE"
+                    size="small"
+                    variant="filled"
+                    fullWidth
+                    className="custom-bordered-input"
+                    sx={{
+                      fontSize: `${fontSize}px`,
+                      width: 165,
+                      "& .MuiFilledInput-root": {
+                        height: 48,
+                      },
+                      "& .MuiInputBase-input": {
+                        paddingTop: "20px",
+                      },
+                    }}
+                    onKeyDown={handleEnterKeyPress(dueDateRef, expAfterGSTRef)}
+                  />
+                )}
+              </InputMask>
+
             </div>
             <div>
               <TextField
@@ -5352,7 +5373,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 value={formData.expafterGST}
                 label="EXP AFTER GST"
                 onKeyDown={(e) => {
-                  handleKeyDowndown(e, saveButtonRef);
+                  handleEnterKeyPress(expAfterGSTRef, saveButtonRef)(e);
                   handleKeyDownAfter(e);
                 }}
                 onFocus={(e) => {
@@ -5498,178 +5519,6 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   </div>
                 </div>
               )}
-              {/* {isModalOpenAfter && (
-                <div className="Modal">
-                  <div className="Modal-content">
-                    <h1 className="headingE">EXPENSE AFTER TAX</h1>
-                    <div className="form-group">
-                      <input
-                        type="checkbox"
-                        id="gross"
-                        checked={formData.gross}
-                        onChange={handleGross}
-                      />
-                      <label
-                        style={{ marginLeft: 5 }}
-                        className="label"
-                        htmlFor="Gross"
-                      >
-                        GROSS
-                      </label>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense6}</text>
-                      <input
-                        id="Exp_rate6"
-                        value={formData.Exp_rate6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp6"
-                        value={formData.Exp6}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense7}</text>
-                      <input
-                        id="Exp_rate7"
-                        value={formData.Exp_rate7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp7"
-                        value={formData.Exp7}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense8}</text>
-                      <input
-                        id="Exp_rate8"
-                        value={formData.Exp_rate8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 26.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp8"
-                        value={formData.Exp8}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense9}</text>
-                      <input
-                        id="Exp_rate9"
-                        value={formData.Exp_rate9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 18,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp9"
-                        value={formData.Exp9}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginTop: 10,
-                      }}
-                    >
-                      <text>{Expense10}</text>
-                      <input
-                        id="Exp_rate10"
-                        value={formData.Exp_rate10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 24.5,
-                        }}
-                        onChange={handleNumberChange} // Updated to the new function name
-                      />
-                      <input
-                        id="Exp10"
-                        value={formData.Exp10}
-                        style={{
-                          border: "1px solid black",
-                          width: 100,
-                          marginLeft: 5,
-                        }}
-                      />
-                    </div>
-                    <Button
-                      onClick={closeModalAfter}
-                      style={{
-                        borderColor: "transparent",
-                        backgroundColor: "red",
-                        marginTop: 10,
-                      }}
-                    >
-                      CLOSE
-                    </Button>
-                  </div>
-                </div>
-              )} */}
             </div>
                <div>
               <TextField
