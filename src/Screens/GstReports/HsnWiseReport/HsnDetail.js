@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import HsnResultModal from "./HsnResultModal";
+import financialYear from "../../Shared/financialYear";
 
 const HsnDetailModal = ({ show, onHide }) => {
 
@@ -19,11 +20,26 @@ const HsnDetailModal = ({ show, onHide }) => {
   const [purSale, setPurSale] = useState("Purchase");
   const [grossDetail, setGrossDetail] = useState("Gross");
   const [rewriteHSN, setRewriteHSN] = useState(false);
-  const [fromDate, setFromDate] = useState("01-04-2025");
-  const [toDate, setToDate] = useState("31-03-2026");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [showHsnDetail, setShowHsnDetail] = useState(false);
   const [hsnType, setHsnType] = useState(""); // Sale | Purchase
   const [hsnData, setHsnData] = useState([]);
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  useEffect(() => {
+    const fy = financialYear.getFYDates();
+    setFromDate(formatDate(fy.start));
+    setToDate(formatDate(fy.end));
+  }, []);
 
   const handlePrint = async (purSale) => {
     setHsnType(purSale);

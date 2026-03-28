@@ -1121,7 +1121,7 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="GSTR-2 Filed Status" />
                 </StyledListItem>
-                <StyledListItem button onClick={() => handleNavigation("/")}>
+                <StyledListItem button onClick={() => handleNavigation("/GstReport?type=GSTR3BYearly")}>
                   <StyledIcon style={{}}>
                     <DescriptionIcon />
                   </StyledIcon>
@@ -1157,7 +1157,7 @@ export default function App() {
                   </StyledIcon>
                   <StyledListItemText primary="Other Details" />
                 </StyledListItem>
-                <StyledListItem button onClick={() => handleNavigation("/")}>
+                <StyledListItem button onClick={() => handleNavigation("/GstReport?type=Gstr9")}>
                   <StyledIcon style={{}}>
                     <DescriptionIcon />
                   </StyledIcon>

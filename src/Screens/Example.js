@@ -3344,441 +3344,312 @@ import { Button } from 'react-bootstrap';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import axios from 'axios';
+import InputMask from "react-input-mask";
 
 const Example = () => {
 
-  // const parseDate = (dateStr) => {
-  //   if (!dateStr) return null;
-
-  //   // ✅ ISO format (2026-03-23T00:00:00.000Z)
-  //   if (!isNaN(Date.parse(dateStr))) {
-  //     return new Date(dateStr);
-  //   }
-
-  //   // ✅ dd-mm-yyyy
-  //   if (dateStr.includes("-")) {
-  //     const parts = dateStr.split("-");
-
-  //     // if format is dd-mm-yyyy
-  //     if (parts[0].length === 2) {
-  //       return new Date(parts[2], parts[1] - 1, parts[0]);
-  //     }
-
-  //     // if format is yyyy-mm-dd
-  //     if (parts[0].length === 4) {
-  //       return new Date(parts[0], parts[1] - 1, parts[2]);
-  //     }
-  //   }
-
-  //   // ❌ fallback
-  //   return null;
-  // };
-  
-
-  // const exportSum3B = async () => {
-  //   try {
-  //     // ================= API =================
-  //     const [saleRes, purchaseRes] = await Promise.all([
-  //       axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"),
-  //       axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase"),
-  //     ]);
-
-  //     const sales = saleRes.data;
-  //     const purchases = purchaseRes.data;
-
-  //     // ================= MONTH MAP =================
-  //     const monthMap = {
-  //       3: "B", 4: "C", 5: "D", 6: "E",
-  //       7: "F", 8: "G", 9: "H", 10: "I",
-  //       11: "J", 0: "K", 1: "L", 2: "M"
-  //     };
-
-  //     // ================= INIT =================
-  //     const init = () => ({
-  //       // SALE
-  //       sale_regWithin: 0,
-  //       sale_regOut: 0,
-  //       sale_unregWithin: 0,
-  //       sale_unregOut: 0,
-  //       sale_taxFreeWithin: 0,
-  //       sale_taxFreeOut: 0,
-  //       sale_export: 0,
-
-  //       // PURCHASE
-  //       pur_regWithin: 0,
-  //       pur_regOut: 0,
-  //       pur_unregWithin: 0,
-  //       pur_unregOut: 0,
-  //       pur_taxFreeWithin: 0,
-  //       pur_taxFreeOut: 0,
-  //     });
-
-  //     const monthData = {};
-  //     Object.values(monthMap).forEach((col) => {
-  //       monthData[col] = init();
-  //     });
-
-  //     // ================= SALES =================
-  //     sales.forEach((s) => {
-  //       const d = parseDate(s.formData?.date);
-  //       const col = monthMap[d.getMonth()];
-  //       if (!col) return;
-
-  //       const taxable = Number(s.formData?.sub_total || 0);
-  //       const igst = Number(s.formData?.igst || 0);
-  //       const tax = Number(s.formData?.tax || 0);
-
-  //       const customer = s.customerDetails?.[0] || {};
-  //       const isRegistered = customer.gstno && customer.gstno !== "";
-  //       const isOut = igst > 0;
-  //       const isTaxFree = tax === 0;
-  //       const isExport = s.formData?.stype?.toLowerCase().includes("export");
-
-  //       if (isExport) {
-  //         monthData[col].sale_export += taxable;
-  //       } else if (isTaxFree) {
-  //         if (isOut) monthData[col].sale_taxFreeOut += taxable;
-  //         else monthData[col].sale_taxFreeWithin += taxable;
-  //       } else if (isRegistered) {
-  //         if (isOut) monthData[col].sale_regOut += taxable;
-  //         else monthData[col].sale_regWithin += taxable;
-  //       } else {
-  //         if (isOut) monthData[col].sale_unregOut += taxable;
-  //         else monthData[col].sale_unregWithin += taxable;
-  //       }
-  //     });
-
-  //     // ================= PURCHASE =================
-  //     purchases.forEach((p) => {
-  //       let d = parseDate(p.formData?.date);
-  //       const col = monthMap[d.getMonth()];
-  //       if (!col) return;
-
-  //       const taxable = Number(p.formData?.sub_total || 0);
-  //       const igst = Number(p.formData?.igst || 0);
-  //       const tax = Number(p.formData?.tax || 0);
-
-  //       const supplier = p.supplierdetails?.[0] || {};
-  //       const isRegistered = supplier.gstno && supplier.gstno !== "";
-  //       const isOut = igst > 0;
-  //       const isTaxFree = tax === 0;
-
-  //       if (isTaxFree) {
-  //         if (isOut) monthData[col].pur_taxFreeOut += taxable;
-  //         else monthData[col].pur_taxFreeWithin += taxable;
-  //       } else if (isRegistered) {
-  //         if (isOut) monthData[col].pur_regOut += taxable;
-  //         else monthData[col].pur_regWithin += taxable;
-  //       } else {
-  //         if (isOut) monthData[col].pur_unregOut += taxable;
-  //         else monthData[col].pur_unregWithin += taxable;
-  //       }
-  //     });
-
-  //     // ================= LOAD EXCEL =================
-  //     const res = await fetch("excel/sum3b.xlsx");
-  //     if (!res.ok) {
-  //       alert("Template sum3b.xlsx not found");
-  //       return;
-  //     }
-
-  //     const buffer = await res.arrayBuffer();
-
-  //     const workbook = new ExcelJS.Workbook();
-  //     await workbook.xlsx.load(buffer);
-
-  //     const sheet = workbook.getWorksheet("Pur_Sale");
-  //     if (!sheet) {
-  //       alert("Sheet 'Pur_Sale' not found");
-  //       return;
-  //     }
-
-  //     // ================= FILL DATA =================
-  //     Object.keys(monthData).forEach((col) => {
-  //       const d = monthData[col];
-
-  //       // ===== SALES =====
-  //       sheet.getCell(`${col}7`).value = d.sale_regWithin;
-  //       sheet.getCell(`${col}8`).value = d.sale_regOut;
-  //       sheet.getCell(`${col}9`).value = d.sale_unregWithin;
-  //       sheet.getCell(`${col}10`).value = d.sale_unregOut;
-  //       sheet.getCell(`${col}11`).value = d.sale_taxFreeWithin;
-  //       sheet.getCell(`${col}12`).value = d.sale_taxFreeOut;
-  //       sheet.getCell(`${col}13`).value = d.sale_export;
-
-  //       // ===== PURCHASE =====
-  //       sheet.getCell(`${col}17`).value = d.pur_regWithin;
-  //       sheet.getCell(`${col}18`).value = d.pur_regOut;
-  //       sheet.getCell(`${col}19`).value = d.pur_unregWithin;
-  //       sheet.getCell(`${col}20`).value = d.pur_unregOut;
-  //       sheet.getCell(`${col}21`).value = d.pur_taxFreeWithin;
-  //       sheet.getCell(`${col}22`).value = d.pur_taxFreeOut;
-  //     });
-
-  //     // ================= SAVE =================
-  //     const fileBuffer = await workbook.xlsx.writeBuffer();
-
-  //     saveAs(
-  //       new Blob([fileBuffer], {
-  //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //       }),
-  //       "sum3b.xlsx"
-  //     );
-
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Export failed");
-  //   }
-  // };
-
+  const [fromDate, setFromDate] = useState("");
+  const [uptoDate, setUptoDate] = useState("");
   const parseDate = (dateStr) => {
-  if (!dateStr) return null;
+    if (!dateStr) return null;
 
-  // ✅ dd-mm-yyyy (MOST IMPORTANT FIRST)
-  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
-    const [dd, mm, yyyy] = dateStr.split("-");
-    return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-  }
+    // ✅ dd-mm-yyyy (MOST IMPORTANT FIRST)
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      const [dd, mm, yyyy] = dateStr.split("-");
+      return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+    }
 
-  // ✅ ISO (2026-03-09T00:00:00.000Z)
-  if (typeof dateStr === "string" && dateStr.includes("T")) {
-    const d = new Date(dateStr);
-    return isNaN(d) ? null : d;
-  }
+    // ✅ ISO (2026-03-09T00:00:00.000Z)
+    if (typeof dateStr === "string" && dateStr.includes("T")) {
+      const d = new Date(dateStr);
+      return isNaN(d) ? null : d;
+    }
 
-  // ✅ yyyy-mm-dd
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    const [yyyy, mm, dd] = dateStr.split("-");
-    return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-  }
+    // ✅ yyyy-mm-dd
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [yyyy, mm, dd] = dateStr.split("-");
+      return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+    }
 
-  return null;
-};
+    return null;
+  };
+  const getParsedRange = () => {
+    const from = parseDate(fromDate);
+    const upto = parseDate(uptoDate);
 
-const exportSum3B = async () => {
-  try {
-    const [saleRes, purchaseRes] = await Promise.all([
-      axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"),
-      axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase"),
-    ]);
+    if (!from || !upto) {
+      alert("Please enter valid From and Upto dates");
+      return null;
+    }
 
-    const sales = saleRes.data;
-    const purchases = purchaseRes.data;
+    // set time to full day
+    from.setHours(0, 0, 0, 0);
+    upto.setHours(23, 59, 59, 999);
 
-    const monthMap = {
-      3: "B", 4: "C", 5: "D", 6: "E",
-      7: "F", 8: "G", 9: "H", 10: "I",
-      11: "J", 0: "K", 1: "L", 2: "M"
-    };
+    return { from, upto };
+  };
 
-    const init = () => ({
-      sale_regWithin: 0,
-      sale_regOut: 0,
-      sale_unregWithin: 0,
-      sale_unregOut: 0,
-      sale_taxFreeWithin: 0,
-      sale_taxFreeOut: 0,
-      sale_export: 0,
+  const exportSum3B = async () => {
+    try {
 
-      sale_regWithin_cgst: 0,
-      sale_regWithin_sgst: 0,
-      sale_unregWithin_cgst: 0,
-      sale_unregWithin_sgst: 0,
+      const range = getParsedRange();
+      if (!range) return;
 
-      sale_regOut_igst: 0,
-      sale_unregOut_igst: 0,
-      sale_export_igst: 0,
+      const { from, upto } = range;
 
-      pur_regWithin: 0,
-      pur_regOut: 0,
-      pur_unregWithin: 0,
-      pur_unregOut: 0,
-      pur_taxFreeWithin: 0,
-      pur_taxFreeOut: 0,
+      const [saleRes, purchaseRes] = await Promise.all([
+        axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/sale"),
+        axios.get("https://www.shkunweb.com/shkunlive/03AAYFG4472A1ZG_01042025_31032026/tenant/api/purchase"),
+      ]);
 
-      pur_regWithin_cgst: 0,
-      pur_regWithin_sgst: 0,
-      pur_unregWithin_cgst: 0,
-      pur_unregWithin_sgst: 0,
+      // ✅ FILTER HERE
+      const sales = saleRes.data.filter((s) => {
+        const d = parseDate(s.formData?.date);
+        return d && d >= from && d <= upto;
+      });
 
-      pur_regOut_igst: 0,
-      pur_unregOut_igst: 0,
-      pur_import_igst: 0,
-    });
+      const purchases = purchaseRes.data.filter((p) => {
+        const d = parseDate(p.formData?.date);
+        return d && d >= from && d <= upto;
+      });
 
-    const monthData = {};
-    Object.values(monthMap).forEach((col) => {
-      monthData[col] = init();
-    });
+      const monthMap = {
+        3: "B", 4: "C", 5: "D", 6: "E",
+        7: "F", 8: "G", 9: "H", 10: "I",
+        11: "J", 0: "K", 1: "L", 2: "M"
+      };
 
-    // ================= SALES =================
-    sales.forEach((s) => {
-      const d = parseDate(s.formData?.date);
-      if (!d || isNaN(d)) return;
+      const init = () => ({
+        sale_regWithin: 0,
+        sale_regOut: 0,
+        sale_unregWithin: 0,
+        sale_unregOut: 0,
+        sale_taxFreeWithin: 0,
+        sale_taxFreeOut: 0,
+        sale_export: 0,
 
-      const col = monthMap[d.getMonth()];
-      if (!col) return;
+        sale_regWithin_cgst: 0,
+        sale_regWithin_sgst: 0,
+        sale_unregWithin_cgst: 0,
+        sale_unregWithin_sgst: 0,
 
-      const cgst = Number(s.formData?.cgst || 0);
-      const sgst = Number(s.formData?.sgst || 0);
-      const igst = Number(s.formData?.igst || 0);
-      const tax = Number(s.formData?.tax || 0);
-      const taxable = Number(s.formData?.sub_total || 0);
+        sale_regOut_igst: 0,
+        sale_unregOut_igst: 0,
+        sale_export_igst: 0,
 
-      const customer = s.customerDetails?.[0] || {};
-      const isRegistered = customer.gstno && customer.gstno !== "";
-      const isOut = igst > 0;
-      const isTaxFree = tax === 0;
-      const isExport = s.formData?.stype?.toLowerCase().includes("export");
+        pur_regWithin: 0,
+        pur_regOut: 0,
+        pur_unregWithin: 0,
+        pur_unregOut: 0,
+        pur_taxFreeWithin: 0,
+        pur_taxFreeOut: 0,
 
-      // ORIGINAL
-      if (isExport) {
-        monthData[col].sale_export += taxable;
-      } else if (isTaxFree) {
-        if (isOut) monthData[col].sale_taxFreeOut += taxable;
-        else monthData[col].sale_taxFreeWithin += taxable;
-      } else if (isRegistered) {
-        if (isOut) monthData[col].sale_regOut += taxable;
-        else monthData[col].sale_regWithin += taxable;
-      } else {
-        if (isOut) monthData[col].sale_unregOut += taxable;
-        else monthData[col].sale_unregWithin += taxable;
-      }
+        pur_regWithin_cgst: 0,
+        pur_regWithin_sgst: 0,
+        pur_unregWithin_cgst: 0,
+        pur_unregWithin_sgst: 0,
 
-      // CGST/SGST
-      if (!isOut) {
-        if (isRegistered) {
-          monthData[col].sale_regWithin_cgst += cgst;
-          monthData[col].sale_regWithin_sgst += sgst;
+        pur_regOut_igst: 0,
+        pur_unregOut_igst: 0,
+        pur_import_igst: 0,
+      });
+
+      const monthData = {};
+      Object.values(monthMap).forEach((col) => {
+        monthData[col] = init();
+      });
+
+      // ================= SALES =================
+      sales.forEach((s) => {
+        const d = parseDate(s.formData?.date);
+        if (!d || isNaN(d)) return;
+
+        const col = monthMap[d.getMonth()];
+        if (!col) return;
+
+        const cgst = Number(s.formData?.cgst || 0);
+        const sgst = Number(s.formData?.sgst || 0);
+        const igst = Number(s.formData?.igst || 0);
+        const tax = Number(s.formData?.tax || 0);
+        const taxable = Number(s.formData?.sub_total || 0);
+
+        const customer = s.customerDetails?.[0] || {};
+        const isRegistered = customer.gstno && customer.gstno !== "";
+        const isOut = igst > 0;
+        const isTaxFree = tax === 0;
+        const isExport = s.formData?.stype?.toLowerCase().includes("export");
+
+        // ORIGINAL
+        if (isExport) {
+          monthData[col].sale_export += taxable;
+        } else if (isTaxFree) {
+          if (isOut) monthData[col].sale_taxFreeOut += taxable;
+          else monthData[col].sale_taxFreeWithin += taxable;
+        } else if (isRegistered) {
+          if (isOut) monthData[col].sale_regOut += taxable;
+          else monthData[col].sale_regWithin += taxable;
         } else {
-          monthData[col].sale_unregWithin_cgst += cgst;
-          monthData[col].sale_unregWithin_sgst += sgst;
+          if (isOut) monthData[col].sale_unregOut += taxable;
+          else monthData[col].sale_unregWithin += taxable;
         }
-      }
 
-      // IGST
-      if (isExport) {
-        monthData[col].sale_export_igst += igst;
-      } else if (isOut) {
+        // CGST/SGST
+        if (!isOut) {
+          if (isRegistered) {
+            monthData[col].sale_regWithin_cgst += cgst;
+            monthData[col].sale_regWithin_sgst += sgst;
+          } else {
+            monthData[col].sale_unregWithin_cgst += cgst;
+            monthData[col].sale_unregWithin_sgst += sgst;
+          }
+        }
+
+        // IGST
+        if (isExport) {
+          monthData[col].sale_export_igst += igst;
+        } else if (isOut) {
+          if (isRegistered) {
+            monthData[col].sale_regOut_igst += igst;
+          } else {
+            monthData[col].sale_unregOut_igst += igst;
+          }
+        }
+      });
+
+      // ================= PURCHASE =================
+      purchases.forEach((p) => {
+        const d = parseDate(p.formData?.date);
+        if (!d || isNaN(d)) return;
+
+        const col = monthMap[d.getMonth()];
+        if (!col) return;
+
+        const cgst = Number(p.formData?.cgst || 0);
+        const sgst = Number(p.formData?.sgst || 0);
+        const igst = Number(p.formData?.igst || 0);
+        const tax = Number(p.formData?.tax || 0);
+        const taxable = Number(p.formData?.sub_total || 0);
+
+        const supplier = p.supplierdetails?.[0] || {};
+        const isRegistered = supplier.gstno && supplier.gstno !== "";
+        const isOut = igst > 0;
+        const isImport = p.formData?.stype?.toLowerCase().includes("import");
+
+        // ORIGINAL
         if (isRegistered) {
-          monthData[col].sale_regOut_igst += igst;
+          if (isOut) monthData[col].pur_regOut += taxable;
+          else monthData[col].pur_regWithin += taxable;
         } else {
-          monthData[col].sale_unregOut_igst += igst;
+          if (isOut) monthData[col].pur_unregOut += taxable;
+          else monthData[col].pur_unregWithin += taxable;
         }
-      }
-    });
 
-    // ================= PURCHASE =================
-    purchases.forEach((p) => {
-      const d = parseDate(p.formData?.date);
-      if (!d || isNaN(d)) return;
-
-      const col = monthMap[d.getMonth()];
-      if (!col) return;
-
-      const cgst = Number(p.formData?.cgst || 0);
-      const sgst = Number(p.formData?.sgst || 0);
-      const igst = Number(p.formData?.igst || 0);
-      const tax = Number(p.formData?.tax || 0);
-      const taxable = Number(p.formData?.sub_total || 0);
-
-      const supplier = p.supplierdetails?.[0] || {};
-      const isRegistered = supplier.gstno && supplier.gstno !== "";
-      const isOut = igst > 0;
-      const isImport = p.formData?.stype?.toLowerCase().includes("import");
-
-      // ORIGINAL
-      if (isRegistered) {
-        if (isOut) monthData[col].pur_regOut += taxable;
-        else monthData[col].pur_regWithin += taxable;
-      } else {
-        if (isOut) monthData[col].pur_unregOut += taxable;
-        else monthData[col].pur_unregWithin += taxable;
-      }
-
-      // CGST/SGST
-      if (!isOut) {
-        if (isRegistered) {
-          monthData[col].pur_regWithin_cgst += cgst;
-          monthData[col].pur_regWithin_sgst += sgst;
-        } else {
-          monthData[col].pur_unregWithin_cgst += cgst;
-          monthData[col].pur_unregWithin_sgst += sgst;
+        // CGST/SGST
+        if (!isOut) {
+          if (isRegistered) {
+            monthData[col].pur_regWithin_cgst += cgst;
+            monthData[col].pur_regWithin_sgst += sgst;
+          } else {
+            monthData[col].pur_unregWithin_cgst += cgst;
+            monthData[col].pur_unregWithin_sgst += sgst;
+          }
         }
-      }
 
-      // IGST
-      if (isImport) {
-        monthData[col].pur_import_igst += igst;
-      } else if (isOut) {
-        if (isRegistered) {
-          monthData[col].pur_regOut_igst += igst;
-        } else {
-          monthData[col].pur_unregOut_igst += igst;
+        // IGST
+        if (isImport) {
+          monthData[col].pur_import_igst += igst;
+        } else if (isOut) {
+          if (isRegistered) {
+            monthData[col].pur_regOut_igst += igst;
+          } else {
+            monthData[col].pur_unregOut_igst += igst;
+          }
         }
-      }
-    });
+      });
 
-    // ================= EXCEL =================
-    const res = await fetch("excel/sum3b.xlsx");
-    const buffer = await res.arrayBuffer();
+      // ================= EXCEL =================
+      const res = await fetch("excel/sum3b.xlsx");
+      const buffer = await res.arrayBuffer();
 
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
-    const sheet = workbook.getWorksheet("Pur_Sale");
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      const sheet = workbook.getWorksheet("Pur_Sale");
 
-    Object.keys(monthData).forEach((col) => {
-      const d = monthData[col];
+      Object.keys(monthData).forEach((col) => {
+        const d = monthData[col];
 
-            // ===== SALES =====
-      sheet.getCell(`${col}7`).value = d.sale_regWithin;
-      sheet.getCell(`${col}8`).value = d.sale_regOut;
-      sheet.getCell(`${col}9`).value = d.sale_unregWithin;
-      sheet.getCell(`${col}10`).value = d.sale_unregOut;
-      sheet.getCell(`${col}11`).value = d.sale_taxFreeWithin;
-      sheet.getCell(`${col}12`).value = d.sale_taxFreeOut;
-      sheet.getCell(`${col}13`).value = d.sale_export;
+              // ===== SALES =====
+        sheet.getCell(`${col}7`).value = d.sale_regWithin;
+        sheet.getCell(`${col}8`).value = d.sale_regOut;
+        sheet.getCell(`${col}9`).value = d.sale_unregWithin;
+        sheet.getCell(`${col}10`).value = d.sale_unregOut;
+        sheet.getCell(`${col}11`).value = d.sale_taxFreeWithin;
+        sheet.getCell(`${col}12`).value = d.sale_taxFreeOut;
+        sheet.getCell(`${col}13`).value = d.sale_export;
 
-      // ===== PURCHASE =====
-      sheet.getCell(`${col}17`).value = d.pur_regWithin;
-      sheet.getCell(`${col}18`).value = d.pur_regOut;
-      sheet.getCell(`${col}19`).value = d.pur_unregWithin;
-      sheet.getCell(`${col}20`).value = d.pur_unregOut;
-      sheet.getCell(`${col}21`).value = d.pur_taxFreeWithin;
-      sheet.getCell(`${col}22`).value = d.pur_taxFreeOut;
+        // ===== PURCHASE =====
+        sheet.getCell(`${col}17`).value = d.pur_regWithin;
+        sheet.getCell(`${col}18`).value = d.pur_regOut;
+        sheet.getCell(`${col}19`).value = d.pur_unregWithin;
+        sheet.getCell(`${col}20`).value = d.pur_unregOut;
+        sheet.getCell(`${col}21`).value = d.pur_taxFreeWithin;
+        sheet.getCell(`${col}22`).value = d.pur_taxFreeOut;
 
-      sheet.getCell(`${col}29`).value = d.sale_regWithin_cgst;
-      sheet.getCell(`${col}30`).value = d.sale_unregWithin_cgst;
+        sheet.getCell(`${col}29`).value = d.sale_regWithin_cgst;
+        sheet.getCell(`${col}30`).value = d.sale_unregWithin_cgst;
 
-      sheet.getCell(`${col}35`).value = d.pur_regWithin_cgst;
-      sheet.getCell(`${col}36`).value = d.pur_unregWithin_cgst;
+        sheet.getCell(`${col}35`).value = d.pur_regWithin_cgst;
+        sheet.getCell(`${col}36`).value = d.pur_unregWithin_cgst;
 
-      sheet.getCell(`${col}43`).value = d.sale_regWithin_sgst;
-      sheet.getCell(`${col}44`).value = d.sale_unregWithin_sgst;
+        sheet.getCell(`${col}43`).value = d.sale_regWithin_sgst;
+        sheet.getCell(`${col}44`).value = d.sale_unregWithin_sgst;
 
-      sheet.getCell(`${col}49`).value = d.pur_regWithin_sgst;
-      sheet.getCell(`${col}50`).value = d.pur_unregWithin_sgst;
+        sheet.getCell(`${col}49`).value = d.pur_regWithin_sgst;
+        sheet.getCell(`${col}50`).value = d.pur_unregWithin_sgst;
 
-      sheet.getCell(`${col}58`).value = d.sale_regOut_igst;
-      sheet.getCell(`${col}59`).value = d.sale_unregOut_igst;
-      sheet.getCell(`${col}60`).value = d.sale_export_igst;
+        sheet.getCell(`${col}58`).value = d.sale_regOut_igst;
+        sheet.getCell(`${col}59`).value = d.sale_unregOut_igst;
+        sheet.getCell(`${col}60`).value = d.sale_export_igst;
 
-      sheet.getCell(`${col}64`).value = d.pur_regOut_igst;
-      sheet.getCell(`${col}65`).value = d.pur_unregOut_igst;
-      sheet.getCell(`${col}66`).value = d.pur_import_igst;
-    });
+        sheet.getCell(`${col}64`).value = d.pur_regOut_igst;
+        sheet.getCell(`${col}65`).value = d.pur_unregOut_igst;
+        sheet.getCell(`${col}66`).value = d.pur_import_igst;
+      });
 
-    const fileBuffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([fileBuffer]), "sum3b.xlsx");
+      const fileBuffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([fileBuffer]), "sum3b.xlsx");
 
-  } catch (err) {
-    console.error(err);
-    alert("Export failed");
-  }
-};
+    } catch (err) {
+      console.error(err);
+      alert("Export failed");
+    }
+  };
 
   return (
     <div>
+    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      
+      <InputMask
+        mask="99-99-9999"
+        value={fromDate}
+        onChange={(e) => setFromDate(e.target.value)}
+      >
+        {(inputProps) => (
+          <input {...inputProps} placeholder="From Date (dd-mm-yyyy)" />
+        )}
+      </InputMask>
+
+      <InputMask
+        mask="99-99-9999"
+        value={uptoDate}
+        onChange={(e) => setUptoDate(e.target.value)}
+      >
+        {(inputProps) => (
+          <input {...inputProps} placeholder="Upto Date (dd-mm-yyyy)" />
+        )}
+      </InputMask>
+
+    </div>
       <Button onClick={exportSum3B}>EXPORT</Button>
     </div>
   )

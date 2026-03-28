@@ -4,6 +4,8 @@ import AcwiseGstRep from "./AccWiseGstReport/AcwiseGstRep";
 import MonthlyFormModal from "./MonthlyForms/MonthlyFormModal";
 import PartywiseGstSumm from "./PartyGstSumm/PartywiseGstSumm";
 import PwiseGSTDetail from "./PartywiseGSTDetail/PwiseGSTDetail";
+import GSTR3BY from "./GSTR3bYearly/GSTR3BY";
+import Gstr9 from "./GSTR9/Gstr9";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -41,6 +43,12 @@ const GstReport = () => {
       )}
       {type === "PartyGstDetail" && (
         <PwiseGSTDetail open={openPurRep} onClose={handleClose} />
+      )}
+      {type === "GSTR3BYearly" && (
+        <GSTR3BY show={openPurRep} onHide={handleClose} />
+      )}
+      {type === "Gstr9" && (
+        <Gstr9 show={openPurRep} onHide={handleClose} />
       )}
     </div>
   );
