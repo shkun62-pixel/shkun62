@@ -873,44 +873,50 @@ const SaleService = () => {
     return `${dd}-${mm}-${yyyy}`;
   };
 
+  const applySaleRecordToState = (record) => {
+    if (!record) return;
+
+    const updatedFormData = {
+      ...record.formData,
+      date: formatDateToDDMMYYYY(record.formData.date),
+      duedate: formatDateToDDMMYYYY(record.formData.duedate),
+    };
+
+    setFormData(updatedFormData);
+    setData1({ ...record, formData: updatedFormData });
+    setItems(normalizeItems(record.items || []));
+    setcustomerDetails([...(record.customerDetails || [])]);
+    setshipped([...(record.shipped || [])]);
+    setIndex(record?.formData?.vbillno || 0);
+
+    if (record?.customerDetails?.length > 0) {
+      setCustgst(record.customerDetails[0].gstno || "");
+    }
+
+    setIsDisabled(true);
+  };
+
   const fetchData = async () => {
     try {
       let response;
+
       if (saleId) {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`
         );
       } else {
         response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
         );
       }
 
       if (response.status === 200 && response.data && response.data.data) {
         const lastEntry = response.data.data;
 
-        const updatedFormData = {
-          ...lastEntry.formData,
-          date: formatDateToDDMMYYYY(lastEntry.formData.date),
-          duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
-        };
-
         setFirstTimeCheckData("DataAvailable");
-        setFormData(updatedFormData);
+        applySaleRecordToState(lastEntry);
 
-        // setItems([...lastEntry.items]);
-        setItems(normalizeItems(lastEntry.items));
-        setcustomerDetails([...lastEntry.customerDetails]);
-        setshipped([...lastEntry.shipped]);
-
-        if (lastEntry.customerDetails.length > 0) {
-          setCustgst(lastEntry.customerDetails[0].gstno);
-        }
-
-        setData1({ ...lastEntry, formData: updatedFormData });
-        setIndex(lastEntry.formData?.vbillno || 0);
-
-        return lastEntry; // ✅ Return this for use in handleAdd
+        return lastEntry;
       } else {
         setFirstTimeCheckData("DataNotAvailable");
         initializeEmptyData();
@@ -923,12 +929,28 @@ const SaleService = () => {
     }
   };
 
-  // Function to initialize empty data
+  const saleWinFromState = location.state?.saleWin;
+
+  // Load from localStorage if refresh
+  const saleWinFromStorage = localStorage.getItem("saleWinSS")
+    ? JSON.parse(localStorage.getItem("saleWinSS"))
+    : null;
+
+  // Final object (state first, then storage)
+  const saleWin = saleWinFromState || saleWinFromStorage;
+
+  // Extract valpha safely
+  const selectedValpha = saleWin?.valpha || "";
+  const getValphaQuery = () => {
+    return selectedValpha
+      ? `?valpha=${encodeURIComponent(selectedValpha)}`
+      : "";
+  };
+
   const initializeEmptyData = () => {
-    // Default date as current date
     const emptyFormData = {
       date: new Date().toLocaleDateString(), // Use today's date
-      valpha:"",
+      valpha: selectedValpha || "",
       vtype: "S",
       vbillno: 0,
       vno: 0,
@@ -1031,7 +1053,6 @@ const SaleService = () => {
         TDS194Q: "",
       },
     ];
-    // Set the empty data
     setFormData(emptyFormData);
     setItems(normalizeItems([]));
     setcustomerDetails(emptycustomer);
@@ -1041,15 +1062,14 @@ const SaleService = () => {
       items: emptyItems,
       shipped: emptyshipped,
       customerDetails: emptycustomer,
-    }); // Store empty data
+    });
     setIndex(0);
   };
 
   useEffect(() => {
     fetchData();
     setIsDisabled(true);
-    // Add this line to set isDisabled to true initially
-  }, []);
+  }, [selectedValpha, saleId, tenant]);
 
     // Search Modal states
   const [showSearch, setShowSearch] = useState(false);
@@ -1065,8 +1085,9 @@ const SaleService = () => {
   const fetchAllBills = async () => {
     try {
       const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale${getValphaQuery()}`
       );
+
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
         setFilteredBills(res.data);
@@ -1172,12 +1193,16 @@ const SaleService = () => {
   const fetchVoucherNumbers = async () => {
     try {
       const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno${getValphaQuery()}`
       );
 
       return {
         lastVno: res?.data?.lastVno || 0,
         nextVno: res?.data?.nextVno || 1,
+        lastBillNo: res?.data?.lastBillNo || 0,
+        nextBillNo: res?.data?.nextBillNo || 1,
+        lastVoucherNo: res?.data?.lastVoucherNo || 0,
+        nextVoucherNo: res?.data?.nextVoucherNo || 1,
       };
     } catch (error) {
       console.error("Error fetching voucher numbers:", error);
@@ -1191,41 +1216,15 @@ const SaleService = () => {
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("(View)");
+
     try {
-      if (data1) {
+      if (data1?._id) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next?dummy=1${getValphaQueryWithPrefix()}`
         );
-        if (response.status === 200 && response.data) {
-          const nextData = response.data.data;
-          setData1(nextData);
-          setIndex(index + 1);
-          setFormData({
-          ...nextData.formData,
-          date: formatDateToDDMMYYYY(nextData.formData.date),
-          duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
-          });
 
-          // Update items and supplier details
-          const updatedItems = nextData.items.map((item) => ({
-            ...item,
-          }));
-          const updatedCustomer = nextData.customerDetails.map((item) => ({
-            ...item,
-          }));
-          const updatedshipped = nextData.shipped.map((item) => ({
-            ...item,
-          }));
-          setItems(normalizeItems(updatedItems));
-          // setItems(updatedItems);
-          setcustomerDetails(updatedCustomer);
-          setshipped(updatedshipped);
-
-          // Set custGst from the supplier details
-          if (updatedCustomer.length > 0) {
-            setCustgst(updatedCustomer[0].gstno); // Set GST number
-          }
-          setIsDisabled(true);
+        if (response.status === 200 && response.data?.data) {
+          applySaleRecordToState(response.data.data);
         }
       }
     } catch (error) {
@@ -1236,41 +1235,15 @@ const SaleService = () => {
   const handlePrevious = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("(View)");
+
     try {
-      if (data1) {
+      if (data1?._id) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous`,
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous?dummy=1${getValphaQueryWithPrefix()}`
         );
-        if (response.status === 200 && response.data) {
-          const prevData = response.data.data;
-          setData1(prevData);
-          setIndex(index - 1);
-          setFormData({
-          ...prevData.formData,
-          date: formatDateToDDMMYYYY(prevData.formData.date),
-          duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
-          });
 
-          // Update items and supplier details
-          const updatedItems = prevData.items.map((item) => ({
-            ...item,
-          }));
-          const updatedCustomer = prevData.customerDetails.map((item) => ({
-            ...item,
-          }));
-          const updatedshipped = prevData.shipped.map((item) => ({
-            ...item,
-          }));
-          // setItems(updatedItems);
-          setItems(normalizeItems(updatedItems));
-          setcustomerDetails(updatedCustomer);
-          setshipped(updatedshipped);
-
-          // Set custGst from the supplier details
-          if (updatedCustomer.length > 0) {
-            setCustgst(updatedCustomer[0].gstno); // Set GST number
-          }
-          setIsDisabled(true);
+        if (response.status === 200 && response.data?.data) {
+          applySaleRecordToState(response.data.data);
         }
       }
     } catch (error) {
@@ -1284,39 +1257,11 @@ const SaleService = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first${getValphaQuery()}`
       );
-      if (response.status === 200 && response.data) {
-        const firstData = response.data.data;
-        setData1(firstData);
-        setIndex(0);
-        setFormData({
-        ...firstData.formData,
-        date: formatDateToDDMMYYYY(firstData.formData.date),
-        duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
-        });
 
-        // Update items and supplier details
-        const updatedItems = firstData.items.map((item) => ({
-          ...item,
-        }));
-        const updatedCustomer = firstData.customerDetails.map((item) => ({
-          ...item,
-        }));
-        const updatedshipped = firstData.shipped.map((item) => ({
-          ...item,
-        }));
-        // setItems(updatedItems);
-        setItems(normalizeItems(updatedItems));
-        setcustomerDetails(updatedCustomer);
-        setshipped(updatedshipped);
-
-        // Set custGst from the supplier details
-        if (updatedCustomer.length > 0) {
-          setCustgst(updatedCustomer[0].gstno); // Set GST number
-        }
-
-        setIsDisabled(true);
+      if (response.status === 200 && response.data?.data) {
+        applySaleRecordToState(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching first record:", error);
@@ -1329,39 +1274,11 @@ const SaleService = () => {
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
       );
-      if (response.status === 200 && response.data) {
-        const lastData = response.data.data;
-        setData1(lastData);
-        const lastIndex = response.data.length - 1;
-        setIndex(lastIndex);
-        setFormData({
-        ...lastData.formData,
-        date: formatDateToDDMMYYYY(lastData.formData.date),
-        duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
-        });
 
-        // Update items and supplier details
-        const updatedItems = lastData.items.map((item) => ({
-          ...item,
-        }));
-        const updatedCustomer = lastData.customerDetails.map((item) => ({
-          ...item,
-        }));
-        const updatedshipped = lastData.shipped.map((item) => ({
-          ...item,
-        }));
-        // setItems(updatedItems);
-        setItems(normalizeItems(updatedItems));
-        setcustomerDetails(updatedCustomer);
-        setshipped(updatedshipped);
-        // Set custGst from the supplier details
-        if (updatedCustomer.length > 0) {
-          setCustgst(updatedCustomer[0].gstno); // Set GST number
-        }
-
-        setIsDisabled(true);
+      if (response.status === 200 && response.data?.data) {
+        applySaleRecordToState(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching last record:", error);
@@ -1376,15 +1293,16 @@ const SaleService = () => {
       await fetchSalesSetup();
       const voucherData = await fetchVoucherNumbers();
       if (!voucherData) return;
-
-      const lastvoucherno = voucherData.nextVno;
-      const lastvno = voucherData.nextVno;
+      const nextBillNo =
+      voucherData.nextBillNo || voucherData.nextVno || 1;
+      const nextVoucherNo =
+      voucherData.nextVoucherNo || voucherData.nextVno || 1;
 
       const newData = {
         date: getTodayDDMMYYYY(),
         valpha: selectedValpha,
-        vbillno: lastvoucherno,
-        vno: lastvno,
+        vbillno: nextBillNo,
+        vno: nextVoucherNo,
         vtype: "S",
         gr: "",
         exfor: "",
@@ -1484,44 +1402,28 @@ const SaleService = () => {
   };
 
   const handleExit = async () => {
-    // Check if grandtotal is Greater Than zero
     if (formData.grandtotal > 0 && isEditMode) {
       const confirmExit = window.confirm(
-        "Are you sure you want to Exit? Unsaved changes may be lost.",
+        "Are you sure you want to Exit? Unsaved changes may be lost."
       );
-      if (!confirmExit) {
-        return;
-      }
+      if (!confirmExit) return;
     }
-    
-    if(!isEditMode){
-      navigate("/dashboard"); 
+  
+    if (!isEditMode) {
+      navigate("/dashboard");
       return;
     }
-
+  
     setTitle("(View)");
+  
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
       );
-
-      if (response.status === 200 && response.data.data) {
-        const lastEntry = response.data.data;
-        setFormData({
-        ...lastEntry.formData,
-        date: formatDateToDDMMYYYY(lastEntry.formData.date),
-        duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
-        });
-        setData1(response.data.data);
-        // setItems(lastEntry.items.map((item) => ({ ...item })));
-        setItems(normalizeItems(lastEntry.items));
-        setcustomerDetails(
-          lastEntry.customerDetails.map((item) => ({ ...item })),
-        );
-        setshipped(lastEntry.shipped.map((item) => ({ ...item })));
-
-        setIsDisabled(true);
-        setIndex(lastEntry.formData);
+  
+      if (response.status === 200 && response.data?.data) {
+        applySaleRecordToState(response.data.data);
+  
         setIsAddEnabled(true);
         setIsEditMode(false);
         setIsSubmitEnabled(false);
@@ -1533,54 +1435,7 @@ const SaleService = () => {
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
       } else {
-        console.log("No data available");
-        const newData = {
-          date: "",
-          valpha:"",
-          vtype: "S",
-          vbillno: 0,
-          vno: 0,
-          gr: "",
-          exfor: "",
-          trpt: "",
-          stype: "",
-          btype: "",
-          conv: "",
-          rem1: "",
-          rem2: "",
-          v_tpt: "",
-          broker: "",
-          srv_rate: 0,
-          srv_tax: 0,
-          tcs1_rate: 0,
-          tcs1: 0,
-          tcs206_rate: 0,
-          tcs206: 0,
-          duedate: "",
-          pcess: 0,
-          tax: 0,
-          sub_total: 0,
-          exp_before: 0,
-          cgst: 0,
-          sgst: 0,
-          igst: 0,
-          expafterGST: 0,
-          grandtotal: 0,
-        };
-        setFormData(newData);
-        setItems(normalizeItems([]));
-        setcustomerDetails([
-          {
-            vacode: "",
-            gstno: "",
-            pan: "",
-            Add1: "",
-            city: "",
-            state: "",
-            Tcs206c1H: "",
-            TDS194Q: "",
-          },
-        ]);
+        initializeEmptyData();
         setIsDisabled(true);
       }
     } catch (error) {
@@ -1811,44 +1666,44 @@ const SaleService = () => {
       };
 
       // 3) Save Sale GST (add/edit)
-      // const saleGstUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
-      // const saleGstMethod = isAbcmode ? "put" : "post";
-      // const saleRes = await axios({
-      //   method: saleGstMethod,
-      //   url: saleGstUrl,
-      //   data: combinedData,
-      // });
+      const saleGstUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst${isAbcmode ? `/${data1._id}` : ""}`; // NOTE: replace 'aa' with ${tenant} if you have it
+      const saleGstMethod = isAbcmode ? "put" : "post";
+      const saleRes = await axios({
+        method: saleGstMethod,
+        url: saleGstUrl,
+        data: combinedData,
+      });
 
-      // // Try to extract saleId from response; fallbacks included for PUT/legacy responses
-      // const saleId =
-      //   saleRes?.data?.saleId ||
-      //   saleRes?.data?._id ||
-      //   (isAbcmode ? data1?._id : null);
+      // Try to extract saleId from response; fallbacks included for PUT/legacy responses
+      const saleId =
+        saleRes?.data?.saleId ||
+        saleRes?.data?._id ||
+        (isAbcmode ? data1?._id : null);
 
-      // if (!saleId) {
-      //   console.warn(
-      //     "saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.",
-      //   );
-      // }
+      if (!saleId) {
+        console.warn(
+          "saleId not found in /salegst response. Ensure backend returns { ok: true, saleId }.",
+        );
+      }
 
-      // if (saleRes?.status === 200 || saleRes?.status === 201) {
-      //   // 5) Post FA entries (with setup codes) — include saleId
-      //   try {
-      //     const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
-      //     const faBody = saleId ? { ...combinedData, saleId } : combinedData;
+      if (saleRes?.status === 200 || saleRes?.status === 201) {
+        // 5) Post FA entries (with setup codes) — include saleId
+        try {
+          const faUrl = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salefaFile${isAbcmode ? `/${data1._id}` : ""}`;
+          const faBody = saleId ? { ...combinedData, saleId } : combinedData;
 
-      //     await axios({
-      //       method: isAbcmode ? "put" : "post",
-      //       url: faUrl,
-      //       data: faBody,
-      //     });
-      //   } catch (faErr) {
-      //     console.error("salefaFile error:", faErr);
-      //   }
+          await axios({
+            method: isAbcmode ? "put" : "post",
+            url: faUrl,
+            data: faBody,
+          });
+        } catch (faErr) {
+          console.error("salefaFile error:", faErr);
+        }
 
-      //   fetchData();
-      //   isDataSaved = true;
-      // }
+        fetchData();
+        isDataSaved = true;
+      }
       console.table(combinedData);
     } catch (error) {
       console.error("Error saving data:", error);
@@ -3409,23 +3264,16 @@ const SaleService = () => {
   });
 
   // Storing Valpha
-  const saleWinFromState = location.state?.saleWin;
-
-  // Load from localStorage if refresh
-  const saleWinFromStorage = localStorage.getItem("saleWinSS")
-    ? JSON.parse(localStorage.getItem("saleWinSS"))
-    : null;
-
-  // Final object (state first, then storage)
-  const saleWin = saleWinFromState || saleWinFromStorage;
-
-  // Extract valpha safely
-  const selectedValpha = saleWin?.valpha || "";
+  const getValphaQueryWithPrefix = () => {
+    return selectedValpha
+      ? `&valpha=${encodeURIComponent(selectedValpha)}`
+      : "";
+  };
 
   useEffect(() => {
     if (saleWinFromState) {
       localStorage.setItem("saleWinSS", JSON.stringify(saleWinFromState));
-    }    
+    }
   }, [saleWinFromState]);
 
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
