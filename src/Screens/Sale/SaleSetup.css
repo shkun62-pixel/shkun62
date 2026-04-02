@@ -306,3 +306,526 @@ font-weight: bolder;
 .HoverSelect:focus{
   border-color: blue;
 }
+
+
+/* New CSS */
+:root {
+  --SS-font-size: 13px;
+  --SS-font-size-sm: 12px;
+  --SS-font-size-lg: 15px;
+  --SS-font-weight: 700;
+
+  --SS-text: #0f172a;
+  --SS-subtext: #475569;
+
+  --SS-blue: #2563eb;
+  --SS-blue-dark: #1d4ed8;
+  --SS-green: #16a34a;
+  --SS-green-dark: #15803d;
+  --SS-red: #dc2626;
+  --SS-red-dark: #b91c1c;
+  --SS-slate: #64748b;
+  --SS-slate-dark: #475569;
+  --SS-cyan: #06b6d4;
+  --SS-cyan-dark: #0284c7;
+
+  --SS-shell-radius: 24px;
+  --SS-soft-border: 1px solid #e5e7eb;
+  --SS-card-border: 1px solid #e2e8f0;
+  --SS-card-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --SS-deep-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* modal shell */
+.SS-newModalz {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.SS-check:focus {
+  cursor: pointer;
+}
+
+/* main shell */
+.SS-maincontainer.SS-freshSetupShell {
+  width: min(1520px, 98vw);
+  height: calc(100vh - 20px);
+  max-height: calc(100vh - 20px);
+  min-height: calc(100vh - 20px);
+  border-radius: var(--SS-shell-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 20%),
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.07), transparent 18%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: var(--SS-deep-shadow);
+  color: var(--SS-text);
+}
+
+/* top row */
+.SS-topStrip {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.SS-topStripLeft {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.SS-stripTitle {
+  margin: 0;
+  font-size: clamp(22px, 1.8vw, 30px);
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.SS-topStripCenter {
+  min-width: 0;
+  padding: 8px 12px 4px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.SS-freshStepLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+}
+
+/* form area */
+.SS-freshForm {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 14px 18px 18px;
+  overflow: hidden;
+}
+
+.SS-freshContentArea {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 16px 110px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+/* inner cards */
+.SS-section {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid #e8eef7;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  padding: 12px;
+}
+
+/* floating footer */
+.SS-floatingFooter {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  min-height: 72px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow:
+    0 18px 34px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.06);
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  z-index: 5;
+}
+
+.SS-floatingFooterLeft {
+  display: flex;
+  align-items: center;
+}
+
+.SS-footerPill {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #eef2ff, #f8fafc);
+  border: 1px solid #dbeafe;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.SS-floatingFooterActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px !important;
+}
+
+/* buttons */
+.SS-freshBtn,
+.SS-btn {
+  min-width: 112px;
+  height: 42px;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.4px;
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12) !important;
+}
+
+.SS-freshBtnBack,
+.SS-btnSecondary {
+  background: linear-gradient(135deg, var(--SS-slate), var(--SS-slate-dark)) !important;
+  color: #fff !important;
+}
+
+.SS-freshBtnNext,
+.SS-btnBlue {
+  background: linear-gradient(135deg, var(--SS-blue), var(--SS-blue-dark)) !important;
+  color: #fff !important;
+}
+
+.SS-freshBtnSave,
+.SS-btnSave,
+.SS-btnPrimary {
+  background: linear-gradient(135deg, var(--SS-green), var(--SS-green-dark)) !important;
+  color: #fff !important;
+}
+
+.SS-freshBtnClose,
+.SS-btnClose {
+  background: linear-gradient(135deg, var(--SS-red), var(--SS-red-dark)) !important;
+  color: #fff !important;
+}
+
+.SS-freshBtnSeries,
+.SS-btnSeries {
+  background: linear-gradient(135deg, var(--SS-cyan), var(--SS-cyan-dark)) !important;
+  color: #fff !important;
+}
+
+/* expense section */
+.SS-expenseHeader {
+  display: grid;
+  grid-template-columns: minmax(90px, 110px) minmax(180px, 240px) 90px 90px 90px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: #475569;
+  background: linear-gradient(90deg, #eef2ff, #f0f9ff);
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.SS-expenseRow {
+  display: grid;
+  grid-template-columns: minmax(90px, 110px) minmax(180px, 240px) 90px 90px 90px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  border: 1px solid #ecf2f9;
+  transition: all 0.2s ease;
+}
+
+.SS-expenseRow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+  border-color: #dbeafe;
+}
+
+/* old prefixed utility classes preserved */
+.SS-maincontainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.SS-maincontainer2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  width: 100%;
+  padding: 8px 4px;
+  align-items: flex-start;
+}
+
+.SS-rightside {
+  margin-left: 0;
+  flex: 1 1 420px;
+  min-width: 320px;
+}
+
+.SS-leftside {
+  flex: 1 1 420px;
+  min-width: 320px;
+}
+
+.SS-ColorSelect,
+.SS-customername,
+.SS-termss,
+.SS-vehicleno,
+.SS-stype,
+.SS-BillCash,
+.SS-Supply,
+.SS-Product,
+.SS-Rem1,
+.SS-Rem2,
+.SS-Rem3,
+.SS-Transport,
+.SS-Broker,
+.SS-GRno,
+.SS-sale_ac,
+.SS-Backdate,
+.SS-CessCode,
+.SS-TCSrate,
+.SS-TcsTax,
+.SS-Tcs206H,
+.SS-TDSAcc,
+.SS-TcsAc,
+.SS-IgstAc,
+.SS-SgstAc,
+.SS-CgstAc,
+.SS-Labour,
+.SS-Postage,
+.SS-Discount,
+.SS-Freight,
+.SS-Expenses,
+.SS-Expenses10,
+.SS-focuscursor,
+.SS-RemPost,
+.SS-acLed,
+.SS-revtime,
+.SS-invtime,
+.SS-afterTax,
+.SS-itemLed,
+.SS-extraRem,
+.SS-cdwindow,
+.SS-disitems,
+.SS-taxRoff,
+.SS-roundoff,
+.SS-lowsale,
+.SS-negstklevel,
+.SS-rateSec,
+.SS-tdsPolicy,
+.SS-decimalrate,
+.SS-bag,
+.SS-qty,
+.SS-printunReg,
+.SS-zerovalue,
+.SS-TDSOptions,
+.SS-displayHSN,
+.SS-Exp1 {
+  border: 1px solid #1f2937;
+  font-weight: var(--SS-font-weight);
+  font-size: var(--SS-font-size);
+  min-height: 34px;
+  border-radius: 8px;
+  background: #fff;
+  margin-left: 0 !important;
+}
+
+.SS-CessCode,
+.SS-IgstAc,
+.SS-SgstAc,
+.SS-CgstAc {
+  color: #c62828;
+}
+
+.SS-Labour,
+.SS-Postage,
+.SS-Discount,
+.SS-Freight,
+.SS-Expenses,
+.SS-Expenses10,
+.SS-Exp1 {
+  width: 100%;
+}
+
+.SS-printunReg,
+.SS-zerovalue,
+.SS-TDSOptions,
+.SS-displayHSN {
+  width: 100%;
+  max-width: 150px;
+}
+
+.SS-HoverSelect:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+.SS-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.SS-row-sm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+}
+
+.SS-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.SS-topbar,
+.SS-titleWrap,
+.SS-title,
+.SS-glassShell,
+.SS-topHero,
+.SS-topHeroLeft,
+.SS-badge,
+.SS-heroTitle,
+.SS-heroSubTitle,
+.SS-topHeroRight,
+.SS-statusCard,
+.SS-statusLabel,
+.SS-statusValue,
+.SS-stepperWrap,
+.SS-footerBar,
+.SS-footerLeft,
+.SS-miniInfo {
+  all: unset;
+}
+
+/* responsive */
+@media (max-width: 1280px) {
+  .SS-maincontainer.SS-freshSetupShell {
+    width: 99vw;
+    height: calc(100vh - 12px);
+    max-height: calc(100vh - 12px);
+  }
+
+  .SS-topStrip {
+    padding: 12px 14px 8px;
+  }
+
+  .SS-freshForm {
+    padding: 12px 14px 14px;
+  }
+
+  .SS-floatingFooter {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .SS-topStrip {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .SS-topStripLeft {
+    justify-content: center;
+  }
+
+  .SS-stripTitle {
+    text-align: center;
+  }
+
+  .SS-expenseHeader,
+  .SS-expenseRow {
+    grid-template-columns: 1fr;
+  }
+
+  .SS-floatingFooterActions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .SS-newModalz {
+    padding: 6px;
+  }
+
+  .SS-maincontainer.SS-freshSetupShell {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .SS-freshForm {
+    padding: 10px;
+  }
+
+  .SS-freshContentArea {
+    padding: 12px 12px 130px;
+  }
+
+  .SS-floatingFooter {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 10px;
+  }
+
+  .SS-freshBtn,
+  .SS-btn {
+    min-width: 96px;
+    height: 40px;
+    font-size: 12px !important;
+  }
+}

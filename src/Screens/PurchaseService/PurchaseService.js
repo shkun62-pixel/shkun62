@@ -243,7 +243,7 @@ const PurchaseService = () => {
       amount: true,
       discount: false,
       others: true,
-      gst:false,
+      gst:true,
       cgst: true,
       sgst: true,
       igst: true,
