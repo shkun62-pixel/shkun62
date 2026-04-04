@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Table } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
 import AccWisePrint from "./AccWisePrint";
@@ -34,7 +34,7 @@ export default function AccWiseSaleSumm({ show, onClose }) {
   }, []);
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
-  const [reportType, setReportType] = useState("With GST");
+  const [reportType, setReportType] = useState("Without GST");
   const [stateName, setStateName] = useState("");
   const [minQty, setMinQty] = useState("");
   const [maxQty, setMaxQty] = useState("");
@@ -43,6 +43,13 @@ export default function AccWiseSaleSumm({ show, onClose }) {
   const [agent, setAgent] = useState("");
   const [taxType, setTaxType] = useState("All");
   const [lessDrCr, setLessDrCr] = useState(true);
+
+  // Ledger selection modal state
+  const [ledgerModalOpen, setLedgerModalOpen] = useState(false);
+  const [ledgers, setLedgers] = useState([]);                 // All ledger names from API
+  const [selectedLedgers, setSelectedLedgers] = useState([]); // Only checked
+  const [ledgerSearch, setLedgerSearch] = useState("");       // Search input
+  const [selectAll, setSelectAll] = useState(false);          // Select All toggle
 
 
   // print modal
@@ -88,16 +95,18 @@ export default function AccWiseSaleSumm({ show, onClose }) {
   }
 
   // group into single row per account
-  function summarizeByAccount(purchases) {
+    function summarizeByAccount(purchases) {
     const result = {};
 
     purchases.forEach((p) => {
       p.items.forEach((item) => {
-        const acc = item.Scodess;
+        const accId = String(item.Scodes01);
+        const accName = item.Scodess;
 
-        if (!result[acc]) {
-          result[acc] = {
-            account: acc,
+        if (!result[accId]) {
+          result[accId] = {
+            accountId: accId,     // internal
+            account: accName,     // display
             city: p.formData.city || "",
             bags: 0,
             qty: 0,
@@ -105,14 +114,14 @@ export default function AccWiseSaleSumm({ show, onClose }) {
           };
         }
 
-        result[acc].bags += Number(item.pkgs || 0);
-        result[acc].qty += Number(item.weight || 0);
-        if(reportType === "Without GST"){
-          result[acc].value += Number(item.amount || 0);
-        } else{
-          result[acc].value += Number(item.vamt || 0);
+        result[accId].bags += Number(item.pkgs || 0);
+        result[accId].qty += Number(item.weight || 0);
+
+        if (reportType === "Without GST") {
+          result[accId].value += Number(item.amount || 0);
+        } else {
+          result[accId].value += Number(item.vamt || 0);
         }
-        
       });
     });
 
@@ -121,6 +130,39 @@ export default function AccWiseSaleSumm({ show, onClose }) {
       avg: r.qty > 0 ? r.value / r.qty : 0,
     }));
   }
+  // function summarizeByAccount(purchases) {
+  //   const result = {};
+
+  //   purchases.forEach((p) => {
+  //     p.items.forEach((item) => {
+  //       const acc = item.Scodess;
+
+  //       if (!result[acc]) {
+  //         result[acc] = {
+  //           account: acc,
+  //           city: p.formData.city || "",
+  //           bags: 0,
+  //           qty: 0,
+  //           value: 0,
+  //         };
+  //       }
+
+  //       result[acc].bags += Number(item.pkgs || 0);
+  //       result[acc].qty += Number(item.weight || 0);
+  //       if(reportType === "Without GST"){
+  //         result[acc].value += Number(item.amount || 0);
+  //       } else{
+  //         result[acc].value += Number(item.vamt || 0);
+  //       }
+        
+  //     });
+  //   });
+
+  //   return Object.values(result).map((r) => ({
+  //     ...r,
+  //     avg: r.qty > 0 ? r.value / r.qty : 0,
+  //   }));
+  // }
 
   function formatMonth(dateStr) {
     const d = parseAnyDate(dateStr);
@@ -144,13 +186,15 @@ export default function AccWiseSaleSumm({ show, onClose }) {
       const month = formatMonth(p.formData?.date);
 
       p.items.forEach(item => {
-        const account = item.Scodess;
-        const key = `${month}__${account}`;
+        const accountId = String(item.Scodes01);
+        const accountName = item.Scodess;
+        const key = `${month}__${accountId}`;
 
         if (!result[key]) {
           result[key] = {
             month,
-            account,
+            accountId,
+            account: accountName,
             city: p.formData.city || "",
             bags: 0,
             qty: 0,
@@ -182,13 +226,15 @@ export default function AccWiseSaleSumm({ show, onClose }) {
       const date = formatDateKey(p.formData?.date);
 
       p.items.forEach(item => {
-        const account = item.Scodess;
-        const key = `${date}__${account}`;
+        const accountId = String(item.Scodes01);
+        const accountName = item.Scodess;
+        const key = `${date}__${accountId}`;
 
         if (!result[key]) {
           result[key] = {
             date,
-            account,
+            accountId,
+            account: accountName,
             city: p.formData.city || "",
             bags: 0,
             qty: 0,
@@ -241,6 +287,22 @@ export default function AccWiseSaleSumm({ show, onClose }) {
           if (!isValid(apiDate)) return false;
           return apiDate >= from && apiDate <= to;
         });
+      }
+
+      // FILTER BY LEDGERS IF SELECTED
+      if (selectedLedgers.length > 0) {
+        data = data
+          .map(rec => {
+            const filteredItems = (rec.items || []).filter(item =>
+              selectedLedgers.includes(String(item.vcode))
+            );
+
+            return {
+              ...rec,
+              items: filteredItems
+            };
+          })
+          .filter(rec => rec.items.length > 0); // remove empty vouchers
       }
 
       // CITY FILTER
@@ -305,6 +367,98 @@ export default function AccWiseSaleSumm({ show, onClose }) {
       setPrintOpen(true);
     });
   };
+
+  useEffect(() => {
+    axios.get(API_URL).then((res) => {
+      if (Array.isArray(res.data)) {
+
+        const list = res.data
+          .flatMap(r =>
+            (r.items || []).map(item => ({
+              name: item.sdisc || "",   // display
+              id: String(item.vcode) || ""      // stable
+            }))
+          )
+          .filter(x => x.id !== "");
+
+        // remove duplicates based on vcode
+        const unique = [];
+        const map = new Map();
+
+        for (const item of list) {
+          if (!map.has(item.id)) {
+            map.set(item.id, true);
+            unique.push(item);
+          }
+        }
+
+        setLedgers(unique);
+
+        // select all by default (using vcode)
+        setSelectedLedgers(unique.map(x => String(x.id)));
+        setSelectAll(true);
+      }
+    });
+  }, []);
+
+  // Toggle single ledger
+  function toggleLedger(id) {
+    setSelectedLedgers((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
+    );
+  }
+
+  // helper: currently visible (filtered) ledgers based on search
+  function getVisibleLedgers() {
+    const q = (ledgerSearch || "").toLowerCase();
+    return ledgers.filter(
+      (x) =>
+        x.name.toLowerCase().includes(q) ||
+        x.id.toLowerCase().includes(q)
+    );
+  }
+
+  // Select all
+  function toggleSelectAll() {
+    const visible = getVisibleLedgers();
+    const visibleIds = visible.map(x => x.id);
+
+    const allVisibleSelected =
+      visibleIds.length > 0 &&
+      visibleIds.every(v => selectedLedgers.includes(v));
+
+    if (allVisibleSelected) {
+      setSelectedLedgers(prev =>
+        prev.filter(v => !visibleIds.includes(v))
+      );
+      setSelectAll(false);
+    } else {
+      setSelectedLedgers(prev => {
+        const set = new Set(prev);
+        visibleIds.forEach(v => set.add(v));
+        return Array.from(set);
+      });
+      setSelectAll(true);
+    }
+  }
+
+  useEffect(() => {
+    const visible = getVisibleLedgers();
+
+    if (visible.length === 0) {
+      setSelectAll(false);
+      return;
+    }
+
+    const visibleIds = visible.map(x => x.id);
+    const allVisibleSelected = visibleIds.every(v =>
+      selectedLedgers.includes(v)
+    );
+
+    setSelectAll(allVisibleSelected);
+  }, [ledgerSearch, ledgers, selectedLedgers]);
 
   const exportToExcel = () => {
     if (!groupedData || groupedData.length === 0) {
@@ -620,15 +774,15 @@ export default function AccWiseSaleSumm({ show, onClose }) {
               </div>
 
               <div className="form-check mb-1">
-  <input
-    type="radio"
-    className="form-check-input"
-    name="summaryType"
-    value="month"
-    checked={summaryType === "month"}
-    onChange={(e) => setSummaryType(e.target.value)}
-  />
-  <label className="form-check-label">Month Wise</label>
+              <input
+                type="radio"
+                className="form-check-input"
+                name="summaryType"
+                value="month"
+                checked={summaryType === "month"}
+                onChange={(e) => setSummaryType(e.target.value)}
+              />
+              <label className="form-check-label">Month Wise</label>
               </div>
 
               <div className="form-check mb-4">
@@ -683,11 +837,14 @@ export default function AccWiseSaleSumm({ show, onClose }) {
                 marginTop: "25px",
               }}
           >
+            <Button variant="outline-secondary" onClick={() => setLedgerModalOpen(true)}>
+              Select Stock Accounts
+            </Button>
             <Button variant="primary" onClick={onOpenPrint}>
-              Print
+              PRINT
             </Button>
             <Button variant="secondary" onClick={onClose}>
-              Exit
+              EXIT
             </Button>
               </div>
             </div>
@@ -729,6 +886,94 @@ export default function AccWiseSaleSumm({ show, onClose }) {
         <Button variant="success" onClick={exportToExcel}> EXPORT </Button>
         <Button variant="secondary" onClick={() => setPrintOpen(false)}>CLOSE</Button>
       </Modal.Footer>
+    </Modal>
+
+    {/* LEDGER SELECTION MODAL */}
+    <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Select Stock Accounts</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+
+        {/* LEDGER TABLE */}
+        <div
+          style={{
+            maxHeight: "350px",
+            overflowY: "auto",
+            padding: "10px",
+          }}
+        >
+          <Table className="custom-table" size="sm">
+            <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
+              <tr>
+                <th style={{ width: "50px", textAlign: "center" }}>Select</th>
+                <th>Account Name</th>
+                <th>Ac Code</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {ledgers
+                .filter(
+                  (x) =>
+                    x.name.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
+                    x.id.toLowerCase().includes(ledgerSearch.toLowerCase())
+                )
+                .map((x, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLedgers.includes(x.id)}
+                        onChange={() => toggleLedger(x.id)}
+                      />
+                    </td>
+                    <td>{x.name}</td>   {/* sdisc */}
+                    <td>{x.id}</td>     {/* vcode */}
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
+
+      </Modal.Body>
+
+      <Modal.Footer
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {/* SEARCH BAR ON LEFT */}
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search ledger..."
+          style={{ width: "300px" }}
+          value={ledgerSearch}
+          onChange={(e) => setLedgerSearch(e.target.value)}
+        />
+
+        {/* BUTTONS ON RIGHT */}
+        <div>
+          <Button
+            variant={selectAll ? "warning" : "success"}
+            onClick={toggleSelectAll}
+          >
+            {selectAll ? "Unselect All" : "Select All"}
+          </Button>{" "}
+          <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
+            Close
+          </Button>{" "}
+          <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
+            Apply
+          </Button>
+        </div>
+      </Modal.Footer>
+
     </Modal>
     </>
   );

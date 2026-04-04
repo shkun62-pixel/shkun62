@@ -45,8 +45,8 @@ const AccountWisePrint = forwardRef(
     const totalBags = rows.reduce((sum, r) => sum + r.bags, 0);
     const totalQty = rows.reduce((sum, r) => sum + r.qty, 0);
     const totalValue = rows.reduce((sum, r) => sum + r.value, 0);
-    const totalAvg =
-      rows.reduce((sum, r) => sum + r.avg, 0) / rows.length;
+    const totalAvg = totalValue / totalQty;
+      // rows.reduce((sum, r) => sum + r.avg, 0) / rows.length;
 
     return (
       <div ref={ref}>

@@ -35,7 +35,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
 
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
-  const [reportType, setReportType] = useState("With GST");
+  const [reportType, setReportType] = useState("Without GST");
   const [stateName, setStateName] = useState("");
   const [minQty, setMinQty] = useState("");
   const [maxQty, setMaxQty] = useState("");
@@ -100,11 +100,13 @@ export default function AccountWiseSummPur({ show, onClose }) {
 
     purchases.forEach((p) => {
       p.items.forEach((item) => {
-        const acc = item.Pcodess;
+        const accId = String(item.Pcodes01);
+        const accName = item.Pcodess;
 
-        if (!result[acc]) {
-          result[acc] = {
-            account: acc,
+        if (!result[accId]) {
+          result[accId] = {
+            accountId: accId,     // internal
+            account: accName,     // display
             city: p.formData.city || "",
             bags: 0,
             qty: 0,
@@ -112,14 +114,14 @@ export default function AccountWiseSummPur({ show, onClose }) {
           };
         }
 
-        result[acc].bags += Number(item.pkgs || 0);
-        result[acc].qty += Number(item.weight || 0);
-        if(reportType === "Without GST"){
-          result[acc].value += Number(item.amount || 0);
-        } else{
-          result[acc].value += Number(item.vamt || 0);
+        result[accId].bags += Number(item.pkgs || 0);
+        result[accId].qty += Number(item.weight || 0);
+
+        if (reportType === "Without GST") {
+          result[accId].value += Number(item.amount || 0);
+        } else {
+          result[accId].value += Number(item.vamt || 0);
         }
-        
       });
     });
 
@@ -128,7 +130,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
       avg: r.qty > 0 ? r.value / r.qty : 0,
     }));
   }
-
+ 
   function formatMonth(dateStr) {
     const d = parseAnyDate(dateStr);
     if (!d) return "";
@@ -151,13 +153,15 @@ export default function AccountWiseSummPur({ show, onClose }) {
       const month = formatMonth(p.formData?.date);
 
       p.items.forEach(item => {
-        const account = item.Pcodess;
-        const key = `${month}__${account}`;
+        const accountId = String(item.Pcodes01);
+        const accountName = item.Pcodess;
+        const key = `${month}__${accountId}`;
 
         if (!result[key]) {
           result[key] = {
             month,
-            account,
+            accountId,
+            account: accountName,
             city: p.formData.city || "",
             bags: 0,
             qty: 0,
@@ -189,13 +193,15 @@ export default function AccountWiseSummPur({ show, onClose }) {
       const date = formatDateKey(p.formData?.date);
 
       p.items.forEach(item => {
-        const account = item.Pcodess;
-        const key = `${date}__${account}`;
+        const accountId = String(item.Pcodes01);
+        const accountName = item.Pcodess;
+        const key = `${date}__${accountId}`;
 
         if (!result[key]) {
-          result[key] = {
+         result[key] = {
             date,
-            account,
+            accountId,
+            account: accountName,
             city: p.formData.city || "",
             bags: 0,
             qty: 0,
@@ -252,9 +258,18 @@ export default function AccountWiseSummPur({ show, onClose }) {
 
       // FILTER BY LEDGERS IF SELECTED
       if (selectedLedgers.length > 0) {
-        data = data.filter(rec =>
-          selectedLedgers.includes(rec.items?.[0]?.sdisc)
-        );
+        data = data
+          .map(rec => {
+            const filteredItems = (rec.items || []).filter(item =>
+              selectedLedgers.includes(String(item.vcode))
+            );
+
+            return {
+              ...rec,
+              items: filteredItems
+            };
+          })
+          .filter(rec => rec.items.length > 0); // remove empty vouchers
       }
 
       // CITY FILTER
@@ -325,37 +340,40 @@ export default function AccountWiseSummPur({ show, onClose }) {
       if (Array.isArray(res.data)) {
 
         const list = res.data
-          .map(r => ({
-            sdisc: r.items?.[0]?.sdisc || "",
-            vcode: r.items?.[0]?.vcode || ""
-          }))
-          .filter(x => x.sdisc !== "");
+          .flatMap(r =>
+            (r.items || []).map(item => ({
+              name: item.sdisc || "",   // display
+              id: String(item.vcode) || ""      // stable
+            }))
+          )
+          .filter(x => x.id !== "");
 
-        // remove duplicates by vacode
+        // remove duplicates based on vcode
         const unique = [];
         const map = new Map();
+
         for (const item of list) {
-          if (!map.has(item.sdisc)) {
-            map.set(item.sdisc, true);
+          if (!map.has(item.id)) {
+            map.set(item.id, true);
             unique.push(item);
           }
         }
 
         setLedgers(unique);
 
-        // select all default
-        setSelectedLedgers(unique.map(x => x.sdisc));
+        // select all by default (using vcode)
+        setSelectedLedgers(unique.map(x => String(x.id)));
         setSelectAll(true);
       }
     });
   }, []);
 
   // Toggle single ledger
-  function toggleLedger(name) {
+  function toggleLedger(id) {
     setSelectedLedgers((prev) =>
-      prev.includes(name)
-        ? prev.filter((x) => x !== name)
-        : [...prev, name]
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
     );
   }
 
@@ -364,29 +382,29 @@ export default function AccountWiseSummPur({ show, onClose }) {
     const q = (ledgerSearch || "").toLowerCase();
     return ledgers.filter(
       (x) =>
-        x.sdisc.toLowerCase().includes(q) ||
-        (x.vcode || "").toLowerCase().includes(q)
+        x.name.toLowerCase().includes(q) ||
+        x.id.toLowerCase().includes(q)
     );
   }
 
   // Select all
   function toggleSelectAll() {
     const visible = getVisibleLedgers();
-    const visibleVacodes = visible.map(x => x.sdisc);
+    const visibleIds = visible.map(x => x.id);
 
-    // If every visible vacode is already selected => unselect visible ones
-    const allVisibleSelected = visibleVacodes.length > 0 &&
-      visibleVacodes.every(v => selectedLedgers.includes(v));
+    const allVisibleSelected =
+      visibleIds.length > 0 &&
+      visibleIds.every(v => selectedLedgers.includes(v));
 
     if (allVisibleSelected) {
-      // remove visible vacodes from selectedLedgers
-      setSelectedLedgers(prev => prev.filter(v => !visibleVacodes.includes(v)));
+      setSelectedLedgers(prev =>
+        prev.filter(v => !visibleIds.includes(v))
+      );
       setSelectAll(false);
     } else {
-      // add visible vacodes to selectedLedgers (avoid duplicates)
       setSelectedLedgers(prev => {
         const set = new Set(prev);
-        visibleVacodes.forEach(v => set.add(v));
+        visibleIds.forEach(v => set.add(v));
         return Array.from(set);
       });
       setSelectAll(true);
@@ -395,12 +413,17 @@ export default function AccountWiseSummPur({ show, onClose }) {
 
   useEffect(() => {
     const visible = getVisibleLedgers();
+
     if (visible.length === 0) {
       setSelectAll(false);
       return;
     }
-    const visibleVacodes = visible.map(x => x.sdisc);
-    const allVisibleSelected = visibleVacodes.every(v => selectedLedgers.includes(v));
+
+    const visibleIds = visible.map(x => x.id);
+    const allVisibleSelected = visibleIds.every(v =>
+      selectedLedgers.includes(v)
+    );
+
     setSelectAll(allVisibleSelected);
   }, [ledgerSearch, ledgers, selectedLedgers]);
 
@@ -409,6 +432,8 @@ export default function AccountWiseSummPur({ show, onClose }) {
       alert("No data to export");
       return;
     }
+    // ✅ remove internal fields like accountId
+    const cleanedData = groupedData.map(({ accountId, ...rest }) => rest);
 
     const wb = XLSX.utils.book_new();
     const ws = {};
@@ -434,7 +459,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
     // ----------------------------
     // Dynamic headers
     // ----------------------------
-    let headers = Object.keys(groupedData[0]).map(k => headerMap[k] || k);
+    let headers = Object.keys(cleanedData[0]).map(k => headerMap[k] || k);
     if (summaryType === "date") {
       headers = [
         "Date",
@@ -494,7 +519,7 @@ export default function AccountWiseSummPur({ show, onClose }) {
     // ----------------------------
     // Data Rows
     // ----------------------------
-    groupedData.forEach(r => {
+    cleanedData.forEach(r => {
       const row = headers.map((h, i) => {
         const key = Object.keys(headerMap).find(k => headerMap[k] === h);
         let val = r[key] ?? "";
@@ -718,15 +743,15 @@ export default function AccountWiseSummPur({ show, onClose }) {
               </div>
 
               <div className="form-check mb-1">
-  <input
-    type="radio"
-    className="form-check-input"
-    name="summaryType"
-    value="month"
-    checked={summaryType === "month"}
-    onChange={(e) => setSummaryType(e.target.value)}
-  />
-  <label className="form-check-label">Month Wise</label>
+              <input
+                type="radio"
+                className="form-check-input"
+                name="summaryType"
+                value="month"
+                checked={summaryType === "month"}
+                onChange={(e) => setSummaryType(e.target.value)}
+              />
+              <label className="form-check-label">Month Wise</label>
               </div>
 
               <div className="form-check mb-4">
@@ -785,10 +810,10 @@ export default function AccountWiseSummPur({ show, onClose }) {
               Select Stock Accounts
             </Button>
             <Button variant="primary" onClick={onOpenPrint}>
-              Print
+              PRINT
             </Button>
             <Button variant="secondary" onClick={onClose}>
-              Exit
+              EXIT
             </Button>
               </div>
             </div>
@@ -861,20 +886,20 @@ export default function AccountWiseSummPur({ show, onClose }) {
               {ledgers
                 .filter(
                   (x) =>
-                    x.sdisc.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
-                    x.vcode.toLowerCase().includes(ledgerSearch.toLowerCase())
+                    x.name.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
+                    x.id.toLowerCase().includes(ledgerSearch.toLowerCase())
                 )
                 .map((x, idx) => (
                   <tr key={idx}>
                     <td style={{ textAlign: "center" }}>
                       <input
                         type="checkbox"
-                        checked={selectedLedgers.includes(x.sdisc)}
-                        onChange={() => toggleLedger(x.sdisc)}
+                        checked={selectedLedgers.includes(x.id)}
+                        onChange={() => toggleLedger(x.id)}
                       />
                     </td>
-                    <td>{x.sdisc}</td>
-                    <td>{x.vcode}</td>
+                    <td>{x.name}</td>   {/* sdisc */}
+                    <td>{x.id}</td>     {/* vcode */}
                   </tr>
                 ))}
             </tbody>

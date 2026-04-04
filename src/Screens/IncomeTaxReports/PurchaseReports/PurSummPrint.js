@@ -62,11 +62,11 @@ const PurSummPrint = forwardRef(
     // Totals
     const totalBags = groupedData
       .reduce((a, b) => a + (b.bags || 0), 0)
-      .toFixed(2);
+      .toFixed(3);
 
     const totalQty = groupedData
       .reduce((a, b) => a + (b.qty || 0), 0)
-      .toFixed(2);
+      .toFixed(3);
 
     const totalValue = groupedData
       .reduce((a, b) => a + (b.value || 0), 0)
@@ -144,8 +144,8 @@ const PurSummPrint = forwardRef(
                   <td style={thtd}>{m.month}</td>
                   <td style={thtd}>{m.supplierName}</td>
                   <td style={thtd}>{m.city}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{m.bags.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{m.qty.toFixed(2)}</td>
+                  <td style={{...thtd, textAlign:'right'}}>{m.bags.toFixed(3)}</td>
+                  <td style={{...thtd, textAlign:'right'}}>{m.qty.toFixed(3)}</td>
                   <td style={{...thtd, textAlign:'right'}}>{m.value.toFixed(2)}</td>
                 </tr>
               ))}
@@ -156,8 +156,8 @@ const PurSummPrint = forwardRef(
                 <tr key={i}>
                   <td style={thtd}>{d.date}</td>
                   <td style={thtd}>{d.supplier}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{d.bags.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{d.qty.toFixed(2)}</td>
+                  <td style={{...thtd, textAlign:'right'}}>{d.bags.toFixed(3)}</td>
+                  <td style={{...thtd, textAlign:'right'}}>{d.qty.toFixed(3)}</td>
                   <td style={{...thtd, textAlign:'right'}}>{d.value.toFixed(2)}</td>
                 </tr>
               ))}
@@ -169,8 +169,8 @@ const PurSummPrint = forwardRef(
                   <td style={thtd}>{s.supplierName}</td>
                   <td style={thtd}>{s.city}</td>
                   <td style={thtd}>{s.pan}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{s.bags.toFixed(2)}</td>
-                  <td style={{...thtd, textAlign:'right'}}>{s.qty.toFixed(2)}</td>
+                  <td style={{...thtd, textAlign:'right'}}>{s.bags.toFixed(3)}</td>
+                  <td style={{...thtd, textAlign:'right'}}>{s.qty.toFixed(3)}</td>
                   <td style={{...thtd, textAlign:'right'}}>{s.value.toFixed(2)}</td>
                 </tr>
               ))}
