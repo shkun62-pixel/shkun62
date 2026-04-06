@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Table } from "react-bootstrap";
 import axios from "axios";
 import InputMask from "react-input-mask";
 import { useReactToPrint } from "react-to-print";
@@ -35,7 +35,7 @@ export default function ProductWisePur({ show, onClose }) {
 
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
-  const [reportType, setReportType] = useState("With GST");
+  const [reportType, setReportType] = useState("Without GST");
   const [stateName, setStateName] = useState("");
   const [minQty, setMinQty] = useState("");
   const [maxQty, setMaxQty] = useState("");
@@ -45,6 +45,12 @@ export default function ProductWisePur({ show, onClose }) {
   const [taxType, setTaxType] = useState("All");
   const [lessDrCr, setLessDrCr] = useState(true);
 
+  // Product selection modal state
+  const [ledgerModalOpen, setLedgerModalOpen] = useState(false);
+  const [ledgers, setLedgers] = useState([]);                 // All ledger names from API
+  const [selectedLedgers, setSelectedLedgers] = useState([]); // Only checked
+  const [ledgerSearch, setLedgerSearch] = useState("");       // Search input
+  const [selectAll, setSelectAll] = useState(false);          // Select All toggle
 
   // print modal
   const [printOpen, setPrintOpen] = useState(false);
@@ -94,10 +100,12 @@ export default function ProductWisePur({ show, onClose }) {
 
     purchases.forEach((p) => {
       p.items.forEach((item) => {
+        const accountId = String(item.vcode);
         const acc = item.sdisc;
 
-        if (!result[acc]) {
-          result[acc] = {
+        if (!result[accountId]) {
+          result[accountId] = {
+            accountId,
             account: acc,
             city: p.formData.city || "",
             bags: 0,
@@ -106,12 +114,12 @@ export default function ProductWisePur({ show, onClose }) {
           };
         }
 
-        result[acc].bags += Number(item.pkgs || 0);
-        result[acc].qty += Number(item.weight || 0);
+        result[accountId].bags += Number(item.pkgs || 0);
+        result[accountId].qty += Number(item.weight || 0);
         if(reportType === "Without GST"){
-          result[acc].value += Number(item.amount || 0);
+          result[accountId].value += Number(item.amount || 0);
         } else{
-          result[acc].value += Number(item.vamt || 0);
+          result[accountId].value += Number(item.vamt || 0);
         }
         
       });
@@ -145,12 +153,14 @@ export default function ProductWisePur({ show, onClose }) {
       const month = formatMonth(p.formData?.date);
 
       p.items.forEach(item => {
+        const accountId = String(item.vcode);
         const account = item.sdisc;
-        const key = `${month}__${account}`;
+        const key = `${month}__${accountId}`;
 
         if (!result[key]) {
           result[key] = {
             month,
+            accountId,
             account,
             city: p.formData.city || "",
             bags: 0,
@@ -183,12 +193,16 @@ export default function ProductWisePur({ show, onClose }) {
       const date = formatDateKey(p.formData?.date);
 
       p.items.forEach(item => {
+        const accountId = String(item.vcode);
         const account = item.sdisc;
-        const key = `${date}__${account}`;
+        const key = `${date}__${accountId}`;
+        // const account = item.sdisc;
+        // const key = `${date}__${account}`;
 
         if (!result[key]) {
           result[key] = {
             date,
+            accountId,
             account,
             city: p.formData.city || "",
             bags: 0,
@@ -244,11 +258,27 @@ export default function ProductWisePur({ show, onClose }) {
         });
       }
 
+      // FILTER BY PRODUCT IF SELECTED
+      if (selectedLedgers.length > 0) {
+        data = data
+          .map(rec => {
+            const filteredItems = (rec.items || []).filter(item =>
+              selectedLedgers.includes(String(item.vcode))
+            );
+
+            return {
+              ...rec,
+              items: filteredItems
+            };
+          })
+          .filter(rec => rec.items.length > 0); // remove empty vouchers
+      }
+
       // CITY FILTER
       if (city.trim() !== "") {
         data = data.filter(p => {
           const apiCity =
-            p.customerDetails?.[0]?.city ||
+            p.supplierdetails?.[0]?.city ||
             p.formData?.city ||
             "";
           return apiCity.toLowerCase().includes(city.toLowerCase());
@@ -258,7 +288,7 @@ export default function ProductWisePur({ show, onClose }) {
       if (stateName.trim() !== "") {
         data = data.filter(p => {
           const apiState =
-            p.customerDetails?.[0]?.state ||
+            p.supplierdetails?.[0]?.state ||
             p.formData?.state ||
             "";
           return apiState.toLowerCase().includes(stateName.toLowerCase());
@@ -312,6 +342,7 @@ export default function ProductWisePur({ show, onClose }) {
       alert("No data to export");
       return;
     }
+    const cleanedData = groupedData.map(({ accountId, ...rest }) => rest);
 
     const wb = XLSX.utils.book_new();
     const ws = {};
@@ -337,7 +368,7 @@ export default function ProductWisePur({ show, onClose }) {
     // ----------------------------
     // Dynamic headers
     // ----------------------------
-    let headers = Object.keys(groupedData[0]).map(k => headerMap[k] || k);
+    let headers = Object.keys(cleanedData[0]).map(k => headerMap[k] || k);
     if (summaryType === "date") {
       headers = [
         "Date",
@@ -397,7 +428,7 @@ export default function ProductWisePur({ show, onClose }) {
     // ----------------------------
     // Data Rows
     // ----------------------------
-    groupedData.forEach(r => {
+    cleanedData.forEach(r => {
       const row = headers.map((h, i) => {
         const key = Object.keys(headerMap).find(k => headerMap[k] === h);
         let val = r[key] ?? "";
@@ -465,6 +496,98 @@ export default function ProductWisePur({ show, onClose }) {
     XLSX.utils.book_append_sheet(wb, ws, "Purchase Summary");
     XLSX.writeFile(wb, "Purchase_Summary.xlsx");
   };
+
+  useEffect(() => {
+    axios.get(API_URL).then((res) => {
+      if (Array.isArray(res.data)) {
+
+        const list = res.data
+          .flatMap(r =>
+            (r.items || []).map(item => ({
+              name: item.sdisc || "",   // display
+              id: String(item.vcode) || ""      // stable
+            }))
+          )
+          .filter(x => x.id !== "");
+
+        // remove duplicates based on vcode
+        const unique = [];
+        const map = new Map();
+
+        for (const item of list) {
+          if (!map.has(item.id)) {
+            map.set(item.id, true);
+            unique.push(item);
+          }
+        }
+
+        setLedgers(unique);
+
+        // select all by default (using vcode)
+        setSelectedLedgers(unique.map(x => String(x.id)));
+        setSelectAll(true);
+      }
+    });
+  }, []);
+
+  // Toggle single ledger
+  function toggleLedger(id) {
+    setSelectedLedgers((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
+    );
+  }
+
+  // helper: currently visible (filtered) ledgers based on search
+  function getVisibleLedgers() {
+    const q = (ledgerSearch || "").toLowerCase();
+    return ledgers.filter(
+      (x) =>
+        x.name.toLowerCase().includes(q) ||
+        x.id.toLowerCase().includes(q)
+    );
+  }
+
+  // Select all
+  function toggleSelectAll() {
+    const visible = getVisibleLedgers();
+    const visibleIds = visible.map(x => x.id);
+
+    const allVisibleSelected =
+      visibleIds.length > 0 &&
+      visibleIds.every(v => selectedLedgers.includes(v));
+
+    if (allVisibleSelected) {
+      setSelectedLedgers(prev =>
+        prev.filter(v => !visibleIds.includes(v))
+      );
+      setSelectAll(false);
+    } else {
+      setSelectedLedgers(prev => {
+        const set = new Set(prev);
+        visibleIds.forEach(v => set.add(v));
+        return Array.from(set);
+      });
+      setSelectAll(true);
+    }
+  }
+
+  useEffect(() => {
+    const visible = getVisibleLedgers();
+
+    if (visible.length === 0) {
+      setSelectAll(false);
+      return;
+    }
+
+    const visibleIds = visible.map(x => x.id);
+    const allVisibleSelected = visibleIds.every(v =>
+      selectedLedgers.includes(v)
+    );
+
+    setSelectAll(allVisibleSelected);
+  }, [ledgerSearch, ledgers, selectedLedgers]);
 
   return (
     <>
@@ -621,15 +744,15 @@ export default function ProductWisePur({ show, onClose }) {
               </div>
 
               <div className="form-check mb-1">
-  <input
-    type="radio"
-    className="form-check-input"
-    name="summaryType"
-    value="month"
-    checked={summaryType === "month"}
-    onChange={(e) => setSummaryType(e.target.value)}
-  />
-  <label className="form-check-label">Month Wise</label>
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name="summaryType"
+                  value="month"
+                  checked={summaryType === "month"}
+                  onChange={(e) => setSummaryType(e.target.value)}
+                />
+                <label className="form-check-label">Month Wise</label>
               </div>
 
               <div className="form-check mb-4">
@@ -684,11 +807,14 @@ export default function ProductWisePur({ show, onClose }) {
                 marginTop: "25px",
               }}
           >
+            <Button variant="outline-secondary" onClick={() => setLedgerModalOpen(true)}>
+              Select Product
+            </Button>
             <Button variant="primary" onClick={onOpenPrint}>
-              Print
+              PRINT
             </Button>
             <Button variant="secondary" onClick={onClose}>
-              Exit
+              EXIT
             </Button>
               </div>
             </div>
@@ -730,6 +856,94 @@ export default function ProductWisePur({ show, onClose }) {
         <Button variant="success" onClick={exportToExcel}> EXPORT </Button>
         <Button variant="secondary" onClick={() => setPrintOpen(false)}>CLOSE</Button>
       </Modal.Footer>
+    </Modal>
+
+    {/* PRODUCT SELECTION MODAL */}
+    <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Select Stock Accounts</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+
+        {/* LEDGER TABLE */}
+        <div
+          style={{
+            maxHeight: "350px",
+            overflowY: "auto",
+            padding: "10px",
+          }}
+        >
+          <Table className="custom-table" size="sm">
+            <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
+              <tr>
+                <th style={{ width: "50px", textAlign: "center" }}>Select</th>
+                <th>Account Name</th>
+                <th>Ac Code</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {ledgers
+                .filter(
+                  (x) =>
+                    x.name.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
+                    x.id.toLowerCase().includes(ledgerSearch.toLowerCase())
+                )
+                .map((x, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLedgers.includes(x.id)}
+                        onChange={() => toggleLedger(x.id)}
+                      />
+                    </td>
+                    <td>{x.name}</td>   {/* sdisc */}
+                    <td>{x.id}</td>     {/* vcode */}
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
+
+      </Modal.Body>
+
+      <Modal.Footer
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {/* SEARCH BAR ON LEFT */}
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search ledger..."
+          style={{ width: "300px" }}
+          value={ledgerSearch}
+          onChange={(e) => setLedgerSearch(e.target.value)}
+        />
+
+        {/* BUTTONS ON RIGHT */}
+        <div>
+          <Button
+            variant={selectAll ? "warning" : "success"}
+            onClick={toggleSelectAll}
+          >
+            {selectAll ? "Unselect All" : "Select All"}
+          </Button>{" "}
+          <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
+            Close
+          </Button>{" "}
+          <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
+            Apply
+          </Button>
+        </div>
+      </Modal.Footer>
+
     </Modal>
     </>
   );

@@ -35,7 +35,7 @@ export default function BrokerWiseSale({ show, onClose }) {
 
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
-  const [reportType, setReportType] = useState("With GST");
+  const [reportType, setReportType] = useState("Without GST");
   const [stateName, setStateName] = useState("");
   const [minQty, setMinQty] = useState("");
   const [maxQty, setMaxQty] = useState("");

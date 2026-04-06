@@ -249,7 +249,7 @@ export default function BrokerWisePur({ show, onClose }) {
       if (city.trim() !== "") {
         data = data.filter(p => {
           const apiCity =
-            p.customerDetails?.[0]?.city ||
+            p.supplierdetails?.[0]?.city ||
             p.formData?.city ||
             "";
           return apiCity.toLowerCase().includes(city.toLowerCase());
@@ -259,7 +259,7 @@ export default function BrokerWisePur({ show, onClose }) {
       if (stateName.trim() !== "") {
         data = data.filter(p => {
           const apiState =
-            p.customerDetails?.[0]?.state ||
+            p.supplierdetails?.[0]?.state ||
             p.formData?.state ||
             "";
           return apiState.toLowerCase().includes(stateName.toLowerCase());
@@ -622,15 +622,15 @@ export default function BrokerWisePur({ show, onClose }) {
               </div>
 
               <div className="form-check mb-1">
-  <input
-    type="radio"
-    className="form-check-input"
-    name="summaryType"
-    value="month"
-    checked={summaryType === "month"}
-    onChange={(e) => setSummaryType(e.target.value)}
-  />
-  <label className="form-check-label">Month Wise</label>
+                <input
+                  type="radio"
+                  className="form-check-input"
+                  name="summaryType"
+                  value="month"
+                  checked={summaryType === "month"}
+                  onChange={(e) => setSummaryType(e.target.value)}
+                />
+                <label className="form-check-label">Month Wise</label>
               </div>
 
               <div className="form-check mb-4">

@@ -38,6 +38,9 @@ export default function PartyWiseSumSale({ show, onClose }) {
     setToRaw(formatDate(fy.end));
   }, []);
 
+  const getVcode = (supplier) => {
+    return String(supplier?.Vcode ?? "").trim();
+  };
   const [city, setCity] = useState("");
   const [stateName, setStateName] = useState("");
   const [agent, setAgent] = useState("");
@@ -124,9 +127,11 @@ export default function PartyWiseSumSale({ show, onClose }) {
 
       // FILTER BY LEDGERS IF SELECTED
       if (selectedLedgers.length > 0) {
-        arr = arr.filter(rec =>
-          selectedLedgers.includes(rec.customerDetails?.[0]?.vacode)
-        );
+        arr = arr.filter(rec => {
+          const supplier = rec.customerDetails?.[0] || {};
+          const vcode = getVcode(supplier);   // ✅ FIX
+          return selectedLedgers.includes(vcode);
+        });
       }
 
       // Agent Filter
@@ -180,6 +185,8 @@ export default function PartyWiseSumSale({ show, onClose }) {
 
     apiArray.forEach((rec) => {
       const supplier = rec.customerDetails?.[0] || {};
+
+      const vcode = getVcode(supplier); // ✅ FIX
       const name = (supplier.vacode || "Unknown Supplier").trim();
       const city = supplier.city || "";
       const pan = supplier.pan || "";
@@ -198,30 +205,25 @@ export default function PartyWiseSumSale({ show, onClose }) {
           },
           { bags: 0, qty: 0, value: 0 }
         );
-      } else if (reportType === "With GST") {
-        const bags = items.reduce((a, it) => a + (parseFloat(it.pkgs) || 0), 0);
-        const qty = items.reduce(
-          (a, it) => a + (parseFloat(it.weight) || 0),
-          0
-        );
+      } else {
+        sums.bags = items.reduce((a, it) => a + (parseFloat(it.pkgs) || 0), 0);
+        sums.qty = items.reduce((a, it) => a + (parseFloat(it.weight) || 0), 0);
 
-        sums.bags = bags;
-        sums.qty = qty;
-
-        // Use grandtotal from formData
         const grand = parseFloat(rec.formData?.grandtotal);
         sums.value = isNaN(grand) ? 0 : grand;
       }
 
       const { minQty, maxQty, minValue, maxValue } = filters;
+
       if (minQty && sums.qty < parseFloat(minQty)) return;
       if (maxQty && sums.qty > parseFloat(maxQty)) return;
       if (minValue && sums.value < parseFloat(minValue)) return;
       if (maxValue && sums.value > parseFloat(maxValue)) return;
 
-      if (!map.has(name)) {
-        map.set(name, {
-          supplierName: name,
+      if (!map.has(vcode)) {
+        map.set(vcode, {
+          supplierName: name, // display
+          vcode,              // internal
           city,
           pan,
           bags: sums.bags,
@@ -229,7 +231,7 @@ export default function PartyWiseSumSale({ show, onClose }) {
           value: sums.value,
         });
       } else {
-        const ex = map.get(name);
+        const ex = map.get(vcode);
         ex.bags += sums.bags;
         ex.qty += sums.qty;
         ex.value += sums.value;
@@ -241,6 +243,9 @@ export default function PartyWiseSumSale({ show, onClose }) {
 
   function groupByDate(apiArray = [], reportType) {
     return apiArray.map(rec => {
+      const supplier = rec.customerDetails?.[0] || {};
+      const vcode = getVcode(supplier);  // ✅ FIX
+
       const items = rec.items ?? [];
 
       const bags = items.reduce((a, it) => a + (parseFloat(it.pkgs) || 0), 0);
@@ -258,7 +263,8 @@ export default function PartyWiseSumSale({ show, onClose }) {
         bags,
         qty,
         value,
-        supplier: rec.customerDetails?.[0]?.vacode || "",
+        supplier: supplier.vacode || "",
+        vcode, // ✅ added
       };
     });
   }
@@ -309,11 +315,11 @@ export default function PartyWiseSumSale({ show, onClose }) {
       });
 
       const supplier = rec.customerDetails?.[0] || {};
+      const vcode = getVcode(supplier);  // ✅ FIX
       const supplierName = (supplier.vacode || "Unknown Supplier").trim();
       const city = supplier.city || "";
 
-      // Unique key = Month + Supplier
-      const key = `${monthKey}__${supplierName}`;
+      const key = `${monthKey}__${vcode}`; // ✅ FIX
 
       const items = Array.isArray(rec.items) ? rec.items : [];
 
@@ -331,6 +337,7 @@ export default function PartyWiseSumSale({ show, onClose }) {
         map.set(key, {
           month: monthKey,
           supplierName,
+          vcode,
           city,
           bags,
           qty,
@@ -363,18 +370,23 @@ export default function PartyWiseSumSale({ show, onClose }) {
       if (Array.isArray(res.data)) {
 
         const list = res.data
-          .map(r => ({
-            vacode: r.customerDetails?.[0]?.vacode || "",
-            city: r.customerDetails?.[0]?.city || ""
-          }))
-          .filter(x => x.vacode !== "");
+          .map(r => {
+            const supplier = r.customerDetails?.[0] || {};
+            return {
+              vcode: getVcode(supplier),   // ✅ FIX
+              vacode: supplier.vacode || "",
+              city: supplier.city || ""
+            };
+          })
+          .filter(x => x.vcode !== "");
 
-        // remove duplicates by vacode
+        // remove duplicates by vcode
         const unique = [];
         const map = new Map();
+
         for (const item of list) {
-          if (!map.has(item.vacode)) {
-            map.set(item.vacode, true);
+          if (!map.has(item.vcode)) {
+            map.set(item.vcode, true);
             unique.push(item);
           }
         }
@@ -382,18 +394,18 @@ export default function PartyWiseSumSale({ show, onClose }) {
         setLedgers(unique);
 
         // select all default
-        setSelectedLedgers(unique.map(x => x.vacode));
+        setSelectedLedgers(unique.map(x => x.vcode));
         setSelectAll(true);
       }
     });
   }, []);
 
   // Toggle single ledger
-  function toggleLedger(name) {
+  function toggleLedger(vcode) {
     setSelectedLedgers((prev) =>
-      prev.includes(name)
-        ? prev.filter((x) => x !== name)
-        : [...prev, name]
+      prev.includes(vcode)
+        ? prev.filter((x) => x !== vcode)
+        : [...prev, vcode]
     );
   }
 
@@ -410,21 +422,25 @@ export default function PartyWiseSumSale({ show, onClose }) {
   // Select all
   function toggleSelectAll() {
     const visible = getVisibleLedgers();
-    const visibleVacodes = visible.map(x => x.vacode);
 
-    // If every visible vacode is already selected => unselect visible ones
-    const allVisibleSelected = visibleVacodes.length > 0 &&
-      visibleVacodes.every(v => selectedLedgers.includes(v));
+    // ✅ USE VCODE (NOT vacode)
+    const visibleVcodes = visible.map(x => x.vcode);
+
+    const allVisibleSelected =
+      visibleVcodes.length > 0 &&
+      visibleVcodes.every(v => selectedLedgers.includes(v));
 
     if (allVisibleSelected) {
-      // remove visible vacodes from selectedLedgers
-      setSelectedLedgers(prev => prev.filter(v => !visibleVacodes.includes(v)));
+      // ❌ remove visible vcodes
+      setSelectedLedgers(prev =>
+        prev.filter(v => !visibleVcodes.includes(v))
+      );
       setSelectAll(false);
     } else {
-      // add visible vacodes to selectedLedgers (avoid duplicates)
+      // ✅ add visible vcodes
       setSelectedLedgers(prev => {
         const set = new Set(prev);
-        visibleVacodes.forEach(v => set.add(v));
+        visibleVcodes.forEach(v => set.add(v));
         return Array.from(set);
       });
       setSelectAll(true);
@@ -433,12 +449,18 @@ export default function PartyWiseSumSale({ show, onClose }) {
 
   useEffect(() => {
     const visible = getVisibleLedgers();
+
     if (visible.length === 0) {
       setSelectAll(false);
       return;
     }
-    const visibleVacodes = visible.map(x => x.vacode);
-    const allVisibleSelected = visibleVacodes.every(v => selectedLedgers.includes(v));
+
+    const visibleVcodes = visible.map(x => x.vcode);
+
+    const allVisibleSelected = visibleVcodes.every(v =>
+      selectedLedgers.includes(v)
+    );
+
     setSelectAll(allVisibleSelected);
   }, [ledgerSearch, ledgers, selectedLedgers]);
 
@@ -890,11 +912,11 @@ export default function PartyWiseSumSale({ show, onClose }) {
 
                   {/* <Button variant="warning" onClick={handleExport}> Export </Button> */}
                   <Button variant="primary" onClick={onOpenPrint}>
-                    Print
+                    PRINT
                   </Button>
 
                   <Button variant="secondary" onClick={onClose}>
-                    Exit
+                    EXIT
                   </Button>
                 </div>
               </div>
@@ -950,92 +972,92 @@ export default function PartyWiseSumSale({ show, onClose }) {
       </Modal>
 
       {/* LEDGER SELECTION MODAL */}
-    <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title>Select Ledger Accounts</Modal.Title>
-      </Modal.Header>
+      <Modal show={ledgerModalOpen} onHide={() => setLedgerModalOpen(false)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Select Ledger Accounts</Modal.Title>
+        </Modal.Header>
 
-      <Modal.Body>
+        <Modal.Body>
 
-        {/* LEDGER TABLE */}
-        <div
+          {/* LEDGER TABLE */}
+          <div
+            style={{
+              maxHeight: "350px",
+              overflowY: "auto",
+              padding: "10px",
+            }}
+          >
+            <Table className="custom-table" size="sm">
+              <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                <tr>
+                  <th style={{ width: "50px", textAlign: "center" }}>Select</th>
+                  <th>Account Name</th>
+                  <th>City</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {ledgers
+                  .filter(
+                    (x) =>
+                      x.vacode.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
+                      x.city.toLowerCase().includes(ledgerSearch.toLowerCase())
+                  )
+                  .map((x, idx) => (
+                    <tr key={idx}>
+                      <td style={{ textAlign: "center" }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedLedgers.includes(x.vcode)}
+                          onChange={() => toggleLedger(x.vcode)}
+                        />
+                      </td>
+                      <td>{x.vacode}</td>
+                      <td>{x.city}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </Table>
+          </div>
+
+        </Modal.Body>
+
+        <Modal.Footer
           style={{
-            maxHeight: "350px",
-            overflowY: "auto",
-            padding: "10px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
           }}
         >
-          <Table className="custom-table" size="sm">
-            <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
-              <tr>
-                <th style={{ width: "50px", textAlign: "center" }}>Select</th>
-                <th>Account Name</th>
-                <th>City</th>
-              </tr>
-            </thead>
+          {/* SEARCH BAR ON LEFT */}
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search ledger..."
+            style={{ width: "300px" }}
+            value={ledgerSearch}
+            onChange={(e) => setLedgerSearch(e.target.value)}
+          />
 
-            <tbody>
-              {ledgers
-                .filter(
-                  (x) =>
-                    x.vacode.toLowerCase().includes(ledgerSearch.toLowerCase()) ||
-                    x.city.toLowerCase().includes(ledgerSearch.toLowerCase())
-                )
-                .map((x, idx) => (
-                  <tr key={idx}>
-                    <td style={{ textAlign: "center" }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedLedgers.includes(x.vacode)}
-                        onChange={() => toggleLedger(x.vacode)}
-                      />
-                    </td>
-                    <td>{x.vacode}</td>
-                    <td>{x.city}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </Table>
-        </div>
+          {/* BUTTONS ON RIGHT */}
+          <div>
+            <Button
+              variant={selectAll ? "warning" : "success"}
+              onClick={toggleSelectAll}
+            >
+              {selectAll ? "Unselect All" : "Select All"}
+            </Button>{" "}
+            <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
+              Close
+            </Button>{" "}
+            <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
+              Apply
+            </Button>
+          </div>
+        </Modal.Footer>
 
-      </Modal.Body>
-
-      <Modal.Footer
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        {/* SEARCH BAR ON LEFT */}
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Search ledger..."
-          style={{ width: "300px" }}
-          value={ledgerSearch}
-          onChange={(e) => setLedgerSearch(e.target.value)}
-        />
-
-        {/* BUTTONS ON RIGHT */}
-        <div>
-          <Button
-            variant={selectAll ? "warning" : "success"}
-            onClick={toggleSelectAll}
-          >
-            {selectAll ? "Unselect All" : "Select All"}
-          </Button>{" "}
-          <Button variant="secondary" onClick={() => setLedgerModalOpen(false)}>
-            Close
-          </Button>{" "}
-          <Button variant="primary" onClick={() => setLedgerModalOpen(false)}>
-            Apply
-          </Button>
-        </div>
-      </Modal.Footer>
-
-    </Modal>
+      </Modal>
     </>
   );
 }

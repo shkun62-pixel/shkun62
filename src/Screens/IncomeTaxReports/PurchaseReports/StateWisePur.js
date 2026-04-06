@@ -6,6 +6,7 @@ import { useReactToPrint } from "react-to-print";
 import useCompanySetup from "../../Shared/useCompanySetup";
 import * as XLSX from 'sheetjs-style';
 import AccountWisePrint from "./AccountWisePrint";
+import financialYear from "../../Shared/financialYear";
 
 const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 const API_URL = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/purchase`;
@@ -14,11 +15,11 @@ export default function StateWisePur({ show, onClose }) {
     
   const { companyName, companyAdd, companyCity } = useCompanySetup();
   // filters
-  const [fromDate, setFromDate] = useState("01-04-2025");
-  const [toDate, setToDate] = useState("31-03-2026");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [city, setCity] = useState("");
   const [summaryType, setSummaryType] = useState("account");
-  const [reportType, setReportType] = useState("With GST");
+  const [reportType, setReportType] = useState("Without GST");
   const [stateName, setStateName] = useState("");
   const [minQty, setMinQty] = useState("");
   const [maxQty, setMaxQty] = useState("");
@@ -27,6 +28,21 @@ export default function StateWisePur({ show, onClose }) {
   const [agent, setAgent] = useState("");
   const [taxType, setTaxType] = useState("All");
   const [lessDrCr, setLessDrCr] = useState(true);
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  useEffect(() => {
+    const fy = financialYear.getFYDates();
+    setFromDate(formatDate(fy.start)); // converted
+    setToDate(formatDate(fy.end));     // converted
+  }, []);
 
 
   // print modal
@@ -671,10 +687,10 @@ export default function StateWisePur({ show, onClose }) {
               }}
           >
             <Button variant="primary" onClick={onOpenPrint}>
-              Print
+              PRINT
             </Button>
             <Button variant="secondary" onClick={onClose}>
-              Exit
+              EXIT
             </Button>
               </div>
             </div>

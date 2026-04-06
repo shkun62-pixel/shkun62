@@ -31,6 +31,7 @@ export default function ProdWiseDetail({ show, onClose }) {
     setToDate(formatDate(fy.end)); // converted
   }, []);
 
+  const [summaryType, setSummaryType] = useState("gross");
   const [city, setCity] = useState("");
   const [reportType, setReportType] = useState("Without GST");
   const [stateName, setStateName] = useState("");
@@ -226,7 +227,71 @@ export default function ProdWiseDetail({ show, onClose }) {
         // GROUP SUMMARY
         let summary = [];
 
-        summary = summarizeAccountProductWise(data);
+        if (summaryType === "gross") {
+  summary = summarizeAccountProductWise(data);
+        } else {
+          const result = {};
+
+          data.forEach(p => {
+            const supplier = p.supplierdetails?.[0] || {};
+            const accId = String(supplier.Vcode) || "UNKNOWN"
+            const accName = supplier.vacode || "UNKNOWN";
+            const city = supplier.city || "";
+
+            if (!result[accId]) {
+              result[accId] = {
+                accId,
+                account: accName,
+                city,
+                bills: []
+              };
+            }
+
+            const bill = {
+              billNo: p.formData?.vno,
+              date: p.formData?.date,
+              items: [],
+              totalQty: 0,
+              totalAmt: 0,
+              totalGST: 0,
+              totalValue: 0
+            };
+
+            (p.items || []).forEach(item => {
+              const cases = Number(item.pkgs || 0);
+              const qty = Number(item.weight || 0);
+              const amt = Number(item.amount || 0);
+              const cgst = Number(item.ctax || 0);
+              const sgst = Number(item.stax || 0);
+              const igst = Number(item.itax || 0);
+
+              const gst = cgst + sgst + igst;
+              const total = Number(item.vamt || 0);
+
+              bill.items.push({
+                product: item.sdisc,
+                code: item.vcode,
+                cases,
+                qty,
+                rate: Number(item.rate || 0),
+                amt,
+                gstRate: Number(item.gst || 0),
+                gst,
+                total
+              });
+
+              bill.totalCases += cases;
+              bill.totalQty += qty;
+              bill.totalAmt += amt;
+              bill.totalGST += gst;
+              bill.totalValue += total;
+            });
+
+            result[accId].bills.push(bill);
+          });
+
+          summary = Object.values(result);
+        }
 
         // APPLY QTY / VALUE RANGE (same for all)
         if (minQty !== "")
@@ -296,7 +361,7 @@ export default function ProdWiseDetail({ show, onClose }) {
     return ledgers.filter(
       (x) =>
         x.name.toLowerCase().includes(q) ||
-        (x.code + "").toLowerCase()().includes(q)
+        (x.code + "").toLowerCase().includes(q),
     );
   }
 
@@ -545,6 +610,32 @@ export default function ProdWiseDetail({ show, onClose }) {
                   borderRadius: "10px",
                 }}
               >
+                <div className="mb-3" style={{display:'flex', flexDirection:'row'}}>
+                  <div className="form-check mr-3">
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="summaryType"
+                      value="gross"
+                      checked={summaryType === "gross"}
+                      onChange={(e) => setSummaryType(e.target.value)}
+                    />
+                    <label className="form-check-label">GROSS</label>
+                  </div>
+
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="summaryType"
+                      value="detailed"
+                      checked={summaryType === "detailed"}
+                      onChange={(e) => setSummaryType(e.target.value)}
+                    />
+                    <label className="form-check-label">DETAILED</label>
+                  </div>
+                </div>
+                
                 <div style={rowStyle}>
                   <label style={labelStyle}>Min Qty</label>
                   <Form.Control
@@ -632,6 +723,7 @@ export default function ProdWiseDetail({ show, onClose }) {
               companyName={companyName}
               companyAdd={companyAdd}
               companyCity={companyCity}
+              summaryType = {summaryType}
               tittle={"PRODUCT WISE DETAIL PURCHASE"}
             />
           )}
