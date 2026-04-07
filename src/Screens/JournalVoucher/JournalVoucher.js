@@ -68,7 +68,7 @@ const JournalVoucher = () => {
     "#8FBC8F",
   ];
   const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
-  const [fontSize, setFontSize] = useState(19);
+  const [fsize, setfsize] = useState(19);
   const [formData, setFormData] = useState({
     vtype: "J",
     date: "",
@@ -1551,7 +1551,7 @@ const JournalVoucher = () => {
               maxLength: 48,
               style: {
                 height: 20,
-                fontSize: `${fontSize}px`,
+                fontSize: `${fsize}px`,
                 fontWeight: "bold",
               },
               readOnly: !isEditMode || isDisabled,
@@ -1571,7 +1571,7 @@ const JournalVoucher = () => {
               maxLength: 48,
               style: {
                 height: 20,
-                fontSize: `${fontSize}px`,
+                fontSize: `${fsize}px`,
                 fontWeight: "bold",
               },
               readOnly: !isEditMode || isDisabled,
@@ -1634,7 +1634,7 @@ const JournalVoucher = () => {
                     className="Account"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1661,7 +1661,7 @@ const JournalVoucher = () => {
                       height: 40,
                       width: "100%",
                       boxSizing: "border-box",
-                       fontSize: `${fontSize}px`,
+                       fontSize: `${fsize}px`,
                       border: "none",
                       padding: "5px 8px",
                       position: "relative",
@@ -1744,7 +1744,7 @@ const JournalVoucher = () => {
                     className="Debit"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fsize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1779,7 +1779,7 @@ const JournalVoucher = () => {
                     className="Credits"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1837,7 +1837,7 @@ const JournalVoucher = () => {
               background: "skyblue",
               position: "sticky",
               bottom: -1,
-              fontSize: `${fontSize}px`,
+              fontSize: `${fsize}px`,
               borderTop: "1px solid black",
             }}
           >

@@ -2794,12 +2794,12 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     });
   };
 
-  const [fontSize, setFontSize] = useState(16.5); // Initial font size in pixels
+  const [fsize, setfsize] = useState(16.5); // Initial font size in pixels
   const increaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
+    setfsize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
   };
   const decreaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
+    setfsize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
@@ -3484,7 +3484,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3518,7 +3518,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   height: "100%",
                   padding: "0 12px", // adjust spacing
                   backgroundColor: "white",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   fontWeight: "bold"
                 },
               }}
@@ -3553,7 +3553,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 displayEmpty
                 inputProps={{
                   sx: {
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     pointerEvents:
                       !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                   },
@@ -3852,7 +3852,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       },
                       readOnly: !isEditMode || isDisabled,
                     }}
@@ -3869,7 +3869,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3893,7 +3893,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3915,7 +3915,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3953,7 +3953,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3977,7 +3977,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 fullWidth
                 className="custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   width: 165,
                   "& .MuiFilledInput-root": {
                     height: 48,
@@ -4008,7 +4008,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 12,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -4030,7 +4030,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 10,
                   style: {
                     height: "20px",
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     // padding: "0 8px"
                   },
                   readOnly: !isEditMode || isDisabled,
@@ -4055,7 +4055,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -4077,7 +4077,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: "20px",
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     // padding: "0 8px"
                   },
                   readOnly: !isEditMode || isDisabled,
@@ -4093,7 +4093,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 variant="filled"
                 className="custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 47, // adjust as needed (default ~56px for filled)
                   },
@@ -4139,7 +4139,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   }}
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
@@ -4173,7 +4173,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 className="SupplyTYPE custom-bordered-input"
                 sx={{
                   // width: '250px',
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 47, // adjust as needed (default ~56px for filled)
                   },
@@ -4218,7 +4218,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
@@ -4276,7 +4276,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="ItemCode"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4305,7 +4305,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="desc"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4332,7 +4332,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="Hsn"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4365,7 +4365,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
@@ -4394,7 +4394,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
@@ -4423,7 +4423,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
@@ -4447,7 +4447,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="Amount"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4482,7 +4482,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="Disc"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4510,7 +4510,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="discount"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4538,7 +4538,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="Others"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4682,7 +4682,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                       id="gst"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4709,7 +4709,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="CTax"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4737,7 +4737,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="STax"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4766,7 +4766,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     className="ITax"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4815,7 +4815,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               </tr>
             ))}
           </tbody>
-          <tfoot style={{ background: color, position: "sticky", bottom: -6, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tfoot style={{ background: color, position: "sticky", bottom: -6, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
             {tableData.itemcode && <td></td>}
             {tableData.sdisc && <td>TOTAL</td>}
@@ -4885,7 +4885,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
               maxLength: 48,
               style: {
                 height: 20,
-                fontSize: `${fontSize}px`,
+                fontSize: `${fsize}px`,
                 readOnly: !isEditMode || isDisabled,
               },
             }}
@@ -4907,7 +4907,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   readOnly: !isEditMode || isDisabled,
                 },
               }}
@@ -4930,7 +4930,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   readOnly: !isEditMode || isDisabled,
                 },
               }}
@@ -4952,7 +4952,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   readOnly: !isEditMode || isDisabled,
                 },
               }}
@@ -4976,7 +4976,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 size="small"
@@ -5000,7 +5000,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     readOnly: !isEditMode || isDisabled,
                   },
                 }}
@@ -5025,7 +5025,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     readOnly: !isEditMode || isDisabled,
                   },
                 }}
@@ -5081,7 +5081,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   sx={{
                     color: "red",
                     fontWeight: "bold",
-                    fontSize: `${fontSize}px`, // 👈 Dynamic font size
+                    fontSize: `${fsize}px`, // 👈 Dynamic font size
                     backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white", // mimic disabled style
                     pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                   }}
@@ -5112,7 +5112,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: 'red',
                   },
                 }}
@@ -5145,7 +5145,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5165,7 +5165,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5188,7 +5188,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5210,7 +5210,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5232,7 +5232,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5255,7 +5255,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5290,7 +5290,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                     fullWidth
                     className="custom-bordered-input"
                     sx={{
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: 165,
                       "& .MuiFilledInput-root": {
                         height: 48,
@@ -5314,7 +5314,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 size="small"
@@ -5332,7 +5332,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 size="small"
@@ -5356,7 +5356,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 onFocus={(e) => e.target.select()}
@@ -5387,7 +5387,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                   readOnly: !isEditMode || isDisabled,
                 }}
@@ -5529,7 +5529,7 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                     fontWeight: "bold",
                   },

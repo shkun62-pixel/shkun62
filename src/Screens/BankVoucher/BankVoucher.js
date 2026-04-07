@@ -75,7 +75,7 @@ const BankVoucher = () => {
     "#8FBC8F",
   ];
   const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
-  const [fontSize, setFontSize] = useState(17);
+  const [fsize, setfsize] = useState(17);
   const [formData, setFormData] = useState({
     vtype: "B",
     valpha:"",
@@ -1950,7 +1950,7 @@ const BankVoucher = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
                 readOnly: !isEditMode || isDisabled,
               }}
@@ -1970,7 +1970,7 @@ const BankVoucher = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
                 readOnly: !isEditMode || isDisabled,
               }}
@@ -1999,7 +1999,7 @@ const BankVoucher = () => {
                     maxLength: 48,
                     style: {
                       height: 20,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     },
                     readOnly: !isEditMode || isDisabled,
                   }}
@@ -2019,7 +2019,7 @@ const BankVoucher = () => {
                     maxLength: 48,
                     style: {
                       height: 20,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     },
                     readOnly: !isEditMode || isDisabled,
                   }}
@@ -2082,7 +2082,7 @@ const BankVoucher = () => {
                     className="Account"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2104,7 +2104,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2127,7 +2127,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2151,7 +2151,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2174,7 +2174,7 @@ const BankVoucher = () => {
                     readOnly
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2197,7 +2197,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2220,7 +2220,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2243,7 +2243,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2267,7 +2267,7 @@ const BankVoucher = () => {
                     readOnly={!isEditMode || isDisabled}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -2316,7 +2316,7 @@ const BankVoucher = () => {
               </tr>
             ))}
           </tbody>
-          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
             <td></td>
             <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>

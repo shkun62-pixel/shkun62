@@ -2695,12 +2695,12 @@ const allFieldsCus = productsCus.reduce((fields, product) => {
     });
   };
 
-  const [fontSize, setFontSize] = useState(16.5); // Initial font size in pixels
-  const increaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
+  const [fsize, setfsize] = useState(16.5); // Initial font size in pixels
+  const increasefsize = () => {
+    setfsize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
   };
-  const decreaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
+  const decreasefsize = () => {
+    setfsize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
@@ -3374,7 +3374,7 @@ const handleKeyDown = (event, index, field) => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3663,7 +3663,7 @@ const handleKeyDown = (event, index, field) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       },
                       readOnly: !isEditMode || isDisabled,
                     }}
@@ -3680,7 +3680,7 @@ const handleKeyDown = (event, index, field) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3704,7 +3704,7 @@ const handleKeyDown = (event, index, field) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3726,7 +3726,7 @@ const handleKeyDown = (event, index, field) => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3766,7 +3766,7 @@ const handleKeyDown = (event, index, field) => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3869,7 +3869,7 @@ const handleKeyDown = (event, index, field) => {
                 maxLength: 12,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3891,7 +3891,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 10,
                   style: {
                     height: "20px",
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     // padding: "0 8px"
                   },
                   readOnly: !isEditMode || isDisabled,
@@ -3917,7 +3917,7 @@ const handleKeyDown = (event, index, field) => {
                 style: {
                   height: "20px",
                   width: 140,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3962,7 +3962,7 @@ const handleKeyDown = (event, index, field) => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
                 readOnly: !isEditMode || isDisabled,
               }}
@@ -3971,7 +3971,7 @@ const handleKeyDown = (event, index, field) => {
               <FormControl
                 className=" Billss custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48,
                   },
@@ -4011,7 +4011,7 @@ const handleKeyDown = (event, index, field) => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -4035,7 +4035,7 @@ const handleKeyDown = (event, index, field) => {
                 variant="filled"
                 className="custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 47, // adjust as needed (default ~56px for filled)
                   },
@@ -4076,7 +4076,7 @@ const handleKeyDown = (event, index, field) => {
                   }}
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
@@ -4110,7 +4110,7 @@ const handleKeyDown = (event, index, field) => {
                 className="SupplyTYPE custom-bordered-input"
                 sx={{
                   // width: '250px',
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 47, // adjust as needed (default ~56px for filled)
                   },
@@ -4150,7 +4150,7 @@ const handleKeyDown = (event, index, field) => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                     },
                   }}
@@ -4209,7 +4209,7 @@ const handleKeyDown = (event, index, field) => {
                     className="ItemCode"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4238,7 +4238,7 @@ const handleKeyDown = (event, index, field) => {
                     className="desc"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4265,7 +4265,7 @@ const handleKeyDown = (event, index, field) => {
                     className="Hsn"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4298,7 +4298,7 @@ const handleKeyDown = (event, index, field) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
@@ -4327,7 +4327,7 @@ const handleKeyDown = (event, index, field) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
@@ -4356,7 +4356,7 @@ const handleKeyDown = (event, index, field) => {
                       border: "none",
                       padding: 5,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                     }}
                     maxLength={48}
                     readOnly={!isEditMode || isDisabled}
@@ -4380,7 +4380,7 @@ const handleKeyDown = (event, index, field) => {
                     className="Amount"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4415,7 +4415,7 @@ const handleKeyDown = (event, index, field) => {
                     className="Disc"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4443,7 +4443,7 @@ const handleKeyDown = (event, index, field) => {
                     className="discount"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4471,7 +4471,7 @@ const handleKeyDown = (event, index, field) => {
                     className="Others"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4491,7 +4491,7 @@ const handleKeyDown = (event, index, field) => {
                     className="Others"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4743,7 +4743,7 @@ const handleKeyDown = (event, index, field) => {
                     className="CTax"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4771,7 +4771,7 @@ const handleKeyDown = (event, index, field) => {
                     className="STax"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4800,7 +4800,7 @@ const handleKeyDown = (event, index, field) => {
                     className="ITax"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -4849,7 +4849,7 @@ const handleKeyDown = (event, index, field) => {
               </tr>
             ))}
           </tbody>
-          <tfoot style={{ background: color, position: "sticky", bottom: -6, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tfoot style={{ background: color, position: "sticky", bottom: -6, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
             {tableData.itemcode && <td></td>}
             {tableData.sdisc && <td>TOTAL</td>}
@@ -4918,7 +4918,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 size="small"
@@ -4942,7 +4942,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     readOnly: !isEditMode || isDisabled,
                   },
                 }}
@@ -4967,7 +4967,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     readOnly: !isEditMode || isDisabled,
                   },
                 }}
@@ -5023,7 +5023,7 @@ const handleKeyDown = (event, index, field) => {
                   sx={{
                     color: "red",
                     fontWeight: "bold",
-                    fontSize: `${fontSize}px`, // 👈 Dynamic font size
+                    fontSize: `${fsize}px`, // 👈 Dynamic font size
                     backgroundColor: (!isEditMode || isDisabled) ? "#f0f0f0" : "white", // mimic disabled style
                     pointerEvents: (!isEditMode || isDisabled) ? "none" : "auto", // stop mouse clicks
                   }}
@@ -5054,7 +5054,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: 'red',
                   },
                 }}
@@ -5087,7 +5087,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5107,7 +5107,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5136,7 +5136,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5157,7 +5157,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5180,7 +5180,7 @@ const handleKeyDown = (event, index, field) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5202,7 +5202,7 @@ const handleKeyDown = (event, index, field) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5224,7 +5224,7 @@ const handleKeyDown = (event, index, field) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5247,7 +5247,7 @@ const handleKeyDown = (event, index, field) => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5299,7 +5299,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 size="small"
@@ -5317,7 +5317,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 size="small"
@@ -5341,7 +5341,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 onFocus={(e) => e.target.select()}
@@ -5372,7 +5372,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                   readOnly: !isEditMode || isDisabled,
                 }}
@@ -5514,7 +5514,7 @@ const handleKeyDown = (event, index, field) => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                     fontWeight: "bold",
                   },

@@ -2862,13 +2862,13 @@ const SaleService = () => {
     items[currentIndex]?.RateCal,
   ]);
 
-  const [fontSize, setFontSize] = useState(17); // Initial font size in pixels
+  const [fsize, setfsize] = useState(17); // Initial font size in pixels
   const increaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
+    setfsize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
   };
 
   const decreaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
+    setfsize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
@@ -3347,7 +3347,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3629,7 +3629,7 @@ const SaleService = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       },
                       readOnly: !isEditMode || isDisabled,
                     }}
@@ -3647,7 +3647,7 @@ const SaleService = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3672,7 +3672,7 @@ const SaleService = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3695,7 +3695,7 @@ const SaleService = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3785,7 +3785,7 @@ const SaleService = () => {
                 maxLength: 12,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3807,7 +3807,7 @@ const SaleService = () => {
                   maxLength: 10,
                   style: {
                     height: "20px",
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     // padding: "0 8px"
                   },
                   readOnly: !isEditMode || isDisabled,
@@ -3832,7 +3832,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
                 readOnly: !isEditMode || isDisabled,
               }}
@@ -3841,7 +3841,7 @@ const SaleService = () => {
               <FormControl
                 className=" Billss custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
@@ -3887,7 +3887,7 @@ const SaleService = () => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -3912,7 +3912,7 @@ const SaleService = () => {
                 // disabled={!isEditMode || isDisabled}
                 className="TAXtypez custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
@@ -3958,7 +3958,7 @@ const SaleService = () => {
                   }}
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -3993,7 +3993,7 @@ const SaleService = () => {
                 className="SupplyTYPE custom-bordered-input"
                 sx={{
                   // width: '250px',
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
@@ -4039,7 +4039,7 @@ const SaleService = () => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -4102,7 +4102,7 @@ const SaleService = () => {
                       className="ItemCode"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4132,7 +4132,7 @@ const SaleService = () => {
                       className="desc"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4159,7 +4159,7 @@ const SaleService = () => {
                       className="Hsn"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4192,7 +4192,7 @@ const SaleService = () => {
                         border: "none",
                         padding: 5,
                         textAlign: "right",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       }}
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
@@ -4221,7 +4221,7 @@ const SaleService = () => {
                         border: "none",
                         padding: 5,
                         textAlign: "right",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       }}
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
@@ -4250,7 +4250,7 @@ const SaleService = () => {
                         border: "none",
                         padding: 5,
                         textAlign: "right",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       }}
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
@@ -4274,7 +4274,7 @@ const SaleService = () => {
                       className="Amount"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4313,7 +4313,7 @@ const SaleService = () => {
                       className="Disc"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4342,7 +4342,7 @@ const SaleService = () => {
                       className="discount"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4370,7 +4370,7 @@ const SaleService = () => {
                       className="Others"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4516,7 +4516,7 @@ const SaleService = () => {
                       id="gst"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4543,7 +4543,7 @@ const SaleService = () => {
                       className="CTax"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4571,7 +4571,7 @@ const SaleService = () => {
                       className="STax"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4600,7 +4600,7 @@ const SaleService = () => {
                       className="ITax"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4649,7 +4649,7 @@ const SaleService = () => {
               background: color,
               position: "sticky",
               bottom: -6,
-              fontSize: `${fontSize}px`,
+              fontSize: `${fsize}px`,
               borderTop: "1px solid black",
             }}
           >
@@ -4779,7 +4779,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -4802,7 +4802,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -4825,7 +4825,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -4871,7 +4871,7 @@ const SaleService = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -4904,7 +4904,7 @@ const SaleService = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -4923,7 +4923,7 @@ const SaleService = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -4952,7 +4952,7 @@ const SaleService = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 onFocus={(e) => e.target.select()}
@@ -4971,7 +4971,7 @@ const SaleService = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -4993,7 +4993,7 @@ const SaleService = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5015,7 +5015,7 @@ const SaleService = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5038,7 +5038,7 @@ const SaleService = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5071,7 +5071,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -5101,7 +5101,7 @@ const SaleService = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                   readOnly: !isEditMode || isDisabled,
                 }}
@@ -5242,7 +5242,7 @@ const SaleService = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   color: "red",
                   fontWeight: "bold",
                 },

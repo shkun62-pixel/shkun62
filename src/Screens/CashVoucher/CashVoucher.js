@@ -1227,7 +1227,7 @@ const CashVoucher = () => {
     return fields;
   }, []);
 
-  const [fontSize, setFontSize] = useState(18);
+  const [fsize, setfsize] = useState(18);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
     if (event.key === "Enter" || event.key === "Tab") {
@@ -1557,8 +1557,8 @@ const CashVoucher = () => {
         <span style={styles2.days}>{currentDay}</span>
       </div>
       {/* <div style={{ marginLeft: "90%", marginTop: -35 }}>
-          <Button onClick={decreaseFontSize}><FaMinus /></Button>
-          <Button style={{ marginLeft: 10 }} onClick={increaseFontSize}><FaPlus /></Button>
+          <Button onClick={decreasefsize}><FaMinus /></Button>
+          <Button style={{ marginLeft: 10 }} onClick={increasefsize}><FaPlus /></Button>
       </div> */}
       <div className="Tops">
         <span>DATE</span>
@@ -1595,7 +1595,7 @@ const CashVoucher = () => {
             maxLength: 48,
             style: {
               height: 20,
-              fontSize: `${fontSize}px`,
+              fontSize: `${fsize}px`,
               fontWeight: "bold",
             },
             readOnly: !isEditMode || isDisabled,
@@ -1615,7 +1615,7 @@ const CashVoucher = () => {
             maxLength: 48,
             style: {
               height: 20,
-              fontSize: `${fontSize}px`,
+              fontSize: `${fsize}px`,
               fontWeight: "bold",
             },
             readOnly: !isEditMode || isDisabled,
@@ -1671,7 +1671,7 @@ const CashVoucher = () => {
                   className="Account"
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1698,7 +1698,7 @@ const CashVoucher = () => {
                     list={showNarrationSuggestions ? "narrationList" : undefined}
                     style={{
                       height: 40,
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1729,7 +1729,7 @@ const CashVoucher = () => {
                     style={{
                       height: 40,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1753,7 +1753,7 @@ const CashVoucher = () => {
                     style={{
                       height: 40,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1778,7 +1778,7 @@ const CashVoucher = () => {
                     style={{
                       height: 40,
                       textAlign: "right",
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       width: "100%",
                       boxSizing: "border-box",
                       border: "none",
@@ -1820,7 +1820,7 @@ const CashVoucher = () => {
               </tr>
             ))}
           </tbody>
-          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fontSize}px`,borderTop:"1px solid black" }}>
+          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
             <td colSpan={2}></td>
             <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>

@@ -2952,13 +2952,13 @@ const DebitNote = () => {
     items[currentIndex]?.RateCal,
   ]);
 
-  const [fontSize, setFontSize] = useState(17); // Initial font size in pixels
-  const increaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
+  const [fsize, setfsize] = useState(17); // Initial font size in pixels
+  const increasefsize = () => {
+    setfsize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
   };
 
-  const decreaseFontSize = () => {
-    setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
+  const decreasefsize = () => {
+    setfsize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
@@ -3423,7 +3423,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3705,7 +3705,7 @@ const DebitNote = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       },
                       readOnly: !isEditMode || isDisabled,
                     }}
@@ -3723,7 +3723,7 @@ const DebitNote = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3748,7 +3748,7 @@ const DebitNote = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3771,7 +3771,7 @@ const DebitNote = () => {
                       maxLength: 48,
                       style: {
                         height: "20px",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         // padding: "0 8px",
                       },
                       readOnly: !isEditMode || isDisabled,
@@ -3861,7 +3861,7 @@ const DebitNote = () => {
                 maxLength: 12,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   // padding: "0 8px"
                 },
                 readOnly: !isEditMode || isDisabled,
@@ -3965,7 +3965,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: "20px",
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
                 readOnly: !isEditMode || isDisabled,
               }}
@@ -3974,7 +3974,7 @@ const DebitNote = () => {
               <FormControl
                 className=" Billss custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
@@ -4015,7 +4015,7 @@ const DebitNote = () => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -4040,7 +4040,7 @@ const DebitNote = () => {
                 // disabled={!isEditMode || isDisabled}
                 className="TAXtypez custom-bordered-input"
                 sx={{
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
@@ -4081,7 +4081,7 @@ const DebitNote = () => {
                   }}
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -4116,7 +4116,7 @@ const DebitNote = () => {
                 className="SupplyTYPE custom-bordered-input"
                 sx={{
                   // width: '250px',
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   "& .MuiFilledInput-root": {
                     height: 48, // adjust as needed (default ~56px for filled)
                   },
@@ -4157,7 +4157,7 @@ const DebitNote = () => {
                   displayEmpty
                   inputProps={{
                     sx: {
-                      fontSize: `${fontSize}px`,
+                      fontSize: `${fsize}px`,
                       pointerEvents:
                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
                     },
@@ -4231,7 +4231,7 @@ const DebitNote = () => {
                       className="ItemCode"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4260,7 +4260,7 @@ const DebitNote = () => {
                       className="desc"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4287,7 +4287,7 @@ const DebitNote = () => {
                       className="Hsn"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4320,7 +4320,7 @@ const DebitNote = () => {
                         border: "none",
                         padding: 5,
                         textAlign: "right",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       }}
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
@@ -4349,7 +4349,7 @@ const DebitNote = () => {
                         border: "none",
                         padding: 5,
                         textAlign: "right",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       }}
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
@@ -4378,7 +4378,7 @@ const DebitNote = () => {
                         border: "none",
                         padding: 5,
                         textAlign: "right",
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                       }}
                       maxLength={48}
                       readOnly={!isEditMode || isDisabled}
@@ -4402,7 +4402,7 @@ const DebitNote = () => {
                       className="Amount"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4441,7 +4441,7 @@ const DebitNote = () => {
                       className="Disc"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4470,7 +4470,7 @@ const DebitNote = () => {
                       className="discount"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4498,7 +4498,7 @@ const DebitNote = () => {
                       className="Others"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4519,7 +4519,7 @@ const DebitNote = () => {
                       className="Others"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4727,7 +4727,7 @@ const DebitNote = () => {
                       className="CTax"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4755,7 +4755,7 @@ const DebitNote = () => {
                       className="STax"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4784,7 +4784,7 @@ const DebitNote = () => {
                       className="ITax"
                       style={{
                         height: 40,
-                        fontSize: `${fontSize}px`,
+                        fontSize: `${fsize}px`,
                         width: "100%",
                         boxSizing: "border-box",
                         border: "none",
@@ -4835,7 +4835,7 @@ const DebitNote = () => {
               background: color,
               position: "sticky",
               bottom: -6,
-              fontSize: `${fontSize}px`,
+              fontSize: `${fsize}px`,
               borderTop: "1px solid black",
             }}
           >
@@ -4966,7 +4966,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -4989,7 +4989,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -5012,7 +5012,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -5100,7 +5100,7 @@ const DebitNote = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5133,7 +5133,7 @@ const DebitNote = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5152,7 +5152,7 @@ const DebitNote = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     color: "red",
                   },
                 }}
@@ -5181,7 +5181,7 @@ const DebitNote = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                 }}
                 onFocus={(e) => e.target.select()}
@@ -5200,7 +5200,7 @@ const DebitNote = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5222,7 +5222,7 @@ const DebitNote = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5244,7 +5244,7 @@ const DebitNote = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5267,7 +5267,7 @@ const DebitNote = () => {
                 inputProps={{
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                     backgroundColor: "white",
                     borderRadius: 5,
                   },
@@ -5300,7 +5300,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                 },
               }}
               onFocus={(e) => e.target.select()}
@@ -5330,7 +5330,7 @@ const DebitNote = () => {
                   maxLength: 48,
                   style: {
                     height: 20,
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${fsize}px`,
                   },
                   readOnly: !isEditMode || isDisabled,
                 }}
@@ -5528,7 +5528,7 @@ const DebitNote = () => {
                 maxLength: 48,
                 style: {
                   height: 20,
-                  fontSize: `${fontSize}px`,
+                  fontSize: `${fsize}px`,
                   color: "red",
                   fontWeight: "bold",
                 },
