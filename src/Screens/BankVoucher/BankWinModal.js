@@ -1,3 +1,471 @@
+// import React, { useContext, useEffect, useMemo, useState } from "react";
+// import {
+//   Modal,
+//   Box,
+//   Typography,
+//   TextField,
+//   Button,
+//   Grid,
+//   Divider,
+//   FormControlLabel,
+//   Checkbox,
+//   Chip,
+//   IconButton,
+//   Tooltip,
+//   CircularProgress,
+// } from "@mui/material";
+
+// import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+// import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+// import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+// import AddRoundedIcon from "@mui/icons-material/AddRounded";
+// import EditRoundedIcon from "@mui/icons-material/EditRounded";
+
+// import { alpha } from "@mui/material/styles";
+// import axios from "axios";
+// import { CompanyContext } from "../Context/CompanyContext";
+
+// const wrapStyle = {
+//   position: "absolute",
+//   top: "50%",
+//   left: "50%",
+//   transform: "translate(-50%, -50%)",
+//   width: 920,
+//   bgcolor: "#fff",
+//   borderRadius: 4,
+//   boxShadow: "0 22px 70px rgba(0,0,0,.22)",
+//   overflow: "hidden",
+// };
+
+// const ynToBool = (v) => String(v || "").toUpperCase() === "Y";
+// const boolToYn = (b) => (b ? "Y" : "N");
+
+// const emptyForm = {
+//   name: "",
+//   valpha: "",
+//   serialno: 0,
+//   prefix: "",
+//   onbillno: true,
+//   bankf3: "",
+//   path: "",
+//   billtype: "",
+//   ledpost: false,
+//   gstpost: false,
+//   stkpost: false,
+//   vatpost: false,
+// };
+
+// export default function PurWinModal({ open, onClose }) {
+//   const { company } = useContext(CompanyContext);
+
+//   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+
+//   const [records, setRecords] = useState([]);
+//   const [currentIndex, setCurrentIndex] = useState(0);
+
+//   const [form, setForm] = useState(emptyForm);
+//   const [editingId, setEditingId] = useState(null);
+
+//   const [saving, setSaving] = useState(false);
+//   const [deleting, setDeleting] = useState(false);
+
+//   const isEdit = useMemo(() => !!editingId, [editingId]);
+
+//   // FETCH DATA
+//   const fetchData = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank-win`
+//       );
+
+//       if (res.data?.ok) {
+//         setRecords(res.data.data || []);
+
+//         if (res.data.data.length > 0) {
+//           loadRecord(res.data.data[0], 0);
+//         }
+//       }
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (open) fetchData();
+//   }, [open]);
+
+//   // LOAD RECORD INTO FORM
+//   const loadRecord = (rec, index) => {
+//     setCurrentIndex(index);
+//     setEditingId(rec._id);
+
+//     setForm({
+//       name: rec?.name || "",
+//       valpha: rec?.valpha || "",
+//       serialno: Number(rec?.serialno || 0),
+//       prefix: rec?.prefix || "",
+//       onbillno: ynToBool(rec?.onbillno),
+//       bankf3: rec?.bankf3 || "",
+//       path: rec?.path || "",
+//       billtype: rec?.billtype || "",
+//       ledpost: ynToBool(rec?.ledpost),
+//       gstpost: ynToBool(rec?.gstpost),
+//       stkpost: ynToBool(rec?.stkpost),
+//       vatpost: ynToBool(rec?.vatpost),
+//     });
+//   };
+
+//   const setField = (k, v) => {
+//     setForm((p) => ({ ...p, [k]: v }));
+
+//     if (!editingId) return;
+
+//     // switch to edit mode automatically
+//     setEditingId(records[currentIndex]?._id);
+//   };
+
+//   const validate = () => {
+//     if (!form.name.trim()) return "Name is required";
+//     if (!form.path.trim()) return "Path is required";
+//     return "";
+//   };
+
+//   // ADD NEw
+//   const addNewRecord = () => {
+//     setForm(emptyForm);
+//     setEditingId(null);
+//     setCurrentIndex(records.length);
+//   };
+
+//   // SAVE
+//   const handleSave = async () => {
+//     const err = validate();
+//     if (err) return alert(err);
+
+//     const payload = {
+//       name: form.name,
+//       valpha: form.valpha,
+//       serialno: Number(form.serialno),
+//       prefix: form.prefix,
+//       bankf3: form.bankf3,
+//       path: form.path,
+//       billtype: form.billtype,
+//       ledpost: boolToYn(form.ledpost),
+//       gstpost: boolToYn(form.gstpost),
+//       stkpost: boolToYn(form.stkpost),
+//       vatpost: boolToYn(form.vatpost),
+//       onbillno: boolToYn(form.onbillno),
+//     };
+
+//     try {
+//       setSaving(true);
+
+//       let res;
+
+//       if (isEdit) {
+//         res = await axios.put(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank-win-update/${editingId}`,
+//           payload
+//         );
+//       } else {
+//         res = await axios.post(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank-win-post`,
+//           payload
+//         );
+//       }
+
+//       if (!res.data?.ok) return alert("Save failed");
+//       onClose();
+//       fetchData();
+//     } catch (e) {
+//       alert(e.message);
+//     } finally {
+//       setSaving(false);
+//     }
+//   };
+
+//   // DELETE
+//   const handleDelete = async () => {
+//     if (!editingId) return;
+
+//     if (!window.confirm("Delete this record?")) return;
+
+//     try {
+//       setDeleting(true);
+
+//       const res = await axios.delete(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank-win-delete/${editingId}`
+//       );
+
+//       if (!res.data?.ok) return alert("Delete failed");
+
+//       fetchData();
+//     } catch (e) {
+//       alert(e.message);
+//     } finally {
+//       setDeleting(false);
+//     }
+//   };
+
+//   // NEXT
+//   const nextRecord = () => {
+//     if (currentIndex + 1 >= records.length) return;
+
+//     loadRecord(records[currentIndex + 1], currentIndex + 1);
+//   };
+
+//   // PREVIOUS
+//   const prevRecord = () => {
+//     if (currentIndex === 0) return;
+
+//     loadRecord(records[currentIndex - 1], currentIndex - 1);
+//   };
+
+//   const headerGradient =
+//     "linear-gradient(135deg, rgba(15,23,42,1), rgba(2,132,199,1))";
+
+//   return (
+//     <Modal open={open} onClose={onClose} style={{ zIndex: 10000 }}>
+//       <Box sx={wrapStyle}>
+//         {/* HEADER */}
+//         <Box
+//           sx={{
+//             px: 2,
+//             py: 2,
+//             color: "white",
+//             background: headerGradient,
+//             display: "flex",
+//             justifyContent: "space-between",
+//           }}
+//         >
+//           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+//             {isEdit ? <EditRoundedIcon /> : <AddRoundedIcon />}
+
+//             <Box>
+//               <Typography sx={{ fontWeight: 900, fontSize: 18, lineHeight: 1.1 }}>
+//                 {isEdit ? "Edit Bank Window" : "Create Bank Window"}
+//               </Typography>
+//               <Typography sx={{ opacity: 0.85, fontSize: 12, mt: 0.2 }}>
+//                 Add / update posting rules, prefix, path and bill settings
+//               </Typography>
+//             </Box>
+
+//             {isEdit && (
+//               <Chip
+//                 label={`ID: ${editingId?.slice(-6)}`}
+//                 size="small"
+//                 sx={{ background: alpha("#fff", 0.2), color: "white" }}
+//               />
+//             )}
+//           </Box>
+
+//           <Box>
+//             <IconButton onClick={onClose} sx={{ color: "white" }}>
+//               <CloseRoundedIcon />
+//             </IconButton>
+//           </Box>
+//         </Box>
+
+//         {/* BODY */}
+//         <Box sx={{ p: 2 }}>
+//           <div style={{display:'flex', flexDirection:'row', justifyContent:"space-between"}}>
+//             <Typography sx={{ fontWeight: 800, mb: 1.5, color: "#0f172a" }}>           
+//               Basic Details        
+//             </Typography>
+//             <Typography sx={{ mb: 2, fontWeight: 700 }}>
+//               Record {records.length ? currentIndex + 1 : 0} / {records.length}
+//             </Typography>
+//           </div>
+//           <Grid container spacing={2}>
+//             <Grid item xs={6}>
+//               <TextField
+//                 label="Name"
+//                 fullWidth
+//                 value={form.name}
+//                 onChange={(e) => setField("name", e.target.value)}
+//               />
+//             </Grid>
+
+//             <Grid item xs={3}>
+//               <TextField
+//                 label="Serial"
+//                 type="number"
+//                 fullWidth
+//                 value={form.serialno}
+//                 onChange={(e) => setField("serialno", e.target.value)}
+//               />
+//             </Grid>
+
+//             <Grid item xs={3}>
+//               <TextField
+//                 label="Prefix"
+//                 fullWidth
+//                 value={form.prefix}
+//                 onChange={(e) => setField("prefix", e.target.value)}
+//               />
+//             </Grid>
+
+//             <Grid item xs={4}>
+//               <TextField
+//                 label="Valpha"
+//                 fullWidth
+//                 value={form.valpha}
+//                 onChange={(e) => setField("valpha", e.target.value)}
+//               />
+//             </Grid>
+
+//             <Grid item xs={4}>
+//               <TextField
+//                 label="bankF3"
+//                 fullWidth
+//                 value={form.bankf3}
+//                 onChange={(e) => setField("bankf3", e.target.value)}
+//               />
+//             </Grid>
+
+//             <Grid item xs={4}>
+//               <TextField
+//                 label="Bill Type"
+//                 fullWidth
+//                 value={form.billtype}
+//                 onChange={(e) => setField("billtype", e.target.value)}
+//               />
+//             </Grid>
+
+//             <Grid item xs={12}>
+//               <TextField
+//                 label="Path"
+//                 fullWidth
+//                 value={form.path}
+//                 onChange={(e) => setField("path", e.target.value)}
+//                 helperText="Example: /bank, /bank-win etc."
+//               />
+//             </Grid>
+//           </Grid>
+
+//           <Divider sx={{ my: 2 }} />
+
+//           <Typography sx={{ fontWeight: 800, mb: 1.2, color: "#0f172a" }}>
+//             Posting Options (Y/N)
+//           </Typography>
+
+//           <Grid container>
+//             <Grid item xs={4}>
+//               <FormControlLabel
+//                 control={
+//                   <Checkbox
+//                     checked={form.ledpost}
+//                     onChange={(e) => setField("ledpost", e.target.checked)}
+//                   />
+//                 }
+//                 label="Led Post"
+//               />
+//             </Grid>
+
+//             <Grid item xs={4}>
+//               <FormControlLabel
+//                 control={
+//                   <Checkbox
+//                     checked={form.gstpost}
+//                     onChange={(e) => setField("gstpost", e.target.checked)}
+//                   />
+//                 }
+//                 label="GST Post"
+//               />
+//             </Grid>
+
+//             <Grid item xs={4}>
+//               <FormControlLabel
+//                 control={
+//                   <Checkbox
+//                     checked={form.stkpost}
+//                     onChange={(e) => setField("stkpost", e.target.checked)}
+//                   />
+//                 }
+//                 label="Stock Post"
+//               />
+//             </Grid>
+
+//             <Grid item xs={12} sm={6} md={4}>
+//                 <FormControlLabel
+//                   control={
+//                     <Checkbox
+//                       checked={!!form.vatpost}
+//                       onChange={(e) => setField("vatpost", e.target.checked)}
+//                     />
+//                   }
+//                   label="VAT Post"
+//                 />
+//               </Grid>
+
+//               <Grid item xs={12} sm={6} md={4}>
+//                 <FormControlLabel
+//                   control={
+//                     <Checkbox
+//                       checked={!!form.onbillno}
+//                       onChange={(e) => setField("onbillno", e.target.checked)}
+//                     />
+//                   }
+//                   label="On Bill No"
+//                 />
+//               </Grid>
+//           </Grid>
+//         </Box>
+
+//         {/* FOOTER */}
+//         <Box
+//           sx={{
+//             p: 2,
+//             display: "flex",
+//             justifyContent: "space-between",
+//             borderTop: "1px solid #eee",
+//           }}
+//         >
+//           <Box>
+//             <Button
+//               variant="outlined"
+//               startIcon={<AddRoundedIcon />}
+//               onClick={addNewRecord}
+//               sx={{ mr: 1 }}
+//               >
+//               Add New
+//             </Button>
+//             <Button variant="outlined" onClick={prevRecord}>
+//               Previous
+//             </Button>
+
+//             <Button
+//               variant="outlined"
+//               onClick={nextRecord}
+//               sx={{ ml: 1 }}
+//             >
+//               Next
+//             </Button>
+//             <Button
+//               variant="outlined"
+//               onClick={handleDelete}
+//               sx={{ ml: 1 }}
+//             >
+//               Delete
+//             </Button>
+//           </Box>
+
+//           <Button
+//             variant="contained"
+//             onClick={handleSave}
+//             startIcon={<SaveRoundedIcon />}
+//             disabled={saving}
+//           >
+//             {isEdit ? "Update" : "Create"}
+//           </Button>
+//         </Box>
+//       </Box>
+//     </Modal>
+//   );
+// }
+
+// Live
+
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Modal,
@@ -57,7 +525,7 @@ const emptyForm = {
 
 export default function PurWinModal({ open, onClose }) {
   const { company } = useContext(CompanyContext);
-
+  // const tenant = company?.databaseName;
   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   const [records, setRecords] = useState([]);

@@ -140,6 +140,18 @@ const InvoiceG4 = React.forwardRef(({
   const year = dateObj.getFullYear();
   return `${day}/${month}/${year}`;
 };
+
+    const totals = items.reduce(
+      (acc, item) => {
+        acc.Exp1 += Number(item.Exp1 || 0);
+        acc.Exp2 += Number(item.Exp2 || 0);
+        acc.Exp3 += Number(item.Exp3 || 0);
+        acc.Exp4 += Number(item.Exp4 || 0);
+        acc.Exp5 += Number(item.Exp5 || 0);
+        return acc;
+      },
+      { Exp1: 0, Exp2: 0, Exp3: 0, Exp4: 0, Exp5: 0 }
+    );
  
     return (
       <Modal
@@ -291,7 +303,7 @@ const InvoiceG4 = React.forwardRef(({
                           borderRight:"1px solid black"}}>
                       <text
                         style={{
-                          fontSize: 60,
+                          fontSize: 40,
                           fontWeight: "600",
                           fontFamily: "serif",
                           color:'darkblue'
@@ -601,18 +613,18 @@ const InvoiceG4 = React.forwardRef(({
                   {/* OTHER DETAILS */}
                   <div style={{width:250}}>
                   <div style={{borderBottom:"1px solid black",borderLeft:"1px solid black"}}>
-                    <text style={{fontSize:20,marginLeft:90}}>Other Details</text>
+                    <text style={{fontSize:20,marginLeft:80}}>Other Details</text>
                     </div>
                     {/* Height */}
                     <div style={{borderLeft:"1px solid black",height:"86.5%"}}>
-                      <div style={{display:'flex',flexDirection:'column',marginLeft:10}}>
-                      <text style={{fontSize:18}}>Labour:{items.Exp1}</text>
-                      <text style={{fontSize:18}}>Postage:{items.Exp1}</text>
-                      <text style={{fontSize:18}}>Discount:{items.Exp1}</text>
-                      <text style={{fontSize:18}}>Freight:{items.Exp1}</text>
-                    <text style={{fontSize:18}} >Expense5:</text>
+                      <div style={{display:'flex',flexDirection:'column',marginLeft:10,height:"78%"}}>
+                          {totals.Exp1 > 0 && <span style={{fontSize:17}}>Labour: {totals.Exp1.toFixed(2)}</span>}
+                          {totals.Exp2 > 0 && <span style={{fontSize:17}}>Freight: {totals.Exp2.toFixed(2)}</span>}
+                          {totals.Exp3 > 0 && <span style={{fontSize:17}}>Postage: {totals.Exp3.toFixed(2)}</span>}
+                          {totals.Exp4 > 0 && <span style={{fontSize:17}}>Commission: {totals.Exp4.toFixed(2)}</span>}
+                          {totals.Exp5 > 0 && <span style={{fontSize:17}}>Other: {totals.Exp5.toFixed(2)}</span>}
                       </div>
-                      <div style={{height:1,backgroundColor:"black",marginTop:3,display:'flex',flexDirection:'row'}}>
+                      <div style={{height:1,backgroundColor:"black",display:'flex',flexDirection:'row'}}>
                         <text style={{fontSize:18,marginLeft:10,color:'red'}}>Total GST Rs:</text>
                         <text style={{fontSize:18,marginLeft:20,color:'red'}}>{formData.tax}</text>
                       </div>
@@ -656,12 +668,11 @@ const InvoiceG4 = React.forwardRef(({
                 <div style={{display:"flex",flexDirection:"row",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black",height:120}}>
                <div style={{width:"50%",borderRight:"1px solid black"}}>
                 <text style={{marginLeft:10,fontSize:17,textDecoration:"underline"}}>Our Bank:</text>
-                <text style={{fontSize:16,marginLeft:20}}>{companyName}</text>
                 <div style={{display:'flex',flexDirection:'column'}}>
-                <text style={{fontSize:16,marginLeft:"24%"}}>A/C No.5022334421341</text>
-                <text style={{fontSize:16,marginLeft:"24%"}}>IFSC.HDFC0002763</text>
-                <text style={{fontSize:16,marginLeft:"24%"}}>BANK-HDFC BANK LTD</text>
-                <text style={{fontSize:16,marginLeft:"24%"}}>MANDI GOBINDGARH</text>
+                <text style={{fontSize:16,marginLeft:"5%"}}>A/C No.5022334421341</text>
+                <text style={{fontSize:16,marginLeft:"5%"}}>IFSC.HDFC0002763</text>
+                <text style={{fontSize:16,marginLeft:"5%"}}>BANK-HDFC BANK LTD</text>
+                <text style={{fontSize:16,marginLeft:"5%"}}>MANDI GOBINDGARH</text>
                 </div>
                </div>
                <div style={{display:'flex',flexDirection:"column",marginTop:20,textAlign:'center',marginLeft:40}}>
@@ -670,22 +681,58 @@ const InvoiceG4 = React.forwardRef(({
                </div>
                 </div>
                 {/*  */}
-                <div style={{display:"flex",flexDirection:"row",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black",height:180}}>
-               <div style={{width:"72%",display:'flex',flexDirection:'column'}}>
-                <text style={{fontSize:20,textDecoration:'underline',marginLeft:10}}>Terms & Conditions:</text>
-                <a style={{marginLeft:10,fontSize:18}}>1.Our responsibility ceases after the goods are removed from our premises.</a>
-                <a style={{marginLeft:10,fontSize:18}}>2.Goods once sold are not returnable or exchangeable.</a>
-                <a style={{marginLeft:10,fontSize:18}}>3.If the bill is not paid within a week intrest@25% will be charged from the date of bill.</a>
-                <a style={{marginLeft:10,fontSize:18}}>Subjected to FATEHGARH SAHIB Jurisdiction Only.</a>
-                <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
-                  <text style={{fontSize:22,marginLeft:15}}>E.& O.E</text>
-                  <text style={{fontSize:22,marginLeft:"42%"}}>Checked/Prepared by</text>
-                </div>
-               </div>
-               <div style={{display:'flex',flexDirection:"column",marginTop:30,marginLeft:30}}>
-              <text style={{fontSize:20}}>FOR {companyName}</text>
-              <text style={{fontSize:22,marginTop:"33%",marginLeft:20}}>Authorised Signature</text>
-               </div>
+                <div style={{display:"flex",flexDirection:"column",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black"}}>
+                    <div style={{ display: "flex", flexDirection: "row" }}>
+                                <div
+                                  style={{ display: "flex", flexDirection: "column" }}
+                                >
+                                  <text
+                                    style={{
+                                      fontSize: 20,
+                                      textDecoration: "underline",
+                                      marginLeft: 10,
+                                    }}
+                                  >
+                                    Terms & Conditions:
+                                  </text>
+                                  <span style={{ marginLeft: 10, fontSize: 18 }}>
+                                    1.Our responsibility ceases after the goods are
+                                    removed from our premises.
+                                  </span>
+                                  <span style={{ marginLeft: 10, fontSize: 18 }}>
+                                    2.Goods once sold are not returnable or
+                                    exchangeable.
+                                  </span>
+                                  <span style={{ marginLeft: 10, fontSize: 18 }}>
+                                    3.If the bill is not paid within a week intrest@25%
+                                    will be charged from the date of bill.
+                                  </span>
+                                  <span style={{ marginLeft: 10, fontSize: 18 }}>
+                                    Subjected to FATEHGARH SAHIB Jurisdiction Only.
+                                  </span>
+                                </div>
+                                <text style={{ fontSize: 18, alignItems: "center" }}>
+                                  FOR {companyName}
+                                </text>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginTop: 5,
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <text style={{ fontSize: 22, marginLeft: 10 }}>
+                        E.& O.E
+                      </text>
+                      <text style={{ fontSize: 22 }}>
+                        Checked/Prepared by
+                      </text>
+                      <text style={{ fontSize: 22, marginRight: 10 }}>
+                        Authorised Signature
+                      </text>
+                    </div>
                 </div>
                 <div style={{ fontSize: "12px" }}>
                   <text>Footer content specific to page {pageIndex + 1}</text>

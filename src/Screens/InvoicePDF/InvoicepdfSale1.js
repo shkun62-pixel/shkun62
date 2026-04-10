@@ -125,24 +125,59 @@ const InvoicepdfSale1 = React.forwardRef(({
   // Example usage with formData.grandtotal
   let totalInWords = numberToIndianWords(formData.grandtotal);
 
-  const formatDate = (dateValue) => {
-  // Check if date is already in dd/mm/yyyy or d/m/yyyy format
-  const ddmmyyyyPattern = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
 
-  if (ddmmyyyyPattern.test(dateValue)) {
-    return dateValue;  // already correctly formatted
-  }
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
 
-  // otherwise assume ISO or another format, parse it
-  const dateObj = new Date(dateValue);
-  if (isNaN(dateObj)) {
-    return "";  // invalid date fallback
-  }
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const year = dateObj.getFullYear();
-  return `${day}/${month}/${year}`;
-};
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
   
     return (
       <Modal
@@ -202,7 +237,7 @@ const InvoicepdfSale1 = React.forwardRef(({
                   <div style={{ textAlign: "center", height: 120  }}>
                     <text
                       style={{
-                        fontSize: 60,
+                        fontSize: 40,
                         fontWeight: "600",
                         fontFamily: "serif",
                         color:'darkblue'
@@ -216,7 +251,7 @@ const InvoicepdfSale1 = React.forwardRef(({
                         fontWeight: "bold",
                         fontSize: 18,
                         marginLeft: 0,
-                        marginTop:-20,
+                        marginTop:-10,
                         fontFamily:'cursive'
                       }}
                     >
@@ -269,7 +304,7 @@ const InvoicepdfSale1 = React.forwardRef(({
                       </div>
                       <div style={{display:"flex",flexDirection:"row",height:"50%"}}>
                       <div style={{borderRight:"1px solid black",width:"50%",fontSize:20}}> <text style={{marginLeft:10}}>Invoice Date.</text></div>
-                      <div><text style={{fontSize:20,marginLeft:10}}>{formatDate(formData.date)}</text></div>
+                      <div><text style={{fontSize:20,marginLeft:10}}>{formatDateToDDMMYYYY(formData.date)}</text></div>
                       </div>
                       </div>
                   </div>
@@ -406,19 +441,67 @@ const InvoicepdfSale1 = React.forwardRef(({
                     <div style={{heightL:"100%",width:"12.25%"}}></div>
                 </div>
                 {/*  */}
-                <div style={{display:"flex",flexDirection:"row",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black",height:150}}>
-               <div style={{width:"72%",display:'flex',flexDirection:'column'}}>
-                <text style={{fontSize:20,textDecoration:'underline',marginLeft:10}}>Terms & Conditions:</text>
-                <span style={{marginLeft:10,fontSize:18}}>1.Our responsibility ceases after the goods are removed from our premises.</span>
-                <span style={{marginLeft:10,fontSize:18}}>2.Goods once sold are not returnable or exchangeable.</span>
-                <span style={{marginLeft:10,fontSize:18}}>3.If the bill is not paid within a week intrest@25% will be charged from the date of bill.</span>
-                <span style={{marginLeft:10,fontSize:18}}>Subjected to FATEHGARH SAHIB Jurisdiction Only.</span>
-               </div>
-               <div style={{display:'flex',flexDirection:"column",marginTop:5,marginLeft:40}}>
-              <text style={{fontSize:20}}>FOR {companyName}</text>
-              <text style={{fontSize:22,marginTop:"25%",marginLeft:20}}>Authorised Signature</text>
-               </div>
-                </div>
+                 <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        borderLeft: "1px solid black",
+                        borderRight: "1px solid black",
+                        borderBottom: "1px solid black",
+                      }}
+                    >
+                      <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <text
+                            style={{
+                              fontSize: 20,
+                              textDecoration: "underline",
+                              marginLeft: 10,
+                            }}
+                          >
+                            Terms & Conditions:
+                          </text>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            1.Our responsibility ceases after the goods are
+                            removed from our premises.
+                          </span>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            2.Goods once sold are not returnable or
+                            exchangeable.
+                          </span>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            3.If the bill is not paid within a week intrest@25%
+                            will be charged from the date of bill.
+                          </span>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            Subjected to FATEHGARH SAHIB Jurisdiction Only.
+                          </span>
+                        </div>
+                        <text style={{ fontSize: 18, alignItems: "center" }}>
+                          FOR {companyName}
+                        </text>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          marginTop: 5,
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <text style={{ fontSize: 22, marginLeft: 10 }}>
+                          E.& O.E
+                        </text>
+                        <text style={{ fontSize: 22 }}>
+                          Checked/Prepared by
+                        </text>
+                        <text style={{ fontSize: 22, marginRight: 10 }}>
+                          Authorised Signature
+                        </text>
+                      </div>
+                    </div>
                 <div style={{ fontSize: "12px" }}>
                   <text>Footer content specific to page {pageIndex + 1}</text>
                 </div>

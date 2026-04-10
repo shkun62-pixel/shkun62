@@ -1,4 +1,2097 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import "./CashVoucher.css";
+// import DatePicker from "react-datepicker";
+// import InputMask from "react-input-mask";
+// import "react-datepicker/dist/react-datepicker.css";
+// import "react-toastify/dist/ReactToastify.css";
+// import Table from "react-bootstrap/Table";
+// import Button from "react-bootstrap/Button";
+// import ProductModalCustomer from "../Modals/ProductModalCustomer";
+// import { Font } from "@react-pdf/renderer";
+// import axios from "axios";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import { Modal } from "react-bootstrap"; // Import Bootstrap components
+// import { useEditMode } from "../../EditModeContext";
+// import InvoicePDFcash from "../InvoicePDFcash";
+// import { CompanyContext } from '../Context/CompanyContext';
+// import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+// import { useContext } from "react";
+// import TextField from "@mui/material/TextField";
+// import {IconButton} from '@mui/material';
+// import DeleteIcon from '@mui/icons-material/Delete';
+// import { useNavigate, useLocation } from "react-router-dom";
+// import useCompanySetup from "../Shared/useCompanySetup";
+// import PrintChoiceModal from "../Shared/PrintChoiceModal";
+// import FAVoucherModal from "../Shared/FAVoucherModal";
+// import useCashBankSetup from "../Shared/useCashBankSetup";
+// import SearchModal from "../Shared/SearchModal";
+// import useShortcuts from "../Shared/useShortcuts";
+
+// // Register font
+// Font.register({
+//   family: "Roboto",
+//   src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf",
+// });
+
+// // ✅ Forward ref so DatePicker can focus the input
+// const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
+//   <InputMask
+//     mask="99-99-9999"
+//     maskChar="_"
+//     value={value}
+//     onChange={onChange}
+//     onBlur={onBlur}
+//   >
+//     {(inputProps) => <input {...inputProps} ref={ref} className="DatePICKER" />}
+//   </InputMask>
+// ));
+
+// const CashVoucher = () => {
+
+//   const companySetup = useCompanySetup();
+//   const { decimals } = useCashBankSetup();
+//   const location = useLocation();
+//   const cashId = location.state?.cashId;
+//   const navigate = useNavigate();
+
+//   const { company } = useContext(CompanyContext);
+//   // const tenant = company?.databaseName;
+//     const tenant = "03AAYFG4472A1ZG_01042025_31032026"
+
+//   if (!tenant) {
+//     // you may want to guard here or show an error state,
+//     // since without a tenant you can’t hit the right API
+//     console.error("No tenant selected!");
+//   }
+
+//   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+//   const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+
+//   const tableRef = useRef(null);
+//   const [open, setOpen] = React.useState(false);
+//   const handleOpen = () => setOpen(true);
+//   const handleClose = () => setOpen(false);
+//   const [currentDate, setCurrentDate] = useState("");
+//   const [currentDay, setCurrentDay] = useState("");
+//   const addButtonRef = useRef(null);
+//   const datePickerRef = useRef(null);
+//   const voucherRef = useRef(null);
+//   const [title, setTitle] = useState("VIEW");
+//   const accountNameRefs = useRef([]);
+//   const narrationRefs = useRef([]);
+//   const paymentRefs = useRef([]);
+//   const receiptRefs = useRef([]);
+//   const discountRefs = useRef([]);
+//   const saveButtonRef = useRef(null);
+//   const tableScrollRef = useRef(null);
+//   const [isSaving, setIsSaving] = useState(false);
+//   const initialColors = [
+//     "#E9967A",
+//     "#F0E68C",
+//     "#FFDEAD",
+//     "#ADD8E6",
+//     "#87CEFA",
+//     "#FFF0F5",
+//     "#FFC0CB",
+//     "#D8BFD8",
+//     "#DC143C",
+//     "#DCDCDC",
+//     "#8FBC8F",
+//   ];
+//   const [buttonColors, setButtonColors] = useState(initialColors);
+//   const [formData, setFormData] = useState({
+//     vtype: "C",
+//     date: "",
+//     voucherno: 0,
+//     cashinhand: "",
+//     owner: "",
+//     user: "",
+//     totalpayment: "",
+//     totalreceipt: "",
+//     totaldiscount: "",
+//   });
+//   const MIN_ROWS = 8;
+
+//   const createEmptyRow = (id) => ({
+//     id,
+//     acode:"",
+//     accountname: "",
+//     narration: "",
+//     payment_debit: "",
+//     receipt_credit: "",
+//     discount: "",
+//     discounted_payment: "",
+//     discounted_receipt: "",
+//     disablePayment: false,
+//     disableReceipt: false,
+//   });
+
+//   const normalizeItems = (items = []) => {
+//     const rows = [...items];
+
+//     while (rows.length < MIN_ROWS) {
+//       rows.push(createEmptyRow(rows.length + 1));
+//     }
+
+//     return rows;
+//   };
+
+//   const [items, setItems] = useState(() => normalizeItems());
+//   // const [items, setItems] = useState([
+//   //   {
+//   //     id: 1,
+//   //     acode:"",
+//   //     accountname: "",
+//   //     narration: "",
+//   //     payment_debit: "",
+//   //     receipt_credit: "",
+//   //     discount: "",
+//   //     discounted_payment: "",
+//   //     discounted_receipt: "",
+//   //     disablePayment: false,
+//   //     disableReceipt: false,
+//   //   },
+//   // ]);
+
+//   useEffect(() => {
+//     if (addButtonRef.current && !cashId) {
+//       addButtonRef.current.focus();
+//     }
+//   }, []);
+
+// // DateError
+//   useEffect(() => {
+//     const date = new Date();
+//     const options = { weekday: "long" };
+//     const day = new Intl.DateTimeFormat("en-US", options).format(date);
+
+//     const formattedDate = date.toLocaleDateString();
+
+//     setCurrentDate(formattedDate);
+//     setCurrentDay(day);
+//   }, []);
+ 
+//   const formatDateToDDMMYYYY = (dateStr) => {
+//     if (!dateStr) return "";
+
+//     // ✅ Already dd-mm-yyyy
+//     const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+//     const match = dateStr.match(ddmmyyyy);
+//     if (match) {
+//       const [, dd, mm, yyyy] = match;
+//       const test = new Date(`${yyyy}-${mm}-${dd}`);
+//       if (
+//         test.getDate() === Number(dd) &&
+//         test.getMonth() + 1 === Number(mm) &&
+//         test.getFullYear() === Number(yyyy)
+//       ) {
+//         return dateStr;
+//       }
+//     }
+
+//     let date;
+
+//     // ✅ ISO with time (Z or offset)
+//     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+//       const [y, m, d] = dateStr.substring(0, 10).split("-");
+//       date = new Date(y, m - 1, d); // avoid timezone issues
+//     }
+//     // ✅ ISO date only (yyyy-mm-dd)
+//     else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+//       const [y, m, d] = dateStr.split("-");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // ✅ dd/mm/yyyy
+//     else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+//       const [d, m, y] = dateStr.split("/");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // ✅ yyyy/mm/dd
+//     else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+//       const [y, m, d] = dateStr.split("/");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // 🔁 fallback (Date.parse)
+//     else {
+//       date = new Date(dateStr);
+//     }
+
+//     if (!date || isNaN(date.getTime())) return "";
+
+//     const dd = String(date.getDate()).padStart(2, "0");
+//     const mm = String(date.getMonth() + 1).padStart(2, "0");
+//     const yyyy = date.getFullYear();
+
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+
+//   // Search Modal states
+//   const [showSearch, setShowSearch] = useState(false);
+//   const [allBills, setAllBills] = useState([]);
+//   const [searchBillNo, setSearchBillNo] = useState("");
+//   const [filteredBills, setFilteredBills] = useState([]);
+//   const [searchDate, setSearchDate] = useState(null);
+//   const [activeRowIndex, setActiveRowIndex] = useState(0);
+//     // ⭐ infinite scroll state
+//   const [visibleCount, setVisibleCount] = useState(10);
+
+//   // Fetch all bills for search
+//   const fetchAllBills = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`,
+//       );
+//       if (Array.isArray(res.data)) {
+//         setAllBills(res.data);
+//         setFilteredBills(res.data);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching bills", error);
+//     }
+//   };
+
+//   // Update filtering logic
+//   useEffect(() => {
+//     let filtered = allBills;
+
+//     if (searchBillNo.trim() !== "") {
+//       filtered = filtered.filter((bill) =>
+//         bill.formData.voucherno
+//           .toString()
+//           .toLowerCase()
+//           .includes(searchBillNo.toLowerCase())
+//       );
+//     }
+
+//     if (searchDate) {
+//       const selected = formatDateToDDMMYYYY(searchDate);
+
+//       if (selected) {
+//         filtered = filtered.filter((bill) => {
+//           const billDate = formatDateToDDMMYYYY(bill.formData.date);
+//           return billDate === selected;
+//         });
+//       }
+//     }
+
+//     setFilteredBills(filtered);
+
+//     // ⭐ reset visible rows when search changes
+//     setVisibleCount(30);
+//   }, [searchBillNo, searchDate, allBills]);
+
+//   const handleSelectBill = (bill) => {
+//     setFormData({
+//        ...bill.formData,
+//        date: bill.formData.date,
+//      });
+//       setItems(normalizeItems(bill.items));
+//       setShowSearch(false);
+//       setSearchBillNo("");
+//       setSearchDate("");
+//   };
+  
+//   useEffect(() => {
+//     const handleKeyDown = (e) => {
+//       if (!showSearch) return;
+
+//       if (e.key === "ArrowDown") {
+//         e.preventDefault();
+//         setActiveRowIndex((prev) =>
+//           prev < filteredBills.length - 1 ? prev + 1 : prev
+//         );
+//       }
+
+//       if (e.key === "ArrowUp") {
+//         e.preventDefault();
+//         setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+//       }
+
+//       if (e.key === "Enter") {
+//         e.preventDefault();
+//         const bill = filteredBills[activeRowIndex];
+//         if (bill) {
+//           handleSelectBill(bill);
+//           setShowSearch(false);
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+
+//     return () => window.removeEventListener("keydown", handleKeyDown);
+//   }, [filteredBills, activeRowIndex, showSearch]);
+  
+//   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
+//   // Fetch Data
+//   const [data, setData] = useState([]);
+//   const [data1, setData1] = useState([]);
+//   const [index, setIndex] = useState(0);
+//   const [isAddEnabled, setIsAddEnabled] = useState(true);
+//   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
+//   const [isPreviousEnabled, setIsPreviousEnabled] = useState(true);
+//   const [isNextEnabled, setIsNextEnabled] = useState(true);
+//   const [isFirstEnabled, setIsFirstEnabled] = useState(true);
+//   const [isLastEnabled, setIsLastEnabled] = useState(true);
+//   const [isSearchEnabled, setIsSearchEnabled] = useState(true);
+//   const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
+//   const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
+//   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+//   const [isAbcmode, setIsAbcmode] = useState(false);
+//   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+//   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+//   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
+
+//     // replace your Print button onClick:
+//   const handlePrintClick = () => setPrintChoiceOpen(true);
+
+//   // 1) Normal print (your existing PDF)
+//   const handleNormalPrint = () => {
+//     setPrintChoiceOpen(false);
+//     handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+//   };
+
+//   // 2) FA voucher preview
+//   const handleFAPreview = async () => {
+//     setIsFAModalOpen(true);
+//   };
+
+//   const fetchData = async () => {
+//     try {
+//       let response;
+//       if (cashId) {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cashget/${cashId}`
+//         );
+//       } else {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`
+//         );
+//       }
+//       // const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`);
+
+//       if (response.status === 200 && response.data.data) {
+//         const lastEntry = response.data.data;
+//         // Set flags and update form data
+//         setFirstTimeCheckData("DataAvailable");
+//         setFormData(lastEntry.formData);
+
+//         // Update items with the last entry's items
+//         const updatedItems = lastEntry.items.map((item) => ({
+//           ...item, // Ensure immutability
+//           disableReceipt: item.disableReceipt || false, // Handle disableReceipt flag safely
+//         }));
+//         // setItems(updatedItems);
+//         setItems(normalizeItems(updatedItems));
+
+//         // Calculate total payment, total receipt, and total discount
+//         const totalPayment = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
+//           .toFixed(2);
+//         const totalReceipt = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
+//           .toFixed(2);
+//         const totalDiscount = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
+//           .toFixed(2);
+
+//         // Update formData with the calculated totals
+//         setFormData((prevFormData) => ({
+//           ...prevFormData,
+//           totalpayment: totalPayment,
+//           totalreceipt: totalReceipt,
+//           totaldiscount: totalDiscount,
+//         }));
+
+//         // Set data and index
+//         setData1(lastEntry); // Assuming setData1 holds the current entry data
+//         setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
+//         return lastEntry; // ✅ Return this for use in handleAdd
+//       } else {
+//         setFirstTimeCheckData("DataNotAvailable");
+//         console.log("No data available");
+//         // Create an empty data object with voucher number 0
+//         const emptyFormData = {
+//           voucherno: 0,
+//           date: new Date().toLocaleDateString(), // Use today's date
+//           cashinhand: "",
+//           owner: "Owner",
+//           user: "",
+//           totalpayment: "0.00",
+//           totalreceipt: "0.00",
+//           totaldiscount: "0.00",
+//         };
+//         const emptyItems = [
+//           {
+//             id: 1,
+//             acode:"",
+//             accountname: "",
+//             narration: "",
+//             payment_debit: "",
+//             receipt_credit: "",
+//             discount: "",
+//             discounted_payment: "0.00",
+//             discounted_receipt: "0.00",
+//             disablePayment: false,
+//             disableReceipt: false,
+//           },
+//         ];
+
+//         // Set the empty data
+//         setFormData(emptyFormData);
+//         setItems(normalizeItems([]));
+//         setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
+//         setIndex(0); // Set index to 0 for the empty voucher
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+
+//       // In case of error, you can also initialize empty data if needed
+//       const emptyFormData = {
+//         voucherno: 0,
+//         date: new Date().toLocaleDateString(),
+//         cashinhand: "",
+//         owner: "Owner",
+//         user: "",
+//         totalpayment: "0.00",
+//         totalreceipt: "0.00",
+//         totaldiscount: "0.00",
+//       };
+//       const emptyItems = [
+//         {
+//           id: 1,
+//           acode:"",
+//           accountname: "",
+//           narration: "",
+//           payment_debit: "",
+//           receipt_credit: "",
+//           discount: "",
+//           discounted_payment: "0.00",
+//           discounted_receipt: "0.00",
+//           disablePayment: false,
+//           disableReceipt: false,
+//         },
+//       ];
+//       setFormData(emptyFormData);
+//       setItems(normalizeItems([]));
+//       setData1({ formData: emptyFormData, items: emptyItems });
+//       setIndex(0);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   useEffect(() => {
+//     const handleEsc = (e) => {
+//       if (e.key === "Escape" && !isEditMode && cashId) {
+//         const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
+
+//         navigate(-1); // go back
+//         setTimeout(() => {
+//           // restore modal state after navigation
+//           if (modalState.keepModalOpen) {
+//             window.dispatchEvent(
+//               new CustomEvent("reopenTrailModal", { detail: modalState })
+//             );
+//           }
+//         }, 50);
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleEsc);
+//     return () => window.removeEventListener("keydown", handleEsc);
+//   }, [isEditMode]);
+  
+//   useEffect(() => {
+//     if (data.length > 0) {
+//       setFormData(data[data.length - 1]);
+//       setIndex(data.length - 1);
+//     }
+//   }, [data]);
+
+//   // Add this line to set isDisabled to true initially
+//   useEffect(() => {
+//     setIsDisabled(true);
+//   }, []);
+
+//   const getTodayDDMMYYYY = () => {
+//     const today = new Date();
+//     const dd = String(today.getDate()).padStart(2, "0");
+//     const mm = String(today.getMonth() + 1).padStart(2, "0");
+//     const yyyy = today.getFullYear();
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+//   const skipItemCodeFocusRef = useRef(false);
+
+//   const fetchVoucherNumbers = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last-voucherno`
+//       );
+
+//       return {
+//         lastVoucherNo: res?.data?.lastVoucherNo || 0,
+//         nextVoucherNo: res?.data?.nextVoucherNo || 1,
+//       };
+//     } catch (error) {
+//       console.error("Error fetching voucher numbers:", error);
+//       toast.error("Unable to fetch voucher number", {
+//         position: "top-center",
+//       });
+//       return null;
+//     }
+//   };
+
+//   const handleNext = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+//     // console.log(data1._id)
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/next/${data1._id}`
+//         );
+//         if (response.status === 200 && response.data) {
+//           const nextData = response.data.data;
+//           setData1(response.data.data);
+//           setIndex(index + 1);
+//           setFormData(nextData.formData);
+//           const updatedItems = nextData.items.map((item) => ({
+//             ...item,
+//             disableReceipt: item.disableReceipt || false,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching next record:", error);
+//     }
+//   };
+
+//   const handlePrevious = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/previous/${data1._id}`
+//         );
+//         if (response.status === 200 && response.data) {
+//           // console.log(response);
+//           setData1(response.data.data);
+//           const prevData = response.data.data;
+//           setIndex(index - 1);
+//           setFormData(prevData.formData);
+//           const updatedItems = prevData.items.map((item) => ({
+//             ...item,
+//             disableReceipt: item.disableReceipt || false,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching previous record:", error);
+//     }
+//   };
+
+//   const handleFirst = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/first`
+//       );
+//       if (response.status === 200 && response.data) {
+//         const firstData = response.data.data;
+//         setIndex(0);
+//         setFormData(firstData.formData);
+//         setData1(response.data.data);
+//         const updatedItems = firstData.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching first record:", error);
+//     }
+//   };
+
+//   const handleLast = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`
+//       );
+//       if (response.status === 200 && response.data) {
+//         const lastData = response.data.data;
+//         const lastIndex = response.data.length - 1;
+//         setIndex(lastIndex);
+//         setFormData(lastData.formData);
+//         setData1(response.data.data);
+//         const updatedItems = lastData.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching last record:", error);
+//     }
+//   };
+
+//   const handleAdd = async () => {
+//     setTitle("NEW");
+//     try {
+//       const voucherData = await fetchVoucherNumbers();
+//       if (!voucherData) return;
+
+//       const lastvoucherno = voucherData.nextVoucherNo;
+//       const newData = {
+//         vtype: "C",
+//         date: getTodayDDMMYYYY(),
+//         voucherno: lastvoucherno,
+//         cashinhand: "",
+//         owner: "Owner",
+//         user: "",
+//         totalpayment: "",
+//         totalreceipt: "",
+//         totaldiscount: "",
+//       };
+//       setData([...data, newData]);
+//       setFormData(newData);
+//       setItems(normalizeItems([]));
+//       setIndex(data.length);
+//       setIsAddEnabled(false);
+//       setIsSubmitEnabled(true);
+//       setIsPreviousEnabled(false);
+//       setIsNextEnabled(false);
+//       setIsFirstEnabled(false);
+//       setIsLastEnabled(false);
+//       setIsSearchEnabled(false);
+//       setIsSPrintEnabled(false);
+//       setIsDeleteEnabled(false);
+//       setIsDisabled(false);
+//       setIsEditMode(true);
+//       skipItemCodeFocusRef.current = true;
+//       if (datePickerRef.current) {
+//         datePickerRef.current.focus();
+//       }
+//       // voucherRef.current.focus()
+//     } catch (error) {
+//       console.error("Error adding new entry:", error);
+//     }
+//   };
+
+//   const handleSaveClick = async () => {
+//     document.body.style.backgroundColor = "white";
+
+//     // Validate if at least one row is filled
+//     const filledRows = items.filter((item) => item.accountname !== "");
+//     if (filledRows.length === 0) {
+//       toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
+//       return;
+//     }
+
+//     // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+//     const isValidTransaction = filledRows.every(
+//       (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
+//     );
+//     if (!isValidTransaction) {
+//       toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
+//       return;
+//     }
+
+//     // ✅ NEW VALIDATION: Prevent both debit and credit in same row
+//     const hasBothDebitAndCredit = filledRows.some(
+//       (item) => parseFloat(item.payment_debit) > 0 && parseFloat(item.receipt_credit) > 0
+//     );
+//     if (hasBothDebitAndCredit) {
+//       toast.error("A row cannot have both Payment Debit and Receipt Credit values at the same time.", {
+//         position: "top-center",
+//       });
+//       return;
+//     }
+    
+//     const voucherData = await fetchVoucherNumbers();
+//     if (!voucherData) return;
+
+//     if (!isAbcmode) {
+//       // ADD mode
+//       if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
+//         toast.error(`Voucher No ${formData.voucherno} already used!`, {
+//           position: "top-center",
+//         });
+//         setIsSubmitEnabled(true);
+//         return;
+//       }
+//     } else {
+//       // EDIT mode
+//       if (
+//         Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
+//         Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
+//       ) {
+//         toast.error(`Voucher No ${formData.voucherno} already used!`, {
+//           position: "top-center",
+//         });
+//         setIsSubmitEnabled(true);
+//         return;
+//       }
+//     }
+
+//     // Only disable the save button AFTER validation passes
+//     setIsSaving(true);
+//     try {
+//       let combinedData = {
+//         _id: formData._id,
+//         formData: {
+//           date: formData.date,
+//           vtype: formData.vtype,
+//           voucherno: formData.voucherno,
+//           cashinhand: formData.cashinhand || "",
+//           owner: formData.owner,
+//           user: formData.user || "",
+//           totalpayment: formData.totalpayment,
+//           totalreceipt: formData.totalreceipt,
+//           totaldiscount: formData.totaldiscount,
+//         },
+//         items: filledRows.map((item) => ({
+//           id: item.id,
+//           acode: item.acode,
+//           accountname: item.accountname,
+//           narration: item.narration,
+//           payment_debit: item.payment_debit,
+//           receipt_credit: item.receipt_credit,
+//           discount: item.discount,
+//           discounted_payment: item.discounted_payment,
+//           discounted_receipt: item.discounted_receipt,
+//           name: item.name,
+//           disableReceipt: item.disableReceipt,
+//           disablePayment: item.disablePayment,
+//         })),
+//       };
+
+//       // console.log("Combined Data:", combinedData);
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash${
+//         isAbcmode ? `/${data1._id}` : ""
+//       }`;
+//       const method = isAbcmode ? "put" : "post";
+//       console.log("Method",method);
+      
+
+//       const response = await axios({
+//         method,
+//         url: apiEndpoint,
+//         data: combinedData,
+//       });
+
+//       console.log("API Response:", response);
+
+//       if (response?.status === 200 || response?.status === 201) {
+//         toast.success("Data Saved Successfully!", { position: "top-center" });
+//         setIsAddEnabled(true);
+//         setIsDisabled(true);
+//         setIsEditMode(false);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         fetchData(); // Refresh data to get updated _id and other info
+//         fetchNarrations(); // Refresh narrations
+//         setTitle("VIEW");
+//       } else {
+//         throw new Error(`Unexpected response status: ${response?.status}`);
+//       }
+//     } catch (error) {
+//       console.error("Error saving data:", error?.response?.data || error.message);
+//       toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, {
+//         position: "top-center",
+//       });
+//     } finally {
+//       setIsSaving(false);
+//     }
+//   };
+
+//   const handleDeleteClick = async (id) => {
+//     if (!id) {
+//       toast.error("Invalid ID. Please select an item to delete.", {
+//         position: "top-center",
+//       });
+//       return;
+//     }
+
+//     const userConfirmed = window.confirm(
+//       "Are you sure you want to delete this item?"
+//     );
+//     if (!userConfirmed) return;
+
+//     setIsSaving(true);
+//     try {
+//       // ✅ use id, not data1._id
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/${data1._id}`;
+//       const response = await axios.delete(apiEndpoint);
+
+//       if (response.status === 200) {
+//         toast.success("Data deleted successfully!", { position: "top-center" });
+//         fetchData(); // Refresh the data after successful deletion
+//       } else {
+//         throw new Error(`Failed to delete data: ${response.statusText}`);
+//       }
+//     } catch (error) {
+//       console.error("Error deleting data:", error);
+//       toast.error(`Failed to delete data. Error: ${error.message}`, {
+//         position: "top-center",
+//       });
+//     } finally {
+//       setIsSaving(false);
+//     }
+//   };
+  
+//   const handleExit = async () => {
+
+//     document.body.style.backgroundColor = "white"; // Reset background color
+//     setTitle("View");
+
+//     if(!isEditMode){
+//       navigate("/dashboard"); 
+//       return;
+//     } 
+    
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`
+//       ); // Fetch the latest data
+
+//       if (response.status === 200 && response.data.data) {
+//         // If data is available
+//         const lastEntry = response.data.data;
+//         setFormData(lastEntry.formData); // Set form data
+
+//         const updatedItems = lastEntry.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         // setItems(updatedItems);
+//         setItems(normalizeItems(updatedItems));
+//         setIsDisabled(true);
+//         setIndex(lastEntry.formData);
+//         setIsAddEnabled(true);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         setIsEditMode(false);
+//         // Update totals
+//         const totalPayment = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
+//           .toFixed(2);
+//         const totalReceipt = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
+//           .toFixed(2);
+//         const totalDiscount = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
+//           .toFixed(2);
+
+//         setFormData((prevFormData) => ({
+//           ...prevFormData,
+//           totalpayment: totalPayment,
+//           totalreceipt: totalReceipt,
+//           totaldiscount: totalDiscount,
+//         }));
+//       } else {
+//         // If no data is available, initialize with default values
+//         console.log("No data available");
+//         const newData = {
+//           date: "",
+//           voucherno: 0,
+//           cashinhand: "",
+//           owner: "Owner",
+//           user: "",
+//           totalpayment: "",
+//           totalreceipt: "",
+//           totaldiscount: "",
+//         };
+//         setFormData(newData); // Set default form data
+//         setItems(normalizeItems([]));
+//         setIsDisabled(true); // Disable fields after loading the default data
+//         setIsAddEnabled(true);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         setIsEditMode(false);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+//     }
+//   };
+
+//   const handleEditClick = () => {
+//     setTitle("EDIT");
+//     setIsDisabled(false);
+//     setIsEditMode(true);
+//     setIsAddEnabled(false);
+//     setIsSubmitEnabled(true);
+//     setIsPreviousEnabled(false);
+//     setIsNextEnabled(false);
+//     setIsFirstEnabled(false);
+//     setIsLastEnabled(false);
+//     setIsSearchEnabled(false);
+//     setIsSPrintEnabled(false);
+//     setIsDeleteEnabled(false);
+//     setIsAbcmode(true);
+//     if (accountNameRefs.current[0]) {
+//       accountNameRefs.current[0].focus();
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (isEditMode) {
+//       if (skipItemCodeFocusRef.current) {
+//         skipItemCodeFocusRef.current = false; // reset
+//         return;
+//       }
+
+//       setTimeout(() => {
+//         const el = accountNameRefs.current[0];
+//         if (el && !el.disabled) {
+//           el.focus();
+//           el.select && el.select();
+//         }
+//       }, 0);
+//     }
+//   }, [isEditMode]);
+
+//   const calculateTotalDiscount = () => {
+//     // Calculate the total discount by summing up all discount values
+//     const totalDiscount = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.discount || 0);
+//     }, 0);
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totaldiscount: totalDiscount.toFixed(2),
+//     }));
+//   };
+
+//   const calculateTotalPayment = () => {
+//     // Calculate the total payment by summing up all payment_debit values
+//     const totalPayment = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.payment_debit || 0);
+//     }, 0);
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totalpayment: totalPayment.toFixed(2),
+//     }));
+//   };
+
+//   const calculateTotalReceipt = () => {
+//     // Calculate the total receipt by summing up all receipt_credit values
+//     const totalReceipt = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.receipt_credit || 0);
+//     }, 0);
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totalreceipt: totalReceipt.toFixed(2),
+//     }));
+//   };
+
+//   const fetchNarrations = async () => {
+//     try {
+//       const res = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`
+//       );
+//       const data = await res.json();
+
+//       // extract narrations from all items
+//       const narrs = data
+//         .flatMap(entry => entry.items || [])
+//         .map(item => item.narration)
+//         .filter(n => n && n.trim() !== "");  // remove empty narrations
+
+//       // unique values
+//       const uniqueNarrs = [...new Set(narrs)];
+
+//       setNarrationSuggestions(uniqueNarrs);
+//     } catch (err) {
+//       console.error("Narration fetch failed:", err);
+//     }
+//   };
+
+//   const handleNumberChange = (event, index, field) => {
+//     const value = event.target.value;
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+//     const updatedItems = [...items];
+//     updatedItems[index][field] = value;
+//     const isValueGreaterThanZero = parseFloat(value) > 0;
+
+//     if (field === "payment_debit") {
+//       updatedItems[index].disableReceipt = isValueGreaterThanZero;
+//     } else if (field === "receipt_credit") {
+//       updatedItems[index].disablePayment = isValueGreaterThanZero;
+//     }
+//     setItems(updatedItems);
+//     // Calculate totals after updating items
+//     calculateTotalPayment();
+//     calculateTotalReceipt();
+//     calculateTotalDiscount();
+//     // calculateCashInHand();
+//   };
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+
+//   // Modal For Customer
+//   const [productsCus, setProductsCus] = useState([]);
+//   const [showModalCus, setShowModalCus] = useState(false);
+//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//   const [loadingCus, setLoadingCus] = useState(true);
+//   const [errorCus, setErrorCus] = useState(null);
+  
+//   React.useEffect(() => {
+//     // Fetch products from the API when the component mounts
+//     fetchCustomers();
+//     fetchNarrations();  // new
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductsCus(formattedData);
+//       setLoadingCus(false);
+//     } catch (error) {
+//       setErrorCus(error.message);
+//       setLoadingCus(false);
+//     }
+//   };
+
+//   const handleItemChangeCus = (index, key, value) => {
+//     if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
+//       return; // reject invalid input
+//     }
+//     const updatedItems = [...items];
+//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+//     calculateTotalDiscount();
+//     // If the key is 'name', find the corresponding product and set the price
+//     if (key === "name") {
+//       const selectedProduct = productsCus.find(
+//         (product) => product.ahead === value
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["accountname"] = selectedProduct.ahead;
+//       }
+//     } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
+//       const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
+//       const discount = parseFloat(updatedItems[index]["discount"]) || 0;
+//       const discountedPayment = payment - discount;
+//       const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
+
+//       let discountedReceipt = receipt - discount;
+//       if (updatedItems[index].disableReceipt) {
+//         discountedReceipt = 0; // Set to zero if receipt field is disabled
+//       }
+
+//       let discounted_payment = discountedPayment;
+//       if (updatedItems[index].disablePayment) {
+//         discounted_payment = 0; // Set to zero if payment field is disabled
+//       }
+
+//       updatedItems[index]["payment_debit"] = payment.toFixed(2);
+//       updatedItems[index]["discounted_payment"] = discounted_payment.toFixed(2);
+//       updatedItems[index]["receipt_credit"] = receipt.toFixed(2);
+//       updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
+//       updatedItems[index]["discount"] = discount;
+//     }
+//     setItems(updatedItems);
+//   };
+//   const handleAddItem = () => {
+//     if (isEditMode) {
+//       const newItem = {
+//         id: items.length + 1,
+//         accountname: "",
+//         narration: "",
+//         payment_debit: "",
+//         receipt_credit: "",
+//         discount: "",
+//         discounted_payment: "",
+//         discounted_receipt: "",
+//         disablePayment: false,
+//         disableReceipt: false,
+//       };
+
+//       // Update the state with the new item
+//       setItems([...items, newItem]);
+//       setTimeout(() => {
+//         accountNameRefs.current[items.length].focus();
+//       }, 100);
+//     }
+//   };
+
+//   const handleDeleteItem = (index) => {
+//     if (isEditMode) {
+//       const confirmDelete = window.confirm(
+//         "Do you really want to delete this item?"
+//       );
+//       // Proceed with deletion if the user confirms
+//       if (confirmDelete) {
+//         const filteredItems = items.filter((item, i) => i !== index);
+//         setItems(filteredItems);
+//       }
+//     }
+//   };
+
+//   const handleProductSelectCus = (product) => {
+//     if (!product) {
+//       alert("No product received!");
+//       setShowModalCus(false);
+//       return;
+//     }
+  
+//     // clone the array
+//     const newCustomers = [...items];
+  
+//     // overwrite the one at the selected index
+//     newCustomers[selectedItemIndexCus] = {
+//       ...newCustomers[selectedItemIndexCus],
+//       accountname: product.ahead || '', 
+//       acode: product.acode || '', 
+//     };
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexCus !== null) {
+//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//       setShowModalCus(false);
+//       setTimeout(() => {
+//         narrationRefs.current[selectedItemIndexCus].focus();
+//       }, 100);
+//     }
+//     setItems(newCustomers);
+//     setIsEditMode(true);
+//     setShowModalCus(false);
+//   };
+
+//   const handleCloseModalCus = () => {
+//     setShowModalCus(false);
+//     setIsEditMode(true);
+//     setPressedKey(""); // resets for next modal open
+//   };
+
+//   const openModalForItemCus = (index) => {
+//     if (isEditMode) {
+//       setSelectedItemIndexCus(index);
+//       setShowModalCus(true);
+//     }
+//   };
+
+//   const allFieldsCus = productsCus.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   const [fsize, setfsize] = useState(18);
+
+//   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault();
+//       if (nextRef && nextRef.current) {
+//         nextRef.current.focus();
+//       } else {
+//         if (tableRef.current) {
+//           const firstInputInTable = tableRef.current.querySelector("input");
+//           if (firstInputInTable) {
+//             firstInputInTable.focus();
+//           }
+//         }
+//       }
+//     }
+//   };
+
+//   const handleVoucherEnter = (e) => {
+//     if (e.key === "Enter") {
+//       e.preventDefault();
+
+//       // Focus first ACCOUNTNAME input
+//       if (accountNameRefs.current[0]) {
+//         accountNameRefs.current[0].focus();
+//       }
+//     }
+//   };
+
+//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+//   const focusAndScroll = (refArray, rowIndex) => {
+//     const inputEl = refArray.current?.[rowIndex];
+//     const container = tableScrollRef.current;
+
+//     if (!inputEl || !container) return;
+
+//     // focus & select
+//     inputEl.focus();
+//     setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+//     // find row
+//     const rowEl = inputEl.closest("tr");
+//     if (!rowEl) return;
+
+//     const rowTop = rowEl.offsetTop;
+//     const rowHeight = rowEl.offsetHeight;
+//     const containerHeight = container.clientHeight;
+
+//     // 🔥 key line — force visibility
+//     container.scrollTop =
+//       rowTop - containerHeight + rowHeight + 60;
+//   };
+//   const handleKeyDown = (event, index, field) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault(); // Stop default Tab navigation
+//       switch (field) {
+//         case "accountname":
+//           if (items[index].accountname.trim() === "") {
+//             saveButtonRef.current.focus();
+//           } else {
+//             narrationRefs.current[index]?.focus();
+//           }
+//           break;
+//           case "narration":
+//             if (items[index].accountname.trim() === "") {
+//               saveButtonRef.current?.focus();
+//             } else {
+//               if (items[index].disablePayment) {
+//                 // If debit is disabled, move focus to credit
+//                 receiptRefs.current[index]?.focus();
+//               } else {
+//                 paymentRefs.current[index]?.focus();
+//               }
+//             }
+//             break;
+//         case "payment_debit":
+//           if (!items[index].disableReceipt) {
+//             receiptRefs.current[index]?.focus();
+//           } else {
+//             if (
+//               accountNameRefs.current[index].value.trim().length > 0 &&
+//               items[index].payment_debit.trim().length > 0
+//             ) {
+//               discountRefs.current[index]?.focus();
+//             } else {
+//               alert("Account name and Payment/Receipt cannot be empty");
+//               paymentRefs.current[index]?.focus();
+//             }
+//           }
+//           break;
+//         case "receipt_credit":
+//           if (accountNameRefs.current[index].value.trim().length > 0 && items[index].receipt_credit.trim().length > 0) {
+//             discountRefs.current[index]?.focus();
+//           } else {
+//             alert("Account name and Payment/Receipt cannot be empty");
+//             receiptRefs.current[index]?.focus();
+//           }
+//           break;
+//           case "discount":
+//           if (index === items.length - 1) {
+//             handleAddItem();
+//             setTimeout(() => {
+//               focusAndScroll(accountNameRefs, index + 1);
+//             }, 0);
+//           } else {
+//             focusAndScroll(accountNameRefs, index + 1);
+//           }
+//           break;
+//         default:
+//           break;
+//       }
+//     } 
+//     // Move Right (→)
+//     else if (event.key === "ArrowRight") {
+//       if (field === "accountname"){ narrationRefs.current[index]?.focus();
+//         setTimeout(() => narrationRefs.current[index]?.select(), 0);
+//       }
+//       if (field === "narration") {
+//         if (!items[index].disablePayment){ paymentRefs.current[index]?.focus();
+//           setTimeout(() => paymentRefs.current[index]?.select(), 0);
+//         }
+//         else {receiptRefs.current[index]?.focus();
+//         setTimeout(() => receiptRefs.current[index]?.select(), 0);
+//         }
+//       }
+//       else if (field === "payment_debit" && !items[index].disableReceipt){
+//         receiptRefs.current[index]?.focus();
+//         setTimeout(() => receiptRefs.current[index]?.select(), 0);
+//       }
+//       else if (field === "payment_debit" && items[index].disableReceipt){
+//         discountRefs.current[index]?.focus();
+//         setTimeout(() => discountRefs.current[index]?.select(), 0);
+//       }
+//       else if (field === "receipt_credit"){ discountRefs.current[index]?.focus();
+//         setTimeout(() => discountRefs.current[index]?.select(), 0);
+//       }
+//     } 
+//     // Move Left (←)
+//     else if (event.key === "ArrowLeft") {
+//       if (field === "discount") {
+//         if (!items[index].disableReceipt){ receiptRefs.current[index]?.focus();
+//           setTimeout(() => receiptRefs.current[index]?.select(), 0);
+//         }
+//         else {paymentRefs.current[index]?.focus();
+//         setTimeout(() => paymentRefs.current[index]?.select(), 0);
+//         }
+//       } 
+//       if (field === "receipt_credit") {
+//         if (!items[index].disablePayment){ paymentRefs.current[index]?.focus();
+//           setTimeout(() => paymentRefs.current[index]?.select(), 0);
+//         }
+//         else {narrationRefs.current[index]?.focus();
+//         setTimeout(() => narrationRefs.current[index]?.select(), 0);
+//         }
+//       } 
+//       else if (field === "payment_debit"){ narrationRefs.current[index]?.focus();
+//         setTimeout(() => narrationRefs.current[index]?.select(), 0);
+//       }
+//       else if (field === "narration"){ accountNameRefs.current[index]?.focus();
+//         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//       }
+//     } 
+
+//     // Move Up
+//     else if (event.key === "ArrowUp" && index > 0) {
+//       setTimeout(() => {
+//         if (field === "accountname")
+//           focusAndScroll(accountNameRefs, index - 1);
+//         else if (field === "narration")
+//           focusAndScroll(narrationRefs, index - 1);
+//         else if (field === "payment_debit")
+//           focusAndScroll(paymentRefs, index - 1);
+//         else if (field === "receipt_credit")
+//           focusAndScroll(receiptRefs, index - 1);
+//         else if (field === "discount")
+//           focusAndScroll(discountRefs, index - 1);
+//       }, 0);
+//     }
+
+// // Move Down
+//   else if (event.key === "ArrowDown" && index < items.length - 1) {
+//     setTimeout(() => {
+//       if (field === "accountname")
+//         focusAndScroll(accountNameRefs, index + 1);
+//       else if (field === "narration")
+//         focusAndScroll(narrationRefs, index + 1);
+//       else if (field === "payment_debit")
+//         focusAndScroll(paymentRefs, index + 1);
+//       else if (field === "receipt_credit")
+//         focusAndScroll(receiptRefs, index + 1);
+//       else if (field === "discount")
+//         focusAndScroll(discountRefs, index + 1);
+//     }, 0);
+//   }
+//     // Open Modal on Letter Input in Account Name
+//     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+//       setPressedKey(event.key);
+//       openModalForItemCus(index);
+//       event.preventDefault();
+//     }
+//   };
+
+//   // Update the blur handlers so that they always format the value to 2 decimals.
+//   const handlePkgsBlur = (index) => {
+//     const decimalPlaces = decimals;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].payment_debit);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].payment_debit = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleWeightBlur = (index) => {
+//     const decimalPlaces = decimals;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].receipt_credit);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].receipt_credit = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleRateBlur = (index) => {
+//     const decimalPlaces = decimals;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].discount);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].discount = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleOpenModalBack = (event, index, field) => {
+//       if (event.key === "Backspace" && field === "accountname") {
+//           setSelectedItemIndexCus(index);
+//           setShowModalCus(true);
+//           event.preventDefault();
+//       }
+//   };
+
+//   const isRowFilled = (row) => {
+//     return (row.accountname || "").trim() !== "";
+//   };
+//   const canEditRow = (rowIndex) => {
+//       // 🔒 If not in edit mode, nothing is editable
+//       if (!isEditMode) return false;
+
+//       // First row is editable in edit mode
+//       if (rowIndex === 0) return true;
+
+//       // All previous rows must be filled
+//       for (let i = 0; i < rowIndex; i++) {
+//         if (!isRowFilled(items[i])) {
+//           return false;
+//         }
+//       }
+//       return true;
+//   };
+
+//   // ShortCuts for Buttons
+//   const AnyModalOpen = showModalCus || printChoiceOpen || showSearch;
+//   useShortcuts({
+//     handleAdd,
+//     handleEdit: handleEditClick,
+//     handlePrevious,
+//     handleNext,
+//     handleFirst,
+//     handleLast,
+//     handleExit,
+//     handlePrint: handlePrintClick,
+//     isEditMode,
+//     isModalOpen: AnyModalOpen,   // 👈 here
+//   });
+
+//   useEffect(() => {
+//     const handleKeyDown = (event) => {
+//       if (event.key === "Escape") {
+
+//         if (showSearch) {
+//           setShowSearch(false);
+//           return;
+//         }
+
+//         if (printChoiceOpen) {
+//           setPrintChoiceOpen(false);
+//           return;
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+
+//     return () => {
+//       window.removeEventListener("keydown", handleKeyDown);
+//     };
+//   }, [showSearch, printChoiceOpen]);
+
+//   const handleNumericValue = (event) => {
+//     const { id, value } = event.target;
+//     // Allow only numeric values, including optional decimal points
+//     if (/^\d*\.?\d*$/.test(value) || value === "") {
+//       setFormData((prevData) => ({
+//         ...prevData,
+//         [id]: value,
+//       }));
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <ToastContainer />
+//       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
+//         <InvoicePDFcash
+//           formData={formData}
+//           items={items}
+//           isOpen={open}
+//           handleClose={handleClose}
+//         />
+//       </div>
+//       <h1 className="HeaderCASH">CASH VOUCHER</h1>
+//       <span className="tittle">{title}</span>
+//       <div className="containers">
+//         <span style={styles2.dates}>{currentDate}</span>
+//         <span style={styles2.days}>{currentDay}</span>
+//       </div>
+//       {/* <div style={{ marginLeft: "90%", marginTop: -35 }}>
+//           <Button onClick={decreasefsize}><FaMinus /></Button>
+//           <Button style={{ marginLeft: 10 }} onClick={increasefsize}><FaPlus /></Button>
+//       </div> */}
+//       <div className="Tops">
+//         <span>DATE</span>
+//         <InputMask
+//             mask="99-99-9999"
+//             placeholder="dd-mm-yyyy"
+//             value={formData.date}
+//             readOnly={!isEditMode || isDisabled}
+//             onChange={(e) =>
+//               setFormData({ ...formData, date: e.target.value })
+//             }
+//           >
+//             {(inputProps) => (
+//               <input
+//                 {...inputProps}
+//                 className="DatePICKER"
+//                 ref={datePickerRef}
+//                 onKeyDown={(e) => {
+//                   handleEnterKeyPress(datePickerRef, voucherRef)(e);
+//                 }}
+//               />
+//             )}
+//         </InputMask>
+//         <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
+//           <TextField
+//           inputRef={voucherRef}
+//           id="voucherno"
+//           value={formData.voucherno}
+//           label="VOUCHER NO."
+//           onFocus={(e) => e.target.select()}  // Select text on focus
+//           onKeyDown={handleVoucherEnter}
+//           onChange={handleNumericValue}
+//           inputProps={{
+//             maxLength: 48,
+//             style: {
+//               height: 20,
+//               fontSize: `${fsize}px`,
+//               fontWeight: "bold",
+//             },
+//             readOnly: !isEditMode || isDisabled,
+//           }}
+//           size="small"
+//           variant="filled"
+//           className="custom-bordered-input"
+//           sx={{ width: 150 }}
+//           />
+//           <TextField
+//           id="owner"
+//           value={formData.owner}
+//           label="USER"
+//           onFocus={(e) => e.target.select()}  // Select text on focus
+//           // onChange={handleInputChange}
+//           inputProps={{
+//             maxLength: 48,
+//             style: {
+//               height: 20,
+//               fontSize: `${fsize}px`,
+//               fontWeight: "bold",
+//             },
+//             readOnly: !isEditMode || isDisabled,
+//           }}
+//           size="small"
+//           variant="filled"
+//           className="custom-bordered-input"
+//           sx={{ width: 150,marginLeft:1,marginRight:1 }}
+//           disabled     // ← ALWAYS DISABLED
+//           />
+//         </div>  
+//       </div>
+//       <div ref={tableScrollRef} className="TableSectionz">
+//         <Table ref={tableRef} className="custom-table">
+//           <thead
+//             style={{
+//               backgroundColor: "skyblue",
+//               textAlign: "center",
+//               position: "sticky",
+//               top: 0,
+//             }}
+//           >
+//             <tr style={{ color: "white" }}>
+//               <th>ACCOUNTNAME</th>
+//               <th>
+//                 NARRATION
+//                 <input 
+//                   type="checkbox"
+//                   style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
+//                   tabIndex={-1}       // ⬅⬅ prevents tab focus
+//                   checked={showNarrationSuggestions}
+//                   onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+//                   onKeyDown={(e) => {
+//                     if (e.key === "Enter") {
+//                       e.preventDefault();
+//                       e.stopPropagation();
+//                     }
+//                   }}
+//                 />
+//               </th>
+//               <th>PAYMENT</th>
+//               <th>RECEIPT</th>
+//               <th>DISCOUNT</th>
+//               {isEditMode && <th className="text-center">DELETE</th>}
+//             </tr>
+//           </thead>
+//           <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
+//             {items.map((item, index) => (
+//               <tr key={`${item.accountname}-${index}`}>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                   className="Account"
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.accountname}
+//                     readOnly={!isEditMode || isDisabled}
+//                     onChange={(e) => { // console.log(accountNameRefs.current[index].value)
+//                     }}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "accountname")
+//                       handleOpenModalBack(e, index, "accountname");
+//                     }}
+                  
+//                     ref={(el) => (accountNameRefs.current[index] = el)}
+//                     onFocus={(e) => e.target.select()}  // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="Narration"
+//                     list={showNarrationSuggestions ? "narrationList" : undefined}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     readOnly={!isEditMode || isDisabled}
+//                     value={item.narration}
+//                     onChange={(e) =>
+//                       handleItemChangeCus(index, "narration", e.target.value)
+//                     }
+//                     ref={(el) => (narrationRefs.current[index] = el)}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "narration");
+//                     }}
+//                     onFocus={(e) => e.target.select()}  // Select text on focus
+//                   />
+//                   {showNarrationSuggestions && (
+//                     <datalist id="narrationList">
+//                       {narrationSuggestions.map((n, i) => (
+//                         <option key={i} value={n} />
+//                       ))}
+//                     </datalist>
+//                   )}
+//                 </td>
+//                 <td style={{ padding: 0, width: 160 }}>
+//                   <input
+//                   className="Payment"
+//                     style={{
+//                       height: 40,
+//                       textAlign: "right",
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     readOnly={!isEditMode || isDisabled}
+//                     value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
+//                     onChange={(e) =>
+//                       handleNumberChange(e, index, "payment_debit")
+//                     }
+//                     disabled={!canEditRow(index) || item.disablePayment}
+//                     ref={(el) => (paymentRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
+//                     onBlur={() => handlePkgsBlur(index)}
+//                     onFocus={(e) => e.target.select()}  // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, width: 160 }}>
+//                   <input
+//                   className="Receipt"
+//                     style={{
+//                       height: 40,
+//                       textAlign: "right",
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     readOnly={!isEditMode || isDisabled}
+//                     value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
+//                     onChange={(e) =>
+//                       handleNumberChange(e, index, "receipt_credit")
+//                     }
+//                     disabled={!canEditRow(index) || item.disableReceipt}
+//                     ref={(el) => (receiptRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
+//                     onBlur={() => handleWeightBlur(index)}
+//                     onFocus={(e) => e.target.select()}  // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, width: 160 }}>
+//                   <input
+//                   disabled={!canEditRow(index)}
+//                   className="Discounts"
+//                     style={{
+//                       height: 40,
+//                       textAlign: "right",
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                     }}
+//                     readOnly={!isEditMode || isDisabled}
+//                     value={Number(item.discount) === 0 ? "" : item.discount}
+//                     onChange={(e) =>
+//                       handleItemChangeCus(index, "discount", e.target.value)
+//                     }
+//                     ref={(el) => (discountRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "discount")}
+//                     onBlur={() => handleRateBlur(index)}
+//                     onFocus={(e) => e.target.select()}  // Select text on focus
+//                   />
+//                 </td>
+//                 {isEditMode && (
+//                   <td style={{ padding: 0 }}>
+//                     {canEditRow(index) && (
+//                       <div
+//                         style={{
+//                           display: "flex",
+//                           justifyContent: "center",
+//                           alignItems: "center",
+//                           height: "100%",
+//                         }}
+//                       >
+//                         <IconButton
+//                           color="error"
+//                           size="small"
+//                           tabIndex={-1}
+//                           onClick={() => handleDeleteItem(index)}
+//                         >
+//                           <DeleteIcon />
+//                         </IconButton>
+//                       </div>
+//                     )}
+//                   </td>
+//                 )}
+//               </tr>
+//             ))}
+//           </tbody>
+//           <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
+//           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+//             <td colSpan={2}></td>
+//             <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
+//             <td>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
+//             <td>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
+//             {isEditMode && <td></td>}
+//           </tr>
+//           </tfoot>
+//         </Table>
+//       </div>
+     
+//       <div className="addbutton" style={{ marginTop: 10 }}>
+//         <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
+//           Add Row
+//         </Button>
+//       </div>
+//       {showModalCus && (
+//       <ProductModalCustomer
+//         allFields={allFieldsCus}
+//         onSelect={handleProductSelectCus}
+//         onClose={handleCloseModalCus}
+//         initialKey={pressedKey}
+//         tenant={tenant}
+//       />
+//       )}
+//       <div className="Belowcontent">
+//         <PrintChoiceModal
+//           open={printChoiceOpen}
+//           onClose={() => setPrintChoiceOpen(false)}
+//           onNormal={handleNormalPrint}
+//           onFA={handleFAPreview}
+//         />
+ 
+//         <FAVoucherModal
+//           open={isFAModalOpen}
+//           onClose={() => setIsFAModalOpen(false)}
+//           tenant= {tenant}
+//           voucherno={formData?.voucherno}
+//           vtype="C"
+//         />
+//         <div className="Buttonsgroupz">
+//           <Button
+//             ref={addButtonRef}
+//             className="Buttonz"
+//             style={{ backgroundColor: buttonColors[0] }}
+//             onClick={handleAdd}
+//             disabled={!isAddEnabled}
+//           >
+//             Add
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[1] }}
+//             onClick={handleEditClick}
+//             disabled={!isAddEnabled}
+//           >
+//             Edit
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[2] }}
+//             onClick={handlePrevious}
+//             disabled={!isPreviousEnabled}
+//           >
+//             Previous
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ backgroundColor: buttonColors[3] }}
+//             onClick={handleNext}
+//             disabled={!isNextEnabled}
+//           >
+//             Next
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ backgroundColor: buttonColors[4] }}
+//             onClick={handleFirst}
+//             disabled={!isFirstEnabled}
+//           >
+//             First
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ backgroundColor: buttonColors[5] }}
+//             onClick={handleLast}
+//             disabled={!isLastEnabled}
+//           >
+//             Last
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[6] }}
+//              onClick={() => {
+//               fetchAllBills();
+//               setActiveRowIndex(0);
+//               setShowSearch(true);
+//             }}
+//             disabled={!isSearchEnabled}
+//           >
+//             Search
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[7] }}
+//             onClick={handlePrintClick}
+//             disabled={!isPrintEnabled}
+//           >
+//             Print
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[8] }}
+//             onClick={handleDeleteClick}
+//             disabled={!isDeleteEnabled}
+//           >
+//             Delete
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[9] }}
+//             onClick={handleExit}
+//           >
+//             Exit
+//           </Button>
+//           <Button
+//             ref={saveButtonRef}
+//             className="Buttonz"
+//             onClick={handleSaveClick}
+//             disabled={!isSubmitEnabled}
+//             style={{backgroundColor: buttonColors[10] }}
+//           >
+//             Save
+//           </Button>
+//         </div>
+//       </div>
+//       {/* Search Modal */}
+//       <Modal
+//         show={showSearch}
+//         keyboard={false}
+//         backdrop="static"
+//         onHide={() => setShowSearch(false)}
+//         size="lg"
+//       >
+//         <Modal.Header closeButton>
+//           <Modal.Title>Search</Modal.Title>
+//         </Modal.Header>
+
+//         <Modal.Body>
+//           <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+//             <TextField
+//               className="custom-bordered-input"
+//               size="small"
+//               variant="filled"
+//               label="Enter Bill No..."
+//               value={searchBillNo}
+//               onChange={(e) => setSearchBillNo(e.target.value)}
+//             />
+
+//             <InputMask
+//               mask="99-99-9999"
+//               placeholder="dd-mm-yyyy"
+//               value={searchDate}
+//               onChange={(e) => setSearchDate(e.target.value)}
+//             >
+//               {(props) => (
+//                 <TextField
+//                   className="custom-bordered-input"
+//                   {...props}
+//                   label="DATE"
+//                   size="small"
+//                   variant="filled"
+//                   fullWidth
+//                   style={{ width: 230, marginLeft: 5 }}
+//                 />
+//               )}
+//             </InputMask>
+
+//             <Button
+//               variant="secondary"
+//               onClick={() => {
+//                 setSearchBillNo("");
+//                 setSearchDate(null);
+//               }}
+//             >
+//               Clear
+//             </Button>
+//           </div>
+
+//           <div
+//             style={{ maxHeight: "300px", overflowY: "auto" }}
+//             onScroll={(e) => {
+//               const bottom =
+//                 e.target.scrollHeight - e.target.scrollTop <=
+//                 e.target.clientHeight + 5;
+
+//               if (bottom && visibleCount < filteredBills.length) {
+//                 setVisibleCount((prev) => prev + 30);
+//               }
+//             }}
+//           >
+//             <Table>
+//               <thead>
+//                 <tr>
+//                   <th>V.NO</th>
+//                   <th>DATE</th>
+//                   <th>ACCOUNT</th>
+//                   <th>PAYMENT</th>
+//                   <th>RECEIPT</th>
+//                   <th>DISCOUNT</th>
+//                 </tr>
+//               </thead>
+
+//               <tbody>
+//                 {filteredBills.slice(0, visibleCount).map((bill, index) => (
+//                   <tr key={bill._id}
+//                   style={{
+//                     backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+//                     cursor: "pointer",
+//                   }}
+//                    onClick={() => {
+//                     setActiveRowIndex(index);
+//                     handleSelectBill(bill);
+//                     setShowSearch(false);
+//                   }}
+//                   >
+//                     <td>{bill.formData.voucherno}</td>
+//                     <td>
+//                       {formatDateToDDMMYYYY(bill.formData.date)}
+//                     </td>
+//                     <td>{bill.items?.[0]?.accountname}</td>
+//                     <td>{bill.formData.totalpayment}</td>
+//                     <td>{bill.formData.totalreceipt}</td>
+//                     <td>{bill.formData.totaldiscount}</td>
+//                   </tr>
+//                 ))}
+
+//                 {filteredBills.length === 0 && (
+//                   <tr>
+//                     <td colSpan="6" style={{ textAlign: "center" }}>
+//                       No matching records
+//                     </td>
+//                   </tr>
+//                 )}
+//               </tbody>
+//             </Table>
+//           </div>
+//         </Modal.Body>
+//       </Modal>
+//     </div>
+//   );
+// };
+
+// const styles2 = {
+//   days: {
+//     display: "block",
+//     fontSize: "22px",
+//     fontWeight: "bold",
+//   },
+//   dates: {
+//     display: "block",
+//     fontSize: "20px",
+//     fontWeight: "bold",
+//   },
+// };
+
+// export default CashVoucher;
+
+// Live
+
+import React, { useState, useEffect, useRef, forwardRef, useContext } from "react";
 import "./CashVoucher.css";
 import DatePicker from "react-datepicker";
 import InputMask from "react-input-mask";
@@ -10,22 +2103,17 @@ import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import { Font } from "@react-pdf/renderer";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Modal } from "react-bootstrap"; // Import Bootstrap components
+import { Modal } from "react-bootstrap";
 import { useEditMode } from "../../EditModeContext";
 import InvoicePDFcash from "../InvoicePDFcash";
-import { CompanyContext } from '../Context/CompanyContext';
-import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import { useContext } from "react";
-import TextField from "@mui/material/TextField";
-import {IconButton} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { CompanyContext } from "../Context/CompanyContext";
+import { TextField, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useLocation } from "react-router-dom";
 import useCompanySetup from "../Shared/useCompanySetup";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import useCashBankSetup from "../Shared/useCashBankSetup";
-import SearchModal from "../Shared/SearchModal";
 import useShortcuts from "../Shared/useShortcuts";
 
 // Register font
@@ -34,7 +2122,7 @@ Font.register({
   src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf",
 });
 
-// ✅ Forward ref so DatePicker can focus the input
+// Forward ref so DatePicker can focus the input
 const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
   <InputMask
     mask="99-99-9999"
@@ -48,7 +2136,6 @@ const MaskedInput = forwardRef(({ value, onChange, onBlur }, ref) => (
 ));
 
 const CashVoucher = () => {
-
   const companySetup = useCompanySetup();
   const { decimals } = useCashBankSetup();
   const location = useLocation();
@@ -57,11 +2144,9 @@ const CashVoucher = () => {
 
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-    const tenant = "03AAYFG4472A1ZG_01042025_31032026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
-    // you may want to guard here or show an error state,
-    // since without a tenant you can’t hit the right API
     console.error("No tenant selected!");
   }
 
@@ -86,6 +2171,7 @@ const CashVoucher = () => {
   const saveButtonRef = useRef(null);
   const tableScrollRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
+
   const initialColors = [
     "#E9967A",
     "#F0E68C",
@@ -99,7 +2185,9 @@ const CashVoucher = () => {
     "#DCDCDC",
     "#8FBC8F",
   ];
+
   const [buttonColors, setButtonColors] = useState(initialColors);
+
   const [formData, setFormData] = useState({
     vtype: "C",
     date: "",
@@ -111,11 +2199,12 @@ const CashVoucher = () => {
     totalreceipt: "",
     totaldiscount: "",
   });
+
   const MIN_ROWS = 8;
 
   const createEmptyRow = (id) => ({
     id,
-    acode:"",
+    acode: "",
     accountname: "",
     narration: "",
     payment_debit: "",
@@ -129,53 +2218,33 @@ const CashVoucher = () => {
 
   const normalizeItems = (items = []) => {
     const rows = [...items];
-
     while (rows.length < MIN_ROWS) {
       rows.push(createEmptyRow(rows.length + 1));
     }
-
     return rows;
   };
 
   const [items, setItems] = useState(() => normalizeItems());
-  // const [items, setItems] = useState([
-  //   {
-  //     id: 1,
-  //     acode:"",
-  //     accountname: "",
-  //     narration: "",
-  //     payment_debit: "",
-  //     receipt_credit: "",
-  //     discount: "",
-  //     discounted_payment: "",
-  //     discounted_receipt: "",
-  //     disablePayment: false,
-  //     disableReceipt: false,
-  //   },
-  // ]);
 
   useEffect(() => {
     if (addButtonRef.current && !cashId) {
       addButtonRef.current.focus();
     }
-  }, []);
+  }, [cashId]);
 
-// DateError
   useEffect(() => {
     const date = new Date();
     const options = { weekday: "long" };
     const day = new Intl.DateTimeFormat("en-US", options).format(date);
-
     const formattedDate = date.toLocaleDateString();
 
     setCurrentDate(formattedDate);
     setCurrentDay(day);
   }, []);
- 
+
   const formatDateToDDMMYYYY = (dateStr) => {
     if (!dateStr) return "";
 
-    // ✅ Already dd-mm-yyyy
     const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
     const match = dateStr.match(ddmmyyyy);
     if (match) {
@@ -192,28 +2261,19 @@ const CashVoucher = () => {
 
     let date;
 
-    // ✅ ISO with time (Z or offset)
     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
       const [y, m, d] = dateStr.substring(0, 10).split("-");
-      date = new Date(y, m - 1, d); // avoid timezone issues
-    }
-    // ✅ ISO date only (yyyy-mm-dd)
-    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      date = new Date(y, m - 1, d);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const [y, m, d] = dateStr.split("-");
       date = new Date(y, m - 1, d);
-    }
-    // ✅ dd/mm/yyyy
-    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
       const [d, m, y] = dateStr.split("/");
       date = new Date(y, m - 1, d);
-    }
-    // ✅ yyyy/mm/dd
-    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+    } else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
       const [y, m, d] = dateStr.split("/");
       date = new Date(y, m - 1, d);
-    }
-    // 🔁 fallback (Date.parse)
-    else {
+    } else {
       date = new Date(dateStr);
     }
 
@@ -233,15 +2293,11 @@ const CashVoucher = () => {
   const [filteredBills, setFilteredBills] = useState([]);
   const [searchDate, setSearchDate] = useState(null);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
-    // ⭐ infinite scroll state
   const [visibleCount, setVisibleCount] = useState(10);
 
-  // Fetch all bills for search
   const fetchAllBills = async () => {
     try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`,
-      );
+      const res = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`);
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
         setFilteredBills(res.data);
@@ -251,16 +2307,12 @@ const CashVoucher = () => {
     }
   };
 
-  // Update filtering logic
   useEffect(() => {
     let filtered = allBills;
 
     if (searchBillNo.trim() !== "") {
       filtered = filtered.filter((bill) =>
-        bill.formData.voucherno
-          .toString()
-          .toLowerCase()
-          .includes(searchBillNo.toLowerCase())
+        bill.formData.voucherno.toString().toLowerCase().includes(searchBillNo.toLowerCase())
       );
     }
 
@@ -276,31 +2328,27 @@ const CashVoucher = () => {
     }
 
     setFilteredBills(filtered);
-
-    // ⭐ reset visible rows when search changes
     setVisibleCount(30);
   }, [searchBillNo, searchDate, allBills]);
 
   const handleSelectBill = (bill) => {
     setFormData({
-       ...bill.formData,
-       date: bill.formData.date,
-     });
-      setItems(normalizeItems(bill.items));
-      setShowSearch(false);
-      setSearchBillNo("");
-      setSearchDate("");
+      ...bill.formData,
+      date: bill.formData.date,
+    });
+    setItems(normalizeItems(bill.items));
+    setShowSearch(false);
+    setSearchBillNo("");
+    setSearchDate("");
   };
-  
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleModalSearchKeyDown = (e) => {
       if (!showSearch) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActiveRowIndex((prev) =>
-          prev < filteredBills.length - 1 ? prev + 1 : prev
-        );
+        setActiveRowIndex((prev) => (prev < filteredBills.length - 1 ? prev + 1 : prev));
       }
 
       if (e.key === "ArrowUp") {
@@ -318,13 +2366,11 @@ const CashVoucher = () => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleModalSearchKeyDown);
+    return () => window.removeEventListener("keydown", handleModalSearchKeyDown);
   }, [filteredBills, activeRowIndex, showSearch]);
-  
+
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
-  // Fetch Data
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
   const [index, setIndex] = useState(0);
@@ -337,22 +2383,19 @@ const CashVoucher = () => {
   const [isSearchEnabled, setIsSearchEnabled] = useState(true);
   const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
   const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
-  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+  const { isEditMode, setIsEditMode } = useEditMode();
   const [isAbcmode, setIsAbcmode] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+  const [isDisabled, setIsDisabled] = useState(false);
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
 
-    // replace your Print button onClick:
   const handlePrintClick = () => setPrintChoiceOpen(true);
 
-  // 1) Normal print (your existing PDF)
   const handleNormalPrint = () => {
     setPrintChoiceOpen(false);
-    handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+    handleOpen();
   };
 
-  // 2) FA voucher preview
   const handleFAPreview = async () => {
     setIsFAModalOpen(true);
   };
@@ -361,42 +2404,35 @@ const CashVoucher = () => {
     try {
       let response;
       if (cashId) {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cashget/${cashId}`
-        );
+        response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cashget/${cashId}`);
       } else {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`
-        );
+        response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`);
       }
-      // const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`);
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
-        // Set flags and update form data
         setFirstTimeCheckData("DataAvailable");
         setFormData(lastEntry.formData);
 
-        // Update items with the last entry's items
         const updatedItems = lastEntry.items.map((item) => ({
-          ...item, // Ensure immutability
-          disableReceipt: item.disableReceipt || false, // Handle disableReceipt flag safely
+          ...item,
+          disableReceipt: item.disableReceipt || false,
         }));
-        // setItems(updatedItems);
+
         setItems(normalizeItems(updatedItems));
 
-        // Calculate total payment, total receipt, and total discount
         const totalPayment = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
           .toFixed(2);
+
         const totalReceipt = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
           .toFixed(2);
+
         const totalDiscount = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
           .toFixed(2);
 
-        // Update formData with the calculated totals
         setFormData((prevFormData) => ({
           ...prevFormData,
           totalpayment: totalPayment,
@@ -404,17 +2440,16 @@ const CashVoucher = () => {
           totaldiscount: totalDiscount,
         }));
 
-        // Set data and index
-        setData1(lastEntry); // Assuming setData1 holds the current entry data
-        setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
-        return lastEntry; // ✅ Return this for use in handleAdd
+        setData1(lastEntry);
+        setIndex(lastEntry.voucherno);
+        return lastEntry;
       } else {
         setFirstTimeCheckData("DataNotAvailable");
         console.log("No data available");
-        // Create an empty data object with voucher number 0
+
         const emptyFormData = {
           voucherno: 0,
-          date: new Date().toLocaleDateString(), // Use today's date
+          date: new Date().toLocaleDateString(),
           cashinhand: "",
           owner: "Owner",
           user: "",
@@ -422,10 +2457,11 @@ const CashVoucher = () => {
           totalreceipt: "0.00",
           totaldiscount: "0.00",
         };
+
         const emptyItems = [
           {
             id: 1,
-            acode:"",
+            acode: "",
             accountname: "",
             narration: "",
             payment_debit: "",
@@ -438,16 +2474,14 @@ const CashVoucher = () => {
           },
         ];
 
-        // Set the empty data
         setFormData(emptyFormData);
         setItems(normalizeItems([]));
-        setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
-        setIndex(0); // Set index to 0 for the empty voucher
+        setData1({ formData: emptyFormData, items: emptyItems });
+        setIndex(0);
       }
     } catch (error) {
       console.error("Error fetching data", error);
 
-      // In case of error, you can also initialize empty data if needed
       const emptyFormData = {
         voucherno: 0,
         date: new Date().toLocaleDateString(),
@@ -458,10 +2492,11 @@ const CashVoucher = () => {
         totalreceipt: "0.00",
         totaldiscount: "0.00",
       };
+
       const emptyItems = [
         {
           id: 1,
-          acode:"",
+          acode: "",
           accountname: "",
           narration: "",
           payment_debit: "",
@@ -473,6 +2508,7 @@ const CashVoucher = () => {
           disableReceipt: false,
         },
       ];
+
       setFormData(emptyFormData);
       setItems(normalizeItems([]));
       setData1({ formData: emptyFormData, items: emptyItems });
@@ -489,13 +2525,10 @@ const CashVoucher = () => {
       if (e.key === "Escape" && !isEditMode && cashId) {
         const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
 
-        navigate(-1); // go back
+        navigate(-1);
         setTimeout(() => {
-          // restore modal state after navigation
           if (modalState.keepModalOpen) {
-            window.dispatchEvent(
-              new CustomEvent("reopenTrailModal", { detail: modalState })
-            );
+            window.dispatchEvent(new CustomEvent("reopenTrailModal", { detail: modalState }));
           }
         }, 50);
       }
@@ -503,8 +2536,8 @@ const CashVoucher = () => {
 
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isEditMode]);
-  
+  }, [isEditMode, cashId, navigate]);
+
   useEffect(() => {
     if (data.length > 0) {
       setFormData(data[data.length - 1]);
@@ -512,7 +2545,6 @@ const CashVoucher = () => {
     }
   }, [data]);
 
-  // Add this line to set isDisabled to true initially
   useEffect(() => {
     setIsDisabled(true);
   }, []);
@@ -524,13 +2556,12 @@ const CashVoucher = () => {
     const yyyy = today.getFullYear();
     return `${dd}-${mm}-${yyyy}`;
   };
+
   const skipItemCodeFocusRef = useRef(false);
 
   const fetchVoucherNumbers = async () => {
     try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last-voucherno`
-      );
+      const res = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last-voucherno`);
 
       return {
         lastVoucherNo: res?.data?.lastVoucherNo || 0,
@@ -548,7 +2579,6 @@ const CashVoucher = () => {
   const handleNext = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
-    // console.log(data1._id)
     try {
       if (data1) {
         const response = await axios.get(
@@ -581,7 +2611,6 @@ const CashVoucher = () => {
           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
-          // console.log(response);
           setData1(response.data.data);
           const prevData = response.data.data;
           setIndex(index - 1);
@@ -604,9 +2633,7 @@ const CashVoucher = () => {
     setTitle("View");
 
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/first`
-      );
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/first`);
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
         setIndex(0);
@@ -629,9 +2656,7 @@ const CashVoucher = () => {
     setTitle("View");
 
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`
-      );
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`);
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
         const lastIndex = response.data.length - 1;
@@ -668,6 +2693,7 @@ const CashVoucher = () => {
         totalreceipt: "",
         totaldiscount: "",
       };
+
       setData([...data, newData]);
       setFormData(newData);
       setItems(normalizeItems([]));
@@ -684,10 +2710,10 @@ const CashVoucher = () => {
       setIsDisabled(false);
       setIsEditMode(true);
       skipItemCodeFocusRef.current = true;
+
       if (datePickerRef.current) {
         datePickerRef.current.focus();
       }
-      // voucherRef.current.focus()
     } catch (error) {
       console.error("Error adding new entry:", error);
     }
@@ -696,38 +2722,43 @@ const CashVoucher = () => {
   const handleSaveClick = async () => {
     document.body.style.backgroundColor = "white";
 
-    // Validate if at least one row is filled
     const filledRows = items.filter((item) => item.accountname !== "");
     if (filledRows.length === 0) {
-      toast.error("Please fill in at least one account name before saving.", { position: "top-center" });
-      return;
-    }
-
-    // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
-    const isValidTransaction = filledRows.every(
-      (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
-    );
-    if (!isValidTransaction) {
-      toast.error("Payment or Receipt must be greater than 0.", { position: "top-center" });
-      return;
-    }
-
-    // ✅ NEW VALIDATION: Prevent both debit and credit in same row
-    const hasBothDebitAndCredit = filledRows.some(
-      (item) => parseFloat(item.payment_debit) > 0 && parseFloat(item.receipt_credit) > 0
-    );
-    if (hasBothDebitAndCredit) {
-      toast.error("A row cannot have both Payment Debit and Receipt Credit values at the same time.", {
+      toast.error("Please fill in at least one account name before saving.", {
         position: "top-center",
       });
       return;
     }
-    
+
+    const isValidTransaction = filledRows.every(
+      (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
+    );
+
+    if (!isValidTransaction) {
+      toast.error("Payment or Receipt must be greater than 0.", {
+        position: "top-center",
+      });
+      return;
+    }
+
+    const hasBothDebitAndCredit = filledRows.some(
+      (item) => parseFloat(item.payment_debit) > 0 && parseFloat(item.receipt_credit) > 0
+    );
+
+    if (hasBothDebitAndCredit) {
+      toast.error(
+        "A row cannot have both Payment Debit and Receipt Credit values at the same time.",
+        {
+          position: "top-center",
+        }
+      );
+      return;
+    }
+
     const voucherData = await fetchVoucherNumbers();
     if (!voucherData) return;
 
     if (!isAbcmode) {
-      // ADD mode
       if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
         toast.error(`Voucher No ${formData.voucherno} already used!`, {
           position: "top-center",
@@ -736,7 +2767,6 @@ const CashVoucher = () => {
         return;
       }
     } else {
-      // EDIT mode
       if (
         Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
         Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
@@ -749,8 +2779,8 @@ const CashVoucher = () => {
       }
     }
 
-    // Only disable the save button AFTER validation passes
     setIsSaving(true);
+
     try {
       let combinedData = {
         _id: formData._id,
@@ -781,13 +2811,11 @@ const CashVoucher = () => {
         })),
       };
 
-      // console.log("Combined Data:", combinedData);
       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash${
         isAbcmode ? `/${data1._id}` : ""
       }`;
       const method = isAbcmode ? "put" : "post";
-      console.log("Method",method);
-      
+      console.log("Method", method);
 
       const response = await axios({
         method,
@@ -810,44 +2838,44 @@ const CashVoucher = () => {
         setIsSearchEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
-        fetchData(); // Refresh data to get updated _id and other info
-        fetchNarrations(); // Refresh narrations
+        fetchData();
+        fetchNarrations();
         setTitle("VIEW");
       } else {
         throw new Error(`Unexpected response status: ${response?.status}`);
       }
     } catch (error) {
       console.error("Error saving data:", error?.response?.data || error.message);
-      toast.error(`Failed to save data. ${error?.response?.data?.message || "Please try again."}`, {
-        position: "top-center",
-      });
+      toast.error(
+        `Failed to save data. ${error?.response?.data?.message || "Please try again."}`,
+        {
+          position: "top-center",
+        }
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDeleteClick = async (id) => {
-    if (!id) {
+    if (!id && !data1?._id) {
       toast.error("Invalid ID. Please select an item to delete.", {
         position: "top-center",
       });
       return;
     }
 
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?"
-    );
+    const userConfirmed = window.confirm("Are you sure you want to delete this item?");
     if (!userConfirmed) return;
 
     setIsSaving(true);
     try {
-      // ✅ use id, not data1._id
       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {
         toast.success("Data deleted successfully!", { position: "top-center" });
-        fetchData(); // Refresh the data after successful deletion
+        fetchData();
       } else {
         throw new Error(`Failed to delete data: ${response.statusText}`);
       }
@@ -860,32 +2888,28 @@ const CashVoucher = () => {
       setIsSaving(false);
     }
   };
-  
-  const handleExit = async () => {
 
-    document.body.style.backgroundColor = "white"; // Reset background color
+  const handleExit = async () => {
+    document.body.style.backgroundColor = "white";
     setTitle("View");
 
-    if(!isEditMode){
-      navigate("/dashboard"); 
+    if (!isEditMode) {
+      navigate("/dashboard");
       return;
-    } 
-    
+    }
+
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`
-      ); // Fetch the latest data
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/cash/last`);
 
       if (response.status === 200 && response.data.data) {
-        // If data is available
         const lastEntry = response.data.data;
-        setFormData(lastEntry.formData); // Set form data
+        setFormData(lastEntry.formData);
 
         const updatedItems = lastEntry.items.map((item) => ({
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
-        // setItems(updatedItems);
+
         setItems(normalizeItems(updatedItems));
         setIsDisabled(true);
         setIndex(lastEntry.formData);
@@ -899,13 +2923,15 @@ const CashVoucher = () => {
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
         setIsEditMode(false);
-        // Update totals
+
         const totalPayment = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
           .toFixed(2);
+
         const totalReceipt = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
           .toFixed(2);
+
         const totalDiscount = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
           .toFixed(2);
@@ -917,8 +2943,8 @@ const CashVoucher = () => {
           totaldiscount: totalDiscount,
         }));
       } else {
-        // If no data is available, initialize with default values
         console.log("No data available");
+
         const newData = {
           date: "",
           voucherno: 0,
@@ -929,9 +2955,10 @@ const CashVoucher = () => {
           totalreceipt: "",
           totaldiscount: "",
         };
-        setFormData(newData); // Set default form data
+
+        setFormData(newData);
         setItems(normalizeItems([]));
-        setIsDisabled(true); // Disable fields after loading the default data
+        setIsDisabled(true);
         setIsAddEnabled(true);
         setIsSubmitEnabled(false);
         setIsPreviousEnabled(true);
@@ -962,6 +2989,7 @@ const CashVoucher = () => {
     setIsSPrintEnabled(false);
     setIsDeleteEnabled(false);
     setIsAbcmode(true);
+
     if (accountNameRefs.current[0]) {
       accountNameRefs.current[0].focus();
     }
@@ -970,7 +2998,7 @@ const CashVoucher = () => {
   useEffect(() => {
     if (isEditMode) {
       if (skipItemCodeFocusRef.current) {
-        skipItemCodeFocusRef.current = false; // reset
+        skipItemCodeFocusRef.current = false;
         return;
       }
 
@@ -985,10 +3013,10 @@ const CashVoucher = () => {
   }, [isEditMode]);
 
   const calculateTotalDiscount = () => {
-    // Calculate the total discount by summing up all discount values
     const totalDiscount = items.reduce((acc, item) => {
       return acc + parseFloat(item.discount || 0);
     }, 0);
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       totaldiscount: totalDiscount.toFixed(2),
@@ -996,10 +3024,10 @@ const CashVoucher = () => {
   };
 
   const calculateTotalPayment = () => {
-    // Calculate the total payment by summing up all payment_debit values
     const totalPayment = items.reduce((acc, item) => {
       return acc + parseFloat(item.payment_debit || 0);
     }, 0);
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       totalpayment: totalPayment.toFixed(2),
@@ -1007,10 +3035,10 @@ const CashVoucher = () => {
   };
 
   const calculateTotalReceipt = () => {
-    // Calculate the total receipt by summing up all receipt_credit values
     const totalReceipt = items.reduce((acc, item) => {
       return acc + parseFloat(item.receipt_credit || 0);
     }, 0);
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       totalreceipt: totalReceipt.toFixed(2),
@@ -1019,20 +3047,15 @@ const CashVoucher = () => {
 
   const fetchNarrations = async () => {
     try {
-      const res = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`
-      );
+      const res = await fetch(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cash`);
       const data = await res.json();
 
-      // extract narrations from all items
       const narrs = data
-        .flatMap(entry => entry.items || [])
-        .map(item => item.narration)
-        .filter(n => n && n.trim() !== "");  // remove empty narrations
+        .flatMap((entry) => entry.items || [])
+        .map((item) => item.narration)
+        .filter((n) => n && n.trim() !== "");
 
-      // unique values
       const uniqueNarrs = [...new Set(narrs)];
-
       setNarrationSuggestions(uniqueNarrs);
     } catch (err) {
       console.error("Narration fetch failed:", err);
@@ -1044,8 +3067,10 @@ const CashVoucher = () => {
     if (!/^\d*\.?\d*$/.test(value)) {
       return;
     }
+
     const updatedItems = [...items];
     updatedItems[index][field] = value;
+
     const isValueGreaterThanZero = parseFloat(value) > 0;
 
     if (field === "payment_debit") {
@@ -1053,12 +3078,11 @@ const CashVoucher = () => {
     } else if (field === "receipt_credit") {
       updatedItems[index].disablePayment = isValueGreaterThanZero;
     }
+
     setItems(updatedItems);
-    // Calculate totals after updating items
     calculateTotalPayment();
     calculateTotalReceipt();
     calculateTotalDiscount();
-    // calculateCashInHand();
   };
 
   const capitalizeWords = (str) => {
@@ -1071,27 +3095,25 @@ const CashVoucher = () => {
   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
   const [loadingCus, setLoadingCus] = useState(true);
   const [errorCus, setErrorCus] = useState(null);
-  
+
   React.useEffect(() => {
-    // Fetch products from the API when the component mounts
     fetchCustomers();
-    fetchNarrations();  // new
+    fetchNarrations();
   }, []);
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`
-      );
+      const response = await fetch(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`);
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
+
       const data = await response.json();
-      // Ensure to extract the formData for easier access in the rest of your app
       const formattedData = data.map((item) => ({
         ...item.formData,
         _id: item._id,
       }));
+
       setProductsCus(formattedData);
       setLoadingCus(false);
     } catch (error) {
@@ -1101,21 +3123,20 @@ const CashVoucher = () => {
   };
 
   const handleItemChangeCus = (index, key, value) => {
-    if ((key === "discount") && !/^\d*\.?\d*$/.test(value)) {
-      return; // reject invalid input
+    if (key === "discount" && !/^\d*\.?\d*$/.test(value)) {
+      return;
     }
+
     const updatedItems = [...items];
-    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+    updatedItems[index][key] = capitalizeWords(value);
     calculateTotalDiscount();
-    // If the key is 'name', find the corresponding product and set the price
+
     if (key === "name") {
-      const selectedProduct = productsCus.find(
-        (product) => product.ahead === value
-      );
+      const selectedProduct = productsCus.find((product) => product.ahead === value);
       if (selectedProduct) {
         updatedItems[index]["accountname"] = selectedProduct.ahead;
       }
-    } else if (key === "discount" || key === "payment_debit" ||key === "receipt_credit") {
+    } else if (key === "discount" || key === "payment_debit" || key === "receipt_credit") {
       const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
       const discount = parseFloat(updatedItems[index]["discount"]) || 0;
       const discountedPayment = payment - discount;
@@ -1123,12 +3144,12 @@ const CashVoucher = () => {
 
       let discountedReceipt = receipt - discount;
       if (updatedItems[index].disableReceipt) {
-        discountedReceipt = 0; // Set to zero if receipt field is disabled
+        discountedReceipt = 0;
       }
 
       let discounted_payment = discountedPayment;
       if (updatedItems[index].disablePayment) {
-        discounted_payment = 0; // Set to zero if payment field is disabled
+        discounted_payment = 0;
       }
 
       updatedItems[index]["payment_debit"] = payment.toFixed(2);
@@ -1137,8 +3158,10 @@ const CashVoucher = () => {
       updatedItems[index]["discounted_receipt"] = discountedReceipt.toFixed(2);
       updatedItems[index]["discount"] = discount;
     }
+
     setItems(updatedItems);
   };
+
   const handleAddItem = () => {
     if (isEditMode) {
       const newItem = {
@@ -1154,23 +3177,19 @@ const CashVoucher = () => {
         disableReceipt: false,
       };
 
-      // Update the state with the new item
       setItems([...items, newItem]);
       setTimeout(() => {
-        accountNameRefs.current[items.length].focus();
+        accountNameRefs.current[items.length]?.focus();
       }, 100);
     }
   };
 
-  const handleDeleteItem = (index) => {
+  const handleDeleteItem = (rowIndex) => {
     if (isEditMode) {
-      const confirmDelete = window.confirm(
-        "Do you really want to delete this item?"
-      );
-      // Proceed with deletion if the user confirms
+      const confirmDelete = window.confirm("Do you really want to delete this item?");
       if (confirmDelete) {
-        const filteredItems = items.filter((item, i) => i !== index);
-        setItems(filteredItems);
+        const filteredItems = items.filter((item, i) => i !== rowIndex);
+        setItems(normalizeItems(filteredItems));
       }
     }
   };
@@ -1181,24 +3200,24 @@ const CashVoucher = () => {
       setShowModalCus(false);
       return;
     }
-  
-    // clone the array
+
     const newCustomers = [...items];
-  
-    // overwrite the one at the selected index
+
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
-      accountname: product.ahead || '', 
-      acode: product.acode || '', 
+      accountname: product.ahead || "",
+      acode: product.acode || "",
     };
+
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
       setShowModalCus(false);
       setTimeout(() => {
-        narrationRefs.current[selectedItemIndexCus].focus();
+        narrationRefs.current[selectedItemIndexCus]?.focus();
       }, 100);
     }
+
     setItems(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
@@ -1207,7 +3226,7 @@ const CashVoucher = () => {
   const handleCloseModalCus = () => {
     setShowModalCus(false);
     setIsEditMode(true);
-    setPressedKey(""); // resets for next modal open
+    setPressedKey("");
   };
 
   const openModalForItemCus = (index) => {
@@ -1223,11 +3242,10 @@ const CashVoucher = () => {
         fields.push(key);
       }
     });
-
     return fields;
   }, []);
 
-  const [fsize, setfsize] = useState(18);
+  const [fontSize, setFontSize] = useState(18);
 
   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
     if (event.key === "Enter" || event.key === "Tab") {
@@ -1248,26 +3266,23 @@ const CashVoucher = () => {
   const handleVoucherEnter = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-
-      // Focus first ACCOUNTNAME input
       if (accountNameRefs.current[0]) {
         accountNameRefs.current[0].focus();
       }
     }
   };
 
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+  const [pressedKey, setPressedKey] = useState("");
+
   const focusAndScroll = (refArray, rowIndex) => {
     const inputEl = refArray.current?.[rowIndex];
     const container = tableScrollRef.current;
 
     if (!inputEl || !container) return;
 
-    // focus & select
     inputEl.focus();
     setTimeout(() => inputEl.select && inputEl.select(), 0);
 
-    // find row
     const rowEl = inputEl.closest("tr");
     if (!rowEl) return;
 
@@ -1275,39 +3290,40 @@ const CashVoucher = () => {
     const rowHeight = rowEl.offsetHeight;
     const containerHeight = container.clientHeight;
 
-    // 🔥 key line — force visibility
-    container.scrollTop =
-      rowTop - containerHeight + rowHeight + 60;
+    container.scrollTop = rowTop - containerHeight + rowHeight + 60;
   };
+
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault(); // Stop default Tab navigation
+      event.preventDefault();
+
       switch (field) {
         case "accountname":
           if (items[index].accountname.trim() === "") {
-            saveButtonRef.current.focus();
+            saveButtonRef.current?.focus();
           } else {
             narrationRefs.current[index]?.focus();
           }
           break;
-          case "narration":
-            if (items[index].accountname.trim() === "") {
-              saveButtonRef.current?.focus();
+
+        case "narration":
+          if (items[index].accountname.trim() === "") {
+            saveButtonRef.current?.focus();
+          } else {
+            if (items[index].disablePayment) {
+              receiptRefs.current[index]?.focus();
             } else {
-              if (items[index].disablePayment) {
-                // If debit is disabled, move focus to credit
-                receiptRefs.current[index]?.focus();
-              } else {
-                paymentRefs.current[index]?.focus();
-              }
+              paymentRefs.current[index]?.focus();
             }
-            break;
+          }
+          break;
+
         case "payment_debit":
           if (!items[index].disableReceipt) {
             receiptRefs.current[index]?.focus();
           } else {
             if (
-              accountNameRefs.current[index].value.trim().length > 0 &&
+              accountNameRefs.current[index]?.value.trim().length > 0 &&
               items[index].payment_debit.trim().length > 0
             ) {
               discountRefs.current[index]?.focus();
@@ -1317,15 +3333,20 @@ const CashVoucher = () => {
             }
           }
           break;
+
         case "receipt_credit":
-          if (accountNameRefs.current[index].value.trim().length > 0 && items[index].receipt_credit.trim().length > 0) {
+          if (
+            accountNameRefs.current[index]?.value.trim().length > 0 &&
+            items[index].receipt_credit.trim().length > 0
+          ) {
             discountRefs.current[index]?.focus();
           } else {
             alert("Account name and Payment/Receipt cannot be empty");
             receiptRefs.current[index]?.focus();
           }
           break;
-          case "discount":
+
+        case "discount":
           if (index === items.length - 1) {
             handleAddItem();
             setTimeout(() => {
@@ -1335,108 +3356,95 @@ const CashVoucher = () => {
             focusAndScroll(accountNameRefs, index + 1);
           }
           break;
+
         default:
           break;
       }
-    } 
-    // Move Right (→)
-    else if (event.key === "ArrowRight") {
-      if (field === "accountname"){ narrationRefs.current[index]?.focus();
+    } else if (event.key === "ArrowRight") {
+      if (field === "accountname") {
+        narrationRefs.current[index]?.focus();
         setTimeout(() => narrationRefs.current[index]?.select(), 0);
       }
       if (field === "narration") {
-        if (!items[index].disablePayment){ paymentRefs.current[index]?.focus();
+        if (!items[index].disablePayment) {
+          paymentRefs.current[index]?.focus();
           setTimeout(() => paymentRefs.current[index]?.select(), 0);
+        } else {
+          receiptRefs.current[index]?.focus();
+          setTimeout(() => receiptRefs.current[index]?.select(), 0);
         }
-        else {receiptRefs.current[index]?.focus();
-        setTimeout(() => receiptRefs.current[index]?.select(), 0);
-        }
-      }
-      else if (field === "payment_debit" && !items[index].disableReceipt){
+      } else if (field === "payment_debit" && !items[index].disableReceipt) {
         receiptRefs.current[index]?.focus();
         setTimeout(() => receiptRefs.current[index]?.select(), 0);
-      }
-      else if (field === "payment_debit" && items[index].disableReceipt){
+      } else if (field === "payment_debit" && items[index].disableReceipt) {
+        discountRefs.current[index]?.focus();
+        setTimeout(() => discountRefs.current[index]?.select(), 0);
+      } else if (field === "receipt_credit") {
         discountRefs.current[index]?.focus();
         setTimeout(() => discountRefs.current[index]?.select(), 0);
       }
-      else if (field === "receipt_credit"){ discountRefs.current[index]?.focus();
-        setTimeout(() => discountRefs.current[index]?.select(), 0);
-      }
-    } 
-    // Move Left (←)
-    else if (event.key === "ArrowLeft") {
+    } else if (event.key === "ArrowLeft") {
       if (field === "discount") {
-        if (!items[index].disableReceipt){ receiptRefs.current[index]?.focus();
+        if (!items[index].disableReceipt) {
+          receiptRefs.current[index]?.focus();
           setTimeout(() => receiptRefs.current[index]?.select(), 0);
-        }
-        else {paymentRefs.current[index]?.focus();
-        setTimeout(() => paymentRefs.current[index]?.select(), 0);
-        }
-      } 
-      if (field === "receipt_credit") {
-        if (!items[index].disablePayment){ paymentRefs.current[index]?.focus();
+        } else {
+          paymentRefs.current[index]?.focus();
           setTimeout(() => paymentRefs.current[index]?.select(), 0);
         }
-        else {narrationRefs.current[index]?.focus();
-        setTimeout(() => narrationRefs.current[index]?.select(), 0);
-        }
-      } 
-      else if (field === "payment_debit"){ narrationRefs.current[index]?.focus();
-        setTimeout(() => narrationRefs.current[index]?.select(), 0);
       }
-      else if (field === "narration"){ accountNameRefs.current[index]?.focus();
+      if (field === "receipt_credit") {
+        if (!items[index].disablePayment) {
+          paymentRefs.current[index]?.focus();
+          setTimeout(() => paymentRefs.current[index]?.select(), 0);
+        } else {
+          narrationRefs.current[index]?.focus();
+          setTimeout(() => narrationRefs.current[index]?.select(), 0);
+        }
+      } else if (field === "payment_debit") {
+        narrationRefs.current[index]?.focus();
+        setTimeout(() => narrationRefs.current[index]?.select(), 0);
+      } else if (field === "narration") {
+        accountNameRefs.current[index]?.focus();
         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
       }
-    } 
-
-    // Move Up
-    else if (event.key === "ArrowUp" && index > 0) {
+    } else if (event.key === "ArrowUp" && index > 0) {
       setTimeout(() => {
-        if (field === "accountname")
-          focusAndScroll(accountNameRefs, index - 1);
-        else if (field === "narration")
-          focusAndScroll(narrationRefs, index - 1);
-        else if (field === "payment_debit")
-          focusAndScroll(paymentRefs, index - 1);
-        else if (field === "receipt_credit")
-          focusAndScroll(receiptRefs, index - 1);
-        else if (field === "discount")
-          focusAndScroll(discountRefs, index - 1);
+        if (field === "accountname") focusAndScroll(accountNameRefs, index - 1);
+        else if (field === "narration") focusAndScroll(narrationRefs, index - 1);
+        else if (field === "payment_debit") focusAndScroll(paymentRefs, index - 1);
+        else if (field === "receipt_credit") focusAndScroll(receiptRefs, index - 1);
+        else if (field === "discount") focusAndScroll(discountRefs, index - 1);
       }, 0);
-    }
-
-// Move Down
-  else if (event.key === "ArrowDown" && index < items.length - 1) {
-    setTimeout(() => {
-      if (field === "accountname")
-        focusAndScroll(accountNameRefs, index + 1);
-      else if (field === "narration")
-        focusAndScroll(narrationRefs, index + 1);
-      else if (field === "payment_debit")
-        focusAndScroll(paymentRefs, index + 1);
-      else if (field === "receipt_credit")
-        focusAndScroll(receiptRefs, index + 1);
-      else if (field === "discount")
-        focusAndScroll(discountRefs, index + 1);
-    }, 0);
-  }
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+    } else if (event.key === "ArrowDown" && index < items.length - 1) {
+      setTimeout(() => {
+        if (field === "accountname") focusAndScroll(accountNameRefs, index + 1);
+        else if (field === "narration") focusAndScroll(narrationRefs, index + 1);
+        else if (field === "payment_debit") focusAndScroll(paymentRefs, index + 1);
+        else if (field === "receipt_credit") focusAndScroll(receiptRefs, index + 1);
+        else if (field === "discount") focusAndScroll(discountRefs, index + 1);
+      }, 0);
+    } else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
       openModalForItemCus(index);
       event.preventDefault();
     }
   };
-
-  // Update the blur handlers so that they always format the value to 2 decimals.
+const handleNumericValue = (event) => {
+    const { id, value } = event.target;
+    // Allow only numeric values, including optional decimal points
+    if (/^\d*\.?\d*$/.test(value) || value === "") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+    }
+  };
   const handlePkgsBlur = (index) => {
     const decimalPlaces = decimals;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].payment_debit);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].payment_debit = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
@@ -1445,9 +3453,7 @@ const CashVoucher = () => {
     const decimalPlaces = decimals;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].receipt_credit);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].receipt_credit = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
@@ -1456,42 +3462,37 @@ const CashVoucher = () => {
     const decimalPlaces = decimals;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].discount);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].discount = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
 
   const handleOpenModalBack = (event, index, field) => {
-      if (event.key === "Backspace" && field === "accountname") {
-          setSelectedItemIndexCus(index);
-          setShowModalCus(true);
-          event.preventDefault();
-      }
+    if (event.key === "Backspace" && field === "accountname") {
+      setSelectedItemIndexCus(index);
+      setShowModalCus(true);
+      event.preventDefault();
+    }
   };
 
   const isRowFilled = (row) => {
     return (row.accountname || "").trim() !== "";
   };
+
   const canEditRow = (rowIndex) => {
-      // 🔒 If not in edit mode, nothing is editable
-      if (!isEditMode) return false;
+    if (!isEditMode) return false;
+    if (rowIndex === 0) return true;
 
-      // First row is editable in edit mode
-      if (rowIndex === 0) return true;
-
-      // All previous rows must be filled
-      for (let i = 0; i < rowIndex; i++) {
-        if (!isRowFilled(items[i])) {
-          return false;
-        }
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
       }
-      return true;
+    }
+    return true;
   };
 
-  // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || printChoiceOpen || showSearch;
+
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -1502,13 +3503,12 @@ const CashVoucher = () => {
     handleExit,
     handlePrint: handlePrintClick,
     isEditMode,
-    isModalOpen: AnyModalOpen,   // 👈 here
+    isModalOpen: AnyModalOpen,
   });
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleGlobalEscape = (event) => {
       if (event.key === "Escape") {
-
         if (showSearch) {
           setShowSearch(false);
           return;
@@ -1521,27 +3521,16 @@ const CashVoucher = () => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-
+    window.addEventListener("keydown", handleGlobalEscape);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleGlobalEscape);
     };
   }, [showSearch, printChoiceOpen]);
 
-  const handleNumericValue = (event) => {
-    const { id, value } = event.target;
-    // Allow only numeric values, including optional decimal points
-    if (/^\d*\.?\d*$/.test(value) || value === "") {
-      setFormData((prevData) => ({
-        ...prevData,
-        [id]: value,
-      }));
-    }
-  };
-
   return (
-    <div>
+    <div className="cash-voucher-page">
       <ToastContainer />
+
       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
         <InvoicePDFcash
           formData={formData}
@@ -1550,414 +3539,412 @@ const CashVoucher = () => {
           handleClose={handleClose}
         />
       </div>
-      <h1 className="HeaderCASH">CASH VOUCHER</h1>
-      <span className="tittle">{title}</span>
-      <div className="containers">
-        <span style={styles2.dates}>{currentDate}</span>
-        <span style={styles2.days}>{currentDay}</span>
-      </div>
-      {/* <div style={{ marginLeft: "90%", marginTop: -35 }}>
-          <Button onClick={decreasefsize}><FaMinus /></Button>
-          <Button style={{ marginLeft: 10 }} onClick={increasefsize}><FaPlus /></Button>
-      </div> */}
-      <div className="Tops">
-        <span>DATE</span>
-        <InputMask
-            mask="99-99-9999"
-            placeholder="dd-mm-yyyy"
-            value={formData.date}
-            readOnly={!isEditMode || isDisabled}
-            onChange={(e) =>
-              setFormData({ ...formData, date: e.target.value })
-            }
-          >
-            {(inputProps) => (
-              <input
-                {...inputProps}
-                className="DatePICKER"
-                ref={datePickerRef}
-                onKeyDown={(e) => {
-                  handleEnterKeyPress(datePickerRef, voucherRef)(e);
-                }}
-              />
-            )}
-        </InputMask>
-        <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
-          <TextField
-          inputRef={voucherRef}
-          id="voucherno"
-          value={formData.voucherno}
-          label="VOUCHER NO."
-          onFocus={(e) => e.target.select()}  // Select text on focus
-          onKeyDown={handleVoucherEnter}
-          onChange={handleNumericValue}
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fsize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150 }}
-          />
-          <TextField
-          id="owner"
-          value={formData.owner}
-          label="USER"
-          onFocus={(e) => e.target.select()}  // Select text on focus
-          // onChange={handleInputChange}
-          inputProps={{
-            maxLength: 48,
-            style: {
-              height: 20,
-              fontSize: `${fsize}px`,
-              fontWeight: "bold",
-            },
-            readOnly: !isEditMode || isDisabled,
-          }}
-          size="small"
-          variant="filled"
-          className="custom-bordered-input"
-          sx={{ width: 150,marginLeft:1,marginRight:1 }}
-          disabled     // ← ALWAYS DISABLED
-          />
-        </div>  
-      </div>
-      <div ref={tableScrollRef} className="TableSectionz">
-        <Table ref={tableRef} className="custom-table">
-          <thead
-            style={{
-              backgroundColor: "skyblue",
-              textAlign: "center",
-              position: "sticky",
-              top: 0,
-            }}
-          >
-            <tr style={{ color: "white" }}>
-              <th>ACCOUNTNAME</th>
-              <th>
-                NARRATION
-                <input 
-                  type="checkbox"
-                  style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
-                  tabIndex={-1}       // ⬅⬅ prevents tab focus
-                  checked={showNarrationSuggestions}
-                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                  }}
-                />
-              </th>
-              <th>PAYMENT</th>
-              <th>RECEIPT</th>
-              <th>DISCOUNT</th>
-              {isEditMode && <th className="text-center">DELETE</th>}
-            </tr>
-          </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(520px - 40px)" }}>
-            {items.map((item, index) => (
-              <tr key={`${item.accountname}-${index}`}>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                  className="Account"
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.accountname}
-                    readOnly={!isEditMode || isDisabled}
-                    onChange={(e) => { // console.log(accountNameRefs.current[index].value)
-                    }}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "accountname")
-                      handleOpenModalBack(e, index, "accountname");
-                    }}
-                  
-                    ref={(el) => (accountNameRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="Narration"
-                    list={showNarrationSuggestions ? "narrationList" : undefined}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={item.narration}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "narration", e.target.value)
-                    }
-                    ref={(el) => (narrationRefs.current[index] = el)}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "narration");
-                    }}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                  {showNarrationSuggestions && (
-                    <datalist id="narrationList">
-                      {narrationSuggestions.map((n, i) => (
-                        <option key={i} value={n} />
-                      ))}
-                    </datalist>
+
+      <div className="cash-voucher-shell">
+        <div className="cash-voucher-header-card">
+          <div className="cash-voucher-header-top">
+            <div className="header-title-wrap">
+              <h1 >CASH VOUCHER</h1>
+              <span className="tittle">{title}</span>
+            </div>
+
+            <div className="containers modern-date-box">
+              <span style={styles2.dates}>{currentDate}</span>
+              <span style={styles2.days}>{currentDay}</span>
+            </div>
+          </div>
+
+          <div className="cash-voucher-topbar">
+            <div className="topbar-left">
+              <div className="field-block">
+                <label className="top-label">DATE</label>
+                <InputMask
+                  mask="99-99-9999"
+                  placeholder="dd-mm-yyyy"
+                  value={formData.date}
+                  readOnly={!isEditMode || isDisabled}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                >
+                  {(inputProps) => (
+                    <input
+                      {...inputProps}
+                      className="DatePICKER modern-date-input"
+                      ref={datePickerRef}
+                      onKeyDown={(e) => {
+                        handleEnterKeyPress(datePickerRef, voucherRef)(e);
+                      }}
+                    />
                   )}
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Payment"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "payment_debit")
-                    }
-                    disabled={!canEditRow(index) || item.disablePayment}
-                    ref={(el) => (paymentRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
-                    onBlur={() => handlePkgsBlur(index)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  className="Receipt"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "receipt_credit")
-                    }
-                    disabled={!canEditRow(index) || item.disableReceipt}
-                    ref={(el) => (receiptRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
-                    onBlur={() => handleWeightBlur(index)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, width: 160 }}>
-                  <input
-                  disabled={!canEditRow(index)}
-                  className="Discounts"
-                    style={{
-                      height: 40,
-                      textAlign: "right",
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.discount) === 0 ? "" : item.discount}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "discount", e.target.value)
-                    }
-                    ref={(el) => (discountRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "discount")}
-                    onBlur={() => handleRateBlur(index)}
-                    onFocus={(e) => e.target.select()}  // Select text on focus
-                  />
-                </td>
-                {isEditMode && (
-                  <td style={{ padding: 0 }}>
-                    {canEditRow(index) && (
-                      <div
+                </InputMask>
+              </div>
+            </div>
+
+            <div className="topbar-right">
+              <TextField
+                inputRef={voucherRef}
+                id="voucherno"
+                value={formData.voucherno}
+                label="VOUCHER NO."
+                          onChange={handleNumericValue}
+
+                onFocus={(e) => e.target.select()}
+                onKeyDown={handleVoucherEnter}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    fontWeight: "bold",
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                size="small"
+                variant="filled"
+                className="custom-bordered-input voucher-field"
+                sx={{ width: 170 }}
+              />
+
+              <TextField
+                id="owner"
+                value={formData.owner}
+                label="USER"
+                onFocus={(e) => e.target.select()}
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    fontWeight: "bold",
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                size="small"
+                variant="filled"
+                className="custom-bordered-input voucher-field"
+                sx={{ width: 170 }}
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="cash-voucher-table-card">
+          <div ref={tableScrollRef} className="TableSectionz">
+            <Table ref={tableRef} className="custom-table modern-cash-table">
+              <thead>
+                <tr>
+                  <th>ACCOUNT NAME</th>
+                  <th>
+                    <div className="narration-head">
+                      <span>NARRATION</span>
+                      <input
+                        type="checkbox"
                         style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100%",
+                          marginLeft: 5,
+                          transform: "scale(1.15)",
+                          cursor: "pointer",
                         }}
-                      >
-                        <IconButton
-                          color="error"
-                          size="small"
-                          tabIndex={-1}
-                          onClick={() => handleDeleteItem(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </div>
+                        tabIndex={-1}
+                        checked={showNarrationSuggestions}
+                        onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }
+                        }}
+                      />
+                    </div>
+                  </th>
+                  <th>PAYMENT</th>
+                  <th>RECEIPT</th>
+                  <th>DISCOUNT</th>
+                  {isEditMode && <th className="text-center">DELETE</th>}
+                </tr>
+              </thead>
+
+              <tbody>
+                {items.map((item, index) => (
+                  <tr key={`${item.accountname}-${index}`}>
+                    <td style={{ padding: 0 }}>
+                      <input
+                        disabled={!canEditRow(index)}
+                        className="Account"
+                        type="text"
+                        value={item.accountname}
+                        readOnly={!isEditMode || isDisabled}
+                        onChange={() => {}}
+                        onKeyDown={(e) => {
+                          handleKeyDown(e, index, "accountname");
+                          handleOpenModalBack(e, index, "accountname");
+                        }}
+                        ref={(el) => (accountNameRefs.current[index] = el)}
+                        onFocus={(e) => e.target.select()}
+                        style={{fontSize: `${fontSize}px`}}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        disabled={!canEditRow(index)}
+                        className="Narration"
+                        list={showNarrationSuggestions ? "narrationList" : undefined}
+                        readOnly={!isEditMode || isDisabled}
+                        value={item.narration}
+                        onChange={(e) => handleItemChangeCus(index, "narration", e.target.value)}
+                        ref={(el) => (narrationRefs.current[index] = el)}
+                        onKeyDown={(e) => {
+                          handleKeyDown(e, index, "narration");
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        style={{fontSize: `${fontSize}px`}}
+                      />
+                      {showNarrationSuggestions && (
+                        <datalist id="narrationList">
+                          {narrationSuggestions.map((n, i) => (
+                            <option key={i} value={n} />
+                          ))}
+                        </datalist>
+                      )}
+                    </td>
+
+                    <td style={{ padding: 0, width: 160 }}>
+                      <input
+                        className="Payment"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
+                        onChange={(e) => handleNumberChange(e, index, "payment_debit")}
+                        disabled={!canEditRow(index) || item.disablePayment}
+                        ref={(el) => (paymentRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
+                        onBlur={() => handlePkgsBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                        style={{fontSize: `${fontSize}px`}}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0, width: 160 }}>
+                      <input
+                        className="Receipt"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
+                        onChange={(e) => handleNumberChange(e, index, "receipt_credit")}
+                        disabled={!canEditRow(index) || item.disableReceipt}
+                        ref={(el) => (receiptRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
+                        onBlur={() => handleWeightBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                        style={{fontSize: `${fontSize}px`}}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0, width: 160 }}>
+                      <input
+                        disabled={!canEditRow(index)}
+                        className="Discounts"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.discount) === 0 ? "" : item.discount}
+                        onChange={(e) => handleItemChangeCus(index, "discount", e.target.value)}
+                        ref={(el) => (discountRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "discount")}
+                        onBlur={() => handleRateBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                        style={{fontSize: `${fontSize}px`}}
+                      />
+                    </td>
+
+                    {isEditMode && (
+                      <td style={{ padding: 0 }}>
+                        {canEditRow(index) && (
+                          <div className="delete-cell-wrap">
+                            <IconButton
+                              color="error"
+                              size="small"
+                              tabIndex={-1}
+                              onClick={() => handleDeleteItem(index)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </div>
+                        )}
+                      </td>
                     )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
-          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
-            <td colSpan={2}></td>
-            <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
-            <td>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
-            <td>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
-            {isEditMode && <td></td>}
-          </tr>
-          </tfoot>
-        </Table>
-      </div>
-     
-      <div className="addbutton" style={{ marginTop: 10 }}>
-        <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
-          Add Row
-        </Button>
-      </div>
-      {showModalCus && (
-      <ProductModalCustomer
-        allFields={allFieldsCus}
-        onSelect={handleProductSelectCus}
-        onClose={handleCloseModalCus}
-        initialKey={pressedKey}
-        tenant={tenant}
-      />
-      )}
-      <div className="Belowcontent">
-        <PrintChoiceModal
-          open={printChoiceOpen}
-          onClose={() => setPrintChoiceOpen(false)}
-          onNormal={handleNormalPrint}
-          onFA={handleFAPreview}
-        />
- 
-        <FAVoucherModal
-          open={isFAModalOpen}
-          onClose={() => setIsFAModalOpen(false)}
-          tenant= {tenant}
-          voucherno={formData?.voucherno}
-          vtype="C"
-        />
-        <div className="Buttonsgroupz">
-          <Button
-            ref={addButtonRef}
-            className="Buttonz"
-            style={{ backgroundColor: buttonColors[0] }}
-            onClick={handleAdd}
-            disabled={!isAddEnabled}
-          >
-            Add
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[1] }}
-            onClick={handleEditClick}
-            disabled={!isAddEnabled}
-          >
-            Edit
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[2] }}
-            onClick={handlePrevious}
-            disabled={!isPreviousEnabled}
-          >
-            Previous
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ backgroundColor: buttonColors[3] }}
-            onClick={handleNext}
-            disabled={!isNextEnabled}
-          >
-            Next
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ backgroundColor: buttonColors[4] }}
-            onClick={handleFirst}
-            disabled={!isFirstEnabled}
-          >
-            First
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ backgroundColor: buttonColors[5] }}
-            onClick={handleLast}
-            disabled={!isLastEnabled}
-          >
-            Last
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[6] }}
-             onClick={() => {
-              fetchAllBills();
-              setActiveRowIndex(0);
-              setShowSearch(true);
-            }}
-            disabled={!isSearchEnabled}
-          >
-            Search
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[7] }}
-            onClick={handlePrintClick}
-            disabled={!isPrintEnabled}
-          >
-            Print
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[8] }}
-            onClick={handleDeleteClick}
-            disabled={!isDeleteEnabled}
-          >
-            Delete
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[9] }}
-            onClick={handleExit}
-          >
-            Exit
-          </Button>
-          <Button
-            ref={saveButtonRef}
-            className="Buttonz"
-            onClick={handleSaveClick}
-            disabled={!isSubmitEnabled}
-            style={{backgroundColor: buttonColors[10] }}
-          >
-            Save
-          </Button>
+                  </tr>
+                ))}
+              </tbody>
+
+              <tfoot>
+                <tr>
+                  <td colSpan={2}></td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
+                  {isEditMode && <td></td>}
+                </tr>
+              </tfoot>
+            </Table>
+          </div>
+
+          <div className="addbutton add-row-wrap">
+            <Button className="fw-bold btn-secondary add-row-btn" onClick={handleAddItem}>
+              + Add Row
+            </Button>
+          </div>
+        </div>
+
+        {showModalCus && (
+          <ProductModalCustomer
+            allFields={allFieldsCus}
+            onSelect={handleProductSelectCus}
+            onClose={handleCloseModalCus}
+            initialKey={pressedKey}
+            tenant={tenant}
+          />
+        )}
+
+        {/* <div className="Belowcontent"> */}
+<div className="Belowcontent cash-bottom-section">
+          <PrintChoiceModal
+            open={printChoiceOpen}
+            onClose={() => setPrintChoiceOpen(false)}
+            onNormal={handleNormalPrint}
+            onFA={handleFAPreview}
+          />
+
+          <FAVoucherModal
+            open={isFAModalOpen}
+            onClose={() => setIsFAModalOpen(false)}
+            tenant={tenant}
+            voucherno={formData?.voucherno}
+            vtype="C"
+          />
+
+        {/* <div className="cash-bottom-buttons"> */}
+<div className="Belowcontent cash-bottom-section">
+  <PrintChoiceModal
+    open={printChoiceOpen}
+    onClose={() => setPrintChoiceOpen(false)}
+    onNormal={handleNormalPrint}
+    onFA={handleFAPreview}
+  />
+
+  <FAVoucherModal
+    open={isFAModalOpen}
+    onClose={() => setIsFAModalOpen(false)}
+    tenant={tenant}
+    voucherno={formData?.voucherno}
+    vtype="C"
+  />
+
+  <div className="Buttonsgroupz journal-bottom-buttons">
+    <Button
+      ref={addButtonRef}
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[0] }}
+      onClick={handleAdd}
+      disabled={!isAddEnabled}
+    >
+      Add
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[1] }}
+      onClick={handleEditClick}
+      disabled={!isAddEnabled}
+    >
+      Edit
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[2] }}
+      onClick={handlePrevious}
+      disabled={!isPreviousEnabled}
+    >
+      Previous
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[3] }}
+      onClick={handleNext}
+      disabled={!isNextEnabled}
+    >
+      Next
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[4] }}
+      onClick={handleFirst}
+      disabled={!isFirstEnabled}
+    >
+      First
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[5] }}
+      onClick={handleLast}
+      disabled={!isLastEnabled}
+    >
+      Last
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[6] }}
+      onClick={() => {
+        fetchAllBills();
+        setActiveRowIndex(0);
+        setShowSearch(true);
+      }}
+      disabled={!isSearchEnabled}
+    >
+      Search
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[7] }}
+      onClick={handlePrintClick}
+      disabled={!isPrintEnabled}
+    >
+      Print
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[8] }}
+      onClick={handleDeleteClick}
+      disabled={!isDeleteEnabled}
+    >
+      Delete
+    </Button>
+
+    <Button
+      className="Buttonz modern-btn"
+      style={{ backgroundColor: buttonColors[9] }}
+      onClick={handleExit}
+    >
+      Exit
+    </Button>
+
+    <Button
+      ref={saveButtonRef}
+      className="Buttonz modern-btn save-btn"
+      onClick={handleSaveClick}
+      disabled={!isSubmitEnabled}
+      style={{ backgroundColor: buttonColors[10] }}
+    >
+      Save
+    </Button>
+  </div>
+</div>
         </div>
       </div>
-      {/* Search Modal */}
+
       <Modal
         show={showSearch}
         keyboard={false}
@@ -1970,7 +3957,7 @@ const CashVoucher = () => {
         </Modal.Header>
 
         <Modal.Body>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px", flexWrap: "wrap" }}>
             <TextField
               className="custom-bordered-input"
               size="small"
@@ -2014,8 +4001,7 @@ const CashVoucher = () => {
             style={{ maxHeight: "300px", overflowY: "auto" }}
             onScroll={(e) => {
               const bottom =
-                e.target.scrollHeight - e.target.scrollTop <=
-                e.target.clientHeight + 5;
+                e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 5;
 
               if (bottom && visibleCount < filteredBills.length) {
                 setVisibleCount((prev) => prev + 30);
@@ -2036,21 +4022,20 @@ const CashVoucher = () => {
 
               <tbody>
                 {filteredBills.slice(0, visibleCount).map((bill, index) => (
-                  <tr key={bill._id}
-                  style={{
-                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
-                    cursor: "pointer",
-                  }}
-                   onClick={() => {
-                    setActiveRowIndex(index);
-                    handleSelectBill(bill);
-                    setShowSearch(false);
-                  }}
+                  <tr
+                    key={bill._id}
+                    style={{
+                      backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setActiveRowIndex(index);
+                      handleSelectBill(bill);
+                      setShowSearch(false);
+                    }}
                   >
                     <td>{bill.formData.voucherno}</td>
-                    <td>
-                      {formatDateToDDMMYYYY(bill.formData.date)}
-                    </td>
+                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
                     <td>{bill.items?.[0]?.accountname}</td>
                     <td>{bill.formData.totalpayment}</td>
                     <td>{bill.formData.totalreceipt}</td>
@@ -2077,12 +4062,12 @@ const CashVoucher = () => {
 const styles2 = {
   days: {
     display: "block",
-    fontSize: "22px",
+    fontSize: "12px",
     fontWeight: "bold",
   },
   dates: {
     display: "block",
-    fontSize: "20px",
+    fontSize: "10px",
     fontWeight: "bold",
   },
 };

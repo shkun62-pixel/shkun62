@@ -1,6 +1,5 @@
 // import React, { useState, useEffect, useRef, forwardRef } from "react";
 // import "./Sale.css";
-// import DatePicker from "react-datepicker";
 // import InputMask from "react-input-mask";
 // import "react-datepicker/dist/react-datepicker.css";
 // import "react-toastify/dist/ReactToastify.css";
@@ -11,7 +10,7 @@
 // import axios from "axios";
 // import { ToastContainer, toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
-// import { FaPlus, FaMinus, FaCog, FaTimes } from "react-icons/fa";
+// import { FaCog, FaTimes } from "react-icons/fa";
 // import SaleSetup from "./SaleSetup";
 // import InvoicePDF from "../InvoicePDF/InvoicePDF";
 // import InvoicepdfSale1 from "../InvoicePDF/InvoicepdfSale1";
@@ -727,10 +726,6 @@
 //     };
 //   };
 
-//   // useEffect(() => {
-//   //   setFormData((prevState) => calculateTotalGst(prevState));
-//   // }, [items, T21, T12, formData.tcs1_rate]);
-
 //   const handleNumberChange = (event) => {
 //     const { id, value } = event.target;
 
@@ -756,20 +751,6 @@
 //       return calculateTotalGst(newFormData, true); // ✅ KEEP THIS
 //     });
 //   };
-
-//   // const handleNumberChange = (event) => {
-//   //   const { id, value } = event.target;
-//   //   const numberValue = value.replace(/[^0-9.]/g, "");
-//   //   const validNumberValue =
-//   //     numberValue.split(".").length > 2
-//   //       ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
-//   //       : numberValue;
-
-//   //   setFormData((prevState) => {
-//   //     const newFormData = { ...prevState, [id]: validNumberValue };
-//   //     return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
-//   //   });
-//   // };
 
 //   const [settingsOpen, setSettingsOpen] = useState(false);
 //   const [data, setData] = useState([]);
@@ -889,47 +870,50 @@
 //     return `${dd}-${mm}-${yyyy}`;
 //   };
 
+//   const applySaleRecordToState = (record) => {
+//     if (!record) return;
+
+//     const updatedFormData = {
+//       ...record.formData,
+//       date: formatDateToDDMMYYYY(record.formData.date),
+//       duedate: formatDateToDDMMYYYY(record.formData.duedate),
+//     };
+
+//     setFormData(updatedFormData);
+//     setData1({ ...record, formData: updatedFormData });
+//     setItems(normalizeItems(record.items || []));
+//     setcustomerDetails([...(record.customerDetails || [])]);
+//     setshipped([...(record.shipped || [])]);
+//     setIndex(record?.formData?.vbillno || 0);
+
+//     if (record?.customerDetails?.length > 0) {
+//       setCustgst(record.customerDetails[0].gstno || "");
+//     }
+
+//     setIsDisabled(true);
+//   };
+
 //   const fetchData = async () => {
 //     try {
 //       let response;
+
 //       if (saleId) {
 //         response = await axios.get(
-//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`,
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`
 //         );
 //       } else {
 //         response = await axios.get(
-//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
 //         );
 //       }
-//       // const response = await axios.get(
-//       //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
-//       // );
 
 //       if (response.status === 200 && response.data && response.data.data) {
 //         const lastEntry = response.data.data;
 
-//         const updatedFormData = {
-//           ...lastEntry.formData,
-//           date: formatDateToDDMMYYYY(lastEntry.formData.date),
-//           duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
-//         };
-
 //         setFirstTimeCheckData("DataAvailable");
-//         setFormData(updatedFormData);
+//         applySaleRecordToState(lastEntry);
 
-//         // setItems([...lastEntry.items]);
-//         setItems(normalizeItems(lastEntry.items));
-//         setcustomerDetails([...lastEntry.customerDetails]);
-//         setshipped([...lastEntry.shipped]);
-
-//         if (lastEntry.customerDetails.length > 0) {
-//           setCustgst(lastEntry.customerDetails[0].gstno);
-//         }
-
-//         setData1({ ...lastEntry, formData: updatedFormData });
-//         setIndex(lastEntry.formData?.vbillno || 0);
-
-//         return lastEntry; // ✅ Return this for use in handleAdd
+//         return lastEntry;
 //       } else {
 //         setFirstTimeCheckData("DataNotAvailable");
 //         initializeEmptyData();
@@ -942,12 +926,28 @@
 //     }
 //   };
 
-//   // Function to initialize empty data
+//   const saleWinFromState = location.state?.saleWin;
+
+//   // Load from localStorage if refresh
+//   const saleWinFromStorage = localStorage.getItem("saleWin")
+//     ? JSON.parse(localStorage.getItem("saleWin"))
+//     : null;
+
+//   // Final object (state first, then storage)
+//   const saleWin = saleWinFromState || saleWinFromStorage;
+
+//   // Extract valpha safely
+//   const selectedValpha = saleWin?.valpha || "";
+//   const getValphaQuery = () => {
+//     return selectedValpha
+//       ? `?valpha=${encodeURIComponent(selectedValpha)}`
+//       : "";
+//   };
+
 //   const initializeEmptyData = () => {
-//     // Default date as current date
 //     const emptyFormData = {
-//       date: new Date().toLocaleDateString(), // Use today's date
-//       valpha:"",
+//       date: new Date().toLocaleDateString(),
+//       valpha: selectedValpha || "",
 //       vtype: "S",
 //       vbillno: 0,
 //       vno: 0,
@@ -1048,7 +1048,6 @@
 //         TDS194Q: "",
 //       },
 //     ];
-//     // Set the empty data
 //     setFormData(emptyFormData);
 //     setItems(normalizeItems([]));
 //     setcustomerDetails(emptycustomer);
@@ -1058,15 +1057,14 @@
 //       items: emptyItems,
 //       shipped: emptyshipped,
 //       customerDetails: emptycustomer,
-//     }); // Store empty data
+//     });
 //     setIndex(0);
 //   };
 
 //   useEffect(() => {
 //     fetchData();
 //     setIsDisabled(true);
-//     // Add this line to set isDisabled to true initially
-//   }, []);
+//   }, [selectedValpha, saleId, tenant]);
 
 //     // Search Modal states
 //   const [showSearch, setShowSearch] = useState(false);
@@ -1082,8 +1080,9 @@
 //   const fetchAllBills = async () => {
 //     try {
 //       const res = await axios.get(
-//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale${getValphaQuery()}`
 //       );
+
 //       if (Array.isArray(res.data)) {
 //         setAllBills(res.data);
 //         setFilteredBills(res.data);
@@ -1189,12 +1188,16 @@
 //   const fetchVoucherNumbers = async () => {
 //     try {
 //       const res = await axios.get(
-//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`,
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno${getValphaQuery()}`
 //       );
 
 //       return {
 //         lastVno: res?.data?.lastVno || 0,
 //         nextVno: res?.data?.nextVno || 1,
+//         lastBillNo: res?.data?.lastBillNo || 0,
+//         nextBillNo: res?.data?.nextBillNo || 1,
+//         lastVoucherNo: res?.data?.lastVoucherNo || 0,
+//         nextVoucherNo: res?.data?.nextVoucherNo || 1,
 //       };
 //     } catch (error) {
 //       console.error("Error fetching voucher numbers:", error);
@@ -1208,41 +1211,15 @@
 //   const handleNext = async () => {
 //     document.body.style.backgroundColor = "white";
 //     setTitle("(View)");
+
 //     try {
-//       if (data1) {
+//       if (data1?._id) {
 //         const response = await axios.get(
-//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next`,
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next?dummy=1${getValphaQueryWithPrefix()}`
 //         );
-//         if (response.status === 200 && response.data) {
-//           const nextData = response.data.data;
-//           setData1(nextData);
-//           setIndex(index + 1);
-//           setFormData({
-//           ...nextData.formData,
-//           date: formatDateToDDMMYYYY(nextData.formData.date),
-//           duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
-//           });
 
-//           // Update items and supplier details
-//           const updatedItems = nextData.items.map((item) => ({
-//             ...item,
-//           }));
-//           const updatedCustomer = nextData.customerDetails.map((item) => ({
-//             ...item,
-//           }));
-//           const updatedshipped = nextData.shipped.map((item) => ({
-//             ...item,
-//           }));
-//           setItems(normalizeItems(updatedItems));
-//           // setItems(updatedItems);
-//           setcustomerDetails(updatedCustomer);
-//           setshipped(updatedshipped);
-
-//           // Set custGst from the supplier details
-//           if (updatedCustomer.length > 0) {
-//             setCustgst(updatedCustomer[0].gstno); // Set GST number
-//           }
-//           setIsDisabled(true);
+//         if (response.status === 200 && response.data?.data) {
+//           applySaleRecordToState(response.data.data);
 //         }
 //       }
 //     } catch (error) {
@@ -1253,41 +1230,15 @@
 //   const handlePrevious = async () => {
 //     document.body.style.backgroundColor = "white";
 //     setTitle("(View)");
+
 //     try {
-//       if (data1) {
+//       if (data1?._id) {
 //         const response = await axios.get(
-//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous`,
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous?dummy=1${getValphaQueryWithPrefix()}`
 //         );
-//         if (response.status === 200 && response.data) {
-//           const prevData = response.data.data;
-//           setData1(prevData);
-//           setIndex(index - 1);
-//           setFormData({
-//           ...prevData.formData,
-//           date: formatDateToDDMMYYYY(prevData.formData.date),
-//           duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
-//           });
 
-//           // Update items and supplier details
-//           const updatedItems = prevData.items.map((item) => ({
-//             ...item,
-//           }));
-//           const updatedCustomer = prevData.customerDetails.map((item) => ({
-//             ...item,
-//           }));
-//           const updatedshipped = prevData.shipped.map((item) => ({
-//             ...item,
-//           }));
-//           // setItems(updatedItems);
-//           setItems(normalizeItems(updatedItems));
-//           setcustomerDetails(updatedCustomer);
-//           setshipped(updatedshipped);
-
-//           // Set custGst from the supplier details
-//           if (updatedCustomer.length > 0) {
-//             setCustgst(updatedCustomer[0].gstno); // Set GST number
-//           }
-//           setIsDisabled(true);
+//         if (response.status === 200 && response.data?.data) {
+//           applySaleRecordToState(response.data.data);
 //         }
 //       }
 //     } catch (error) {
@@ -1301,39 +1252,11 @@
 
 //     try {
 //       const response = await axios.get(
-//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first`,
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first${getValphaQuery()}`
 //       );
-//       if (response.status === 200 && response.data) {
-//         const firstData = response.data.data;
-//         setData1(firstData);
-//         setIndex(0);
-//         setFormData({
-//         ...firstData.formData,
-//         date: formatDateToDDMMYYYY(firstData.formData.date),
-//         duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
-//         });
 
-//         // Update items and supplier details
-//         const updatedItems = firstData.items.map((item) => ({
-//           ...item,
-//         }));
-//         const updatedCustomer = firstData.customerDetails.map((item) => ({
-//           ...item,
-//         }));
-//         const updatedshipped = firstData.shipped.map((item) => ({
-//           ...item,
-//         }));
-//         // setItems(updatedItems);
-//         setItems(normalizeItems(updatedItems));
-//         setcustomerDetails(updatedCustomer);
-//         setshipped(updatedshipped);
-
-//         // Set custGst from the supplier details
-//         if (updatedCustomer.length > 0) {
-//           setCustgst(updatedCustomer[0].gstno); // Set GST number
-//         }
-
-//         setIsDisabled(true);
+//       if (response.status === 200 && response.data?.data) {
+//         applySaleRecordToState(response.data.data);
 //       }
 //     } catch (error) {
 //       console.error("Error fetching first record:", error);
@@ -1346,39 +1269,11 @@
 
 //     try {
 //       const response = await axios.get(
-//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
 //       );
-//       if (response.status === 200 && response.data) {
-//         const lastData = response.data.data;
-//         setData1(lastData);
-//         const lastIndex = response.data.length - 1;
-//         setIndex(lastIndex);
-//         setFormData({
-//         ...lastData.formData,
-//         date: formatDateToDDMMYYYY(lastData.formData.date),
-//         duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
-//         });
 
-//         // Update items and supplier details
-//         const updatedItems = lastData.items.map((item) => ({
-//           ...item,
-//         }));
-//         const updatedCustomer = lastData.customerDetails.map((item) => ({
-//           ...item,
-//         }));
-//         const updatedshipped = lastData.shipped.map((item) => ({
-//           ...item,
-//         }));
-//         // setItems(updatedItems);
-//         setItems(normalizeItems(updatedItems));
-//         setcustomerDetails(updatedCustomer);
-//         setshipped(updatedshipped);
-//         // Set custGst from the supplier details
-//         if (updatedCustomer.length > 0) {
-//           setCustgst(updatedCustomer[0].gstno); // Set GST number
-//         }
-
-//         setIsDisabled(true);
+//       if (response.status === 200 && response.data?.data) {
+//         applySaleRecordToState(response.data.data);
 //       }
 //     } catch (error) {
 //       console.error("Error fetching last record:", error);
@@ -1394,14 +1289,17 @@
 //       const voucherData = await fetchVoucherNumbers();
 //       if (!voucherData) return;
 
-//       const lastvoucherno = voucherData.nextVno;
-//       const lastvno = voucherData.nextVno;
+//       const nextBillNo =
+//       voucherData.nextBillNo || voucherData.nextVno || 1;
+
+//       const nextVoucherNo =
+//       voucherData.nextVoucherNo || voucherData.nextVno || 1;
 
 //       const newData = {
 //         date: getTodayDDMMYYYY(),
 //         valpha: selectedValpha,
-//         vbillno: lastvoucherno,
-//         vno: lastvno,
+//         vbillno: nextBillNo,
+//         vno: nextVoucherNo,
 //         vtype: "S",
 //         gr: "",
 //         exfor: "",
@@ -1501,44 +1399,28 @@
 //   };
 
 //   const handleExit = async () => {
-//     // Check if grandtotal is Greater Than zero
 //     if (formData.grandtotal > 0 && isEditMode) {
 //       const confirmExit = window.confirm(
-//         "Are you sure you want to Exit? Unsaved changes may be lost.",
+//         "Are you sure you want to Exit? Unsaved changes may be lost."
 //       );
-//       if (!confirmExit) {
-//         return;
-//       }
+//       if (!confirmExit) return;
 //     }
-    
-//     if(!isEditMode){
-//       navigate("/dashboard"); 
+  
+//     if (!isEditMode) {
+//       navigate("/dashboard");
 //       return;
 //     }
-
+  
 //     setTitle("(View)");
+  
 //     try {
 //       const response = await axios.get(
-//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
 //       );
-
-//       if (response.status === 200 && response.data.data) {
-//         const lastEntry = response.data.data;
-//         setFormData({
-//         ...lastEntry.formData,
-//         date: formatDateToDDMMYYYY(lastEntry.formData.date),
-//         duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
-//         });
-//         setData1(response.data.data);
-//         // setItems(lastEntry.items.map((item) => ({ ...item })));
-//         setItems(normalizeItems(lastEntry.items));
-//         setcustomerDetails(
-//           lastEntry.customerDetails.map((item) => ({ ...item })),
-//         );
-//         setshipped(lastEntry.shipped.map((item) => ({ ...item })));
-
-//         setIsDisabled(true);
-//         setIndex(lastEntry.formData);
+  
+//       if (response.status === 200 && response.data?.data) {
+//         applySaleRecordToState(response.data.data);
+  
 //         setIsAddEnabled(true);
 //         setIsEditMode(false);
 //         setIsSubmitEnabled(false);
@@ -1550,54 +1432,7 @@
 //         setIsSPrintEnabled(true);
 //         setIsDeleteEnabled(true);
 //       } else {
-//         console.log("No data available");
-//         const newData = {
-//           date: "",
-//           valpha:"",
-//           vtype: "S",
-//           vbillno: 0,
-//           vno: 0,
-//           gr: "",
-//           exfor: "",
-//           trpt: "",
-//           stype: "",
-//           btype: "",
-//           conv: "",
-//           rem1: "",
-//           rem2: "",
-//           v_tpt: "",
-//           broker: "",
-//           srv_rate: 0,
-//           srv_tax: 0,
-//           tcs1_rate: 0,
-//           tcs1: 0,
-//           tcs206_rate: 0,
-//           tcs206: 0,
-//           duedate: "",
-//           pcess: 0,
-//           tax: 0,
-//           sub_total: 0,
-//           exp_before: 0,
-//           cgst: 0,
-//           sgst: 0,
-//           igst: 0,
-//           expafterGST: 0,
-//           grandtotal: 0,
-//         };
-//         setFormData(newData);
-//         setItems(normalizeItems([]));
-//         setcustomerDetails([
-//           {
-//             vacode: "",
-//             gstno: "",
-//             pan: "",
-//             Add1: "",
-//             city: "",
-//             state: "",
-//             Tcs206c1H: "",
-//             TDS194Q: "",
-//           },
-//         ]);
+//         initializeEmptyData();
 //         setIsDisabled(true);
 //       }
 //     } catch (error) {
@@ -2332,269 +2167,6 @@
 //     const updatedForm = calculateTotalGst(formData);
 //     setFormData(updatedForm);
 //   };
-//   // const handleItemChange = (index, key, value, field) => {
-//   //   // If key is "pkgs" or "weight", allow only numbers and a single decimal point
-//   //   if (
-//   //     (key === "pkgs" ||
-//   //       key === "weight" ||
-//   //       key === "tariff" ||
-//   //       key === "rate" ||
-//   //       key === "disc" ||
-//   //       key === "discount" ||
-//   //       key === "amount") &&
-//   //     !/^-?\d*\.?\d*$/.test(value)
-//   //   ) {
-//   //     return; // reject invalid input
-//   //   }
-
-//   //   // Always force disc/discount to be negative
-//   //   if (key === "disc" || key === "discount") {
-//   //     const numeric = parseFloat(value);
-//   //     if (!isNaN(numeric)) {
-//   //       value = -Math.abs(numeric); // Force negative
-//   //     }
-//   //   }
-
-//   //   const updatedItems = [...items];
-//   //   if (["sdisc"].includes(key)) {
-//   //     updatedItems[index][key] = capitalizeWords(value);
-//   //   } else {
-//   //     updatedItems[index][key] = value;
-//   //   }
-
-//   //   // If the key is 'name', find the corresponding product and set the price
-//   //   if (key === "name") {
-//   //     const selectedProduct = products.find(
-//   //       (product) => product.Aheads === value,
-//   //     );
-
-//   //     if (selectedProduct) {
-//   //       // ✅ Always update these
-//   //       updatedItems[index]["vcode"] = selectedProduct.Acodes;
-//   //       updatedItems[index]["sdisc"] = selectedProduct.Aheads;
-//   //       updatedItems[index]["gst"] = selectedProduct.itax_rate;
-//   //       updatedItems[index]["tariff"] = selectedProduct.Hsn;
-//   //       updatedItems[index]["Units"] = selectedProduct.TradeName;
-
-//   //       // ✅ ABC MODE special logic
-//   //       if (isAbcmode) {
-//   //         const mrp = parseFloat(selectedProduct.Mrps);
-
-//   //         if (!isNaN(mrp) && mrp > 0) {
-//   //           updatedItems[index]["rate"] = mrp;
-//   //         }
-
-//   //         setItems(updatedItems);
-//   //         return; // 🚫 stop further changes
-//   //       }
-
-//   //       // ⬇️ Normal mode (unchanged)
-//   //       updatedItems[index]["Units"] = selectedProduct.TradeName;
-//   //       updatedItems[index]["rate"] = selectedProduct.Mrps;
-//   //       updatedItems[index]["gst"] = selectedProduct.itax_rate;
-//   //       updatedItems[index]["tariff"] = selectedProduct.Hsn;
-
-//   //       if (postingSetup?.isDefault === true) {
-//   //         const gstRate = String(selectedProduct.itax_rate);
-
-//   //         const matchedSetup = postingSetup.rows.find(
-//   //           (row) => String(row.gst) === gstRate,
-//   //         );
-
-//   //         if (matchedSetup) {
-//   //           updatedItems[index]["Scodes01"] = matchedSetup.Scodes01;
-//   //           updatedItems[index]["Scodess"] = matchedSetup.Scodess;
-//   //           updatedItems[index]["Pcodes01"] = matchedSetup.Pcodes01;
-//   //           updatedItems[index]["Pcodess"] = matchedSetup.Pcodess;
-//   //         } else {
-//   //           updatedItems[index]["Scodes01"] = "";
-//   //           updatedItems[index]["Scodess"] = "";
-//   //           updatedItems[index]["Pcodes01"] = "";
-//   //           updatedItems[index]["Pcodess"] = "";
-//   //         }
-//   //       } else {
-//   //         updatedItems[index]["Scodes01"] = selectedProduct.AcCode;
-//   //         updatedItems[index]["Scodess"] = selectedProduct.Scodess;
-//   //         updatedItems[index]["Pcodes01"] = selectedProduct.acCode;
-//   //         updatedItems[index]["Pcodess"] = selectedProduct.Pcodess;
-//   //       }
-
-//   //       updatedItems[index]["RateCal"] = selectedProduct.Rateins;
-//   //       updatedItems[index]["Qtyperpc"] = selectedProduct.Qpps || 0;
-//   //       updatedItems[index]["curMrp"] = selectedProduct.Mrps || 0;
-//   //     }
-//   //   }
-
-//   //   let pkgs = parseFloat(updatedItems[index].pkgs);
-//   //   pkgs = isNaN(pkgs) ? 0 : pkgs;
-
-//   //   let Qtyperpkgs = parseFloat(updatedItems[index].Qtyperpc);
-//   //   Qtyperpkgs = isNaN(Qtyperpkgs) ? 0 : Qtyperpkgs;
-
-//   //   let AL = pkgs * Qtyperpkgs || 0;
-//   //   let gst;
-//   //   if (pkgs > 0 && Qtyperpkgs > 0 && key !== "weight") {
-//   //     updatedItems[index]["weight"] = AL.toFixed(weightValue);
-//   //   }
-//   //   // Calculate CGST and SGST based on the GST value
-//   //   if (
-//   //     formData.stype === "Tax Free Within State" &&
-//   //     custGst.startsWith("03")
-//   //   ) {
-//   //     gst = 0;
-//   //   } else if (
-//   //     formData.stype === "Tax Free Interstate" &&
-//   //     !custGst.startsWith("03")
-//   //   ) {
-//   //     gst = 0;
-//   //   } else {
-//   //     gst = parseFloat(updatedItems[index].gst);
-//   //   }
-
-//   //   let weight = parseFloat(updatedItems[index].weight);
-//   //   weight = isNaN(weight) ? 0 : weight;
-
-//   //   const pkgsVal = parseFloat(updatedItems[index].pkgs) || 0;
-//   //   const rate = parseFloat(updatedItems[index].rate) || 0;
-
-//   //   const totalAccordingWeight = weight * rate;
-//   //   const totalAccordingPkgs = pkgsVal * rate;
-
-//   //   let RateCal = updatedItems[index].RateCal;
-//   //   let TotalAcc = totalAccordingWeight; // Set a default value
-
-//   //   // Calcuate the Amount According to RateCalculation field
-//   //   if (
-//   //     RateCal === "Default" ||
-//   //     RateCal === "" ||
-//   //     RateCal === null ||
-//   //     RateCal === undefined
-//   //   ) {
-//   //     TotalAcc = totalAccordingWeight;
-//   //   } else if (RateCal === "Wt/Qty") {
-//   //     TotalAcc = totalAccordingWeight;
-//   //     // console.log("totalAccordingWeight");
-//   //   } else if (RateCal === "Pc/Pkgs") {
-//   //     TotalAcc = totalAccordingPkgs;
-//   //     // console.log("totalAccordingPkgs");
-//   //   }
-//   //   const currentMrp = parseFloat(updatedItems[index].curMrp);
-
-//   //   // 🔥 If user manually edits amount → recalculate rate
-//   //   if ( key === "amount" &&  value !== "" &&  !isNaN(parseFloat(value)) && !value.endsWith(".")
-//   //   ) {
-//   //     let enteredAmount = parseFloat(value);
-//   //     let qty = 0;
-
-//   //     if (RateCal === "Pc/Pkgs") {
-//   //       qty = parseFloat(updatedItems[index].pkgs) || 0;
-//   //     } else {
-//   //       qty = parseFloat(updatedItems[index].weight) || 0;
-//   //     }
-
-//   //     // ✅ STOP if MRP exists and is valid (> 0)
-//   //     if (!isNaN(currentMrp) && currentMrp > 0) {
-//   //       return; // ❌ Do not recalculate rate
-//   //     }
-
-//   //     // ✅ Calculate only when MRP is null, empty, 0 or invalid
-//   //     if (qty > 0 && enteredAmount > 0) {
-//   //       let newRate = enteredAmount / qty;
-
-//   //       updatedItems[index]["rate"] = T21
-//   //         ? Math.round(newRate).toFixed(2)
-//   //         : newRate.toFixed(2);
-
-//   //       TotalAcc = enteredAmount;
-//   //     }
-//   //   }
-//   //   // Ensure TotalAcc is a valid number before calling toFixed()
-//   //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-
-//   //   let others = parseFloat(updatedItems[index].exp_before) || 0;
-//   //   let disc = parseFloat(updatedItems[index].disc) || 0;
-//   //   let manualDiscount = parseFloat(updatedItems[index].discount) || 0;
-//   //   let per;
-//   //   if (key === "discount") {
-//   //     per = manualDiscount;
-//   //   } else {
-//   //     per = (disc / 100) * TotalAcc;
-//   //     updatedItems[index]["discount"] = T21
-//   //       ? Math.round(per).toFixed(2)
-//   //       : per.toFixed(2);
-//   //   }
-
-//   //   // ✅ Convert to float for reliable calculation
-//   //   per = parseFloat(per);
-//   //   let Amounts = TotalAcc + per + others;
-
-//   //   // Ensure TotalAcc is a valid number before calling toFixed()
-//   //   // TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-//   //   // Check if GST number starts with "0" to "3"
-//   //   let cgst, sgst, igst;
-//   //   if (CompanyState == customerDetails[0].state) {
-//   //     cgst = (Amounts * (gst / 2)) / 100 || 0;
-//   //     sgst = (Amounts * (gst / 2)) / 100 || 0;
-//   //     igst = 0;
-//   //   } else {
-//   //     cgst = sgst = 0;
-//   //     igst = (Amounts * gst) / 100 || 0;
-//   //   }
-
-//   //   // Calculate the total with GST and Others
-//   //   let totalWithGST = Amounts + cgst + sgst + igst;
-//   //   // Update CGST, SGST, Others, and total fields in the item
-//   //   if (T21) {
-//   //     if (key !== "discount") {
-//   //       updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-//   //     }
-
-//   //     if (key !== "amount") {
-//   //       updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-//   //     }
-
-//   //     updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-//   //   } else {
-//   //     if (key !== "discount") {
-//   //       updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-//   //     }
-
-//   //     if (key !== "amount") {
-//   //       updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-//   //     }
-
-//   //     updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-//   //   }
-//   //   // if (T21) {
-//   //   //   if (key !== "discount") {
-//   //   //     updatedItems[index]["discount"] = Math.round(per).toFixed(2);
-//   //   //   }
-//   //   //   updatedItems[index]["amount"] = Math.round(TotalAcc).toFixed(2);
-//   //   //   updatedItems[index]["vamt"] = Math.round(totalWithGST).toFixed(2);
-//   //   // } else {
-//   //   //   if (key !== "discount") {
-//   //   //     updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-//   //   //   }
-//   //   //   updatedItems[index]["amount"] = TotalAcc.toFixed(2);
-//   //   //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2);
-//   //   // }
-//   //   if (T12) {
-//   //     updatedItems[index]["ctax"] = Math.round(cgst).toFixed(2);
-//   //     updatedItems[index]["stax"] = Math.round(sgst).toFixed(2);
-//   //     updatedItems[index]["itax"] = Math.round(igst).toFixed(2);
-//   //   } else {
-//   //     updatedItems[index]["ctax"] = cgst.toFixed(2);
-//   //     updatedItems[index]["stax"] = sgst.toFixed(2);
-//   //     updatedItems[index]["itax"] = igst.toFixed(2);
-//   //   }
-//   //   // Calculate the percentage of the value based on the GST percentage
-//   //   const percentage =
-//   //     TotalAcc > 0 ? ((totalWithGST - Amounts) / TotalAcc) * 100 : 0;
-//   //   updatedItems[index]["percentage"] = percentage.toFixed(2);
-//   //   setItems(updatedItems);
-//   //   const updatedForm = calculateTotalGst(formData);
-//   //   setFormData(updatedForm);
-//   // };
 
 //   // Function to handle adding a new item
 //   const handleAddItem = () => {
@@ -3354,13 +2926,13 @@
 //     items[currentIndex]?.RateCal,
 //   ]);
 
-//   const [fontSize, setFontSize] = useState(17); // Initial font size in pixels
-//   const increaseFontSize = () => {
-//     setFontSize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
+//   const [fsize, setfsize] = useState(17); // Initial font size in pixels
+//   const increasefsize = () => {
+//     setfsize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
 //   };
 
-//   const decreaseFontSize = () => {
-//     setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
+//   const decreasefsize = () => {
+//     setfsize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
 //   };
 //   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
 //   const fieldOrder = [
@@ -3760,19 +3332,11 @@
 //   });
 
 //   // Storing Valpha
-//   // Get object from navigation
-//   const saleWinFromState = location.state?.saleWin;
-
-//   // Load from localStorage if refresh
-//   const saleWinFromStorage = localStorage.getItem("saleWin")
-//     ? JSON.parse(localStorage.getItem("saleWin"))
-//     : null;
-
-//   // Final object (state first, then storage)
-//   const saleWin = saleWinFromState || saleWinFromStorage;
-
-//   // Extract valpha safely
-//   const selectedValpha = saleWin?.valpha || "";
+//   const getValphaQueryWithPrefix = () => {
+//     return selectedValpha
+//       ? `&valpha=${encodeURIComponent(selectedValpha)}`
+//       : "";
+//   };
 
 //   useEffect(() => {
 //     if (saleWinFromState) {
@@ -3861,7 +3425,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: "20px",
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                   // padding: "0 8px"
 //                 },
 //                 readOnly: !isEditMode || isDisabled,
@@ -4143,7 +3707,7 @@
 //                       maxLength: 48,
 //                       style: {
 //                         height: "20px",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                       },
 //                       readOnly: !isEditMode || isDisabled,
 //                     }}
@@ -4161,7 +3725,7 @@
 //                       maxLength: 48,
 //                       style: {
 //                         height: "20px",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         // padding: "0 8px",
 //                       },
 //                       readOnly: !isEditMode || isDisabled,
@@ -4186,7 +3750,7 @@
 //                       maxLength: 48,
 //                       style: {
 //                         height: "20px",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         // padding: "0 8px",
 //                       },
 //                       readOnly: !isEditMode || isDisabled,
@@ -4209,7 +3773,7 @@
 //                       maxLength: 48,
 //                       style: {
 //                         height: "20px",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         // padding: "0 8px",
 //                       },
 //                       readOnly: !isEditMode || isDisabled,
@@ -4299,7 +3863,7 @@
 //                 maxLength: 12,
 //                 style: {
 //                   height: "20px",
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                   // padding: "0 8px"
 //                 },
 //                 readOnly: !isEditMode || isDisabled,
@@ -4321,7 +3885,7 @@
 //                   maxLength: 10,
 //                   style: {
 //                     height: "20px",
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     // padding: "0 8px"
 //                   },
 //                   readOnly: !isEditMode || isDisabled,
@@ -4346,7 +3910,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: "20px",
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                 },
 //                 readOnly: !isEditMode || isDisabled,
 //               }}
@@ -4355,7 +3919,7 @@
 //               <FormControl
 //                 className=" Billss custom-bordered-input"
 //                 sx={{
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                   "& .MuiFilledInput-root": {
 //                     height: 48, // adjust as needed (default ~56px for filled)
 //                   },
@@ -4401,7 +3965,7 @@
 //                   displayEmpty
 //                   inputProps={{
 //                     sx: {
-//                       fontSize: `${fontSize}px`,
+//                       fontSize: `${fsize}px`,
 //                       pointerEvents:
 //                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
 //                     },
@@ -4426,7 +3990,7 @@
 //                 // disabled={!isEditMode || isDisabled}
 //                 className="TAXtypez custom-bordered-input"
 //                 sx={{
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                   "& .MuiFilledInput-root": {
 //                     height: 48, // adjust as needed (default ~56px for filled)
 //                   },
@@ -4472,7 +4036,7 @@
 //                   }}
 //                   inputProps={{
 //                     sx: {
-//                       fontSize: `${fontSize}px`,
+//                       fontSize: `${fsize}px`,
 //                       pointerEvents:
 //                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
 //                     },
@@ -4507,7 +4071,7 @@
 //                 className="SupplyTYPE custom-bordered-input"
 //                 sx={{
 //                   // width: '250px',
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                   "& .MuiFilledInput-root": {
 //                     height: 48, // adjust as needed (default ~56px for filled)
 //                   },
@@ -4553,7 +4117,7 @@
 //                   displayEmpty
 //                   inputProps={{
 //                     sx: {
-//                       fontSize: `${fontSize}px`,
+//                       fontSize: `${fsize}px`,
 //                       pointerEvents:
 //                         !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
 //                     },
@@ -4617,7 +4181,7 @@
 //                       className="ItemCode"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4647,7 +4211,7 @@
 //                       className="desc"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4674,7 +4238,7 @@
 //                       className="Hsn"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4707,7 +4271,7 @@
 //                         border: "none",
 //                         padding: 5,
 //                         textAlign: "right",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                       }}
 //                       maxLength={48}
 //                       readOnly={!isEditMode || isDisabled}
@@ -4736,7 +4300,7 @@
 //                         border: "none",
 //                         padding: 5,
 //                         textAlign: "right",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                       }}
 //                       maxLength={48}
 //                       readOnly={!isEditMode || isDisabled}
@@ -4765,7 +4329,7 @@
 //                         border: "none",
 //                         padding: 5,
 //                         textAlign: "right",
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                       }}
 //                       maxLength={48}
 //                       readOnly={!isEditMode || isDisabled}
@@ -4789,7 +4353,7 @@
 //                       className="Amount"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4828,7 +4392,7 @@
 //                       className="Disc"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4857,7 +4421,7 @@
 //                       className="discount"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4885,7 +4449,7 @@
 //                       className="Others"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -4906,7 +4470,7 @@
 //                       className="Others"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -5050,7 +4614,7 @@
 //                       className="CTax"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -5078,7 +4642,7 @@
 //                       className="STax"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -5107,7 +4671,7 @@
 //                       className="ITax"
 //                       style={{
 //                         height: 40,
-//                         fontSize: `${fontSize}px`,
+//                         fontSize: `${fsize}px`,
 //                         width: "100%",
 //                         boxSizing: "border-box",
 //                         border: "none",
@@ -5156,7 +4720,7 @@
 //               background: color,
 //               position: "sticky",
 //               bottom: -6,
-//               fontSize: `${fontSize}px`,
+//               fontSize: `${fsize}px`,
 //               borderTop: "1px solid black",
 //             }}
 //           >
@@ -5287,7 +4851,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: 20,
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                 },
 //               }}
 //               onFocus={(e) => e.target.select()}
@@ -5310,7 +4874,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: 20,
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                 },
 //               }}
 //               onFocus={(e) => e.target.select()}
@@ -5333,7 +4897,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: 20,
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                 },
 //               }}
 //               onFocus={(e) => e.target.select()}
@@ -5379,7 +4943,7 @@
 //                   maxLength: 48,
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     color: "red",
 //                   },
 //                 }}
@@ -5412,7 +4976,7 @@
 //                   maxLength: 48,
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     color: "red",
 //                   },
 //                 }}
@@ -5431,7 +4995,7 @@
 //                   maxLength: 48,
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     color: "red",
 //                   },
 //                 }}
@@ -5460,7 +5024,7 @@
 //                   maxLength: 48,
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                   },
 //                 }}
 //                 onFocus={(e) => e.target.select()}
@@ -5479,7 +5043,7 @@
 //                 inputProps={{
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     backgroundColor: "white",
 //                     borderRadius: 5,
 //                   },
@@ -5501,7 +5065,7 @@
 //                 inputProps={{
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     backgroundColor: "white",
 //                     borderRadius: 5,
 //                   },
@@ -5523,7 +5087,7 @@
 //                 inputProps={{
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     backgroundColor: "white",
 //                     borderRadius: 5,
 //                   },
@@ -5546,7 +5110,7 @@
 //                 inputProps={{
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                     backgroundColor: "white",
 //                     borderRadius: 5,
 //                   },
@@ -5579,7 +5143,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: 20,
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                 },
 //               }}
 //               onFocus={(e) => e.target.select()}
@@ -5609,7 +5173,7 @@
 //                   maxLength: 48,
 //                   style: {
 //                     height: 20,
-//                     fontSize: `${fontSize}px`,
+//                     fontSize: `${fsize}px`,
 //                   },
 //                   readOnly: !isEditMode || isDisabled,
 //                 }}
@@ -5750,7 +5314,7 @@
 //                 maxLength: 48,
 //                 style: {
 //                   height: 20,
-//                   fontSize: `${fontSize}px`,
+//                   fontSize: `${fsize}px`,
 //                   color: "red",
 //                   fontWeight: "bold",
 //                 },
@@ -6023,8 +5587,10 @@
 
 // export default Sale;
 
+// Live
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "./Sale.css";
+import DatePicker from "react-datepicker";
 import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -6033,9 +5599,11 @@ import Button from "react-bootstrap/Button";
 import ProductModal from "../Modals/ProductModal";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import axios from "axios";
+import { isMacOs } from 'react-device-detect';
+import ReactDOM from "react-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaCog, FaTimes } from "react-icons/fa";
+import { FaPlus, FaMinus, FaCog, FaTimes } from "react-icons/fa";
 import SaleSetup from "./SaleSetup";
 import InvoicePDF from "../InvoicePDF/InvoicePDF";
 import InvoicepdfSale1 from "../InvoicePDF/InvoicepdfSale1";
@@ -6074,6 +5642,7 @@ const Sale = () => {
   const { applicable194Q } = useTdsApplicable();
   const { company } = useContext(CompanyContext);
   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+  // const tenant = company?.databaseName;
 
   if (!tenant) {
     // you may want to guard here or show an error state,
@@ -6751,6 +6320,10 @@ const Sale = () => {
     };
   };
 
+  // useEffect(() => {
+  //   setFormData((prevState) => calculateTotalGst(prevState));
+  // }, [items, T21, T12, formData.tcs1_rate]);
+
   const handleNumberChange = (event) => {
     const { id, value } = event.target;
 
@@ -6776,6 +6349,20 @@ const Sale = () => {
       return calculateTotalGst(newFormData, true); // ✅ KEEP THIS
     });
   };
+
+  // const handleNumberChange = (event) => {
+  //   const { id, value } = event.target;
+  //   const numberValue = value.replace(/[^0-9.]/g, "");
+  //   const validNumberValue =
+  //     numberValue.split(".").length > 2
+  //       ? numberValue.replace(/\.{2,}/g, "").replace(/(.*)\./g, "$1.")
+  //       : numberValue;
+
+  //   setFormData((prevState) => {
+  //     const newFormData = { ...prevState, [id]: validNumberValue };
+  //     return calculateTotalGst(newFormData, true); // ✅ Skip TCS recalculation
+  //   });
+  // };
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [data, setData] = useState([]);
@@ -6895,63 +6482,235 @@ const Sale = () => {
     return `${dd}-${mm}-${yyyy}`;
   };
 
-  const applySaleRecordToState = (record) => {
-    if (!record) return;
+//   const fetchData = async () => {
+//     try {
+//       let response;
+//       if (saleId) {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`,
+//         );
+//       } else {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+//         );
+//       }
+//       // const response = await axios.get(
+//       //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`
+//       // );
 
-    const updatedFormData = {
-      ...record.formData,
-      date: formatDateToDDMMYYYY(record.formData.date),
-      duedate: formatDateToDDMMYYYY(record.formData.duedate),
-    };
+//       if (response.status === 200 && response.data && response.data.data) {
+//         const lastEntry = response.data.data;
 
-    setFormData(updatedFormData);
-    setData1({ ...record, formData: updatedFormData });
-    setItems(normalizeItems(record.items || []));
-    setcustomerDetails([...(record.customerDetails || [])]);
-    setshipped([...(record.shipped || [])]);
-    setIndex(record?.formData?.vbillno || 0);
+//         const updatedFormData = {
+//           ...lastEntry.formData,
+//           date: formatDateToDDMMYYYY(lastEntry.formData.date),
+//           duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+//         };
 
-    if (record?.customerDetails?.length > 0) {
-      setCustgst(record.customerDetails[0].gstno || "");
-    }
+//         setFirstTimeCheckData("DataAvailable");
+//         setFormData(updatedFormData);
 
-    setIsDisabled(true);
+//         // setItems([...lastEntry.items]);
+//         setItems(normalizeItems(lastEntry.items));
+//         setcustomerDetails([...lastEntry.customerDetails]);
+//         setshipped([...lastEntry.shipped]);
+
+//         if (lastEntry.customerDetails.length > 0) {
+//           setCustgst(lastEntry.customerDetails[0].gstno);
+//         }
+
+//         setData1({ ...lastEntry, formData: updatedFormData });
+//         setIndex(lastEntry.formData?.vbillno || 0);
+
+//         return lastEntry; // ✅ Return this for use in handleAdd
+//       } else {
+//         setFirstTimeCheckData("DataNotAvailable");
+//         initializeEmptyData();
+//         return null;
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+//       initializeEmptyData();
+//       return null;
+//     }
+//   };
+
+const applySaleRecordToState = (record) => {
+  if (!record) return;
+
+  const updatedFormData = {
+    ...record.formData,
+    date: formatDateToDDMMYYYY(record.formData.date),
+    duedate: formatDateToDDMMYYYY(record.formData.duedate),
   };
 
-  const fetchData = async () => {
-    try {
-      let response;
+  setFormData(updatedFormData);
+  setData1({ ...record, formData: updatedFormData });
+  setItems(normalizeItems(record.items || []));
+  setcustomerDetails([...(record.customerDetails || [])]);
+  setshipped([...(record.shipped || [])]);
+  setIndex(record?.formData?.vbillno || 0);
 
-      if (saleId) {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`
-        );
-      } else {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
-        );
-      }
+  if (record?.customerDetails?.length > 0) {
+    setCustgst(record.customerDetails[0].gstno || "");
+  }
 
-      if (response.status === 200 && response.data && response.data.data) {
-        const lastEntry = response.data.data;
+  setIsDisabled(true);
+};
 
-        setFirstTimeCheckData("DataAvailable");
-        applySaleRecordToState(lastEntry);
+const fetchData = async () => {
+  try {
+    let response;
 
-        return lastEntry;
-      } else {
-        setFirstTimeCheckData("DataNotAvailable");
-        initializeEmptyData();
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
+    if (saleId) {
+      response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegstget/${saleId}`
+      );
+    } else {
+      response = await axios.get(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
+      );
+    }
+
+    if (response.status === 200 && response.data && response.data.data) {
+      const lastEntry = response.data.data;
+
+      setFirstTimeCheckData("DataAvailable");
+      applySaleRecordToState(lastEntry);
+
+      return lastEntry;
+    } else {
+      setFirstTimeCheckData("DataNotAvailable");
       initializeEmptyData();
       return null;
     }
-  };
+  } catch (error) {
+    console.error("Error fetching data", error);
+    initializeEmptyData();
+    return null;
+  }
+};
 
-  const saleWinFromState = location.state?.saleWin;
+  // Function to initialize empty data
+//   const initializeEmptyData = () => {
+//     // Default date as current date
+//     const emptyFormData = {
+//       date: new Date().toLocaleDateString(), // Use today's date
+//       valpha:"",
+//       vtype: "S",
+//       vbillno: 0,
+//       vno: 0,
+//       gr: "",
+//       exfor: "",
+//       trpt: "",
+//       stype: "",
+//       btype: "",
+//       conv: "",
+//       rem1: "",
+//       rem2: "",
+//       v_tpt: "",
+//       broker: "",
+//       gross: false,
+//       srv_rate: 0,
+//       srv_tax: 0,
+//       tcs1_rate: 0,
+//       tcs1: 0,
+//       tcs206_rate: 0,
+//       tcs206: 0,
+//       duedate: "",
+//       pcess: 0,
+//       tax: 0,
+//       sub_total: 0,
+//       exp_before: 0,
+//       Exp_rate6: 0,
+//       Exp_rate7: 0,
+//       Exp_rate8: 0,
+//       Exp_rate9: 0,
+//       Exp_rate10: 0,
+//       Exp6: 0,
+//       Exp7: 0,
+//       Exp8: 0,
+//       Exp9: 0,
+//       Exp10: 0,
+//       cgst: 0,
+//       sgst: 0,
+//       igst: 0,
+//       expafterGST: 0,
+//       grandtotal: 0,
+//     };
+//     const emptyItems = [
+//       {
+//         id: 1,
+//         vcode: "",
+//         sdisc: "",
+//         Units: "",
+//         pkgs: "0.00",
+//         weight: "0.00",
+//         rate: "0.00",
+//         amount: "0.00",
+//         disc: 0,
+//         discount: "",
+//         gst: 0,
+//         RateCal: "",
+//         Qtyperpc: 0,
+//         Pcodes01: "",
+//         Pcodess: "",
+//         Scodes01: "",
+//         Scodess: "",
+//         Exp_rate1: 0,
+//         Exp_rate2: 0,
+//         Exp_rate3: 0,
+//         Exp_rate4: 0,
+//         Exp_rate5: 0,
+//         Exp1: 0,
+//         Exp2: 0,
+//         Exp3: 0,
+//         Exp4: 0,
+//         Exp5: 0,
+//         exp_before: 0,
+//         ctax: "0.00",
+//         stax: "0.00",
+//         itax: "0.00",
+//         tariff: "",
+//         vamt: "0.00",
+//       },
+//     ];
+//     const emptyshipped = [
+//       {
+//         shippedto: "",
+//         shippingAdd: "",
+//         shippingcity: "",
+//         shippingState: "",
+//         shippingGst: "",
+//         shippingPan: "",
+//       },
+//     ];
+//     const emptycustomer = [
+//       {
+//         Vcode: "",
+//         vacode: "",
+//         gstno: "",
+//         pan: "",
+//         city: "",
+//         state: "",
+//         Tcs206c1H: "",
+//         TDS194Q: "",
+//       },
+//     ];
+//     // Set the empty data
+//     setFormData(emptyFormData);
+//     setItems(normalizeItems([]));
+//     setcustomerDetails(emptycustomer);
+//     setshipped(emptyshipped);
+//     setData1({
+//       formData: emptyFormData,
+//       items: emptyItems,
+//       shipped: emptyshipped,
+//       customerDetails: emptycustomer,
+//     }); // Store empty data
+//     setIndex(0);
+//   };
+ const saleWinFromState = location.state?.saleWin;
 
   // Load from localStorage if refresh
   const saleWinFromStorage = localStorage.getItem("saleWin")
@@ -6963,133 +6722,141 @@ const Sale = () => {
 
   // Extract valpha safely
   const selectedValpha = saleWin?.valpha || "";
-  const getValphaQuery = () => {
-    return selectedValpha
-      ? `?valpha=${encodeURIComponent(selectedValpha)}`
-      : "";
+const getValphaQuery = () => {
+  return selectedValpha
+    ? `?valpha=${encodeURIComponent(selectedValpha)}`
+    : "";
+};
+const initializeEmptyData = () => {
+  const emptyFormData = {
+    date: new Date().toLocaleDateString(),
+    valpha: selectedValpha || "",
+    vtype: "S",
+    vbillno: 0,
+    vno: 0,
+    gr: "",
+    exfor: "",
+    trpt: "",
+    stype: "",
+    btype: "",
+    conv: "",
+    rem1: "",
+    rem2: "",
+    v_tpt: "",
+    broker: "",
+    gross: false,
+    srv_rate: 0,
+    srv_tax: 0,
+    tcs1_rate: 0,
+    tcs1: 0,
+    tcs206_rate: 0,
+    tcs206: 0,
+    duedate: "",
+    pcess: 0,
+    tax: 0,
+    sub_total: 0,
+    exp_before: 0,
+    Exp_rate6: 0,
+    Exp_rate7: 0,
+    Exp_rate8: 0,
+    Exp_rate9: 0,
+    Exp_rate10: 0,
+    Exp6: 0,
+    Exp7: 0,
+    Exp8: 0,
+    Exp9: 0,
+    Exp10: 0,
+    cgst: 0,
+    sgst: 0,
+    igst: 0,
+    expafterGST: 0,
+    grandtotal: 0,
   };
 
-  const initializeEmptyData = () => {
-    const emptyFormData = {
-      date: new Date().toLocaleDateString(),
-      valpha: selectedValpha || "",
-      vtype: "S",
-      vbillno: 0,
-      vno: 0,
-      gr: "",
-      exfor: "",
-      trpt: "",
-      stype: "",
-      btype: "",
-      conv: "",
-      rem1: "",
-      rem2: "",
-      v_tpt: "",
-      broker: "",
-      gross: false,
-      srv_rate: 0,
-      srv_tax: 0,
-      tcs1_rate: 0,
-      tcs1: 0,
-      tcs206_rate: 0,
-      tcs206: 0,
-      duedate: "",
-      pcess: 0,
-      tax: 0,
-      sub_total: 0,
+  const emptyItems = [
+    {
+      id: 1,
+      vcode: "",
+      sdisc: "",
+      Units: "",
+      pkgs: "0.00",
+      weight: "0.00",
+      rate: "0.00",
+      amount: "0.00",
+      disc: 0,
+      discount: "",
+      gst: 0,
+      RateCal: "",
+      Qtyperpc: 0,
+      Pcodes01: "",
+      Pcodess: "",
+      Scodes01: "",
+      Scodess: "",
+      Exp_rate1: 0,
+      Exp_rate2: 0,
+      Exp_rate3: 0,
+      Exp_rate4: 0,
+      Exp_rate5: 0,
+      Exp1: 0,
+      Exp2: 0,
+      Exp3: 0,
+      Exp4: 0,
+      Exp5: 0,
       exp_before: 0,
-      Exp_rate6: 0,
-      Exp_rate7: 0,
-      Exp_rate8: 0,
-      Exp_rate9: 0,
-      Exp_rate10: 0,
-      Exp6: 0,
-      Exp7: 0,
-      Exp8: 0,
-      Exp9: 0,
-      Exp10: 0,
-      cgst: 0,
-      sgst: 0,
-      igst: 0,
-      expafterGST: 0,
-      grandtotal: 0,
-    };
-    const emptyItems = [
-      {
-        id: 1,
-        vcode: "",
-        sdisc: "",
-        Units: "",
-        pkgs: "0.00",
-        weight: "0.00",
-        rate: "0.00",
-        amount: "0.00",
-        disc: 0,
-        discount: "",
-        gst: 0,
-        RateCal: "",
-        Qtyperpc: 0,
-        Pcodes01: "",
-        Pcodess: "",
-        Scodes01: "",
-        Scodess: "",
-        Exp_rate1: 0,
-        Exp_rate2: 0,
-        Exp_rate3: 0,
-        Exp_rate4: 0,
-        Exp_rate5: 0,
-        Exp1: 0,
-        Exp2: 0,
-        Exp3: 0,
-        Exp4: 0,
-        Exp5: 0,
-        exp_before: 0,
-        ctax: "0.00",
-        stax: "0.00",
-        itax: "0.00",
-        tariff: "",
-        vamt: "0.00",
-      },
-    ];
-    const emptyshipped = [
-      {
-        shippedto: "",
-        shippingAdd: "",
-        shippingcity: "",
-        shippingState: "",
-        shippingGst: "",
-        shippingPan: "",
-      },
-    ];
-    const emptycustomer = [
-      {
-        Vcode: "",
-        vacode: "",
-        gstno: "",
-        pan: "",
-        city: "",
-        state: "",
-        Tcs206c1H: "",
-        TDS194Q: "",
-      },
-    ];
-    setFormData(emptyFormData);
-    setItems(normalizeItems([]));
-    setcustomerDetails(emptycustomer);
-    setshipped(emptyshipped);
-    setData1({
-      formData: emptyFormData,
-      items: emptyItems,
-      shipped: emptyshipped,
-      customerDetails: emptycustomer,
-    });
-    setIndex(0);
-  };
+      ctax: "0.00",
+      stax: "0.00",
+      itax: "0.00",
+      tariff: "",
+      vamt: "0.00",
+    },
+  ];
 
-  useEffect(() => {
-    fetchData();
-    setIsDisabled(true);
-  }, [selectedValpha, saleId, tenant]);
+  const emptyshipped = [
+    {
+      shippedto: "",
+      shippingAdd: "",
+      shippingcity: "",
+      shippingState: "",
+      shippingGst: "",
+      shippingPan: "",
+    },
+  ];
+
+  const emptycustomer = [
+    {
+      Vcode: "",
+      vacode: "",
+      gstno: "",
+      pan: "",
+      city: "",
+      state: "",
+      Tcs206c1H: "",
+      TDS194Q: "",
+    },
+  ];
+
+  setFormData(emptyFormData);
+  setItems(normalizeItems([]));
+  setcustomerDetails(emptycustomer);
+  setshipped(emptyshipped);
+  setData1({
+    formData: emptyFormData,
+    items: emptyItems,
+    shipped: emptyshipped,
+    customerDetails: emptycustomer,
+  });
+  setIndex(0);
+};
+
+//   useEffect(() => {
+//     fetchData();
+//     setIsDisabled(true);
+//     // Add this line to set isDisabled to true initially
+//   }, []);
+useEffect(() => {
+  fetchData();
+  setIsDisabled(true);
+}, [selectedValpha, saleId, tenant]);
 
     // Search Modal states
   const [showSearch, setShowSearch] = useState(false);
@@ -7102,20 +6869,33 @@ const Sale = () => {
   const [visibleCount, setVisibleCount] = useState(10);
 
   // Fetch all bills for search
-  const fetchAllBills = async () => {
-    try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale${getValphaQuery()}`
-      );
+//   const fetchAllBills = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale`,
+//       );
+//       if (Array.isArray(res.data)) {
+//         setAllBills(res.data);
+//         setFilteredBills(res.data);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching bills", error);
+//     }
+//   };
+const fetchAllBills = async () => {
+  try {
+    const res = await axios.get(
+      `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/sale${getValphaQuery()}`
+    );
 
-      if (Array.isArray(res.data)) {
-        setAllBills(res.data);
-        setFilteredBills(res.data);
-      }
-    } catch (error) {
-      console.error("Error fetching bills", error);
+    if (Array.isArray(res.data)) {
+      setAllBills(res.data);
+      setFilteredBills(res.data);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching bills", error);
+  }
+};
 
   // Update filtering logic
   useEffect(() => {
@@ -7210,260 +6990,677 @@ const Sale = () => {
     return `${dd}-${mm}-${yyyy}`;
   };
 
-  const fetchVoucherNumbers = async () => {
-    try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno${getValphaQuery()}`
-      );
+//   const fetchVoucherNumbers = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno`,
+//       );
 
-      return {
-        lastVno: res?.data?.lastVno || 0,
-        nextVno: res?.data?.nextVno || 1,
-        lastBillNo: res?.data?.lastBillNo || 0,
-        nextBillNo: res?.data?.nextBillNo || 1,
-        lastVoucherNo: res?.data?.lastVoucherNo || 0,
-        nextVoucherNo: res?.data?.nextVoucherNo || 1,
-      };
-    } catch (error) {
-      console.error("Error fetching voucher numbers:", error);
-      toast.error("Unable to fetch voucher number", {
-        position: "top-center",
-      });
-      return null;
-    }
-  };
+//       return {
+//         lastVno: res?.data?.lastVno || 0,
+//         nextVno: res?.data?.nextVno || 1,
+//       };
+//     } catch (error) {
+//       console.error("Error fetching voucher numbers:", error);
+//       toast.error("Unable to fetch voucher number", {
+//         position: "top-center",
+//       });
+//       return null;
+//     }
+//   };
+const fetchVoucherNumbers = async () => {
+  try {
+    const res = await axios.get(
+      `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last-voucherno${getValphaQuery()}`
+    );
 
-  const handleNext = async () => {
-    document.body.style.backgroundColor = "white";
-    setTitle("(View)");
+    return {
+      lastVno: res?.data?.lastVno || 0,
+      nextVno: res?.data?.nextVno || 1,
+      lastBillNo: res?.data?.lastBillNo || 0,
+      nextBillNo: res?.data?.nextBillNo || 1,
+      lastVoucherNo: res?.data?.lastVoucherNo || 0,
+      nextVoucherNo: res?.data?.nextVoucherNo || 1,
+    };
+  } catch (error) {
+    console.error("Error fetching voucher numbers:", error);
+    toast.error("Unable to fetch voucher number", {
+      position: "top-center",
+    });
+    return null;
+  }
+};
 
-    try {
-      if (data1?._id) {
-        const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next?dummy=1${getValphaQueryWithPrefix()}`
-        );
+//   const handleNext = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("(View)");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next`,
+//         );
+//         if (response.status === 200 && response.data) {
+//           const nextData = response.data.data;
+//           setData1(nextData);
+//           setIndex(index + 1);
+//           setFormData({
+//           ...nextData.formData,
+//           date: formatDateToDDMMYYYY(nextData.formData.date),
+//           duedate: formatDateToDDMMYYYY(nextData.formData.duedate),
+//           });
 
-        if (response.status === 200 && response.data?.data) {
-          applySaleRecordToState(response.data.data);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching next record:", error);
-    }
-  };
+//           // Update items and supplier details
+//           const updatedItems = nextData.items.map((item) => ({
+//             ...item,
+//           }));
+//           const updatedCustomer = nextData.customerDetails.map((item) => ({
+//             ...item,
+//           }));
+//           const updatedshipped = nextData.shipped.map((item) => ({
+//             ...item,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           // setItems(updatedItems);
+//           setcustomerDetails(updatedCustomer);
+//           setshipped(updatedshipped);
 
-  const handlePrevious = async () => {
-    document.body.style.backgroundColor = "white";
-    setTitle("(View)");
+//           // Set custGst from the supplier details
+//           if (updatedCustomer.length > 0) {
+//             setCustgst(updatedCustomer[0].gstno); // Set GST number
+//           }
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching next record:", error);
+//     }
+//   };
+const handleNext = async () => {
+  document.body.style.backgroundColor = "white";
+  setTitle("(View)");
 
-    try {
-      if (data1?._id) {
-        const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous?dummy=1${getValphaQueryWithPrefix()}`
-        );
-
-        if (response.status === 200 && response.data?.data) {
-          applySaleRecordToState(response.data.data);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching previous record:", error);
-    }
-  };
-
-  const handleFirst = async () => {
-    document.body.style.backgroundColor = "white";
-    setTitle("(View)");
-
-    try {
+  try {
+    if (data1?._id) {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first${getValphaQuery()}`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/next?dummy=1${getValphaQueryWithPrefix()}`
       );
 
       if (response.status === 200 && response.data?.data) {
         applySaleRecordToState(response.data.data);
       }
-    } catch (error) {
-      console.error("Error fetching first record:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching next record:", error);
+  }
+};
 
-  const handleLast = async () => {
-    document.body.style.backgroundColor = "white";
-    setTitle("(View)");
+//   const handlePrevious = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("(View)");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous`,
+//         );
+//         if (response.status === 200 && response.data) {
+//           const prevData = response.data.data;
+//           setData1(prevData);
+//           setIndex(index - 1);
+//           setFormData({
+//           ...prevData.formData,
+//           date: formatDateToDDMMYYYY(prevData.formData.date),
+//           duedate: formatDateToDDMMYYYY(prevData.formData.duedate),
+//           });
 
-    try {
+//           // Update items and supplier details
+//           const updatedItems = prevData.items.map((item) => ({
+//             ...item,
+//           }));
+//           const updatedCustomer = prevData.customerDetails.map((item) => ({
+//             ...item,
+//           }));
+//           const updatedshipped = prevData.shipped.map((item) => ({
+//             ...item,
+//           }));
+//           // setItems(updatedItems);
+//           setItems(normalizeItems(updatedItems));
+//           setcustomerDetails(updatedCustomer);
+//           setshipped(updatedshipped);
+
+//           // Set custGst from the supplier details
+//           if (updatedCustomer.length > 0) {
+//             setCustgst(updatedCustomer[0].gstno); // Set GST number
+//           }
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching previous record:", error);
+//     }
+//   };
+const handlePrevious = async () => {
+  document.body.style.backgroundColor = "white";
+  setTitle("(View)");
+
+  try {
+    if (data1?._id) {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/${data1._id}/previous?dummy=1${getValphaQueryWithPrefix()}`
       );
 
       if (response.status === 200 && response.data?.data) {
         applySaleRecordToState(response.data.data);
       }
-    } catch (error) {
-      console.error("Error fetching last record:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching previous record:", error);
+  }
+};
 
-  const handleAdd = async () => {
-    if (datePickerRef.current) {
-      datePickerRef.current.focus();
+//   const handleFirst = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("(View)");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first`,
+//       );
+//       if (response.status === 200 && response.data) {
+//         const firstData = response.data.data;
+//         setData1(firstData);
+//         setIndex(0);
+//         setFormData({
+//         ...firstData.formData,
+//         date: formatDateToDDMMYYYY(firstData.formData.date),
+//         duedate: formatDateToDDMMYYYY(firstData.formData.duedate),
+//         });
+
+//         // Update items and supplier details
+//         const updatedItems = firstData.items.map((item) => ({
+//           ...item,
+//         }));
+//         const updatedCustomer = firstData.customerDetails.map((item) => ({
+//           ...item,
+//         }));
+//         const updatedshipped = firstData.shipped.map((item) => ({
+//           ...item,
+//         }));
+//         // setItems(updatedItems);
+//         setItems(normalizeItems(updatedItems));
+//         setcustomerDetails(updatedCustomer);
+//         setshipped(updatedshipped);
+
+//         // Set custGst from the supplier details
+//         if (updatedCustomer.length > 0) {
+//           setCustgst(updatedCustomer[0].gstno); // Set GST number
+//         }
+
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching first record:", error);
+//     }
+//   };
+const handleFirst = async () => {
+  document.body.style.backgroundColor = "white";
+  setTitle("(View)");
+
+  try {
+    const response = await axios.get(
+      `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/first${getValphaQuery()}`
+    );
+
+    if (response.status === 200 && response.data?.data) {
+      applySaleRecordToState(response.data.data);
     }
-    try {
-      await fetchSalesSetup();
-      const voucherData = await fetchVoucherNumbers();
-      if (!voucherData) return;
+  } catch (error) {
+    console.error("Error fetching first record:", error);
+  }
+};
 
-      const nextBillNo =
+//   const handleLast = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("(View)");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+//       );
+//       if (response.status === 200 && response.data) {
+//         const lastData = response.data.data;
+//         setData1(lastData);
+//         const lastIndex = response.data.length - 1;
+//         setIndex(lastIndex);
+//         setFormData({
+//         ...lastData.formData,
+//         date: formatDateToDDMMYYYY(lastData.formData.date),
+//         duedate: formatDateToDDMMYYYY(lastData.formData.duedate),
+//         });
+
+//         // Update items and supplier details
+//         const updatedItems = lastData.items.map((item) => ({
+//           ...item,
+//         }));
+//         const updatedCustomer = lastData.customerDetails.map((item) => ({
+//           ...item,
+//         }));
+//         const updatedshipped = lastData.shipped.map((item) => ({
+//           ...item,
+//         }));
+//         // setItems(updatedItems);
+//         setItems(normalizeItems(updatedItems));
+//         setcustomerDetails(updatedCustomer);
+//         setshipped(updatedshipped);
+//         // Set custGst from the supplier details
+//         if (updatedCustomer.length > 0) {
+//           setCustgst(updatedCustomer[0].gstno); // Set GST number
+//         }
+
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching last record:", error);
+//     }
+//   };
+const handleLast = async () => {
+  document.body.style.backgroundColor = "white";
+  setTitle("(View)");
+
+  try {
+    const response = await axios.get(
+      `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
+    );
+
+    if (response.status === 200 && response.data?.data) {
+      applySaleRecordToState(response.data.data);
+    }
+  } catch (error) {
+    console.error("Error fetching last record:", error);
+  }
+};
+
+//   const handleAdd = async () => {
+//     if (datePickerRef.current) {
+//       datePickerRef.current.focus();
+//     }
+//     try {
+//       await fetchSalesSetup();
+//       const voucherData = await fetchVoucherNumbers();
+//       if (!voucherData) return;
+
+//       const lastvoucherno = voucherData.nextVno;
+//       const lastvno = voucherData.nextVno;
+
+//       const newData = {
+//         date: getTodayDDMMYYYY(),
+//         valpha: selectedValpha,
+//         vbillno: lastvoucherno,
+//         vno: lastvno,
+//         vtype: "S",
+//         gr: "",
+//         exfor: "",
+//         trpt: "",
+//         stype: "",
+//         btype: BillType,
+//         conv: SupplyType,
+//         rem1: "",
+//         rem2: "",
+//         v_tpt: "",
+//         broker: "",
+//         gross: false,
+//         tcsper: 0,
+//         srv_rate: 0,
+//         srv_tax: 0,
+//         tcs1_rate: 0,
+//         tcs1: 0,
+//         tcs206_rate: 0,
+//         tcs206: 0,
+//         duedate: getTodayDDMMYYYY(),
+//         pcess: 0,
+//         tax: 0,
+//         sub_total: 0,
+//         exp_before: 0,
+//         Exp_rate6: 0,
+//         Exp_rate7: 0,
+//         Exp_rate8: 0,
+//         Exp_rate9: 0,
+//         Exp_rate10: 0,
+//         Exp6: 0,
+//         Exp7: 0,
+//         Exp8: 0,
+//         Exp9: 0,
+//         Exp10: 0,
+//         Tds2: "",
+//         Ctds: "",
+//         Stds: "",
+//         iTds: "",
+//         cgst: 0,
+//         sgst: 0,
+//         igst: 0,
+//         expafterGST: 0,
+//         ExpRoundoff: 0,
+//         grandtotal: 0,
+//       };
+//       setData([...data, newData]);
+//       setFormData(newData);
+//       // setItems(normalizeItems([]));
+//       setItems(
+//         normalizeItems([], {
+//           ExpRate1,
+//           ExpRate2,
+//           ExpRate3,
+//           ExpRate4,
+//           ExpRate5,
+//         }),
+//       );
+//       setcustomerDetails([
+//         {
+//           Vcode: "",
+//           vacode: "",
+//           gstno: "",
+//           pan: "",
+//           Add1: "",
+//           city: "",
+//           state: "",
+//           Tcs206c1H: "",
+//           TDS194Q: "",
+//         },
+//       ]);
+//       setshipped([
+//         {
+//           shippedto: "",
+//           shippingAdd: "",
+//           shippingcity: "",
+//           shippingState: "",
+//           shippingGst: "",
+//           shippingPan: "",
+//         },
+//       ]);
+//       setIndex(data.length);
+//       setIsAddEnabled(false);
+//       setIsPreviousEnabled(false);
+//       setIsNextEnabled(false);
+//       setIsFirstEnabled(false);
+//       setIsLastEnabled(false);
+//       setIsSearchEnabled(false);
+//       setIsSPrintEnabled(false);
+//       setIsDeleteEnabled(false);
+//       setIsDisabled(false);
+//       setIsEditMode(true);
+//       setIsAbcmode(false);
+//       setTitle("NEW");
+//     } catch (error) {
+//       console.error("Error adding new entry:", error);
+//     }
+//   };
+const handleAdd = async () => {
+  if (datePickerRef.current) {
+    datePickerRef.current.focus();
+  }
+
+  try {
+    await fetchSalesSetup();
+    const voucherData = await fetchVoucherNumbers();
+    if (!voucherData) return;
+
+    const nextBillNo =
       voucherData.nextBillNo || voucherData.nextVno || 1;
 
-      const nextVoucherNo =
+    const nextVoucherNo =
       voucherData.nextVoucherNo || voucherData.nextVno || 1;
 
-      const newData = {
-        date: getTodayDDMMYYYY(),
-        valpha: selectedValpha,
-        vbillno: nextBillNo,
-        vno: nextVoucherNo,
-        vtype: "S",
-        gr: "",
-        exfor: "",
-        trpt: "",
-        stype: "",
-        btype: BillType,
-        conv: SupplyType,
-        rem1: "",
-        rem2: "",
-        v_tpt: "",
-        broker: "",
-        gross: false,
-        tcsper: 0,
-        srv_rate: 0,
-        srv_tax: 0,
-        tcs1_rate: 0,
-        tcs1: 0,
-        tcs206_rate: 0,
-        tcs206: 0,
-        duedate: getTodayDDMMYYYY(),
-        pcess: 0,
-        tax: 0,
-        sub_total: 0,
-        exp_before: 0,
-        Exp_rate6: 0,
-        Exp_rate7: 0,
-        Exp_rate8: 0,
-        Exp_rate9: 0,
-        Exp_rate10: 0,
-        Exp6: 0,
-        Exp7: 0,
-        Exp8: 0,
-        Exp9: 0,
-        Exp10: 0,
-        Tds2: "",
-        Ctds: "",
-        Stds: "",
-        iTds: "",
-        cgst: 0,
-        sgst: 0,
-        igst: 0,
-        expafterGST: 0,
-        ExpRoundoff: 0,
-        grandtotal: 0,
-      };
-      setData([...data, newData]);
-      setFormData(newData);
-      // setItems(normalizeItems([]));
-      setItems(
-        normalizeItems([], {
-          ExpRate1,
-          ExpRate2,
-          ExpRate3,
-          ExpRate4,
-          ExpRate5,
-        }),
-      );
-      setcustomerDetails([
-        {
-          Vcode: "",
-          vacode: "",
-          gstno: "",
-          pan: "",
-          Add1: "",
-          city: "",
-          state: "",
-          Tcs206c1H: "",
-          TDS194Q: "",
-        },
-      ]);
-      setshipped([
-        {
-          shippedto: "",
-          shippingAdd: "",
-          shippingcity: "",
-          shippingState: "",
-          shippingGst: "",
-          shippingPan: "",
-        },
-      ]);
-      setIndex(data.length);
-      setIsAddEnabled(false);
-      setIsPreviousEnabled(false);
-      setIsNextEnabled(false);
-      setIsFirstEnabled(false);
-      setIsLastEnabled(false);
-      setIsSearchEnabled(false);
-      setIsSPrintEnabled(false);
-      setIsDeleteEnabled(false);
-      setIsDisabled(false);
-      setIsEditMode(true);
-      setIsAbcmode(false);
-      setTitle("NEW");
-    } catch (error) {
-      console.error("Error adding new entry:", error);
-    }
-  };
+    const newData = {
+      date: getTodayDDMMYYYY(),
+      valpha: selectedValpha || "",
+      vbillno: nextBillNo,
+      vno: nextVoucherNo,
+      vtype: "S",
+      gr: "",
+      exfor: "",
+      trpt: "",
+      stype: "",
+      btype: BillType,
+      conv: SupplyType,
+      rem1: "",
+      rem2: "",
+      v_tpt: "",
+      broker: "",
+      gross: false,
+      tcsper: 0,
+      srv_rate: 0,
+      srv_tax: 0,
+      tcs1_rate: 0,
+      tcs1: 0,
+      tcs206_rate: 0,
+      tcs206: 0,
+      duedate: getTodayDDMMYYYY(),
+      pcess: 0,
+      tax: 0,
+      sub_total: 0,
+      exp_before: 0,
+      Exp_rate6: 0,
+      Exp_rate7: 0,
+      Exp_rate8: 0,
+      Exp_rate9: 0,
+      Exp_rate10: 0,
+      Exp6: 0,
+      Exp7: 0,
+      Exp8: 0,
+      Exp9: 0,
+      Exp10: 0,
+      Tds2: "",
+      Ctds: "",
+      Stds: "",
+      iTds: "",
+      cgst: 0,
+      sgst: 0,
+      igst: 0,
+      expafterGST: 0,
+      ExpRoundoff: 0,
+      grandtotal: 0,
+    };
 
-  const handleExit = async () => {
-    if (formData.grandtotal > 0 && isEditMode) {
-      const confirmExit = window.confirm(
-        "Are you sure you want to Exit? Unsaved changes may be lost."
-      );
-      if (!confirmExit) return;
+    setData([...data, newData]);
+    setFormData(newData);
+
+    setItems(
+      normalizeItems([], {
+        ExpRate1,
+        ExpRate2,
+        ExpRate3,
+        ExpRate4,
+        ExpRate5,
+      })
+    );
+
+    setcustomerDetails([
+      {
+        Vcode: "",
+        vacode: "",
+        gstno: "",
+        pan: "",
+        Add1: "",
+        city: "",
+        state: "",
+        Tcs206c1H: "",
+        TDS194Q: "",
+      },
+    ]);
+
+    setshipped([
+      {
+        shippedto: "",
+        shippingAdd: "",
+        shippingcity: "",
+        shippingState: "",
+        shippingGst: "",
+        shippingPan: "",
+      },
+    ]);
+
+    setIndex(nextBillNo);
+    setIsAddEnabled(false);
+    setIsPreviousEnabled(false);
+    setIsNextEnabled(false);
+    setIsFirstEnabled(false);
+    setIsLastEnabled(false);
+    setIsSearchEnabled(false);
+    setIsSPrintEnabled(false);
+    setIsDeleteEnabled(false);
+    setIsDisabled(false);
+    setIsEditMode(true);
+    setIsAbcmode(false);
+    setTitle("NEW");
+  } catch (error) {
+    console.error("Error adding new entry:", error);
+  }
+};
+
+//   const handleExit = async () => {
+//     // Check if grandtotal is Greater Than zero
+//     if (formData.grandtotal > 0 && isEditMode) {
+//       const confirmExit = window.confirm(
+//         "Are you sure you want to Exit? Unsaved changes may be lost.",
+//       );
+//       if (!confirmExit) {
+//         return;
+//       }
+//     }
+    
+//     if(!isEditMode){
+//       navigate("/dashboard"); 
+//       return;
+//     }
+
+//     setTitle("(View)");
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last`,
+//       );
+
+//       if (response.status === 200 && response.data.data) {
+//         const lastEntry = response.data.data;
+//         setFormData({
+//         ...lastEntry.formData,
+//         date: formatDateToDDMMYYYY(lastEntry.formData.date),
+//         duedate: formatDateToDDMMYYYY(lastEntry.formData.duedate),
+//         });
+//         setData1(response.data.data);
+//         // setItems(lastEntry.items.map((item) => ({ ...item })));
+//         setItems(normalizeItems(lastEntry.items));
+//         setcustomerDetails(
+//           lastEntry.customerDetails.map((item) => ({ ...item })),
+//         );
+//         setshipped(lastEntry.shipped.map((item) => ({ ...item })));
+
+//         setIsDisabled(true);
+//         setIndex(lastEntry.formData);
+//         setIsAddEnabled(true);
+//         setIsEditMode(false);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//       } else {
+//         console.log("No data available");
+//         const newData = {
+//           date: "",
+//           valpha:"",
+//           vtype: "S",
+//           vbillno: 0,
+//           vno: 0,
+//           gr: "",
+//           exfor: "",
+//           trpt: "",
+//           stype: "",
+//           btype: "",
+//           conv: "",
+//           rem1: "",
+//           rem2: "",
+//           v_tpt: "",
+//           broker: "",
+//           srv_rate: 0,
+//           srv_tax: 0,
+//           tcs1_rate: 0,
+//           tcs1: 0,
+//           tcs206_rate: 0,
+//           tcs206: 0,
+//           duedate: "",
+//           pcess: 0,
+//           tax: 0,
+//           sub_total: 0,
+//           exp_before: 0,
+//           cgst: 0,
+//           sgst: 0,
+//           igst: 0,
+//           expafterGST: 0,
+//           grandtotal: 0,
+//         };
+//         setFormData(newData);
+//         setItems(normalizeItems([]));
+//         setcustomerDetails([
+//           {
+//             vacode: "",
+//             gstno: "",
+//             pan: "",
+//             Add1: "",
+//             city: "",
+//             state: "",
+//             Tcs206c1H: "",
+//             TDS194Q: "",
+//           },
+//         ]);
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+//     }
+//   };
+const handleExit = async () => {
+  if (formData.grandtotal > 0 && isEditMode) {
+    const confirmExit = window.confirm(
+      "Are you sure you want to Exit? Unsaved changes may be lost."
+    );
+    if (!confirmExit) return;
+  }
+
+  if (!isEditMode) {
+    navigate("/dashboard");
+    return;
+  }
+
+  setTitle("(View)");
+
+  try {
+    const response = await axios.get(
+      `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
+    );
+
+    if (response.status === 200 && response.data?.data) {
+      applySaleRecordToState(response.data.data);
+
+      setIsAddEnabled(true);
+      setIsEditMode(false);
+      setIsSubmitEnabled(false);
+      setIsPreviousEnabled(true);
+      setIsNextEnabled(true);
+      setIsFirstEnabled(true);
+      setIsLastEnabled(true);
+      setIsSearchEnabled(true);
+      setIsSPrintEnabled(true);
+      setIsDeleteEnabled(true);
+    } else {
+      initializeEmptyData();
+      setIsDisabled(true);
     }
-  
-    if (!isEditMode) {
-      navigate("/dashboard");
-      return;
-    }
-  
-    setTitle("(View)");
-  
-    try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/salegst/last${getValphaQuery()}`
-      );
-  
-      if (response.status === 200 && response.data?.data) {
-        applySaleRecordToState(response.data.data);
-  
-        setIsAddEnabled(true);
-        setIsEditMode(false);
-        setIsSubmitEnabled(false);
-        setIsPreviousEnabled(true);
-        setIsNextEnabled(true);
-        setIsFirstEnabled(true);
-        setIsLastEnabled(true);
-        setIsSearchEnabled(true);
-        setIsSPrintEnabled(true);
-        setIsDeleteEnabled(true);
-      } else {
-        initializeEmptyData();
-        setIsDisabled(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  };
+  } catch (error) {
+    console.error("Error fetching data", error);
+  }
+};
 
   const handleEditClick = () => {
     setTitle("(Edit)");
@@ -8192,8 +8389,8 @@ const Sale = () => {
     const updatedForm = calculateTotalGst(formData);
     setFormData(updatedForm);
   };
-
-  // Function to handle adding a new item
+ 
+ 
   const handleAddItem = () => {
     if (isEditMode) {
       const newItem = {
@@ -8660,85 +8857,7 @@ const Sale = () => {
     }
   };
 
-  // const handleInputChange = (index, field, value) => {
-  //   const numericValue =
-  //     typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
-  //   const updatedItems = [...items];
-  //   updatedItems[index][field] = numericValue;
-
-  //   // Recalculate expenses when Exp_rate1 to Exp_rate6 change
-  //   const vamt = parseFloat(updatedItems[index].amount) || 0;
-  //   const expRates = [
-  //     parseFloat(updatedItems[index].Exp_rate1) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate2) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate3) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate4) || 0,
-  //     parseFloat(updatedItems[index].Exp_rate5) || 0,
-  //   ];
-  //   const expFields = ["Exp1", "Exp2", "Exp3", "Exp4", "Exp5"];
-
-  //   let totalExpenses = 0;
-  //   expRates.forEach((rate, i) => {
-  //     const expense = (vamt * rate) / 100;
-  //     updatedItems[index][expFields[i]] = expense.toFixed(2);
-  //     totalExpenses += expense;
-  //   });
-
-  //   // Update the exp_before field with the total of all expenses
-  //   updatedItems[index].exp_before = totalExpenses.toFixed(2);
-
-  //   const gst = parseFloat(updatedItems[index].gst);
-  //   const totalAccordingWeight =
-  //     parseFloat(updatedItems[index].weight) *
-  //     parseFloat(updatedItems[index].rate);
-  //   const totalAccordingPkgs =
-  //     parseFloat(updatedItems[index].pkgs) *
-  //     parseFloat(updatedItems[index].rate);
-  //   let RateCal = updatedItems[index].RateCal;
-  //   let TotalAcc = totalAccordingWeight; // Set a default value
-
-  //   if (
-  //     RateCal === "Default" ||
-  //     RateCal === "" ||
-  //     RateCal === null ||
-  //     RateCal === undefined
-  //   ) {
-  //     TotalAcc = totalAccordingWeight;
-  //   } else if (RateCal === "Wt/Qty") {
-  //     TotalAcc = totalAccordingWeight;
-  //   } else if (RateCal === "Pc/Pkgs") {
-  //     TotalAcc = totalAccordingPkgs;
-  //   }
-  //   const others = parseFloat(updatedItems[index].exp_before) || 0;
-  //   let disc = parseFloat(updatedItems[index].disc) || 0;
-  //   let per = ((disc / 100) * TotalAcc).toFixed(2);
-  //   let Amounts = TotalAcc + others + parseFloat(per);
-
-  //   // Ensure TotalAcc is a valid number before calling toFixed()
-  //   TotalAcc = isNaN(TotalAcc) ? 0 : TotalAcc;
-  //   let cgst = 0,
-  //     sgst = 0,
-  //     igst = 0;
-  //   if (CompanyState == customerDetails[0].state) {
-  //     cgst = (Amounts * (gst / 2)) / 100;
-  //     sgst = (Amounts * (gst / 2)) / 100;
-  //   } else {
-  //     igst = (Amounts * gst) / 100;
-  //   }
-
-  //   const totalWithGST = Amounts + cgst + sgst + igst;
-
-  //   // Update tax and total fields
-  //   updatedItems[index]["ctax"] = cgst.toFixed(2);
-  //   updatedItems[index]["stax"] = sgst.toFixed(2);
-  //   updatedItems[index]["itax"] = igst.toFixed(2);
-  //   updatedItems[index]["discount"] = parseFloat(per).toFixed(2);
-  //   updatedItems[index]["vamt"] = totalWithGST.toFixed(2); // ✅ Update the total amount (vamt)
-
-  //   setItems(updatedItems);
-  //   calculateTotalGst(); // ✅ Recalculate the grand total
-  // };
-
+ 
   const handleInputChange = (index, field, value) => {
     const numericValue =
       typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value;
@@ -8951,13 +9070,13 @@ const Sale = () => {
     items[currentIndex]?.RateCal,
   ]);
 
-  const [fsize, setfsize] = useState(17); // Initial font size in pixels
-  const increasefsize = () => {
-    setfsize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
+  const [fontSize, setFontSize] = useState(17); // Initial font size in pixels
+  const increaseFontSize = () => {
+    setFontSize((prevSize) => (prevSize < 20 ? prevSize + 2 : prevSize)); // Increase font size up to 20 pixels
   };
 
-  const decreasefsize = () => {
-    setfsize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
+  const decreaseFontSize = () => {
+    setFontSize((prevSize) => (prevSize > 14 ? prevSize - 2 : prevSize)); // Decrease font size down to 14 pixels
   };
   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
   const fieldOrder = [
@@ -9057,47 +9176,57 @@ const Sale = () => {
       return;
     }
 
-    // ------------- ARROW RIGHT: next field in row -----------------
-    if (event.key === "ArrowRight") {
-      const currentPos = fieldOrder.findIndex((f) => f.name === field);
-      if (currentPos !== -1) {
-        for (let i = currentPos + 1; i < fieldOrder.length; i++) {
-          const nextField = fieldOrder[i];
-          if (focusRef(nextField.refArray, index)) return;
+    // -------------------- ARROW RIGHT --------------------
+    else if (event.key === "ArrowRight") {
+      if (field === "vcode") {
+        focusRef(desciptionRefs, index);
+      } else if (field === "sdisc") {
+        focusRef(hsnCodeRefs, index);
+      } else if (field === "tariff") {
+        focusRef(peciesRefs, index);
+      } else if (field === "pkgs") {
+        focusRef(quantityRefs, index);
+      } else if (field === "weight") {
+        focusRef(priceRefs, index);
+      } else if (field === "rate") {
+        // If amount column exists, go there first, else to disc
+        if (!focusRef(amountRefs, index)) {
+          focusRef(discountRef, index);
         }
+      } else if (field === "amount") {
+        focusRef(discountRef, index);
+      } else if (field === "disc") {
+        focusRef(discount2Ref, index);
+      } else if (field === "discount") {
+        focusRef(othersRefs, index);
       }
     }
 
-    // ------------- ARROW LEFT: previous field in row -----------------
+    // -------------------- ARROW LEFT --------------------
     else if (event.key === "ArrowLeft") {
-      const currentPos = fieldOrder.findIndex((f) => f.name === field);
-      if (currentPos !== -1) {
-        for (let i = currentPos - 1; i >= 0; i--) {
-          const prevField = fieldOrder[i];
-          if (focusRef(prevField.refArray, index)) return;
-        }
+      if (field === "exp_before") {
+        focusRef(discount2Ref, index);
+      } else if (field === "discount") {
+        focusRef(discountRef, index);
+      } else if (field === "disc") {
+        focusRef(amountRefs, index);
+      } else if (field === "amount") {
+        focusRef(priceRefs, index);
+      } else if (field === "rate") {
+        focusRef(quantityRefs, index);
+      } else if (field === "weight") {
+        focusRef(peciesRefs, index);
+      } else if (field === "pkgs") {
+        focusRef(hsnCodeRefs, index);
+      } else if (field === "tariff") {
+        focusRef(desciptionRefs, index);
+      } else if (field === "sdisc") {
+        focusRef(itemCodeRefs, index);
+      } else if (field === "vcode") {
+        focusRef(itemCodeRefs, index);
       }
     }
 
-    // ------------- ARROW UP: same field, previous row -----------------
-    else if (event.key === "ArrowUp" && index > 0) {
-      const cfg = fieldOrder.find((f) => f.name === field);
-      if (cfg) {
-        setTimeout(() => {
-          focusRef(cfg.refArray, index - 1);
-        }, 50);
-      }
-    }
-
-    // ------------- ARROW DOWN: same field, next row -----------------
-    else if (event.key === "ArrowDown" && index < items.length - 1) {
-      const cfg = fieldOrder.find((f) => f.name === field);
-      if (cfg) {
-        setTimeout(() => {
-          focusRef(cfg.refArray, index + 1);
-        }, 50);
-      }
-    }
     // --------------- OPEN MODAL ON LETTER (ACCOUNT NAME) ---------------
     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
@@ -9240,18 +9369,93 @@ const Sale = () => {
     }
   }, [isModalOpenExp]);
 
-  const handleKeyDownModal = (event, index) => {
-    if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault();
+  // const handleKeyDownModal = (event, index) => {
+  //   if (event.key === "Enter" || event.key === "Tab") {
+  //     event.preventDefault();
 
-      if (index < expRateRefs.current.length - 1) {
-        expRateRefs.current[index + 1]?.focus();
-        expRateRefs.current[index + 1]?.select();
-      } else {
-        closeButtonRef.current?.focus();
+  //     if (index < expRateRefs.current.length - 1) {
+  //       expRateRefs.current[index + 1]?.focus();
+  //       expRateRefs.current[index + 1]?.select();
+  //     } else {
+  //       closeButtonRef.current?.focus();
+  //     }
+  //   }
+  // };
+  const handleKeyDownModal = (e, index) => {
+  if (!expRateRefs.current) return;
+
+  const current = expRateRefs.current[index];
+
+  // move only on Enter
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const next = expRateRefs.current[index + 1];
+    if (next) {
+      next.focus();
+      next.select?.();
+    } else {
+      closeButtonRef.current?.focus?.();
+    }
+    return;
+  }
+
+  // move vertically with Up/Down
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    const next = expRateRefs.current[index + 2];
+    if (next) {
+      next.focus();
+      next.select?.();
+    }
+    return;
+  }
+
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+    const prev = expRateRefs.current[index - 2];
+    if (prev) {
+      prev.focus();
+      prev.select?.();
+    }
+    return;
+  }
+
+  // move right only if cursor is at end
+  if (e.key === "ArrowRight") {
+    const start = current?.selectionStart ?? 0;
+    const end = current?.selectionEnd ?? 0;
+    const len = current?.value?.length ?? 0;
+
+    if (start === len && end === len) {
+      e.preventDefault();
+      const next = expRateRefs.current[index + 1];
+      if (next) {
+        next.focus();
+        next.select?.();
       }
     }
-  };
+    return;
+  }
+
+  // move left only if cursor is at start
+  if (e.key === "ArrowLeft") {
+    const start = current?.selectionStart ?? 0;
+    const end = current?.selectionEnd ?? 0;
+
+    if (start === 0 && end === 0) {
+      e.preventDefault();
+      const prev = expRateRefs.current[index - 1];
+      if (prev) {
+        prev.focus();
+        prev.select?.();
+      }
+    }
+    return;
+  }
+
+  // IMPORTANT:
+  // do nothing for normal typing like 1, 18, 12.5 etc.
+};
 
   // EXP AFTER
   const expAfterRefs = useRef([]);
@@ -9357,11 +9561,14 @@ const Sale = () => {
   });
 
   // Storing Valpha
-  const getValphaQueryWithPrefix = () => {
-    return selectedValpha
-      ? `&valpha=${encodeURIComponent(selectedValpha)}`
-      : "";
-  };
+  // Get object from navigation
+ 
+
+const getValphaQueryWithPrefix = () => {
+  return selectedValpha
+    ? `&valpha=${encodeURIComponent(selectedValpha)}`
+    : "";
+};
 
   useEffect(() => {
     if (saleWinFromState) {
@@ -9379,2236 +9586,1949 @@ const Sale = () => {
     }
   };
 
-  return (
-    <div>
-      <ToastContainer />
-      {isModalOpen && <SaleSetup onClose={closeModal} />}
-      <div style={{ visibility: "hidden", width: 0, height: 0 }}>
-        {SelectedInvoiceComponent && (
-          <SelectedInvoiceComponent
-            formData={formData}
-            items={nonEmptyItems2}
-            customerDetails={customerDetails}
-            shipped={shipped}
-            isOpen={open}
-            handleClose={handleCloseInvoice}
-            componentRef={printRef} // pass the ref
-            selectedCopies={selectedCopies}
-          />
-        )}
-      </div>
-      <div style={{ display: "flex", flexDirection: "row", marginTop: -30 }}>
-        <h1 className="headerSale">
-          SALE GST{" "}
-          <span className="text-black-500 font-semibold text-base sm:text-lg">
-            {title}
-          </span>
-        </h1>
-      </div>
-      {/* Top Parts */}
-      <div className="sale_toppart ">
-        <div className="Dated ">
-          <InputMask
-            mask="99-99-9999"
-            placeholder="dd-mm-yyyy"
-            value={formData.date}
-            readOnly={!isEditMode || isDisabled}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-          >
-            {(inputProps) => (
-              <input
-                {...inputProps}
-                className="DatePICKER"
-                ref={datePickerRef}
-                onKeyDown={(e) => {
-                  handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
-                }}
-              />
-            )}
-          </InputMask>
-          {/* <DatePicker
-            ref={datePickerRef}
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => validateDate(selectedDate)}
-            customInput={<MaskedInput />}
-          /> */}
-          <div className="billdivz">
-            <TextField
-              inputRef={voucherNoRef}
-              className="billzNo custom-bordered-input"
-              id="vbillno"
-              value={formData.vbillno}
-              variant="filled"
-              size="small"
-              label="BILL NO"
-              onKeyDown={handleKeyDownTab} // Handle Tab key here
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: "20px",
-                  fontSize: `${fsize}px`,
-                  // padding: "0 8px"
-                },
-                readOnly: !isEditMode || isDisabled,
-              }}
-            />
-          </div>
-          <div className="Setup">
-            <button
-              className="Button"
-              style={{
-                backgroundColor: "blue",
-                color: "white",
-                fontWeight: "bold",
-              }}
-              onClick={openModal}
-            >
-              SETUP
-            </button>
-            {/* Settings Button */}
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(true)}
-              className="Setting text-xl text-blue-700"
-              style={{
-                cursor: "pointer",
-                border: "none",
-                background: "transparent",
-                padding: 6,
-                borderRadius: 10,
-              }}
-              title="Settings"
-            >
-              <FaCog />
-            </button>
-            {/* Fullscreen Overlay Drawer */}
-            <Modal
-              show={settingsOpen}
-              onHide={() => setSettingsOpen(false)}
-              centered
-              size="lg"
-              backdrop="static"
-              keyboard={true}
-              dialogClassName="p-0"
-              style={{ maxHeight: "100vh", overflowY: "hidden", marginTop:-10 }}
-            >
-              {/* Premium Header */}
-              <div
-                style={{
-                  padding: "14px 18px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid rgba(0,0,0,0.08)",
-                  background:
-                    "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.10), rgba(255,255,255,0.85))",
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
-                    Options
-                  </div>
-                  <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-                    Customize table fields & theme
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSettingsOpen(false)}
-                  style={{
-                    height: 38,
-                    width: 38,
-                    borderRadius: 12,
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    background: "rgba(255,255,255,0.8)",
-                    display: "grid",
-                    placeItems: "center",
-                    cursor: "pointer",
-                  }}
-                  title="Close"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-              {/* Body */}
-              <Modal.Body style={{ padding: 18, background: "rgba(249,250,251,0.85)" }}>
-                {/* Theme Card */}
-                <div
-                  style={{
-                    borderRadius: 16,
-                    padding: 14,
-                    background: "rgba(255,255,255,0.9)",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                    boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
-                    marginBottom: 14,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 10,
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
-                        COLOR / GRADIENT
-                      </div>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-                        Choose header theme
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        height: 34,
-                        width: 34,
-                        borderRadius: 12,
-                        background: color,
-                        border: "1px solid rgba(255,255,255,0.7)",
-                        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
-                      }}
-                      title="Preview"
-                    />
-                  </div>
-                  <select
-                    value={color}
-                    onChange={handleChange}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(0,0,0,0.12)",
-                      background: "white",
-                      fontSize: 13,
-                      outline: "none",
-                    }}
-                  >
-                    {gradientOptions.map((option, index) => (
-                      <option key={index} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {/* Fields Card */}
-                <div
-                  style={{
-                    borderRadius: 16,
-                    padding: 14,
-                    background: "rgba(255,255,255,0.9)",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                    boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 10,
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
-                        SELECT TABLE FIELDS
-                      </div>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-                        Toggle column visibility
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        padding: "6px 10px",
-                        borderRadius: 10,
-                        background: "rgba(17,24,39,0.06)",
-                        color: "#374151",
-                      }}
-                    >
-                      {Object.values(tableData).filter(Boolean).length}/
-                      {Object.keys(tableData).length}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      maxHeight: "52vh",
-                      overflowY: "auto",
-                      paddingRight: 6,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
-                    }}
-                  >
-                    {Object.keys(tableData).map((field) => {
-                      const checked = tableData[field];
-                      return (
-                        <div
-                          key={field}
-                          onClick={() => handleCheckboxChange(field)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 10,
-                            padding: "10px 12px",
-                            borderRadius: 14,
-                            cursor: "pointer",
-                            border: checked
-                              ? "1px solid rgba(59,130,246,0.35)"
-                              : "1px solid rgba(0,0,0,0.10)",
-                            background: checked
-                              ? "linear-gradient(180deg, rgba(59,130,246,0.10), rgba(255,255,255,0.85))"
-                              : "rgba(255,255,255,0.8)",
-                            boxShadow: checked
-                              ? "0 12px 26px rgba(37,99,235,0.10)"
-                              : "0 10px 18px rgba(0,0,0,0.05)",
-                          }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => handleCheckboxChange(field)}
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ height: 16, width: 16 }}
-                            />
-                            <div>
-                              <div style={{ fontSize: 13, fontWeight: 800, color: "#111827" }}>
-                                {field.toUpperCase()}
-                              </div>
-                              <div style={{ fontSize: 12, color: "#6B7280" }}>
-                                Show / hide column
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 800,
-                              padding: "5px 9px",
-                              borderRadius: 10,
-                              background: checked ? "#2563EB" : "rgba(17,24,39,0.06)",
-                              color: checked ? "white" : "#4B5563",
-                            }}
-                          >
-                            {checked ? "ON" : "OFF"}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Modal.Body>
-            </Modal>
-          </div>
-        </div>
-        <div className="TopFields">
-          {customerDetails.map((item, index) => (
-            <div key={item.vacode}>
-              <div className="CUS">
-                <div className="customerdiv">
-                  <TextField
-                    inputRef={customerNameRef}
-                    label="CUSTOMER NAME"
-                    variant="filled"
-                    size="small"
-                    value={item.vacode}
-                    className="customerNAME custom-bordered-input"
-                    onKeyDown={(e) => {
-                      handleEnterKeyPress(customerNameRef, shippedtoRef)(e);
-                      handleKeyDown(e, index, "accountname");
-                      handleOpenModalBack(e, index, "accountname");
-                    }}
-                    onDoubleClick={(e) => {
-                      handleDoubleClick(e, "accountname", index);
-                    }}
-                    onFocus={(e) => e.target.select()}
-                    inputProps={{
-                      maxLength: 48,
-                      style: {
-                        height: "20px",
-                        fontSize: `${fsize}px`,
-                      },
-                      readOnly: !isEditMode || isDisabled,
-                    }}
-                  />
-                </div>
-                <div className="citydivZ">
-                  <TextField
-                    //  disabled
-                    className="cityName custom-bordered-input"
-                    value={item.city}
-                    variant="filled"
-                    label="CITY"
-                    size="small"
-                    inputProps={{
-                      maxLength: 48,
-                      style: {
-                        height: "20px",
-                        fontSize: `${fsize}px`,
-                        // padding: "0 8px",
-                      },
-                      readOnly: !isEditMode || isDisabled,
-                    }}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "city", e.target.value)
-                    }
-                    onFocus={(e) => e.target.select()}
-                  />
-                </div>
-              </div>
-              <div className="GST">
-                <div>
-                  <TextField
-                    //  disabled
-                    className="gstnoZ custom-bordered-input"
-                    value={item.gstno}
-                    variant="filled"
-                    size="small"
-                    label="GST NO"
-                    inputProps={{
-                      maxLength: 48,
-                      style: {
-                        height: "20px",
-                        fontSize: `${fsize}px`,
-                        // padding: "0 8px",
-                      },
-                      readOnly: !isEditMode || isDisabled,
-                    }}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "gstNumber", e.target.value)
-                    }
-                    onFocus={(e) => e.target.select()}
-                  />
-                </div>
-                <div className="pandivZ">
-                  <TextField
-                    //  disabled
-                    className="PANNoZ custom-bordered-input"
-                    value={item.pan}
-                    variant="filled"
-                    size="small"
-                    label="PAN NO"
-                    inputProps={{
-                      maxLength: 48,
-                      style: {
-                        height: "20px",
-                        fontSize: `${fsize}px`,
-                        // padding: "0 8px",
-                      },
-                      readOnly: !isEditMode || isDisabled,
-                    }}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "PanNo", e.target.value)
-                    }
-                    onFocus={(e) => e.target.select()}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-          {showModalCus && (
-            <ProductModalCustomer
-              allFields={allFieldsCus}
-              onSelect={handleProductSelectCus}
-              onClose={handleCloseModalCus}
-              initialKey={pressedKey}
-              tenant={tenant}
-            />
-          )}
-          <div className="shippedTO">
-            {shipped.map((item, index) => (
-              <div key={item.shippedto}>
-                <div>
-                  <TextField
-                    multiline
-                    inputRef={shippedtoRef}
-                    className="shippedtoz custom-bordered-input"
-                    id="shippedto"
-                    variant="filled"
-                    label="SHIPPED TO"
-                    size="small"
-                    value={`${item.shippedto || ""}\n${item.shippingGst || ""}\n${item.shippingcity || ""}`}
-                    InputProps={{
-                      readOnly: !isEditMode || isDisabled,
-                      style: {
-                        height: 100,
-                        fontSize: 14,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      },
-                    }}
-                    inputProps={{
-                      maxLength: 150,
-                      fontSize: 14,
-                    }}
-                    onKeyDown={(e) => {
-                      handleOpenModal(e, index, "shippedto");
-                      handleKeyDowndown(e, grNoRef);
-                      handleOpenModalBack(e, index, "shippedto");
-                    }}
-                    onDoubleClick={(e) => {
-                      handleDoubleClick(e, "shippedto", index);
-                    }}
-                    onFocus={(e) => e.target.select()}
-                  />
-                </div>
-              </div>
-            ))}
-            {showModalAcc && (
-              <ProductModalCustomer
-                allFields={allFieldsAcc}
-                onSelect={handleProductSelectAcc}
-                onClose={() => setShowModalAcc(false)}
-                initialKey={pressedKey}
-                tenant={tenant}
-                onRefresh={fetchCustomers}
-              />
-            )}
-          </div>
-          <div className="GRNo">
-            <TextField
-              inputRef={grNoRef}
-              className="GRNOZ custom-bordered-input"
-              id="gr"
-              label="GR NO"
-              value={formData.gr}
-              variant="filled"
-              size="small"
-              onChange={handleNumericValue}
-              onKeyDown={handleEnterKeyPress(grNoRef, termsRef)}
-              onFocus={(e) => e.target.select()}
-              inputProps={{
-                maxLength: 12,
-                style: {
-                  height: "20px",
-                  fontSize: `${fsize}px`,
-                  // padding: "0 8px"
-                },
-                readOnly: !isEditMode || isDisabled,
-              }}
-            />
-            <div className="ExFor">
-              <TextField
-                inputRef={termsRef}
-                className="custom-bordered-input"
-                id="exfor"
-                value={formData.exfor}
-                variant="filled"
-                label="TERMS"
-                size="small"
-                onChange={HandleValueChange}
-                onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
-                onFocus={(e) => e.target.select()}
-                inputProps={{
-                  maxLength: 10,
-                  style: {
-                    height: "20px",
-                    fontSize: `${fsize}px`,
-                    // padding: "0 8px"
-                  },
-                  readOnly: !isEditMode || isDisabled,
-                }}
-                // sx={{ width: 128}}
-              />
-            </div>
-          </div>
-          <div className="VehicleDiv">
-            <TextField
-              inputRef={vehicleNoRef}
-              className="VEHICLE custom-bordered-input"
-              id="trpt"
-              value={formData.trpt}
-              variant="filled"
-              label="VEHICLE NO."
-              size="small"
-              onChange={handleCapitalAlpha}
-              onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
-              onFocus={(e) => e.target.select()}
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: "20px",
-                  fontSize: `${fsize}px`,
-                },
-                readOnly: !isEditMode || isDisabled,
-              }}
-            />
-            <div className="BillType">
-              <FormControl
-                className=" Billss custom-bordered-input"
-                sx={{
-                  fontSize: `${fsize}px`,
-                  "& .MuiFilledInput-root": {
-                    height: 48, // adjust as needed (default ~56px for filled)
-                  },
-                }}
-                size="small"
-                variant="filled"
-                // disabled={!isEditMode || isDisabled}
-              >
-                <InputLabel id="billcash-label">BILL TYPE</InputLabel>
-                <Select
-                inputRef={billcashRef}
-                  className="custom-bordered-input"
-                  labelId="billcash-label"
-                  id="billcash"
-                  value={formData.btype}
-                  onChange={(e) => {
-                    if (!isEditMode || isDisabled) return; // prevent changing
-                    handleBillCash(e);
-                  }}
-                  onOpen={(e) => {
-                    if (!isEditMode || isDisabled) {
-                      e.preventDefault(); // prevent dropdown opening
-                    }
-                  }}
-                  onKeyDownCapture={(e) => {
-                    if (e.key === "Enter") {
-                      const menuOpen = document.querySelector(".MuiMenu-paper");
 
-                      // ✅ CLOSED → move next (block opening)
-                      if (!menuOpen) {
-                        e.preventDefault();
-                        e.stopPropagation();
+return (
+  // ✅ ONLY CHANGE: added isMacOs class for Mac zoom fix
+//   <div className={`sa-sale-page ${isMacOs ? 'sa-mac' : ''}`}>
+    // <div   style={{
+    //         zoom: isMacOs ? 1 : 1,
+    //         WebkitTextSizeAdjust: "100%",
+    //         transformOrigin: "top left",
+    //       }}>
+    <div className={`sa-sale-page ${isMacOs ? 'sa-mac' : ''}`}>
 
-                        handleEnterKeyPress(billcashRef, taxTypreRef)(e);
-                      }
-                      // ✅ OPEN → let MUI handle selection
-                    }
-
-                    // ArrowDown → let MUI open normally
-                    if (e.key === "ArrowDown") return;
-                  }}
-                  label="BILL TYPE"
-                  displayEmpty
-                  inputProps={{
-                    sx: {
-                      fontSize: `${fsize}px`,
-                      pointerEvents:
-                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
-                    },
-                  }}
-                  MenuProps={{ disablePortal: true }}
-                >
-                  <MenuItem value="">
-                    <em></em>
-                  </MenuItem>
-                  <MenuItem value="Bill">Bill</MenuItem>
-                  <MenuItem value="Cash">Cash</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-          </div>
-          <div className="TAXDiv">
-            <div>
-              <FormControl
-                fullWidth
-                size="small"
-                variant="filled"
-                // disabled={!isEditMode || isDisabled}
-                className="TAXtypez custom-bordered-input"
-                sx={{
-                  fontSize: `${fsize}px`,
-                  "& .MuiFilledInput-root": {
-                    height: 48, // adjust as needed (default ~56px for filled)
-                  },
-                }}
-              >
-                <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
-                <Select
-                inputRef={taxTypreRef}
-                  className="TAXtypez"
-                  labelId="taxtype-label"
-                  id="stype"
-                  value={formData.stype}
-                  onChange={(e) => {
-                    if (!isEditMode || isDisabled) return; // prevent changing
-                    handleTaxType(e);
-                  }}
-                  onOpen={(e) => {
-                    if (!isEditMode || isDisabled) {
-                      e.preventDefault(); // prevent dropdown opening
-                    }
-                  }}
-                  onKeyDownCapture={(e) => {
-                    if (e.key === "Enter") {
-                      const menuOpen = document.querySelector(".MuiMenu-paper");
-
-                      // ✅ CLOSED → move next (block opening)
-                      if (!menuOpen) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        handleEnterKeyPress(taxTypreRef, supplyRef)(e);
-                      }
-                      // ✅ OPEN → let MUI handle selection
-                    }
-
-                    // ArrowDown → let MUI open normally
-                    if (e.key === "ArrowDown") return;
-                  }}
-                  label="TAX TYPE"
-                  displayEmpty
-                  MenuProps={{
-                    disablePortal: true,
-                  }}
-                  inputProps={{
-                    sx: {
-                      fontSize: `${fsize}px`,
-                      pointerEvents:
-                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
-                    },
-                  }}
-                >
-                  <MenuItem value="">
-                    <em></em>
-                  </MenuItem>
-                  <MenuItem value="GST Sale (RD)">GST Sale (RD)</MenuItem>
-                  <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
-                  <MenuItem value="GST (URD)">GST (URD)</MenuItem>
-                  <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
-                  <MenuItem value="Tax Free Within State">
-                    Tax Free Within State
-                  </MenuItem>
-                  <MenuItem value="Tax Free Interstate">
-                    Tax Free Interstate
-                  </MenuItem>
-                  <MenuItem value="Export Sale">Export Sale</MenuItem>
-                  <MenuItem value="Export Sale(IGST)">
-                    Export Sale(IGST)
-                  </MenuItem>
-                  <MenuItem value="Including GST">Including GST</MenuItem>
-                  <MenuItem value="Including IGST">Including IGST</MenuItem>
-                  <MenuItem value="Not Applicable">Not Applicable</MenuItem>
-                  <MenuItem value="Exempted Sale">Exempted Sale</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-            <div style={{ marginTop: 3 }}>
-              <FormControl
-                className="SupplyTYPE custom-bordered-input"
-                sx={{
-                  // width: '250px',
-                  fontSize: `${fsize}px`,
-                  "& .MuiFilledInput-root": {
-                    height: 48, // adjust as needed (default ~56px for filled)
-                  },
-                }}
-                size="small"
-                // disabled={!isEditMode || isDisabled}
-                variant="filled"
-              >
-                <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
-                <Select
-                inputRef={supplyRef}
-                  className="SupplyTYPE"
-                  labelId="supply-label"
-                  id="supply"
-                  value={formData.conv}
-                  onChange={(e) => {
-                    if (!isEditMode || isDisabled) return; // prevent changing
-                    handleSupply(e);
-                  }}
-                  onOpen={(e) => {
-                    if (!isEditMode || isDisabled) {
-                      e.preventDefault(); // prevent dropdown opening
-                    }
-                  }}
-                  onKeyDownCapture={(e) => {
-                    if (e.key === "Enter") {
-                      const menuOpen = document.querySelector(".MuiMenu-paper");
-
-                      // ✅ CLOSED → move next (block opening)
-                      if (!menuOpen) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        handleEnterKeyPress(supplyRef, null)(e);
-                      }
-                      // ✅ OPEN → let MUI handle selection
-                    }
-
-                    // ArrowDown → let MUI open normally
-                    if (e.key === "ArrowDown") return;
-                  }}
-                  label="SUPPLY TYPE"
-                  displayEmpty
-                  inputProps={{
-                    sx: {
-                      fontSize: `${fsize}px`,
-                      pointerEvents:
-                        !isEditMode || isDisabled ? "none" : "auto", // stop mouse clicks
-                    },
-                  }}
-                  MenuProps={{ disablePortal: true }}
-                >
-                  <MenuItem value="">
-                    <em></em>
-                  </MenuItem>
-                  <MenuItem value="Manufacturing Sale">
-                    1. Manufacturing Sale
-                  </MenuItem>
-                  <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Top Part Ends Here */}
-      {/* Table Part */}
-      <div
-        ref={tableContainerRef}
-        style={{ marginTop: 5 }}
-        className="TableContainer"
-      >
-        <Table ref={tableRef} className="custom-table">
-          <thead
-            style={{
-              background: color,
-              textAlign: "center",
-              position: "sticky",
-              top: 0,
-            }}
-          >
-            <tr style={{ color: "#575a5a" }}>
-              {tableData.itemcode && <th>ITEMCODE</th>}
-              {tableData.sdisc && <th>DESCRIPTION</th>}
-              {tableData.hsncode && <th>HSNCODE</th>}
-              {tableData.pcs && <th>PCS</th>}
-              {tableData.qty && <th>QTY</th>}
-              {tableData.rate && <th>RATE</th>}
-              {tableData.amount && <th>AMOUNT</th>}
-              {tableData.discount && <th>DIS@</th>}
-              {tableData.discount && <th>DISCOUNT</th>}
-              {tableData.gst && <th>GST</th>}
-              {tableData.others && <th>OTHERS</th>}
-              {tableData.cgst && <th>CGST</th>}
-              {tableData.sgst && <th>SGST</th>}
-              {tableData.igst && <th>IGST</th>}
-              {isEditMode && <th className="text-center">DELETE</th>}
-            </tr>
-          </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(320px - 40px)" }}>
-            {items.map((item, index) => (
-              <tr key={item.id}>
-                {tableData.itemcode && (
-                  <td style={{ padding: 0, width: 30 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="ItemCode"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                      }}
-                      type="text"
-                      value={item.vcode}
-                      readOnly
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "vcode");
-                        handleOpenModal(e, index, "vcode");
-                        handleOpenModalBack(e, index, "vcode");
-                        handleF3Press(e, index)
-                      }}
-                      onDoubleClick={(e) => {
-                        handleDoubleClick(e, "vcode", index);
-                      }}
-                      ref={(el) => (itemCodeRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.sdisc && (
-                  <td style={{ padding: 0, width: 300 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="desc"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                      }}
-                      maxLength={48}
-                      value={item.sdisc}
-                      readOnly={!isEditMode || isDisabled}
-                      onChange={(e) =>
-                        handleItemChange(index, "sdisc", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "sdisc");
-                      }}
-                      ref={(el) => (desciptionRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.hsncode && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="Hsn"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      maxLength={8}
-                      readOnly={!isEditMode || isDisabled}
-                      value={item.tariff}
-                      onChange={(e) =>
-                        handleItemChange(index, "tariff", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "tariff");
-                      }}
-                      ref={(el) => (hsnCodeRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.pcs && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="PCS"
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                        fontSize: `${fsize}px`,
-                      }}
-                      maxLength={48}
-                      readOnly={!isEditMode || isDisabled}
-                      value={Number(item.pkgs) === 0 ? "" : item.pkgs}
-                      onChange={(e) =>
-                        handleItemChange(index, "pkgs", e.target.value)
-                      }
-                      onBlur={() => handlePkgsBlur(index)} // Format value on blur
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "pkgs");
-                      }}
-                      ref={(el) => (peciesRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.qty && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="QTY"
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                        fontSize: `${fsize}px`,
-                      }}
-                      maxLength={48}
-                      readOnly={!isEditMode || isDisabled}
-                      value={Number(item.weight) === 0 ? "" : item.weight}
-                      onChange={(e) =>
-                        handleItemChange(index, "weight", e.target.value)
-                      }
-                      onBlur={() => handleWeightBlur(index)} // Format value on blur
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "weight");
-                      }}
-                      ref={(el) => (quantityRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.rate && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="Price"
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                        fontSize: `${fsize}px`,
-                      }}
-                      maxLength={48}
-                      readOnly={!isEditMode || isDisabled}
-                      value={Number(item.rate) === 0 ? "" : item.rate}
-                      onChange={(e) =>
-                        handleItemChange(index, "rate", e.target.value)
-                      }
-                      onBlur={() => handleRateBlur(index)} // Format value on blur
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "rate");
-                      }}
-                      ref={(el) => (priceRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.amount && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="Amount"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      maxLength={48}
-                      readOnly={!isEditMode || isDisabled}
-                      value={Number(item.amount) === 0 ? "" : item.amount}
-                      onBlur={(e) => {
-                        const value = parseFloat(e.target.value);
-                        if (!isNaN(value)) {
-                          handleItemChange(
-                            index,
-                            "amount",
-                            value.toFixed(rateValue),
-                          );
-                        }
-                      }}
-                      onChange={(e) =>
-                        handleItemChange(index, "amount", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "amount");
-                      }}
-                      ref={(el) => (amountRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                      min="0"
-                    />
-                  </td>
-                )}
-                {tableData.discount && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="Disc"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={Number(item.disc) === 0 ? "" : item.disc}
-                      onChange={(e) =>
-                        handleItemChange(index, "disc", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "disc");
-                      }}
-                      onBlur={() => handleBlur(index, "disc")}
-                      ref={(el) => (discountRef.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                      readOnly={!isEditMode || isDisabled}
-                    />
-                  </td>
-                )}
-                {tableData.discount && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      id="discount"
-                      className="discount"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      value={Number(item.discount) === 0 ? "" : item.discount}
-                      onChange={(e) =>
-                        handleItemChange(index, "discount", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "discount");
-                      }}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                      ref={(el) => (discount2Ref.current[index] = el)}
-                      onBlur={() => handleBlur(index, "discount")}
-                      readOnly={!isEditMode || isDisabled}
-                    />
-                  </td>
-                )}
-                {tableData.gst && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="Others"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "center",
-                      }}
-                      maxLength={2}
-                      value={Number(item.gst) === 0 ? "" : item.gst + "%"}
-                      // value={item.gst +"%"}
-                      readOnly={!isEditMode || isDisabled}
-                    />
-                  </td>
-                )}
-                {tableData.others && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      disabled={!canEditRow(index)}
-                      className="Others"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                      }}
-                      maxLength={48}
-                      type="text"
-                      value={
-                        Number(item.exp_before) === 0 ? "" : item.exp_before
-                      }
-                      readOnly={!isEditMode || isDisabled}
-                      onDoubleClick={(e) =>
-                        handleDoubleClick(e, "exp_before", index)
-                      }
-                      // onChange={(e) => handleItemChange(index, "exp_before", e.target.value)}
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "exp_before");
-                        handleKeyDownExp(e, "exp_before", index);
-                      }}
-                      onFocus={(e) => {
-                        e.target.select(); // Select the entire text when the field is focused
-                        if (WindowBefore) {
-                          setCurrentIndex(index);
-                          setIsModalOpenExp(true);
-                        }
-                      }}
-                      ref={(el) => (othersRefs.current[index] = el)}
-                    />
-                  </td>
-                )}
-                {isModalOpenExp && currentIndex !== null && (
-                  <div className="Modalz">
-                    <div className="Modal-content">
-                      <h1 className="headingE">ADD/LESS BEFORE GST</h1>
-                      <div className="form-group">
-                        <input
-                          type="checkbox"
-                          id="gross"
-                          checked={items[currentIndex]?.gross || false}
-                          onChange={(e) =>
-                            handleInputChange(
-                              currentIndex,
-                              "gross",
-                              e.target.checked,
-                            )
-                          }
-                        />
-                        <label
-                          style={{ marginLeft: 5 }}
-                          className="label"
-                          htmlFor="Gross"
-                        >
-                          GROSS
-                        </label>
-                      </div>
-                      {[
-                        { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
-                        { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
-                        { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
-                        { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
-                        { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
-                        ].map((field, idx) => {
-                          const rateIndex = idx * 2;
-                          const valueIndex = idx * 2 + 1;
-
-                          return (
-                            <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "10px" }}>
-                              
-                              <label style={{ width: "100px", fontWeight: "bold" }}>
-                                {field.label}
-                              </label>
-
-                              {/* RATE FIELD */}
-                              <input
-                                ref={(el) => (expRateRefs.current[rateIndex] = el)}
-                                value={items[currentIndex][field.rate]}
-                                style={{
-                                  border: "1px solid black",
-                                  padding: "5px",
-                                  width: "120px",
-                                  textAlign: "right",
-                                  borderRadius: "4px",
-                                }}
-                                onChange={(e) =>
-                                  handleInputChange(currentIndex, field.rate, e.target.value)
-                                }
-                                onKeyDown={(e) => handleKeyDownModal(e, rateIndex)}
-                              />
-
-                              {/* VALUE FIELD */}
-                              <input
-                                ref={(el) => (expRateRefs.current[valueIndex] = el)}
-                                value={items[currentIndex][field.value]}
-                                style={{
-                                  border: "1px solid black",
-                                  padding: "5px",
-                                  width: "120px",
-                                  textAlign: "right",
-                                  borderRadius: "4px",
-                                }}
-                                onBlur={() =>
-                                  handleExpenseBlur(currentIndex, field.value)
-                                }
-                                onChange={(e) =>
-                                  handleInputChange(currentIndex, field.value, e.target.value)
-                                }
-                                onKeyDown={(e) => handleKeyDownModal(e, valueIndex)}
-                              />
-                            </div>
-                          );
-                      })}
-                      <Button
-                        ref={closeButtonRef}
-                        onClick={() => {
-                          const idx = currentIndex; // store before reset
-
-                          setIsModalOpenExp(false);
-                          setCurrentIndex(null);
-
-                          // restore focus to Others field
-                          setTimeout(() => {
-                            othersRefs.current[idx]?.focus();
-                            othersRefs.current[idx]?.select();
-                          }, 0);
-                        }}
-                        style={{
-                          borderColor: "transparent",
-                          backgroundColor: "red",
-                          marginTop: 10,
-                        }}
-                      >
-                        CLOSE
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {tableData.cgst && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className="CTax"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                        color: "black",
-                      }}
-                      maxLength={48}
-                      disabled
-                      value={Number(item.ctax) === 0 ? "" : item.ctax}
-                      onChange={(e) =>
-                        handleItemChange(index, "ctax", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "ctax");
-                      }}
-                      ref={(el) => (cgstRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                    />
-                  </td>
-                )}
-                {tableData.sgst && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className="STax"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                        color: "black",
-                      }}
-                      maxLength={48}
-                      disabled
-                      value={Number(item.stax) === 0 ? "" : item.stax}
-                      onChange={(e) =>
-                        handleItemChange(index, "stax", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "stax");
-                      }}
-                      ref={(el) => (sgstRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                      min="0"
-                    />
-                  </td>
-                )}
-                {tableData.igst && (
-                  <td style={{ padding: 0 }}>
-                    <input
-                      className="ITax"
-                      style={{
-                        height: 40,
-                        fontSize: `${fsize}px`,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        border: "none",
-                        padding: 5,
-                        textAlign: "right",
-                        color: "black",
-                      }}
-                      maxLength={48}
-                      disabled
-                      value={Number(item.itax) === 0 ? "" : item.itax}
-                      onChange={(e) =>
-                        handleItemChange(index, "itax", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        handleKeyDown(e, index, "itax");
-                      }}
-                      ref={(el) => (igstRefs.current[index] = el)}
-                      onFocus={(e) => e.target.select()} // Select text on focus
-                      min="0"
-                    />
-                  </td>
-                )}
-                {isEditMode && (
-                  <td style={{ padding: 0 }}>
-                    {canEditRow(index) && (
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100%",
-                        }}
-                      >
-                        <IconButton color="error" size="small" tabIndex={-1} onClick={() => handleDeleteItem(index)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </div>
-                    )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-          <tfoot
-            style={{
-              background: color,
-              position: "sticky",
-              bottom: -6,
-              fontSize: `${fsize}px`,
-              borderTop: "1px solid black",
-            }}
-          >
-            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
-              {tableData.itemcode && <td></td>}
-              {tableData.sdisc && <td>TOTAL</td>}
-              {tableData.hsncode && <td></td>}
-              {tableData.pcs && (
-                <td>
-                  {items
-                    .reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0)
-                    .toFixed(pkgsValue)}
-                </td>
-              )}
-              {tableData.qty && (
-                <td>
-                  {items
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.weight || 0),
-                      0,
-                    )
-                    .toFixed(weightValue)}
-                </td>
-              )}
-              {tableData.rate && <td></td>}
-              {tableData.amount && (
-                <td>
-                  {items
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.amount || 0),
-                      0,
-                    )
-                    .toFixed(2)}
-                </td>
-              )}
-              {tableData.discount && (
-                <>
-                  <td>
-                    {items
-                      .reduce(
-                        (sum, item) => sum + parseFloat(item.disc || 0),
-                        0,
-                      )
-                      .toFixed(2)}
-                  </td>
-                  <td>
-                    {items
-                      .reduce(
-                        (sum, item) => sum + parseFloat(item.discount || 0),
-                        0,
-                      )
-                      .toFixed(2)}
-                  </td>
-                </>
-              )}
-              {tableData.gst && <td></td>}
-              {tableData.others && (
-                <td>
-                  {items
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.exp_before || 0),
-                      0,
-                    )
-                    .toFixed(2)}
-                </td>
-              )}
-              {tableData.cgst && (
-                <td>
-                  {items
-                    .reduce((sum, item) => sum + parseFloat(item.ctax || 0), 0)
-                    .toFixed(2)}
-                </td>
-              )}
-              {tableData.sgst && (
-                <td>
-                  {items
-                    .reduce((sum, item) => sum + parseFloat(item.stax || 0), 0)
-                    .toFixed(2)}
-                </td>
-              )}
-              {tableData.igst && (
-                <td>
-                  {items
-                    .reduce((sum, item) => sum + parseFloat(item.itax || 0), 0)
-                    .toFixed(2)}
-                </td>
-              )}
-              {isEditMode && <td></td>}
-            </tr>
-          </tfoot>
-        </Table>
-      </div>
-      {showModal && (
-        <ProductModal
-          products={products}
-          allFields={allFields}
-          onSelect={handleProductSelect}
-          onClose={handleModalDone}
-          tenant={tenant}
-          initialKey={pressedKey}
-          fetchParentProducts={fetchProducts}
+    <ToastContainer />
+    {isModalOpen && <SaleSetup onClose={closeModal} />}
+    <div style={{ visibility: "hidden", width: 0, height: 0 }}>
+      {SelectedInvoiceComponent && (
+        <SelectedInvoiceComponent
+          formData={formData}
+          items={nonEmptyItems2}
+          customerDetails={customerDetails}
+          shipped={shipped}
+          isOpen={open}
+          handleClose={handleCloseInvoice}
+          componentRef={printRef}
+          selectedCopies={selectedCopies}
         />
       )}
+    </div>
 
-      <div className="addbutton" style={{ marginTop: 2, marginBottom: 5 }}>
-        <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
-          Add Row
-        </Button>
-      </div>
-      {/* Bottom Part */}
-      <div className="Belowcontents">
-        <div
-          className="Parent"
-          style={{ display: "flex", flexDirection: "row" }}
+    {/* Top Parts */}
+    <div className="sa-sale_toppart sa-pur_toppart">
+      <div  className="sa-Dated" style={{marginLeft:20}}>
+        <InputMask
+          mask="99-99-9999"
+          placeholder="dd-mm-yyyy"
+          value={formData.date}
+
+          readOnly={!isEditMode || isDisabled}
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
         >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <TextField
-              className="Remz custom-bordered-input"
-              id="rem2"
-              value={formData.rem2}
-              inputRef={remarksRef}
-              label="REMARKS"
-              onChange={HandleValueChange}
+          {(inputProps) => (
+            <input
+              {...inputProps}
+              className="sa-DatePICKER"
+              ref={datePickerRef}
               onKeyDown={(e) => {
-                handleKeyDowndown(e, transportRef);
+                handleEnterKeyPress(datePickerRef, voucherNoRef)(e);
               }}
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 280 }}
             />
-            <TextField
-              className="Remz custom-bordered-input"
-              id="v_tpt"
-              value={formData.v_tpt}
-              inputRef={transportRef}
-              label="TRANSPORT"
-              onChange={HandleValueChange}
-              onKeyDown={(e) => {
-                handleKeyDowndown(e, brokerRef);
-                handleOpenModalTpt(e, "v_tpt", "v_tpt");
-              }}
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 280 }}
-            />
-            <TextField
-              className="Remz custom-bordered-input"
-              id="broker"
-              value={formData.broker}
-              inputRef={brokerRef}
-              label="BROKER"
-              onChange={HandleValueChange}
-              onKeyDown={(e) => {
-                handleKeyDowndown(e, expAfterGSTRef);
-                handleOpenModalBroker(e, "broker", "broker");
-              }}
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-            />
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}
+          )}
+        </InputMask>
+        <div className="sa-billdivz">
+          <TextField
+            inputRef={voucherNoRef}
+            className="sa-billzNo sa-custom-bordered-input"
+            id="vbillno"
+            value={formData.vbillno}
+            style={{marginLeft:30}}
+            variant="filled"
+            size="small"
+            label="BILL NO"
+            onKeyDown={handleKeyDownTab}
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: "20px",
+                fontSize: `${fontSize}px`,
+              },
+              readOnly: !isEditMode || isDisabled,
+            }}
+          />
+        </div>
+        <div className="sa-sale-center-title">
+          <span className="sa-sale-center-title-main">SALE GST</span>
+        </div>
+        <div className="sa-Setup">
+          <button
+            className="sa-Button"
+            style={{
+              backgroundColor: "blue",
+              color: "white",
+              fontWeight: "bold",
+            }}
+            onClick={openModal}
           >
-            <div className="duedatez">
-              <InputMask
-                mask="99-99-9999"
-                placeholder="dd-mm-yyyy"
-                value={formData.duedate}
-                readOnly={!isEditMode || isDisabled}
-                onChange={(e) =>
-                  setFormData({ ...formData, duedate: e.target.value })
-                }
-              >
-                {(props) => (
-                  <TextField
-                    className="custom-bordered-input"
-                    {...props}
-                    label="DUE DATE"
-                    size="small"
-                    variant="filled"
-                    fullWidth
-                    style={{ width: 225 }}
-                  />
-                )}
-              </InputMask>
-            </div>
-            <div>
-              <TextField
-                className="custom-bordered-input"
-                id="srv_tax"
-                value={formData.srv_tax}
-                // disabled
-                label="TDS 194-Q"
-                onChange={handleNumericValue}
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    color: "red",
-                  },
-                }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                sx={{ width: 225 }}
-              />
-            </div>
+            SETUP
+          </button>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            className="sa-Setting text-xl text-blue-700"
+            style={{
+              cursor: "pointer",
+              border: "none",
+              background: "transparent",
+              padding: 6,
+              borderRadius: 10,
+            }}
+            title="Settings"
+          >
+            <FaCog />
+          </button>
+          <Modal
+            show={settingsOpen}
+            onHide={() => setSettingsOpen(false)}
+            centered
+            size="lg"
+            backdrop="static"
+            keyboard={true}
+            dialogClassName="p-0"
+            style={{ maxHeight: "100vh", overflowY: "hidden", marginTop: -10 }}
+          >
             <div
               style={{
+                padding: "14px 18px",
                 display: "flex",
-                flexDirection: "row",
+                justifyContent: "space-between",
                 alignItems: "center",
+                borderBottom: "1px solid rgba(0,0,0,0.08)",
+                background:
+                  "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.10), rgba(255,255,255,0.85))",
               }}
             >
-              <TextField
-                className="TCSRATE custom-bordered-input"
-                inputRef={tcsRef2}
-                id="tcs1_rate"
-                value={formData.tcs1_rate}
-                onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    tcs1_rate: e.target.value,
-                  }))
-                }
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    color: "red",
-                  },
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
+                  Options
+                </div>
+                <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                  Customize table fields & theme
+                </div>
+              </div>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                style={{
+                  height: 38,
+                  width: 38,
+                  borderRadius: 12,
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  background: "rgba(255,255,255,0.8)",
+                  display: "grid",
+                  placeItems: "center",
+                  cursor: "pointer",
                 }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                InputProps={{ readOnly: !isEditMode || isDisabled }}
-              />
-
-              <TextField
-                className="TCSPER custom-bordered-input"
-                id="tcs1"
-                value={formData.tcs1}
-                label="TCS 206C@"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    color: "red",
-                  },
-                }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                // sx={{ width: 120 }}
-              />
+                title="Close"
+              >
+                <FaTimes />
+              </button>
             </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              marginLeft: 5,
-              marginTop: "auto",
-            }}
-          >
-            {formData.Tds2 && Number(formData.Tds2) > 0 && (
-              <TextField
-                className="custom-bordered-input"
-                id="tax"
-                value={"2%"}
-                label="GST. TDS"
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                  },
+            <Modal.Body style={{ padding: 18, background: "rgba(249,250,251,0.85)" }}>
+              <div
+                style={{
+                  borderRadius: 16,
+                  padding: 14,
+                  background: "rgba(255,255,255,0.9)",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                  boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                  marginBottom: 14,
                 }}
-                onFocus={(e) => e.target.select()}
-                size="small"
-                variant="filled"
-                sx={{ width: 120 }}
-              />
-            )}
-            <div style={{ display: "flex", flexDirection: "row" }}>
-              <TextField
-                className="CTDS custom-bordered-input"
-                value={formData.Ctds}
-                label="C.TDS"
-                size="small"
-                variant="filled"
-                inputProps={{
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    backgroundColor: "white",
-                    borderRadius: 5,
-                  },
-                }}
-                sx={{
-                  // width: 150,
-                  "& .MuiOutlinedInput-root": {
-                    border: "1px solid black",
-                    borderRadius: 1,
-                  },
-                }}
-              />
-              <TextField
-                className="CTDS custom-bordered-input"
-                value={formData.Stds}
-                label="S.TDS"
-                size="small"
-                variant="filled"
-                inputProps={{
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    backgroundColor: "white",
-                    borderRadius: 5,
-                  },
-                }}
-                sx={{
-                  // width: 150,
-                  "& .MuiOutlinedInput-root": {
-                    border: "1px solid black",
-                    borderRadius: 1,
-                  },
-                }}
-              />
-              <TextField
-                className="CTDS custom-bordered-input"
-                value={formData.iTds}
-                label="I.TDS"
-                size="small"
-                variant="filled"
-                inputProps={{
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    backgroundColor: "white",
-                    borderRadius: 5,
-                  },
-                }}
-                sx={{
-                  // width: 150,
-                  "& .MuiOutlinedInput-root": {
-                    border: "1px solid black",
-                    borderRadius: 1,
-                  },
-                }}
-              />
-              <span style={{ fontSize: 20, marginTop: "10px" }}>=</span>
-              <TextField
-                className="CTDS custom-bordered-input"
-                value={formData.Tds2}
-                label="TOTAL"
-                size="small"
-                variant="filled"
-                inputProps={{
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                    backgroundColor: "white",
-                    borderRadius: 5,
-                  },
-                }}
-                sx={{
-                  // width: 150,
-                  "& .MuiOutlinedInput-root": {
-                    border: "1px solid black",
-                    borderRadius: 1,
-                  },
-                }}
-              />
-            </div>
-          </div>
-          <div
-            className="totals"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              marginLeft: "auto",
-              marginRight: "12px",
-            }}
-          >
-            <TextField
-              className="TOTALFIELDS custom-bordered-input"
-              id="tax"
-              value={formData.tax}
-              label="TOTAL GST"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                },
-              }}
-              onFocus={(e) => e.target.select()}
-              size="small"
-              variant="filled"
-              // sx={{ width: 150 }}
-            />
-            <div>
-              <TextField
-                className="TOTALFIELDS custom-bordered-input"
-                inputRef={expAfterGSTRef}
-                id="expafterGST"
-                value={formData.expafterGST}
-                label="EXP AFTER GST"
-                onKeyDown={(e) => {
-                  handleKeyDowndown(e, saveButtonRef);
-                  handleKeyDownAfter(e);
-                }}
-                onFocus={(e) => {
-                  e.target.select();
-                  if (WindowAfter) {
-                    setIsModalOpenAfter(true);
-                  }
-                }}
-                onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
-                inputProps={{
-                  maxLength: 48,
-                  style: {
-                    height: 20,
-                    fontSize: `${fsize}px`,
-                  },
-                  readOnly: !isEditMode || isDisabled,
-                }}
-                size="small"
-                variant="filled"
-                // sx={{ width: 150 }}
-              />
-              {isModalOpenAfter && (
+              >
                 <div
                   style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: "rgba(0,0,0,0.5)",
                     display: "flex",
-                    justifyContent: "center",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    zIndex: 1000,
+                    marginBottom: 10,
                   }}
                 >
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                      COLOR / GRADIENT
+                    </div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      Choose header theme
+                    </div>
+                  </div>
                   <div
                     style={{
-                      background: 'linear-gradient(to bottom, #edc5a7,#a5d8ed)',
-                      padding: "25px 30px",
-                      borderRadius: "12px",
-                      width: "450px",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
-                      animation: "fadeIn 0.3s ease-in-out",
+                      height: 34,
+                      width: 34,
+                      borderRadius: 12,
+                      background: color,
+                      border: "1px solid rgba(255,255,255,0.7)",
+                      boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
+                    }}
+                    title="Preview"
+                  />
+                </div>
+                <select
+                  value={color}
+                  onChange={handleChange}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 12,
+                    border: "1px solid rgba(0,0,0,0.12)",
+                    background: "white",
+                    fontSize: 13,
+                    outline: "none",
+                  }}
+                >
+                  {gradientOptions.map((option, index) => (
+                    <option key={index} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div
+                style={{
+                  borderRadius: 16,
+                  padding: 14,
+                  background: "rgba(255,255,255,0.9)",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                  boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: "#111827" }}>
+                      SELECT TABLE FIELDS
+                    </div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      Toggle column visibility
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      padding: "6px 10px",
+                      borderRadius: 10,
+                      background: "rgba(17,24,39,0.06)",
+                      color: "#374151",
                     }}
                   >
-                    <h2
-                      style={{
-                        textAlign: "center",
-                        marginBottom: "20px",
-                        fontWeight: "600",
-                        color: "#333",
-                        fontSize:"18px",
-                      }}
-                    >
-                      EXPENSE AFTER TAX
-                    </h2>
-
-                    {/* Expense Rows */}
-                    {[
-                    { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
-                    { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
-                    { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
-                    { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
-                    { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
-                  ].map((item, index) => {
-                    const rateIndex = index * 2;
-                    const amountIndex = index * 2 + 1;
-
+                    {Object.values(tableData).filter(Boolean).length}/
+                    {Object.keys(tableData).length}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    maxHeight: "52vh",
+                    overflowY: "auto",
+                    paddingRight: 6,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}
+                >
+                  {Object.keys(tableData).map((field) => {
+                    const checked = tableData[field];
                     return (
                       <div
-                        key={index}
+                        key={field}
+                        onClick={() => handleCheckboxChange(field)}
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          marginBottom: "12px",
+                          justifyContent: "space-between",
+                          gap: 10,
+                          padding: "10px 12px",
+                          borderRadius: 14,
+                          cursor: "pointer",
+                          border: checked
+                            ? "1px solid rgba(59,130,246,0.35)"
+                            : "1px solid rgba(0,0,0,0.10)",
+                          background: checked
+                            ? "linear-gradient(180deg, rgba(59,130,246,0.10), rgba(255,255,255,0.85))"
+                            : "rgba(255,255,255,0.8)",
+                          boxShadow: checked
+                            ? "0 12px 26px rgba(37,99,235,0.10)"
+                            : "0 10px 18px rgba(0,0,0,0.05)",
                         }}
                       >
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => handleCheckboxChange(field)}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ height: 16, width: 16 }}
+                          />
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: "#111827" }}>
+                              {field.toUpperCase()}
+                            </div>
+                            <div style={{ fontSize: 12, color: "#6B7280" }}>
+                              Show / hide column
+                            </div>
+                          </div>
+                        </div>
                         <div
                           style={{
-                            flex: 1,
-                            fontWeight: "bold",
-                            color: "#444",
+                            fontSize: 11,
+                            fontWeight: 800,
+                            padding: "5px 9px",
+                            borderRadius: 10,
+                            background: checked ? "#2563EB" : "rgba(17,24,39,0.06)",
+                            color: checked ? "white" : "#4B5563",
                           }}
                         >
-                          {item.label}
+                          {checked ? "ON" : "OFF"}
                         </div>
-
-                        {/* RATE */}
-                        <input
-                          ref={(el) => (expAfterRefs.current[rateIndex] = el)}
-                          id={item.rate}
-                          value={formData[item.rate]}
-                          onChange={handleNumberChange}
-                          onKeyDown={(e) => handleKeyDownAfterw2(e, rateIndex)}
-                          placeholder="Rate"
-                          style={{
-                            width: "90px",
-                            padding: "6px",
-                            borderRadius: "6px",
-                            border: "1px solid black",
-                            marginRight: "8px",
-                            textAlign: "right",
-                          }}
-                        />
-
-                        {/* AMOUNT */}
-                        <input
-                          ref={(el) => (expAfterRefs.current[amountIndex] = el)}
-                          id={item.amount}
-                          value={formData[item.amount]}
-                          onChange={handleNumberChange}
-                          onKeyDown={(e) => handleKeyDownAfterw2(e, amountIndex)}
-                          placeholder="Amount"
-                          style={{
-                            width: "90px",
-                            padding: "6px",
-                            borderRadius: "6px",
-                            border: "1px solid black",
-                            textAlign: "right",
-                          }}
-                        />
                       </div>
                     );
                   })}
-                    {/* Close Button */}
-                    <div style={{ textAlign: "center", marginTop: "20px" }}>
-                      <Button
-                        ref={closeAfterRef}
-                        onClick={closeModalAfter}
-                        style={{
-                          backgroundColor: "#ff4d4f",
-                          border: "none",
-                          padding: "8px 20px",
-                          borderRadius: "6px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        CLOSE
-                      </Button>
-                    </div>
-                  </div>
                 </div>
-              )}
+              </div>
+            </Modal.Body>
+          </Modal>
+        </div>
+      </div>
+      <div className="sa-TopFields">
+        {customerDetails.map((item, index) => (
+          <div key={item.vacode}>
+            <div className="sa-CUS">
+              <div className="sa-customerdiv">
+                <TextField
+                  inputRef={customerNameRef}
+                  label="CUSTOMER NAME"
+                  variant="filled"
+                  size="small"
+                  value={item.vacode}
+                  className="sa-customerNAME sa-custom-bordered-input"
+                  onKeyDown={(e) => {
+                    handleEnterKeyPress(customerNameRef, shippedtoRef)(e);
+                    handleKeyDown(e, index, "accountname");
+                    handleOpenModalBack(e, index, "accountname");
+                  }}
+                  onDoubleClick={(e) => {
+                    handleDoubleClick(e, "accountname", index);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "20px",
+                      fontSize: `${fontSize}px`,
+                    },
+                    readOnly: !isEditMode || isDisabled,
+                  }}
+                />
+              </div>
+              <div className="sa-citydivZ">
+                <TextField
+                  className="sa-cityName sa-custom-bordered-input"
+                  value={item.city}
+                  variant="filled"
+                  label="CITY"
+                  size="small"
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "20px",
+                      fontSize: `${fontSize}px`,
+                    },
+                    readOnly: !isEditMode || isDisabled,
+                  }}
+                  onChange={(e) =>
+                    handleItemChangeCus(index, "city", e.target.value)
+                  }
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
             </div>
+            <div className="sa-GST" style={{marginTop:5}}>
+              <div>
+                <TextField
+                  className="sa-gstnoZ sa-custom-bordered-input"
+                  value={item.gstno}
+                  variant="filled"
+                  size="small"
+                  label="GST NO"
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "20px",
+                      fontSize: `${fontSize}px`,
+                    },
+                    readOnly: !isEditMode || isDisabled,
+                  }}
+                  onChange={(e) =>
+                    handleItemChangeCus(index, "gstNumber", e.target.value)
+                  }
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
+              <div className="sa-pandivZ">
+                <TextField
+                  className="sa-PANNoZ sa-custom-bordered-input"
+                  value={item.pan}
+                  variant="filled"
+                  size="small"
+                  label="PAN NO"
+                  inputProps={{
+                    maxLength: 48,
+                    style: {
+                      height: "20px",
+                      fontSize: `${fontSize}px`,
+                    },
+                    readOnly: !isEditMode || isDisabled,
+                  }}
+                  onChange={(e) =>
+                    handleItemChangeCus(index, "PanNo", e.target.value)
+                  }
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+        {showModalCus && (
+          <ProductModalCustomer
+            allFields={allFieldsCus}
+            onSelect={handleProductSelectCus}
+            onClose={handleCloseModalCus}
+            initialKey={pressedKey}
+            tenant={tenant}
+          />
+        )}
+        <div className="sa-shippedTO">
+          {shipped.map((item, index) => (
+            <div key={item.shippedto}>
+              <div>
+                <TextField
+                  multiline
+                  inputRef={shippedtoRef}
+                  className="sa-shippedtoz sa-custom-bordered-input"
+                  id="shippedto"
+                  variant="filled"
+                  label="SHIPPED TO"
+                  size="small"
+                  value={`${item.shippedto || ""}\n${item.shippingGst || ""}\n${item.shippingcity || ""}`}
+                  InputProps={{
+                    readOnly: !isEditMode || isDisabled,
+                    style: {
+                      height: 100,
+                      fontSize: `${fontSize}px`,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    },
+                  }}
+                  inputProps={{
+                    maxLength: 150,
+                    fontSize: `${fontSize}px`,
+                  }}
+                  onKeyDown={(e) => {
+                    handleOpenModal(e, index, "shippedto");
+                    handleKeyDowndown(e, grNoRef);
+                    handleOpenModalBack(e, index, "shippedto");
+                  }}
+                  onDoubleClick={(e) => {
+                    handleDoubleClick(e, "shippedto", index);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
+            </div>
+          ))}
+          {showModalAcc && (
+            <ProductModalCustomer
+              allFields={allFieldsAcc}
+              onSelect={handleProductSelectAcc}
+              onClose={() => setShowModalAcc(false)}
+              initialKey={pressedKey}
+              tenant={tenant}
+              onRefresh={fetchCustomers}
+            />
+          )}
+        </div>
+        <div className="sa-GRNo">
+          <TextField
+            inputRef={grNoRef}
+            className="sa-GRNOZ sa-custom-bordered-input"
+            id="gr"
+            label="GR NO"
+            value={formData.gr}
+            variant="filled"
+            size="small"
+            onChange={handleNumericValue}
+            onKeyDown={handleEnterKeyPress(grNoRef, termsRef)}
+            onFocus={(e) => e.target.select()}
+            inputProps={{
+              maxLength: 12,
+              style: {
+                height: "20px",
+                fontSize: `${fontSize}px`,
+              },
+              readOnly: !isEditMode || isDisabled,
+            }}
+          />
+          <div className="sa-ExFor">
             <TextField
-              id="grandtotal"
-              value={formData.grandtotal}
-              label="GRAND TOTAL"
-              onKeyDown={handleKeyDownTab2} // Handle Tab key here
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                  color: "red",
-                  fontWeight: "bold",
-                },
-              }}
-              size="small"
+              inputRef={termsRef}
+              className="sa-custom-bordered-input"
+              id="exfor"
+              value={formData.exfor}
               variant="filled"
-              className="TOTALFIELDS custom-bordered-input"
-              // sx={{ width: 150 }}
+              label="TERMS"
+              size="small"
+              fullWidth
+              onChange={HandleValueChange}
+              onKeyDown={handleEnterKeyPress(termsRef, vehicleNoRef)}
+              onFocus={(e) => e.target.select()}
+              inputProps={{
+                maxLength: 10,
+                style: {
+                  height: "20px",
+                  fontSize: `${fontSize}px`,
+                },
+                readOnly: !isEditMode || isDisabled,
+              }}
             />
           </div>
         </div>
-        <div className="Buttonsgroupz">
-          <Button
-            ref={addButtonRef}
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handleAdd}
-            disabled={!isAddEnabled}
-          >
-            Add
-          </Button>
-          {isFAModalOpen && (
-            <FAVoucherModal
-              open={isFAModalOpen}
-              onClose={() => setIsFAModalOpen(false)}
-              tenant={tenant}
-              voucherno={formData.vbillno}
-              vtype="S"
-            />
-          )}
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handleEditClick}
-            disabled={!isAddEnabled}
-          >
-            Edit
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handlePrevious}
-            disabled={!isPreviousEnabled}
-          >
-            Previous
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handleNext}
-            disabled={!isNextEnabled}
-          >
-            Next
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handleFirst}
-            disabled={!isFirstEnabled}
-          >
-            First
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handleLast}
-            disabled={!isLastEnabled}
-          >
-            Last
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            disabled={!isSearchEnabled}
-            onClick={() => {
-              fetchAllBills();
-              setActiveRowIndex(0);
-              setShowSearch(true);
+        <div className="sa-VehicleDiv">
+          <TextField
+            inputRef={vehicleNoRef}
+            className="sa-VEHICLE sa-custom-bordered-input"
+            id="trpt"
+            value={formData.trpt}
+            variant="filled"
+            label="VEHICLE NO."
+            size="small"
+            onChange={handleCapitalAlpha}
+            onKeyDown={handleEnterKeyPress(vehicleNoRef, billcashRef)}
+            onFocus={(e) => e.target.select()}
+            inputProps={{
+              maxLength: 48,
+              style: {
+                height: "20px",
+                fontSize: `${fontSize}px`,
+              },
+              readOnly: !isEditMode || isDisabled,
+            }}
+          />
+          <div className="sa-BillType">
+            <FormControl
+              className="sa-Billss sa-custom-bordered-input"
+              sx={{
+                fontSize: `${fontSize}px`,
+                "& .MuiFilledInput-root": { height: 48 },
+              }}
+              size="small"
+              variant="filled"
+            >
+              <InputLabel id="billcash-label">BILL TYPE</InputLabel>
+              <Select
+                inputRef={billcashRef}
+                className="sa-custom-bordered-input"
+                labelId="billcash-label"
+                id="billcash"
+                value={formData.btype}
+                onChange={(e) => {
+                  if (!isEditMode || isDisabled) return;
+                  handleBillCash(e);
+                }}
+                onOpen={(e) => {
+                  if (!isEditMode || isDisabled) e.preventDefault();
+                }}
+                onKeyDownCapture={(e) => {
+                  if (e.key === "Enter") {
+                    const menuOpen = document.querySelector(".MuiMenu-paper");
+                    if (!menuOpen) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEnterKeyPress(billcashRef, taxTypreRef)(e);
+                    }
+                  }
+                  if (e.key === "ArrowDown") return;
+                }}
+                label="BILL TYPE"
+                displayEmpty
+                inputProps={{
+                  sx: {
+                    fontSize: `${fontSize}px`,
+                    pointerEvents: !isEditMode || isDisabled ? "none" : "auto",
+                  },
+                }}
+                MenuProps={{ disablePortal: true }}
+              >
+                <MenuItem value=""><em></em></MenuItem>
+                <MenuItem value="Bill">Bill</MenuItem>
+                <MenuItem value="Cash">Cash</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+        </div>
+        <div className="sa-TAXDiv">
+          <div>
+            <FormControl
+              fullWidth
+              size="small"
+              variant="filled"
+              className="sa-TAXtypez sa-custom-bordered-input"
+              sx={{
+                fontSize: `${fontSize}px`,
+                "& .MuiFilledInput-root": { height: 48 },
+              }}
+            >
+              <InputLabel id="taxtype-label">TAX TYPE</InputLabel>
+              <Select
+                inputRef={taxTypreRef}
+                className="sa-TAXtypez"
+                labelId="taxtype-label"
+                id="stype"
+                value={formData.stype}
+                onChange={(e) => {
+                  if (!isEditMode || isDisabled) return;
+                  handleTaxType(e);
+                }}
+                onOpen={(e) => {
+                  if (!isEditMode || isDisabled) e.preventDefault();
+                }}
+                onKeyDownCapture={(e) => {
+                  if (e.key === "Enter") {
+                    const menuOpen = document.querySelector(".MuiMenu-paper");
+                    if (!menuOpen) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEnterKeyPress(taxTypreRef, supplyRef)(e);
+                    }
+                  }
+                  if (e.key === "ArrowDown") return;
+                }}
+                label="TAX TYPE"
+                displayEmpty
+                MenuProps={{ disablePortal: true }}
+                inputProps={{
+                  sx: {
+                    fontSize: `${fontSize}px`,
+                    pointerEvents: !isEditMode || isDisabled ? "none" : "auto",
+                  },
+                }}
+              >
+                <MenuItem value=""><em></em></MenuItem>
+                <MenuItem value="GST Sale (RD)">GST Sale (RD)</MenuItem>
+                <MenuItem value="IGST Sale (RD)">IGST Sale (RD)</MenuItem>
+                <MenuItem value="GST (URD)">GST (URD)</MenuItem>
+                <MenuItem value="IGST (URD)">IGST (URD)</MenuItem>
+                <MenuItem value="Tax Free Within State">Tax Free Within State</MenuItem>
+                <MenuItem value="Tax Free Interstate">Tax Free Interstate</MenuItem>
+                <MenuItem value="Export Sale">Export Sale</MenuItem>
+                <MenuItem value="Export Sale(IGST)">Export Sale(IGST)</MenuItem>
+                <MenuItem value="Including GST">Including GST</MenuItem>
+                <MenuItem value="Including IGST">Including IGST</MenuItem>
+                <MenuItem value="Not Applicable">Not Applicable</MenuItem>
+                <MenuItem value="Exempted Sale">Exempted Sale</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+          <div>
+            <FormControl
+              className="sa-SupplyTYPE sa-custom-bordered-input"
+              sx={{
+                fontSize: `${fontSize}px`,
+                "& .MuiFilledInput-root": { height: 48 },
+              }}
+              size="small"
+              variant="filled"
+            >
+              <InputLabel id="supply-label">SUPPLY TYPE</InputLabel>
+              <Select
+                inputRef={supplyRef}
+                className="sa-SupplyTYPE"
+                labelId="supply-label"
+                id="supply"
+                value={formData.conv}
+                onChange={(e) => {
+                  if (!isEditMode || isDisabled) return;
+                  handleSupply(e);
+                }}
+                onOpen={(e) => {
+                  if (!isEditMode || isDisabled) e.preventDefault();
+                }}
+                onKeyDownCapture={(e) => {
+                  if (e.key === "Enter") {
+                    const menuOpen = document.querySelector(".MuiMenu-paper");
+                    if (!menuOpen) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEnterKeyPress(supplyRef, null)(e);
+                    }
+                  }
+                  if (e.key === "ArrowDown") return;
+                }}
+                label="SUPPLY TYPE"
+                displayEmpty
+                inputProps={{
+                  sx: {
+                    fontSize: `${fontSize}px`,
+                    pointerEvents: !isEditMode || isDisabled ? "none" : "auto",
+                  },
+                }}
+                MenuProps={{ disablePortal: true }}
+              >
+                <MenuItem value=""><em></em></MenuItem>
+                <MenuItem value="Manufacturing Sale">1. Manufacturing Sale</MenuItem>
+                <MenuItem value="Trading Sale">2. Trading Sale</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+        </div>
+      </div>
+    </div>
+    {/* Top Part Ends Here */}
+
+    {/* Table Part */}
+    <div
+      ref={tableContainerRef}
+      // style={{ marginTop: 0,zoom:1.4 }}
+      style={{ marginTop: 0, zoom: isMacOs ? 1.4 : 1 }}
+      className="sa-TableContainer"
+    >
+      <Table ref={tableRef} className="sa-custom-table">
+        <thead
+          style={{
+            background: color,
+            textAlign: "center",
+            position: "sticky",
+            top: 0,
+          }}
+        >
+          <tr style={{ color: "#575a5a" }}>
+            {tableData.itemcode && <th>ITEMCODE</th>}
+            {tableData.sdisc && <th>DESCRIPTION</th>}
+            {tableData.hsncode && <th>HSNCODE</th>}
+            {tableData.pcs && <th>PCS</th>}
+            {tableData.qty && <th>QTY</th>}
+            {tableData.rate && <th>RATE</th>}
+            {tableData.amount && <th>AMOUNT</th>}
+            {tableData.discount && <th>DIS@</th>}
+            {tableData.discount && <th>DISCOUNT</th>}
+            {tableData.gst && <th>GST</th>}
+            {tableData.others && <th>OTHERS</th>}
+            {tableData.cgst && <th>CGST</th>}
+            {tableData.sgst && <th>SGST</th>}
+            {tableData.igst && <th>IGST</th>}
+            {isEditMode && <th className="text-center">DELETE</th>}
+          </tr>
+        </thead>
+        <tbody style={{ overflowY: "auto"}}>
+          {items.map((item, index) => (
+            <tr key={item.id}>
+              {tableData.itemcode && (
+                <td style={{ padding: 0, width: 30 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-ItemCode"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5 }}
+                    type="text"
+                    value={item.vcode}
+                    readOnly
+                    onKeyDown={(e) => {
+                      handleKeyDown(e, index, "vcode");
+                      handleOpenModal(e, index, "vcode");
+                      handleOpenModalBack(e, index, "vcode");
+                      handleF3Press(e, index);
+                    }}
+                    onDoubleClick={(e) => { handleDoubleClick(e, "vcode", index); }}
+                    ref={(el) => (itemCodeRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.sdisc && (
+                <td style={{ padding: 0, width: 300 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-desc"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5 }}
+                    maxLength={48}
+                    value={item.sdisc}
+                    readOnly={!isEditMode || isDisabled}
+                    onChange={(e) => handleItemChange(index, "sdisc", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "sdisc"); }}
+                    ref={(el) => (desciptionRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.hsncode && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-Hsn"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right" }}
+                    maxLength={8}
+                    readOnly={!isEditMode || isDisabled}
+                    value={item.tariff}
+                    onChange={(e) => handleItemChange(index, "tariff", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "tariff"); }}
+                    ref={(el) => (hsnCodeRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.pcs && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-PCS"
+                    style={{ height: 40, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right", fontSize: `${fontSize}px` }}
+                    maxLength={48}
+                    readOnly={!isEditMode || isDisabled}
+                    value={Number(item.pkgs) === 0 ? "" : item.pkgs}
+                    onChange={(e) => handleItemChange(index, "pkgs", e.target.value)}
+                    onBlur={() => handlePkgsBlur(index)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "pkgs"); }}
+                    ref={(el) => (peciesRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.qty && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-QTY"
+                    style={{ height: 40, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right", fontSize: `${fontSize}px` }}
+                    maxLength={48}
+                    readOnly={!isEditMode || isDisabled}
+                    value={Number(item.weight) === 0 ? "" : item.weight}
+                    onChange={(e) => handleItemChange(index, "weight", e.target.value)}
+                    onBlur={() => handleWeightBlur(index)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "weight"); }}
+                    ref={(el) => (quantityRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.rate && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-Price"
+                    style={{ height: 40, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right", fontSize: `${fontSize}px` }}
+                    maxLength={48}
+                    readOnly={!isEditMode || isDisabled}
+                    value={Number(item.rate) === 0 ? "" : item.rate}
+                    onChange={(e) => handleItemChange(index, "rate", e.target.value)}
+                    onBlur={() => handleRateBlur(index)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "rate"); }}
+                    ref={(el) => (priceRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.amount && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-Amount"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right" }}
+                    maxLength={48}
+                    readOnly={!isEditMode || isDisabled}
+                    value={Number(item.amount) === 0 ? "" : item.amount}
+                    onBlur={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) handleItemChange(index, "amount", value.toFixed(rateValue));
+                    }}
+                    onChange={(e) => handleItemChange(index, "amount", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "amount"); }}
+                    ref={(el) => (amountRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                    min="0"
+                  />
+                </td>
+              )}
+              {tableData.discount && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-Disc"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right" }}
+                    value={Number(item.disc) === 0 ? "" : item.disc}
+                    onChange={(e) => handleItemChange(index, "disc", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "disc"); }}
+                    onBlur={() => handleBlur(index, "disc")}
+                    ref={(el) => (discountRef.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                    readOnly={!isEditMode || isDisabled}
+                  />
+                </td>
+              )}
+              {tableData.discount && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    id="discount"
+                    className="sa-discount"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right" }}
+                    value={Number(item.discount) === 0 ? "" : item.discount}
+                    onChange={(e) => handleItemChange(index, "discount", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "discount"); }}
+                    onFocus={(e) => e.target.select()}
+                    ref={(el) => (discount2Ref.current[index] = el)}
+                    onBlur={() => handleBlur(index, "discount")}
+                    readOnly={!isEditMode || isDisabled}
+                  />
+                </td>
+              )}
+              {tableData.gst && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-Others"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "center" }}
+                    maxLength={2}
+                    value={Number(item.gst) === 0 ? "" : item.gst + "%"}
+                    readOnly={!isEditMode || isDisabled}
+                  />
+                </td>
+              )}
+              {tableData.others && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    disabled={!canEditRow(index)}
+                    className="sa-Others"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right" }}
+                    maxLength={48}
+                    type="text"
+                    value={Number(item.exp_before) === 0 ? "" : item.exp_before}
+                    readOnly={!isEditMode || isDisabled}
+                    onDoubleClick={(e) => handleDoubleClick(e, "exp_before", index)}
+                    onKeyDown={(e) => {
+                      handleKeyDown(e, index, "exp_before");
+                      handleKeyDownExp(e, "exp_before", index);
+                    }}
+                    onFocus={(e) => {
+                      e.target.select();
+                      if (WindowBefore) {
+                        setCurrentIndex(index);
+                        setIsModalOpenExp(true);
+                      }
+                    }}
+                    ref={(el) => (othersRefs.current[index] = el)}
+                  />
+                </td>
+              )}
+              {/* {isModalOpenExp && currentIndex !== null && (
+                <div className="sa-Modalz">
+                  <div className="sa-Modal-content">
+                    <h1 className="sa-headingE">ADD/LESS BEFORE GST</h1>
+                    <div className="sa-form-group">
+                      <input
+                        type="checkbox"
+                        id="gross"
+                        checked={items[currentIndex]?.gross || false}
+                        onChange={(e) => handleInputChange(currentIndex, "gross", e.target.checked)}
+                      />
+                      <label style={{ marginLeft: 5 }} className="sa-label" htmlFor="Gross">GROSS</label>
+                    </div>
+                    {[
+                      { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
+                      { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
+                      { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
+                      { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
+                      { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
+                    ].map((field, idx) => {
+                      const rateIndex = idx * 2;
+                      const valueIndex = idx * 2 + 1;
+                      return (
+                        <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "10px" }}>
+                          <label style={{ width: "100px", fontWeight: "bold" }}>{field.label}</label>
+                          <input
+                            ref={(el) => (expRateRefs.current[rateIndex] = el)}
+                            value={items[currentIndex][field.rate]}
+                            style={{ border: "1px solid black", padding: "5px", width: "120px", textAlign: "right", borderRadius: "4px" }}
+                            onChange={(e) => handleInputChange(currentIndex, field.rate, e.target.value)}
+                            onKeyDown={(e) => handleKeyDownModal(e, rateIndex)}
+                          />
+                          <input
+                            ref={(el) => (expRateRefs.current[valueIndex] = el)}
+                            value={items[currentIndex][field.value]}
+                            style={{ border: "1px solid black", padding: "5px", width: "120px", textAlign: "right", borderRadius: "4px" }}
+                            onBlur={() => handleExpenseBlur(currentIndex, field.value)}
+                            onChange={(e) => handleInputChange(currentIndex, field.value, e.target.value)}
+                            onKeyDown={(e) => handleKeyDownModal(e, valueIndex)}
+                          />
+                        </div>
+                      );
+                    })}
+                    <Button
+                      ref={closeButtonRef}
+                      onClick={() => {
+                        const idx = currentIndex;
+                        setIsModalOpenExp(false);
+                        setCurrentIndex(null);
+                        setTimeout(() => {
+                          othersRefs.current[idx]?.focus();
+                          othersRefs.current[idx]?.select();
+                        }, 0);
+                      }}
+                      style={{ borderColor: "transparent", backgroundColor: "red", marginTop: 10 }}
+                    >
+                      CLOSE
+                    </Button>
+                  </div>
+                </div>
+              )} */}
+              {isModalOpenExp && currentIndex !== null && (
+  <div
+    tabIndex={-1}
+      onKeyDown={(e) => {
+      if (e.key === "Escape") {
+        const idx = currentIndex;
+        setIsModalOpenExp(false);
+        setCurrentIndex(null);
+        setTimeout(() => {
+          othersRefs.current[idx]?.focus();
+          othersRefs.current[idx]?.select();
+        }, 0);
+      }
+    }}
+    onClick={(e) => {
+      if (e.target === e.currentTarget) {
+        const idx = currentIndex;
+        setIsModalOpenExp(false);
+        setCurrentIndex(null);
+        setTimeout(() => {
+          othersRefs.current[idx]?.focus();
+          othersRefs.current[idx]?.select();
+        }, 0);
+      }
+    }}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(15, 23, 42, 0.18)",
+      backdropFilter: "blur(3px)",
+      WebkitBackdropFilter: "blur(3px)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 2000,
+      padding: "20px",
+    }}
+  >
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "620px",
+        background: "#ffffff",
+        borderRadius: "18px",
+        boxShadow: "0 18px 50px rgba(15, 23, 42, 0.18)",
+        border: "1px solid rgba(148, 163, 184, 0.22)",
+        overflow: "hidden",
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        style={{
+          padding: "18px 22px 14px",
+          borderBottom: "1px solid #e5e7eb",
+          background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "19px",
+            fontWeight: 800,
+            color: "#0f172a",
+            letterSpacing: "0.4px",
+            textAlign: "center",
+          }}
+        >
+          ADD / LESS BEFORE GST
+        </div>
+
+        <div
+          style={{
+            fontSize: "12px",
+            color: "#64748b",
+            textAlign: "center",
+            marginTop: 4,
+          }}
+        >
+          Manage expense values before GST calculation
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const idx = currentIndex;
+            setIsModalOpenExp(false);
+            setCurrentIndex(null);
+            setTimeout(() => {
+              othersRefs.current[idx]?.focus();
+              othersRefs.current[idx]?.select();
+            }, 0);
+          }}
+          style={{
+            position: "absolute",
+            right: "14px",
+            top: "14px",
+            width: "34px",
+            height: "34px",
+            borderRadius: "10px",
+            border: "1px solid #e2e8f0",
+            background: "#ffffff",
+            color: "#334155",
+            cursor: "pointer",
+            fontSize: "18px",
+            fontWeight: 700,
+            lineHeight: 1,
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      <div style={{ padding: "20px 22px 22px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "18px",
+            padding: "12px 14px",
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            borderRadius: "12px",
+          }}
+        >
+          <input
+            type="checkbox"
+            id="gross"
+            checked={items[currentIndex]?.gross || false}
+            onChange={(e) =>
+              handleInputChange(currentIndex, "gross", e.target.checked)
+            }
+            style={{
+              width: "16px",
+              height: "16px",
+              cursor: "pointer",
+              accentColor: "#2563eb",
+            }}
+          />
+          <label
+            htmlFor="gross"
+            style={{
+              fontSize: "14px",
+              fontWeight: 700,
+              color: "#0f172a",
+              cursor: "pointer",
             }}
           >
-            Search
-          </Button>
-          <Button
-            ref={printButtonRef}
-            className="Buttonz"
-            // onClick={handleOpen}
-            onClick={openPrintMenu}
-            // onClick={handleViewFAVoucher}
-            style={{ background: color }}
-            disabled={!isPrintEnabled}
-          >
-            Print
-          </Button>
+            GROSS
+          </label>
+        </div>
 
-          <BillPrintMenu
-            isOpen={isMenuOpen}
-            onClose={closePrintMenu}
-            preview={handleOpen}
-            formDataSale={formData}
-            handlePrint={handlePrintClick}
-            setSelectedCopies={setSelectedCopies}
-            onFaView={handleViewFAVoucher}
-          />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "170px 1fr 1fr",
+            gap: "12px 14px",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 800,
+              color: "#475569",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Expense
+          </div>
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 800,
+              color: "#475569",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              textAlign: "center",
+            }}
+          >
+            Rate
+          </div>
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 800,
+              color: "#475569",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              textAlign: "center",
+            }}
+          >
+            Value
+          </div>
 
+          {[
+            { label: Expense1, rate: "Exp_rate1", value: "Exp1" },
+            { label: Expense2, rate: "Exp_rate2", value: "Exp2" },
+            { label: Expense3, rate: "Exp_rate3", value: "Exp3" },
+            { label: Expense4, rate: "Exp_rate4", value: "Exp4" },
+            { label: Expense5, rate: "Exp_rate5", value: "Exp5" },
+          ].map((field, idx) => {
+            const rateIndex = idx * 2;
+            const valueIndex = idx * 2 + 1;
+
+            return (
+              <React.Fragment key={idx}>
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#1e293b",
+                    paddingLeft: "4px",
+                  }}
+                >
+                  {field.label}
+                </div>
+
+                <input
+                  ref={(el) => (expRateRefs.current[rateIndex] = el)}
+                  value={items[currentIndex][field.rate] || ""}
+                  onChange={(e) =>
+                    handleInputChange(currentIndex, field.rate, e.target.value)
+                  }
+                  onKeyDown={(e) => handleKeyDownModal(e, rateIndex)}
+                  style={{
+                    width: "100%",
+                    height: "40px",
+                    border: "1px solid #cbd5e1",
+                    outline: "none",
+                    padding: "0 12px",
+                    textAlign: "right",
+                    fontSize: "14px",
+                    borderRadius: "10px",
+                    background: "#ffffff",
+                    color: "#0f172a",
+                    boxSizing: "border-box",
+                  }}
+                />
+
+                <input
+                  ref={(el) => (expRateRefs.current[valueIndex] = el)}
+                  value={items[currentIndex][field.value] || ""}
+                  onBlur={() => handleExpenseBlur(currentIndex, field.value)}
+                  onChange={(e) =>
+                    handleInputChange(currentIndex, field.value, e.target.value)
+                  }
+                  onKeyDown={(e) => handleKeyDownModal(e, valueIndex)}
+                  style={{
+                    width: "100%",
+                    height: "40px",
+                    border: "1px solid #cbd5e1",
+                    outline: "none",
+                    padding: "0 12px",
+                    textAlign: "right",
+                    fontSize: "14px",
+                    borderRadius: "10px",
+                    background: "#ffffff",
+                    color: "#0f172a",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        <div
+          style={{
+            marginTop: "22px",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
           <Button
-            className="delete"
-            style={{ background: color }}
-            onClick={handleDeleteClick}
-            disabled={!isDeleteEnabled}
+            ref={closeButtonRef}
+            onClick={() => {
+              const idx = currentIndex;
+              setIsModalOpenExp(false);
+              setCurrentIndex(null);
+              setTimeout(() => {
+                othersRefs.current[idx]?.focus();
+                othersRefs.current[idx]?.select();
+              }, 0);
+            }}
+            style={{
+              minWidth: "110px",
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
+              color: "#0f172a",
+              fontWeight: 700,
+              borderRadius: "10px",
+              padding: "9px 16px",
+              boxShadow: "0 4px 14px rgba(15, 23, 42, 0.06)",
+            }}
           >
-            Delete
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ background: color }}
-            onClick={handleExit}
-          >
-            Exit
-          </Button>
-          <Button
-            ref={saveButtonRef}
-            className="Buttonz"
-            onClick={handleDataSave}
-            disabled={!isSubmitEnabled}
-            style={{ background: color }}
-          >
-            Save
+            CLOSE
           </Button>
         </div>
       </div>
-      {/* Search Modal */}
-      <Modal
-        show={showSearch}
-        keyboard={false}
-        backdrop="static"
-        onHide={() => setShowSearch(false)}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Search</Modal.Title>
-        </Modal.Header>
+    </div>
+  </div>
+)}
+              {tableData.cgst && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    className="sa-CTax"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right", color: "black" }}
+                    maxLength={48}
+                    disabled
+                    value={Number(item.ctax) === 0 ? "" : item.ctax}
+                    onChange={(e) => handleItemChange(index, "ctax", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "ctax"); }}
+                    ref={(el) => (cgstRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </td>
+              )}
+              {tableData.sgst && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    className="sa-STax"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right", color: "black" }}
+                    maxLength={48}
+                    disabled
+                    value={Number(item.stax) === 0 ? "" : item.stax}
+                    onChange={(e) => handleItemChange(index, "stax", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "stax"); }}
+                    ref={(el) => (sgstRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                    min="0"
+                  />
+                </td>
+              )}
+              {tableData.igst && (
+                <td style={{ padding: 0 }}>
+                  <input
+                    className="sa-ITax"
+                    style={{ height: 40, fontSize: `${fontSize}px`, width: "100%", boxSizing: "border-box", border: "none", padding: 5, textAlign: "right", color: "black" }}
+                    maxLength={48}
+                    disabled
+                    value={Number(item.itax) === 0 ? "" : item.itax}
+                    onChange={(e) => handleItemChange(index, "itax", e.target.value)}
+                    onKeyDown={(e) => { handleKeyDown(e, index, "itax"); }}
+                    ref={(el) => (igstRefs.current[index] = el)}
+                    onFocus={(e) => e.target.select()}
+                    min="0"
+                  />
+                </td>
+              )}
+              {isEditMode && (
+                <td style={{ padding: 0 }}>
+                  {canEditRow(index) && (
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                      <IconButton color="error" size="small" tabIndex={-1} onClick={() => handleDeleteItem(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </div>
+                  )}
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot
+          style={{
+            background: color,
+            position: "sticky",
+            bottom: -6,
+            fontSize: `${fontSize}px`,
+            borderTop: "1px solid black",
+          }}
+        >
+          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+            {tableData.itemcode && <td></td>}
+            {tableData.sdisc && <td>TOTAL</td>}
+            {tableData.hsncode && <td></td>}
+            {tableData.pcs && <td>{items.reduce((sum, item) => sum + parseFloat(item.pkgs || 0), 0).toFixed(pkgsValue)}</td>}
+            {tableData.qty && <td>{items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0).toFixed(weightValue)}</td>}
+            {tableData.rate && <td></td>}
+            {tableData.amount && <td>{items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}</td>}
+            {tableData.discount && (
+              <>
+                <td>{items.reduce((sum, item) => sum + parseFloat(item.disc || 0), 0).toFixed(2)}</td>
+                <td>{items.reduce((sum, item) => sum + parseFloat(item.discount || 0), 0).toFixed(2)}</td>
+              </>
+            )}
+            {tableData.gst && <td></td>}
+            {tableData.others && <td>{items.reduce((sum, item) => sum + parseFloat(item.exp_before || 0), 0).toFixed(2)}</td>}
+            {tableData.cgst && <td>{items.reduce((sum, item) => sum + parseFloat(item.ctax || 0), 0).toFixed(2)}</td>}
+            {tableData.sgst && <td>{items.reduce((sum, item) => sum + parseFloat(item.stax || 0), 0).toFixed(2)}</td>}
+            {tableData.igst && <td>{items.reduce((sum, item) => sum + parseFloat(item.itax || 0), 0).toFixed(2)}</td>}
+            {isEditMode && <td></td>}
+          </tr>
+        </tfoot>
+      </Table>
+    </div>
 
-        <Modal.Body>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-            <TextField
-              className="custom-bordered-input"
-              size="small"
-              variant="filled"
-              label="Enter Bill No..."
-              value={searchBillNo}
-              onChange={(e) => setSearchBillNo(e.target.value)}
-            />
+    {showModal && (
+      <ProductModal
+        products={products}
+        allFields={allFields}
+        onSelect={handleProductSelect}
+        onClose={handleModalDone}
+        tenant={tenant}
+        initialKey={pressedKey}
+        fetchParentProducts={fetchProducts}
+      />
+    )}
 
+  
+
+    {/* Bottom Part */}
+    <div className="sa-Belowcontents">
+      <div className="sa-Parent" style={{ display: "flex", flexDirection: "row" }}>
+        <div className="sa-footer-col sa-footer-leftcol" style={{ display: "flex", flexDirection: "column" }}>
+          <TextField
+            className="sa-Remz sa-custom-bordered-input"
+            id="rem2"
+            value={formData.rem2}
+            inputRef={remarksRef}
+            label="REMARKS"
+            onChange={HandleValueChange}
+            onKeyDown={(e) => { handleKeyDowndown(e, transportRef); }}
+            inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px` } }}
+            onFocus={(e) => e.target.select()}
+            size="small"
+            variant="filled"
+          />
+          <TextField
+            className="sa-Remz sa-custom-bordered-input"
+            id="v_tpt"
+            value={formData.v_tpt}
+            inputRef={transportRef}
+            label="TRANSPORT"
+            onChange={HandleValueChange}
+            onKeyDown={(e) => {
+              handleKeyDowndown(e, brokerRef);
+              handleOpenModalTpt(e, "v_tpt", "v_tpt");
+            }}
+            inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px` } }}
+            onFocus={(e) => e.target.select()}
+            size="small"
+            variant="filled"
+          />
+          <TextField
+            className="sa-Remz sa-custom-bordered-input"
+            id="broker"
+            value={formData.broker}
+            inputRef={brokerRef}
+            label="BROKER"
+            onChange={HandleValueChange}
+            onKeyDown={(e) => {
+              handleKeyDowndown(e, expAfterGSTRef);
+              handleOpenModalBroker(e, "broker", "broker");
+            }}
+            inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px` } }}
+            onFocus={(e) => e.target.select()}
+            size="small"
+            variant="filled"
+          />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}>
+          <div className="sa-duedatez">
             <InputMask
               mask="99-99-9999"
               placeholder="dd-mm-yyyy"
-              value={searchDate}
-              onChange={(e) => setSearchDate(e.target.value)}
+              value={formData.duedate}
+              readOnly={!isEditMode || isDisabled}
+              onChange={(e) => setFormData({ ...formData, duedate: e.target.value })}
             >
               {(props) => (
                 <TextField
-                  className="custom-bordered-input"
+                  className="sa-custom-bordered-input"
                   {...props}
-                  label="DATE"
+                  label="DUE DATE"
                   size="small"
                   variant="filled"
                   fullWidth
-                  style={{ width: 230, marginLeft: 5 }}
+                  style={{ width: 225}}
                 />
               )}
             </InputMask>
           </div>
-
-          <div
-            style={{ maxHeight: "300px", overflowY: "auto" }}
-            onScroll={(e) => {
-              const bottom =
-                e.target.scrollHeight - e.target.scrollTop <=
-                e.target.clientHeight + 5;
-
-              if (bottom && visibleCount < filteredBills.length) {
-                setVisibleCount((prev) => prev + 30);
-              }
-            }}
-          >
-            <Table>
-              <thead>
-                <tr>
-                  <th>BILL NO</th>
-                  <th>DATE</th>
-                  <th>CUSTOMER</th>
-                  <th>CITY</th>
-                  <th>GRAND TOTAL</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredBills.slice(0, visibleCount).map((bill, index) => (
-                  <tr key={bill._id}
-                  style={{
-                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
-                    cursor: "pointer",
-                  }}
-                   onClick={() => {
-                    setActiveRowIndex(index);
-                    handleSelectBill(bill);
-                    setShowSearch(false);
-                  }}
-                  >
-                    <td>{bill.formData.vbillno}</td>
-                    <td>
-                      {formatDateToDDMMYYYY(bill.formData.date)}
-                    </td>
-                    <td>{bill.customerDetails?.[0]?.vacode}</td>
-                    <td>{bill.customerDetails?.[0]?.city}</td>
-                    <td>{bill.formData.grandtotal}</td>
-                  </tr>
-                ))}
-
-                {filteredBills.length === 0 && (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                      No matching records
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
+          <div>
+            <TextField
+              className="sa-custom-bordered-input"
+              id="srv_tax"
+              value={formData.srv_tax}
+              label="TDS 194-Q"
+              onChange={handleNumericValue}
+              inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px`, color: "red" } }}
+              onFocus={(e) => e.target.select()}
+              size="small"
+              variant="filled"
+              sx={{ width: 214 }}
+            />
           </div>
-        </Modal.Body>
-      </Modal>
-      <F3Modal
-        show={showPurchaseModal}
-        onClose={() => setShowPurchaseModal(false)}
-        tenant={tenant}
-        onSelect={(row) => {
-          const index = selectedItemIndexForPurchase;
-          if (index === null) return;
+          <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+            <TextField
+              className="sa-TCSRATE sa-custom-bordered-input"
+              inputRef={tcsRef2}
+              id="tcs1_rate"
+              value={formData.tcs1_rate}
+              onKeyDown={(e) => handleKeyDowndown(e, expAfterGSTRef)}
+              onChange={(e) => setFormData((prev) => ({ ...prev, tcs1_rate: e.target.value }))}
+              inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px`, color: "red" } }}
+              onFocus={(e) => e.target.select()}
+              size="small"
+              variant="filled"
+              InputProps={{ readOnly: !isEditMode || isDisabled }}
+            />
+            <TextField
+              className="sa-TCSPER sa-custom-bordered-input"
+              id="tcs1"
+              value={formData.tcs1}
+              label="TCS 206C@"
+              inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px`, color: "red" } }}
+              onFocus={(e) => e.target.select()}
+              size="small"
+              variant="filled"
+            />
+          </div>
+        </div>
+        <div className="sa-footer-col sa-footer-taxcol" style={{ display: "flex", flexDirection: "column", marginLeft: 5, marginTop: "auto" }}>
+          {formData.Tds2 && Number(formData.Tds2) > 0 && (
+            <TextField
+              className="sa-custom-bordered-input"
+              id="tax"
+              value={"2%"}
+              label="GST. TDS"
+              inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px` } }}
+              onFocus={(e) => e.target.select()}
+              size="small"
+              variant="filled"
+              sx={{ width: 120 }}
+            />
+          )}
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <TextField className="sa-CTDS sa-custom-bordered-input" value={formData.Ctds} label="C.TDS" size="small" variant="filled" inputProps={{ style: { height: 20, fontSize: `${fontSize}px`, backgroundColor: "white", borderRadius: 5 } }} />
+            <TextField className="sa-CTDS sa-custom-bordered-input" value={formData.Stds} label="S.TDS" size="small" variant="filled" inputProps={{ style: { height: 20, fontSize: `${fontSize}px`, backgroundColor: "white", borderRadius: 5 } }} />
+            <TextField className="sa-CTDS sa-custom-bordered-input" value={formData.iTds} label="I.TDS" size="small" variant="filled" inputProps={{ style: { height: 20, fontSize: `${fontSize}px`, backgroundColor: "white", borderRadius: 5 } }} />
+            <span style={{ fontSize: 20, marginTop: "10px" }}>=</span>
+            <TextField className="sa-CTDS sa-custom-bordered-input" value={formData.Tds2} label="TOTAL" size="small" variant="filled" inputProps={{ style: { height: 20, fontSize: `${fontSize}px`, backgroundColor: "white", borderRadius: 5 } }} />
+          </div>
+        </div>
+        <div className="sa-totals sa-footer-col sa-footer-totalcol" style={{ display: "flex", flexDirection: "column", marginLeft: "auto", marginRight: "12px" }}>
+          <TextField
+            className="sa-TOTALFIELDS sa-custom-bordered-input"
+            id="tax"
+            value={formData.tax}
+            label="TOTAL GST"
+            inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px` } }}
+            onFocus={(e) => e.target.select()}
+            size="small"
+            variant="filled"
+          />
+          <div>
+            <TextField
+              className="sa-TOTALFIELDS sa-custom-bordered-input"
+              inputRef={expAfterGSTRef}
+              id="expafterGST"
+              value={formData.expafterGST}
+              label="EXP AFTER GST"
+              onKeyDown={(e) => {
+                handleKeyDowndown(e, saveButtonRef);
+                handleKeyDownAfter(e);
+              }}
+              onFocus={(e) => {
+                e.target.select();
+                if (WindowAfter) setIsModalOpenAfter(true);
+              }}
+              onDoubleClick={() => handleDoubleClickAfter("expafterGST")}
+              inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px` }, readOnly: !isEditMode || isDisabled }}
+              size="small"
+              variant="filled"
+            />
+            {isModalOpenAfter &&
+              ReactDOM.createPortal(
+                <div
+                  tabIndex={-1}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      closeModalAfter();
+                    }
+                  }}
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                      closeModalAfter();
+                    }
+                  }}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    background: "rgba(15, 23, 42, 0.18)",
+                    backdropFilter: "blur(3px)",
+                    WebkitBackdropFilter: "blur(3px)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 999999,
+                    padding: "20px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: "100%",
+                      maxWidth: "620px",
+                      background: "#ffffff",
+                      borderRadius: "18px",
+                      boxShadow: "0 18px 50px rgba(15, 23, 42, 0.18)",
+                      border: "1px solid rgba(148, 163, 184, 0.22)",
+                      overflow: "hidden",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <div
+                      style={{
+                        padding: "18px 22px 14px",
+                        borderBottom: "1px solid #e5e7eb",
+                        background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+                        position: "relative",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "19px",
+                          fontWeight: 800,
+                          color: "#0f172a",
+                          letterSpacing: "0.4px",
+                          textAlign: "center",
+                        }}
+                      >
+                        EXPENSE AFTER TAX
+                      </div>
 
-          // 🔥 Step 1: set base fields via handler
-          handleItemChange(index, "sdisc", row.desc || "");
-          handleItemChange(index, "pkgs", row.pkgs || 0);
-          handleItemChange(index, "weight", row.qty || 0);
-          handleItemChange(index, "rate", row.rate || 0);
-          handleItemChange(index, "gst", row.gst || 0);
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#64748b",
+                          textAlign: "center",
+                          marginTop: 4,
+                        }}
+                      >
+                        Manage expense values after tax calculation
+                      </div>
 
-          // 🔥 Step 2: set remaining fields manually (no calc needed)
-          setItems((prev) => {
-            const updated = [...prev];
-            const item = { ...updated[index] };
+                      <button
+                        type="button"
+                        onClick={closeModalAfter}
+                        style={{
+                          position: "absolute",
+                          right: "14px",
+                          top: "14px",
+                          width: "34px",
+                          height: "34px",
+                          borderRadius: "10px",
+                          border: "1px solid #e2e8f0",
+                          background: "#ffffff",
+                          color: "#334155",
+                          cursor: "pointer",
+                          fontSize: "18px",
+                          fontWeight: 700,
+                          lineHeight: 1,
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
 
-            item.vcode = row.vcode || "";
-            item.Units = row.Units || "";
-            item.tariff = row.tariff || "";
-            item.Pcodes01 = row.Pcodes01 || "";
-            item.Pcodess = row.Pcodess || "";
-            item.Scodes01 = row.Scodes01 || "";
-            item.Scodess = row.Scodess || "";
-            item.RateCal = row.RateCal || "";
-            item.Qtyperpc = row.Qtyperpc || 0;
+                    <div style={{ padding: "20px 22px 22px" }}>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "170px 1fr 1fr",
+                          gap: "12px 14px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            color: "#475569",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                          }}
+                        >
+                          Expense
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            color: "#475569",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            textAlign: "center",
+                          }}
+                        >
+                          Rate
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            color: "#475569",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            textAlign: "center",
+                          }}
+                        >
+                          Amount
+                        </div>
 
-            updated[index] = item;
-            return updated;
-          });
-        }}
-      />
+                        {[
+                          { label: Expense6, rate: "Exp_rate6", amount: "Exp6" },
+                          { label: Expense7, rate: "Exp_rate7", amount: "Exp7" },
+                          { label: Expense8, rate: "Exp_rate8", amount: "Exp8" },
+                          { label: Expense9, rate: "Exp_rate9", amount: "Exp9" },
+                          { label: Expense10, rate: "Exp_rate10", amount: "Exp10" },
+                        ].map((item, index) => {
+                          const rateIndex = index * 2;
+                          const amountIndex = index * 2 + 1;
+
+                          return (
+                            <React.Fragment key={index}>
+                              <div
+                                style={{
+                                  fontSize: "13px",
+                                  fontWeight: 700,
+                                  color: "#1e293b",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                {item.label}
+                              </div>
+
+                              <input
+                                ref={(el) => (expAfterRefs.current[rateIndex] = el)}
+                                id={item.rate}
+                                value={formData[item.rate] || ""}
+                                onChange={handleNumberChange}
+                                onKeyDown={(e) => handleKeyDownAfterw2(e, rateIndex)}
+                                placeholder="Rate"
+                                style={{
+                                  width: "100%",
+                                  height: "40px",
+                                  border: "1px solid #cbd5e1",
+                                  outline: "none",
+                                  padding: "0 12px",
+                                  textAlign: "right",
+                                  fontSize: "14px",
+                                  borderRadius: "10px",
+                                  background: "#ffffff",
+                                  color: "#0f172a",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+
+                              <input
+                                ref={(el) => (expAfterRefs.current[amountIndex] = el)}
+                                id={item.amount}
+                                value={formData[item.amount] || ""}
+                                onChange={handleNumberChange}
+                                onKeyDown={(e) => handleKeyDownAfterw2(e, amountIndex)}
+                                placeholder="Amount"
+                                style={{
+                                  width: "100%",
+                                  height: "40px",
+                                  border: "1px solid #cbd5e1",
+                                  outline: "none",
+                                  padding: "0 12px",
+                                  textAlign: "right",
+                                  fontSize: "14px",
+                                  borderRadius: "10px",
+                                  background: "#ffffff",
+                                  color: "#0f172a",
+                                  boxSizing: "border-box",
+                                }}
+                              />
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "22px",
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <Button
+                          ref={closeAfterRef}
+                          onClick={closeModalAfter}
+                          style={{
+                            minWidth: "110px",
+                            background: "#ffffff",
+                            border: "1px solid #cbd5e1",
+                            color: "#0f172a",
+                            fontWeight: 700,
+                            borderRadius: "10px",
+                            padding: "9px 16px",
+                            boxShadow: "0 4px 14px rgba(15, 23, 42, 0.06)",
+                          }}
+                        >
+                          CLOSE
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>,
+                document.body
+              )}
+          </div>
+          <TextField
+            id="grandtotal"
+            value={formData.grandtotal}
+            label="GRAND TOTAL"
+            onKeyDown={handleKeyDownTab2}
+            inputProps={{ maxLength: 48, style: { height: 20, fontSize: `${fontSize}px`, color: "red", fontWeight: "bold" } }}
+            size="small"
+            variant="filled"
+            className="sa-TOTALFIELDS sa-custom-bordered-input"
+          />
+        </div>
+      </div>
+      <div className="sa-Buttonsgroupz">
+        <Button ref={addButtonRef} className="sa-Buttonz" style={{ background: color }} onClick={handleAdd} disabled={!isAddEnabled}>Add</Button>
+        {isFAModalOpen && <FAVoucherModal open={isFAModalOpen} onClose={() => setIsFAModalOpen(false)} tenant={tenant} voucherno={formData.vbillno} vtype="S" />}
+        <Button className="sa-Buttonz" style={{ background: color }} onClick={handleEditClick} disabled={!isAddEnabled}>Edit</Button>
+        <Button className="sa-Buttonz" style={{ background: color }} onClick={handlePrevious} disabled={!isPreviousEnabled}>Previous</Button>
+        <Button className="sa-Buttonz" style={{ background: color }} onClick={handleNext} disabled={!isNextEnabled}>Next</Button>
+        <Button className="sa-Buttonz" style={{ background: color }} onClick={handleFirst} disabled={!isFirstEnabled}>First</Button>
+        <Button className="sa-Buttonz" style={{ background: color }} onClick={handleLast} disabled={!isLastEnabled}>Last</Button>
+        <Button className="sa-Buttonz" style={{ background: color }} disabled={!isSearchEnabled} onClick={() => { fetchAllBills(); setActiveRowIndex(0); setShowSearch(true); }}>Search</Button>
+        <Button ref={printButtonRef} className="sa-Buttonz" onClick={openPrintMenu} style={{ background: color }} disabled={!isPrintEnabled}>Print</Button>
+        <BillPrintMenu isOpen={isMenuOpen} onClose={closePrintMenu} preview={handleOpen} formDataSale={formData} handlePrint={handlePrintClick} setSelectedCopies={setSelectedCopies} onFaView={handleViewFAVoucher} />
+        <Button className="sa-delete" style={{ background: color }} onClick={handleDeleteClick} disabled={!isDeleteEnabled}>Delete</Button>
+        <Button className="sa-Buttonz" style={{ background: color }} onClick={handleExit}>Exit</Button>
+        <Button ref={saveButtonRef} className="sa-Buttonz" onClick={handleDataSave} disabled={!isSubmitEnabled} style={{ background: color }}>Save</Button>
+      </div>
     </div>
-  );
+
+    {/* Search Modal */}
+    <Modal show={showSearch} keyboard={false} backdrop="static" onHide={() => setShowSearch(false)} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Search</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+          <TextField className="sa-custom-bordered-input" size="small" variant="filled" label="Enter Bill No..." value={searchBillNo} onChange={(e) => setSearchBillNo(e.target.value)} />
+          <InputMask mask="99-99-9999" placeholder="dd-mm-yyyy" value={searchDate} onChange={(e) => setSearchDate(e.target.value)}>
+            {(props) => (
+              <TextField className="sa-custom-bordered-input" {...props} label="DATE" size="small" variant="filled" fullWidth style={{ width: 230, marginLeft: 5 }} />
+            )}
+          </InputMask>
+        </div>
+        <div
+          style={{ maxHeight: "300px", overflowY: "auto" }}
+          onScroll={(e) => {
+            const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 5;
+            if (bottom && visibleCount < filteredBills.length) setVisibleCount((prev) => prev + 30);
+          }}
+        >
+          <Table>
+            <thead>
+              <tr>
+                <th>BILL NO</th>
+                <th>DATE</th>
+                <th>CUSTOMER</th>
+                <th>CITY</th>
+                <th>GRAND TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBills.slice(0, visibleCount).map((bill, index) => (
+                <tr
+                  key={bill._id}
+                  style={{ backgroundColor: index === activeRowIndex ? "#d1e7ff" : "", cursor: "pointer" }}
+                  onClick={() => { setActiveRowIndex(index); handleSelectBill(bill); setShowSearch(false); }}
+                >
+                  <td>{bill.formData.vbillno}</td>
+                  <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
+                  <td>{bill.customerDetails?.[0]?.vacode}</td>
+                  <td>{bill.customerDetails?.[0]?.city}</td>
+                  <td>{bill.formData.grandtotal}</td>
+                </tr>
+              ))}
+              {filteredBills.length === 0 && (
+                <tr><td colSpan="6" style={{ textAlign: "center" }}>No matching records</td></tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </Modal.Body>
+    </Modal>
+
+    <F3Modal
+      show={showPurchaseModal}
+      onClose={() => setShowPurchaseModal(false)}
+      tenant={tenant}
+      onSelect={(row) => {
+        const index = selectedItemIndexForPurchase;
+        if (index === null) return;
+        handleItemChange(index, "sdisc", row.desc || "");
+        handleItemChange(index, "pkgs", row.pkgs || 0);
+        handleItemChange(index, "weight", row.qty || 0);
+        handleItemChange(index, "rate", row.rate || 0);
+        handleItemChange(index, "gst", row.gst || 0);
+        setItems((prev) => {
+          const updated = [...prev];
+          const item = { ...updated[index] };
+          item.vcode = row.vcode || "";
+          item.Units = row.Units || "";
+          item.tariff = row.tariff || "";
+          item.Pcodes01 = row.Pcodes01 || "";
+          item.Pcodess = row.Pcodess || "";
+          item.Scodes01 = row.Scodes01 || "";
+          item.Scodess = row.Scodess || "";
+          item.RateCal = row.RateCal || "";
+          item.Qtyperpc = row.Qtyperpc || 0;
+          updated[index] = item;
+          return updated;
+        });
+      }}
+    />
+  </div>
+);
 };
 
 export default Sale;
-

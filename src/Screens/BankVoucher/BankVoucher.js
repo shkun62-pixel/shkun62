@@ -1,19 +1,2585 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import "./BankVoucher.css";
+// import InputMask from "react-input-mask";
+// import "react-datepicker/dist/react-datepicker.css";
+// import "react-toastify/dist/ReactToastify.css";
+// import Table from "react-bootstrap/Table";
+// import Button from "react-bootstrap/Button";
+// import { BiTrash } from "react-icons/bi";
+// import ProductModalCustomer from "../Modals/ProductModalCustomer";
+// import axios from "axios";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import InvoicePDFbank from "../InvoicePDFbank";
+// import { useEditMode } from "../../EditModeContext";
+// import { CompanyContext } from "../Context/CompanyContext";
+// import { useContext } from "react";
+// import TextField from "@mui/material/TextField";
+// import { IconButton } from "@mui/material";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import PrintChoiceModal from "../Shared/PrintChoiceModal";
+// import useCompanySetup from "../Shared/useCompanySetup";
+// import FAVoucherModal from "../Shared/FAVoucherModal";
+// import SearchModal from "../Shared/SearchModal";
+// import useShortcuts from "../Shared/useShortcuts";
+// import { Modal } from "react-bootstrap"; // Import Bootstrap components
+
+// const BankVoucher = () => {
+
+//   const companySetup = useCompanySetup();
+//   const location = useLocation();
+//   const bankId = location.state?.bankId;
+//   const navigate = useNavigate();
+//   const { company } = useContext(CompanyContext);
+//   // const tenant = company?.databaseName;
+//   const tenant = "03AAYFG4472A1ZG_01042025_31032026"
+
+//   if (!tenant) {
+//     // you may want to guard here or show an error state,
+//     // since without a tenant you can’t hit the right API
+//     console.error("No tenant selected!");
+//   }
+
+//   const [open, setOpen] = React.useState(false);
+//   const handleOpen = () => setOpen(true);
+//   const handleClose = () => setOpen(false);
+//   const addButtonRef = useRef(null);
+//   const datePickerRef = useRef(null);
+//   const VoucherRef = useRef(null);
+//   const BankRefs = useRef(null);
+//   const tableRef = useRef(null);
+//   const accountNameRefs = useRef([]);
+//   const paymentDebitRefs = useRef([]);
+//   const receiptCreditRefs = useRef([]);
+//   const discountRefs = useRef([]);
+//   const totalRefs = useRef([]);
+//   const bankChargersRefs = useRef([]);
+//   const tdsRsRefs = useRef([]);
+//   const chqnoBankRefs = useRef([]);
+//   const remarksRefs = useRef([]);
+//   const saveButtonRef = useRef(null);
+//   const [title, setTitle] = useState("VIEW");
+//   const [isSaving, setIsSaving] = useState(false);
+//   const initialColors = [
+//     "#E9967A",
+//     "#F0E68C",
+//     "#FFDEAD",
+//     "#ADD8E6",
+//     "#87CEFA",
+//     "#FFF0F5",
+//     "#FFC0CB",
+//     "#D8BFD8",
+//     "#DC143C",
+//     "#DCDCDC",
+//     "#8FBC8F",
+//   ];
+//   const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
+//   const [fsize, setfsize] = useState(17);
+//   const [formData, setFormData] = useState({
+//     vtype: "B",
+//     valpha:"",
+//     date: "",
+//     voucherno: 0,
+//     user: "Owner",
+//     totalpayment: "",
+//     totalreceipt: "",
+//     totaldiscount: "",
+//     totalbankcharges: "",
+//     againstbillno: "",
+//   });
+//   // const [items, setItems] = useState([
+//   //   {
+//   //     id: 1,
+//   //     accountname: "",
+//   //     pan:"",
+//   //     Add1:"",
+//   //     bsGroup:"",
+//   //     payment_debit: "",
+//   //     receipt_credit: "",
+//   //     discount: "",
+//   //     Total: "",
+//   //     bankchargers: "",
+//   //     tdsRs: "",
+//   //     chqnoBank: "",
+//   //     remarks: "",
+//   //     discounted_payment: "",
+//   //     discounted_receipt: "",
+//   //     destination: "",
+//   //     disablePayment: false,
+//   //     disableReceipt: false,
+//   //   },
+//   // ]);
+//   const MIN_ROWS = 9;
+//   const createEmptyRow = (id) => ({
+//     id,
+//     accountname: "",
+//     acode:0,
+//     pan:"",
+//     Add1:"",
+//     bsGroup:"",
+//     payment_debit: "",
+//     receipt_credit: "",
+//     discount: "",
+//     Total: "",
+//     bankchargers: "",
+//     tdsRs: "",
+//     chqnoBank: "",
+//     remarks: "",
+//     discounted_payment: "",
+//     discounted_receipt: "",
+//     destination: "",
+//     disablePayment: false,
+//     disableReceipt: false,
+//   });
+
+//   const normalizeItems = (items = []) => {
+//     const rows = [...items];
+
+//     while (rows.length < MIN_ROWS) {
+//       rows.push(createEmptyRow(rows.length + 1));
+//     }
+
+//     return rows;
+//   };
+
+//   const [items, setItems] = useState(() => normalizeItems());
+//   const [bankdetails, setbankdetails] = useState([
+//     {
+//       Bankname: "",
+//       code: "",
+//     },
+//   ]);
+
+//   useEffect(() => {
+//     if (addButtonRef.current && !bankId) {
+//       addButtonRef.current.focus();
+//     }
+//   }, []);
+
+//   // Naration Suggestions
+//   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+//   const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+//   const fetchNarrations = async () => {
+//     try {
+//       const res = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`
+//       );
+//       const data = await res.json();
+
+//       // extract narrations from all items
+//       const narrs = data
+//         .flatMap(entry => entry.items || [])
+//         .map(item => item.remarks)
+//         .filter(n => n && n.trim() !== "");  // remove empty narrations
+
+//       // unique values
+//       const uniqueNarrs = [...new Set(narrs)];
+
+//       setNarrationSuggestions(uniqueNarrs);
+//     } catch (err) {
+//       console.error("Narration fetch failed:", err);
+//     }
+//   };
+
+//   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+//   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
+
+//   // replace your Print button onClick:
+//   const handlePrintClick = () => setPrintChoiceOpen(true);
+
+//   // 1) Normal print (your existing PDF)
+//   const handleNormalPrint = () => {
+//     setPrintChoiceOpen(false);
+//     handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+//   };
+
+//   // 2) FA voucher preview
+//   const handleFAPreview = async () => {
+//     setIsFAModalOpen(true);
+//   };
+
+//   const calculateTotalBankCharges = () => {
+//     const totalBankCharges = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.bankchargers || 0);
+//     }, 0);
+
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totalbankcharges: totalBankCharges.toFixed(2),
+//     }));
+//   };
+//   const calculateTotalDiscount = () => {
+//     const totalDiscount = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.discount || 0);
+//     }, 0);
+
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totaldiscount: totalDiscount.toFixed(2),
+//     }));
+//   };
+
+//   const calculateTotalPayment = () => {
+//     const totalPayment = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.payment_debit || 0);
+//     }, 0);
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totalpayment: totalPayment.toFixed(2), // Format to 2 decimal places
+//     }));
+//   };
+//   const calculateTotalReceipt = () => {
+//     const totalReceipt = items.reduce((acc, item) => {
+//       return acc + parseFloat(item.receipt_credit || 0);
+//     }, 0);
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totalreceipt: totalReceipt.toFixed(2), // Format to 2 decimal places
+//     }));
+//   };
+//   const [decimalValue, setdecimalValue] = useState(0);
+//   const fetchCashBankSetup = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cashbanksetup`
+//       );
+//       if (!response.ok) throw new Error("Failed to fetch sales setup");
+
+//       const data = await response.json();
+
+//       if (Array.isArray(data) && data.length > 0 && data[0].formData) {
+//         const formDataFromAPI = data[0].formData;
+//         setdecimalValue(formDataFromAPI.decimals);
+//         // console.log(decimalValue);
+//       } else {
+//         throw new Error("Invalid response structure");
+//       }
+//     } catch (error) {
+//       console.error("Error fetching sales setup:", error.message);
+//     }
+//   };
+//   useEffect(() => {
+//     fetchCashBankSetup();
+//   }, [decimalValue]);
+
+//   // Fetching LedgerAccount Details
+//   React.useEffect(() => {
+//     // Fetch products from the API when the component mounts
+//     fetchCustomers();
+//     fetchNarrations();
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `http://localhost:3012/${tenant}/tenant/api/ledgerAccount`
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductsCus(formattedData);
+//       setLoadingCus(false);
+//       setProductsAcc(formattedData);
+//       setLoadingAcc(false);
+//     } catch (error) {
+//       setErrorCus(error.message);
+//       setLoadingCus(false);
+//       setErrorAcc(error.message);
+//       setLoadingAcc(false);
+//     }
+//   };
+
+//   // Modal For Account Name
+//   const [productsAcc, setProductsAcc] = useState([]);
+//   const [showModalAcc, setShowModalAcc] = useState(false);
+//   const [selectedItemIndexAcc, setSelectedItemIndexAcc] = useState(null);
+//   const [loadingAcc, setLoadingAcc] = useState(true);
+//   const [errorAcc, setErrorAcc] = useState(null);
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+
+//   const handleItemChangeAcc = (index, key, value) => {
+//     if (
+//       (key === "bankchargers" || key === "tdsRs") &&
+//       !/^\d*\.?\d*$/.test(value)
+//     ) {
+//       return; // reject invalid input
+//     }
+//     const updatedItems = [...items];
+
+//     if (["accountname", "chqnoBank", "remarks"].includes(key)) {
+//       updatedItems[index][key] = capitalizeWords(value);
+//     } else {
+//       updatedItems[index][key] = value;
+//     }
+//     calculateTotalPayment();
+//     calculateTotalReceipt();
+//     calculateTotalDiscount();
+//     calculateTotalBankCharges();
+
+//     // If the key is 'ahead', find the corresponding product and set the price
+//     if (key === "ahead") {
+//       const selectedProduct = productsAcc.find(
+//         (product) => product.ahead === value
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["accountname"] = selectedProduct.ahead;
+//         updatedItems[index]["acode"] = selectedProduct.acode;
+//         updatedItems[index]["destination"] = selectedProduct.city;
+//         updatedItems[index]["pan"] = selectedProduct.pan;
+//         updatedItems[index]["Add1"] = selectedProduct.add1;
+//         // alert(updatedItems[index]['destination'] = selectedProduct.city)
+//       }
+//     } else if (key === "discount") {
+//       const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
+//       const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
+//       const discount = parseFloat(value) || 0;
+
+//       let total = payment + receipt + discount;
+//       updatedItems[index]["Total"] = total.toFixed(2);
+
+//       let discountedPayment = payment - discount;
+//       updatedItems[index]["discounted_payment"] = updatedItems[index]
+//         .disablePayment
+//         ? "0.00"
+//         : discountedPayment.toFixed(2);
+
+//       let discountedReceipt = receipt - discount;
+//       updatedItems[index]["discounted_receipt"] = updatedItems[index]
+//         .disableReceipt
+//         ? "0.00"
+//         : discountedReceipt.toFixed(2);
+//     }
+
+//     setItems(updatedItems);
+//   };
+
+//     const handleProductSelectAcc = (product) => {
+//     if (!product) {
+//       alert("No account selected!");
+//       setShowModalAcc(false);
+//       return;
+//     }
+  
+//     // Deep copy shipped array
+//     const updatedShipped = [...items];
+
+//     // Update the correct object in the array
+//     updatedShipped[selectedItemIndexAcc] = {
+//       ...updatedShipped[selectedItemIndexAcc],
+//       accountname: product.ahead || "",
+//       acode: product.acode || 0,
+//       destination: product.city || "",
+//       pan: product.pan || "",
+//       Add1: product.add1 || "",
+//       bsGroup : product.Bsgroup || "",
+//       // Add any other mappings needed
+//     };
+
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexAcc !== null) {
+//       handleItemChangeAcc(selectedItemIndexAcc, "ahead", nameValue);
+//       setShowModalAcc(false);
+//       setTimeout(() => {
+//         paymentDebitRefs.current[selectedItemIndexAcc].focus();
+//       }, 100);
+//     }
+//     setItems(updatedShipped);       // <- update the array in state!
+//     setIsEditMode(true);
+//     setShowModalAcc(false);
+//   };
+
+//   const openModalForItemAcc = (index) => {
+//     if (isEditMode) {
+//       setSelectedItemIndexAcc(index);
+//       setShowModalAcc(true);
+//     }
+//   };
+
+//   const allFieldsAcc = productsAcc.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   const handleAddItem = () => {
+//     if (isEditMode) {
+//       const newItem = {
+//         id: items.length + 1,
+//         accountname: "",
+//         acode:0,
+//         pan:"",
+//         Add1:"",
+//         bsGroup:"",
+//         payment_debit: "",
+//         receipt_credit: "",
+//         discount: "",
+//         Total: "",
+//         bankchargers: "",
+//         tdsRs: "",
+//         chqnoBank: "",
+//         remarks: "",
+//         discounted_payment: "",
+//         discounted_receipt: "",
+//         destination: "",
+//         disablePayment: false,
+//         disableReceipt: false,
+//       };
+//       setItems((prevItems) => [...prevItems, newItem]);
+//       setTimeout(() => {
+//         accountNameRefs.current[items.length].focus();
+//       }, 100);
+//     }
+//   };
+
+//   const handleDeleteItem = (index) => {
+//     if (isEditMode) {
+//       const confirmDelete = window.confirm(
+//         "Do you really want to delete this item?"
+//       );
+//       // Proceed with deletion if the user confirms
+//       if (confirmDelete) {
+//         const filteredItems = items.filter((item, i) => i !== index);
+//         setItems(filteredItems);
+//       }
+//     }
+//   };
+
+//   // Modal For BanK Details
+//   const [productsCus, setProductsCus] = useState([]);
+//   const [showModalCus, setShowModalCus] = useState(false);
+//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//   const [loadingCus, setLoadingCus] = useState(true);
+//   const [errorCus, setErrorCus] = useState(null);
+
+//   const handleItemChangeCus = (index, key, value) => {
+//     const updatedItems = [...bankdetails];
+//     updatedItems[index][key] = value;
+//     // If the key is 'name', find the corresponding product and set the price
+//     if (key === "name") {
+//       const selectedProduct = productsCus.find(
+//         (product) => product.ahead === value
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["Bankname"] = selectedProduct.ahead;
+//         updatedItems[index]["code"] = selectedProduct.acode;
+//       }
+//     }
+//     setbankdetails(updatedItems);
+//   };
+
+//     const handleProductSelectCus = (product) => {
+//     if (!product) {
+//       alert("No product received!");
+//       setShowModalCus(false);
+//       return;
+//     }
+  
+//     // clone the array
+//     const newCustomers = [...bankdetails];
+  
+//     // overwrite the one at the selected index
+//     newCustomers[selectedItemIndexCus] = {
+//       ...newCustomers[selectedItemIndexCus],
+//       Bankname: product.ahead || '', 
+//       code: product.acode || '', 
+//     };
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexCus !== null) {
+//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//       setShowModalCus(false);
+//       // Focus back on the input field after selecting the value
+//       setTimeout(() => {
+//         BankRefs.current.focus()
+//       }, 0);
+//       // setTimeout(() => {
+//       //   accountNameRefs.current[selectedItemIndexCus].focus();
+//       // }, 100);
+//     }
+//     setbankdetails(newCustomers);
+//     setIsEditMode(true);
+//     setShowModalCus(false);
+  
+//   };
+
+//   const handleCloseModalCus = () => {
+//     setShowModalCus(false);
+//     setIsEditMode(true);
+//     setPressedKey(""); // resets for next modal open
+//   };
+
+//   const openModalForItemCus = (index) => {
+//     if (isEditMode) {
+//       setSelectedItemIndexCus(index);
+//       setShowModalCus(true);
+//     }
+//   };
+
+//   const allFieldsCus = productsCus.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   // Api Response
+//   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
+//   const fetchData = async () => {
+//     try {
+//       let response;
+//       if (bankId) {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bankget/${bankId}`
+//         );
+//       } else {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
+//         );
+//       }
+//       // const response = await axios.get(
+//       //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
+//       // );
+//       // console.log("Response: ", response.data);
+
+//       if (response.status === 200 && response.data.data) {
+//         const lastEntry = response.data.data;
+//         // Set flags and update form data
+//         setFirstTimeCheckData("DataAvailable");
+//         setFormData(lastEntry.formData);
+//         // console.log(lastEntry.formData, "Formdata");
+
+//         // Update items with the last entry's items
+//         const updatedItems = lastEntry.items.map((item) => ({
+//           ...item, // Ensure immutability
+//           disableReceipt: item.disableReceipt || false, // Handle disableReceipt flag safely
+//         }));
+//         // setItems(updatedItems);
+//         setItems(normalizeItems(updatedItems));
+//         const updatedItems2 = lastEntry.bankdetails.map((item) => ({
+//           ...item, // Ensure immutability
+//         }));
+//         setbankdetails(updatedItems2);
+
+//         // Calculate total payment, total receipt, and total discount
+//         const totalPayment = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
+//           .toFixed(2);
+//         const totalReceipt = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
+//           .toFixed(2);
+//         const totalDiscount = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
+//           .toFixed(2);
+//         const totalBankcharges = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.bankchargers || 0), 0)
+//           .toFixed(2);
+
+//         // Update formData with the calculated totals
+//         setFormData((prevFormData) => ({
+//           ...prevFormData,
+//           totalpayment: totalPayment,
+//           totalreceipt: totalReceipt,
+//           totaldiscount: totalDiscount,
+//           totalbankcharges: totalBankcharges,
+//         }));
+
+//         // Set data and index
+//         setData1(lastEntry); // Assuming setData1 holds the current entry data
+//         setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
+//         return lastEntry; // ✅ Return this for use in handleAdd
+//       } else {
+//         setFirstTimeCheckData("DataNotAvailable");
+//         console.log("No data available");
+//         // Create an empty data object with voucher number 0
+//         const emptyFormData = {
+//           voucherno: 0,
+//           date: "", // Use today's date
+//           vtype: "B",
+//           valpha:"",
+//           user: "Owner",
+//           totalpayment: "",
+//           totalreceipt: "",
+//           totaldiscount: "",
+//           totalbankcharges: "",
+//           againstbillno: "",
+//         };
+//         const emptyItems = [
+//           {
+//             id: 1,
+//             accountname: "",
+//             acode:0,
+//             pan:"",
+//             Add1:"",
+//             bsGroup:"",
+//             payment_debit: "",
+//             receipt_credit: "",
+//             discount: "",
+//             Total: "",
+//             bankchargers: "",
+//             tdsRs: "",
+//             chqnoBank: "",
+//             remarks: "",
+//             discounted_payment: "",
+//             discounted_receipt: "",
+//             destination: "",
+//             disablePayment: false,
+//             disableReceipt: false,
+//           },
+//         ];
+//         const emptybankdetails = [
+//           {
+//             Bankname: "",
+//             code: "",
+//           },
+//         ];
+//         // Set the empty data
+//         setFormData(emptyFormData);
+//         setItems(normalizeItems([]));
+//         setbankdetails(emptybankdetails);
+//         setData1({
+//           formData: emptyFormData,
+//           items: emptyItems,
+//           bankdetails: emptybankdetails,
+//         }); // Store empty data
+//         setIndex(0); // Set index to 0 for the empty voucher
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+
+//       // In case of error, you can also initialize empty data if needed
+//       const emptyFormData = {
+//         voucherno: 0,
+//         date: "", // Use today's date
+//         vtype: "B",
+//         valpha:"",
+//         user: "Owner",
+//         totalpayment: "",
+//         totalreceipt: "",
+//         totaldiscount: "",
+//         totalbankcharges: "",
+//         againstbillno: "",
+//       };
+//       const emptyItems = [
+//         {
+//           id: 1,
+//           accountname: "",
+//           acode:0,
+//           pan:"",
+//           Add1:"",
+//           bsGroup:"",
+//           payment_debit: "",
+//           receipt_credit: "",
+//           discount: "",
+//           Total: "",
+//           bankchargers: "",
+//           tdsRs: "",
+//           chqnoBank: "",
+//           remarks: "",
+//           discounted_payment: "",
+//           discounted_receipt: "",
+//           destination: "",
+//           disablePayment: false,
+//           disableReceipt: false,
+//         },
+//       ];
+//       setFormData(emptyFormData);
+//       setItems(normalizeItems([]));
+//       setData1({ formData: emptyFormData, items: emptyItems });
+//       setIndex(0);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   const [data, setData] = useState([]);
+//   const [data1, setData1] = useState([]);
+//   const [index, setIndex] = useState(0);
+//   const [isAddEnabled, setIsAddEnabled] = useState(true);
+//   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
+//   const [isPreviousEnabled, setIsPreviousEnabled] = useState(true);
+//   const [isNextEnabled, setIsNextEnabled] = useState(true);
+//   const [isFirstEnabled, setIsFirstEnabled] = useState(true);
+//   const [isLastEnabled, setIsLastEnabled] = useState(true);
+//   const [isSearchEnabled, setIsSearchEnabled] = useState(true);
+//   const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
+//   const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
+//   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+//   const [isAbcmode, setIsAbcmode] = useState(false);
+//   const [isEditMode2, setIsEditMode2] = useState(false); // State to track edit mode
+//   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+
+//   useEffect(() => {
+//     if (data.length > 0) {
+//       setFormData(data[data.length - 1]); // Set currentData to the last record
+//       setIndex(data.length - 1);
+//     }
+//   }, [data]);
+
+//   // Add this line to set isDisabled to true initially
+//   useEffect(() => {
+//     setIsDisabled(true);
+//   }, []);
+
+//   useEffect(() => {
+//     const handleEsc = (e) => {
+//       if (e.key === "Escape" && !isEditMode && bankId) {
+//         const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
+
+//         navigate(-1); // go back
+//         setTimeout(() => {
+//           // restore modal state after navigation
+//           if (modalState.keepModalOpen) {
+//             window.dispatchEvent(
+//               new CustomEvent("reopenTrailModal", { detail: modalState })
+//             );
+//           }
+//         }, 50);
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleEsc);
+//     return () => window.removeEventListener("keydown", handleEsc);
+//   }, [isEditMode]);
+
+//   const fetchVoucherNumbers = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last-voucherno`
+//       );
+
+//       return {
+//         lastVoucherNo: res?.data?.lastVoucherNo || 0,
+//         nextVoucherNo: res?.data?.nextVoucherNo || 1,
+//       };
+//     } catch (error) {
+//       console.error("Error fetching voucher numbers:", error);
+//       toast.error("Unable to fetch voucher number", {
+//         position: "top-center",
+//       });
+//       return null;
+//     }
+//   };
+
+//   const handleNext = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("VIEW");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/next/${data1._id}`
+//         );
+//         if (response.status === 200 && response.data) {
+//           const nextData = response.data.data;
+//           setData1(response.data.data);
+//           setIndex(index + 1);
+//           setFormData(nextData.formData);
+//           const updatedItems = nextData.items.map((item) => ({
+//             ...item,
+//             disableReceipt: item.disableReceipt || false,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           const updatedItems2 = nextData.bankdetails.map((item) => ({
+//             ...item,
+//           }));
+//           setbankdetails(updatedItems2);
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching next record:", error);
+//     }
+//   };
+
+//   const handlePrevious = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("VIEW");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/previous/${data1._id}`
+//         );
+//         if (response.status === 200 && response.data) {
+//           // console.log(response);
+//           setData1(response.data.data);
+//           const prevData = response.data.data;
+//           setIndex(index - 1);
+//           setFormData(prevData.formData);
+//           const updatedItems = prevData.items.map((item) => ({
+//             ...item,
+//             disableReceipt: item.disableReceipt || false,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           const updatedItems2 = prevData.bankdetails.map((item) => ({
+//             ...item,
+//           }));
+//           setbankdetails(updatedItems2);
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching previous record:", error);
+//     }
+//   };
+
+//   const handleFirst = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("VIEW");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant//bank/first`
+//       );
+//       if (response.status === 200 && response.data) {
+//         const firstData = response.data.data;
+//         setIndex(0);
+//         setFormData(firstData.formData);
+//         setData1(response.data.data);
+//         const updatedItems = firstData.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         const updatedItems2 = firstData.bankdetails.map((item) => ({
+//           ...item,
+//         }));
+//         setbankdetails(updatedItems2);
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching first record:", error);
+//     }
+//   };
+
+//   const handleLast = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("VIEW");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
+//       );
+//       if (response.status === 200 && response.data) {
+//         const lastData = response.data.data;
+//         const lastIndex = response.data.length - 1;
+//         setIndex(lastIndex);
+//         setFormData(lastData.formData);
+//         setData1(response.data.data);
+//         const updatedItems = lastData.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         const updatedItems2 = lastData.bankdetails.map((item) => ({
+//           ...item,
+//         }));
+//         setbankdetails(updatedItems2);
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching last record:", error);
+//     }
+//   };
+
+//   const getTodayDDMMYYYY = () => {
+//     const today = new Date();
+//     const dd = String(today.getDate()).padStart(2, "0");
+//     const mm = String(today.getMonth() + 1).padStart(2, "0");
+//     const yyyy = today.getFullYear();
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+//   const skipItemCodeFocusRef = useRef(false);
+//   const handleAdd = async () => {
+//     setTitle("NEW");
+//     try {
+//       const voucherData = await fetchVoucherNumbers();
+//       if (!voucherData) return;
+
+//       const lastvoucherno = voucherData.nextVoucherNo;
+
+//       const newData = {
+//         vtype: "B",
+//         valpha: selectedValpha,
+//         date: getTodayDDMMYYYY(),
+//         voucherno: lastvoucherno,
+//         user: "Owner",
+//         totalpayment: "",
+//         totalreceipt: "",
+//         totaldiscount: "",
+//         totalbankcharges: "",
+//         againstbillno: "",
+//       };
+//       setData([...data, newData]);
+//       setFormData(newData);
+//       setItems(normalizeItems([]));
+//       setIndex(data.length);
+//       setIsAddEnabled(false);
+//       setIsSubmitEnabled(true);
+//       setIsPreviousEnabled(false);
+//       setIsNextEnabled(false);
+//       setIsFirstEnabled(false);
+//       setIsLastEnabled(false);
+//       setIsSearchEnabled(false);
+//       setIsPreviousEnabled(false);
+//       setIsSPrintEnabled(false);
+//       setIsDeleteEnabled(false);
+//       setIsDisabled(false);
+//       setIsEditMode(true);
+//       skipItemCodeFocusRef.current = true;
+//       if (datePickerRef.current) {
+//         datePickerRef.current.focus();
+//       }
+//     } catch (error) {
+//       console.error("Error adding new entry:", error);
+//     }
+//   };
+
+//   const handleExit = async () => {
+//     document.body.style.backgroundColor = "white"; // Reset background color
+//     setTitle("VIEW");
+
+//     if(!isEditMode){
+//       navigate("/dashboard"); 
+//       return;
+//     }
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
+//       ); // Fetch the latest data
+//       if (response.status === 200 && response.data.data) {
+//         // If data is available
+//         const lastEntry = response.data.data;
+//         setFormData(lastEntry.formData);
+//         const updatedItems = lastEntry.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         const updatedItems2 = lastEntry.bankdetails.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         setbankdetails(updatedItems2);
+//         setIndex(lastEntry.formData);
+//         setIsAddEnabled(true);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         setIsEditMode(false);
+//         // Update totals
+//         const totalpayment = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
+//           .toFixed(2);
+//         const totalreceipt = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.receipt_credit || 0), 0)
+//           .toFixed(2);
+//         const totaldiscount = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.discount || 0), 0)
+//           .toFixed(2);
+//         const totalbankcharges = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.bankchargers || 0), 0)
+//           .toFixed(2);
+//         setFormData((prevFormData) => ({
+//           ...prevFormData,
+//           totalpayment: totalpayment,
+//           totalreceipt: totalreceipt,
+//           totaldiscount: totaldiscount,
+//           totalbankcharges: totalbankcharges,
+//         }));
+//         setIsDisabled(true); // Disable fields after loading the data
+//       } else {
+//         // If no data is available, initialize with default values
+//         console.log("No data available");
+//         const newData = {
+//           vtype: "B",
+//           valpha:"",
+//           date: "",
+//           voucherno: 0,
+//           user: "Owner",
+//           totalpayment: "",
+//           totalreceipt: "",
+//           totaldiscount: "",
+//           totalbankcharges: "",
+//           againstbillno: "",
+//         };
+//         setFormData(newData);
+//         setItems(normalizeItems([]));
+//         setIsDisabled(true); // Disable fields after loading the default data
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+//     }
+//   };
+
+//   const handleEditClick = () => {
+//     setTitle("EDIT");
+//     setIsDisabled(false); // Enable fields when editing
+//     setIsEditMode(true); // Enter edit mode when editing
+//     setIsAddEnabled(false);
+//     setIsSubmitEnabled(true); // Enable the Save button when in edit mode
+//     setIsPreviousEnabled(false);
+//     setIsNextEnabled(false);
+//     setIsFirstEnabled(false);
+//     setIsLastEnabled(false);
+//     setIsSearchEnabled(false);
+//     setIsPreviousEnabled(false);
+//     setIsSPrintEnabled(false);
+//     setIsDeleteEnabled(false);
+//     setIsAbcmode(true);
+//     if (accountNameRefs.current[0]) {
+//       accountNameRefs.current[0].focus();
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (isEditMode) {
+//       if (skipItemCodeFocusRef.current) {
+//         skipItemCodeFocusRef.current = false; // reset
+//         return;
+//       }
+
+//       setTimeout(() => {
+//         const el = accountNameRefs.current[0];
+//         if (el && !el.disabled) {
+//           el.focus();
+//           el.select && el.select();
+//         }
+//       }, 0);
+//     }
+//   }, [isEditMode]);
+
+//   const handleSaveClick = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setIsSaving(true);
+//     let isDataSaved = false;
+//     try {
+//       const filledRows = items.filter((item) => item.accountname !== "");
+//       if (filledRows.length === 0) {
+//         toast.error("Please fill in at least one account name before saving.", {
+//           position: "top-center",
+//         });
+//         setIsSaving(false);
+//         return;
+//       }
+//       // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+//       const isValidTransaction = filledRows.every(
+//         (item) =>
+//           parseFloat(item.payment_debit) > 0 ||
+//           parseFloat(item.receipt_credit) > 0
+//       );
+
+//       if (!isValidTransaction) {
+//         toast.error("Payment or Receipt must be greater than 0.", {
+//           position: "top-center",
+//         });
+//         return;
+//       }
+
+//       const voucherData = await fetchVoucherNumbers();
+//       if (!voucherData) return;
+
+//       if (!isAbcmode) {
+//         // ADD mode
+//         if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
+//           toast.error(`Voucher No ${formData.voucherno} already used!`, {
+//             position: "top-center",
+//           });
+//           setIsSubmitEnabled(true);
+//           return;
+//         }
+//       } else {
+//         // EDIT mode
+//         if (
+//           Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
+//           Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
+//         ) {
+//           toast.error(`Voucher No ${formData.voucherno} already used!`, {
+//             position: "top-center",
+//           });
+//           setIsSubmitEnabled(true);
+//           return;
+//         }
+//       }
+
+//       let combinedData;
+//       if (isAbcmode) {
+//         combinedData = {
+//           _id: formData._id,
+//           formData: {
+//             date: formData.date,
+//             vtype: formData.vtype,
+//             valpha: formData.valpha,
+//             voucherno: formData.voucherno,
+//             user: formData.user || "",
+//             totalpayment: formData.totalpayment,
+//             totalreceipt: formData.totalreceipt || "",
+//             totaldiscount: formData.totaldiscount,
+//             totalbankcharges: formData.totalbankcharges,
+//             againstbillno: formData.againstbillno || "",
+//           },
+//           items: filledRows.map((item) => ({
+//             id: item.id,
+//             accountname: item.accountname,
+//             acode: item.acode,
+//             pan: item.pan,
+//             Add1: item.Add1,
+//             bsGroup: item.bsGroup,
+//             payment_debit: item.payment_debit,
+//             receipt_credit: item.receipt_credit,
+//             discount: item.discount,
+//             Total: item.Total,
+//             bankchargers: item.bankchargers,
+//             tdsRs: item.tdsRs,
+//             chqnoBank: item.chqnoBank,
+//             remarks: item.remarks,
+//             discounted_payment: item.discounted_payment,
+//             discounted_receipt: item.discounted_receipt,
+//             destination: item.destination,
+//             disablePayment: item.disablePayment,
+//             disableReceipt: item.disableReceipt,
+//             name: item.name,
+//           })),
+//           bankdetails: bankdetails.map((item) => ({
+//             Bankname: item.Bankname,
+//             code: item.code,
+//           })),
+//         };
+//       } else {
+//         combinedData = {
+//           _id: formData._id,
+//           formData: {
+//             date: formData.date,
+//             vtype: formData.vtype,
+//             valpha: formData.valpha,
+//             voucherno: formData.voucherno,
+//             user: formData.user || "",
+//             totalpayment: formData.totalpayment,
+//             totalreceipt: formData.totalreceipt || "",
+//             totaldiscount: formData.totaldiscount,
+//             totalbankcharges: formData.totalbankcharges,
+//             againstbillno: formData.againstbillno || "",
+//           },
+//           items: filledRows.map((item) => ({
+//             id: item.id,
+//             accountname: item.accountname,
+//             acode: item.acode,
+//             pan: item.pan,
+//             Add1: item.Add1,
+//             bsGroup: item.bsGroup,
+//             payment_debit: item.payment_debit,
+//             receipt_credit: item.receipt_credit,
+//             discount: item.discount,
+//             Total: item.Total,
+//             bankchargers: item.bankchargers,
+//             tdsRs: item.tdsRs,
+//             chqnoBank: item.chqnoBank,
+//             remarks: item.remarks,
+//             discounted_payment: item.discounted_payment,
+//             discounted_receipt: item.discounted_receipt,
+//             destination: item.destination,
+//             disablePayment: item.disablePayment,
+//             disableReceipt: item.disableReceipt,
+//             name: item.name,
+//           })),
+//           bankdetails: bankdetails.map((item) => ({
+//             Bankname: item.Bankname,
+//             code: item.code,
+//           })),
+//         };
+//       }
+//       // Debugging
+//       // console.log("Combined Data:", combinedData);
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank${
+//         isAbcmode ? `/${data1._id}` : ""
+//       }`;
+//       const method = isAbcmode ? "put" : "post";
+//       const response = await axios({
+//         method,
+//         url: apiEndpoint,
+//         data: combinedData,
+//       });
+
+//       if (response.status === 200 || response.status === 201) {
+//         // fetchData();
+//         isDataSaved = true;
+//       }
+//     } catch (error) {
+//       console.error("Error saving data:", error);
+//       toast.error("Failed to save data. Please try again.", {
+//         position: "top-center",
+//       });
+//     } finally {
+//       setIsSubmitEnabled(true);
+//       setIsSaving(false);
+//       if (isDataSaved) {
+//         setTitle("VIEW");
+//         setIsAddEnabled(true);
+//         setIsDisabled(true);
+//         setIsEditMode(false);
+//         setIsEditMode2(false);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsPreviousEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         fetchData(); // Refresh data after saving
+//         fetchNarrations(); // Refresh narrations after saving
+//         toast.success("Data Saved Successfully!", { position: "top-center" });
+//       } else {
+//         setIsAddEnabled(false);
+//         setIsDisabled(false);
+//       }
+//     }
+//   };
+
+//   const handleDeleteClick = async (id) => {
+//     if (!id) {
+//       toast.error("Invalid ID. Please select an item to delete.", {
+//         position: "top-center",
+//       });
+//       return;
+//     }
+
+//     const userConfirmed = window.confirm(
+//       "Are you sure you want to delete this bank voucher?"
+//     );
+//     if (!userConfirmed) return;
+
+//     try {
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/${data1._id}`;
+//       const response = await axios.delete(apiEndpoint);
+
+//       if (response.status === 200) {
+//         toast.success("Bank voucher deleted successfully!", {
+//           position: "top-center",
+//         });
+//         fetchData(); // reload bank list
+//       } else {
+//         throw new Error(`Failed to delete data: ${response.statusText}`);
+//       }
+//     } catch (error) {
+//       console.error("Error deleting bank voucher:", error);
+//       toast.error(`Failed to delete. Error: ${error.message}`, {
+//         position: "top-center",
+//       });
+//     }
+//   };
+//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+//   const tableScrollRef = useRef(null);
+//   const focusAndScroll = (refArray, rowIndex) => {
+//     const inputEl = refArray.current?.[rowIndex];
+//     const container = tableScrollRef.current;
+
+//     if (!inputEl || !container) return;
+
+//     // focus & select
+//     inputEl.focus();
+//     setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+//     // find row
+//     const rowEl = inputEl.closest("tr");
+//     if (!rowEl) return;
+
+//     const rowTop = rowEl.offsetTop;
+//     const rowHeight = rowEl.offsetHeight;
+//     const containerHeight = container.clientHeight;
+
+//     // 🔥 key line — force visibility
+//     container.scrollTop =
+//       rowTop - containerHeight + rowHeight + 60;
+//   };
+//   const handleKeyDown = (event, index, field) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault(); // Stop default Tab navigation
+//       switch (field) {
+//         case "accountname":
+//           if (items[index].accountname.trim() === "") {
+//             saveButtonRef.current.focus();
+//           } else {
+//             if (items[index].disablePayment) {
+//               receiptCreditRefs.current[index]?.focus();
+//             } else {
+//               paymentDebitRefs.current[index]?.focus();
+//             }
+//           }
+//           break;
+//         case "payment_debit":
+//           if (!items[index].disableReceipt) {
+//             receiptCreditRefs.current[index]?.focus();
+//           } else {
+//             discountRefs.current[index]?.focus();
+//           }
+//           break;
+//         case "receipt_credit":
+//           if (items[index].accountname.trim() === "") {
+//             saveButtonRef.current.focus();
+//           } else {
+//             discountRefs.current[index]?.focus();
+//           }
+//           break;
+//         case "discount":
+//           totalRefs.current[index]?.focus();
+//           break;
+//         case "Total":
+//           bankChargersRefs.current[index]?.focus();
+//           break;
+//         case "bankchargers":
+//           tdsRsRefs.current[index]?.focus();
+//           break;
+//         case "tdsRs":
+//           chqnoBankRefs.current[index]?.focus();
+//           break;
+//         case "chqnoBank":
+//           remarksRefs.current[index]?.focus();
+//           break;
+//         case "remarks":
+//           if (index === items.length - 1) {
+//             handleAddItem();
+//             setTimeout(() => {
+//               focusAndScroll(accountNameRefs, index + 1);
+//             }, 0);
+//           } else {
+//             focusAndScroll(accountNameRefs, index + 1);
+//           }
+//           break;
+//         default:
+//           break;
+//       }
+//     }
+//     // Move Right (→)
+//     else if (event.key === "ArrowRight") {
+//       if (field === "accountname") {
+//         if (items[index].disablePayment) {
+//           receiptCreditRefs.current[index]?.focus();
+//           setTimeout(() => receiptCreditRefs.current[index]?.select(), 0);
+//         } else {
+//           paymentDebitRefs.current[index]?.focus();
+//           setTimeout(() => paymentDebitRefs.current[index]?.select(), 0);
+//         }
+//       } else if (field === "payment_debit" && !items[index].disableReceipt) {
+//         receiptCreditRefs.current[index]?.focus();
+//         setTimeout(() => receiptCreditRefs.current[index]?.select(), 0);
+//       } else if (field === "payment_debit" && items[index].disableReceipt) {
+//         discountRefs.current[index]?.focus();
+//         setTimeout(() => discountRefs.current[index]?.select(), 0);
+//       } else if (field === "receipt_credit") {
+//         discountRefs.current[index]?.focus();
+//         setTimeout(() => discountRefs.current[index]?.select(), 0);
+//       } else if (field === "discount") {
+//         totalRefs.current[index]?.focus();
+//         setTimeout(() => totalRefs.current[index]?.select(), 0);
+//       } else if (field === "Total") {
+//         bankChargersRefs.current[index]?.focus();
+//         setTimeout(() => bankChargersRefs.current[index]?.select(), 0);
+//       } else if (field === "bankchargers") {
+//         tdsRsRefs.current[index]?.focus();
+//         setTimeout(() => tdsRsRefs.current[index]?.select(), 0);
+//       } else if (field === "tdsRs") {
+//         chqnoBankRefs.current[index]?.focus();
+//         setTimeout(() => chqnoBankRefs.current[index]?.select(), 0);
+//       } else if (field === "chqnoBank") {
+//         remarksRefs.current[index]?.focus();
+//         setTimeout(() => remarksRefs.current[index]?.select(), 0);
+//       }
+//     }
+//     // Move Left (←)
+//     else if (event.key === "ArrowLeft") {
+//       if (field === "remarks") {
+//         chqnoBankRefs.current[index]?.focus();
+//         setTimeout(() => chqnoBankRefs.current[index]?.select(), 0);
+//       } else if (field === "chqnoBank") {
+//         tdsRsRefs.current[index]?.focus();
+//         setTimeout(() => tdsRsRefs.current[index]?.select(), 0);
+//       } else if (field === "tdsRs") {
+//         bankChargersRefs.current[index]?.focus();
+//         setTimeout(() => bankChargersRefs.current[index]?.select(), 0);
+//       } else if (field === "bankchargers") {
+//         totalRefs.current[index]?.focus();
+//         setTimeout(() => totalRefs.current[index]?.select(), 0);
+//       } else if (field === "Total") {
+//         discountRefs.current[index]?.focus();
+//         setTimeout(() => discountRefs.current[index]?.select(), 0);
+//       } else if (field === "discount") {
+//         if (!items[index].disableReceipt) {
+//           receiptCreditRefs.current[index]?.focus();
+//           setTimeout(() => receiptCreditRefs.current[index]?.select(), 0);
+//         } else if (!items[index].disablePayment) {
+//           paymentDebitRefs.current[index]?.focus();
+//           setTimeout(() => paymentDebitRefs.current[index]?.select(), 0);
+//         } else {
+//           accountNameRefs.current[index]?.focus();
+//           setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//         }
+//       } else if (field === "receipt_credit" && !items[index].disablePayment) {
+//         accountNameRefs.current[index]?.focus();
+//         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//       } else if (field === "receipt_credit" && items[index].disablePayment) {
+//         accountNameRefs.current[index]?.focus();
+//         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//       } else if (field === "payment_debit") {
+//         accountNameRefs.current[index]?.focus();
+//         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//       }
+//     }
+
+//     // Move Up
+//     else if (event.key === "ArrowUp" && index > 0) {
+//       setTimeout(() => {
+//         if (field === "accountname")
+//           accountNameRefs.current[index - 1]?.focus();
+//         else if (field === "payment_debit")
+//           paymentDebitRefs.current[index - 1]?.focus();
+//         else if (field === "receipt_credit")
+//           receiptCreditRefs.current[index - 1]?.focus();
+//         else if (field === "discount") discountRefs.current[index - 1]?.focus();
+//         else if (field === "Total") totalRefs.current[index - 1]?.focus();
+//         else if (field === "bankchargers")
+//           bankChargersRefs.current[index - 1]?.focus();
+//         else if (field === "tdsRs") tdsRsRefs.current[index - 1]?.focus();
+//         else if (field === "chqnoBank")
+//           chqnoBankRefs.current[index - 1]?.focus();
+//         else if (field === "remarks") remarksRefs.current[index - 1]?.focus();
+//       }, 100);
+//     }
+//     // Move Down
+//     else if (event.key === "ArrowDown" && index < items.length - 1) {
+//       setTimeout(() => {
+//         if (field === "accountname")
+//           accountNameRefs.current[index + 1]?.focus();
+//         else if (field === "payment_debit")
+//           paymentDebitRefs.current[index + 1]?.focus();
+//         else if (field === "receipt_credit")
+//           receiptCreditRefs.current[index + 1]?.focus();
+//         else if (field === "discount") discountRefs.current[index + 1]?.focus();
+//         else if (field === "Total") totalRefs.current[index + 1]?.focus();
+//         else if (field === "bankchargers")
+//           bankChargersRefs.current[index + 1]?.focus();
+//         else if (field === "tdsRs") tdsRsRefs.current[index + 1]?.focus();
+//         else if (field === "chqnoBank")
+//           chqnoBankRefs.current[index + 1]?.focus();
+//         else if (field === "remarks") remarksRefs.current[index + 1]?.focus();
+//       }, 100);
+//     }
+//     // Open Modal on Letter Input in Account Name
+//     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+//       setPressedKey(event.key);
+//       openModalForItemAcc(index);
+//       event.preventDefault();
+//     }
+//   };
+
+//   const handleNumberChange = (event, index, field) => {
+//     const value = event.target.value;
+//     // Validate that the input is numeric
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+//     const updatedItems = [...items];
+//     updatedItems[index][field] = value;
+
+//     // Calculate total payment, total receipt, total discount, and total bank charges for all rows
+//     let totalPayment = 0;
+//     let totalReceipt = 0;
+//     let totalDiscount = 0;
+//     let totalBankCharges = 0;
+
+//     updatedItems.forEach((item) => {
+//       const payment = parseFloat(item.payment_debit) || 0;
+//       const receipt = parseFloat(item.receipt_credit) || 0;
+//       const discount = parseFloat(item.discount) || 0;
+//       const bankCharges = parseFloat(item.bankchargers) || 0;
+//       totalPayment += payment;
+//       totalReceipt += receipt;
+//       totalDiscount += discount;
+//       totalBankCharges += bankCharges;
+//     });
+//     // Update total payment, total receipt, total discount, and total bank charges in formData
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       totalpayment: totalPayment.toFixed(2),
+//       totalreceipt: totalReceipt.toFixed(2),
+//       totaldiscount: totalDiscount.toFixed(2),
+//       totalbankcharges: totalBankCharges.toFixed(2),
+//     }));
+
+//     if (field === "payment_debit" || field === "receipt_credit") {
+//       const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
+//       const receipt = parseFloat(updatedItems[index]["receipt_credit"]) || 0;
+//       const discount = parseFloat(updatedItems[index]["discount"]) || 0;
+
+//       let total = payment + receipt + discount;
+//       updatedItems[index]["Total"] = total.toFixed(2);
+
+//       let discountedPayment = payment - discount;
+//       updatedItems[index]["discounted_payment"] = updatedItems[index]
+//         .disablePayment
+//         ? "0.00"
+//         : discountedPayment.toFixed(2);
+
+//       let discountedReceipt = receipt - discount;
+//       updatedItems[index]["discounted_receipt"] = updatedItems[index]
+//         .disableReceipt
+//         ? "0.00"
+//         : discountedReceipt.toFixed(2);
+//     }
+
+//     // Check if the value is greater than 0 to update disable conditions
+//     const isValueGreaterThanZero = parseFloat(value) > 0;
+
+//     // Disable According to debit or credit
+//     if (field === "payment_debit") {
+//       updatedItems[index].disableReceipt = isValueGreaterThanZero;
+//     } else if (field === "receipt_credit") {
+//       updatedItems[index].disablePayment = isValueGreaterThanZero;
+//     }
+//     setItems(updatedItems);
+//   };
+
+//   const handleOpenModal = (event, index, field) => {
+//     if (/^[a-zA-Z]$/.test(event.key) && field === "Bankname") {
+//       setPressedKey(event.key); // Set the pressed key
+//       openModalForItemCus(index);
+//       event.preventDefault(); // Prevent any default action
+//     }
+//   };
+ 
+//   const handleNumericValue = (event) => {
+//     const { id, value } = event.target;
+//     // Allow only numeric values, including optional decimal points
+//     if (/^\d*\.?\d*$/.test(value) || value === "") {
+//       setFormData((prevData) => ({
+//         ...prevData,
+//         [id]: value,
+//       }));
+//     }
+//   };
+//   // Update the blur handlers so that they always format the value to 2 decimals.
+//   const handlePkgsBlur = (index) => {
+//     const decimalPlaces = decimalValue;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].payment_debit);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].payment_debit = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleWeightBlur = (index) => {
+//     const decimalPlaces = decimalValue;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].receipt_credit);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].receipt_credit = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleRateBlur = (index) => {
+//     const decimalPlaces = decimalValue;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].discount);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].discount = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleBankBlur = (index) => {
+//     const decimalPlaces = decimalValue;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].bankchargers);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].bankchargers = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+//   const handleTDSBlur = (index) => {
+//     const decimalPlaces = decimalValue;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].tdsRs);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].tdsRs = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault();
+//       if (nextRef && nextRef.current) {
+//         nextRef.current.focus();
+//       } else {
+//         if (tableRef.current) {
+//           const firstInputInTable = tableRef.current.querySelector("input");
+//           if (firstInputInTable) {
+//             firstInputInTable.focus();
+//           }
+//         }
+//       }
+//     }
+//   };
+
+//   const handleBankEnter = (e) => {
+//     if (e.key === "Enter" || e.key === "Tab") {
+//       e.preventDefault();
+
+//       // Focus first ACCOUNTNAME input
+//       if (accountNameRefs.current[0]) {
+//         accountNameRefs.current[0].focus();
+//       }
+//     }
+//   };
+
+//   const isRowFilled = (row) => {
+//     return (row.accountname || "").trim() !== "";
+//   };
+//   const canEditRow = (rowIndex) => {
+//       // 🔒 If not in edit mode, nothing is editable
+//       if (!isEditMode) return false;
+
+//       // First row is editable in edit mode
+//       if (rowIndex === 0) return true;
+
+//       // All previous rows must be filled
+//       for (let i = 0; i < rowIndex; i++) {
+//         if (!isRowFilled(items[i])) {
+//           return false;
+//         }
+//       }
+//       return true;
+//   };
+
+//   const formatDateToDDMMYYYY = (dateStr) => {
+//     if (!dateStr) return "";
+
+//     // ✅ Already dd-mm-yyyy
+//     const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+//     const match = dateStr.match(ddmmyyyy);
+//     if (match) {
+//       const [, dd, mm, yyyy] = match;
+//       const test = new Date(`${yyyy}-${mm}-${dd}`);
+//       if (
+//         test.getDate() === Number(dd) &&
+//         test.getMonth() + 1 === Number(mm) &&
+//         test.getFullYear() === Number(yyyy)
+//       ) {
+//         return dateStr;
+//       }
+//     }
+
+//     let date;
+
+//     // ✅ ISO with time (Z or offset)
+//     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+//       const [y, m, d] = dateStr.substring(0, 10).split("-");
+//       date = new Date(y, m - 1, d); // avoid timezone issues
+//     }
+//     // ✅ ISO date only (yyyy-mm-dd)
+//     else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+//       const [y, m, d] = dateStr.split("-");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // ✅ dd/mm/yyyy
+//     else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+//       const [d, m, y] = dateStr.split("/");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // ✅ yyyy/mm/dd
+//     else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+//       const [y, m, d] = dateStr.split("/");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // 🔁 fallback (Date.parse)
+//     else {
+//       date = new Date(dateStr);
+//     }
+
+//     if (!date || isNaN(date.getTime())) return "";
+
+//     const dd = String(date.getDate()).padStart(2, "0");
+//     const mm = String(date.getMonth() + 1).padStart(2, "0");
+//     const yyyy = date.getFullYear();
+
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+
+//   const [showSearch, setShowSearch] = useState(false);
+//   const [allBills, setAllBills] = useState([]);
+//   const [searchBillNo, setSearchBillNo] = useState("");
+//   const [filteredBills, setFilteredBills] = useState([]);
+//   const [searchDate, setSearchDate] = useState(null);
+//   const [activeRowIndex, setActiveRowIndex] = useState(0);
+//     // ⭐ infinite scroll state
+//   const [visibleCount, setVisibleCount] = useState(10);
+
+//   // Fetch all bills for search
+//   const fetchAllBills = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`,
+//       );
+//       if (Array.isArray(res.data)) {
+//         setAllBills(res.data);
+//         setFilteredBills(res.data);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching bills", error);
+//     }
+//   };
+
+//   // Update filtering logic
+//   useEffect(() => {
+//     let filtered = allBills;
+
+//     if (searchBillNo.trim() !== "") {
+//       filtered = filtered.filter((bill) =>
+//         bill.formData.voucherno
+//           .toString()
+//           .toLowerCase()
+//           .includes(searchBillNo.toLowerCase())
+//       );
+//     }
+
+//     if (searchDate) {
+//       const selected = formatDateToDDMMYYYY(searchDate);
+
+//       if (selected) {
+//         filtered = filtered.filter((bill) => {
+//           const billDate = formatDateToDDMMYYYY(bill.formData.date);
+//           return billDate === selected;
+//         });
+//       }
+//     }
+
+//     setFilteredBills(filtered);
+
+//     // ⭐ reset visible rows when search changes
+//     setVisibleCount(30);
+//   }, [searchBillNo, searchDate, allBills]);
+
+//   const handleSelectBill = (bill) => {
+//     setFormData({
+//       ...bill.formData,
+//       date: bill.formData.date,
+//     });
+//     setItems(normalizeItems(bill.items));
+//     setShowSearch(false);
+//     setFilteredBills([]);
+//     setSearchBillNo("");
+//     setSearchDate("");
+//   };
+  
+//   useEffect(() => {
+//     const handleKeyDown = (e) => {
+//       if (!showSearch) return;
+
+//       if (e.key === "ArrowDown") {
+//         e.preventDefault();
+//         setActiveRowIndex((prev) =>
+//           prev < filteredBills.length - 1 ? prev + 1 : prev
+//         );
+//       }
+
+//       if (e.key === "ArrowUp") {
+//         e.preventDefault();
+//         setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+//       }
+
+//       if (e.key === "Enter") {
+//         e.preventDefault();
+//         const bill = filteredBills[activeRowIndex];
+//         if (bill) {
+//           handleSelectBill(bill);
+//           setShowSearch(false);
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+
+//     return () => window.removeEventListener("keydown", handleKeyDown);
+//   }, [filteredBills, activeRowIndex, showSearch]);
+
+//   // ShortCuts for Buttons
+//   const AnyModalOpen = showModalCus || showModalAcc || showSearch || printChoiceOpen
+//   useShortcuts({
+//     handleAdd,
+//     handleEdit: handleEditClick,
+//     handlePrevious,
+//     handleNext,
+//     handleFirst,
+//     handleLast,
+//     handleExit,
+//     handlePrint: handlePrintClick,
+//     isEditMode,
+//     isModalOpen: AnyModalOpen,   // 👈 here
+//   });
+
+//   useEffect(() => {
+//     const handleKeyDown = (event) => {
+//       if (event.key === "Escape") {
+
+//         if (showSearch) {
+//           setShowSearch(false);
+//           return;
+//         }
+
+//         if (printChoiceOpen) {
+//           setPrintChoiceOpen(false);
+//           return;
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+
+//     return () => {
+//       window.removeEventListener("keydown", handleKeyDown);
+//     };
+//   }, [showSearch, printChoiceOpen]);
+
+//   // Storing Valpha
+//   const bankWinFromState = location.state?.bankWin;
+
+//   // Load from localStorage if refresh
+//   const bankWinFromStorage = localStorage.getItem("bankWin")
+//     ? JSON.parse(localStorage.getItem("bankWin"))
+//     : null;
+
+//   // Final object (state first, then storage)
+//   const bankWin = bankWinFromState || bankWinFromStorage;
+
+//   // Extract valpha safely
+//   const selectedValpha = bankWin?.valpha || "";
+
+//   useEffect(() => {
+//     if (bankWinFromState) {
+//       localStorage.setItem("bankWin", JSON.stringify(bankWinFromState));
+//     }
+//   }, [bankWinFromState]);
+
+//   return (
+//     <div>
+//       <ToastContainer />
+//       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
+//         <InvoicePDFbank
+//           formData={formData}
+//           items={items}
+//           isOpen={open}
+//           handleClose={handleClose}
+//         />
+//       </div>
+//       <h1 className="HeaderBANK">BANK VOUCHER</h1>
+//       <span className="tittle">{title}</span>
+//       <div className="topdetails">
+//         <div style={{ display: "flex", flexDirection: "row" }}>
+//           <InputMask
+//             mask="99-99-9999"
+//             placeholder="dd-mm-yyyy"
+//             value={formData.date}
+//             readOnly={!isEditMode || isDisabled}
+//             onChange={(e) =>
+//               setFormData({ ...formData, date: e.target.value })
+//             }
+//           >
+//             {(inputProps) => (
+//               <input
+//                 {...inputProps}
+//                 className="DatePICKER"
+//                 ref={datePickerRef}
+//                 onKeyDown={(e) => {
+//                   handleEnterKeyPress(datePickerRef, VoucherRef)(e);
+//                 }}
+//               />
+//             )}
+//           </InputMask>
+//           {/* <DatePicker
+//             ref={datePickerRef}
+//             selected={selectedDate || null}
+//             openToDate={new Date()}
+//             onCalendarClose={handleCalendarClose}
+//             dateFormat="dd-MM-yyyy"
+//             onChange={handleDateChange}
+//             onBlur={() => checkFutureDate(selectedDate)}
+//             customInput={<MaskedInput />}
+//           /> */}
+//           <div style={{ marginLeft: 5 }}>
+//             <TextField
+//               className="custom-bordered-input"
+//               inputRef={VoucherRef}
+//               id="voucherno"
+//               value={formData.voucherno}
+//               onChange={handleNumericValue}
+//               onKeyDown={(e) => handleEnterKeyPress(VoucherRef, BankRefs)(e)}
+//               onFocus={(e) => e.target.select()}
+//               label="VOUCHER NO"
+//               size="small"
+//               variant="filled"
+//               inputProps={{
+//                 maxLength: 48,
+//                 style: {
+//                   height: 20,
+//                   fontSize: `${fsize}px`,
+//                 },
+//                 readOnly: !isEditMode || isDisabled,
+//               }}
+//               sx={{ width: 150 }} // Adjust width as needed
+//             />
+//           </div>
+//           <div style={{ marginLeft: 5 }}>
+//             <TextField
+//               className="custom-bordered-input"
+//               id="user"
+//               value={formData.user}
+//               onFocus={(e) => e.target.select()}
+//               label="USER"
+//               size="small"
+//               variant="filled"
+//               inputProps={{
+//                 maxLength: 48,
+//                 style: {
+//                   height: 20,
+//                   fontSize: `${fsize}px`,
+//                 },
+//                 readOnly: !isEditMode || isDisabled,
+//               }}
+//               sx={{ width: 150 }} // Adjust width as needed
+//             />
+//           </div>
+//         </div>
+//         <div style={{ marginTop: 5 }}>
+//           {bankdetails.map((item, index) => (
+//             <div className="bankdiv" key={item.Bankname}>
+//               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+//                 <TextField
+//                   inputRef={BankRefs}
+//                   className="custom-bordered-input"
+//                   id="Bankname"
+//                   value={item.Bankname}
+//                   onFocus={(e) => e.target.select()}
+//                   label="BANK NAME"
+//                   size="small"
+//                   variant="filled"
+//                   onKeyDown={(e) => {
+//                     handleOpenModal(e, index, "Bankname");
+//                     handleBankEnter(e);
+//                   }}
+//                   inputProps={{
+//                     maxLength: 48,
+//                     style: {
+//                       height: 20,
+//                       fontSize: `${fsize}px`,
+//                     },
+//                     readOnly: !isEditMode || isDisabled,
+//                   }}
+//                   sx={{ width: 280 }} // Adjust width as needed
+//                 />
+//               </div>
+//               <div style={{ marginLeft: 5 }}>
+//                 <TextField
+//                   className="custom-bordered-input"
+//                   id="code"
+//                   value={item.code}
+//                   onFocus={(e) => e.target.select()}
+//                   label="AC CODE"
+//                   size="small"
+//                   variant="filled"
+//                   inputProps={{
+//                     maxLength: 48,
+//                     style: {
+//                       height: 20,
+//                       fontSize: `${fsize}px`,
+//                     },
+//                     readOnly: !isEditMode || isDisabled,
+//                   }}
+//                   sx={{ width: 150 }} // Adjust width as needed
+                
+//                 />
+//               </div>
+//             </div>
+//           ))}
+
+//           {showModalCus && (
+//           <ProductModalCustomer
+//             allFields={allFieldsCus}
+//             onSelect={handleProductSelectCus}
+//             onClose={handleCloseModalCus}
+//             initialKey={pressedKey}
+//             tenant={tenant}
+//           />
+//           )}
+//         </div>
+//       </div>
+//       <div ref={tableScrollRef} className="Tablesections">
+//         <Table ref={tableRef} className="custom-table">
+//           <thead
+//             style={{
+//               backgroundColor: "skyblue",
+//               textAlign: "center",
+//               position: "sticky",
+//               top: 0,
+//             }}
+//           >
+//             <tr style={{ color: "white" }}>
+//               <th style={{ width: 450 }}>ACCOUNT NAME</th>
+//               <th>PAYMENT</th>
+//               <th>RECEIPT</th>
+//               <th>DISCOUNT</th>
+//               <th>TOTAL</th>
+//               <th>BNK.CHG.</th>
+//               <th>TDS Rs.</th>
+//               <th>CHQNO+BANK</th>
+//               <th>
+//                 REMARKS
+//                 <input 
+//                   type="checkbox"
+//                   style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
+//                   tabIndex={-1}       // ⬅⬅ prevents tab focus
+//                   checked={showNarrationSuggestions}
+//                   onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+//                 />
+//               </th>
+//               {isEditMode && <th className="text-center">DELETE</th>}
+//             </tr>
+//           </thead>
+//           <tbody style={{ overflowY: "auto", maxHeight: "calc(380px - 40px)" }}>
+//             {items.map((item, index) => (
+//               <tr key={index}>
+//                 <td style={{ padding: 0}}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="Account"
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.accountname}
+//                     // onClick={() => openModalForItemAcc(index)}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "accountname");
+//                     }}
+//                     ref={(el) => (accountNameRefs.current[index] = el)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                     className="Payments"
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
+//                     onChange={(e) =>
+//                       handleNumberChange(e, index, "payment_debit")
+//                     }
+//                     disabled={!canEditRow(index) || item.disablePayment}
+//                     ref={(el) => (paymentDebitRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
+//                     onBlur={() => handlePkgsBlur(index)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                     className="Receipts"
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
+//                     onChange={(e) =>
+//                       handleNumberChange(e, index, "receipt_credit")
+//                     }
+//                     disabled={!canEditRow(index) || item.disableReceipt}
+//                     ref={(el) => (receiptCreditRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
+//                     onBlur={() => handleWeightBlur(index)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="Discounts"
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     value={Number(item.discount) === 0 ? "" : item.discount}
+//                     onChange={(e) =>
+//                       handleItemChangeAcc(index, "discount", e.target.value)
+//                     }
+//                     ref={(el) => (discountRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "discount")}
+//                     onBlur={() => handleRateBlur(index)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="Totals"
+//                     readOnly
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                       backgroundColor: "#e3f8e3",
+//                     }}
+//                     value={Number(item.Total) === 0 ? "" : item.Total}
+//                     onChange={(e) =>
+//                       handleItemChangeAcc(index, "Total", e.target.value)
+//                     }
+//                     ref={(el) => (totalRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "Total")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="Bankcharges"
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     value={Number(item.bankchargers) === 0 ? "" : item.bankchargers}
+//                     onChange={(e) =>
+//                       handleItemChangeAcc(index, "bankchargers", e.target.value)
+//                     }
+//                     ref={(el) => (bankChargersRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "bankchargers")}
+//                     onBlur={() => handleBankBlur(index)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="TDSrs"
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     value={Number(item.tdsRs) === 0 ? "" : item.tdsRs}
+//                     onChange={(e) =>
+//                       handleItemChangeAcc(index, "tdsRs", e.target.value)
+//                     }
+//                     ref={(el) => (tdsRsRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "tdsRs")}
+//                     onBlur={() => handleTDSBlur(index)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="chnqBank"
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.chqnoBank}
+//                     onChange={(e) =>
+//                       handleItemChangeAcc(index, "chqnoBank", e.target.value)
+//                     }
+//                     ref={(el) => (chqnoBankRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "chqnoBank")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                    disabled={!canEditRow(index)}
+//                     className="REM"
+//                     list={showNarrationSuggestions ? "narrationList" : undefined}
+//                     readOnly={!isEditMode || isDisabled}
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.remarks}
+//                     onChange={(e) =>
+//                       handleItemChangeAcc(index, "remarks", e.target.value)
+//                     }
+//                     ref={(el) => (remarksRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "remarks")}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                   {showNarrationSuggestions && (
+//                     <datalist id="narrationList">
+//                       {narrationSuggestions.map((n, i) => (
+//                         <option key={i} value={n} />
+//                       ))}
+//                     </datalist>
+//                   )}
+//                 </td>
+//                 {isEditMode && (
+//                   <td style={{ padding: 0 }}>
+//                     {canEditRow(index) && (
+//                       <div
+//                         style={{
+//                           display: "flex",
+//                           justifyContent: "center",
+//                           alignItems: "center",
+//                           height: "100%",
+//                         }}
+//                       >
+//                         <IconButton
+//                           color="error"
+//                           size="small"
+//                           tabIndex={-1}
+//                           onClick={() => handleDeleteItem(index)}
+//                         >
+//                           <DeleteIcon />
+//                         </IconButton>
+//                       </div>
+//                     )}
+//                   </td>
+//                 )}
+//               </tr>
+//             ))}
+//           </tbody>
+//           <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
+//           <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+//             <td></td>
+//             <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
+//             <td>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
+//             <td>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
+//             <td></td>
+//             <td>{Number(formData.totalbankcharges) === 0 ? "" : formData.totalbankcharges}</td>
+//             <td colSpan={3}></td>
+//             {isEditMode && <td></td>}
+//           </tr>
+//           </tfoot>
+//         </Table>
+//       </div>
+//       <div className="addbutton">
+//         <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
+//           Add Row
+//         </Button>
+//       </div>
+//       {showModalAcc && (
+//         <ProductModalCustomer
+//         allFields={allFieldsAcc}
+//         onSelect={handleProductSelectAcc}
+//         onClose={() => setShowModalAcc(false)} 
+//         initialKey={pressedKey}
+//         tenant={tenant}
+//         onRefresh={fetchCustomers}
+//         />
+//       )}
+//       <div className="Belowcontent">
+//         <PrintChoiceModal
+//           open={printChoiceOpen}
+//           onClose={() => setPrintChoiceOpen(false)}
+//           onNormal={handleNormalPrint}
+//           onFA={handleFAPreview}
+//         />
+//         <FAVoucherModal
+//           open={isFAModalOpen}
+//           onClose={() => setIsFAModalOpen(false)}
+//           tenant= {tenant}
+//           voucherno={formData?.voucherno}
+//           vtype="B"
+//         />
+
+//         <div className="Buttonsgroupz">
+//           <Button
+//             ref={addButtonRef}
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[0] }}
+//             onClick={handleAdd}
+//             disabled={!isAddEnabled}
+//           >
+//             Add
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[1] }}
+//             onClick={handleEditClick}
+//             disabled={!isAddEnabled}
+//           >
+//             Edit
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[2] }}
+//             onClick={handlePrevious}
+//             disabled={!isPreviousEnabled}
+//             // disabled={!isAddEnabled}
+//           >
+//             Previous
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[3] }}
+//             onClick={handleNext}
+//             disabled={!isNextEnabled}
+//           >
+//             Next
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[4] }}
+//             onClick={handleFirst}
+//             disabled={!isFirstEnabled}
+//           >
+//             First
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[5] }}
+//             onClick={handleLast}
+//             disabled={!isLastEnabled}
+//           >
+//             Last
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{  backgroundColor: buttonColors[6] }}
+//             onClick={() => {
+//               fetchAllBills();
+//               setActiveRowIndex(0);
+//               setShowSearch(true);
+//             }}
+//             disabled={!isSearchEnabled}
+//           >
+//             Search
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[7] }}
+//             onClick={handlePrintClick}
+//             disabled={!isPrintEnabled}
+//           >
+//             Print
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[8] }}
+//             disabled={!isDeleteEnabled}
+//             onClick={handleDeleteClick}
+//           >
+//             Delete
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ color: "black", backgroundColor: buttonColors[9] }}
+//             onClick={handleExit}
+//           >
+//             Exit
+//           </Button>
+//           <Button
+//             ref={saveButtonRef}
+//             className="Buttonz"
+//             onClick={handleSaveClick}
+//             disabled={!isSubmitEnabled}
+//             style={{ color: "black", backgroundColor: buttonColors[10] }}
+//           >
+//             Save
+//           </Button>
+//         </div>
+//       </div>
+//       {/* Search Modal */}
+//       <Modal
+//         show={showSearch}
+//         keyboard={false}
+//         backdrop="static"
+//         onHide={() => setShowSearch(false)}
+//         size="lg"
+//       >
+//         <Modal.Header closeButton>
+//           <Modal.Title>Search</Modal.Title>
+//         </Modal.Header>
+
+//         <Modal.Body>
+//           <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+//             <TextField
+//               className="custom-bordered-input"
+//               size="small"
+//               variant="filled"
+//               label="Enter Bill No..."
+//               value={searchBillNo}
+//               onChange={(e) => setSearchBillNo(e.target.value)}
+//             />
+
+//             <InputMask
+//               mask="99-99-9999"
+//               placeholder="dd-mm-yyyy"
+//               value={searchDate}
+//               onChange={(e) => setSearchDate(e.target.value)}
+//             >
+//               {(props) => (
+//                 <TextField
+//                   className="custom-bordered-input"
+//                   {...props}
+//                   label="DATE"
+//                   size="small"
+//                   variant="filled"
+//                   fullWidth
+//                   style={{ width: 230, marginLeft: 5 }}
+//                 />
+//               )}
+//             </InputMask>
+//           </div>
+
+//           <div
+//             style={{ maxHeight: "300px", overflowY: "auto" }}
+//             onScroll={(e) => {
+//               const bottom =
+//                 e.target.scrollHeight - e.target.scrollTop <=
+//                 e.target.clientHeight + 5;
+
+//               if (bottom && visibleCount < filteredBills.length) {
+//                 setVisibleCount((prev) => prev + 30);
+//               }
+//             }}
+//           >
+//             <Table>
+//               <thead>
+//                 <tr>
+//                   <th>V.NO</th>
+//                   <th>DATE</th>
+//                   <th>ACCOUNT</th>
+//                   <th>PAYMENT</th>
+//                   <th>RECEIPT</th>
+//                   <th>DISCOUNT</th>
+//                 </tr>
+//               </thead>
+
+//               <tbody>
+//                 {filteredBills.slice(0, visibleCount).map((bill, index) => (
+//                   <tr key={bill._id}
+//                   style={{
+//                     backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+//                     cursor: "pointer",
+//                   }}
+//                   onClick={() => {
+//                     setActiveRowIndex(index);
+//                     handleSelectBill(bill);
+//                     setShowSearch(false);
+//                   }}
+//                   >
+//                     <td>{bill.formData.voucherno}</td>
+//                     <td>
+//                       {formatDateToDDMMYYYY(bill.formData.date)}
+//                     </td>
+//                     <td>{bill.items?.[0]?.accountname}</td>
+//                     <td>{bill.formData.totalpayment}</td>
+//                     <td>{bill.formData.totalreceipt}</td>
+//                     <td>{bill.formData.totaldiscount}</td>
+//                   </tr>
+//                 ))}
+
+//                 {filteredBills.length === 0 && (
+//                   <tr>
+//                     <td colSpan="6" style={{ textAlign: "center" }}>
+//                       No matching records
+//                     </td>
+//                   </tr>
+//                 )}
+//               </tbody>
+//             </Table>
+//           </div>
+//         </Modal.Body>
+//       </Modal>
+//     </div>
+//   );
+// };
+// export default BankVoucher;
+
+// Live
+
+import React, { useState, useEffect, useRef, useContext } from "react";
 import "./BankVoucher.css";
 import InputMask from "react-input-mask";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
-import { BiTrash } from "react-icons/bi";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import InvoicePDFbank from "../InvoicePDFbank";
 import { useEditMode } from "../../EditModeContext";
 import { CompanyContext } from "../Context/CompanyContext";
-import { useContext } from "react";
 import TextField from "@mui/material/TextField";
 import { IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -21,29 +2587,26 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PrintChoiceModal from "../Shared/PrintChoiceModal";
 import useCompanySetup from "../Shared/useCompanySetup";
 import FAVoucherModal from "../Shared/FAVoucherModal";
-import SearchModal from "../Shared/SearchModal";
 import useShortcuts from "../Shared/useShortcuts";
-import { Modal } from "react-bootstrap"; // Import Bootstrap components
+import { Modal } from "react-bootstrap";
 
 const BankVoucher = () => {
-
   const companySetup = useCompanySetup();
   const location = useLocation();
   const bankId = location.state?.bankId;
   const navigate = useNavigate();
   const { company } = useContext(CompanyContext);
   // const tenant = company?.databaseName;
-  const tenant = "03AAYFG4472A1ZG_01042025_31032026"
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
-    // you may want to guard here or show an error state,
-    // since without a tenant you can’t hit the right API
     console.error("No tenant selected!");
   }
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   const addButtonRef = useRef(null);
   const datePickerRef = useRef(null);
   const VoucherRef = useRef(null);
@@ -59,8 +2622,11 @@ const BankVoucher = () => {
   const chqnoBankRefs = useRef([]);
   const remarksRefs = useRef([]);
   const saveButtonRef = useRef(null);
+  const tableScrollRef = useRef(null);
+
   const [title, setTitle] = useState("VIEW");
   const [isSaving, setIsSaving] = useState(false);
+
   const initialColors = [
     "#E9967A",
     "#F0E68C",
@@ -74,11 +2640,12 @@ const BankVoucher = () => {
     "#DCDCDC",
     "#8FBC8F",
   ];
-  const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
-  const [fsize, setfsize] = useState(17);
+  const [buttonColors, setButtonColors] = useState(initialColors);
+  const [fontSize, setFontSize] = useState(17);
+
   const [formData, setFormData] = useState({
     vtype: "B",
-    valpha:"",
+    valpha: "",
     date: "",
     voucherno: 0,
     user: "Owner",
@@ -88,36 +2655,15 @@ const BankVoucher = () => {
     totalbankcharges: "",
     againstbillno: "",
   });
-  // const [items, setItems] = useState([
-  //   {
-  //     id: 1,
-  //     accountname: "",
-  //     pan:"",
-  //     Add1:"",
-  //     bsGroup:"",
-  //     payment_debit: "",
-  //     receipt_credit: "",
-  //     discount: "",
-  //     Total: "",
-  //     bankchargers: "",
-  //     tdsRs: "",
-  //     chqnoBank: "",
-  //     remarks: "",
-  //     discounted_payment: "",
-  //     discounted_receipt: "",
-  //     destination: "",
-  //     disablePayment: false,
-  //     disableReceipt: false,
-  //   },
-  // ]);
+
   const MIN_ROWS = 9;
   const createEmptyRow = (id) => ({
     id,
     accountname: "",
-    acode:0,
-    pan:"",
-    Add1:"",
-    bsGroup:"",
+    acode: 0,
+    pan: "",
+    Add1: "",
+    bsGroup: "",
     payment_debit: "",
     receipt_credit: "",
     discount: "",
@@ -135,11 +2681,9 @@ const BankVoucher = () => {
 
   const normalizeItems = (items = []) => {
     const rows = [...items];
-
     while (rows.length < MIN_ROWS) {
       rows.push(createEmptyRow(rows.length + 1));
     }
-
     return rows;
   };
 
@@ -155,27 +2699,22 @@ const BankVoucher = () => {
     if (addButtonRef.current && !bankId) {
       addButtonRef.current.focus();
     }
-  }, []);
+  }, [bankId]);
 
-  // Naration Suggestions
   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
   const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+
   const fetchNarrations = async () => {
     try {
-      const res = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`
-      );
+      const res = await fetch(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`);
       const data = await res.json();
 
-      // extract narrations from all items
       const narrs = data
-        .flatMap(entry => entry.items || [])
-        .map(item => item.remarks)
-        .filter(n => n && n.trim() !== "");  // remove empty narrations
+        .flatMap((entry) => entry.items || [])
+        .map((item) => item.remarks)
+        .filter((n) => n && n.trim() !== "");
 
-      // unique values
       const uniqueNarrs = [...new Set(narrs)];
-
       setNarrationSuggestions(uniqueNarrs);
     } catch (err) {
       console.error("Narration fetch failed:", err);
@@ -185,16 +2724,13 @@ const BankVoucher = () => {
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
 
-  // replace your Print button onClick:
   const handlePrintClick = () => setPrintChoiceOpen(true);
 
-  // 1) Normal print (your existing PDF)
   const handleNormalPrint = () => {
     setPrintChoiceOpen(false);
-    handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+    handleOpen();
   };
 
-  // 2) FA voucher preview
   const handleFAPreview = async () => {
     setIsFAModalOpen(true);
   };
@@ -209,6 +2745,7 @@ const BankVoucher = () => {
       totalbankcharges: totalBankCharges.toFixed(2),
     }));
   };
+
   const calculateTotalDiscount = () => {
     const totalDiscount = items.reduce((acc, item) => {
       return acc + parseFloat(item.discount || 0);
@@ -226,24 +2763,25 @@ const BankVoucher = () => {
     }, 0);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalpayment: totalPayment.toFixed(2), // Format to 2 decimal places
+      totalpayment: totalPayment.toFixed(2),
     }));
   };
+
   const calculateTotalReceipt = () => {
     const totalReceipt = items.reduce((acc, item) => {
       return acc + parseFloat(item.receipt_credit || 0);
     }, 0);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalreceipt: totalReceipt.toFixed(2), // Format to 2 decimal places
+      totalreceipt: totalReceipt.toFixed(2),
     }));
   };
+
   const [decimalValue, setdecimalValue] = useState(0);
+
   const fetchCashBankSetup = async () => {
     try {
-      const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cashbanksetup`
-      );
+      const response = await fetch(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/cashbanksetup`);
       if (!response.ok) throw new Error("Failed to fetch sales setup");
 
       const data = await response.json();
@@ -251,7 +2789,6 @@ const BankVoucher = () => {
       if (Array.isArray(data) && data.length > 0 && data[0].formData) {
         const formDataFromAPI = data[0].formData;
         setdecimalValue(formDataFromAPI.decimals);
-        // console.log(decimalValue);
       } else {
         throw new Error("Invalid response structure");
       }
@@ -259,27 +2796,23 @@ const BankVoucher = () => {
       console.error("Error fetching sales setup:", error.message);
     }
   };
+
   useEffect(() => {
     fetchCashBankSetup();
   }, [decimalValue]);
 
-  // Fetching LedgerAccount Details
   React.useEffect(() => {
-    // Fetch products from the API when the component mounts
     fetchCustomers();
     fetchNarrations();
   }, []);
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3012/${tenant}/tenant/api/ledgerAccount`
-      );
+      const response = await fetch(`http://localhost:3012/${tenant}/tenant/api/ledgerAccount`);
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
       const data = await response.json();
-      // Ensure to extract the formData for easier access in the rest of your app
       const formattedData = data.map((item) => ({
         ...item.formData,
         _id: item._id,
@@ -296,7 +2829,6 @@ const BankVoucher = () => {
     }
   };
 
-  // Modal For Account Name
   const [productsAcc, setProductsAcc] = useState([]);
   const [showModalAcc, setShowModalAcc] = useState(false);
   const [selectedItemIndexAcc, setSelectedItemIndexAcc] = useState(null);
@@ -308,12 +2840,10 @@ const BankVoucher = () => {
   };
 
   const handleItemChangeAcc = (index, key, value) => {
-    if (
-      (key === "bankchargers" || key === "tdsRs") &&
-      !/^\d*\.?\d*$/.test(value)
-    ) {
-      return; // reject invalid input
+    if ((key === "bankchargers" || key === "tdsRs") && !/^\d*\.?\d*$/.test(value)) {
+      return;
     }
+
     const updatedItems = [...items];
 
     if (["accountname", "chqnoBank", "remarks"].includes(key)) {
@@ -321,23 +2851,20 @@ const BankVoucher = () => {
     } else {
       updatedItems[index][key] = value;
     }
+
     calculateTotalPayment();
     calculateTotalReceipt();
     calculateTotalDiscount();
     calculateTotalBankCharges();
 
-    // If the key is 'ahead', find the corresponding product and set the price
     if (key === "ahead") {
-      const selectedProduct = productsAcc.find(
-        (product) => product.ahead === value
-      );
+      const selectedProduct = productsAcc.find((product) => product.ahead === value);
       if (selectedProduct) {
         updatedItems[index]["accountname"] = selectedProduct.ahead;
         updatedItems[index]["acode"] = selectedProduct.acode;
         updatedItems[index]["destination"] = selectedProduct.city;
         updatedItems[index]["pan"] = selectedProduct.pan;
         updatedItems[index]["Add1"] = selectedProduct.add1;
-        // alert(updatedItems[index]['destination'] = selectedProduct.city)
       }
     } else if (key === "discount") {
       const payment = parseFloat(updatedItems[index]["payment_debit"]) || 0;
@@ -348,14 +2875,12 @@ const BankVoucher = () => {
       updatedItems[index]["Total"] = total.toFixed(2);
 
       let discountedPayment = payment - discount;
-      updatedItems[index]["discounted_payment"] = updatedItems[index]
-        .disablePayment
+      updatedItems[index]["discounted_payment"] = updatedItems[index].disablePayment
         ? "0.00"
         : discountedPayment.toFixed(2);
 
       let discountedReceipt = receipt - discount;
-      updatedItems[index]["discounted_receipt"] = updatedItems[index]
-        .disableReceipt
+      updatedItems[index]["discounted_receipt"] = updatedItems[index].disableReceipt
         ? "0.00"
         : discountedReceipt.toFixed(2);
     }
@@ -363,17 +2888,15 @@ const BankVoucher = () => {
     setItems(updatedItems);
   };
 
-    const handleProductSelectAcc = (product) => {
+  const handleProductSelectAcc = (product) => {
     if (!product) {
       alert("No account selected!");
       setShowModalAcc(false);
       return;
     }
-  
-    // Deep copy shipped array
+
     const updatedShipped = [...items];
 
-    // Update the correct object in the array
     updatedShipped[selectedItemIndexAcc] = {
       ...updatedShipped[selectedItemIndexAcc],
       accountname: product.ahead || "",
@@ -381,8 +2904,7 @@ const BankVoucher = () => {
       destination: product.city || "",
       pan: product.pan || "",
       Add1: product.add1 || "",
-      bsGroup : product.Bsgroup || "",
-      // Add any other mappings needed
+      bsGroup: product.Bsgroup || "",
     };
 
     const nameValue = product.ahead || product.name || "";
@@ -390,10 +2912,10 @@ const BankVoucher = () => {
       handleItemChangeAcc(selectedItemIndexAcc, "ahead", nameValue);
       setShowModalAcc(false);
       setTimeout(() => {
-        paymentDebitRefs.current[selectedItemIndexAcc].focus();
+        paymentDebitRefs.current[selectedItemIndexAcc]?.focus();
       }, 100);
     }
-    setItems(updatedShipped);       // <- update the array in state!
+    setItems(updatedShipped);
     setIsEditMode(true);
     setShowModalAcc(false);
   };
@@ -411,7 +2933,6 @@ const BankVoucher = () => {
         fields.push(key);
       }
     });
-
     return fields;
   }, []);
 
@@ -420,10 +2941,10 @@ const BankVoucher = () => {
       const newItem = {
         id: items.length + 1,
         accountname: "",
-        acode:0,
-        pan:"",
-        Add1:"",
-        bsGroup:"",
+        acode: 0,
+        pan: "",
+        Add1: "",
+        bsGroup: "",
         payment_debit: "",
         receipt_credit: "",
         discount: "",
@@ -440,17 +2961,14 @@ const BankVoucher = () => {
       };
       setItems((prevItems) => [...prevItems, newItem]);
       setTimeout(() => {
-        accountNameRefs.current[items.length].focus();
+        accountNameRefs.current[items.length]?.focus();
       }, 100);
     }
   };
 
   const handleDeleteItem = (index) => {
     if (isEditMode) {
-      const confirmDelete = window.confirm(
-        "Do you really want to delete this item?"
-      );
-      // Proceed with deletion if the user confirms
+      const confirmDelete = window.confirm("Do you really want to delete this item?");
       if (confirmDelete) {
         const filteredItems = items.filter((item, i) => i !== index);
         setItems(filteredItems);
@@ -458,7 +2976,6 @@ const BankVoucher = () => {
     }
   };
 
-  // Modal For BanK Details
   const [productsCus, setProductsCus] = useState([]);
   const [showModalCus, setShowModalCus] = useState(false);
   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
@@ -468,11 +2985,8 @@ const BankVoucher = () => {
   const handleItemChangeCus = (index, key, value) => {
     const updatedItems = [...bankdetails];
     updatedItems[index][key] = value;
-    // If the key is 'name', find the corresponding product and set the price
     if (key === "name") {
-      const selectedProduct = productsCus.find(
-        (product) => product.ahead === value
-      );
+      const selectedProduct = productsCus.find((product) => product.ahead === value);
       if (selectedProduct) {
         updatedItems[index]["Bankname"] = selectedProduct.ahead;
         updatedItems[index]["code"] = selectedProduct.acode;
@@ -481,44 +2995,38 @@ const BankVoucher = () => {
     setbankdetails(updatedItems);
   };
 
-    const handleProductSelectCus = (product) => {
+  const handleProductSelectCus = (product) => {
     if (!product) {
       alert("No product received!");
       setShowModalCus(false);
       return;
     }
-  
-    // clone the array
+
     const newCustomers = [...bankdetails];
-  
-    // overwrite the one at the selected index
+
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
-      Bankname: product.ahead || '', 
-      code: product.acode || '', 
+      Bankname: product.ahead || "",
+      code: product.acode || "",
     };
+
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
       setShowModalCus(false);
-      // Focus back on the input field after selecting the value
       setTimeout(() => {
-        BankRefs.current.focus()
+        BankRefs.current?.focus();
       }, 0);
-      // setTimeout(() => {
-      //   accountNameRefs.current[selectedItemIndexCus].focus();
-      // }, 100);
     }
     setbankdetails(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
-  
   };
 
   const handleCloseModalCus = () => {
     setShowModalCus(false);
     setIsEditMode(true);
-    setPressedKey(""); // resets for next modal open
+    setPressedKey("");
   };
 
   const openModalForItemCus = (index) => {
@@ -534,49 +3042,36 @@ const BankVoucher = () => {
         fields.push(key);
       }
     });
-
     return fields;
   }, []);
 
-  // Api Response
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
+
   const fetchData = async () => {
     try {
       let response;
       if (bankId) {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bankget/${bankId}`
-        );
+        response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bankget/${bankId}`);
       } else {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
-        );
+        response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`);
       }
-      // const response = await axios.get(
-      //   `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
-      // );
-      // console.log("Response: ", response.data);
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
-        // Set flags and update form data
         setFirstTimeCheckData("DataAvailable");
         setFormData(lastEntry.formData);
-        // console.log(lastEntry.formData, "Formdata");
 
-        // Update items with the last entry's items
         const updatedItems = lastEntry.items.map((item) => ({
-          ...item, // Ensure immutability
-          disableReceipt: item.disableReceipt || false, // Handle disableReceipt flag safely
+          ...item,
+          disableReceipt: item.disableReceipt || false,
         }));
-        // setItems(updatedItems);
         setItems(normalizeItems(updatedItems));
+
         const updatedItems2 = lastEntry.bankdetails.map((item) => ({
-          ...item, // Ensure immutability
+          ...item,
         }));
         setbankdetails(updatedItems2);
 
-        // Calculate total payment, total receipt, and total discount
         const totalPayment = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
           .toFixed(2);
@@ -590,7 +3085,6 @@ const BankVoucher = () => {
           .reduce((sum, item) => sum + parseFloat(item.bankchargers || 0), 0)
           .toFixed(2);
 
-        // Update formData with the calculated totals
         setFormData((prevFormData) => ({
           ...prevFormData,
           totalpayment: totalPayment,
@@ -599,19 +3093,18 @@ const BankVoucher = () => {
           totalbankcharges: totalBankcharges,
         }));
 
-        // Set data and index
-        setData1(lastEntry); // Assuming setData1 holds the current entry data
-        setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
-        return lastEntry; // ✅ Return this for use in handleAdd
+        setData1(lastEntry);
+        setIndex(lastEntry.voucherno);
+        return lastEntry;
       } else {
         setFirstTimeCheckData("DataNotAvailable");
         console.log("No data available");
-        // Create an empty data object with voucher number 0
+
         const emptyFormData = {
           voucherno: 0,
-          date: "", // Use today's date
+          date: "",
           vtype: "B",
-          valpha:"",
+          valpha: "",
           user: "Owner",
           totalpayment: "",
           totalreceipt: "",
@@ -623,10 +3116,10 @@ const BankVoucher = () => {
           {
             id: 1,
             accountname: "",
-            acode:0,
-            pan:"",
-            Add1:"",
-            bsGroup:"",
+            acode: 0,
+            pan: "",
+            Add1: "",
+            bsGroup: "",
             payment_debit: "",
             receipt_credit: "",
             discount: "",
@@ -648,7 +3141,7 @@ const BankVoucher = () => {
             code: "",
           },
         ];
-        // Set the empty data
+
         setFormData(emptyFormData);
         setItems(normalizeItems([]));
         setbankdetails(emptybankdetails);
@@ -656,18 +3149,17 @@ const BankVoucher = () => {
           formData: emptyFormData,
           items: emptyItems,
           bankdetails: emptybankdetails,
-        }); // Store empty data
-        setIndex(0); // Set index to 0 for the empty voucher
+        });
+        setIndex(0);
       }
     } catch (error) {
       console.error("Error fetching data", error);
 
-      // In case of error, you can also initialize empty data if needed
       const emptyFormData = {
         voucherno: 0,
-        date: "", // Use today's date
+        date: "",
         vtype: "B",
-        valpha:"",
+        valpha: "",
         user: "Owner",
         totalpayment: "",
         totalreceipt: "",
@@ -679,10 +3171,10 @@ const BankVoucher = () => {
         {
           id: 1,
           accountname: "",
-          acode:0,
-          pan:"",
-          Add1:"",
-          bsGroup:"",
+          acode: 0,
+          pan: "",
+          Add1: "",
+          bsGroup: "",
           payment_debit: "",
           receipt_credit: "",
           discount: "",
@@ -721,19 +3213,18 @@ const BankVoucher = () => {
   const [isSearchEnabled, setIsSearchEnabled] = useState(true);
   const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
   const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
-  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+  const { isEditMode, setIsEditMode } = useEditMode();
   const [isAbcmode, setIsAbcmode] = useState(false);
-  const [isEditMode2, setIsEditMode2] = useState(false); // State to track edit mode
-  const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+  const [isEditMode2, setIsEditMode2] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
     if (data.length > 0) {
-      setFormData(data[data.length - 1]); // Set currentData to the last record
+      setFormData(data[data.length - 1]);
       setIndex(data.length - 1);
     }
   }, [data]);
 
-  // Add this line to set isDisabled to true initially
   useEffect(() => {
     setIsDisabled(true);
   }, []);
@@ -743,13 +3234,10 @@ const BankVoucher = () => {
       if (e.key === "Escape" && !isEditMode && bankId) {
         const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
 
-        navigate(-1); // go back
+        navigate(-1);
         setTimeout(() => {
-          // restore modal state after navigation
           if (modalState.keepModalOpen) {
-            window.dispatchEvent(
-              new CustomEvent("reopenTrailModal", { detail: modalState })
-            );
+            window.dispatchEvent(new CustomEvent("reopenTrailModal", { detail: modalState }));
           }
         }, 50);
       }
@@ -757,13 +3245,11 @@ const BankVoucher = () => {
 
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isEditMode]);
+  }, [isEditMode, bankId, navigate]);
 
   const fetchVoucherNumbers = async () => {
     try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last-voucherno`
-      );
+      const res = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last-voucherno`);
 
       return {
         lastVoucherNo: res?.data?.lastVoucherNo || 0,
@@ -783,9 +3269,7 @@ const BankVoucher = () => {
     setTitle("VIEW");
     try {
       if (data1) {
-        const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/next/${data1._id}`
-        );
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/next/${data1._id}`);
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
           setData1(response.data.data);
@@ -813,11 +3297,8 @@ const BankVoucher = () => {
     setTitle("VIEW");
     try {
       if (data1) {
-        const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/previous/${data1._id}`
-        );
+        const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/previous/${data1._id}`);
         if (response.status === 200 && response.data) {
-          // console.log(response);
           setData1(response.data.data);
           const prevData = response.data.data;
           setIndex(index - 1);
@@ -844,9 +3325,7 @@ const BankVoucher = () => {
     setTitle("VIEW");
 
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant//bank/first`
-      );
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant//bank/first`);
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
         setIndex(0);
@@ -873,9 +3352,7 @@ const BankVoucher = () => {
     setTitle("VIEW");
 
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
-      );
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`);
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
         const lastIndex = response.data.length - 1;
@@ -905,7 +3382,9 @@ const BankVoucher = () => {
     const yyyy = today.getFullYear();
     return `${dd}-${mm}-${yyyy}`;
   };
+
   const skipItemCodeFocusRef = useRef(false);
+
   const handleAdd = async () => {
     setTitle("NEW");
     try {
@@ -926,6 +3405,7 @@ const BankVoucher = () => {
         totalbankcharges: "",
         againstbillno: "",
       };
+
       setData([...data, newData]);
       setFormData(newData);
       setItems(normalizeItems([]));
@@ -943,6 +3423,7 @@ const BankVoucher = () => {
       setIsDisabled(false);
       setIsEditMode(true);
       skipItemCodeFocusRef.current = true;
+
       if (datePickerRef.current) {
         datePickerRef.current.focus();
       }
@@ -952,21 +3433,20 @@ const BankVoucher = () => {
   };
 
   const handleExit = async () => {
-    document.body.style.backgroundColor = "white"; // Reset background color
+    document.body.style.backgroundColor = "white";
     setTitle("VIEW");
 
-    if(!isEditMode){
-      navigate("/dashboard"); 
+    if (!isEditMode) {
+      navigate("/dashboard");
       return;
     }
+
     try {
-      const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`
-      ); // Fetch the latest data
+      const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank/last`);
       if (response.status === 200 && response.data.data) {
-        // If data is available
         const lastEntry = response.data.data;
         setFormData(lastEntry.formData);
+
         const updatedItems = lastEntry.items.map((item) => ({
           ...item,
           disableReceipt: item.disableReceipt || false,
@@ -975,6 +3455,7 @@ const BankVoucher = () => {
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
+
         setItems(normalizeItems(updatedItems));
         setbankdetails(updatedItems2);
         setIndex(lastEntry.formData);
@@ -988,7 +3469,7 @@ const BankVoucher = () => {
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
         setIsEditMode(false);
-        // Update totals
+
         const totalpayment = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.payment_debit || 0), 0)
           .toFixed(2);
@@ -1001,6 +3482,7 @@ const BankVoucher = () => {
         const totalbankcharges = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.bankchargers || 0), 0)
           .toFixed(2);
+
         setFormData((prevFormData) => ({
           ...prevFormData,
           totalpayment: totalpayment,
@@ -1008,13 +3490,12 @@ const BankVoucher = () => {
           totaldiscount: totaldiscount,
           totalbankcharges: totalbankcharges,
         }));
-        setIsDisabled(true); // Disable fields after loading the data
+        setIsDisabled(true);
       } else {
-        // If no data is available, initialize with default values
         console.log("No data available");
         const newData = {
           vtype: "B",
-          valpha:"",
+          valpha: "",
           date: "",
           voucherno: 0,
           user: "Owner",
@@ -1026,7 +3507,7 @@ const BankVoucher = () => {
         };
         setFormData(newData);
         setItems(normalizeItems([]));
-        setIsDisabled(true); // Disable fields after loading the default data
+        setIsDisabled(true);
       }
     } catch (error) {
       console.error("Error fetching data", error);
@@ -1035,10 +3516,10 @@ const BankVoucher = () => {
 
   const handleEditClick = () => {
     setTitle("EDIT");
-    setIsDisabled(false); // Enable fields when editing
-    setIsEditMode(true); // Enter edit mode when editing
+    setIsDisabled(false);
+    setIsEditMode(true);
     setIsAddEnabled(false);
-    setIsSubmitEnabled(true); // Enable the Save button when in edit mode
+    setIsSubmitEnabled(true);
     setIsPreviousEnabled(false);
     setIsNextEnabled(false);
     setIsFirstEnabled(false);
@@ -1056,7 +3537,7 @@ const BankVoucher = () => {
   useEffect(() => {
     if (isEditMode) {
       if (skipItemCodeFocusRef.current) {
-        skipItemCodeFocusRef.current = false; // reset
+        skipItemCodeFocusRef.current = false;
         return;
       }
 
@@ -1074,6 +3555,7 @@ const BankVoucher = () => {
     document.body.style.backgroundColor = "white";
     setIsSaving(true);
     let isDataSaved = false;
+
     try {
       const filledRows = items.filter((item) => item.accountname !== "");
       if (filledRows.length === 0) {
@@ -1083,11 +3565,9 @@ const BankVoucher = () => {
         setIsSaving(false);
         return;
       }
-      // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+
       const isValidTransaction = filledRows.every(
-        (item) =>
-          parseFloat(item.payment_debit) > 0 ||
-          parseFloat(item.receipt_credit) > 0
+        (item) => parseFloat(item.payment_debit) > 0 || parseFloat(item.receipt_credit) > 0
       );
 
       if (!isValidTransaction) {
@@ -1101,7 +3581,6 @@ const BankVoucher = () => {
       if (!voucherData) return;
 
       if (!isAbcmode) {
-        // ADD mode
         if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
           toast.error(`Voucher No ${formData.voucherno} already used!`, {
             position: "top-center",
@@ -1110,7 +3589,6 @@ const BankVoucher = () => {
           return;
         }
       } else {
-        // EDIT mode
         if (
           Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
           Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
@@ -1209,11 +3687,8 @@ const BankVoucher = () => {
           })),
         };
       }
-      // Debugging
-      // console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank${
-        isAbcmode ? `/${data1._id}` : ""
-      }`;
+
+      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/bank${isAbcmode ? `/${data1._id}` : ""}`;
       const method = isAbcmode ? "put" : "post";
       const response = await axios({
         method,
@@ -1222,7 +3697,6 @@ const BankVoucher = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        // fetchData();
         isDataSaved = true;
       }
     } catch (error) {
@@ -1248,8 +3722,8 @@ const BankVoucher = () => {
         setIsPreviousEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
-        fetchData(); // Refresh data after saving
-        fetchNarrations(); // Refresh narrations after saving
+        fetchData();
+        fetchNarrations();
         toast.success("Data Saved Successfully!", { position: "top-center" });
       } else {
         setIsAddEnabled(false);
@@ -1266,9 +3740,7 @@ const BankVoucher = () => {
       return;
     }
 
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this bank voucher?"
-    );
+    const userConfirmed = window.confirm("Are you sure you want to delete this bank voucher?");
     if (!userConfirmed) return;
 
     try {
@@ -1279,7 +3751,7 @@ const BankVoucher = () => {
         toast.success("Bank voucher deleted successfully!", {
           position: "top-center",
         });
-        fetchData(); // reload bank list
+        fetchData();
       } else {
         throw new Error(`Failed to delete data: ${response.statusText}`);
       }
@@ -1290,19 +3762,18 @@ const BankVoucher = () => {
       });
     }
   };
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const tableScrollRef = useRef(null);
+
+  const [pressedKey, setPressedKey] = useState("");
+
   const focusAndScroll = (refArray, rowIndex) => {
     const inputEl = refArray.current?.[rowIndex];
     const container = tableScrollRef.current;
 
     if (!inputEl || !container) return;
 
-    // focus & select
     inputEl.focus();
     setTimeout(() => inputEl.select && inputEl.select(), 0);
 
-    // find row
     const rowEl = inputEl.closest("tr");
     if (!rowEl) return;
 
@@ -1310,17 +3781,16 @@ const BankVoucher = () => {
     const rowHeight = rowEl.offsetHeight;
     const containerHeight = container.clientHeight;
 
-    // 🔥 key line — force visibility
-    container.scrollTop =
-      rowTop - containerHeight + rowHeight + 60;
+    container.scrollTop = rowTop - containerHeight + rowHeight + 60;
   };
+
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault(); // Stop default Tab navigation
+      event.preventDefault();
       switch (field) {
         case "accountname":
           if (items[index].accountname.trim() === "") {
-            saveButtonRef.current.focus();
+            saveButtonRef.current?.focus();
           } else {
             if (items[index].disablePayment) {
               receiptCreditRefs.current[index]?.focus();
@@ -1338,7 +3808,7 @@ const BankVoucher = () => {
           break;
         case "receipt_credit":
           if (items[index].accountname.trim() === "") {
-            saveButtonRef.current.focus();
+            saveButtonRef.current?.focus();
           } else {
             discountRefs.current[index]?.focus();
           }
@@ -1371,9 +3841,7 @@ const BankVoucher = () => {
         default:
           break;
       }
-    }
-    // Move Right (→)
-    else if (event.key === "ArrowRight") {
+    } else if (event.key === "ArrowRight") {
       if (field === "accountname") {
         if (items[index].disablePayment) {
           receiptCreditRefs.current[index]?.focus();
@@ -1407,9 +3875,7 @@ const BankVoucher = () => {
         remarksRefs.current[index]?.focus();
         setTimeout(() => remarksRefs.current[index]?.select(), 0);
       }
-    }
-    // Move Left (←)
-    else if (event.key === "ArrowLeft") {
+    } else if (event.key === "ArrowLeft") {
       if (field === "remarks") {
         chqnoBankRefs.current[index]?.focus();
         setTimeout(() => chqnoBankRefs.current[index]?.select(), 0);
@@ -1446,48 +3912,31 @@ const BankVoucher = () => {
         accountNameRefs.current[index]?.focus();
         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
       }
-    }
-
-    // Move Up
-    else if (event.key === "ArrowUp" && index > 0) {
+    } else if (event.key === "ArrowUp" && index > 0) {
       setTimeout(() => {
-        if (field === "accountname")
-          accountNameRefs.current[index - 1]?.focus();
-        else if (field === "payment_debit")
-          paymentDebitRefs.current[index - 1]?.focus();
-        else if (field === "receipt_credit")
-          receiptCreditRefs.current[index - 1]?.focus();
-        else if (field === "discount") discountRefs.current[index - 1]?.focus();
-        else if (field === "Total") totalRefs.current[index - 1]?.focus();
-        else if (field === "bankchargers")
-          bankChargersRefs.current[index - 1]?.focus();
-        else if (field === "tdsRs") tdsRsRefs.current[index - 1]?.focus();
-        else if (field === "chqnoBank")
-          chqnoBankRefs.current[index - 1]?.focus();
-        else if (field === "remarks") remarksRefs.current[index - 1]?.focus();
-      }, 100);
-    }
-    // Move Down
-    else if (event.key === "ArrowDown" && index < items.length - 1) {
+        if (field === "accountname") focusAndScroll(accountNameRefs, index - 1);
+        else if (field === "payment_debit") focusAndScroll(paymentDebitRefs, index - 1);
+        else if (field === "receipt_credit") focusAndScroll(receiptCreditRefs, index - 1);
+        else if (field === "discount") focusAndScroll(discountRefs, index - 1);
+        else if (field === "Total") focusAndScroll(totalRefs, index - 1);
+        else if (field === "bankchargers") focusAndScroll(bankChargersRefs, index - 1);
+        else if (field === "tdsRs") focusAndScroll(tdsRsRefs, index - 1);
+        else if (field === "chqnoBank") focusAndScroll(chqnoBankRefs, index - 1);
+        else if (field === "remarks") focusAndScroll(remarksRefs, index - 1);
+      }, 0);
+    } else if (event.key === "ArrowDown" && index < items.length - 1) {
       setTimeout(() => {
-        if (field === "accountname")
-          accountNameRefs.current[index + 1]?.focus();
-        else if (field === "payment_debit")
-          paymentDebitRefs.current[index + 1]?.focus();
-        else if (field === "receipt_credit")
-          receiptCreditRefs.current[index + 1]?.focus();
-        else if (field === "discount") discountRefs.current[index + 1]?.focus();
-        else if (field === "Total") totalRefs.current[index + 1]?.focus();
-        else if (field === "bankchargers")
-          bankChargersRefs.current[index + 1]?.focus();
-        else if (field === "tdsRs") tdsRsRefs.current[index + 1]?.focus();
-        else if (field === "chqnoBank")
-          chqnoBankRefs.current[index + 1]?.focus();
-        else if (field === "remarks") remarksRefs.current[index + 1]?.focus();
-      }, 100);
-    }
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+        if (field === "accountname") focusAndScroll(accountNameRefs, index + 1);
+        else if (field === "payment_debit") focusAndScroll(paymentDebitRefs, index + 1);
+        else if (field === "receipt_credit") focusAndScroll(receiptCreditRefs, index + 1);
+        else if (field === "discount") focusAndScroll(discountRefs, index + 1);
+        else if (field === "Total") focusAndScroll(totalRefs, index + 1);
+        else if (field === "bankchargers") focusAndScroll(bankChargersRefs, index + 1);
+        else if (field === "tdsRs") focusAndScroll(tdsRsRefs, index + 1);
+        else if (field === "chqnoBank") focusAndScroll(chqnoBankRefs, index + 1);
+        else if (field === "remarks") focusAndScroll(remarksRefs, index + 1);
+      }, 0);
+    } else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
       openModalForItemAcc(index);
       event.preventDefault();
@@ -1496,14 +3945,13 @@ const BankVoucher = () => {
 
   const handleNumberChange = (event, index, field) => {
     const value = event.target.value;
-    // Validate that the input is numeric
     if (!/^\d*\.?\d*$/.test(value)) {
       return;
     }
+
     const updatedItems = [...items];
     updatedItems[index][field] = value;
 
-    // Calculate total payment, total receipt, total discount, and total bank charges for all rows
     let totalPayment = 0;
     let totalReceipt = 0;
     let totalDiscount = 0;
@@ -1519,7 +3967,7 @@ const BankVoucher = () => {
       totalDiscount += discount;
       totalBankCharges += bankCharges;
     });
-    // Update total payment, total receipt, total discount, and total bank charges in formData
+
     setFormData((prevState) => ({
       ...prevState,
       totalpayment: totalPayment.toFixed(2),
@@ -1537,22 +3985,18 @@ const BankVoucher = () => {
       updatedItems[index]["Total"] = total.toFixed(2);
 
       let discountedPayment = payment - discount;
-      updatedItems[index]["discounted_payment"] = updatedItems[index]
-        .disablePayment
+      updatedItems[index]["discounted_payment"] = updatedItems[index].disablePayment
         ? "0.00"
         : discountedPayment.toFixed(2);
 
       let discountedReceipt = receipt - discount;
-      updatedItems[index]["discounted_receipt"] = updatedItems[index]
-        .disableReceipt
+      updatedItems[index]["discounted_receipt"] = updatedItems[index].disableReceipt
         ? "0.00"
         : discountedReceipt.toFixed(2);
     }
 
-    // Check if the value is greater than 0 to update disable conditions
     const isValueGreaterThanZero = parseFloat(value) > 0;
 
-    // Disable According to debit or credit
     if (field === "payment_debit") {
       updatedItems[index].disableReceipt = isValueGreaterThanZero;
     } else if (field === "receipt_credit") {
@@ -1563,15 +4007,14 @@ const BankVoucher = () => {
 
   const handleOpenModal = (event, index, field) => {
     if (/^[a-zA-Z]$/.test(event.key) && field === "Bankname") {
-      setPressedKey(event.key); // Set the pressed key
+      setPressedKey(event.key);
       openModalForItemCus(index);
-      event.preventDefault(); // Prevent any default action
+      event.preventDefault();
     }
   };
- 
+
   const handleNumericValue = (event) => {
     const { id, value } = event.target;
-    // Allow only numeric values, including optional decimal points
     if (/^\d*\.?\d*$/.test(value) || value === "") {
       setFormData((prevData) => ({
         ...prevData,
@@ -1579,14 +4022,12 @@ const BankVoucher = () => {
       }));
     }
   };
-  // Update the blur handlers so that they always format the value to 2 decimals.
+
   const handlePkgsBlur = (index) => {
     const decimalPlaces = decimalValue;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].payment_debit);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].payment_debit = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
@@ -1595,9 +4036,7 @@ const BankVoucher = () => {
     const decimalPlaces = decimalValue;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].receipt_credit);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].receipt_credit = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
@@ -1606,9 +4045,7 @@ const BankVoucher = () => {
     const decimalPlaces = decimalValue;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].discount);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].discount = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
@@ -1617,19 +4054,16 @@ const BankVoucher = () => {
     const decimalPlaces = decimalValue;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].bankchargers);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].bankchargers = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
+
   const handleTDSBlur = (index) => {
     const decimalPlaces = decimalValue;
     const updatedItems = [...items];
     let value = parseFloat(updatedItems[index].tdsRs);
-    if (isNaN(value)) {
-      value = 0;
-    }
+    if (isNaN(value)) value = 0;
     updatedItems[index].tdsRs = value.toFixed(decimalPlaces);
     setItems(updatedItems);
   };
@@ -1653,8 +4087,6 @@ const BankVoucher = () => {
   const handleBankEnter = (e) => {
     if (e.key === "Enter" || e.key === "Tab") {
       e.preventDefault();
-
-      // Focus first ACCOUNTNAME input
       if (accountNameRefs.current[0]) {
         accountNameRefs.current[0].focus();
       }
@@ -1664,26 +4096,22 @@ const BankVoucher = () => {
   const isRowFilled = (row) => {
     return (row.accountname || "").trim() !== "";
   };
+
   const canEditRow = (rowIndex) => {
-      // 🔒 If not in edit mode, nothing is editable
-      if (!isEditMode) return false;
+    if (!isEditMode) return false;
+    if (rowIndex === 0) return true;
 
-      // First row is editable in edit mode
-      if (rowIndex === 0) return true;
-
-      // All previous rows must be filled
-      for (let i = 0; i < rowIndex; i++) {
-        if (!isRowFilled(items[i])) {
-          return false;
-        }
+    for (let i = 0; i < rowIndex; i++) {
+      if (!isRowFilled(items[i])) {
+        return false;
       }
-      return true;
+    }
+    return true;
   };
 
   const formatDateToDDMMYYYY = (dateStr) => {
     if (!dateStr) return "";
 
-    // ✅ Already dd-mm-yyyy
     const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
     const match = dateStr.match(ddmmyyyy);
     if (match) {
@@ -1700,28 +4128,19 @@ const BankVoucher = () => {
 
     let date;
 
-    // ✅ ISO with time (Z or offset)
     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
       const [y, m, d] = dateStr.substring(0, 10).split("-");
-      date = new Date(y, m - 1, d); // avoid timezone issues
-    }
-    // ✅ ISO date only (yyyy-mm-dd)
-    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      date = new Date(y, m - 1, d);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const [y, m, d] = dateStr.split("-");
       date = new Date(y, m - 1, d);
-    }
-    // ✅ dd/mm/yyyy
-    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
       const [d, m, y] = dateStr.split("/");
       date = new Date(y, m - 1, d);
-    }
-    // ✅ yyyy/mm/dd
-    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+    } else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
       const [y, m, d] = dateStr.split("/");
       date = new Date(y, m - 1, d);
-    }
-    // 🔁 fallback (Date.parse)
-    else {
+    } else {
       date = new Date(dateStr);
     }
 
@@ -1740,15 +4159,11 @@ const BankVoucher = () => {
   const [filteredBills, setFilteredBills] = useState([]);
   const [searchDate, setSearchDate] = useState(null);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
-    // ⭐ infinite scroll state
   const [visibleCount, setVisibleCount] = useState(10);
 
-  // Fetch all bills for search
   const fetchAllBills = async () => {
     try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`,
-      );
+      const res = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/bank`);
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
         setFilteredBills(res.data);
@@ -1758,16 +4173,12 @@ const BankVoucher = () => {
     }
   };
 
-  // Update filtering logic
   useEffect(() => {
     let filtered = allBills;
 
     if (searchBillNo.trim() !== "") {
       filtered = filtered.filter((bill) =>
-        bill.formData.voucherno
-          .toString()
-          .toLowerCase()
-          .includes(searchBillNo.toLowerCase())
+        bill.formData.voucherno.toString().toLowerCase().includes(searchBillNo.toLowerCase())
       );
     }
 
@@ -1783,8 +4194,6 @@ const BankVoucher = () => {
     }
 
     setFilteredBills(filtered);
-
-    // ⭐ reset visible rows when search changes
     setVisibleCount(30);
   }, [searchBillNo, searchDate, allBills]);
 
@@ -1799,16 +4208,14 @@ const BankVoucher = () => {
     setSearchBillNo("");
     setSearchDate("");
   };
-  
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleSearchKeyDown = (e) => {
       if (!showSearch) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActiveRowIndex((prev) =>
-          prev < filteredBills.length - 1 ? prev + 1 : prev
-        );
+        setActiveRowIndex((prev) => (prev < filteredBills.length - 1 ? prev + 1 : prev));
       }
 
       if (e.key === "ArrowUp") {
@@ -1826,13 +4233,11 @@ const BankVoucher = () => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleSearchKeyDown);
+    return () => window.removeEventListener("keydown", handleSearchKeyDown);
   }, [filteredBills, activeRowIndex, showSearch]);
 
-  // ShortCuts for Buttons
-  const AnyModalOpen = showModalCus || showModalAcc || showSearch || printChoiceOpen
+  const AnyModalOpen = showModalCus || showModalAcc || showSearch || printChoiceOpen;
   useShortcuts({
     handleAdd,
     handleEdit: handleEditClick,
@@ -1843,13 +4248,12 @@ const BankVoucher = () => {
     handleExit,
     handlePrint: handlePrintClick,
     isEditMode,
-    isModalOpen: AnyModalOpen,   // 👈 here
+    isModalOpen: AnyModalOpen,
   });
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleGlobalKeyDown = (event) => {
       if (event.key === "Escape") {
-
         if (showSearch) {
           setShowSearch(false);
           return;
@@ -1862,25 +4266,19 @@ const BankVoucher = () => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-
+    window.addEventListener("keydown", handleGlobalKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleGlobalKeyDown);
     };
   }, [showSearch, printChoiceOpen]);
 
-  // Storing Valpha
   const bankWinFromState = location.state?.bankWin;
 
-  // Load from localStorage if refresh
   const bankWinFromStorage = localStorage.getItem("bankWin")
     ? JSON.parse(localStorage.getItem("bankWin"))
     : null;
 
-  // Final object (state first, then storage)
   const bankWin = bankWinFromState || bankWinFromStorage;
-
-  // Extract valpha safely
   const selectedValpha = bankWin?.valpha || "";
 
   useEffect(() => {
@@ -1890,8 +4288,9 @@ const BankVoucher = () => {
   }, [bankWinFromState]);
 
   return (
-    <div>
+    <div className="bank-voucher-page">
       <ToastContainer />
+
       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
         <InvoicePDFbank
           formData={formData}
@@ -1900,564 +4299,504 @@ const BankVoucher = () => {
           handleClose={handleClose}
         />
       </div>
-      <h1 className="HeaderBANK">BANK VOUCHER</h1>
-      <span className="tittle">{title}</span>
-      <div className="topdetails">
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          <InputMask
-            mask="99-99-9999"
-            placeholder="dd-mm-yyyy"
-            value={formData.date}
-            readOnly={!isEditMode || isDisabled}
-            onChange={(e) =>
-              setFormData({ ...formData, date: e.target.value })
-            }
-          >
-            {(inputProps) => (
-              <input
-                {...inputProps}
-                className="DatePICKER"
-                ref={datePickerRef}
-                onKeyDown={(e) => {
-                  handleEnterKeyPress(datePickerRef, VoucherRef)(e);
-                }}
-              />
-            )}
-          </InputMask>
-          {/* <DatePicker
-            ref={datePickerRef}
-            selected={selectedDate || null}
-            openToDate={new Date()}
-            onCalendarClose={handleCalendarClose}
-            dateFormat="dd-MM-yyyy"
-            onChange={handleDateChange}
-            onBlur={() => checkFutureDate(selectedDate)}
-            customInput={<MaskedInput />}
-          /> */}
-          <div style={{ marginLeft: 5 }}>
-            <TextField
-              className="custom-bordered-input"
-              inputRef={VoucherRef}
-              id="voucherno"
-              value={formData.voucherno}
-              onChange={handleNumericValue}
-              onKeyDown={(e) => handleEnterKeyPress(VoucherRef, BankRefs)(e)}
-              onFocus={(e) => e.target.select()}
-              label="VOUCHER NO"
-              size="small"
-              variant="filled"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                },
-                readOnly: !isEditMode || isDisabled,
-              }}
-              sx={{ width: 150 }} // Adjust width as needed
-            />
+
+      <div className="bank-voucher-shell">
+        <div className="bank-voucher-header-card">
+          <div className="bank-voucher-header-top">
+            <div className="header-title-wrap">
+              <h1 className="HeaderBANK">BANK VOUCHER</h1>
+              <span className="tittle">{title}</span>
+            </div>
           </div>
-          <div style={{ marginLeft: 5 }}>
-            <TextField
-              className="custom-bordered-input"
-              id="user"
-              value={formData.user}
-              onFocus={(e) => e.target.select()}
-              label="USER"
-              size="small"
-              variant="filled"
-              inputProps={{
-                maxLength: 48,
-                style: {
-                  height: 20,
-                  fontSize: `${fsize}px`,
-                },
-                readOnly: !isEditMode || isDisabled,
-              }}
-              sx={{ width: 150 }} // Adjust width as needed
-            />
+
+          <div className="bank-voucher-topbar">
+            <div className="topbar-left">
+              <div className="field-block">
+                <label className="top-label">DATE</label>
+                <InputMask
+                  mask="99-99-9999"
+                  placeholder="dd-mm-yyyy"
+                  value={formData.date}
+                  readOnly={!isEditMode || isDisabled}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                >
+                  {(inputProps) => (
+                    <input
+                      {...inputProps}
+                      className="DatePICKER modern-date-input"
+                      ref={datePickerRef}
+                      onKeyDown={(e) => {
+                        handleEnterKeyPress(datePickerRef, VoucherRef)(e);
+                      }}
+                    />
+                  )}
+                </InputMask>
+              </div>
+
+              <TextField
+                className="custom-bordered-input voucher-field"
+                inputRef={VoucherRef}
+                id="voucherno"
+                value={formData.voucherno}
+                onChange={handleNumericValue}
+                onKeyDown={(e) => handleEnterKeyPress(VoucherRef, BankRefs)(e)}
+                onFocus={(e) => e.target.select()}
+                label="VOUCHER NO."
+                size="small"
+                variant="filled"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    fontWeight: "bold",
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                sx={{ width: 170 }}
+              />
+
+              <TextField
+                className="custom-bordered-input voucher-field"
+                id="user"
+                value={formData.user}
+                onFocus={(e) => e.target.select()}
+                label="USER"
+                size="small"
+                variant="filled"
+                inputProps={{
+                  maxLength: 48,
+                  style: {
+                    height: 20,
+                    fontSize: `${fontSize}px`,
+                    fontWeight: "bold",
+                  },
+                  readOnly: !isEditMode || isDisabled,
+                }}
+                sx={{ width: 170 }}
+              />
+            </div>
+
+            <div className="topbar-right bank-topbar-right">
+              {bankdetails.map((item, index) => (
+                <div className="bankdiv modern-bank-row" key={`${item.Bankname || "bank"}-${index}`}>
+                  <TextField
+                    inputRef={BankRefs}
+                    className="custom-bordered-input bank-name-field"
+                    id="Bankname"
+                    value={item.Bankname}
+                    onFocus={(e) => e.target.select()}
+                    label="BANK NAME"
+                    size="small"
+                    variant="filled"
+                    onKeyDown={(e) => {
+                      handleOpenModal(e, index, "Bankname");
+                      handleBankEnter(e);
+                    }}
+                    inputProps={{
+                      maxLength: 48,
+                      style: {
+                        height: 20,
+                        fontSize: `${fontSize}px`,
+                        fontWeight: "bold",
+                      },
+                      readOnly: !isEditMode || isDisabled,
+                    }}
+                    sx={{ width: 280 }}
+                  />
+
+                  <TextField
+                    className="custom-bordered-input bank-code-field"
+                    id="code"
+                    value={item.code}
+                    onFocus={(e) => e.target.select()}
+                    label="AC CODE"
+                    size="small"
+                    variant="filled"
+                    inputProps={{
+                      maxLength: 48,
+                      style: {
+                        height: 20,
+                        fontSize: `${fontSize}px`,
+                        fontWeight: "bold",
+                      },
+                      readOnly: !isEditMode || isDisabled,
+                    }}
+                    sx={{ width: 150 }}
+                  />
+                </div>
+              ))}
+
+              {showModalCus && (
+                <ProductModalCustomer
+                  allFields={allFieldsCus}
+                  onSelect={handleProductSelectCus}
+                  onClose={handleCloseModalCus}
+                  initialKey={pressedKey}
+                  tenant={tenant}
+                />
+              )}
+            </div>
           </div>
         </div>
-        <div style={{ marginTop: 5 }}>
-          {bankdetails.map((item, index) => (
-            <div className="bankdiv" key={item.Bankname}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <TextField
-                  inputRef={BankRefs}
-                  className="custom-bordered-input"
-                  id="Bankname"
-                  value={item.Bankname}
-                  onFocus={(e) => e.target.select()}
-                  label="BANK NAME"
-                  size="small"
-                  variant="filled"
-                  onKeyDown={(e) => {
-                    handleOpenModal(e, index, "Bankname");
-                    handleBankEnter(e);
-                  }}
-                  inputProps={{
-                    maxLength: 48,
-                    style: {
-                      height: 20,
-                      fontSize: `${fsize}px`,
-                    },
-                    readOnly: !isEditMode || isDisabled,
-                  }}
-                  sx={{ width: 280 }} // Adjust width as needed
-                />
-              </div>
-              <div style={{ marginLeft: 5 }}>
-                <TextField
-                  className="custom-bordered-input"
-                  id="code"
-                  value={item.code}
-                  onFocus={(e) => e.target.select()}
-                  label="AC CODE"
-                  size="small"
-                  variant="filled"
-                  inputProps={{
-                    maxLength: 48,
-                    style: {
-                      height: 20,
-                      fontSize: `${fsize}px`,
-                    },
-                    readOnly: !isEditMode || isDisabled,
-                  }}
-                  sx={{ width: 150 }} // Adjust width as needed
-                
-                />
-              </div>
-            </div>
-          ))}
 
-          {showModalCus && (
+        <div className="bank-voucher-table-card">
+          <div ref={tableScrollRef} className="Tablesections">
+            <Table ref={tableRef} className="custom-table modern-bank-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 450 }}>ACCOUNT NAME</th>
+                  <th>PAYMENT</th>
+                  <th>RECEIPT</th>
+                  <th>DISCOUNT</th>
+                  <th>TOTAL</th>
+                  <th>BNK.CHG.</th>
+                  <th>TDS Rs.</th>
+                  <th>CHQNO+BANK</th>
+                  <th>
+                    <div className="narration-head">
+                      <span>REMARKS</span>
+                      <input
+                        type="checkbox"
+                        style={{
+                          marginLeft: 5,
+                          transform: "scale(1.15)",
+                          cursor: "pointer",
+                        }}
+                        tabIndex={-1}
+                        checked={showNarrationSuggestions}
+                        onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                      />
+                    </div>
+                  </th>
+                  {isEditMode && <th className="text-center">DELETE</th>}
+                </tr>
+              </thead>
+
+              <tbody>
+                {items.map((item, index) => (
+                  <tr key={index}>
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="Account"
+                        type="text"
+                        value={item.accountname}
+                        readOnly={!isEditMode || isDisabled}
+                        onChange={() => {}}
+                        onKeyDown={(e) => {
+                          handleKeyDown(e, index, "accountname");
+                        }}
+                        ref={(el) => (accountNameRefs.current[index] = el)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        className="Payments"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
+                        onChange={(e) => handleNumberChange(e, index, "payment_debit")}
+                        disabled={!canEditRow(index) || item.disablePayment}
+                        ref={(el) => (paymentDebitRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
+                        onBlur={() => handlePkgsBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        className="Receipts"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
+                        onChange={(e) => handleNumberChange(e, index, "receipt_credit")}
+                        disabled={!canEditRow(index) || item.disableReceipt}
+                        ref={(el) => (receiptCreditRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
+                        onBlur={() => handleWeightBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="Discounts"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.discount) === 0 ? "" : item.discount}
+                        onChange={(e) => handleItemChangeAcc(index, "discount", e.target.value)}
+                        ref={(el) => (discountRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "discount")}
+                        onBlur={() => handleRateBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="Totals"
+                        readOnly
+                        value={Number(item.Total) === 0 ? "" : item.Total}
+                        onChange={(e) => handleItemChangeAcc(index, "Total", e.target.value)}
+                        ref={(el) => (totalRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "Total")}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="Bankcharges"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.bankchargers) === 0 ? "" : item.bankchargers}
+                        onChange={(e) => handleItemChangeAcc(index, "bankchargers", e.target.value)}
+                        ref={(el) => (bankChargersRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "bankchargers")}
+                        onBlur={() => handleBankBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="TDSrs"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.tdsRs) === 0 ? "" : item.tdsRs}
+                        onChange={(e) => handleItemChangeAcc(index, "tdsRs", e.target.value)}
+                        ref={(el) => (tdsRsRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "tdsRs")}
+                        onBlur={() => handleTDSBlur(index)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input  
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="chnqBank"
+                        readOnly={!isEditMode || isDisabled}
+                        type="text"
+                        value={item.chqnoBank}
+                        onChange={(e) => handleItemChangeAcc(index, "chqnoBank", e.target.value)}
+                        ref={(el) => (chqnoBankRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "chqnoBank")}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0 }}>
+                      <input 
+                        style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="REM"
+                        list={showNarrationSuggestions ? "narrationList" : undefined}
+                        readOnly={!isEditMode || isDisabled}
+                        type="text"
+                        value={item.remarks}
+                        onChange={(e) => handleItemChangeAcc(index, "remarks", e.target.value)}
+                        ref={(el) => (remarksRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "remarks")}
+                        onFocus={(e) => e.target.select()}
+                      />
+                      {showNarrationSuggestions && (
+                        <datalist id="narrationList">
+                          {narrationSuggestions.map((n, i) => (
+                            <option key={i} value={n} />
+                          ))}
+                        </datalist>
+                      )}
+                    </td>
+
+                    {isEditMode && (
+                      <td style={{ padding: 0 }}>
+                        {canEditRow(index) && (
+                          <div className="delete-cell-wrap">
+                            <IconButton
+                              color="error"
+                              size="small"
+                              tabIndex={-1}
+                              onClick={() => handleDeleteItem(index)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+
+              <tfoot>
+                <tr>
+                  <td></td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
+                  <td></td>
+                  <td style={{fontSize: `${fontSize}px`}}>{Number(formData.totalbankcharges) === 0 ? "" : formData.totalbankcharges}</td>
+                  <td colSpan={3}></td>
+                  {isEditMode && <td></td>}
+                </tr>
+              </tfoot>
+            </Table>
+          </div>
+
+          <div className="addbutton add-row-wrap">
+            <Button className="fw-bold btn-secondary add-row-btn" onClick={handleAddItem}>
+              + Add Row
+            </Button>
+          </div>
+        </div>
+
+        {showModalAcc && (
           <ProductModalCustomer
-            allFields={allFieldsCus}
-            onSelect={handleProductSelectCus}
-            onClose={handleCloseModalCus}
+            allFields={allFieldsAcc}
+            onSelect={handleProductSelectAcc}
+            onClose={() => setShowModalAcc(false)}
             initialKey={pressedKey}
             tenant={tenant}
+            onRefresh={fetchCustomers}
           />
-          )}
-        </div>
-      </div>
-      <div ref={tableScrollRef} className="Tablesections">
-        <Table ref={tableRef} className="custom-table">
-          <thead
-            style={{
-              backgroundColor: "skyblue",
-              textAlign: "center",
-              position: "sticky",
-              top: 0,
-            }}
-          >
-            <tr style={{ color: "white" }}>
-              <th style={{ width: 450 }}>ACCOUNT NAME</th>
-              <th>PAYMENT</th>
-              <th>RECEIPT</th>
-              <th>DISCOUNT</th>
-              <th>TOTAL</th>
-              <th>BNK.CHG.</th>
-              <th>TDS Rs.</th>
-              <th>CHQNO+BANK</th>
-              <th>
-                REMARKS
-                <input 
-                  type="checkbox"
-                  style={{ marginLeft: 5,transform: "scale(1.2)",cursor: "pointer"}}
-                  tabIndex={-1}       // ⬅⬅ prevents tab focus
-                  checked={showNarrationSuggestions}
-                  onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
-                />
-              </th>
-              {isEditMode && <th className="text-center">DELETE</th>}
-            </tr>
-          </thead>
-          <tbody style={{ overflowY: "auto", maxHeight: "calc(380px - 40px)" }}>
-            {items.map((item, index) => (
-              <tr key={index}>
-                <td style={{ padding: 0}}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="Account"
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.accountname}
-                    // onClick={() => openModalForItemAcc(index)}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "accountname");
-                    }}
-                    ref={(el) => (accountNameRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Payments"
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={Number(item.payment_debit) === 0 ? "" : item.payment_debit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "payment_debit")
-                    }
-                    disabled={!canEditRow(index) || item.disablePayment}
-                    ref={(el) => (paymentDebitRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "payment_debit")}
-                    onBlur={() => handlePkgsBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                    className="Receipts"
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={Number(item.receipt_credit) === 0 ? "" : item.receipt_credit}
-                    onChange={(e) =>
-                      handleNumberChange(e, index, "receipt_credit")
-                    }
-                    disabled={!canEditRow(index) || item.disableReceipt}
-                    ref={(el) => (receiptCreditRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "receipt_credit")}
-                    onBlur={() => handleWeightBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="Discounts"
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={Number(item.discount) === 0 ? "" : item.discount}
-                    onChange={(e) =>
-                      handleItemChangeAcc(index, "discount", e.target.value)
-                    }
-                    ref={(el) => (discountRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "discount")}
-                    onBlur={() => handleRateBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="Totals"
-                    readOnly
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                      backgroundColor: "#e3f8e3",
-                    }}
-                    value={Number(item.Total) === 0 ? "" : item.Total}
-                    onChange={(e) =>
-                      handleItemChangeAcc(index, "Total", e.target.value)
-                    }
-                    ref={(el) => (totalRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "Total")}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="Bankcharges"
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={Number(item.bankchargers) === 0 ? "" : item.bankchargers}
-                    onChange={(e) =>
-                      handleItemChangeAcc(index, "bankchargers", e.target.value)
-                    }
-                    ref={(el) => (bankChargersRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "bankchargers")}
-                    onBlur={() => handleBankBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="TDSrs"
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    value={Number(item.tdsRs) === 0 ? "" : item.tdsRs}
-                    onChange={(e) =>
-                      handleItemChangeAcc(index, "tdsRs", e.target.value)
-                    }
-                    ref={(el) => (tdsRsRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "tdsRs")}
-                    onBlur={() => handleTDSBlur(index)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="chnqBank"
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.chqnoBank}
-                    onChange={(e) =>
-                      handleItemChangeAcc(index, "chqnoBank", e.target.value)
-                    }
-                    ref={(el) => (chqnoBankRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "chqnoBank")}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0 }}>
-                  <input
-                   disabled={!canEditRow(index)}
-                    className="REM"
-                    list={showNarrationSuggestions ? "narrationList" : undefined}
-                    readOnly={!isEditMode || isDisabled}
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.remarks}
-                    onChange={(e) =>
-                      handleItemChangeAcc(index, "remarks", e.target.value)
-                    }
-                    ref={(el) => (remarksRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "remarks")}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                  {showNarrationSuggestions && (
-                    <datalist id="narrationList">
-                      {narrationSuggestions.map((n, i) => (
-                        <option key={i} value={n} />
-                      ))}
-                    </datalist>
-                  )}
-                </td>
-                {isEditMode && (
-                  <td style={{ padding: 0 }}>
-                    {canEditRow(index) && (
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100%",
-                        }}
-                      >
-                        <IconButton
-                          color="error"
-                          size="small"
-                          tabIndex={-1}
-                          onClick={() => handleDeleteItem(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </div>
-                    )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-          <tfoot style={{ background: "skyblue", position: "sticky", bottom: -1, fontSize: `${fsize}px`,borderTop:"1px solid black" }}>
-          <tr style={{ fontWeight: "bold", textAlign: "right" }}>
-            <td></td>
-            <td>{Number(formData.totalpayment) === 0 ? "" : formData.totalpayment}</td>
-            <td>{Number(formData.totalreceipt) === 0 ? "" : formData.totalreceipt}</td>
-            <td>{Number(formData.totaldiscount) === 0 ? "" : formData.totaldiscount}</td>
-            <td></td>
-            <td>{Number(formData.totalbankcharges) === 0 ? "" : formData.totalbankcharges}</td>
-            <td colSpan={3}></td>
-            {isEditMode && <td></td>}
-          </tr>
-          </tfoot>
-        </Table>
-      </div>
-      <div className="addbutton">
-        <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
-          Add Row
-        </Button>
-      </div>
-      {showModalAcc && (
-        <ProductModalCustomer
-        allFields={allFieldsAcc}
-        onSelect={handleProductSelectAcc}
-        onClose={() => setShowModalAcc(false)} 
-        initialKey={pressedKey}
-        tenant={tenant}
-        onRefresh={fetchCustomers}
-        />
-      )}
-      <div className="Belowcontent">
-        <PrintChoiceModal
-          open={printChoiceOpen}
-          onClose={() => setPrintChoiceOpen(false)}
-          onNormal={handleNormalPrint}
-          onFA={handleFAPreview}
-        />
-        <FAVoucherModal
-          open={isFAModalOpen}
-          onClose={() => setIsFAModalOpen(false)}
-          tenant= {tenant}
-          voucherno={formData?.voucherno}
-          vtype="B"
-        />
+        )}
 
-        <div className="Buttonsgroupz">
-          <Button
-            ref={addButtonRef}
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[0] }}
-            onClick={handleAdd}
-            disabled={!isAddEnabled}
-          >
-            Add
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[1] }}
-            onClick={handleEditClick}
-            disabled={!isAddEnabled}
-          >
-            Edit
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[2] }}
-            onClick={handlePrevious}
-            disabled={!isPreviousEnabled}
-            // disabled={!isAddEnabled}
-          >
-            Previous
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[3] }}
-            onClick={handleNext}
-            disabled={!isNextEnabled}
-          >
-            Next
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[4] }}
-            onClick={handleFirst}
-            disabled={!isFirstEnabled}
-          >
-            First
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[5] }}
-            onClick={handleLast}
-            disabled={!isLastEnabled}
-          >
-            Last
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{  backgroundColor: buttonColors[6] }}
-            onClick={() => {
-              fetchAllBills();
-              setActiveRowIndex(0);
-              setShowSearch(true);
-            }}
-            disabled={!isSearchEnabled}
-          >
-            Search
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[7] }}
-            onClick={handlePrintClick}
-            disabled={!isPrintEnabled}
-          >
-            Print
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[8] }}
-            disabled={!isDeleteEnabled}
-            onClick={handleDeleteClick}
-          >
-            Delete
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ color: "black", backgroundColor: buttonColors[9] }}
-            onClick={handleExit}
-          >
-            Exit
-          </Button>
-          <Button
-            ref={saveButtonRef}
-            className="Buttonz"
-            onClick={handleSaveClick}
-            disabled={!isSubmitEnabled}
-            style={{ color: "black", backgroundColor: buttonColors[10] }}
-          >
-            Save
-          </Button>
+        <div className="Belowcontent bank-bottom-section">
+          <PrintChoiceModal
+            open={printChoiceOpen}
+            onClose={() => setPrintChoiceOpen(false)}
+            onNormal={handleNormalPrint}
+            onFA={handleFAPreview}
+          />
+
+          <FAVoucherModal
+            open={isFAModalOpen}
+            onClose={() => setIsFAModalOpen(false)}
+            tenant={tenant}
+            voucherno={formData?.voucherno}
+            vtype="B"
+          />
+
+          <div className="Buttonsgroupz bank-bottom-buttons">
+            <Button
+              ref={addButtonRef}
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[0] }}
+              onClick={handleAdd}
+              disabled={!isAddEnabled}
+            >
+              Add
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[1] }}
+              onClick={handleEditClick}
+              disabled={!isAddEnabled}
+            >
+              Edit
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[2] }}
+              onClick={handlePrevious}
+              disabled={!isPreviousEnabled}
+            >
+              Previous
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[3] }}
+              onClick={handleNext}
+              disabled={!isNextEnabled}
+            >
+              Next
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[4] }}
+              onClick={handleFirst}
+              disabled={!isFirstEnabled}
+            >
+              First
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[5] }}
+              onClick={handleLast}
+              disabled={!isLastEnabled}
+            >
+              Last
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ backgroundColor: buttonColors[6] }}
+              onClick={() => {
+                fetchAllBills();
+                setActiveRowIndex(0);
+                setShowSearch(true);
+              }}
+              disabled={!isSearchEnabled}
+            >
+              Search
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[7] }}
+              onClick={handlePrintClick}
+              disabled={!isPrintEnabled}
+            >
+              Print
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[8] }}
+              disabled={!isDeleteEnabled}
+              onClick={() => handleDeleteClick(data1?._id)}
+            >
+              Delete
+            </Button>
+
+            <Button
+              className="Buttonz modern-btn"
+              style={{ color: "black", backgroundColor: buttonColors[9] }}
+              onClick={handleExit}
+            >
+              Exit
+            </Button>
+
+            <Button
+              ref={saveButtonRef}
+              className="Buttonz modern-btn save-btn"
+              onClick={handleSaveClick}
+              disabled={!isSubmitEnabled}
+              style={{ color: "black", backgroundColor: buttonColors[10] }}
+            >
+              Save
+            </Button>
+          </div>
         </div>
       </div>
-      {/* Search Modal */}
+
       <Modal
         show={showSearch}
         keyboard={false}
@@ -2470,7 +4809,7 @@ const BankVoucher = () => {
         </Modal.Header>
 
         <Modal.Body>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px", flexWrap: "wrap" }}>
             <TextField
               className="custom-bordered-input"
               size="small"
@@ -2504,8 +4843,7 @@ const BankVoucher = () => {
             style={{ maxHeight: "300px", overflowY: "auto" }}
             onScroll={(e) => {
               const bottom =
-                e.target.scrollHeight - e.target.scrollTop <=
-                e.target.clientHeight + 5;
+                e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 5;
 
               if (bottom && visibleCount < filteredBills.length) {
                 setVisibleCount((prev) => prev + 30);
@@ -2526,21 +4864,20 @@ const BankVoucher = () => {
 
               <tbody>
                 {filteredBills.slice(0, visibleCount).map((bill, index) => (
-                  <tr key={bill._id}
-                  style={{
-                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setActiveRowIndex(index);
-                    handleSelectBill(bill);
-                    setShowSearch(false);
-                  }}
+                  <tr
+                    key={bill._id}
+                    style={{
+                      backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setActiveRowIndex(index);
+                      handleSelectBill(bill);
+                      setShowSearch(false);
+                    }}
                   >
                     <td>{bill.formData.voucherno}</td>
-                    <td>
-                      {formatDateToDDMMYYYY(bill.formData.date)}
-                    </td>
+                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
                     <td>{bill.items?.[0]?.accountname}</td>
                     <td>{bill.formData.totalpayment}</td>
                     <td>{bill.formData.totalreceipt}</td>
@@ -2563,4 +4900,5 @@ const BankVoucher = () => {
     </div>
   );
 };
+
 export default BankVoucher;

@@ -68,10 +68,6 @@ const InvoicePDF = React.forwardRef(
       overflowY: "auto",
     };
 
-    // const componentRef = useRef();
-    // const handlePrint = useReactToPrint({
-    //   content: () => componentRef.current,
-    // });
     function numberToIndianWords(num) {
       const ones = [
         "",
@@ -189,6 +185,62 @@ const InvoicePDF = React.forwardRef(
       const year = dateObj.getFullYear();
       return `${day}/${month}/${year}`;
     };
+
+    const totals = items.reduce(
+      (acc, item) => {
+        acc.Exp1 += Number(item.Exp1 || 0);
+        acc.Exp2 += Number(item.Exp2 || 0);
+        acc.Exp3 += Number(item.Exp3 || 0);
+        acc.Exp4 += Number(item.Exp4 || 0);
+        acc.Exp5 += Number(item.Exp5 || 0);
+        return acc;
+      },
+      { Exp1: 0, Exp2: 0, Exp3: 0, Exp4: 0, Exp5: 0 }
+    );
+
+    const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+    const [Expense1, setExpense1] = useState("");
+    const [Expense2, setExpense2] = useState("");
+    const [Expense3, setExpense3] = useState("");
+    const [Expense4, setExpense4] = useState(null);
+    const [Expense5, setExpense5] = useState(null);
+    const [Expense6, setExpense6] = useState(null);
+    const [Expense7, setExpense7] = useState(null);
+    const [Expense8, setExpense8] = useState(null);
+    const [Expense9, setExpense9] = useState(null);
+    const [Expense10, setExpens10] = useState(null);
+  
+    const fetchSalesSetup = async () => {
+      try {
+        const response = await fetch(
+          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/salesetup`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch sales setup");
+  
+        const data = await response.json();
+  
+        if (Array.isArray(data) && data.length > 0 && data[0].formData) {
+          const formDataFromAPI = data[0].formData;
+          setExpense1(formDataFromAPI.Exp1);
+          setExpense2(formDataFromAPI.Exp2);
+          setExpense3(formDataFromAPI.Exp3);
+          setExpense4(formDataFromAPI.Exp4);
+          setExpense5(formDataFromAPI.Exp5);
+          setExpense6(formDataFromAPI.Exp6);
+          setExpense7(formDataFromAPI.Exp7);
+          setExpense8(formDataFromAPI.Exp8);
+          setExpense9(formDataFromAPI.Exp9);
+          setExpens10(formDataFromAPI.Exp10);
+        } else {
+          throw new Error("Invalid response structure");
+        }
+      } catch (error) {
+        console.error("Error fetching sales setup:", error.message);
+      }
+    };
+    useEffect(() => {
+      fetchSalesSetup();
+    }, []);
 
     return (
       <Modal
@@ -815,11 +867,11 @@ const InvoicePDF = React.forwardRef(
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.id}</td>
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.sdisc}</td>
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.tariff}</td>
-                        <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.pkgs}</td>
-                        <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.weight}</td>
+                        <td style={{ borderRight: "1px solid black", paddingLeft: 10,textAlign:'right', paddingRight: 5 }}>{item.pkgs}</td>
+                        <td style={{ borderRight: "1px solid black", paddingLeft: 10,textAlign:'right', paddingRight: 5 }}>{item.weight}</td>
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.Units}</td>
-                        <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.rate}</td>
-                        <td style={{ borderRight: "1px solid black", textAlign: "right", paddingRight: 10 }}>{item.amount}</td>
+                        <td style={{ borderRight: "1px solid black", paddingLeft: 10,textAlign:'right', paddingRight: 5 }}>{item.rate}</td>
+                        <td style={{ borderRight: "1px solid black", textAlign: "right", paddingRight: 5 }}>{item.amount}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -828,7 +880,7 @@ const InvoicePDF = React.forwardRef(
                       <td colSpan="2" style={{ fontWeight: "bold", fontSize: 18, paddingLeft: 20 }}>TOTAL</td>
                       <td></td>
                       <td></td>
-                      <td style={{ fontWeight: "bold", fontSize: 18 }}>{totalQuantity}</td>
+                      <td style={{ fontWeight: "bold", fontSize: 18,textAlign:'right', paddingRight: 5  }}>{(totalQuantity).toFixed(3)}</td>
                       <td></td>
                       <td style={{ fontWeight: "bold", fontSize: 18, color: "red" }}>Total</td>
                       <td style={{ fontWeight: "bold", fontSize: 18, color: "red", textAlign: "right", paddingRight: 10 }}>{formData.sub_total}</td>
@@ -870,7 +922,7 @@ const InvoicePDF = React.forwardRef(
                             borderLeft: "1px solid black",
                           }}
                         >
-                          <text style={{ fontSize: 20, marginLeft: 90 }}>
+                          <text style={{ fontSize: 20, marginLeft: 70 }}>
                             Other Details
                           </text>
                         </div>
@@ -886,21 +938,14 @@ const InvoicePDF = React.forwardRef(
                               display: "flex",
                               flexDirection: "column",
                               marginLeft: 10,
+                              height:"83%"
                             }}
                           >
-                            <text style={{ fontSize: 18 }}>
-                              Labour:{items.Exp1}
-                            </text>
-                            <text style={{ fontSize: 18 }}>
-                              Postage:{items.Exp1}
-                            </text>
-                            <text style={{ fontSize: 18 }}>
-                              Discount:{items.Exp1}
-                            </text>
-                            <text style={{ fontSize: 18 }}>
-                              Freight:{items.Exp1}
-                            </text>
-                            <text style={{ fontSize: 18 }}>Expense5:</text>
+                            {totals.Exp1 > 0 && <span style={{fontSize:17}}>{Expense1}: {totals.Exp1.toFixed(2)}</span>}
+                            {totals.Exp2 > 0 && <span style={{fontSize:17}}>{Expense2}: {totals.Exp2.toFixed(2)}</span>}
+                            {totals.Exp3 > 0 && <span style={{fontSize:17}}>{Expense3}: {totals.Exp3.toFixed(2)}</span>}
+                            {totals.Exp4 > 0 && <span style={{fontSize:17}}>{Expense4}: {totals.Exp4.toFixed(2)}</span>}
+                            {totals.Exp5 > 0 && <span style={{fontSize:17}}>{Expense5}: {totals.Exp5.toFixed(2)}</span>}
                           </div>
                           <div
                             style={{

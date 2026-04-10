@@ -1,4 +1,4 @@
-.HeaderJOU {
+/* .HeaderJOU {
   font-weight: bolder;
   text-align: center;
   margin-top: -30px;
@@ -248,4 +248,514 @@
     .addbutton {
         visibility: visible;
     }
+} */
+
+/* Live */
+
+/* =========================
+   GLOBAL RESET
+========================= */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =========================
+   MAIN PAGE
+========================= */
+.journal-voucher-page {
+  width: 100%;
+  height: 100dvh;
+  overflow: auto;
+  background: #f6f8fb;
+}
+
+.journal-voucher-shell {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 18dvh 62dvh 20dvh;
+  gap: 0;
+  padding: 8px;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER AREA
+========================= */
+.journal-voucher-header-card {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 6px 14px 8px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.journal-voucher-header-top.compact-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  margin-bottom: 2px;
+}
+
+.header-title-wrap.inline-title-wrap {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.HeaderJOU {
+  margin: 0;
+  font-size: clamp(20px, 1.8vw, 28px);
+  line-height: 1.05;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 0.4px;
+}
+
+.tittle {
+  font-size: clamp(13px, 1vw, 16px);
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1;
+}
+
+.journal-voucher-topbar.compact-topbar {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0;
+}
+
+.topbar-left.header-input-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.equal-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.field-block.equal-field {
+  min-width: 0;
+}
+
+/* DATE BLOCK LABEL */
+.top-label {
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.4px;
+  line-height: 1.1;
+  min-height: 14px;
+}
+
+/* Push Voucher No and User slightly down so all 3 align with Date */
+.equal-field:not(.field-block) {
+  margin-top: 18px;
+}
+
+.DatePICKER.modern-date-input.equal-input {
+  width: 100%;
+  height: 46px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  display: flex;
+  align-items: center;
+  line-height: 46px;
+}
+
+.DatePICKER.modern-date-input.equal-input:focus {
+  border-color: #94a3b8;
+  background: #ffffff;
+}
+
+.equal-mui-field,
+.voucher-field {
+  width: 100%;
+}
+
+.equal-mui-field .MuiFilledInput-root,
+.voucher-field .MuiFilledInput-root,
+.custom-bordered-input .MuiFilledInput-root {
+  border-radius: 10px !important;
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  overflow: hidden;
+  min-height: 46px !important;
+  height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.equal-mui-field .MuiFilledInput-root:hover,
+.voucher-field .MuiFilledInput-root:hover,
+.custom-bordered-input .MuiFilledInput-root:hover {
+  background: #ffffff !important;
+}
+
+.equal-mui-field .MuiFilledInput-root.Mui-focused,
+.voucher-field .MuiFilledInput-root.Mui-focused,
+.custom-bordered-input .MuiFilledInput-root.Mui-focused {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+}
+
+.equal-mui-field .MuiFilledInput-root:before,
+.equal-mui-field .MuiFilledInput-root:after,
+.voucher-field .MuiFilledInput-root:before,
+.voucher-field .MuiFilledInput-root:after,
+.custom-bordered-input .MuiFilledInput-root:before,
+.custom-bordered-input .MuiFilledInput-root:after {
+  display: none !important;
+}
+
+.equal-mui-field .MuiInputBase-input,
+.voucher-field .MuiInputBase-input,
+.custom-bordered-input .MuiInputBase-input {
+  height: 46px !important;
+  padding: 18px 14px 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+/* MUI floating label */
+.equal-mui-field .MuiInputLabel-root,
+.voucher-field .MuiInputLabel-root,
+.custom-bordered-input .MuiInputLabel-root {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  top: -1px !important;
+  color: #334155 !important;
+}
+
+.equal-mui-field .MuiInputLabel-shrink,
+.voucher-field .MuiInputLabel-shrink,
+.custom-bordered-input .MuiInputLabel-shrink {
+  transform: translate(12px, 6px) scale(0.75) !important;
+}
+
+/* Better vertical alignment for filled input internal area */
+.equal-mui-field .MuiFilledInput-input,
+.voucher-field .MuiFilledInput-input,
+.custom-bordered-input .MuiFilledInput-input {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* =========================
+   TABLE AREA
+========================= */
+.journal-voucher-table-card {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  padding: 8px 10px 10px;
+}
+
+.Tablesection {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid #dbe3ee;
+  background: #fff;
+}
+
+.custom-table.modern-journal-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.custom-table.modern-journal-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: linear-gradient(to right, #dbeafe, #bfdbfe);
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid #cbd5e1;
+  white-space: nowrap;
+}
+
+.custom-table.modern-journal-table tbody td,
+.custom-table.modern-journal-table tfoot td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.custom-table.modern-journal-table tbody tr {
+  height: 42px;
+}
+
+.custom-table.modern-journal-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.custom-table.modern-journal-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  padding: 10px 8px;
+  border-top: 1px solid #cbd5e1;
+}
+
+.narration-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.Account,
+.Narration,
+.Debit,
+.Credits {
+  width: 100%;
+  height: 42px;
+  border: none;
+  outline: none;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  color: #0f172a;
+}
+
+.Account:focus,
+.Narration:focus,
+.Debit:focus,
+.Credits:focus {
+  background: #eff6ff;
+}
+
+.Debit,
+.Credits {
+  text-align: right;
+}
+
+.delete-cell-wrap {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addbutton.add-row-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.add-row-btn {
+  min-width: 120px;
+  height: 38px;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+}
+
+/* =========================
+   FOOTER / BUTTON AREA
+========================= */
+.Belowcontent.journal-bottom-section {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.Buttonsgroupz.journal-bottom-buttons {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+}
+
+.Buttonz.modern-btn {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: none !important;
+  border-radius: 10px !important;
+  background: linear-gradient(to right, #dbeafe, #bfdbfe) !important;
+  color: #1e293b !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.Buttonz.modern-btn:hover {
+  background: linear-gradient(to right, #cfe5ff, #a8cdfc) !important;
+}
+
+.Buttonz.modern-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.Buttonz.modern-btn.save-btn {
+  background: linear-gradient(to right, #bbf7d0, #86efac) !important;
+  color: #14532d !important;
+}
+
+/* =========================
+   SEARCH MODAL TABLE
+========================= */
+.modal-body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-body table thead th {
+  position: sticky;
+  top: 0;
+  background: #e2e8f0;
+  z-index: 2;
+  padding: 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.modal-body table tbody td {
+  padding: 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1200px) {
+  .journal-voucher-shell {
+    grid-template-rows: 20dvh 58dvh 22dvh;
+  }
+
+  .Buttonsgroupz.journal-bottom-buttons {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar-left.header-input-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .equal-field:not(.field-block) {
+    margin-top: 0;
+  }
+
+  .journal-voucher-shell {
+    grid-template-rows: 24dvh 52dvh 24dvh;
+  }
+
+  .Buttonsgroupz.journal-bottom-buttons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .HeaderJOU {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .journal-voucher-shell {
+    padding: 6px;
+    grid-template-rows: 28dvh 48dvh 24dvh;
+  }
+
+  .Buttonsgroupz.journal-bottom-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .Buttonz.modern-btn {
+    height: 38px;
+    font-size: 12px !important;
+  }
+
+  .custom-table.modern-journal-table thead th {
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+
+  .Account,
+  .Narration,
+  .Debit,
+  .Credits {
+    font-size: 13px;
+    padding: 0 8px;
+  }
 }

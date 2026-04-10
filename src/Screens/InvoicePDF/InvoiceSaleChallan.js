@@ -126,24 +126,59 @@ const InvoiceSaleChallan = React.forwardRef(({
   // Example usage with formData.grandtotal
   let totalInWords = numberToIndianWords(formData.grandtotal);
 
-  const formatDate = (dateValue) => {
-  // Check if date is already in dd/mm/yyyy or d/m/yyyy format
-  const ddmmyyyyPattern = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
 
-  if (ddmmyyyyPattern.test(dateValue)) {
-    return dateValue;  // already correctly formatted
-  }
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
 
-  // otherwise assume ISO or another format, parse it
-  const dateObj = new Date(dateValue);
-  if (isNaN(dateObj)) {
-    return "";  // invalid date fallback
-  }
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const year = dateObj.getFullYear();
-  return `${day}/${month}/${year}`;
-};
+    let date;
+
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
 
     return (
       <Modal
@@ -222,13 +257,14 @@ const InvoiceSaleChallan = React.forwardRef(({
                     </span>
                     <a style={{fontSize:18,marginRight:10}}>Phone: {companyPhn}</a>
                   </div>
-                  <text style={{fontSize:20,marginTop:20}}>CHALLAN UNDER RULE 55(1)(C)OF CGST/SGST RULE FOR WEIGHMENT OF GOODS</text>
+                  <text style={{fontSize:18,marginTop:20}}>CHALLAN UNDER RULE 55(1)(C)OF CGST/SGST RULE FOR WEIGHMENT OF GOODS</text>
                       <text
                         style={{
-                          fontSize: 60,
+                          fontSize: 40,
                           fontWeight: "600",
                           fontFamily: "serif",
-                          color:'darkblue'
+                          color:'darkblue',
+                          letterSpacing:5,
                         }}
                       >
                         {companyName}
@@ -272,7 +308,7 @@ const InvoiceSaleChallan = React.forwardRef(({
                         </div>
                         <div style={{display:"flex",flexDirection:"row",borderBottom:'1px solid black',height:"25%"}}>
                             <div style={{borderRight:"1px solid black",width:"50%",fontSize:20}}> <text style={{marginLeft:10}}>CHALLAN DATE</text></div>
-                            <div><text style={{fontSize:20,marginLeft:10}}>{formatDate(formData.date)}</text></div>
+                            <div><text style={{fontSize:20,marginLeft:10}}>{formatDateToDDMMYYYY(formData.date)}</text></div>
                         </div>
                         <div style={{display:"flex",flexDirection:"row",borderBottom:'1px solid black',height:"25%"}}>
                             <div style={{borderRight:"1px solid black",width:"50%",fontSize:20}}> <text style={{marginLeft:10}}>VEHICLE NO.</text></div>

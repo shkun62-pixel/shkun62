@@ -1,4 +1,4 @@
-.column-selector {
+/* .column-selector {
   margin-bottom: 10px;
 }
 
@@ -398,5 +398,566 @@
 
   .Buttonsgroups {
     margin-left: 70px;
+  }
+} */
+
+
+/* Live */
+
+/* =========================
+   GLOBAL RESET
+========================= */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+.cash-voucher-page {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #f6f8fb;
+  margin-top: -30px;
+}
+
+.cash-voucher-shell {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 20% 60% 20%;
+  gap: 6px;
+  padding: 5vh 8px 8px 8px;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER
+========================= */
+.cash-voucher-header-card {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.cash-voucher-header-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-bottom: 8px;
+}
+
+.header-title-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.header-title-wrap h1 {
+  margin: 0;
+  font-size: clamp(20px, 1.6vw, 26px);
+  line-height: 1.1;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+.tittle {
+  font-size: clamp(12px, 0.95vw, 15px);
+  font-weight: 600;
+  color: #64748b;
+}
+
+.containers.modern-date-box {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 90px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.cash-voucher-topbar {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.topbar-left {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+}
+
+.topbar-right {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+}
+
+.top-label {
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.3px;
+}
+
+.DatePICKER.modern-date-input {
+  width: 170px;
+  height: 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+}
+
+.DatePICKER.modern-date-input:focus {
+  border-color: #94a3b8;
+  background: #ffffff;
+}
+
+.custom-bordered-input.voucher-field {
+  width: 170px;
+}
+
+.custom-bordered-input .MuiFilledInput-root {
+  border-radius: 10px !important;
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  overflow: hidden;
+}
+
+.custom-bordered-input .MuiFilledInput-root:hover {
+  background: #ffffff !important;
+}
+
+.custom-bordered-input .MuiFilledInput-root.Mui-focused {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+}
+
+.custom-bordered-input .MuiFilledInput-root:before,
+.custom-bordered-input .MuiFilledInput-root:after {
+  display: none !important;
+}
+
+.custom-bordered-input .MuiInputBase-input {
+  height: 38px !important;
+  padding: 10px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.custom-bordered-input .MuiInputLabel-root {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* =========================
+   TABLE CARD
+========================= */
+.cash-voucher-table-card {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  padding: 4px 8px 6px;
+}
+
+.TableSectionz {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid #dbe3ee;
+  background: #fff;
+}
+
+/* =========================
+   TABLE
+========================= */
+.custom-table.modern-cash-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.custom-table.modern-cash-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: linear-gradient(to right, #dbeafe, #bfdbfe);
+  color: #1e293b;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  padding: 5px 4px;
+  border-bottom: 1px solid #cbd5e1;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.custom-table.modern-cash-table tbody td,
+.custom-table.modern-cash-table tfoot td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.custom-table.modern-cash-table tbody tr {
+  height: 30px;
+}
+
+.custom-table.modern-cash-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.custom-table.modern-cash-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  padding: 5px 4px;
+  border-top: 1px solid #cbd5e1;
+  line-height: 1.1;
+}
+
+.custom-table.modern-cash-table th:nth-child(1),
+.custom-table.modern-cash-table td:nth-child(1) {
+  width: 24%;
+}
+
+.custom-table.modern-cash-table th:nth-child(2),
+.custom-table.modern-cash-table td:nth-child(2) {
+  width: 30%;
+}
+
+.custom-table.modern-cash-table th:nth-child(3),
+.custom-table.modern-cash-table td:nth-child(3),
+.custom-table.modern-cash-table th:nth-child(4),
+.custom-table.modern-cash-table td:nth-child(4),
+.custom-table.modern-cash-table th:nth-child(5),
+.custom-table.modern-cash-table td:nth-child(5) {
+  width: 14%;
+}
+
+.custom-table.modern-cash-table th:nth-child(6),
+.custom-table.modern-cash-table td:nth-child(6) {
+  width: 8%;
+}
+
+.narration-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* =========================
+   TABLE INPUTS
+========================= */
+.Account,
+.Narration,
+.Payment,
+.Receipt,
+.Discounts {
+  width: 100%;
+  height: 30px;
+  border: none;
+  outline: none;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.Account:focus,
+.Narration:focus,
+.Payment:focus,
+.Receipt:focus,
+.Discounts:focus {
+  background: #eff6ff;
+}
+
+.Payment,
+.Receipt,
+.Discounts {
+  text-align: right;
+}
+
+.delete-cell-wrap {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-cell-wrap .MuiIconButton-root {
+  padding: 4px !important;
+}
+
+/* =========================
+   ADD ROW BUTTON
+========================= */
+.addbutton.add-row-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.add-row-btn {
+  min-width: 95px;
+  height: 28px;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  padding: 0 10px !important;
+}
+
+/* =========================
+   FOOTER - SAME AS JOURNAL
+========================= */
+.Belowcontent.cash-bottom-section {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.cash-bottom-buttons {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+}
+
+.cash-bottom-buttons .Buttonz.modern-btn {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: none !important;
+  border-radius: 10px !important;
+  background: linear-gradient(to right, #dbeafe, #bfdbfe) !important;
+  color: #1e293b !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px !important;
+}
+
+.cash-bottom-buttons .Buttonz.modern-btn:hover {
+  background: linear-gradient(to right, #cfe5ff, #a8cdfc) !important;
+}
+
+.cash-bottom-buttons .Buttonz.modern-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.cash-bottom-buttons .Buttonz.modern-btn.save-btn {
+  background: linear-gradient(to right, #bbf7d0, #86efac) !important;
+  color: #14532d !important;
+}
+
+/* =========================
+   SEARCH MODAL TABLE
+========================= */
+.modal-body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-body table thead th {
+  position: sticky;
+  top: 0;
+  background: #e2e8f0;
+  z-index: 2;
+  padding: 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.modal-body table tbody td {
+  padding: 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1400px) {
+  .cash-bottom-buttons .Buttonz.modern-btn {
+    font-size: 10px !important;
+    height: 34px;
+  }
+
+  .cash-bottom-buttons {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .cash-voucher-shell {
+    padding: 5vh 6px 6px 6px;
+  }
+
+  .cash-voucher-topbar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .topbar-right {
+    justify-content: flex-start;
+  }
+
+  .cash-bottom-buttons {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .cash-voucher-header-top {
+    min-height: 56px;
+    padding-right: 95px;
+  }
+
+  .cash-voucher-shell {
+    grid-template-rows: 28% 50% 22%;
+  }
+
+  .header-title-wrap h1 {
+    font-size: 18px;
+  }
+
+  .tittle {
+    font-size: 12px;
+  }
+
+  .containers.modern-date-box {
+    min-width: 82px;
+    padding: 5px 8px;
+  }
+
+  .custom-table.modern-cash-table thead th {
+    font-size: 10px;
+    padding: 4px 3px;
+  }
+
+  .custom-table.modern-cash-table tbody tr {
+    height: 28px;
+  }
+
+  .Account,
+  .Narration,
+  .Payment,
+  .Receipt,
+  .Discounts,
+  .delete-cell-wrap {
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .cash-bottom-buttons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .cash-bottom-buttons .Buttonz.modern-btn {
+    height: 38px;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .cash-voucher-shell {
+    padding: 6px;
+  }
+
+  .cash-bottom-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 }

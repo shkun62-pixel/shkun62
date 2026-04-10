@@ -1,4 +1,2122 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import React, { useState, useEffect, useRef, forwardRef } from "react";
+// import "./JournalVoucher.css";
+// import DatePicker from "react-datepicker";
+// import InputMask from "react-input-mask";
+// import "react-datepicker/dist/react-datepicker.css";
+// import "react-toastify/dist/ReactToastify.css";
+// import Table from "react-bootstrap/Table";
+// import Button from "react-bootstrap/Button";
+// import { BiTrash } from "react-icons/bi";
+// import ProductModalCustomer from "../Modals/ProductModalCustomer";
+// import { ToastContainer, toast } from "react-toastify";
+// import axios from "axios";
+// import { Modal } from "react-bootstrap"; // Import Bootstrap components
+// import InvoiceJournal from "../InvoicePDF/InvoiceJournal";
+// import { useEditMode } from "../../EditModeContext";
+// import { CompanyContext } from "../Context/CompanyContext";
+// import { useContext } from "react";
+// import TextField from "@mui/material/TextField";
+// import { IconButton } from "@mui/material";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import PrintChoiceModal from "../Shared/PrintChoiceModal";
+// import FAVoucherModal from "../Shared/FAVoucherModal";
+// import SearchModal from "../Shared/SearchModal";
+// import useShortcuts from "../Shared/useShortcuts";
+
+// const JournalVoucher = () => {
+//   const location = useLocation();
+//   const journalId = location.state?.journalId;
+//   const navigate = useNavigate();
+
+//   const { company } = useContext(CompanyContext);
+//   // const tenant = company?.databaseName;
+//   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+
+//   if (!tenant) {
+//     // you may want to guard here or show an error state,
+//     // since without a tenant you can’t hit the right API
+//     console.error("No tenant selected!");
+//   }
+
+//   const [open, setOpen] = React.useState(false);
+//   const handleOpen = () => setOpen(true);
+//   const handleClose = () => setOpen(false);
+//   const addButtonRef = useRef(null);
+//   const accountNameRefs = useRef([]);
+//   const narrationRefs = useRef([]);
+//   const debitRefs = useRef([]);
+//   const credittRefs = useRef([]);
+//   const saveButtonRef = useRef(null);
+//   const [title, setTitle] = useState("View");
+//   const datePickerRef = useRef(null);
+//   const VoucherRef = useRef(null);
+//   const [isSaving, setIsSaving] = useState(false);
+//   const [showSearchModal, setShowSearchModal] = useState(false); // State to handle modal visibility
+//   const [searchResults, setSearchResults] = useState([]); // State to store search results
+//   const initialColors = [
+//     "#E9967A",
+//     "#F0E68C",
+//     "#FFDEAD",
+//     "#ADD8E6",
+//     "#87CEFA",
+//     "#FFF0F5",
+//     "#FFC0CB",
+//     "#D8BFD8",
+//     "#DC143C",
+//     "#DCDCDC",
+//     "#8FBC8F",
+//   ];
+//   const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
+//   const [fsize, setfsize] = useState(19);
+//   const [formData, setFormData] = useState({
+//     vtype: "J",
+//     date: "",
+//     voucherno: 0,
+//     owner: "",
+//     totaldebit: "",
+//     totalcredit: "",
+//   });
+//   const MIN_ROWS = 9;
+//   const createEmptyRow = (id) => ({
+//     id,
+//     accountname: "",
+//     acode:0,
+//     narration: "",
+//     debit: "",
+//     credit: "",
+//     disableDebit: false,
+//     disableCredit: false,
+//   });
+
+//   const normalizeItems = (items = []) => {
+//     const rows = [...items];
+
+//     while (rows.length < MIN_ROWS) {
+//       rows.push(createEmptyRow(rows.length + 1));
+//     }
+
+//     return rows;
+//   };
+
+//   const [items, setItems] = useState(() => normalizeItems());
+//   // const [items, setItems] = useState([
+//   //   {
+//   //     id: "",
+//   //     accountname: "",
+//   //     narration: "",
+//   //     debit: "",
+//   //     credit: "",
+//   //     disableDebit: false,
+//   //     disableCredit: false,
+//   //   },
+//   // ]);
+
+//   useEffect(() => {
+//     if (addButtonRef.current && !journalId) {
+//       addButtonRef.current.focus();
+//     }
+//   }, []);
+
+//   // Naration Suggestions
+//   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
+//   const [showNarrationSuggestions, setShowNarrationSuggestions] =
+//     useState(true);
+//   const fetchNarrations = async () => {
+//     try {
+//       const res = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`,
+//       );
+//       const data = await res.json();
+
+//       // extract narrations from all items
+//       const narrs = data
+//         .flatMap((entry) => entry.items || [])
+//         .map((item) => item.narration)
+//         .filter((n) => n && n.trim() !== ""); // remove empty narrations
+
+//       // unique values
+//       const uniqueNarrs = [...new Set(narrs)];
+
+//       setNarrationSuggestions(uniqueNarrs);
+//     } catch (err) {
+//       console.error("Narration fetch failed:", err);
+//     }
+//   };
+
+//   const handleInputChange = (event) => {
+//     const { id, value } = event.target;
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       [id]: value,
+//     }));
+//   };
+//   const calculateTotalPayment = (data) => {
+//     const totalPayment = data.reduce((acc, item) => {
+//       return acc + parseFloat(item.debit || 0);
+//     }, 0);
+
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totaldebit: totalPayment.toFixed(2),
+//     }));
+//   };
+
+//   const calculateTotalReceipt = (data) => {
+//     const totalReceipt = data.reduce((acc, item) => {
+//       return acc + parseFloat(item.credit || 0);
+//     }, 0);
+
+//     setFormData((prevFormData) => ({
+//       ...prevFormData,
+//       totalcredit: totalReceipt.toFixed(2),
+//     }));
+//   };
+
+//   const handleNumberChange = (event, index, field) => {
+//     const value = event.target.value;
+
+//     // Validate that the input is numeric
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+
+//     const updatedItems = [...items];
+//     updatedItems[index][field] = value;
+
+//     // If the field is 'debit' and its value is greater than zero, disable 'credit'
+//     if (field === "debit") {
+//       updatedItems[index].disableCredit = parseFloat(value) > 0;
+//       updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
+//     }
+//     // If the field is 'credit' and its value is greater than zero, disable 'debit'
+//     else if (field === "credit") {
+//       updatedItems[index].disableDebit = parseFloat(value) > 0;
+//       updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
+//     }
+//     setItems(updatedItems);
+//     calculateTotalPayment(updatedItems);
+//     calculateTotalReceipt(updatedItems);
+//   };
+
+//   const capitalizeWords = (str) => {
+//     return str.replace(/\b\w/g, (char) => char.toUpperCase());
+//   };
+//   // Modal For Customer
+//   const [productsCus, setProductsCus] = useState([]);
+//   const [showModalCus, setShowModalCus] = useState(false);
+//   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
+//   const [loadingCus, setLoadingCus] = useState(true);
+//   const [errorCus, setErrorCus] = useState(null);
+//   const [suggestionRow, setSuggestionRow] = useState(null);
+//   const [suggestionText, setSuggestionText] = useState("");
+
+//   React.useEffect(() => {
+//     // Fetch products from the API when the component mounts
+//     fetchCustomers();
+//     fetchNarrations();
+//   }, []);
+
+//   const fetchCustomers = async () => {
+//     try {
+//       const response = await fetch(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
+//       );
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch products");
+//       }
+//       const data = await response.json();
+//       // Ensure to extract the formData for easier access in the rest of your app
+//       const formattedData = data.map((item) => ({
+//         ...item.formData,
+//         _id: item._id,
+//       }));
+//       setProductsCus(formattedData);
+//       setLoadingCus(false);
+//     } catch (error) {
+//       setErrorCus(error.message);
+//       setLoadingCus(false);
+//     }
+//   };
+
+//   const handleItemChangeCus = (index, key, value) => {
+//     const updatedItems = [...items];
+//     updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
+//     // If the key is 'name', find the corresponding product and set the price
+//     if (key === "name") {
+//       const selectedProduct = productsCus.find(
+//         (product) => product.ahead === value,
+//       );
+//       if (selectedProduct) {
+//         updatedItems[index]["accountname"] = selectedProduct.ahead;
+//         updatedItems[index]["acode"] = selectedProduct.acode;
+//       }
+//     }
+//     // Disable credit field if debit field is filled
+//     if (key === "debit") {
+//       updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
+//     }
+
+//     // Disable debit field if credit field is filled
+//     if (key === "credit") {
+//       updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+//     }
+//     if (key === "narration") {
+//       const inputValue = value.trim().toLowerCase();
+
+//       if (inputValue !== "") {
+//         // Find first matching accountname from ALL rows
+//         const matchedItem = items.find(
+//           (row) =>
+//             row.accountname &&
+//             row.accountname.toLowerCase().startsWith(inputValue)
+//         );
+
+//         if (matchedItem) {
+//           setSuggestionRow(index);
+//           setSuggestionText(matchedItem.accountname);
+//         } else {
+//           setSuggestionRow(null);
+//           setSuggestionText("");
+//         }
+//       } else {
+//         setSuggestionRow(null);
+//         setSuggestionText("");
+//       }
+//     }
+//     setItems(updatedItems);
+//   };
+//   const handleAddItem = () => {
+//     if (isEditMode) {
+//       const newItem = {
+//         id: items.length + 1,
+//         accountname: "",
+//         acode:0,
+//         narration: "",
+//         debit: "",
+//         credit: "",
+//         disableDebit: false,
+//         disableCredit: false,
+//       };
+//       setItems([...items, newItem]);
+//       setTimeout(() => {
+//         accountNameRefs.current[items.length].focus();
+//       }, 100);
+//     }
+//   };
+
+//   const handleDeleteItem = (index) => {
+//     const filteredItems = items.filter((item, i) => i !== index);
+//     setItems(filteredItems);
+//   };
+
+//   const handleProductSelectCus = (product) => {
+//     if (!product) {
+//       alert("No product received!");
+//       setShowModalCus(false);
+//       return;
+//     }
+
+//     // clone the array
+//     const newCustomers = [...items];
+
+//     // overwrite the one at the selected index
+//     newCustomers[selectedItemIndexCus] = {
+//       ...newCustomers[selectedItemIndexCus],
+//       accountname: product.ahead || "",
+//       acode: product.acode
+//     };
+//     const nameValue = product.ahead || product.name || "";
+//     if (selectedItemIndexCus !== null) {
+//       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
+//       setShowModalCus(false);
+//       setTimeout(() => {
+//         narrationRefs.current[selectedItemIndexCus].focus();
+//       }, 100);
+//     }
+//     setItems(newCustomers);
+//     setIsEditMode(true);
+//     setShowModalCus(false);
+//   };
+
+//   const handleCloseModalCus = () => {
+//     setShowModalCus(false);
+//     setIsEditMode(true);
+//     setPressedKey(""); // resets for next modal open
+//   };
+
+//   const openModalForItemCus = (index) => {
+//     if (isEditMode) {
+//       setSelectedItemIndexCus(index);
+//       setShowModalCus(true);
+//     }
+//   };
+
+//   const allFieldsCus = productsCus.reduce((fields, product) => {
+//     Object.keys(product).forEach((key) => {
+//       if (!fields.includes(key)) {
+//         fields.push(key);
+//       }
+//     });
+
+//     return fields;
+//   }, []);
+
+//   // Api Response
+//   const [data, setData] = useState([]);
+//   const [data1, setData1] = useState([]);
+//   const [index, setIndex] = useState(0);
+//   const [isAddEnabled, setIsAddEnabled] = useState(true);
+//   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
+//   const [isPreviousEnabled, setIsPreviousEnabled] = useState(true);
+//   const [isNextEnabled, setIsNextEnabled] = useState(true);
+//   const [isFirstEnabled, setIsFirstEnabled] = useState(true);
+//   const [isLastEnabled, setIsLastEnabled] = useState(true);
+//   const [isSearchEnabled, setIsSearchEnabled] = useState(true);
+//   const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
+//   const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
+//   const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+//   const [isAbcmode, setIsAbcmode] = useState(false);
+//   const [isEditMode2, setIsEditMode2] = useState(false); // State to track edit mode
+//   const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+//   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
+//   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
+//   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
+
+//   // replace your Print button onClick:
+//   const handlePrintClick = () => setPrintChoiceOpen(true);
+
+//   // 1) Normal print (your existing PDF)
+//   const handleNormalPrint = () => {
+//     setPrintChoiceOpen(false);
+//     handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+//   };
+
+//   // 2) FA voucher preview
+//   const handleFAPreview = async () => {
+//     setIsFAModalOpen(true);
+//   };
+
+//   // Fetch Data
+//   const fetchData = async () => {
+//     try {
+//       let response;
+//       if (journalId) {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journalget/${journalId}`,
+//         );
+//       } else {
+//         response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
+//         );
+//       }
+//       // const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`);
+//       // console.log("fetch Response: ", response.data);
+
+//       if (response.status === 200 && response.data.data) {
+//         const lastEntry = response.data.data;
+//         // Set flags and update form data
+//         setFirstTimeCheckData("DataAvailable");
+//         setFormData(lastEntry.formData);
+//         console.log(lastEntry.formData, "Formdata");
+
+//         // Update items with the last entry's items
+//         const updatedItems = lastEntry.items.map((item) => ({
+//           ...item, // Ensure immutability
+//           disableCredit: item.disableCredit || false, // Handle disableReceipt flag safely
+//         }));
+//         setItems(normalizeItems(updatedItems));
+
+//         // Calculate total debit and total credit
+//         const totalDebit = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.debit || 0), 0)
+//           .toFixed(2);
+//         const totalCredit = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.credit || 0), 0)
+//           .toFixed(2);
+
+//         // Update formData with the calculated totals
+//         setFormData((prevFormData) => ({
+//           ...prevFormData,
+//           totaldebit: totalDebit,
+//           totalcredit: totalCredit,
+//         }));
+
+//         // Set data and index
+//         setData1(lastEntry); // Assuming setData1 holds the current entry data
+//         setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
+//         return lastEntry; // ✅ Return this for use in handleAdd
+//       } else {
+//         setFirstTimeCheckData("DataNotAvailable");
+//         console.log("No data available");
+
+//         // Create an empty data object with voucher number 0
+//         const emptyFormData = {
+//           voucherno: 0,
+//           date: new Date().toLocaleDateString(), // Use today's date
+//           vtype: "J",
+//           owner: "",
+//           totaldebit: "0.00",
+//           totalcredit: "0.00",
+//         };
+
+//         const emptyItems = [
+//           {
+//             id: 1,
+//             accountname: "",
+//             narration: "",
+//             debit: "",
+//             credit: "",
+//             disableDebit: false,
+//             disableCredit: false,
+//           },
+//         ];
+
+//         // Set the empty data
+//         setFormData(emptyFormData);
+//         setItems(normalizeItems([]));
+//         setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
+//         setIndex(0); // Set index to 0 for the empty voucher
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+
+//       // In case of error, initialize empty data
+//       const emptyFormData = {
+//         voucherno: 0,
+//         date: new Date().toLocaleDateString(),
+//         cashinhand: "",
+//         owner: "Owner",
+//         user: "",
+//         totalpayment: "0.00",
+//         totalreceipt: "0.00",
+//         totaldiscount: "0.00",
+//       };
+//       const emptyItems = [
+//         {
+//           id: 1,
+//           accountname: "",
+//           acode:0,
+//           narration: "",
+//           payment_debit: 0.0,
+//           receipt_credit: 0.0,
+//           discount: 0.0,
+//           discounted_payment: "0.00",
+//           discounted_receipt: "0.00",
+//           disablePayment: false,
+//           disableReceipt: false,
+//         },
+//       ];
+
+//       setFormData(emptyFormData);
+//       setItems(normalizeItems([]));
+//       setData1({ formData: emptyFormData, items: emptyItems });
+//       setIndex(0);
+//     }
+//   };
+//   useEffect(() => {
+//     fetchData(); // Fetch data when component mounts
+//   }, []);
+
+//   useEffect(() => {
+//     const handleEsc = (e) => {
+//       if (e.key === "Escape" && !isEditMode && journalId) {
+//         const modalState = JSON.parse(
+//           sessionStorage.getItem("trailModalState") || "{}",
+//         );
+
+//         navigate(-1); // go back
+//         setTimeout(() => {
+//           // restore modal state after navigation
+//           if (modalState.keepModalOpen) {
+//             window.dispatchEvent(
+//               new CustomEvent("reopenTrailModal", { detail: modalState }),
+//             );
+//           }
+//         }, 50);
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleEsc);
+//     return () => window.removeEventListener("keydown", handleEsc);
+//   }, [isEditMode]);
+
+//   useEffect(() => {
+//     if (data.length > 0) {
+//       setFormData(data[data.length - 1]); // Set currentData to the last record
+//       setIndex(data.length - 1);
+//     }
+//   }, [data]);
+
+//   // Add this line to set isDisabled to true initially
+//   useEffect(() => {
+//     setIsDisabled(true);
+//   }, []);
+
+//   const getTodayDDMMYYYY = () => {
+//     const today = new Date();
+//     const dd = String(today.getDate()).padStart(2, "0");
+//     const mm = String(today.getMonth() + 1).padStart(2, "0");
+//     const yyyy = today.getFullYear();
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+//   const skipItemCodeFocusRef = useRef(false);
+
+//   const fetchVoucherNumbers = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last-voucherno`
+//       );
+
+//       return {
+//         lastVoucherNo: res?.data?.lastVoucherNo || 0,
+//         nextVoucherNo: res?.data?.nextVoucherNo || 1,
+//       };
+//     } catch (error) {
+//       console.error("Error fetching voucher numbers:", error);
+//       toast.error("Unable to fetch voucher number", {
+//         position: "top-center",
+//       });
+//       return null;
+//     }
+//   };
+
+//   const handleNext = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/next/${data1._id}`,
+//         );
+//         if (response.status === 200 && response.data) {
+//           const nextData = response.data.data;
+//           setData1(response.data.data);
+//           setIndex(index + 1);
+//           setFormData(nextData.formData);
+//           const updatedItems = nextData.items.map((item) => ({
+//             ...item,
+//             disableReceipt: item.disableReceipt || false,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching next record:", error);
+//     }
+//   };
+//   const handlePrevious = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+//     try {
+//       if (data1) {
+//         const response = await axios.get(
+//           `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/previous/${data1._id}`,
+//         );
+//         if (response.status === 200 && response.data) {
+//           console.log(response);
+//           setData1(response.data.data);
+//           const prevData = response.data.data;
+//           setIndex(index - 1);
+//           setFormData(prevData.formData);
+//           const updatedItems = prevData.items.map((item) => ({
+//             ...item,
+//             disableReceipt: item.disableReceipt || false,
+//           }));
+//           setItems(normalizeItems(updatedItems));
+//           setIsDisabled(true);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Error fetching previous record:", error);
+//     }
+//   };
+//   const handleFirst = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/first`,
+//       );
+//       if (response.status === 200 && response.data) {
+//         const firstData = response.data.data;
+//         setIndex(0);
+//         setFormData(firstData.formData);
+//         setData1(response.data.data);
+//         const updatedItems = firstData.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching first record:", error);
+//     }
+//   };
+//   const handleLast = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setTitle("View");
+
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
+//       );
+//       if (response.status === 200 && response.data) {
+//         const lastData = response.data.data;
+//         const lastIndex = response.data.length - 1;
+//         setIndex(lastIndex);
+//         setFormData(lastData.formData);
+//         setData1(response.data.data);
+//         const updatedItems = lastData.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         setIsDisabled(true);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching last record:", error);
+//     }
+//   };
+
+//   const handleAdd = async () => {
+//     setTitle("NEW");
+//     try {
+//       const voucherData = await fetchVoucherNumbers();
+//       if (!voucherData) return;
+
+//       const lastvoucherno = voucherData.nextVoucherNo;
+//       const newData = {
+//         vtype: "J",
+//         date: getTodayDDMMYYYY(),
+//         voucherno: lastvoucherno,
+//         owner: "",
+//         totaldebit: "",
+//         totalcredit: "",
+//       };
+//       setData([...data, newData]);
+//       setFormData(newData);
+//       setItems(normalizeItems([]));
+//       setIndex(data.length);
+//       setIsAddEnabled(false);
+//       setIsSubmitEnabled(true);
+//       setIsPreviousEnabled(false);
+//       setIsNextEnabled(false);
+//       setIsFirstEnabled(false);
+//       setIsLastEnabled(false);
+//       setIsSearchEnabled(false);
+//       setIsPreviousEnabled(false);
+//       setIsSPrintEnabled(false);
+//       setIsDeleteEnabled(false);
+//       setIsDisabled(false);
+//       setIsEditMode(true);
+//       skipItemCodeFocusRef.current = true;
+//       if (datePickerRef.current) {
+//         datePickerRef.current.focus();
+//       }
+//     } catch (error) {
+//       console.error("Error adding new entry:", error);
+//     }
+//   };
+//   const handleEditClick = () => {
+//     setTitle("Edit");
+//     setIsDisabled(false);
+//     setIsEditMode(true);
+//     setIsAddEnabled(false);
+//     setIsSubmitEnabled(true);
+//     setIsPreviousEnabled(false);
+//     setIsNextEnabled(false);
+//     setIsFirstEnabled(false);
+//     setIsLastEnabled(false);
+//     setIsSearchEnabled(false);
+//     setIsPreviousEnabled(false);
+//     setIsSPrintEnabled(false);
+//     setIsDeleteEnabled(false);
+//     setIsAbcmode(true);
+//     if (accountNameRefs.current[0]) {
+//       accountNameRefs.current[0].focus();
+//     }
+//   };
+
+//     const handleSaveClick = async () => {
+//     document.body.style.backgroundColor = "white";
+//     setIsSaving(true);
+//     let isDataSaved = false;
+//     try {
+//       const filledRows = items.filter((item) => item.accountname !== "");
+//       if (filledRows.length === 0) {
+//         toast.error("Please fill in at least one account name before saving.", {
+//           position: "top-center",
+//         });
+//         setIsSaving(false);
+//         return;
+//       }
+//       // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+//       const isValidTransaction = filledRows.every(
+//         (item) => parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0,
+//       );
+
+//       if (!isValidTransaction) {
+//         toast.error("Credit or Debit must be greater than 0.", {
+//           position: "top-center",
+//         });
+//         return;
+//       }
+//       // Ensure that total debit and total credit are equal
+//       const totalDebit = filledRows.reduce(
+//         (sum, item) => sum + parseFloat(item.debit || 0),
+//         0,
+//       );
+//       const totalCredit = filledRows.reduce(
+//         (sum, item) => sum + parseFloat(item.credit || 0),
+//         0,
+//       );
+
+//       if (totalDebit !== totalCredit) {
+//         toast.error("Total Debit and Total Credit must be equal.", {
+//           position: "top-center",
+//         });
+//         setIsSaving(false);
+//         return;
+//       }
+
+//       const voucherData = await fetchVoucherNumbers();
+//       if (!voucherData) return;
+  
+//       if (!isAbcmode) {
+//         // ADD mode
+//         if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
+//           toast.error(`Voucher No ${formData.voucherno} already used!`, {
+//             position: "top-center",
+//           });
+//           setIsSubmitEnabled(true);
+//           return;
+//         }
+//       } else {
+//         // EDIT mode
+//         if (
+//           Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
+//           Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
+//         ) {
+//           toast.error(`Voucher No ${formData.voucherno} already used!`, {
+//             position: "top-center",
+//           });
+//           setIsSubmitEnabled(true);
+//           return;
+//         }
+//       }
+      
+//       let combinedData;
+//       if (isAbcmode) {
+//         console.log(formData);
+//         formData.totalcredit = formData.totalcredit;
+//         formData.totaldebit = formData.totaldebit;
+//         combinedData = {
+//           _id: formData._id,
+//           formData: {
+//             vtype: formData.vtype,
+//             date: formData.date,
+//             voucherno: formData.voucherno,
+//             owner: formData.owner,
+//             totaldebit: formData.totaldebit,
+//             totalcredit: formData.totalcredit,
+//           },
+//           items: filledRows.map((item) => ({
+//             id: item.id,
+//             accountname: item.accountname,
+//             acode: item.acode,
+//             narration: item.narration,
+//             debit: item.debit,
+//             credit: item.credit,
+//             disableDebit: item.disableDebit,
+//             disableCredit: item.disableCredit,
+//           })),
+//         };
+//       } else {
+//         combinedData = {
+//           _id: formData._id,
+//           formData: {
+//             vtype: formData.vtype,
+//             date: formData.date,
+//             voucherno: formData.voucherno,
+//             owner: formData.owner,
+//             totaldebit: formData.totaldebit,
+//             totalcredit: formData.totalcredit,
+//           },
+//           items: filledRows.map((item) => ({
+//             id: item.id,
+//             accountname: item.accountname,
+//             acode: item.acode,
+//             narration: item.narration,
+//             debit: item.debit,
+//             credit: item.credit,
+//             disableDebit: item.disableDebit,
+//             disableCredit: item.disableCredit,
+//           })),
+//         };
+//       }
+//       // Debugging
+//       console.log("Combined Data:", combinedData);
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
+//       const method = isAbcmode ? "put" : "post";
+//       const response = await axios({
+//         method,
+//         url: apiEndpoint,
+//         data: combinedData,
+//       });
+
+//       if (response.status === 200 || response.status === 201) {
+//         // fetchData();
+//         isDataSaved = true;
+//       }
+//     } catch (error) {
+//       console.error("Error saving data:", error);
+//       toast.error("Failed to save data. Please try again.", {
+//         position: "top-center",
+//       });
+//     } finally {
+//       setIsSubmitEnabled(true);
+//       setIsSaving(false);
+//       if (isDataSaved) {
+//         setTitle("View");
+//         setIsAddEnabled(true);
+//         setIsDisabled(true);
+//         setIsEditMode(false);
+//         setIsEditMode2(false);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsPreviousEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         fetchData(); // Refresh data to get updated _id and other info
+//         fetchNarrations(); // Refresh narrations
+//         toast.success("Data Saved Successfully!", { position: "top-center" });
+//       } else {
+//         setIsAddEnabled(false);
+//         setIsDisabled(false);
+//       }
+//     }
+//   };
+
+//   const handleDeleteClick = async (id) => {
+//     if (!id) {
+//       toast.error("Invalid ID. Please select an item to delete.", {
+//         position: "top-center",
+//       });
+//       return;
+//     }
+
+//     const userConfirmed = window.confirm(
+//       "Are you sure you want to delete this item?",
+//     );
+//     if (!userConfirmed) return;
+
+//     setIsSaving(true);
+//     try {
+//       // ✅ use id, not data1._id
+//       const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/${data1._id}`;
+//       const response = await axios.delete(apiEndpoint);
+
+//       if (response.status === 200) {
+//         toast.success("Data deleted successfully!", { position: "top-center" });
+//         fetchData(); // Refresh the data after successful deletion
+//       } else {
+//         throw new Error(`Failed to delete data: ${response.statusText}`);
+//       }
+//     } catch (error) {
+//       console.error("Error deleting data:", error);
+//       toast.error(`Failed to delete data. Error: ${error.message}`, {
+//         position: "top-center",
+//       });
+//     } finally {
+//       setIsSaving(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (isEditMode) {
+//       if (skipItemCodeFocusRef.current) {
+//         skipItemCodeFocusRef.current = false; // reset
+//         return;
+//       }
+
+//       setTimeout(() => {
+//         const el = accountNameRefs.current[0];
+//         if (el && !el.disabled) {
+//           el.focus();
+//           el.select && el.select();
+//         }
+//       }, 0);
+//     }
+//   }, [isEditMode]);
+  
+//   const handleExit = async () => {
+//     document.body.style.backgroundColor = "white"; // Reset background color
+//     setIsAddEnabled(true); // Enable "Add" button
+//     setTitle("View");
+
+//     if(!isEditMode){
+//       navigate("/dashboard"); 
+//       return;
+//     }
+//     try {
+//       const response = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
+//       ); // Fetch the latest data
+
+//       if (response.status === 200 && response.data.data) {
+//         // If data is available
+//         const lastEntry = response.data.data;
+//         setFormData(lastEntry.formData); // Set form data
+
+//         const updatedItems = lastEntry.items.map((item) => ({
+//           ...item,
+//           disableReceipt: item.disableReceipt || false,
+//         }));
+//         setItems(normalizeItems(updatedItems));
+//         // Update totals
+//         const totaldebit = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.debit || 0), 0)
+//           .toFixed(2);
+//         const totalcredit = updatedItems
+//           .reduce((sum, item) => sum + parseFloat(item.credit || 0), 0)
+//           .toFixed(2);
+
+//         setFormData((prevFormData) => ({
+//           ...prevFormData,
+//           totaldebit: totaldebit,
+//           totalcredit: totalcredit,
+//         }));
+//         setIsDisabled(true); // Disable fields after loading the data
+//         setIndex(lastEntry.formData);
+//         setIsAddEnabled(true);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         setIsEditMode(false);
+//       } else {
+//         // If no data is available, initialize with default values
+//         console.log("No data available");
+//         const newData = {
+//           vtype: "J",
+//           date: "",
+//           voucherno: 0,
+//           owner: "",
+//           totaldebit: "",
+//           totalcredit: "",
+//         };
+//         setFormData(newData);
+//         setItems(normalizeItems([]));
+//         setIsDisabled(true); // Disable fields after loading the default data
+//         setIsAddEnabled(true);
+//         setIsSubmitEnabled(false);
+//         setIsPreviousEnabled(true);
+//         setIsNextEnabled(true);
+//         setIsFirstEnabled(true);
+//         setIsLastEnabled(true);
+//         setIsSearchEnabled(true);
+//         setIsSPrintEnabled(true);
+//         setIsDeleteEnabled(true);
+//         setIsEditMode(false);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching data", error);
+//     }
+//   };
+
+//   const copyNarrationFromAbove = (index) => {
+//     if (index === 0) return;
+
+//     setItems((prev) => {
+//       const updated = [...prev];
+
+//       if (!updated[index].narration && updated[index - 1].narration) {
+//         updated[index].narration = updated[index - 1].narration;
+//       }
+
+//       return updated;
+//     });
+//   };
+
+//   const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
+//   const tableScrollRef = useRef(null);
+//   const focusAndScroll = (refArray, rowIndex) => {
+//     const inputEl = refArray.current?.[rowIndex];
+//     const container = tableScrollRef.current;
+
+//     if (!inputEl || !container) return;
+
+//     // focus & select
+//     inputEl.focus();
+//     setTimeout(() => inputEl.select && inputEl.select(), 0);
+
+//     // find row
+//     const rowEl = inputEl.closest("tr");
+//     if (!rowEl) return;
+
+//     const rowTop = rowEl.offsetTop;
+//     const rowHeight = rowEl.offsetHeight;
+//     const containerHeight = container.clientHeight;
+
+//     // 🔥 key line — force visibility
+//     container.scrollTop = rowTop - containerHeight + rowHeight + 60;
+//   };
+
+//   const handleKeyDown = (event, index, field) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault(); // Stop default Tab navigation
+//       switch (field) {
+//         case "accountname":
+//           if (items[index].accountname.trim() === "") {
+//             saveButtonRef.current?.focus();
+//           } else {
+//             narrationRefs.current[index]?.focus();
+//           }
+//           break;
+//         case "narration": {
+//           // 🟡 STEP 1: If narration is empty, copy & STAY
+//           if (
+//             !items[index].narration &&
+//             index > 0 &&
+//             items[index - 1].narration
+//           ) {
+//             copyNarrationFromAbove(index);
+
+//             // 🔥 stay in narration field
+//             setTimeout(() => {
+//               narrationRefs.current[index]?.focus();
+//               narrationRefs.current[index]?.select();
+//             }, 0);
+
+//             return; // ⛔ stop further Enter handling
+//           }
+
+//           // 🟢 STEP 2: Normal Enter behavior (second Enter)
+//           if (items[index].disableDebit) {
+//             credittRefs.current[index]?.focus();
+//           } else {
+//             debitRefs.current[index]?.focus();
+//           }
+//           break;
+//         }
+
+//         case "debit":
+//           if (!items[index].disableCredit) {
+//             credittRefs.current[index]?.focus();
+//           } else {
+//             // If credit is also disabled, move to next row
+//             if (index === items.length - 1) {
+//               handleAddItem();
+//               accountNameRefs.current[index + 1]?.focus();
+//             } else {
+//               accountNameRefs.current[index + 1]?.focus();
+//             }
+//           }
+//           break;
+//         case "credit":
+//           if (index === items.length - 1) {
+//             handleAddItem();
+//             setTimeout(() => {
+//               focusAndScroll(accountNameRefs, index + 1);
+//             }, 0);
+//           } else {
+//             focusAndScroll(accountNameRefs, index + 1);
+//           }
+//           break;
+
+//         // case "credit":
+//         //   if (index === items.length - 1) {
+//         //     handleAddItem();
+//         //     accountNameRefs.current[index + 1]?.focus();
+//         //   } else {
+//         //     accountNameRefs.current[index + 1]?.focus();
+//         //   }
+//         //   break;
+
+//         default:
+//           break;
+//       }
+//     }
+//     // Move Right (→)
+//     else if (event.key === "ArrowRight") {
+//       if (field === "accountname") {
+//         narrationRefs.current[index]?.focus();
+//         setTimeout(() => narrationRefs.current[index]?.select(), 0);
+//       } else if (field === "narration") {
+//         if (items[index].disableDebit) {
+//           // If debit is disabled, move focus to credit
+//           credittRefs.current[index]?.focus();
+//           setTimeout(() => credittRefs.current[index]?.select(), 0);
+//         } else {
+//           debitRefs.current[index]?.focus();
+//           setTimeout(() => debitRefs.current[index]?.select(), 0);
+//         }
+//       } else if (field === "debit") {
+//         if (!items[index].disableCredit) {
+//           credittRefs.current[index]?.focus();
+//           setTimeout(() => credittRefs.current[index]?.select(), 0);
+//         }
+//       } else if (field === "credit") {
+//         if (index === items.length - 1) {
+//           // handleAddItem(); (If needed, uncomment this)
+//           accountNameRefs.current[index + 1]?.focus();
+//           setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//         } else {
+//           accountNameRefs.current[index + 1]?.focus();
+//           setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//         }
+//       }
+//     }
+//     // Move Left (←)
+//     else if (event.key === "ArrowLeft") {
+//       if (field === "credit") {
+//         if (!items[index].disableDebit) {
+//           debitRefs.current[index]?.focus();
+//           setTimeout(() => debitRefs.current[index]?.select(), 0);
+//         } else {
+//           // If debit is disabled, move to narration
+//           narrationRefs.current[index]?.focus();
+//           setTimeout(() => narrationRefs.current[index]?.select(), 0);
+//         }
+//       } else if (field === "debit") {
+//         narrationRefs.current[index]?.focus();
+//         setTimeout(() => narrationRefs.current[index]?.select(), 0);
+//       } else if (field === "narration") {
+//         accountNameRefs.current[index]?.focus();
+//         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
+//       }
+//     }
+//     // Move Up
+//     else if (event.key === "ArrowUp" && index > 0) {
+//       setTimeout(() => {
+//         if (field === "accountname")
+//           accountNameRefs.current[index - 1]?.focus();
+//         else if (field === "narration")
+//           narrationRefs.current[index - 1]?.focus();
+//         else if (field === "debit") debitRefs.current[index - 1]?.focus();
+//         else if (field === "credit") credittRefs.current[index - 1]?.focus();
+//       }, 100);
+//     }
+//     // Move Down
+//     else if (event.key === "ArrowDown" && index < items.length - 1) {
+//       setTimeout(() => {
+//         if (field === "accountname")
+//           accountNameRefs.current[index + 1]?.focus();
+//         else if (field === "narration")
+//           narrationRefs.current[index + 1]?.focus();
+//         else if (field === "debit") debitRefs.current[index + 1]?.focus();
+//         else if (field === "credit") credittRefs.current[index + 1]?.focus();
+//       }, 100);
+//     }
+//     // Open Modal on Letter Input in Account Name
+//     else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+//       setPressedKey(event.key);
+//       openModalForItemCus(index);
+//       event.preventDefault();
+//     }
+//   };
+
+
+//   // Update the blur handlers so that they always format the value to 2 decimals.
+//   const handlePkgsBlur = (index) => {
+//     const decimalPlaces = 2;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].debit);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].debit = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const handleWeightBlur = (index) => {
+//     const decimalPlaces = 2;
+//     const updatedItems = [...items];
+//     let value = parseFloat(updatedItems[index].credit);
+//     if (isNaN(value)) {
+//       value = 0;
+//     }
+//     updatedItems[index].credit = value.toFixed(decimalPlaces);
+//     setItems(updatedItems);
+//   };
+
+//   const isRowFilled = (row) => {
+//     return (row.accountname || "").trim() !== "";
+//   };
+//   const canEditRow = (rowIndex) => {
+//     // 🔒 If not in edit mode, nothing is editable
+//     if (!isEditMode) return false;
+
+//     // First row is editable in edit mode
+//     if (rowIndex === 0) return true;
+
+//     // All previous rows must be filled
+//     for (let i = 0; i < rowIndex; i++) {
+//       if (!isRowFilled(items[i])) {
+//         return false;
+//       }
+//     }
+//     return true;
+//   };
+
+//   const handleEnterKeyPress = (currentRef, nextRef) => (event) => {
+//     if (event.key === "Enter" || event.key === "Tab") {
+//       event.preventDefault();
+//       if (nextRef && nextRef.current) {
+//         nextRef.current.focus();
+//       }
+//     }
+//   };
+
+//   const handleBankEnter = (e) => {
+//     if (e.key === "Enter" || e.key === "Tab") {
+//       e.preventDefault();
+
+//       // Focus first ACCOUNTNAME input
+//       if (accountNameRefs.current[0]) {
+//         accountNameRefs.current[0].focus();
+//       }
+//     }
+//   };
+
+//   const formatDateToDDMMYYYY = (dateStr) => {
+//     if (!dateStr) return "";
+
+//     // ✅ Already dd-mm-yyyy
+//     const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+//     const match = dateStr.match(ddmmyyyy);
+//     if (match) {
+//       const [, dd, mm, yyyy] = match;
+//       const test = new Date(`${yyyy}-${mm}-${dd}`);
+//       if (
+//         test.getDate() === Number(dd) &&
+//         test.getMonth() + 1 === Number(mm) &&
+//         test.getFullYear() === Number(yyyy)
+//       ) {
+//         return dateStr;
+//       }
+//     }
+
+//     let date;
+
+//     // ✅ ISO with time (Z or offset)
+//     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+//       const [y, m, d] = dateStr.substring(0, 10).split("-");
+//       date = new Date(y, m - 1, d); // avoid timezone issues
+//     }
+//     // ✅ ISO date only (yyyy-mm-dd)
+//     else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+//       const [y, m, d] = dateStr.split("-");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // ✅ dd/mm/yyyy
+//     else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+//       const [d, m, y] = dateStr.split("/");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // ✅ yyyy/mm/dd
+//     else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+//       const [y, m, d] = dateStr.split("/");
+//       date = new Date(y, m - 1, d);
+//     }
+//     // 🔁 fallback (Date.parse)
+//     else {
+//       date = new Date(dateStr);
+//     }
+
+//     if (!date || isNaN(date.getTime())) return "";
+
+//     const dd = String(date.getDate()).padStart(2, "0");
+//     const mm = String(date.getMonth() + 1).padStart(2, "0");
+//     const yyyy = date.getFullYear();
+
+//     return `${dd}-${mm}-${yyyy}`;
+//   };
+
+//   const [showSearch, setShowSearch] = useState(false);
+//   const [allBills, setAllBills] = useState([]);
+//   const [searchBillNo, setSearchBillNo] = useState("");
+//   const [filteredBills, setFilteredBills] = useState([]);
+//   const [searchDate, setSearchDate] = useState(null);
+//   const [activeRowIndex, setActiveRowIndex] = useState(0);
+//     // ⭐ infinite scroll state
+//   const [visibleCount, setVisibleCount] = useState(10);
+
+//   // Fetch all bills for search
+//   const fetchAllBills = async () => {
+//     try {
+//       const res = await axios.get(
+//         `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`,
+//       );
+//       if (Array.isArray(res.data)) {
+//         setAllBills(res.data);
+//         setFilteredBills(res.data);
+//       }
+//     } catch (error) {
+//       console.error("Error fetching bills", error);
+//     }
+//   };
+
+//   // Update filtering logic
+//   useEffect(() => {
+//     let filtered = allBills;
+
+//     if (searchBillNo.trim() !== "") {
+//       filtered = filtered.filter((bill) =>
+//         bill.formData.voucherno
+//           .toString()
+//           .toLowerCase()
+//           .includes(searchBillNo.toLowerCase())
+//       );
+//     }
+
+//     if (searchDate) {
+//       const selected = formatDateToDDMMYYYY(searchDate);
+
+//       if (selected) {
+//         filtered = filtered.filter((bill) => {
+//           const billDate = formatDateToDDMMYYYY(bill.formData.date);
+//           return billDate === selected;
+//         });
+//       }
+//     }
+
+//     setFilteredBills(filtered);
+
+//     // ⭐ reset visible rows when search changes
+//     setVisibleCount(30);
+//   }, [searchBillNo, searchDate, allBills]);
+
+//   const handleSelectBill = (bill) => {
+//     setFormData({
+//       ...bill.formData,
+//       date: bill.formData.date,
+//     });
+//     setItems(normalizeItems(bill.items));
+//     setShowSearch(false);
+//     setFilteredBills([]);
+//     setSearchBillNo("");
+//     setSearchDate("");
+//   };
+  
+//   useEffect(() => {
+//     const handleKeyDown = (e) => {
+//       if (!showSearch) return;
+
+//       if (e.key === "ArrowDown") {
+//         e.preventDefault();
+//         setActiveRowIndex((prev) =>
+//           prev < filteredBills.length - 1 ? prev + 1 : prev
+//         );
+//       }
+
+//       if (e.key === "ArrowUp") {
+//         e.preventDefault();
+//         setActiveRowIndex((prev) => (prev > 0 ? prev - 1 : 0));
+//       }
+
+//       if (e.key === "Enter") {
+//         e.preventDefault();
+//         const bill = filteredBills[activeRowIndex];
+//         if (bill) {
+//           handleSelectBill(bill);
+//           setShowSearch(false);
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+
+//     return () => window.removeEventListener("keydown", handleKeyDown);
+//   }, [filteredBills, activeRowIndex, showSearch]);
+
+//   // ShortCuts for Buttons
+//   const AnyModalOpen = showModalCus || showSearch || printChoiceOpen;
+//   useShortcuts({
+//     handleAdd,
+//     handleEdit: handleEditClick,
+//     handlePrevious,
+//     handleNext,
+//     handleFirst,
+//     handleLast,
+//     handleExit,
+//     handlePrint: handlePrintClick,
+//     isEditMode,
+//     isModalOpen: AnyModalOpen,   // 👈 here
+//   });
+
+//   useEffect(() => {
+//     const handleKeyDown = (event) => {
+//       if (event.key === "Escape") {
+
+//         if (showSearch) {
+//           setShowSearch(false);
+//           return;
+//         }
+
+//         if (printChoiceOpen) {
+//           setPrintChoiceOpen(false);
+//           return;
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+
+//     return () => {
+//       window.removeEventListener("keydown", handleKeyDown);
+//     };
+//   }, [showSearch, printChoiceOpen]);
+
+//   const getBalance = (currentIndex) => {
+//     let totalDebit = 0;
+//     let totalCredit = 0;
+
+//     items.forEach((row, i) => {
+//       if (i !== currentIndex) {
+//         totalDebit += parseFloat(row.debit) || 0;
+//         totalCredit += parseFloat(row.credit) || 0;
+//       }
+//     });
+
+//     return totalDebit - totalCredit;
+//   };
+
+//   const handleNumericValue = (event) => {
+//     const { id, value } = event.target;
+//     // Allow only numeric values, including optional decimal points
+//     if (/^\d*\.?\d*$/.test(value) || value === "") {
+//       setFormData((prevData) => ({
+//         ...prevData,
+//         [id]: value,
+//       }));
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <ToastContainer />
+//       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
+//         <InvoiceJournal
+//           formData={formData}
+//           items={items}
+//           isOpen={open}
+//           handleClose={handleClose}
+//         />
+//       </div>
+//       <h1 className="HeaderJOU">JOURNAL VOUCHER</h1>
+//       <text className="tittle">{title}</text>
+
+//       <div className="Top">
+//         <text>DATE</text>
+//         <InputMask
+//           mask="99-99-9999"
+//           placeholder="dd-mm-yyyy"
+//           value={formData.date}
+//           readOnly={!isEditMode || isDisabled}
+//           onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+//         >
+//           {(inputProps) => (
+//             <input
+//               {...inputProps}
+//               className="DatePICKER"
+//               ref={datePickerRef}
+//               onKeyDown={(e) => {
+//                 handleEnterKeyPress(datePickerRef, VoucherRef)(e);
+//               }}
+//             />
+//           )}
+//         </InputMask>
+//         <div style={{ display: "flex", flexDirection: "row", marginTop: 5 }}>
+//           <TextField
+//             inputRef={VoucherRef}
+//             id="voucherno"
+//             value={formData.voucherno}
+//             label="VOUCHER NO."
+//             onFocus={(e) => e.target.select()} // Select text on focus
+//             onKeyDown={handleBankEnter}
+//             onChange={handleNumericValue}
+//             inputProps={{
+//               maxLength: 48,
+//               style: {
+//                 height: 20,
+//                 fontSize: `${fsize}px`,
+//                 fontWeight: "bold",
+//               },
+//               readOnly: !isEditMode || isDisabled,
+//             }}
+//             size="small"
+//             variant="filled"
+//             className="custom-bordered-input"
+//             sx={{ width: 150 }}
+//           />
+//           <TextField
+//             id="owner"
+//             value={formData.owner}
+//             label="USER"
+//             onFocus={(e) => e.target.select()} // Select text on focus
+//             // onChange={handleInputChange}
+//             inputProps={{
+//               maxLength: 48,
+//               style: {
+//                 height: 20,
+//                 fontSize: `${fsize}px`,
+//                 fontWeight: "bold",
+//               },
+//               readOnly: !isEditMode || isDisabled,
+//             }}
+//             size="small"
+//             variant="filled"
+//             className="custom-bordered-input"
+//             sx={{ width: 150, marginLeft: 1 }}
+//             disabled // ← ALWAYS DISABLED
+//           />
+//         </div>
+//       </div>
+//       <div ref={tableScrollRef} className="Tablesection">
+//         <Table className="custom-table">
+//           <thead
+//             style={{
+//               backgroundColor: "skyblue",
+//               textAlign: "center",
+//               position: "sticky",
+//               top: 0,
+//             }}
+//           >
+//             <tr style={{ color: "white" }}>
+//               <th>ACCOUNT NAME</th>
+//               <th>
+//                 NARRATION
+//                 <input
+//                   type="checkbox"
+//                   style={{
+//                     marginLeft: 5,
+//                     transform: "scale(1.2)",
+//                     cursor: "pointer",
+//                   }}
+//                   tabIndex={-1} // ⬅⬅ prevents tab focus
+//                   checked={showNarrationSuggestions}
+//                   onChange={(e) =>
+//                     setShowNarrationSuggestions(e.target.checked)
+//                   }
+//                 />
+//               </th>
+//               <th>DEBIT</th>
+//               <th>CREDIT</th>
+//               {isEditMode && <th className="text-center">DELETE</th>}
+//             </tr>
+//           </thead>
+//           <tbody
+//             style={{
+//               overflowY: "auto",
+//               maxHeight: "calc(420px - 40px)",
+//               marginTop: 10,
+//             }}
+//           >
+//             {items.map((item, index) => (
+//               <tr key={`${item.accountname}-${index}`}>
+//                 {" "}
+//                 {/* Use a combination of accountname and index as key */}
+//                 <td style={{ padding: 0 }}>
+//                   <input
+//                     disabled={!canEditRow(index)}
+//                     className="Account"
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       padding: 5,
+//                     }}
+//                     type="text"
+//                     value={item.accountname}
+//                     readOnly={!isEditMode || isDisabled}
+//                     onKeyDown={(e) => {
+//                       handleKeyDown(e, index, "accountname");
+//                     }}
+//                     ref={(el) => (accountNameRefs.current[index] = el)}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, position: "relative" }}>
+//                   <input
+//                     disabled={!canEditRow(index)}
+//                     className="Narration"
+//                     list={
+//                       showNarrationSuggestions ? "narrationList" : undefined
+//                     }
+//                     style={{
+//                       height: 40,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                        fontSize: `${fsize}px`,
+//                       border: "none",
+//                       padding: "5px 8px",
+//                       position: "relative",
+//                       background: "transparent",
+//                     }}
+//                     value={item.narration}
+//                     ref={(el) => (narrationRefs.current[index] = el)}
+//                     onChange={(e) =>
+//                       handleItemChangeCus(index, "narration", e.target.value)
+//                     }
+//                     onKeyDown={(e) => {
+//                       if (e.key === "Enter") {
+//                         if (!item.narration || item.narration.trim() === "") {
+//                           const updatedItems = [...items];
+
+//                           // 🔥 Get previous row narration
+//                           let prevNarration = "";
+//                           if (index > 0) {
+//                             prevNarration = updatedItems[index - 1].narration || "";
+//                           }
+
+//                           // 🔥 Apply logic
+//                           updatedItems[index].narration =
+//                             prevNarration.trim() !== "" ? prevNarration : "Journal Narration";
+
+//                           setItems(updatedItems);
+//                         }
+//                       }
+
+//                       if (
+//                         e.key === "Tab" &&
+//                         suggestionRow === index &&
+//                         suggestionText
+//                       ) {
+//                         e.preventDefault();
+
+//                         const updatedItems = [...items];
+//                         updatedItems[index].narration = suggestionText;
+//                         setItems(updatedItems);
+
+//                         setSuggestionRow(null);
+//                         setSuggestionText("");
+//                       }
+//                       handleKeyDown(e, index, "narration");
+//                     }}
+//                     onFocus={(e) => e.target.select()} // Select text on focus
+//                   />
+//                    {showNarrationSuggestions && (
+//                     <datalist id="narrationList">
+//                       {narrationSuggestions.map((n, i) => (
+//                         <option key={i} value={n} />
+//                       ))}
+//                     </datalist>
+//                   )}
+
+//                   {/* 👇 Show only remaining text */}
+//                   {suggestionRow === index && suggestionText && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: 0,
+//                         left: 8,
+//                         height: "100%",
+//                         display: "flex",
+//                         alignItems: "center",
+//                         color: "#bbb",
+//                         fontSize: "14px",
+//                         pointerEvents: "none",
+//                       }}
+//                     >
+//                       <span style={{ visibility: "hidden" }}>
+//                         {item.narration}
+//                       </span>
+//                       <span>{suggestionText.slice(item.narration.length)}</span>
+//                     </div>
+//                   )}
+//                 </td>
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Debit"
+//                     style={{
+//                       height: 40,
+//                       fsize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     readOnly={!isEditMode || isDisabled}
+//                     value={Number(item.debit) === 0 ? "" : item.debit}
+//                     onChange={(e) => handleNumberChange(e, index, "debit")}
+//                     disabled={!canEditRow(index) || item.disableDebit}
+//                     ref={(el) => (debitRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "debit")}
+//                     onBlur={() => handlePkgsBlur(index)}
+//                     onFocus={(e) => {
+//                       const balance = getBalance(index);
+
+//                       if (balance < 0) {
+//                         const updatedItems = [...items];
+//                         updatedItems[index].debit = Math.abs(balance);
+//                         setItems(updatedItems);
+//                         calculateTotalPayment(updatedItems);
+//                         calculateTotalReceipt(updatedItems);
+//                       }
+
+//                       setTimeout(() => {
+//                         e.target.select();
+//                       }, 0);
+//                     }}
+//                   />
+//                 </td>
+//                 <td style={{ padding: 0, width: 250 }}>
+//                   <input
+//                     className="Credits"
+//                     style={{
+//                       height: 40,
+//                       fontSize: `${fsize}px`,
+//                       width: "100%",
+//                       boxSizing: "border-box",
+//                       border: "none",
+//                       paddingRight: 10,
+//                     }}
+//                     readOnly={!isEditMode || isDisabled}
+//                     value={Number(item.credit) === 0 ? "" : item.credit}
+//                     onChange={(e) => handleNumberChange(e, index, "credit")}
+//                     disabled={!canEditRow(index) || item.disableCredit}
+//                     ref={(el) => (credittRefs.current[index] = el)}
+//                     onKeyDown={(e) => handleKeyDown(e, index, "credit")}
+//                     onBlur={() => handleWeightBlur(index)}
+//                     onFocus={(e) => {
+//                       const balance = getBalance(index);
+
+//                       if (balance > 0) {
+//                         const updatedItems = [...items];
+//                         updatedItems[index].credit = balance;
+//                         setItems(updatedItems);
+//                         calculateTotalPayment(updatedItems);
+//                         calculateTotalReceipt(updatedItems);
+//                       }
+
+//                       setTimeout(() => {
+//                         e.target.select();
+//                       }, 0);
+//                     }}
+//                   />
+//                 </td>
+//                 {isEditMode && (
+//                   <td style={{ padding: 0 }}>
+//                     {canEditRow(index) && (
+//                       <div
+//                         style={{
+//                           display: "flex",
+//                           justifyContent: "center",
+//                           alignItems: "center",
+//                           height: "100%",
+//                         }}
+//                       >
+//                         <IconButton color="error" size="small" tabIndex={-1}
+//                         onClick={() => handleDeleteItem(index)}
+//                         >
+//                           <DeleteIcon />
+//                         </IconButton>
+//                       </div>
+//                     )}
+//                   </td>
+//                 )}
+//               </tr>
+//             ))}
+//           </tbody>
+//           <tfoot
+//             style={{
+//               background: "skyblue",
+//               position: "sticky",
+//               bottom: -1,
+//               fontSize: `${fsize}px`,
+//               borderTop: "1px solid black",
+//             }}
+//           >
+//             <tr style={{ fontWeight: "bold", textAlign: "right" }}>
+//               <td colSpan={2}></td>
+//               <td>{formData.totaldebit}</td>
+//               <td>{formData.totalcredit}</td>
+//               {isEditMode && <td></td>}
+//             </tr>
+//           </tfoot>
+//         </Table>
+//       </div>
+//       <div className="addbutton">
+//         <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
+//           Add Row
+//         </Button>
+//       </div>
+//       {showModalCus && (
+//         <ProductModalCustomer
+//           allFields={allFieldsCus}
+//           onSelect={handleProductSelectCus}
+//           onClose={handleCloseModalCus}
+//           initialKey={pressedKey}
+//           tenant={tenant}
+//         />
+//       )}
+//       <div className="Belowcontent">
+//         <div className="Buttonsgroupz">
+//           <Button
+//             ref={addButtonRef}
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[0],
+//             }}
+//             onClick={handleAdd}
+//             disabled={!isAddEnabled}
+//           >
+//             Add
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[1],
+//             }}
+//             onClick={handleEditClick}
+//             disabled={!isAddEnabled}
+//           >
+//             Edit
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[2],
+//             }}
+//             onClick={handlePrevious}
+//             disabled={!isPreviousEnabled}
+//           >
+//             Previous
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[3],
+//             }}
+//             onClick={handleNext}
+//             disabled={!isNextEnabled}
+//           >
+//             Next
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[4],
+//             }}
+//             onClick={handleFirst}
+//             disabled={!isFirstEnabled}
+//           >
+//             First
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[5],
+//             }}
+//             onClick={handleLast}
+//             disabled={!isLastEnabled}
+//           >
+//             Last
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{ backgroundColor: buttonColors[6] }}
+//             onClick={() => {
+//               fetchAllBills();
+//               setActiveRowIndex(0);
+//               setShowSearch(true);
+//             }}
+//             disabled={!isSearchEnabled}
+//           >
+//             Search
+//           </Button>
+//           <Button
+//             //  onClick={handleOpen}
+//             onClick={handlePrintClick}
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[7],
+//             }}
+//             disabled={!isPrintEnabled}
+//           >
+//             Print
+//           </Button>
+//           <PrintChoiceModal
+//             open={printChoiceOpen}
+//             onClose={() => setPrintChoiceOpen(false)}
+//             onNormal={handleNormalPrint}
+//             onFA={handleFAPreview}
+//           />
+
+//           <FAVoucherModal
+//             open={isFAModalOpen}
+//             onClose={() => setIsFAModalOpen(false)}
+//             tenant={tenant}
+//             voucherno={formData?.voucherno}
+//             vtype="J"
+//           />
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[8],
+//             }}
+//             disabled={!isDeleteEnabled}
+//             onClick={handleDeleteClick}
+//           >
+//             Delete
+//           </Button>
+//           <Button
+//             className="Buttonz"
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[9],
+//             }}
+//             onClick={handleExit}
+//             // onClick={handleLast}
+//           >
+//             Exit
+//           </Button>
+//           <Button
+//             ref={saveButtonRef}
+//             className="Buttonz"
+//             onClick={handleSaveClick}
+//             disabled={!isSubmitEnabled}
+//             style={{
+//               color: "black",
+//               backgroundColor: buttonColors[10],
+//             }}
+//           >
+//             Save
+//           </Button>
+//         </div>
+//       </div>
+//       {/* Search Modal */}
+//       <Modal
+//         show={showSearch}
+//         keyboard={false}
+//         backdrop="static"
+//         onHide={() => setShowSearch(false)}
+//         size="lg"
+//       >
+//         <Modal.Header closeButton>
+//           <Modal.Title>Search</Modal.Title>
+//         </Modal.Header>
+
+//         <Modal.Body>
+//           <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+//             <TextField
+//               className="custom-bordered-input"
+//               size="small"
+//               variant="filled"
+//               label="Enter V.No..."
+//               value={searchBillNo}
+//               onChange={(e) => setSearchBillNo(e.target.value)}
+//             />
+
+//             <InputMask
+//               mask="99-99-9999"
+//               placeholder="dd-mm-yyyy"
+//               value={searchDate}
+//               onChange={(e) => setSearchDate(e.target.value)}
+//             >
+//               {(props) => (
+//                 <TextField
+//                   className="custom-bordered-input"
+//                   {...props}
+//                   label="DATE"
+//                   size="small"
+//                   variant="filled"
+//                   fullWidth
+//                   style={{ width: 230, marginLeft: 5 }}
+//                 />
+//               )}
+//             </InputMask>
+//           </div>
+
+//           <div
+//             style={{ maxHeight: "300px", overflowY: "auto" }}
+//             onScroll={(e) => {
+//               const bottom =
+//                 e.target.scrollHeight - e.target.scrollTop <=
+//                 e.target.clientHeight + 5;
+
+//               if (bottom && visibleCount < filteredBills.length) {
+//                 setVisibleCount((prev) => prev + 30);
+//               }
+//             }}
+//           >
+//             <Table>
+//               <thead>
+//                 <tr>
+//                   <th>V.NO</th>
+//                   <th>DATE</th>
+//                   <th>ACCOUNT</th>
+//                   <th>DEBIT</th>
+//                   <th>CREDIT</th>
+//                 </tr>
+//               </thead>
+
+//               <tbody>
+//                 {filteredBills.slice(0, visibleCount).map((bill, index) => (
+//                   <tr key={bill._id}
+//                   style={{
+//                     backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+//                     cursor: "pointer",
+//                   }}
+//                   onClick={() => {
+//                     setActiveRowIndex(index);
+//                     handleSelectBill(bill);
+//                     setShowSearch(false);
+//                   }}
+//                   >
+//                     <td>{bill.formData.voucherno}</td>
+//                     <td>
+//                       {formatDateToDDMMYYYY(bill.formData.date)}
+//                     </td>
+//                     <td>{bill.items?.[0]?.accountname}</td>
+//                     <td>{bill.formData.totaldebit}</td>
+//                     <td>{bill.formData.totalcredit}</td>
+//                   </tr>
+//                 ))}
+
+//                 {filteredBills.length === 0 && (
+//                   <tr>
+//                     <td colSpan="6" style={{ textAlign: "center" }}>
+//                       No matching records
+//                     </td>
+//                   </tr>
+//                 )}
+//               </tbody>
+//             </Table>
+//           </div>
+//         </Modal.Body>
+//       </Modal>
+//     </div>
+//   );
+// };
+
+// export default JournalVoucher;
+
+
+// Live
+import React, { useState, useEffect, useRef, useContext } from "react";
 import "./JournalVoucher.css";
 import DatePicker from "react-datepicker";
 import InputMask from "react-input-mask";
@@ -10,11 +2128,10 @@ import { BiTrash } from "react-icons/bi";
 import ProductModalCustomer from "../Modals/ProductModalCustomer";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
-import { Modal } from "react-bootstrap"; // Import Bootstrap components
+import { Modal } from "react-bootstrap";
 import InvoiceJournal from "../InvoicePDF/InvoiceJournal";
 import { useEditMode } from "../../EditModeContext";
 import { CompanyContext } from "../Context/CompanyContext";
-import { useContext } from "react";
 import TextField from "@mui/material/TextField";
 import { IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -34,26 +2151,28 @@ const JournalVoucher = () => {
   const tenant = "03AAYFG4472A1ZG_01042025_31032026";
 
   if (!tenant) {
-    // you may want to guard here or show an error state,
-    // since without a tenant you can’t hit the right API
     console.error("No tenant selected!");
   }
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   const addButtonRef = useRef(null);
   const accountNameRefs = useRef([]);
   const narrationRefs = useRef([]);
   const debitRefs = useRef([]);
   const credittRefs = useRef([]);
   const saveButtonRef = useRef(null);
-  const [title, setTitle] = useState("View");
   const datePickerRef = useRef(null);
   const VoucherRef = useRef(null);
+  const tableScrollRef = useRef(null);
+
+  const [title, setTitle] = useState("View");
   const [isSaving, setIsSaving] = useState(false);
-  const [showSearchModal, setShowSearchModal] = useState(false); // State to handle modal visibility
-  const [searchResults, setSearchResults] = useState([]); // State to store search results
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+
   const initialColors = [
     "#E9967A",
     "#F0E68C",
@@ -67,8 +2186,9 @@ const JournalVoucher = () => {
     "#DCDCDC",
     "#8FBC8F",
   ];
-  const [buttonColors, setButtonColors] = useState(initialColors); // Initial colors
-  const [fsize, setfsize] = useState(19);
+  const [buttonColors, setButtonColors] = useState(initialColors);
+  const [fontSize, setFontSize] = useState(19);
+
   const [formData, setFormData] = useState({
     vtype: "J",
     date: "",
@@ -77,11 +2197,12 @@ const JournalVoucher = () => {
     totaldebit: "",
     totalcredit: "",
   });
+
   const MIN_ROWS = 9;
   const createEmptyRow = (id) => ({
     id,
     accountname: "",
-    acode:0,
+    acode: 0,
     narration: "",
     debit: "",
     credit: "",
@@ -91,53 +2212,34 @@ const JournalVoucher = () => {
 
   const normalizeItems = (items = []) => {
     const rows = [...items];
-
     while (rows.length < MIN_ROWS) {
       rows.push(createEmptyRow(rows.length + 1));
     }
-
     return rows;
   };
 
   const [items, setItems] = useState(() => normalizeItems());
-  // const [items, setItems] = useState([
-  //   {
-  //     id: "",
-  //     accountname: "",
-  //     narration: "",
-  //     debit: "",
-  //     credit: "",
-  //     disableDebit: false,
-  //     disableCredit: false,
-  //   },
-  // ]);
 
   useEffect(() => {
     if (addButtonRef.current && !journalId) {
       addButtonRef.current.focus();
     }
-  }, []);
+  }, [journalId]);
 
-  // Naration Suggestions
   const [narrationSuggestions, setNarrationSuggestions] = useState([]);
-  const [showNarrationSuggestions, setShowNarrationSuggestions] =
-    useState(true);
+  const [showNarrationSuggestions, setShowNarrationSuggestions] = useState(true);
+
   const fetchNarrations = async () => {
     try {
-      const res = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`,
-      );
+      const res = await fetch(`https://www.shk.com/shkl/${tenant}/tenant/api/journal`);
       const data = await res.json();
 
-      // extract narrations from all items
       const narrs = data
         .flatMap((entry) => entry.items || [])
         .map((item) => item.narration)
-        .filter((n) => n && n.trim() !== ""); // remove empty narrations
+        .filter((n) => n && n.trim() !== "");
 
-      // unique values
       const uniqueNarrs = [...new Set(narrs)];
-
       setNarrationSuggestions(uniqueNarrs);
     } catch (err) {
       console.error("Narration fetch failed:", err);
@@ -151,6 +2253,7 @@ const JournalVoucher = () => {
       [id]: value,
     }));
   };
+
   const calculateTotalPayment = (data) => {
     const totalPayment = data.reduce((acc, item) => {
       return acc + parseFloat(item.debit || 0);
@@ -172,11 +2275,19 @@ const JournalVoucher = () => {
       totalcredit: totalReceipt.toFixed(2),
     }));
   };
-
+const handleNumericValue = (event) => {
+    const { id, value } = event.target;
+    // Allow only numeric values, including optional decimal points
+    if (/^\d*\.?\d*$/.test(value) || value === "") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+    }
+  };
   const handleNumberChange = (event, index, field) => {
     const value = event.target.value;
 
-    // Validate that the input is numeric
     if (!/^\d*\.?\d*$/.test(value)) {
       return;
     }
@@ -184,16 +2295,14 @@ const JournalVoucher = () => {
     const updatedItems = [...items];
     updatedItems[index][field] = value;
 
-    // If the field is 'debit' and its value is greater than zero, disable 'credit'
     if (field === "debit") {
       updatedItems[index].disableCredit = parseFloat(value) > 0;
-      updatedItems[index].disableDebit = false; // Ensure 'debit' is not disabled
-    }
-    // If the field is 'credit' and its value is greater than zero, disable 'debit'
-    else if (field === "credit") {
+      updatedItems[index].disableDebit = false;
+    } else if (field === "credit") {
       updatedItems[index].disableDebit = parseFloat(value) > 0;
-      updatedItems[index].disableCredit = false; // Ensure 'credit' is not disabled
+      updatedItems[index].disableCredit = false;
     }
+
     setItems(updatedItems);
     calculateTotalPayment(updatedItems);
     calculateTotalReceipt(updatedItems);
@@ -202,7 +2311,7 @@ const JournalVoucher = () => {
   const capitalizeWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
-  // Modal For Customer
+
   const [productsCus, setProductsCus] = useState([]);
   const [showModalCus, setShowModalCus] = useState(false);
   const [selectedItemIndexCus, setSelectedItemIndexCus] = useState(null);
@@ -212,21 +2321,17 @@ const JournalVoucher = () => {
   const [suggestionText, setSuggestionText] = useState("");
 
   React.useEffect(() => {
-    // Fetch products from the API when the component mounts
     fetchCustomers();
     fetchNarrations();
   }, []);
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/ledgerAccount`,
-      );
+      const response = await fetch(`https://www.shk.com/shkl/${tenant}/tenant/api/ledgerAccount`);
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
       const data = await response.json();
-      // Ensure to extract the formData for easier access in the rest of your app
       const formattedData = data.map((item) => ({
         ...item.formData,
         _id: item._id,
@@ -241,31 +2346,28 @@ const JournalVoucher = () => {
 
   const handleItemChangeCus = (index, key, value) => {
     const updatedItems = [...items];
-    updatedItems[index][key] = capitalizeWords(value); // Capitalize words here
-    // If the key is 'name', find the corresponding product and set the price
+    updatedItems[index][key] = capitalizeWords(value);
+
     if (key === "name") {
-      const selectedProduct = productsCus.find(
-        (product) => product.ahead === value,
-      );
+      const selectedProduct = productsCus.find((product) => product.ahead === value);
       if (selectedProduct) {
         updatedItems[index]["accountname"] = selectedProduct.ahead;
         updatedItems[index]["acode"] = selectedProduct.acode;
       }
     }
-    // Disable credit field if debit field is filled
+
     if (key === "debit") {
-      updatedItems[index]["disableCredit"] = !!value; // Convert value to boolean
+      updatedItems[index]["disableCredit"] = !!value;
     }
 
-    // Disable debit field if credit field is filled
     if (key === "credit") {
-      updatedItems[index]["disableDebit"] = !!value; // Convert value to boolean
+      updatedItems[index]["disableDebit"] = !!value;
     }
+
     if (key === "narration") {
       const inputValue = value.trim().toLowerCase();
 
       if (inputValue !== "") {
-        // Find first matching accountname from ALL rows
         const matchedItem = items.find(
           (row) =>
             row.accountname &&
@@ -284,14 +2386,16 @@ const JournalVoucher = () => {
         setSuggestionText("");
       }
     }
+
     setItems(updatedItems);
   };
+
   const handleAddItem = () => {
     if (isEditMode) {
       const newItem = {
         id: items.length + 1,
         accountname: "",
-        acode:0,
+        acode: 0,
         narration: "",
         debit: "",
         credit: "",
@@ -300,14 +2404,16 @@ const JournalVoucher = () => {
       };
       setItems([...items, newItem]);
       setTimeout(() => {
-        accountNameRefs.current[items.length].focus();
+        accountNameRefs.current[items.length]?.focus();
       }, 100);
     }
   };
 
   const handleDeleteItem = (index) => {
     const filteredItems = items.filter((item, i) => i !== index);
-    setItems(filteredItems);
+    setItems(normalizeItems(filteredItems));
+    calculateTotalPayment(filteredItems);
+    calculateTotalReceipt(filteredItems);
   };
 
   const handleProductSelectCus = (product) => {
@@ -317,23 +2423,22 @@ const JournalVoucher = () => {
       return;
     }
 
-    // clone the array
     const newCustomers = [...items];
-
-    // overwrite the one at the selected index
     newCustomers[selectedItemIndexCus] = {
       ...newCustomers[selectedItemIndexCus],
       accountname: product.ahead || "",
-      acode: product.acode
+      acode: product.acode,
     };
+
     const nameValue = product.ahead || product.name || "";
     if (selectedItemIndexCus !== null) {
       handleItemChangeCus(selectedItemIndexCus, "name", nameValue);
       setShowModalCus(false);
       setTimeout(() => {
-        narrationRefs.current[selectedItemIndexCus].focus();
+        narrationRefs.current[selectedItemIndexCus]?.focus();
       }, 100);
     }
+
     setItems(newCustomers);
     setIsEditMode(true);
     setShowModalCus(false);
@@ -342,7 +2447,7 @@ const JournalVoucher = () => {
   const handleCloseModalCus = () => {
     setShowModalCus(false);
     setIsEditMode(true);
-    setPressedKey(""); // resets for next modal open
+    setPressedKey("");
   };
 
   const openModalForItemCus = (index) => {
@@ -358,11 +2463,9 @@ const JournalVoucher = () => {
         fields.push(key);
       }
     });
-
     return fields;
   }, []);
 
-  // Api Response
   const [data, setData] = useState([]);
   const [data1, setData1] = useState([]);
   const [index, setIndex] = useState(0);
@@ -375,59 +2478,45 @@ const JournalVoucher = () => {
   const [isSearchEnabled, setIsSearchEnabled] = useState(true);
   const [isPrintEnabled, setIsSPrintEnabled] = useState(true);
   const [isDeleteEnabled, setIsDeleteEnabled] = useState(true);
-  const { isEditMode, setIsEditMode } = useEditMode(); // Access the context
+  const { isEditMode, setIsEditMode } = useEditMode();
   const [isAbcmode, setIsAbcmode] = useState(false);
-  const [isEditMode2, setIsEditMode2] = useState(false); // State to track edit mode
-  const [isDisabled, setIsDisabled] = useState(false); // State to track field disablement
+  const [isEditMode2, setIsEditMode2] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
   const [firstTimeCheckData, setFirstTimeCheckData] = useState("");
   const [isFAModalOpen, setIsFAModalOpen] = useState(false);
   const [printChoiceOpen, setPrintChoiceOpen] = useState(false);
 
-  // replace your Print button onClick:
   const handlePrintClick = () => setPrintChoiceOpen(true);
 
-  // 1) Normal print (your existing PDF)
   const handleNormalPrint = () => {
     setPrintChoiceOpen(false);
-    handleOpen(); // your existing setOpen(true) that triggers InvoicePDFbank
+    handleOpen();
   };
 
-  // 2) FA voucher preview
   const handleFAPreview = async () => {
     setIsFAModalOpen(true);
   };
 
-  // Fetch Data
   const fetchData = async () => {
     try {
       let response;
       if (journalId) {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journalget/${journalId}`,
-        );
+        response = await axios.get(`https://www.shk.com/shkl/${tenant}/tenant/journalget/${journalId}`);
       } else {
-        response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
-        );
+        response = await axios.get(`https://www.shk.com/shkl/${tenant}/tenant/journal/last`);
       }
-      // const response = await axios.get(`https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`);
-      // console.log("fetch Response: ", response.data);
 
       if (response.status === 200 && response.data.data) {
         const lastEntry = response.data.data;
-        // Set flags and update form data
         setFirstTimeCheckData("DataAvailable");
         setFormData(lastEntry.formData);
-        console.log(lastEntry.formData, "Formdata");
 
-        // Update items with the last entry's items
         const updatedItems = lastEntry.items.map((item) => ({
-          ...item, // Ensure immutability
-          disableCredit: item.disableCredit || false, // Handle disableReceipt flag safely
+          ...item,
+          disableCredit: item.disableCredit || false,
         }));
         setItems(normalizeItems(updatedItems));
 
-        // Calculate total debit and total credit
         const totalDebit = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.debit || 0), 0)
           .toFixed(2);
@@ -435,25 +2524,21 @@ const JournalVoucher = () => {
           .reduce((sum, item) => sum + parseFloat(item.credit || 0), 0)
           .toFixed(2);
 
-        // Update formData with the calculated totals
         setFormData((prevFormData) => ({
           ...prevFormData,
           totaldebit: totalDebit,
           totalcredit: totalCredit,
         }));
 
-        // Set data and index
-        setData1(lastEntry); // Assuming setData1 holds the current entry data
-        setIndex(lastEntry.voucherno); // Set index to the voucher number or another identifier
-        return lastEntry; // ✅ Return this for use in handleAdd
+        setData1(lastEntry);
+        setIndex(lastEntry.voucherno);
+        return lastEntry;
       } else {
         setFirstTimeCheckData("DataNotAvailable");
-        console.log("No data available");
 
-        // Create an empty data object with voucher number 0
         const emptyFormData = {
           voucherno: 0,
-          date: new Date().toLocaleDateString(), // Use today's date
+          date: new Date().toLocaleDateString(),
           vtype: "J",
           owner: "",
           totaldebit: "0.00",
@@ -472,16 +2557,14 @@ const JournalVoucher = () => {
           },
         ];
 
-        // Set the empty data
         setFormData(emptyFormData);
         setItems(normalizeItems([]));
-        setData1({ formData: emptyFormData, items: emptyItems }); // Store empty data
-        setIndex(0); // Set index to 0 for the empty voucher
+        setData1({ formData: emptyFormData, items: emptyItems });
+        setIndex(0);
       }
     } catch (error) {
       console.error("Error fetching data", error);
 
-      // In case of error, initialize empty data
       const emptyFormData = {
         voucherno: 0,
         date: new Date().toLocaleDateString(),
@@ -496,7 +2579,7 @@ const JournalVoucher = () => {
         {
           id: 1,
           accountname: "",
-          acode:0,
+          acode: 0,
           narration: "",
           payment_debit: 0.0,
           receipt_credit: 0.0,
@@ -514,23 +2597,21 @@ const JournalVoucher = () => {
       setIndex(0);
     }
   };
+
   useEffect(() => {
-    fetchData(); // Fetch data when component mounts
+    fetchData();
   }, []);
 
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape" && !isEditMode && journalId) {
-        const modalState = JSON.parse(
-          sessionStorage.getItem("trailModalState") || "{}",
-        );
+        const modalState = JSON.parse(sessionStorage.getItem("trailModalState") || "{}");
 
-        navigate(-1); // go back
+        navigate(-1);
         setTimeout(() => {
-          // restore modal state after navigation
           if (modalState.keepModalOpen) {
             window.dispatchEvent(
-              new CustomEvent("reopenTrailModal", { detail: modalState }),
+              new CustomEvent("reopenTrailModal", { detail: modalState })
             );
           }
         }, 50);
@@ -539,16 +2620,15 @@ const JournalVoucher = () => {
 
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isEditMode]);
+  }, [isEditMode, journalId, navigate]);
 
   useEffect(() => {
     if (data.length > 0) {
-      setFormData(data[data.length - 1]); // Set currentData to the last record
+      setFormData(data[data.length - 1]);
       setIndex(data.length - 1);
     }
   }, [data]);
 
-  // Add this line to set isDisabled to true initially
   useEffect(() => {
     setIsDisabled(true);
   }, []);
@@ -560,6 +2640,7 @@ const JournalVoucher = () => {
     const yyyy = today.getFullYear();
     return `${dd}-${mm}-${yyyy}`;
   };
+
   const skipItemCodeFocusRef = useRef(false);
 
   const fetchVoucherNumbers = async () => {
@@ -587,7 +2668,7 @@ const JournalVoucher = () => {
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/next/${data1._id}`,
+          `https://www.shk.com/shkl/${tenant}/tenant/journal/next/${data1._id}`
         );
         if (response.status === 200 && response.data) {
           const nextData = response.data.data;
@@ -606,16 +2687,16 @@ const JournalVoucher = () => {
       console.error("Error fetching next record:", error);
     }
   };
+
   const handlePrevious = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
     try {
       if (data1) {
         const response = await axios.get(
-          `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/previous/${data1._id}`,
+          `https://www.shk.com/shkl/${tenant}/tenant/journal/previous/${data1._id}`
         );
         if (response.status === 200 && response.data) {
-          console.log(response);
           setData1(response.data.data);
           const prevData = response.data.data;
           setIndex(index - 1);
@@ -632,12 +2713,13 @@ const JournalVoucher = () => {
       console.error("Error fetching previous record:", error);
     }
   };
+
   const handleFirst = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/first`,
+        `https://www.shk.com/shkl/${tenant}/tenant/journal/first`
       );
       if (response.status === 200 && response.data) {
         const firstData = response.data.data;
@@ -655,13 +2737,14 @@ const JournalVoucher = () => {
       console.error("Error fetching first record:", error);
     }
   };
+
   const handleLast = async () => {
     document.body.style.backgroundColor = "white";
     setTitle("View");
 
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
+        `https://www.shk.com/shkl/${tenant}/tenant/journal/last`
       );
       if (response.status === 200 && response.data) {
         const lastData = response.data.data;
@@ -720,6 +2803,7 @@ const JournalVoucher = () => {
       console.error("Error adding new entry:", error);
     }
   };
+
   const handleEditClick = () => {
     setTitle("Edit");
     setIsDisabled(false);
@@ -740,7 +2824,7 @@ const JournalVoucher = () => {
     }
   };
 
-    const handleSaveClick = async () => {
+  const handleSaveClick = async () => {
     document.body.style.backgroundColor = "white";
     setIsSaving(true);
     let isDataSaved = false;
@@ -753,9 +2837,9 @@ const JournalVoucher = () => {
         setIsSaving(false);
         return;
       }
-      // Validate if EVERY row has either payment_debit > 0 or receipt_credit > 0
+
       const isValidTransaction = filledRows.every(
-        (item) => parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0,
+        (item) => parseFloat(item.debit) > 0 || parseFloat(item.credit) > 0
       );
 
       if (!isValidTransaction) {
@@ -764,14 +2848,14 @@ const JournalVoucher = () => {
         });
         return;
       }
-      // Ensure that total debit and total credit are equal
+
       const totalDebit = filledRows.reduce(
         (sum, item) => sum + parseFloat(item.debit || 0),
-        0,
+        0
       );
       const totalCredit = filledRows.reduce(
         (sum, item) => sum + parseFloat(item.credit || 0),
-        0,
+        0
       );
 
       if (totalDebit !== totalCredit) {
@@ -784,9 +2868,8 @@ const JournalVoucher = () => {
 
       const voucherData = await fetchVoucherNumbers();
       if (!voucherData) return;
-  
+
       if (!isAbcmode) {
-        // ADD mode
         if (Number(formData.voucherno) <= Number(voucherData.lastVoucherNo)) {
           toast.error(`Voucher No ${formData.voucherno} already used!`, {
             position: "top-center",
@@ -795,7 +2878,6 @@ const JournalVoucher = () => {
           return;
         }
       } else {
-        // EDIT mode
         if (
           Number(formData.voucherno) < Number(voucherData.lastVoucherNo) &&
           Number(formData.voucherno) !== Number(data1?.formData?.voucherno)
@@ -807,10 +2889,9 @@ const JournalVoucher = () => {
           return;
         }
       }
-      
+
       let combinedData;
       if (isAbcmode) {
-        console.log(formData);
         formData.totalcredit = formData.totalcredit;
         formData.totaldebit = formData.totaldebit;
         combinedData = {
@@ -857,9 +2938,8 @@ const JournalVoucher = () => {
           })),
         };
       }
-      // Debugging
-      console.log("Combined Data:", combinedData);
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
+
+      const apiEndpoint = `https://www.shk.com/shkl/${tenant}/tenant/journal${isAbcmode ? `/${data1._id}` : ""}`;
       const method = isAbcmode ? "put" : "post";
       const response = await axios({
         method,
@@ -868,7 +2948,6 @@ const JournalVoucher = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        // fetchData();
         isDataSaved = true;
       }
     } catch (error) {
@@ -894,8 +2973,8 @@ const JournalVoucher = () => {
         setIsPreviousEnabled(true);
         setIsSPrintEnabled(true);
         setIsDeleteEnabled(true);
-        fetchData(); // Refresh data to get updated _id and other info
-        fetchNarrations(); // Refresh narrations
+        fetchData();
+        fetchNarrations();
         toast.success("Data Saved Successfully!", { position: "top-center" });
       } else {
         setIsAddEnabled(false);
@@ -912,20 +2991,17 @@ const JournalVoucher = () => {
       return;
     }
 
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this item?",
-    );
+    const userConfirmed = window.confirm("Are you sure you want to delete this item?");
     if (!userConfirmed) return;
 
     setIsSaving(true);
     try {
-      // ✅ use id, not data1._id
-      const apiEndpoint = `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/${data1._id}`;
+      const apiEndpoint = `https://www.shk.com/shkl/${tenant}/tenant/journal/${data1._id}`;
       const response = await axios.delete(apiEndpoint);
 
       if (response.status === 200) {
         toast.success("Data deleted successfully!", { position: "top-center" });
-        fetchData(); // Refresh the data after successful deletion
+        fetchData();
       } else {
         throw new Error(`Failed to delete data: ${response.statusText}`);
       }
@@ -942,7 +3018,7 @@ const JournalVoucher = () => {
   useEffect(() => {
     if (isEditMode) {
       if (skipItemCodeFocusRef.current) {
-        skipItemCodeFocusRef.current = false; // reset
+        skipItemCodeFocusRef.current = false;
         return;
       }
 
@@ -955,32 +3031,31 @@ const JournalVoucher = () => {
       }, 0);
     }
   }, [isEditMode]);
-  
+
   const handleExit = async () => {
-    document.body.style.backgroundColor = "white"; // Reset background color
-    setIsAddEnabled(true); // Enable "Add" button
+    document.body.style.backgroundColor = "white";
+    setIsAddEnabled(true);
     setTitle("View");
 
-    if(!isEditMode){
-      navigate("/dashboard"); 
+    if (!isEditMode) {
+      navigate("/dashboard");
       return;
     }
     try {
       const response = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/journal/last`,
-      ); // Fetch the latest data
+        `https://www.shk.com/shkl/${tenant}/tenant/journal/last`
+      );
 
       if (response.status === 200 && response.data.data) {
-        // If data is available
         const lastEntry = response.data.data;
-        setFormData(lastEntry.formData); // Set form data
+        setFormData(lastEntry.formData);
 
         const updatedItems = lastEntry.items.map((item) => ({
           ...item,
           disableReceipt: item.disableReceipt || false,
         }));
         setItems(normalizeItems(updatedItems));
-        // Update totals
+
         const totaldebit = updatedItems
           .reduce((sum, item) => sum + parseFloat(item.debit || 0), 0)
           .toFixed(2);
@@ -993,7 +3068,7 @@ const JournalVoucher = () => {
           totaldebit: totaldebit,
           totalcredit: totalcredit,
         }));
-        setIsDisabled(true); // Disable fields after loading the data
+        setIsDisabled(true);
         setIndex(lastEntry.formData);
         setIsAddEnabled(true);
         setIsSubmitEnabled(false);
@@ -1006,8 +3081,6 @@ const JournalVoucher = () => {
         setIsDeleteEnabled(true);
         setIsEditMode(false);
       } else {
-        // If no data is available, initialize with default values
-        console.log("No data available");
         const newData = {
           vtype: "J",
           date: "",
@@ -1018,7 +3091,7 @@ const JournalVoucher = () => {
         };
         setFormData(newData);
         setItems(normalizeItems([]));
-        setIsDisabled(true); // Disable fields after loading the default data
+        setIsDisabled(true);
         setIsAddEnabled(true);
         setIsSubmitEnabled(false);
         setIsPreviousEnabled(true);
@@ -1049,19 +3122,17 @@ const JournalVoucher = () => {
     });
   };
 
-  const [pressedKey, setPressedKey] = useState(""); // State to hold the pressed key
-  const tableScrollRef = useRef(null);
+  const [pressedKey, setPressedKey] = useState("");
+
   const focusAndScroll = (refArray, rowIndex) => {
     const inputEl = refArray.current?.[rowIndex];
     const container = tableScrollRef.current;
 
     if (!inputEl || !container) return;
 
-    // focus & select
     inputEl.focus();
     setTimeout(() => inputEl.select && inputEl.select(), 0);
 
-    // find row
     const rowEl = inputEl.closest("tr");
     if (!rowEl) return;
 
@@ -1069,13 +3140,12 @@ const JournalVoucher = () => {
     const rowHeight = rowEl.offsetHeight;
     const containerHeight = container.clientHeight;
 
-    // 🔥 key line — force visibility
     container.scrollTop = rowTop - containerHeight + rowHeight + 60;
   };
 
   const handleKeyDown = (event, index, field) => {
     if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault(); // Stop default Tab navigation
+      event.preventDefault();
       switch (field) {
         case "accountname":
           if (items[index].accountname.trim() === "") {
@@ -1084,8 +3154,8 @@ const JournalVoucher = () => {
             narrationRefs.current[index]?.focus();
           }
           break;
+
         case "narration": {
-          // 🟡 STEP 1: If narration is empty, copy & STAY
           if (
             !items[index].narration &&
             index > 0 &&
@@ -1093,16 +3163,14 @@ const JournalVoucher = () => {
           ) {
             copyNarrationFromAbove(index);
 
-            // 🔥 stay in narration field
             setTimeout(() => {
               narrationRefs.current[index]?.focus();
               narrationRefs.current[index]?.select();
             }, 0);
 
-            return; // ⛔ stop further Enter handling
+            return;
           }
 
-          // 🟢 STEP 2: Normal Enter behavior (second Enter)
           if (items[index].disableDebit) {
             credittRefs.current[index]?.focus();
           } else {
@@ -1115,7 +3183,6 @@ const JournalVoucher = () => {
           if (!items[index].disableCredit) {
             credittRefs.current[index]?.focus();
           } else {
-            // If credit is also disabled, move to next row
             if (index === items.length - 1) {
               handleAddItem();
               accountNameRefs.current[index + 1]?.focus();
@@ -1124,6 +3191,7 @@ const JournalVoucher = () => {
             }
           }
           break;
+
         case "credit":
           if (index === items.length - 1) {
             handleAddItem();
@@ -1135,27 +3203,15 @@ const JournalVoucher = () => {
           }
           break;
 
-        // case "credit":
-        //   if (index === items.length - 1) {
-        //     handleAddItem();
-        //     accountNameRefs.current[index + 1]?.focus();
-        //   } else {
-        //     accountNameRefs.current[index + 1]?.focus();
-        //   }
-        //   break;
-
         default:
           break;
       }
-    }
-    // Move Right (→)
-    else if (event.key === "ArrowRight") {
+    } else if (event.key === "ArrowRight") {
       if (field === "accountname") {
         narrationRefs.current[index]?.focus();
         setTimeout(() => narrationRefs.current[index]?.select(), 0);
       } else if (field === "narration") {
         if (items[index].disableDebit) {
-          // If debit is disabled, move focus to credit
           credittRefs.current[index]?.focus();
           setTimeout(() => credittRefs.current[index]?.select(), 0);
         } else {
@@ -1169,7 +3225,6 @@ const JournalVoucher = () => {
         }
       } else if (field === "credit") {
         if (index === items.length - 1) {
-          // handleAddItem(); (If needed, uncomment this)
           accountNameRefs.current[index + 1]?.focus();
           setTimeout(() => accountNameRefs.current[index]?.select(), 0);
         } else {
@@ -1177,15 +3232,12 @@ const JournalVoucher = () => {
           setTimeout(() => accountNameRefs.current[index]?.select(), 0);
         }
       }
-    }
-    // Move Left (←)
-    else if (event.key === "ArrowLeft") {
+    } else if (event.key === "ArrowLeft") {
       if (field === "credit") {
         if (!items[index].disableDebit) {
           debitRefs.current[index]?.focus();
           setTimeout(() => debitRefs.current[index]?.select(), 0);
         } else {
-          // If debit is disabled, move to narration
           narrationRefs.current[index]?.focus();
           setTimeout(() => narrationRefs.current[index]?.select(), 0);
         }
@@ -1196,39 +3248,27 @@ const JournalVoucher = () => {
         accountNameRefs.current[index]?.focus();
         setTimeout(() => accountNameRefs.current[index]?.select(), 0);
       }
-    }
-    // Move Up
-    else if (event.key === "ArrowUp" && index > 0) {
+    } else if (event.key === "ArrowUp" && index > 0) {
       setTimeout(() => {
-        if (field === "accountname")
-          accountNameRefs.current[index - 1]?.focus();
-        else if (field === "narration")
-          narrationRefs.current[index - 1]?.focus();
+        if (field === "accountname") accountNameRefs.current[index - 1]?.focus();
+        else if (field === "narration") narrationRefs.current[index - 1]?.focus();
         else if (field === "debit") debitRefs.current[index - 1]?.focus();
         else if (field === "credit") credittRefs.current[index - 1]?.focus();
       }, 100);
-    }
-    // Move Down
-    else if (event.key === "ArrowDown" && index < items.length - 1) {
+    } else if (event.key === "ArrowDown" && index < items.length - 1) {
       setTimeout(() => {
-        if (field === "accountname")
-          accountNameRefs.current[index + 1]?.focus();
-        else if (field === "narration")
-          narrationRefs.current[index + 1]?.focus();
+        if (field === "accountname") accountNameRefs.current[index + 1]?.focus();
+        else if (field === "narration") narrationRefs.current[index + 1]?.focus();
         else if (field === "debit") debitRefs.current[index + 1]?.focus();
         else if (field === "credit") credittRefs.current[index + 1]?.focus();
       }, 100);
-    }
-    // Open Modal on Letter Input in Account Name
-    else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
+    } else if (/^[a-zA-Z]$/.test(event.key) && field === "accountname") {
       setPressedKey(event.key);
       openModalForItemCus(index);
       event.preventDefault();
     }
   };
 
-
-  // Update the blur handlers so that they always format the value to 2 decimals.
   const handlePkgsBlur = (index) => {
     const decimalPlaces = 2;
     const updatedItems = [...items];
@@ -1254,14 +3294,11 @@ const JournalVoucher = () => {
   const isRowFilled = (row) => {
     return (row.accountname || "").trim() !== "";
   };
-  const canEditRow = (rowIndex) => {
-    // 🔒 If not in edit mode, nothing is editable
-    if (!isEditMode) return false;
 
-    // First row is editable in edit mode
+  const canEditRow = (rowIndex) => {
+    if (!isEditMode) return false;
     if (rowIndex === 0) return true;
 
-    // All previous rows must be filled
     for (let i = 0; i < rowIndex; i++) {
       if (!isRowFilled(items[i])) {
         return false;
@@ -1282,8 +3319,6 @@ const JournalVoucher = () => {
   const handleBankEnter = (e) => {
     if (e.key === "Enter" || e.key === "Tab") {
       e.preventDefault();
-
-      // Focus first ACCOUNTNAME input
       if (accountNameRefs.current[0]) {
         accountNameRefs.current[0].focus();
       }
@@ -1293,7 +3328,6 @@ const JournalVoucher = () => {
   const formatDateToDDMMYYYY = (dateStr) => {
     if (!dateStr) return "";
 
-    // ✅ Already dd-mm-yyyy
     const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
     const match = dateStr.match(ddmmyyyy);
     if (match) {
@@ -1310,28 +3344,19 @@ const JournalVoucher = () => {
 
     let date;
 
-    // ✅ ISO with time (Z or offset)
     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
       const [y, m, d] = dateStr.substring(0, 10).split("-");
-      date = new Date(y, m - 1, d); // avoid timezone issues
-    }
-    // ✅ ISO date only (yyyy-mm-dd)
-    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      date = new Date(y, m - 1, d);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const [y, m, d] = dateStr.split("-");
       date = new Date(y, m - 1, d);
-    }
-    // ✅ dd/mm/yyyy
-    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
       const [d, m, y] = dateStr.split("/");
       date = new Date(y, m - 1, d);
-    }
-    // ✅ yyyy/mm/dd
-    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+    } else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
       const [y, m, d] = dateStr.split("/");
       date = new Date(y, m - 1, d);
-    }
-    // 🔁 fallback (Date.parse)
-    else {
+    } else {
       date = new Date(dateStr);
     }
 
@@ -1350,15 +3375,11 @@ const JournalVoucher = () => {
   const [filteredBills, setFilteredBills] = useState([]);
   const [searchDate, setSearchDate] = useState(null);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
-    // ⭐ infinite scroll state
   const [visibleCount, setVisibleCount] = useState(10);
 
-  // Fetch all bills for search
   const fetchAllBills = async () => {
     try {
-      const res = await axios.get(
-        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/journal`,
-      );
+      const res = await axios.get(`https://www.shk.com/shkl/${tenant}/tenant/api/journal`);
       if (Array.isArray(res.data)) {
         setAllBills(res.data);
         setFilteredBills(res.data);
@@ -1368,7 +3389,6 @@ const JournalVoucher = () => {
     }
   };
 
-  // Update filtering logic
   useEffect(() => {
     let filtered = allBills;
 
@@ -1393,8 +3413,6 @@ const JournalVoucher = () => {
     }
 
     setFilteredBills(filtered);
-
-    // ⭐ reset visible rows when search changes
     setVisibleCount(30);
   }, [searchBillNo, searchDate, allBills]);
 
@@ -1409,7 +3427,7 @@ const JournalVoucher = () => {
     setSearchBillNo("");
     setSearchDate("");
   };
-  
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!showSearch) return;
@@ -1437,11 +3455,9 @@ const JournalVoucher = () => {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [filteredBills, activeRowIndex, showSearch]);
 
-  // ShortCuts for Buttons
   const AnyModalOpen = showModalCus || showSearch || printChoiceOpen;
   useShortcuts({
     handleAdd,
@@ -1453,13 +3469,12 @@ const JournalVoucher = () => {
     handleExit,
     handlePrint: handlePrintClick,
     isEditMode,
-    isModalOpen: AnyModalOpen,   // 👈 here
+    isModalOpen: AnyModalOpen,
   });
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-
         if (showSearch) {
           setShowSearch(false);
           return;
@@ -1479,6 +3494,17 @@ const JournalVoucher = () => {
     };
   }, [showSearch, printChoiceOpen]);
 
+  // const getBalance = () => {
+  //   let totalDebit = 0;
+  //   let totalCredit = 0;
+
+  //   items.forEach((row) => {
+  //     totalDebit += parseFloat(row.debit) || 0;
+  //     totalCredit += parseFloat(row.credit) || 0;
+  //   });
+
+  //   return totalDebit - totalCredit;
+  // };
   const getBalance = (currentIndex) => {
     let totalDebit = 0;
     let totalCredit = 0;
@@ -1493,20 +3519,10 @@ const JournalVoucher = () => {
     return totalDebit - totalCredit;
   };
 
-  const handleNumericValue = (event) => {
-    const { id, value } = event.target;
-    // Allow only numeric values, including optional decimal points
-    if (/^\d*\.?\d*$/.test(value) || value === "") {
-      setFormData((prevData) => ({
-        ...prevData,
-        [id]: value,
-      }));
-    }
-  };
-
   return (
-    <div>
+    <div className="journal-voucher-page">
       <ToastContainer />
+
       <div style={{ visibility: "hidden", width: 0, height: 0 }}>
         <InvoiceJournal
           formData={formData}
@@ -1515,11 +3531,21 @@ const JournalVoucher = () => {
           handleClose={handleClose}
         />
       </div>
-      <h1 className="HeaderJOU">JOURNAL VOUCHER</h1>
-      <text className="tittle">{title}</text>
 
-      <div className="Top">
-        <text>DATE</text>
+      <div className="journal-voucher-shell">
+        
+        <div className="journal-voucher-header-card">
+  <div className="journal-voucher-header-top compact-header">
+    <div className="header-title-wrap inline-title-wrap">
+      <h1 className="HeaderJOU">JOURNAL VOUCHER</h1>
+      <span className="tittle">({title})</span>
+    </div>
+  </div>
+
+  <div className="journal-voucher-topbar compact-topbar">
+    <div className="topbar-left header-input-grid">
+      <div className="field-block equal-field">
+        <label className="top-label">DATE</label>
         <InputMask
           mask="99-99-9999"
           placeholder="dd-mm-yyyy"
@@ -1530,7 +3556,7 @@ const JournalVoucher = () => {
           {(inputProps) => (
             <input
               {...inputProps}
-              className="DatePICKER"
+              className="DatePICKER modern-date-input equal-input"
               ref={datePickerRef}
               onKeyDown={(e) => {
                 handleEnterKeyPress(datePickerRef, VoucherRef)(e);
@@ -1538,152 +3564,127 @@ const JournalVoucher = () => {
             />
           )}
         </InputMask>
-        <div style={{ display: "flex", flexDirection: "row", marginTop: 5 }}>
-          <TextField
-            inputRef={VoucherRef}
-            id="voucherno"
-            value={formData.voucherno}
-            label="VOUCHER NO."
-            onFocus={(e) => e.target.select()} // Select text on focus
-            onKeyDown={handleBankEnter}
-            onChange={handleNumericValue}
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fsize}px`,
-                fontWeight: "bold",
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            size="small"
-            variant="filled"
-            className="custom-bordered-input"
-            sx={{ width: 150 }}
-          />
-          <TextField
-            id="owner"
-            value={formData.owner}
-            label="USER"
-            onFocus={(e) => e.target.select()} // Select text on focus
-            // onChange={handleInputChange}
-            inputProps={{
-              maxLength: 48,
-              style: {
-                height: 20,
-                fontSize: `${fsize}px`,
-                fontWeight: "bold",
-              },
-              readOnly: !isEditMode || isDisabled,
-            }}
-            size="small"
-            variant="filled"
-            className="custom-bordered-input"
-            sx={{ width: 150, marginLeft: 1 }}
-            disabled // ← ALWAYS DISABLED
-          />
-        </div>
       </div>
-      <div ref={tableScrollRef} className="Tablesection">
-        <Table className="custom-table">
-          <thead
-            style={{
-              backgroundColor: "skyblue",
-              textAlign: "center",
-              position: "sticky",
-              top: 0,
-            }}
-          >
-            <tr style={{ color: "white" }}>
-              <th>ACCOUNT NAME</th>
-              <th>
-                NARRATION
-                <input
-                  type="checkbox"
-                  style={{
-                    marginLeft: 5,
-                    transform: "scale(1.2)",
-                    cursor: "pointer",
-                  }}
-                  tabIndex={-1} // ⬅⬅ prevents tab focus
-                  checked={showNarrationSuggestions}
-                  onChange={(e) =>
-                    setShowNarrationSuggestions(e.target.checked)
-                  }
-                />
-              </th>
-              <th>DEBIT</th>
-              <th>CREDIT</th>
-              {isEditMode && <th className="text-center">DELETE</th>}
-            </tr>
-          </thead>
-          <tbody
-            style={{
-              overflowY: "auto",
-              maxHeight: "calc(420px - 40px)",
-              marginTop: 10,
-            }}
-          >
-            {items.map((item, index) => (
-              <tr key={`${item.accountname}-${index}`}>
-                {" "}
-                {/* Use a combination of accountname and index as key */}
-                <td style={{ padding: 0 }}>
-                  <input
-                    disabled={!canEditRow(index)}
-                    className="Account"
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      padding: 5,
-                    }}
-                    type="text"
-                    value={item.accountname}
-                    readOnly={!isEditMode || isDisabled}
-                    onKeyDown={(e) => {
-                      handleKeyDown(e, index, "accountname");
-                    }}
-                    ref={(el) => (accountNameRefs.current[index] = el)}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                </td>
-                <td style={{ padding: 0, position: "relative" }}>
-                  <input
-                    disabled={!canEditRow(index)}
-                    className="Narration"
-                    list={
-                      showNarrationSuggestions ? "narrationList" : undefined
-                    }
-                    style={{
-                      height: 40,
-                      width: "100%",
-                      boxSizing: "border-box",
-                       fontSize: `${fsize}px`,
-                      border: "none",
-                      padding: "5px 8px",
-                      position: "relative",
-                      background: "transparent",
-                    }}
-                    value={item.narration}
-                    ref={(el) => (narrationRefs.current[index] = el)}
-                    onChange={(e) =>
-                      handleItemChangeCus(index, "narration", e.target.value)
-                    }
-                    onKeyDown={(e) => {
+
+      <div className="equal-field">
+        <TextField
+          inputRef={VoucherRef}
+          id="voucherno"
+          value={formData.voucherno}
+          label="VOUCHER NO."
+          onChange={handleNumericValue}
+          onFocus={(e) => e.target.select()}
+          onKeyDown={handleBankEnter}
+          inputProps={{
+            maxLength: 48,
+            style: {
+              height: 20,
+              fontSize: `${fontSize}px`,
+              fontWeight: "bold",
+            },
+            readOnly: !isEditMode || isDisabled,
+          }}
+          size="small"
+          variant="filled"
+          className="custom-bordered-input voucher-field equal-mui-field"
+          fullWidth
+        />
+      </div>
+
+      <div className="equal-field">
+        <TextField
+          id="owner"
+          value={formData.owner}
+          label="USER"
+          onFocus={(e) => e.target.select()}
+          inputProps={{
+            maxLength: 48,
+            style: {
+              height: 20,
+              fontSize: `${fontSize}px`,
+              fontWeight: "bold",
+            },
+            readOnly: !isEditMode || isDisabled,
+          }}
+          size="small"
+          variant="filled"
+          className="custom-bordered-input voucher-field equal-mui-field"
+          fullWidth
+          disabled
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+        <div className="journal-voucher-table-card">
+          <div ref={tableScrollRef} className="Tablesection">
+            <Table className="custom-table modern-journal-table">
+              <thead>
+                <tr>
+                  <th>ACCOUNT NAME</th>
+                  <th>
+                    <div className="narration-head">
+                      <span>NARRATION</span>
+                      <input
+                        type="checkbox"
+                        style={{
+                          marginLeft: 5,
+                          transform: "scale(1.2)",
+                          cursor: "pointer",
+                        }}
+                        tabIndex={-1}
+                        checked={showNarrationSuggestions}
+                        onChange={(e) => setShowNarrationSuggestions(e.target.checked)}
+                      />
+                    </div>
+                  </th>
+                  <th>DEBIT</th>
+                  <th>CREDIT</th>
+                  {isEditMode && <th className="text-center">DELETE</th>}
+                </tr>
+              </thead>
+
+              <tbody>
+                {items.map((item, index) => (
+                  <tr key={`${item.accountname}-${index}`}>
+                    <td style={{ padding: 0 }}>
+                      <input
+                        disabled={!canEditRow(index)}
+                        className="Account"
+                        type="text"
+                        value={item.accountname}
+                        readOnly={!isEditMode || isDisabled}
+                        onKeyDown={(e) => {
+                          handleKeyDown(e, index, "accountname");
+                        }}
+                        ref={(el) => (accountNameRefs.current[index] = el)}
+                        onFocus={(e) => e.target.select()}
+                        style={{fontSize: `${fontSize}px`}}
+                      />
+                    </td>
+
+                    <td style={{ padding: 0, position: "relative" }}>
+                      <input
+                      style={{fontSize: `${fontSize}px`}}
+                        disabled={!canEditRow(index)}
+                        className="Narration"
+                        list={showNarrationSuggestions ? "narrationList" : undefined}
+                        value={item.narration}
+                        ref={(el) => (narrationRefs.current[index] = el)}
+                        onChange={(e) =>
+                          handleItemChangeCus(index, "narration", e.target.value)
+                        }
+                        onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         if (!item.narration || item.narration.trim() === "") {
                           const updatedItems = [...items];
 
-                          // 🔥 Get previous row narration
+                          // Get previous row narration
                           let prevNarration = "";
                           if (index > 0) {
                             prevNarration = updatedItems[index - 1].narration || "";
                           }
-
-                          // 🔥 Apply logic
                           updatedItems[index].narration =
                             prevNarration.trim() !== "" ? prevNarration : "Journal Narration";
 
@@ -1707,57 +3708,52 @@ const JournalVoucher = () => {
                       }
                       handleKeyDown(e, index, "narration");
                     }}
-                    onFocus={(e) => e.target.select()} // Select text on focus
-                  />
-                   {showNarrationSuggestions && (
-                    <datalist id="narrationList">
-                      {narrationSuggestions.map((n, i) => (
-                        <option key={i} value={n} />
-                      ))}
-                    </datalist>
-                  )}
+                        onFocus={(e) => e.target.select()}
+                        readOnly={!isEditMode || isDisabled}
+                      />
 
-                  {/* 👇 Show only remaining text */}
-                  {suggestionRow === index && suggestionText && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 8,
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        color: "#bbb",
-                        fontSize: "14px",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <span style={{ visibility: "hidden" }}>
-                        {item.narration}
-                      </span>
-                      <span>{suggestionText.slice(item.narration.length)}</span>
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: 0, width: 250 }}>
-                  <input
-                    className="Debit"
-                    style={{
-                      height: 40,
-                      fsize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      paddingRight: 10,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.debit) === 0 ? "" : item.debit}
-                    onChange={(e) => handleNumberChange(e, index, "debit")}
-                    disabled={!canEditRow(index) || item.disableDebit}
-                    ref={(el) => (debitRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "debit")}
-                    onBlur={() => handlePkgsBlur(index)}
-                    onFocus={(e) => {
+                      {showNarrationSuggestions && (
+                        <datalist id="narrationList">
+                          {narrationSuggestions.map((n, i) => (
+                            <option key={i} value={n} />
+                          ))}
+                        </datalist>
+                      )}
+
+                      {suggestionRow === index && suggestionText && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 8,
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            color: "#bbb",
+                            fontSize: "14px",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          <span style={{ visibility: "hidden" }}>
+                            {item.narration}
+                          </span>
+                          <span>{suggestionText.slice(item.narration.length)}</span>
+                        </div>
+                      )}
+                    </td>
+
+                    <td style={{ padding: 0, width: 250 }}>
+                      <input
+                      style={{fontSize: `${fontSize}px`}}
+                        className="Debit"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.debit) === 0 ? "" : item.debit}
+                        onChange={(e) => handleNumberChange(e, index, "debit")}
+                        disabled={!canEditRow(index) || item.disableDebit}
+                        ref={(el) => (debitRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "debit")}
+                        onBlur={() => handlePkgsBlur(index)}
+                        onFocus={(e) => {
                       const balance = getBalance(index);
 
                       if (balance < 0) {
@@ -1772,27 +3768,21 @@ const JournalVoucher = () => {
                         e.target.select();
                       }, 0);
                     }}
-                  />
-                </td>
-                <td style={{ padding: 0, width: 250 }}>
-                  <input
-                    className="Credits"
-                    style={{
-                      height: 40,
-                      fontSize: `${fsize}px`,
-                      width: "100%",
-                      boxSizing: "border-box",
-                      border: "none",
-                      paddingRight: 10,
-                    }}
-                    readOnly={!isEditMode || isDisabled}
-                    value={Number(item.credit) === 0 ? "" : item.credit}
-                    onChange={(e) => handleNumberChange(e, index, "credit")}
-                    disabled={!canEditRow(index) || item.disableCredit}
-                    ref={(el) => (credittRefs.current[index] = el)}
-                    onKeyDown={(e) => handleKeyDown(e, index, "credit")}
-                    onBlur={() => handleWeightBlur(index)}
-                    onFocus={(e) => {
+                      />
+                    </td>
+
+                    <td style={{ padding: 0, width: 250 }}>
+                      <input
+                      style={{fontSize: `${fontSize}px`}}
+                        className="Credits"
+                        readOnly={!isEditMode || isDisabled}
+                        value={Number(item.credit) === 0 ? "" : item.credit}
+                        onChange={(e) => handleNumberChange(e, index, "credit")}
+                        disabled={!canEditRow(index) || item.disableCredit}
+                        ref={(el) => (credittRefs.current[index] = el)}
+                        onKeyDown={(e) => handleKeyDown(e, index, "credit")}
+                        onBlur={() => handleWeightBlur(index)}
+                        onFocus={(e) => {
                       const balance = getBalance(index);
 
                       if (balance > 0) {
@@ -1807,156 +3797,58 @@ const JournalVoucher = () => {
                         e.target.select();
                       }, 0);
                     }}
-                  />
-                </td>
-                {isEditMode && (
-                  <td style={{ padding: 0 }}>
-                    {canEditRow(index) && (
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100%",
-                        }}
-                      >
-                        <IconButton color="error" size="small" tabIndex={-1}
-                        onClick={() => handleDeleteItem(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </div>
+                      />
+                    </td>
+
+                    {isEditMode && (
+                      <td style={{ padding: 0 }}>
+                        {canEditRow(index) && (
+                          <div className="delete-cell-wrap">
+                            <IconButton
+                              color="error"
+                              size="small"
+                              tabIndex={-1}
+                              onClick={() => handleDeleteItem(index)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </div>
+                        )}
+                      </td>
                     )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-          <tfoot
-            style={{
-              background: "skyblue",
-              position: "sticky",
-              bottom: -1,
-              fontSize: `${fsize}px`,
-              borderTop: "1px solid black",
-            }}
-          >
-            <tr style={{ fontWeight: "bold", textAlign: "right" }}>
-              <td colSpan={2}></td>
-              <td>{formData.totaldebit}</td>
-              <td>{formData.totalcredit}</td>
-              {isEditMode && <td></td>}
-            </tr>
-          </tfoot>
-        </Table>
-      </div>
-      <div className="addbutton">
-        <Button className="fw-bold btn-secondary" onClick={handleAddItem}>
-          Add Row
-        </Button>
-      </div>
-      {showModalCus && (
-        <ProductModalCustomer
-          allFields={allFieldsCus}
-          onSelect={handleProductSelectCus}
-          onClose={handleCloseModalCus}
-          initialKey={pressedKey}
-          tenant={tenant}
-        />
-      )}
-      <div className="Belowcontent">
-        <div className="Buttonsgroupz">
-          <Button
-            ref={addButtonRef}
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[0],
-            }}
-            onClick={handleAdd}
-            disabled={!isAddEnabled}
-          >
-            Add
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[1],
-            }}
-            onClick={handleEditClick}
-            disabled={!isAddEnabled}
-          >
-            Edit
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[2],
-            }}
-            onClick={handlePrevious}
-            disabled={!isPreviousEnabled}
-          >
-            Previous
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[3],
-            }}
-            onClick={handleNext}
-            disabled={!isNextEnabled}
-          >
-            Next
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[4],
-            }}
-            onClick={handleFirst}
-            disabled={!isFirstEnabled}
-          >
-            First
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[5],
-            }}
-            onClick={handleLast}
-            disabled={!isLastEnabled}
-          >
-            Last
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{ backgroundColor: buttonColors[6] }}
-            onClick={() => {
-              fetchAllBills();
-              setActiveRowIndex(0);
-              setShowSearch(true);
-            }}
-            disabled={!isSearchEnabled}
-          >
-            Search
-          </Button>
-          <Button
-            //  onClick={handleOpen}
-            onClick={handlePrintClick}
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[7],
-            }}
-            disabled={!isPrintEnabled}
-          >
-            Print
-          </Button>
+                  </tr>
+                ))}
+              </tbody>
+
+              <tfoot>
+                <tr>
+                  <td colSpan={2}></td>
+                  <td style={{fontSize: `${fontSize}px`}}>{formData.totaldebit}</td>
+                  <td style={{fontSize: `${fontSize}px`}}>{formData.totalcredit}</td>
+                  {isEditMode && <td></td>}
+                </tr>
+              </tfoot>
+            </Table>
+          </div>
+
+          <div className="addbutton add-row-wrap">
+            <Button className="fw-bold btn-secondary add-row-btn" onClick={handleAddItem}>
+              + Add Row
+            </Button>
+          </div>
+        </div>
+
+        {showModalCus && (
+          <ProductModalCustomer
+            allFields={allFieldsCus}
+            onSelect={handleProductSelectCus}
+            onClose={handleCloseModalCus}
+            initialKey={pressedKey}
+            tenant={tenant}
+          />
+        )}
+
+        <div className="Belowcontent journal-bottom-section">
           <PrintChoiceModal
             open={printChoiceOpen}
             onClose={() => setPrintChoiceOpen(false)}
@@ -1971,43 +3863,104 @@ const JournalVoucher = () => {
             voucherno={formData?.voucherno}
             vtype="J"
           />
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[8],
-            }}
-            disabled={!isDeleteEnabled}
-            onClick={handleDeleteClick}
-          >
-            Delete
-          </Button>
-          <Button
-            className="Buttonz"
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[9],
-            }}
-            onClick={handleExit}
-            // onClick={handleLast}
-          >
-            Exit
-          </Button>
-          <Button
-            ref={saveButtonRef}
-            className="Buttonz"
-            onClick={handleSaveClick}
-            disabled={!isSubmitEnabled}
-            style={{
-              color: "black",
-              backgroundColor: buttonColors[10],
-            }}
-          >
-            Save
-          </Button>
+
+          <div className="Buttonsgroupz journal-bottom-buttons">
+  <Button
+    ref={addButtonRef}
+    className="Buttonz modern-btn"
+    onClick={handleAdd}
+    disabled={!isAddEnabled}
+  >
+    Add
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={handleEditClick}
+    disabled={!isAddEnabled}
+  >
+    Edit
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={handlePrevious}
+    disabled={!isPreviousEnabled}
+  >
+    Previous
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={handleNext}
+    disabled={!isNextEnabled}
+  >
+    Next
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={handleFirst}
+    disabled={!isFirstEnabled}
+  >
+    First
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={handleLast}
+    disabled={!isLastEnabled}
+  >
+    Last
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={() => {
+      fetchAllBills();
+      setActiveRowIndex(0);
+      setShowSearch(true);
+    }}
+    disabled={!isSearchEnabled}
+  >
+    Search
+  </Button>
+
+  <Button
+    onClick={handlePrintClick}
+    className="Buttonz modern-btn"
+    disabled={!isPrintEnabled}
+  >
+    Print
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    disabled={!isDeleteEnabled}
+    onClick={() => handleDeleteClick(data1?._id)}
+  >
+    Delete
+  </Button>
+
+  <Button
+    className="Buttonz modern-btn"
+    onClick={handleExit}
+  >
+    Exit
+  </Button>
+
+  <Button
+    ref={saveButtonRef}
+    className="Buttonz modern-btn save-btn"
+    onClick={handleSaveClick}
+    disabled={!isSubmitEnabled}
+  >
+    Save
+  </Button>
+</div>
         </div>
       </div>
-      {/* Search Modal */}
+
       <Modal
         show={showSearch}
         keyboard={false}
@@ -2020,7 +3973,7 @@ const JournalVoucher = () => {
         </Modal.Header>
 
         <Modal.Body>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px", flexWrap: "wrap" }}>
             <TextField
               className="custom-bordered-input"
               size="small"
@@ -2075,21 +4028,20 @@ const JournalVoucher = () => {
 
               <tbody>
                 {filteredBills.slice(0, visibleCount).map((bill, index) => (
-                  <tr key={bill._id}
-                  style={{
-                    backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setActiveRowIndex(index);
-                    handleSelectBill(bill);
-                    setShowSearch(false);
-                  }}
+                  <tr
+                    key={bill._id}
+                    style={{
+                      backgroundColor: index === activeRowIndex ? "#d1e7ff" : "",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setActiveRowIndex(index);
+                      handleSelectBill(bill);
+                      setShowSearch(false);
+                    }}
                   >
                     <td>{bill.formData.voucherno}</td>
-                    <td>
-                      {formatDateToDDMMYYYY(bill.formData.date)}
-                    </td>
+                    <td>{formatDateToDDMMYYYY(bill.formData.date)}</td>
                     <td>{bill.items?.[0]?.accountname}</td>
                     <td>{bill.formData.totaldebit}</td>
                     <td>{bill.formData.totalcredit}</td>

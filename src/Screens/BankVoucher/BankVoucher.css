@@ -1,4 +1,4 @@
-.HeaderBANK {
+/* .HeaderBANK {
     font-weight: bolder;
     text-align: center;
     margin-top: -30px;
@@ -16,9 +16,7 @@
     bottom: 0;
     width: 100%;
     background-color: transparent;
-    /* or any other background color */
     z-index: 1000;
-    /* To make sure it stays on top */
 }
 
 .Tablesections {
@@ -86,16 +84,6 @@
   font-weight: bold;
   border-radius: 5px;
 }
-/* .custom-datepickerBank{
-    border: 1px solid black;
-    height: 35px;
-    border-radius: 5px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
-    padding-left: 5px;
-    font-weight: bold;
-    font-size: 18px;
-    width: 182px;
-} */ 
 
 .custom-datepicker-popper {
   z-index: 9999 !important;
@@ -353,4 +341,657 @@ background-color: #8deded;
         overflow-y: auto;
         margin: 5px;
     }
+} */
+
+/* Live */
+
+/* =========================
+   GLOBAL RESET
+========================= */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+.bank-voucher-page {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #f6f8fb;
+  margin-top: -30px;
+}
+
+.bank-voucher-shell {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 20% 60% 20%;
+  gap: 6px;
+  padding: 5vh 8px 8px 8px;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER
+========================= */
+.bank-voucher-header-card {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.bank-voucher-header-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-bottom: 8px;
+}
+
+.header-title-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.HeaderBANK {
+  margin: 0;
+  font-size: clamp(20px, 1.6vw, 26px);
+  line-height: 1.1;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+.tittle {
+  font-size: clamp(12px, 0.95vw, 15px);
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.bank-voucher-topbar {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.topbar-left {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.topbar-right.bank-topbar-right {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.bankdiv.modern-bank-row {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+}
+
+.top-label {
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.3px;
+}
+
+.DatePICKER.modern-date-input {
+  width: 170px;
+  height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  line-height: 36px;
+}
+
+.DatePICKER.modern-date-input:focus {
+  border-color: #94a3b8;
+  background: #ffffff;
+}
+
+.custom-bordered-input.voucher-field,
+.custom-bordered-input.bank-name-field,
+.custom-bordered-input.bank-code-field {
+  width: 170px;
+}
+
+.custom-bordered-input.bank-name-field {
+  width: 280px;
+}
+
+.custom-bordered-input.bank-code-field {
+  width: 150px;
+}
+
+.custom-bordered-input .MuiFilledInput-root {
+  border-radius: 10px !important;
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  overflow: hidden;
+  min-height: 36px !important;
+  height: 36px !important;
+}
+
+.custom-bordered-input .MuiFilledInput-root:hover {
+  background: #ffffff !important;
+}
+
+.custom-bordered-input .MuiFilledInput-root.Mui-focused {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+}
+
+.custom-bordered-input .MuiFilledInput-root:before,
+.custom-bordered-input .MuiFilledInput-root:after {
+  display: none !important;
+}
+
+.custom-bordered-input .MuiInputBase-input {
+  height: 36px !important;
+  min-height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 10px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.custom-bordered-input .MuiInputLabel-root {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* =========================
+   TABLE CARD
+========================= */
+.bank-voucher-table-card {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  padding: 4px 8px 6px;
+}
+
+.Tablesections {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid #dbe3ee;
+  background: #fff;
+}
+
+/* =========================
+   TABLE - FIXED HEIGHT FOR MAC + HP
+========================= */
+.custom-table,
+.custom-table * {
+  box-sizing: border-box;
+}
+
+.custom-table.modern-bank-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.custom-table.modern-bank-table thead th,
+.custom-table.modern-bank-table tbody td,
+.custom-table.modern-bank-table tfoot td {
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+.custom-table.modern-bank-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: linear-gradient(to right, #dbeafe, #bfdbfe);
+  color: #1e293b;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-align: center;
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+  border-bottom: 1px solid #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-table.modern-bank-table tbody tr {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+}
+
+.custom-table.modern-bank-table tbody td {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.custom-table.modern-bank-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.custom-table.modern-bank-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-align: center;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  border-top: 1px solid #cbd5e1;
+}
+
+/* =========================
+   COLUMN WIDTHS
+========================= */
+.custom-table.modern-bank-table th:nth-child(1),
+.custom-table.modern-bank-table td:nth-child(1) {
+  width: 25%;
+}
+
+.custom-table.modern-bank-table th:nth-child(2),
+.custom-table.modern-bank-table td:nth-child(2),
+.custom-table.modern-bank-table th:nth-child(3),
+.custom-table.modern-bank-table td:nth-child(3),
+.custom-table.modern-bank-table th:nth-child(4),
+.custom-table.modern-bank-table td:nth-child(4),
+.custom-table.modern-bank-table th:nth-child(5),
+.custom-table.modern-bank-table td:nth-child(5),
+.custom-table.modern-bank-table th:nth-child(6),
+.custom-table.modern-bank-table td:nth-child(6),
+.custom-table.modern-bank-table th:nth-child(7),
+.custom-table.modern-bank-table td:nth-child(7) {
+  width: 8%;
+}
+
+.custom-table.modern-bank-table th:nth-child(8),
+.custom-table.modern-bank-table td:nth-child(8) {
+  width: 12%;
+}
+
+.custom-table.modern-bank-table th:nth-child(9),
+.custom-table.modern-bank-table td:nth-child(9) {
+  width: 14%;
+}
+
+.custom-table.modern-bank-table th:nth-child(10),
+.custom-table.modern-bank-table td:nth-child(10) {
+  width: 5%;
+}
+
+.narration-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 26px;
+  line-height: 1;
+}
+
+/* =========================
+   TABLE INPUTS - FIXED HEIGHT
+========================= */
+.custom-table.modern-bank-table input,
+.custom-table.modern-bank-table textarea,
+.custom-table.modern-bank-table select {
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.Account,
+.Payments,
+.Receipts,
+.Discounts,
+.Totals,
+.Bankcharges,
+.TDSrs,
+.chnqBank,
+.REM {
+  width: 100%;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  background: transparent;
+  color: #0f172a;
+}
+
+.Account:focus,
+.Payments:focus,
+.Receipts:focus,
+.Discounts:focus,
+.Totals:focus,
+.Bankcharges:focus,
+.TDSrs:focus,
+.chnqBank:focus,
+.REM:focus {
+  background: #eff6ff !important;
+}
+
+.Payments,
+.Receipts,
+.Discounts,
+.Totals,
+.Bankcharges,
+.TDSrs {
+  text-align: right;
+}
+
+.Account,
+.chnqBank,
+.REM {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-cell-wrap {
+  width: 100%;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-cell-wrap .MuiIconButton-root,
+.delete-cell-wrap button {
+  padding: 2px !important;
+  margin: 0 !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+}
+
+/* =========================
+   ADD ROW BUTTON
+========================= */
+.addbutton.add-row-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.add-row-btn {
+  min-width: 95px;
+  height: 28px;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  padding: 0 10px !important;
+}
+
+/* =========================
+   FOOTER - SAME FEEL AS JOURNAL
+========================= */
+.Belowcontent.bank-bottom-section {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.Buttonsgroupz.bank-bottom-buttons {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+}
+
+.Buttonsgroupz.bank-bottom-buttons .Buttonz.modern-btn {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: none !important;
+  border-radius: 10px !important;
+  color: #1e293b !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px !important;
+}
+
+.Buttonsgroupz.bank-bottom-buttons .Buttonz.modern-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* =========================
+   SEARCH MODAL TABLE
+========================= */
+.modal-body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-body table thead th {
+  position: sticky;
+  top: 0;
+  background: #e2e8f0;
+  z-index: 2;
+  padding: 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.modal-body table tbody td {
+  padding: 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* =========================
+   REMOVE EXTRA MUI HEIGHT
+========================= */
+.MuiInputBase-root,
+.MuiFilledInput-root,
+.MuiOutlinedInput-root,
+.MuiInputBase-input,
+.MuiFilledInput-input,
+.MuiOutlinedInput-input {
+  min-height: 0 !important;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1550px) {
+  .HeaderBANK {
+    font-size: clamp(18px, 1.4vw, 24px);
+  }
+
+  .Buttonsgroupz.bank-bottom-buttons .Buttonz.modern-btn {
+    font-size: 10px !important;
+    height: 34px;
+  }
+
+  .Buttonsgroupz.bank-bottom-buttons {
+    gap: 5px;
+  }
+
+  .custom-bordered-input.bank-name-field {
+    width: 240px;
+  }
+}
+
+@media (max-width: 1350px) {
+  .bank-voucher-shell {
+    padding: 5vh 6px 6px 6px;
+  }
+
+  .bank-voucher-topbar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .topbar-right.bank-topbar-right {
+    justify-content: flex-start;
+  }
+
+  .topbar-left {
+    flex-wrap: wrap;
+  }
+
+  .bankdiv.modern-bank-row {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 1200px) {
+  .Buttonsgroupz.bank-bottom-buttons {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .bank-voucher-shell {
+    grid-template-rows: 28% 50% 22%;
+  }
+
+  .HeaderBANK {
+    font-size: 18px;
+  }
+
+  .tittle {
+    font-size: 12px;
+  }
+
+  .custom-bordered-input.voucher-field,
+  .custom-bordered-input.bank-name-field,
+  .custom-bordered-input.bank-code-field,
+  .DatePICKER.modern-date-input {
+    width: 100% !important;
+  }
+
+  .field-block {
+    min-width: 100%;
+  }
+
+  .topbar-left,
+  .topbar-right.bank-topbar-right,
+  .bankdiv.modern-bank-row {
+    width: 100%;
+  }
+
+  .Buttonsgroupz.bank-bottom-buttons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .Buttonsgroupz.bank-bottom-buttons .Buttonz.modern-btn {
+    height: 38px;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .bank-voucher-shell {
+    padding: 6px;
+  }
+
+  .Buttonsgroupz.bank-bottom-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
 }

@@ -3,6 +3,7 @@ import { Modal, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import qrcode from './/qrcode.png'
 import useCompanySetup from '../Shared/useCompanySetup';
+import useCashBankSetup from "../Shared/useCashBankSetup";
 
 const InvoiceSale2 = React.forwardRef(({
     formData,
@@ -16,6 +17,7 @@ const InvoiceSale2 = React.forwardRef(({
   }, ref) => {
 
     const { companyName, companyAdd, companyPhn, companyGST, companyPAN, companyEmail } = useCompanySetup();
+    const { b1, b2, b3, b4, b5 } = useCashBankSetup();
 
     const chunkItems = (items, firstChunkSize, otherChunkSize) => {
       const chunks = [];
@@ -123,25 +125,115 @@ const InvoiceSale2 = React.forwardRef(({
   // Example usage with formData.grandtotal
   let totalInWords = numberToIndianWords(formData.grandtotal);
 
-    const formatDate = (dateValue) => {
-  // Check if date is already in dd/mm/yyyy or d/m/yyyy format
-  const ddmmyyyyPattern = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+  const formatDateToDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
 
-  if (ddmmyyyyPattern.test(dateValue)) {
-    return dateValue;  // already correctly formatted
-  }
+    // ✅ Already dd-mm-yyyy
+    const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(ddmmyyyy);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      const test = new Date(`${yyyy}-${mm}-${dd}`);
+      if (
+        test.getDate() === Number(dd) &&
+        test.getMonth() + 1 === Number(mm) &&
+        test.getFullYear() === Number(yyyy)
+      ) {
+        return dateStr;
+      }
+    }
 
-  // otherwise assume ISO or another format, parse it
-  const dateObj = new Date(dateValue);
-  if (isNaN(dateObj)) {
-    return "";  // invalid date fallback
-  }
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const year = dateObj.getFullYear();
-  return `${day}/${month}/${year}`;
-};
+    let date;
 
+    // ✅ ISO with time (Z or offset)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split("-");
+      date = new Date(y, m - 1, d); // avoid timezone issues
+    }
+    // ✅ ISO date only (yyyy-mm-dd)
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("-");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ dd/mm/yyyy
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // ✅ yyyy/mm/dd
+    else if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) {
+      const [y, m, d] = dateStr.split("/");
+      date = new Date(y, m - 1, d);
+    }
+    // 🔁 fallback (Date.parse)
+    else {
+      date = new Date(dateStr);
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const tenant = "03AAYFG4472A1ZG_01042025_31032026";
+  const [Expense1, setExpense1] = useState("");
+  const [Expense2, setExpense2] = useState("");
+  const [Expense3, setExpense3] = useState("");
+  const [Expense4, setExpense4] = useState(null);
+  const [Expense5, setExpense5] = useState(null);
+  const [Expense6, setExpense6] = useState(null);
+  const [Expense7, setExpense7] = useState(null);
+  const [Expense8, setExpense8] = useState(null);
+  const [Expense9, setExpense9] = useState(null);
+  const [Expense10, setExpens10] = useState(null);
+
+  const fetchSalesSetup = async () => {
+    try {
+      const response = await fetch(
+        `https://www.shkunweb.com/shkunlive/${tenant}/tenant/api/salesetup`,
+      );
+      if (!response.ok) throw new Error("Failed to fetch sales setup");
+
+      const data = await response.json();
+
+      if (Array.isArray(data) && data.length > 0 && data[0].formData) {
+        const formDataFromAPI = data[0].formData;
+        setExpense1(formDataFromAPI.Exp1);
+        setExpense2(formDataFromAPI.Exp2);
+        setExpense3(formDataFromAPI.Exp3);
+        setExpense4(formDataFromAPI.Exp4);
+        setExpense5(formDataFromAPI.Exp5);
+        setExpense6(formDataFromAPI.Exp6);
+        setExpense7(formDataFromAPI.Exp7);
+        setExpense8(formDataFromAPI.Exp8);
+        setExpense9(formDataFromAPI.Exp9);
+        setExpens10(formDataFromAPI.Exp10);
+      } else {
+        throw new Error("Invalid response structure");
+      }
+    } catch (error) {
+      console.error("Error fetching sales setup:", error.message);
+    }
+  };
+  useEffect(() => {
+    fetchSalesSetup();
+  }, []);
+
+  const totals = items.reduce(
+    (acc, item) => {
+      acc.Exp1 += Number(item.Exp1 || 0);
+      acc.Exp2 += Number(item.Exp2 || 0);
+      acc.Exp3 += Number(item.Exp3 || 0);
+      acc.Exp4 += Number(item.Exp4 || 0);
+      acc.Exp5 += Number(item.Exp5 || 0);
+      return acc;
+    },
+    { Exp1: 0, Exp2: 0, Exp3: 0, Exp4: 0, Exp5: 0 }
+  );
     return (
       <Modal
         open={isOpen}
@@ -217,7 +309,7 @@ const InvoiceSale2 = React.forwardRef(({
                         <div style={{borderRight:'1px solid black',borderBottom:'1px solid black',height:160,width:"70%",display:'flex',flexDirection:"column"}}>
                         <text
                         style={{
-                          fontSize: 35,
+                          fontSize: 30,
                           fontWeight: "600",
                           fontFamily: "serif",
                           color:'darkblue',
@@ -232,8 +324,16 @@ const InvoiceSale2 = React.forwardRef(({
                       <span style={{fontSize:20,marginLeft:20}}>PAN: {companyPAN}</span>
                       </div>
                       <div style={{display:'flex',flexDirection:'row',marginLeft:10}}>
-                      <span style={{fontSize:20}}>Ph No: {companyPhn}</span>
-                      <span style={{fontSize:20,marginLeft:20}}>Email: {companyEmail}</span>
+                        {companyPhn && (
+                          <span style={{fontSize:20}}>
+                            Ph No: {companyPhn}
+                          </span>
+                        )}
+                        {companyEmail && (
+                          <span style={{fontSize:20, marginLeft:20}}>
+                            Email: {companyEmail}
+                          </span>
+                        )}
                       </div>
                             </div>
                             <div style={{height:"100%",width:"50%",display:'flex',flexDirection:'column'}}>
@@ -245,7 +345,7 @@ const InvoiceSale2 = React.forwardRef(({
                                 <div style={{borderBottom:"1px solid black",width:"50%",height:53,paddingTop:0}}>
                                     <span style={{fontSize:20,marginLeft:10}}>Dated:</span>
                                   <text style={{ fontSize: 18, marginLeft: 10 }}>
-                                    {formatDate(formData.date)}
+                                    {formatDateToDDMMYYYY(formData.date)}
                                   </text>
                                 </div>
                                 </div>
@@ -361,8 +461,8 @@ const InvoiceSale2 = React.forwardRef(({
                             {/*  */}
                             <div style={{height:160,width:"50%",display:'flex',flexDirection:'column'}}>
                                 <div style={{borderBottom:"1px solid black",width:"100%",height:53,paddingTop:10}}>
-                                    <span style={{fontSize:20,marginLeft:10}}>Transporter Name:</span>
-                                    <text style={{fontSize:20,marginLeft:10}}>{formData.v_tpt}</text>
+                                    <span style={{fontSize:20,marginLeft:10}}>Terms:</span>
+                                    <text style={{fontSize:20,marginLeft:10}}>{formData.exfor}</text>
                                 </div>
                                 <div style={{borderBottom:"1px solid black",width:"100%",height:53,paddingTop:10}}>
                                 {customerDetails.map((item) => (
@@ -373,8 +473,8 @@ const InvoiceSale2 = React.forwardRef(({
                         ))}
                                 </div>
                                 <div style={{width:"100%",height:53,paddingTop:10,marginLeft:10}}>
-                                  <span style={{fontSize:20}}>Terms:</span>
-                                  <text style={{fontSize:20,marginLeft:10}}>{formData.exfor}</text>
+                                  <span style={{fontSize:20}}>Transporter Name:</span>
+                                  <text style={{fontSize:20,marginLeft:10}}>{formData.v_tpt}</text>
                                 </div>
                             </div>
                         </div>
@@ -528,11 +628,11 @@ const InvoiceSale2 = React.forwardRef(({
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.id}</td>
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.sdisc}</td>
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.tariff}</td>
-                        <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.pkgs}</td>
-                        <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.weight}</td>
+                        <td style={{ borderRight: "1px solid black",  textAlign:'right', paddingRight: 5 }}>{item.pkgs}</td>
+                        <td style={{ borderRight: "1px solid black",  textAlign:'right', paddingRight: 5 }}>{item.weight}</td>
                         <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.Units}</td>
-                        <td style={{ borderRight: "1px solid black", paddingLeft: 10 }}>{item.rate}</td>
-                        <td style={{ borderRight: "1px solid black", textAlign: "right", paddingRight: 10 }}>{item.amount}</td>
+                        <td style={{ borderRight: "1px solid black", textAlign:'right', paddingRight: 5 }}>{item.rate}</td>
+                        <td style={{ borderRight: "1px solid black", textAlign: "right", paddingRight: 5 }}>{item.amount}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -541,7 +641,7 @@ const InvoiceSale2 = React.forwardRef(({
                       <td colSpan="2" style={{ fontWeight: "bold", fontSize: 18, paddingLeft: 20 }}>TOTAL</td>
                       <td></td>
                       <td></td>
-                      <td style={{ fontWeight: "bold", fontSize: 18 }}>{totalQuantity}</td>
+                      <td style={{ fontWeight: "bold", fontSize: 18, textAlign:'right' }}>{(totalQuantity).toFixed(3)}</td>
                       <td></td>
                       <td style={{ fontWeight: "bold", fontSize: 18, color: "red" }}>Total</td>
                       <td style={{ fontWeight: "bold", fontSize: 18, color: "red", textAlign: "right", paddingRight: 10 }}>{formData.sub_total}</td>
@@ -550,126 +650,166 @@ const InvoiceSale2 = React.forwardRef(({
                 </table>
                 <div style={{display:"flex",flexDirection:"column",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black",height:245}}>
                   {/* Taxable */}
-                 <div style={{width:"100%",display:'flex',flexDirection:'row'}}>
-<div  style={{width:"15%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <span style={{fontSize:20}}>Taxable</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-  <span style={{fontSize:20}}>Amount</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <text style={{fontSize:20}}>{formData.sub_total}</text>
-  </div>
-</div>
-{/* CGST */}
-<div  style={{width:"20%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <span style={{fontSize:20}}>CGST</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center',display:'flex',flexDirection:'row'}}>
- <div style={{borderRight:'1px solid black',width:"40%"}}>
-  <span style={{fontSize:20}}>Rate</span>
- </div>
- <div style={{width:"70%"}}>
-  <span style={{fontSize:20}}>Amount</span>
- </div>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,display:'flex',flexDirection:'row',textAlign:'center'}}>
-  <div style={{borderRight:'1px solid black',width:"40%"}}>
-  <text style={{fontSize:20}}>9.00%</text>
- </div>
- <div style={{width:"70%"}}>
-  <text style={{fontSize:20}}>{formData.cgst}</text>
- </div>
-  </div>
-</div>
-{/* SGST */}
-<div  style={{width:"20%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <span style={{fontSize:20}}>SGST</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center',display:'flex',flexDirection:'row'}}>
- <div style={{borderRight:'1px solid black',width:"40%"}}>
-  <span style={{fontSize:20}}>Rate</span>
- </div>
- <div style={{width:"70%"}}>
-  <span style={{fontSize:20}}>Amount</span>
- </div>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,display:'flex',flexDirection:'row',textAlign:'center'}}>
-  <div style={{borderRight:'1px solid black',width:"40%"}}>
-  <text style={{fontSize:20}}>9.00%</text>
- </div>
- <div style={{width:"70%"}}>
-  <text style={{fontSize:20}}>{formData.sgst}</text>
- </div>
-  </div>
-</div>
-{/* IGST */}
-<div  style={{width:"20%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <span style={{fontSize:20}}>IGST</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center',display:'flex',flexDirection:'row'}}>
- <div style={{borderRight:'1px solid black',width:"40%"}}>
-  <span style={{fontSize:20}}>Rate</span>
- </div>
- <div style={{width:"70%"}}>
-  <span style={{fontSize:20}}>Amount</span>
- </div>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,display:'flex',flexDirection:'row',textAlign:'center'}}>
-  <div style={{borderRight:'1px solid black',width:"40%"}}>
-  <text style={{fontSize:20}}>9.00%</text>
- </div>
- <div style={{width:"70%"}}>
-  <text style={{fontSize:20}}>{formData.igst}</text>
- </div>
-  </div>
-</div>
-{/* Others */}
-<div  style={{width:"15%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <span style={{fontSize:20}}>Others</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-  <span style={{fontSize:20}}>Amount</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <text style={{fontSize:20}}>{formData.exp_before}</text>
-  </div>
-</div>
-{/* GrandTotal */}
-<div  style={{width:"15%",height:90,display:'flex',flexDirection:"column"}}>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <span style={{fontSize:20}}>Expense</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-  <span style={{fontSize:20}}>Amount</span>
-  </div>
-  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
-    <text style={{fontSize:20}}>{formData.expafterGST}</text>
-  </div>
-</div>
+                <div style={{width:"100%",display:'flex',flexDirection:'row'}}>
+                <div  style={{width:"15%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <span style={{fontSize:20}}>Taxable</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                  <span style={{fontSize:20}}>Amount</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <text style={{fontSize:20}}>{formData.sub_total}</text>
+                  </div>
+                </div>
+                {/* CGST */}
+                <div  style={{width:"20%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <span style={{fontSize:20}}>CGST</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center',display:'flex',flexDirection:'row'}}>
+                <div style={{borderRight:'1px solid black',width:"40%"}}>
+                  <span style={{fontSize:20}}>Rate</span>
+                </div>
+                <div style={{width:"70%"}}>
+                  <span style={{fontSize:20}}>Amount</span>
+                </div>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,display:'flex',flexDirection:'row',textAlign:'center'}}>
+                  <div style={{borderRight:'1px solid black',width:"40%"}}>
+                  <text style={{fontSize:20}}>9.00%</text>
+                </div>
+                <div style={{width:"70%"}}>
+                  <text style={{fontSize:20}}>{formData.cgst}</text>
+                </div>
+                  </div>
+                </div>
+                {/* SGST */}
+                <div  style={{width:"20%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <span style={{fontSize:20}}>SGST</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center',display:'flex',flexDirection:'row'}}>
+                <div style={{borderRight:'1px solid black',width:"40%"}}>
+                  <span style={{fontSize:20}}>Rate</span>
+                </div>
+                <div style={{width:"70%"}}>
+                  <span style={{fontSize:20}}>Amount</span>
+                </div>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,display:'flex',flexDirection:'row',textAlign:'center'}}>
+                  <div style={{borderRight:'1px solid black',width:"40%"}}>
+                  <text style={{fontSize:20}}>9.00%</text>
+                </div>
+                <div style={{width:"70%"}}>
+                  <text style={{fontSize:20}}>{formData.sgst}</text>
+                </div>
+                  </div>
+                </div>
+                {/* IGST */}
+                <div  style={{width:"20%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <span style={{fontSize:20}}>IGST</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center',display:'flex',flexDirection:'row'}}>
+                <div style={{borderRight:'1px solid black',width:"40%"}}>
+                  <span style={{fontSize:20}}>Rate</span>
+                </div>
+                <div style={{width:"70%"}}>
+                  <span style={{fontSize:20}}>Amount</span>
+                </div>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,display:'flex',flexDirection:'row',textAlign:'center'}}>
+                  <div style={{borderRight:'1px solid black',width:"40%"}}>
+                  <text style={{fontSize:20}}>9.00%</text>
+                </div>
+                <div style={{width:"70%"}}>
+                  <text style={{fontSize:20}}>{formData.igst}</text>
+                </div>
+                  </div>
+                </div>
+                {/* Others */}
+                <div  style={{width:"15%",height:90,display:'flex',flexDirection:"column",borderRight:"1px solid black"}}>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <span style={{fontSize:20}}>Others</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                  <span style={{fontSize:20}}>Amount</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <text style={{fontSize:20}}>{formData.exp_before}</text>
+                  </div>
+                </div>
+                {/* GrandTotal */}
+                <div  style={{width:"15%",height:90,display:'flex',flexDirection:"column"}}>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <span style={{fontSize:20}}>Expense</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                  <span style={{fontSize:20}}>Amount</span>
+                  </div>
+                  <div style={{borderBottom:"1px solid black",height:30,textAlign:'center'}}>
+                    <text style={{fontSize:20}}>{formData.expafterGST}</text>
+                  </div>
+                </div>
                 </div>
                 {/* OTHER DETAILS */}
                 <div style={{display:"flex",flexDirection:'row',height:'100%'}}>
-                  <div style={{width:"45%",borderRight:"1px solid black",padding:10}}>
+                  <div style={{width:"50%",borderRight:"1px solid black",padding:10}}>
                     <text style={{fontSize:20}}>Remarks: {formData.rem2}</text>
                   </div>
                   {/* Labour */}
-                  <div style={{display:'flex',flexDirection:'column',width:"30%",height:"100%",marginLeft:10,borderRight:"1px solid"}}>
-                <span style={{fontSize:20}}>Labour:</span>
-                <span style={{fontSize:20}}>Postage:</span>
-                <span style={{fontSize:20}}>Discount:</span>
-                <span style={{fontSize:20}}>Freight:</span>
-                <span style={{fontSize:20}}>Expense5:</span>
-                </div>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: "25%",
+                    height: "100%",
+                    marginLeft: 10,
+                    borderRight: "1px solid",
+                    fontWeight: 'bold',
+                    paddingTop: 10,
+                  }}>
+
+                    {totals.Exp1 > 0 && (
+                      <div style={{display:'flex', justifyContent:'space-between', fontSize:18}}>
+                        <span>{Expense1}:</span>
+                        <span style={{paddingRight:5}}>{totals.Exp1.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {totals.Exp2 > 0 && (
+                      <div style={{display:'flex', justifyContent:'space-between', fontSize:18}}>
+                        <span>{Expense2}:</span>
+                        <span style={{paddingRight:5}}>{totals.Exp2.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {totals.Exp3 > 0 && (
+                      <div style={{display:'flex', justifyContent:'space-between', fontSize:18}}>
+                        <span>{Expense3}:</span>
+                        <span style={{paddingRight:5}}>{totals.Exp3.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {totals.Exp4 > 0 && (
+                      <div style={{display:'flex', justifyContent:'space-between', fontSize:18}}>
+                        <span>{Expense4}:</span>
+                        <span style={{paddingRight:5}}>{totals.Exp4.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {totals.Exp5 > 0 && (
+                      <div style={{display:'flex', justifyContent:'space-between', fontSize:18}}>
+                        <span>{Expense5}:</span>
+                        <span style={{paddingRight:5}}>{totals.Exp5.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                  </div>
                 {/* sd */}
-                <div style={{display:'flex',flexDirection:'column',width:"20%",height:"100%",textAlign:'right',marginRight:20}}>
-                <text style={{fontSize:20,color:'red'}}>Total Tax: {formData.tax}</text>
-                <text style={{fontSize:20,color:'red'}}>Grand Total: {formData.grandtotal}</text>
+                <div style={{display:'flex',flexDirection:'column',width:"25%",height:"100%",textAlign:'right'}}>
+                  <span style={{fontSize:20,color:'red', fontWeight:'bold',borderBottom:'1px solid black',paddingRight:5}}>Total Tax: {formData.tax}</span>
+                  <span style={{fontSize:20,color:'red', fontWeight:'bold',borderBottom:'1px solid black',paddingRight:5}}>Grand Total: {formData.grandtotal}</span>
                 </div>
                 </div>
                   {/* EXPENSE */}
@@ -679,13 +819,11 @@ const InvoiceSale2 = React.forwardRef(({
                 </div>
                 <div style={{display:"flex",flexDirection:"row",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black",height:120}}>
                <div style={{width:"50%",borderRight:"1px solid black"}}>
-                <text style={{marginLeft:10,fontSize:17,textDecoration:"underline"}}>Our Bank:</text>
-                <text style={{fontSize:16,marginLeft:20}}>{companyName}</text>
-                <div style={{display:'flex',flexDirection:'column'}}>
-                <text style={{fontSize:16,marginLeft:"24%"}}>A/C No.5022334421341</text>
-                <text style={{fontSize:16,marginLeft:"24%"}}>IFSC.HDFC0002763</text>
-                <text style={{fontSize:16,marginLeft:"24%"}}>BANK-HDFC BANK LTD</text>
-                <text style={{fontSize:16,marginLeft:"24%"}}>MANDI GOBINDGARH</text>
+                <div style={{display:'flex',flexDirection:'column', marginTop:10, marginLeft:10}}>
+                <text style={{fontSize:16}}><span style={{fontSize:17,textDecoration:"underline",marginRight:10}}>Our Bank:</span>{b1}</text>
+                <text style={{fontSize:16, marginLeft:"16%"}}>{b2}</text>
+                <text style={{fontSize:16, marginLeft:"16%"}}>{b3}</text>
+                <text style={{fontSize:16, marginLeft:"16%"}}>{b4}</text>
                 </div>
                </div>
                <div style={{display:'flex',flexDirection:"column",marginTop:20,textAlign:'center',marginLeft:40}}>
@@ -694,23 +832,67 @@ const InvoiceSale2 = React.forwardRef(({
                </div>
                 </div>
                 {/*  */}
-                <div style={{display:"flex",flexDirection:"row",borderLeft:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black",height:180}}>
-               <div style={{width:"72%",display:'flex',flexDirection:'column'}}>
-                <text style={{fontSize:20,textDecoration:'underline',marginLeft:10}}>Terms & Conditions:</text>
-                <span style={{marginLeft:10,fontSize:18}}>1.Our responsibility ceases after the goods are removed from our premises.</span>
-                <span style={{marginLeft:10,fontSize:18}}>2.Goods once sold are not returnable or exchangeable.</span>
-                <span style={{marginLeft:10,fontSize:18}}>3.If the bill is not paid within a week intrest@25% will be charged from the date of bill.</span>
-                <span style={{marginLeft:10,fontSize:18}}>Subjected to FATEHGARH SAHIB Jurisdiction Only.</span>
-                <div style={{display:'flex',flexDirection:'row',marginTop:5}}>
-                  <text style={{fontSize:22,marginLeft:15}}>E.& O.E</text>
-                  <text style={{fontSize:22,marginLeft:"42%"}}>Checked/Prepared by</text>
-                </div>
-               </div>
-               <div style={{display:'flex',flexDirection:"column",marginTop:30,marginLeft:40}}>
-              <text style={{fontSize:20}}>FOR {companyName}</text>
-              <text style={{fontSize:22,marginTop:"33%",marginLeft:20}}>Authorised Signature</text>
-               </div>
-                </div>
+                     <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        borderLeft: "1px solid black",
+                        borderRight: "1px solid black",
+                        borderBottom: "1px solid black",
+                      }}
+                    >
+                      <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <text
+                            style={{
+                              fontSize: 20,
+                              textDecoration: "underline",
+                              marginLeft: 10,
+                            }}
+                          >
+                            Terms & Conditions:
+                          </text>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            1.Our responsibility ceases after the goods are
+                            removed from our premises.
+                          </span>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            2.Goods once sold are not returnable or
+                            exchangeable.
+                          </span>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            3.If the bill is not paid within a week intrest@25%
+                            will be charged from the date of bill.
+                          </span>
+                          <span style={{ marginLeft: 10, fontSize: 18 }}>
+                            Subjected to FATEHGARH SAHIB Jurisdiction Only.
+                          </span>
+                        </div>
+                        <text style={{ fontSize: 18, alignItems: "center" }}>
+                          FOR {companyName}
+                        </text>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          marginTop: 5,
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <text style={{ fontSize: 22, marginLeft: 10 }}>
+                          E.& O.E
+                        </text>
+                        <text style={{ fontSize: 22 }}>
+                          Checked/Prepared by
+                        </text>
+                        <text style={{ fontSize: 22, marginRight: 10 }}>
+                          Authorised Signature
+                        </text>
+                      </div>
+                    </div>
                 <div style={{ fontSize: "12px" }}>
                   <text>Footer content specific to page {pageIndex + 1}</text>
                 </div>
