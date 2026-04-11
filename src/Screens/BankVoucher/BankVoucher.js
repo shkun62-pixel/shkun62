@@ -2589,6 +2589,7 @@ import useCompanySetup from "../Shared/useCompanySetup";
 import FAVoucherModal from "../Shared/FAVoucherModal";
 import useShortcuts from "../Shared/useShortcuts";
 import { Modal } from "react-bootstrap";
+import BankWinModal from "../BankVoucher/BankWinModal";
 
 const BankVoucher = () => {
   const companySetup = useCompanySetup();
@@ -4287,6 +4288,16 @@ const BankVoucher = () => {
     }
   }, [bankWinFromState]);
 
+  const [openBankWin, setopenBankWin] = useState(false);
+
+  const handleOpenSeries = () => {
+    setopenBankWin(true);
+  };
+
+  const handleCloseSeries = () => {
+    setopenBankWin(false);
+  };
+
   return (
     <div className="bank-voucher-page">
       <ToastContainer />
@@ -4307,8 +4318,12 @@ const BankVoucher = () => {
               <h1 className="HeaderBANK">BANK VOUCHER</h1>
               <span className="tittle">{title}</span>
             </div>
+            <Button onClick={handleOpenSeries}>SERIES</Button>
           </div>
-
+          <BankWinModal
+            open={openBankWin}
+            onClose={handleCloseSeries}
+          />
           <div className="bank-voucher-topbar">
             <div className="topbar-left">
               <div className="field-block">
